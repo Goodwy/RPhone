@@ -1,0 +1,210 @@
+<resources>
+    <string name="widget_description">Recent calls with quick dial</string>
+    <string name="copy">Копировать</string>
+    <string name="delete">Удалить</string>
+    <string name="cancel">Отменить</string>
+    <string name="open">Открыть</string>
+    <string name="save">Сохранить</string>
+    <string name="close">Закрыть</string>
+    <string name="select">Выбрать</string>
+    <string name="share">Поделиться</string>
+
+    <!-- Project support -->
+    <string name="project_support">Поддержка проекта</string>
+    <string name="project_support_summary">Приобретите приложение для поддержки будущих разработок и получения дополнительных функций</string>
+    <string name="project_support_description">
+        <![CDATA[
+        Мы считаем, что конфиденциальность должна быть бесплатной. Именно поэтому все основные функции полностью в вашем распоряжении — и это не стоит ни копейки.<br>
+        Если вам нравится то, что мы создаём, подумайте о том, чтобы угостить нас кофе. В знак благодарности вы получите:<br> <b>все темы, пользовательские цвета и пользовательские шрифты.</b><br>
+        Это не премиум-уровень. Это просто знак благодарности. Благодаря вашей поддержке Rill остается независимым и свободным от рекламы.
+        ]]>
+    </string>
+    <string name="support_project_to_unlock">Поддержите проект для разблокировки</string>
+    <string name="restore_purchase">Восстановить покупки</string>
+    <string name="continue_support">Продолжить</string>
+    <string name="monthly">Ежемесячная поддержка</string>
+    <string name="monthly_description">Гибкие условия для тех, кто хочет поддерживать проект ежемесячно</string>
+    <string name="yearly">Ежегодная пожжержка</string>
+    <string name="yearly_description">Ежегодная поддержка лучшего в мире приложения для звонков</string>
+    <string name="lifetime">Разовая поддержка</string>
+    <string name="lifetime_description">Оплатите один раз и наслаждайтесь максимальным удобством при звонках на всю жизнь</string>
+    <string name="most_flexible">Наиболее гибкий</string>
+    <string name="bast_value">Самое популярное</string>
+    <string name="pay_once">Без подписок</string>
+    <string name="support_development">Поддержать разработку</string>
+    <string name="support_all_options">Все варианты поддержки</string>
+    <string name="support_development_description1">Rill Phone — это приложение с открытым исходным кодом, которое мы с гордостью предлагаем совершенно бесплатно. Ваша поддержка помогает нам сохранить его именно таким.</string>
+    <string name="support_development_description2">Делая пожертвование, вы не просто получаете доступ к новым функциям — вы вкладываете средства в обеспечение конфиденциальности, прозрачности и будущее по-настоящему независимой разработки.</string>
+    <string name="support_development_description3">Каждый вклад, независимо от его размера, имеет значение.</string>
+    <string name="unlock_all_features">Разблокировать все функции</string>
+    <string name="all_features_unlocked">✨ Все функции разблокированы! Спасибо за вашу поддержку!</string>
+    <string name="thank_you_for_your_support">Спасибо за вашу поддержку! ❤️</string>
+    <string name="features_locked">Функции заблокированы</string>
+    <string name="your_donation_ensures">Ваше пожертвование позволяет:</string>
+    <string name="your_donation_ensures_1">✅ Выпускать регулярные обновления и исправления</string>
+    <string name="your_donation_ensures_2">✅ Добавлять новые функции и улучшения</string>
+    <string name="your_donation_ensures_3">✅ Обеспечивать бесплатный доступ для всех</string>
+    <string name="your_donation_ensures_4">✅ Продолжать разработку с открытым исходным кодом</string>
+
+    <!-- Billing -->
+    <string name="no_connection">Нет связи</string>
+    <string name="loading_price">Загрузка…</string>
+
+    <!-- About -->
+    <string name="about">О приложении</string>
+
+    <!-- Settings -->
+    <string name="blocked_numbers">Заблокированные номера</string>
+    <string name="manage_blocked">Управление блокировками</string>
+    <string name="manage_blocked_subtitle">Управление заблокированными звонками и спамом</string>
+    <string name="block_notifications">Блокировать уведомления</string>
+    <string name="block_notifications_subtitle">Отображать уведомление низкого приоритета о заблокированных звонках</string>
+    <string name="block_method">Метод блокировки</string>
+    <string name="block_method_subtitle">Как обрабатывать заблокированные звонки</string>
+    <string name="decline_automatically">Автоматически отказаться</string>
+    <string name="ring_silently">Без звука</string>
+    <string name="log_visibility">Видимость в истории</string>
+    <string name="log_visibility_subtitle">Показывать или скрывать заблокированные звонки в списке последних звонков</string>
+    <string name="hide_from_logs">Скрыть из истории</string>
+    <string name="show_in_logs">Показывать в истории</string>
+    <string name="blocked_size">Заблокировано: %s</string>
+
+    <!-- Call -->
+    <string name="call">Вызов</string>
+    <string name="incoming">Входящий</string>
+    <string name="outgoing">Исходящий</string>
+    <string name="missed">Пропущеннный</string>
+    <string name="rejected">Отклонённый</string>
+    <string name="blocked">Заблокированный</string>
+    <string name="answer">Ответить</string>
+    <string name="decline">Отклонить</string>
+    <string name="answer_and_decline">Ответить и завершить текущий</string>
+    <string name="end_call">Завершить звонок</string>
+    <string name="back_to_call">Вернуться к звонку</string>
+    <string name="keypad">Клавиатура</string>
+    <string name="mute">Без звука</string>
+    <string name="unmute">Вкл. звук</string>
+    <string name="message">Сообщение</string>
+    <string name="speaker">Динамик</string>
+    <string name="add_call">Добавить вызов</string>
+    <string name="resume">Возобновить</string>
+    <string name="swap">Переключить</string>
+    <string name="more">Ещё</string>
+    <string name="hold">Удерживать</string>
+    <string name="on_hold">Звонок на удержании</string>
+    <string name="call_ended">Звонок завершен</string>
+    <string name="calling">Вызов…</string>
+    <string name="incoming_call">Входящий звонок</string>
+    <string name="connecting">Соединение…</string>
+    <string name="slide_to_answer">Ответьте</string>
+    <string name="swipe_up_to_answer">Что бы ответить, проведите вверх</string>
+    <string name="swipe_down_to_reject">Что бы отклонить, проведите вниз</string>
+
+    <!-- Recents -->
+    <string name="recents">Недавние</string>
+    <string name="call_history">История звонков</string>
+    <string name="history_with">История %s</string>
+    <string name="no_call_history_found">История звонков не найдена</string>
+
+    <!-- Contacts -->
+    <string name="contacts">Контакты</string>
+    <string name="contacts_settings">Настройки контакта</string>
+    <string name="create_contact">Создать контакт</string>
+    <string name="edit_contact">Изменить контакт</string>
+    <string name="favorites">Избранное</string>
+    <string name="add_to_favourites">Добавить в избранное</string>
+    <string name="remove_from_favourites">Удалить из избранного</string>
+    <string name="move_to_another_account">Переместить в другой аккаунт</string>
+    <string name="save_to_account">Сохранение в Аккаунте</string>
+    <string name="add_field">Добавить поле</string>
+    <string name="prefix">Префикс</string>
+    <string name="prefix_description">Форма обращения - Господин, Госпожа, Доктор и т.д.</string>
+    <string name="first_name">Имя</string>
+    <string name="middle_name">Отчество</string>
+    <string name="middle_name_description">Отчество, второе имя или инициалы</string>
+    <string name="last_name">Фамилия</string>
+    <string name="suffix">Суффикс</string>
+    <string name="suffix_description">Звание или титул - Младший, Старший, III и т.д.</string>
+    <string name="company">Организация</string>
+    <string name="job_title">Должность</string>
+    <string name="job_title_description">Должность в компании</string>
+    <string name="add_note">Добавить заметку</string>
+    <string name="contact_ringtone">Рингтон для контакта</string>
+    <plurals name="contacts_count">
+        <item quantity="one">%d контакт</item>
+        <item quantity="few">%d контакта</item>
+        <item quantity="many">%d контактов</item>
+        <item quantity="other">%d контактов</item>
+    </plurals>
+    <plurals name="add_to_favorites_confirmation">
+        <item quantity="one">Добавить %d контакт в избранное?</item>
+        <item quantity="few">Добавить %d контакта в избранное?</item>
+        <item quantity="many">Добавить %d контактов в избранное?</item>
+        <item quantity="other">Добавить %d контактов в избранное?</item>
+    </plurals>
+    <plurals name="remove_from_favorites_confirmation">
+        <item quantity="one">Удалить %d контакт из избранного?</item>
+        <item quantity="few">Удалить %d контакта из избранного?</item>
+        <item quantity="many">Удалить %d контактов из избранного?</item>
+        <item quantity="other">Удалить %d контактов из избранного?</item>
+    </plurals>
+
+    <!-- Permission -->
+    <string name="allow">Разрешить</string>
+    <string name="call_history_permission">Rill Phone needs access to your call logs to show your recent activity and missed calls.</string>
+    <string name="contacts_permission">Contacts Permission Required</string>
+    <string name="contacts_permission_description">To view your contacts, allow contacts permission.</string>
+    <string name="search_contacts_permission_description">To search your contacts and identify incoming calls, allow contacts permission.</string>
+
+    <!-- Default Dialer -->
+    <string name="set_as_default">По умолчанию</string>
+    <string name="clear_default">Сброс значения по умолчанию</string>
+    <string name="default_phone_set">%s установлен по умолчанию</string>
+    <string name="default_dialer_title">Сделать Rill Phone приложением по умолчанию</string>
+    <string name="default_dialer_subtitle">Rill Phone может звонить и принимать звонки, только если это приложение выбрано для звонков по умолчанию</string>
+    <string name="default_dialer_warning">Rill Phone cannot function without this permission. Please try again.</string>
+
+    <!-- Call notes -->
+    <string name="call_notes">Заметки о звонках</string>
+    <string name="about_call_notes">Информация о заметках</string>
+    <string name="about_call_notes_subtitle">Quick notes you take during a call. They are stored locally within the app, linked to the phone number (not synced with Google Contacts). Each number has its own private note accessible only from the call log or contact details inside the app.</string>
+    <string name="type_your_note">Введите текст заметки…</string>
+
+    <!-- Times -->
+    <string name="just_now">Только что</string>
+    <string name="yesterday">Вчера</string>
+    <string name="today">Сегодня</string>
+    <string name="seconds_letter">%ds</string>
+    <string name="minutes_letter">%dm</string>
+    <string name="hours_letter">%dh</string>
+    <string name="days_letter">%dd</string>
+
+    <!-- Phone numbers -->
+    <string name="no_label">Без ярлыка</string>
+    <string name="custom_label">Новый тип</string>
+    <string name="change_label">Изменить тип</string>
+    <string name="mobile">Мобильный</string>
+    <string name="main_number">Основной</string>
+    <string name="home">Домашний</string>
+    <string name="work">Рабочий</string>
+    <string name="work_fax">Рабочий факс</string>
+    <string name="home_fax">Рабочий факс</string>
+    <string name="pager">Пейджер</string>
+    <string name="other">Другое</string>
+    <string name="send_whatsapp">Отправить в WhatsApp</string>
+
+    <!-- Events -->
+    <string name="birthday">День рождения</string>
+    <string name="anniversary">Годовщина</string>
+
+    <!-- Onboarding -->
+    <string name="skip">Пропустить</string>
+    <string name="page_title_one">Приватность по умолчанию</string>
+    <string name="page_subtitle_one">Ваши контакты остаются на вашем устройстве. Мы никогда не загружаем, не отслеживаем и не передаем ваши данные кому-либо. Никогда.</string>
+    <string name="page_title_two">Открытый код и прозрачность</string>
+    <string name="page_subtitle_two">Никакой телеметрии. Никакой рекламы. Никакого отслеживания. Полный контроль над вашим общением.</string>
+    <string name="page_title_three">Быстро и надежно</string>
+    <string name="page_subtitle_three">Мгновенный T9 поиск, плавная анимация и молниеносные звонки. Просто телефонное приложение, которое работает.</string>
+    <string name="page_title_warning">В стадии разработки</string>
+    <string name="page_subtitle_warning">Это приложение пока находится в стадии разработки. Некоторые функции могут работать не так, как ожидается. Пожалуйста, пользуйтесь им с осторожностью и сообщайте о любых возникших проблемах.</string>
+</resources>

@@ -1,0 +1,159 @@
+plugins {
+    id 'com.android.application' version '8.13.2'
+    id 'org.jetbrains.kotlin.android' version '2.1.0'
+    id 'org.jetbrains.kotlin.plugin.compose' version '2.1.0'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '2.1.0'
+    id 'com.google.devtools.ksp' version '2.1.0-1.0.29'
+}
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localProperties.load(new FileInputStream(localPropertiesFile))
+}
+
+def productId = localProperties.getProperty('PRODUCT_ID_X1', '')
+def subscriptionId = localProperties.getProperty('SUBSCRIPTION_ID_X1', 'https://default.url')
+def subscriptionYearId = localProperties.getProperty('SUBSCRIPTION_YEAR_ID_X1', 'false')
+
+android {
+    namespace = 'dev.goodwy.rphone'
+    compileSdk = 36
+
+    defaultConfig {
+        applicationId = "dev.goodwy.rphone"
+        minSdk = 26
+        targetSdk = 35
+        versionCode = 13
+        versionName = "0.1.RC"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField "String", "PRODUCT_ID_X1", "\"$productId\""
+        buildConfigField "String", "SUBSCRIPTION_ID_X1", "\"$subscriptionId\""
+        buildConfigField "String", "SUBSCRIPTION_YEAR_ID_X1", "\"$subscriptionYearId\""
+
+        applicationVariants.configureEach { variant ->
+            if (variant.buildType.name == "release") { // Default Activity not found
+                variant.outputs.configureEach { output ->
+                    def baseAppName = "rill-phone"
+                    def newName = "${baseAppName}-${variant.versionCode}"
+                    newName += "-${variant.flavorName}"
+                    newName += "-${variant.buildType.name}"
+                    def originalExtension = outputFileName.substring(outputFileName.lastIndexOf('.'))
+                    outputFileName = newName + originalExtension
+                }
+            }
+        }
+    }
+
+    signingConfigs {
+        release {
+            if (file("keystore.jks").exists()) {
+                storeFile = file("keystore.jks")
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled = true
+            shrinkResources = true
+            signingConfig signingConfigs.release
+            debuggable = false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+        }
+    }
+
+    flavorDimensions += "distribution"
+    productFlavors {
+        create("gplay") { dimension = "distribution" }
+        create("foss") { dimension = "distribution" }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+
+            freeCompilerArgs.addAll(
+                "-opt-in=androidx.compose.material3.ExperimentalMaterial3ExpressiveApi",
+                "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api"
+            )
+        }
+    }
+
+    buildFeatures {
+        compose = true
+        buildConfig true
+    }
+
+    splits {
+        abi {
+            enable = false
+            //     reset()
+            //     include("armeabi-v7a", "arm64-v8a", "x86_64")
+            //     // CRITICAL: Set to true so GitHub Action finds at least one "universal" APK
+            //     universalApk = true
+        }
+    }
+}
+
+dependencies {
+    // UI Stack managed by BOM
+    implementation platform('androidx.compose:compose-bom:2025.12.01')
+    implementation 'androidx.compose.ui:ui'
+    implementation 'androidx.compose.material3:material3'
+    implementation 'androidx.activity:activity-compose'
+    implementation 'androidx.compose.foundation:foundation'
+    implementation 'androidx.compose.ui:ui-graphics'
+    implementation 'androidx.compose.material:material-icons-extended'
+
+    // Core Android / Kotlin
+    implementation 'androidx.core:core-ktx:1.15.0'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.7'
+
+    // Navigation & Serialization
+    implementation 'androidx.navigation:navigation-compose:2.8.5'
+
+    // Biometrics
+    implementation 'androidx.biometric:biometric:1.2.0-alpha05'
+    implementation 'androidx.fragment:fragment-ktx:1.8.5'
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3'
+
+    // Compose Destinations
+    implementation 'io.github.raamcosta.compose-destinations:core:2.1.0'
+    ksp 'io.github.raamcosta.compose-destinations:ksp:2.1.0'
+
+    // Accompanist
+    implementation "com.google.accompanist:accompanist-permissions:0.37.3"
+
+    // DI: Koin
+    implementation platform("io.insert-koin:koin-bom:4.1.1")
+    implementation "io.insert-koin:koin-android"
+    implementation "io.insert-koin:koin-androidx-compose"
+
+    // Image & Utility
+    implementation "io.coil-kt:coil-compose:2.7.0"
+    implementation 'com.google.zxing:core:3.5.4'
+
+
+    // Testing
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+
+    debugImplementation 'androidx.compose.ui:ui-tooling'
+
+    // Goodwy
+    "gplayImplementation" 'com.android.billingclient:billing:8.0.0'
+}

@@ -1,0 +1,211 @@
+<resources>
+    <string name="app_name" translatable="false">Rill Phone</string>
+    <string name="widget_description">Recent calls with quick dial</string>
+    <string name="copy">Copy</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="open">Open</string>
+    <string name="save">Save</string>
+    <string name="close">Close</string>
+    <string name="select">Select</string>
+    <string name="share">Share</string>
+
+    <!-- Billing -->
+    <string name="no_connection">No connection</string>
+    <string name="loading_price">Loading…</string>
+
+    <!-- Project support -->
+    <string name="project_support">Project support</string>
+    <string name="project_support_summary">Get the paid app to support future developments and extra features</string>
+    <string name="project_support_description">
+        <![CDATA[
+        We believe privacy should be free. That\'s why all essential features are completely yours without spending a dime.<br>
+        If you love what we\'re building, consider buying us a coffee. As a thank you, you\'ll get:<br> <b>All themes, Custom color, and Custom fonts.</b><br>
+        This isn\'t a premium tier. It\'s a thank-you gesture. Your support keeps Rill independent, private, and ad-free.
+        ]]>
+    </string>
+    <string name="support_project_to_unlock">Support the project to unlock</string>
+    <string name="restore_purchase">Restore purchase</string>
+    <string name="continue_support">Continue</string>
+    <string name="monthly">Monthly</string>
+    <string name="monthly_description">Flexibility for those who want to make monthly contributions</string>
+    <string name="yearly">Yearly</string>
+    <string name="yearly_description">Annual support for the world\'s best calling app</string>
+    <string name="lifetime">Lifetime</string>
+    <string name="lifetime_description">Pay once and enjoy ultimate convenience on all your calls for life</string>
+    <string name="most_flexible">Most flexible</string>
+    <string name="bast_value">Bast value</string>
+    <string name="pay_once">Pay once</string>
+    <string name="support_development">Support Development</string>
+    <string name="support_all_options">Support all options</string>
+    <string name="support_development_description1">Rill Phone is proudly open-source and completely free. Your support helps us keep it that way.</string>
+    <string name="support_development_description2">By making a donation, you\'re not just unlocking features — you\'re investing in privacy, transparency, and the future of truly independent development.</string>
+    <string name="support_development_description3">Every contribution, no matter the size, makes a difference.</string>
+    <string name="unlock_all_features">Unlock All Features</string>
+    <string name="all_features_unlocked">✨ All features unlocked! Thank you for your support!</string>
+    <string name="thank_you_for_your_support">Thank you for your support! ❤️</string>
+    <string name="features_locked">Features locked</string>
+    <string name="your_donation_ensures">Your donation ensures:</string>
+    <string name="your_donation_ensures_1">✅ Regular updates and security patches</string>
+    <string name="your_donation_ensures_2">✅ New features and improvements</string>
+    <string name="your_donation_ensures_3">✅ Free access for everyone</string>
+    <string name="your_donation_ensures_4">✅ Open-source development</string>
+
+    <!-- About -->
+    <string name="about">About</string>
+
+    <!-- Settings -->
+    <string name="blocked_numbers">Blocked numbers</string>
+    <string name="manage_blocked">Manage blocked</string>
+    <string name="manage_blocked_subtitle">Manage blocked calls and spam</string>
+    <string name="block_notifications">Block notifications</string>
+    <string name="block_notifications_subtitle">Show a low-priority alert for blocked calls</string>
+    <string name="block_method">Block method</string>
+    <string name="block_method_subtitle">How blocked calls are handled</string>
+    <string name="decline_automatically">Decline automatically</string>
+    <string name="ring_silently">Ring silently</string>
+    <string name="log_visibility">Log visibility</string>
+    <string name="log_visibility_subtitle">Show or hide blocked calls in recents</string>
+    <string name="hide_from_logs">Hide from logs</string>
+    <string name="show_in_logs">Show in logs</string>
+    <string name="blocked_size">Blocked: %s</string>
+
+    <!-- Call -->
+    <string name="call">Call</string>
+    <string name="incoming">Incoming</string>
+    <string name="outgoing">Outgoing</string>
+    <string name="missed">Missed</string>
+    <string name="rejected">Rejected</string>
+    <string name="blocked">Blocked</string>
+    <string name="answer">Answer</string>
+    <string name="decline">Decline</string>
+    <string name="answer_and_decline">Answer &amp; end other call</string>
+    <string name="end_call">End Call</string>
+    <string name="back_to_call">Back to call</string>
+    <string name="keypad">Keypad</string>
+    <string name="mute">Mute</string>
+    <string name="unmute">Unmute</string>
+    <string name="message">Message</string>
+    <string name="speaker">Speaker</string>
+    <string name="add_call">Add call</string>
+    <string name="resume">Resume</string>
+    <string name="swap">Swap</string>
+    <string name="more">More</string>
+    <string name="hold">Hold</string>
+    <string name="on_hold">On hold</string>
+    <string name="call_ended">Call Ended</string>
+    <string name="calling">Calling…</string>
+    <string name="incoming_call">Incoming call</string>
+    <string name="connecting">Connecting…</string>
+    <string name="slide_to_answer">slide to answer</string>
+    <string name="swipe_up_to_answer">Swipe up to answer</string>
+    <string name="swipe_down_to_reject">Swipe down to reject</string>
+
+    <!-- Recents -->
+    <string name="recents">Recents</string>
+    <string name="call_history">Call History</string>
+    <string name="history_with">History with %s</string>
+    <string name="no_call_history_found">No call history found</string>
+
+    <!-- Contacts -->
+    <string name="contacts">Contacts</string>
+    <string name="contacts_settings">Contact settings</string>
+    <string name="create_contact">Create Contact</string>
+    <string name="edit_contact">Edit Contact</string>
+    <string name="favorites">Favorites</string>
+    <string name="add_to_favourites">Add to Favorites</string>
+    <string name="remove_from_favourites">Remove from Favourites</string>
+    <string name="move_to_another_account">Move to another account</string>
+    <string name="save_to_account">Save to Account</string>
+    <string name="add_field">Add field</string>
+    <string name="prefix">Prefix</string>
+    <string name="prefix_description">Mr., Mrs., Dr., etc.</string>
+    <string name="first_name">First name</string>
+    <string name="middle_name">Middle name</string>
+    <string name="middle_name_description">Middle name or initial</string>
+    <string name="last_name">Last name</string>
+    <string name="suffix">Suffix</string>
+    <string name="suffix_description">Jr., Sr., III, etc.</string>
+    <string name="company">Company</string>
+    <string name="job_title">Job title</string>
+    <string name="job_title_description">Position at the company</string>
+    <string name="add_note">Add note</string>
+    <string name="contact_ringtone">Contact ringtone</string>
+    <plurals name="contacts_count">
+        <item quantity="one">%d contact</item>
+        <item quantity="few">%d contacts</item>
+        <item quantity="many">%d contacts</item>
+        <item quantity="other">%d contacts</item>
+    </plurals>
+    <plurals name="add_to_favorites_confirmation">
+        <item quantity="one">Add %d contact to Favorites?</item>
+        <item quantity="few">Add %d contacts to Favorites?</item>
+        <item quantity="many">Add %d contacts to Favorites?</item>
+        <item quantity="other">Add %d contacts to Favorites?</item>
+    </plurals>
+    <plurals name="remove_from_favorites_confirmation">
+        <item quantity="one">Remove %d contact from Favorites?</item>
+        <item quantity="few">Remove %d contacts from Favorites?</item>
+        <item quantity="many">Remove %d contacts from Favorites?</item>
+        <item quantity="other">Remove %d contacts from Favorites?</item>
+    </plurals>
+
+    <!-- Permission -->
+    <string name="allow">Allow</string>
+    <string name="call_history_permission">Rill Phone needs access to your call logs to show your recent activity and missed calls.</string>
+    <string name="contacts_permission">Contacts Permission Required</string>
+    <string name="contacts_permission_description">To view your contacts, allow contacts permission.</string>
+    <string name="search_contacts_permission_description">To search your contacts and identify incoming calls, allow contacts permission.</string>
+
+    <!-- Default Dialer -->
+    <string name="set_as_default">Set as default</string>
+    <string name="clear_default">Clear default</string>
+    <string name="default_phone_set">%s set as default</string>
+    <string name="default_dialer_title">Set Rill Phone as default</string>
+    <string name="default_dialer_subtitle">Rill Phone can only start &amp; receive calls if it\'s your default phone app</string>
+    <string name="default_dialer_warning">Rill Phone cannot function without this permission. Please try again.</string>
+
+    <!-- Call notes -->
+    <string name="call_notes">Call notes</string>
+    <string name="about_call_notes">About call notes</string>
+    <string name="about_call_notes_subtitle">Quick notes you take during a call. They are stored locally within the app, linked to the phone number (not synced with Google Contacts). Each number has its own private note accessible only from the call log or contact details inside the app.</string>
+    <string name="type_your_note">Type your note…</string>
+
+    <!-- Times -->
+    <string name="just_now">Just now</string>
+    <string name="yesterday">Yesterday</string>
+    <string name="today">Today</string>
+    <string name="seconds_letter">%ds</string>
+    <string name="minutes_letter">%dm</string>
+    <string name="hours_letter">%dh</string>
+    <string name="days_letter">%dd</string>
+
+    <!-- Phone numbers -->
+    <string name="no_label">No label</string>
+    <string name="custom_label">Custom label</string>
+    <string name="change_label">Change label</string>
+    <string name="mobile">Mobile</string>
+    <string name="main_number">Main</string>
+    <string name="home">Home</string>
+    <string name="work">Work</string>
+    <string name="work_fax">Work Fax</string>
+    <string name="home_fax">Home Fax</string>
+    <string name="pager">Pager</string>
+    <string name="other">Other</string>
+    <string name="send_whatsapp">Send WhatsApp</string>
+
+    <!-- Events -->
+    <string name="birthday">Birthday</string>
+    <string name="anniversary">Anniversary</string>
+
+    <!-- Onboarding -->
+    <string name="skip">Skip</string>
+    <string name="page_title_one">Private by Design</string>
+    <string name="page_subtitle_one">Your contacts stay on your device. We never upload, track, or share your data with anyone. Ever.</string>
+    <string name="page_title_two">Open Source &amp; Transparent</string>
+    <string name="page_subtitle_two">Zero telemetry. Zero ads. Zero tracking. Full control over your communication.</string>
+    <string name="page_title_three">Fast &amp; Reliable</string>
+    <string name="page_subtitle_three">Instant T9 search, smooth animations, and blazing-fast calling. Just a phone app that works.</string>
+    <string name="page_title_warning">Under Development</string>
+    <string name="page_subtitle_warning">This app is still in development. Some features may not work as expected. Please use with caution and report any issues you encounter.</string>
+</resources>

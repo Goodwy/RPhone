@@ -1,0 +1,138 @@
+package dev.goodwy.rphone.controller.util
+
+import android.content.Context
+import android.content.SharedPreferences
+import android.os.Environment
+import org.json.JSONObject
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
+import java.util.zip.ZipOutputStream
+
+object BackupManager {
+
+    private const val PREFS_NAME = "rill_prefs"
+    private const val BACKUP_DIR = "RPhone"
+
+    fun getBackupDir(context: Context): File {
+        val dir = File(context.getExternalFilesDir(null), "Backups")
+        if (!dir.exists()) dir.mkdirs()
+        return dir
+    }
+
+    fun createBackup(context: Context): File? {
+        return try {
+            val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+            val backupFile = File(getBackupDir(context), "RPhone_Backup_$timestamp.rphone")
+
+            ZipOutputStream(FileOutputStream(backupFile)).use { zip ->
+                // 1. Backup SharedPreferences
+                val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                val prefsJson = prefsToJson(prefs)
+                zip.putNextEntry(ZipEntry("prefs.json"))
+                zip.write(prefsJson.toByteArray(Charsets.UTF_8))
+                zip.closeEntry()
+
+                // 2. Backup notes
+                val notesDir = NoteManager.getNotesDir(context)
+                notesDir.listFiles()?.filter { it.extension == "txt" }?.forEach { noteFile ->
+                    zip.putNextEntry(ZipEntry("notes/${noteFile.name}"))
+                    FileInputStream(noteFile).use { it.copyTo(zip) }
+                    zip.closeEntry()
+                }
+            }
+            backupFile
+        } catch (_: Exception) { null }
+    }
+
+    fun restoreBackup(context: Context, backupFile: File): Boolean {
+        return try {
+            ZipInputStream(FileInputStream(backupFile)).use { zip ->
+                var entry = zip.nextEntry
+                while (entry != null) {
+                    when {
+                        entry.name == "prefs.json" -> {
+                            val json = zip.readBytes().toString(Charsets.UTF_8)
+                            restorePrefs(context, json)
+                        }
+                        entry.name.startsWith("notes/") -> {
+                            val fileName = entry.name.removePrefix("notes/")
+                            if (fileName.isNotEmpty()) {
+                                val noteFile = File(NoteManager.getNotesDir(context), fileName)
+                                noteFile.parentFile?.mkdirs()
+                                FileOutputStream(noteFile).use { zip.copyTo(it) }
+                            }
+                        }
+                    }
+                    zip.closeEntry()
+                    entry = zip.nextEntry
+                }
+            }
+            true
+        } catch (_: Exception) { false }
+    }
+
+    private fun prefsToJson(prefs: SharedPreferences): String {
+        val json = JSONObject()
+        val meta = JSONObject() // store type hints for ambiguous types
+        prefs.all.forEach { (key, value) ->
+            when (value) {
+                is Boolean -> json.put(key, value)
+                is Int -> json.put(key, value)
+                is Long -> json.put(key, value)
+                is Float -> {
+                    // Store float as double; mark in meta so restore knows it's a float
+                    json.put(key, value.toDouble())
+                    meta.put(key, "float")
+                }
+                is String -> json.put(key, value)
+                is Set<*> -> json.put(key, value.joinToString(","))
+            }
+        }
+        val wrapper = JSONObject()
+        wrapper.put("data", json)
+        wrapper.put("meta", meta)
+        return wrapper.toString()
+    }
+
+    private fun restorePrefs(context: Context, json: String) {
+        try {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val editor = prefs.edit()
+
+            // Support both new wrapper format and legacy flat format
+            val raw = JSONObject(json)
+            val jsonObj = if (raw.has("data")) raw.getJSONObject("data") else raw
+            val meta = if (raw.has("meta")) raw.getJSONObject("meta") else JSONObject()
+
+            jsonObj.keys().forEach { key ->
+                when (val value = jsonObj.get(key)) {
+                    is Boolean -> editor.putBoolean(key, value)
+                    is Int -> editor.putInt(key, value)
+                    is Long -> {
+                        if (value in Int.MIN_VALUE..Int.MAX_VALUE) editor.putInt(key, value.toInt())
+                        else editor.putLong(key, value)
+                    }
+                    is Double -> {
+                        // Check meta to distinguish float from large int stored as double
+                        if (meta.optString(key) == "float") editor.putFloat(key, value.toFloat())
+                        else editor.putFloat(key, value.toFloat())
+                    }
+                    is String -> editor.putString(key, value)
+                }
+            }
+            editor.apply()
+        } catch (_: Exception) {}
+    }
+
+    fun listBackups(context: Context): List<File> =
+        getBackupDir(context).listFiles()
+            ?.filter { it.extension == "rphone" }
+            ?.sortedByDescending { it.lastModified() }
+            ?: emptyList()
+}
