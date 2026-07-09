@@ -54,6 +54,7 @@
     <string name="about">О приложении</string>
 
     <!-- Settings -->
+    <string name="calling_accounts">Аккаунты для звонков</string>
     <string name="blocked_numbers">Заблокированные номера</string>
     <string name="manage_blocked">Управление блокировками</string>
     <string name="manage_blocked_subtitle">Управление заблокированными звонками и спамом</string>
@@ -108,10 +109,13 @@
 
     <!-- Contacts -->
     <string name="contacts">Контакты</string>
+    <string name="view_contacts">Показать контакты</string>
     <string name="contacts_settings">Настройки контакта</string>
     <string name="create_contact">Создать контакт</string>
     <string name="edit_contact">Изменить контакт</string>
     <string name="favorites">Избранное</string>
+    <string name="edit">Изменить</string>
+    <string name="done">Готово</string>
     <string name="add_to_favourites">Добавить в избранное</string>
     <string name="remove_from_favourites">Удалить из избранного</string>
     <string name="move_to_another_account">Переместить в другой аккаунт</string>
@@ -125,6 +129,8 @@
     <string name="last_name">Фамилия</string>
     <string name="suffix">Суффикс</string>
     <string name="suffix_description">Звание или титул - Младший, Старший, III и т.д.</string>
+    <string name="nickname">Псевдоним</string>
+    <string name="nickname_description">Псевдоним, прозвище или краткое имя</string>
     <string name="company">Организация</string>
     <string name="job_title">Должность</string>
     <string name="job_title_description">Должность в компании</string>

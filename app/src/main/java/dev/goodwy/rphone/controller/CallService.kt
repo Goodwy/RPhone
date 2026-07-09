@@ -63,7 +63,8 @@ class CallService : InCallService() {
 
     companion object {
         private const val CHANNEL_ID = "call_channel"
-        private const val CHANNEL_INCOMING_ID = "call_incoming_channel"
+        private const val INCOMING_CHANNEL_ID = "incoming_call_channel"
+        private const val MISSED_CHANNEL_ID = "missed_call_channel"
         private const val NOTIFICATION_ID = 101
 
         private val _currentCallSession = MutableStateFlow<CallSession?>(null)
@@ -90,19 +91,40 @@ class CallService : InCallService() {
             instance?.setMuted(muted)
         }
 
-        fun setSpeaker(on: Boolean) {
-            val route = if (on) CallAudioState.ROUTE_SPEAKER else CallAudioState.ROUTE_EARPIECE
-            instance?.setAudioRoute(route)
-        }
-
         fun toggleMute() {
             val currentMute = _audioState.value?.isMuted ?: false
             mute(!currentMute)
         }
 
-        fun toggleSpeaker() {
-            val isSpeaker = _audioState.value?.route == CallAudioState.ROUTE_SPEAKER
-            setSpeaker(!isSpeaker)
+        fun cycleAudioRoute() {
+            val state = _audioState.value ?: return
+            val supported = state.supportedRouteMask
+            val current = state.route
+
+            val nextRoute = when (current) {
+                CallAudioState.ROUTE_EARPIECE, CallAudioState.ROUTE_WIRED_HEADSET -> {
+                    if ((supported and CallAudioState.ROUTE_BLUETOOTH) != 0) CallAudioState.ROUTE_BLUETOOTH
+                    else if ((supported and CallAudioState.ROUTE_SPEAKER) != 0) CallAudioState.ROUTE_SPEAKER
+                    else current
+                }
+                CallAudioState.ROUTE_BLUETOOTH -> {
+                    if ((supported and CallAudioState.ROUTE_SPEAKER) != 0) CallAudioState.ROUTE_SPEAKER
+                    else if ((supported and CallAudioState.ROUTE_EARPIECE) != 0) CallAudioState.ROUTE_EARPIECE
+                    else if ((supported and CallAudioState.ROUTE_WIRED_HEADSET) != 0) CallAudioState.ROUTE_WIRED_HEADSET
+                    else current
+                }
+                CallAudioState.ROUTE_SPEAKER -> {
+                    if ((supported and CallAudioState.ROUTE_EARPIECE) != 0) CallAudioState.ROUTE_EARPIECE
+                    else if ((supported and CallAudioState.ROUTE_WIRED_HEADSET) != 0) CallAudioState.ROUTE_WIRED_HEADSET
+                    else if ((supported and CallAudioState.ROUTE_BLUETOOTH) != 0) CallAudioState.ROUTE_BLUETOOTH
+                    else current
+                }
+                else -> current
+            }
+
+            if (nextRoute != current) {
+                instance?.setAudioRoute(nextRoute)
+            }
         }
 
         fun mergeCalls() {
@@ -135,6 +157,18 @@ class CallService : InCallService() {
 
         fun setMuted(muted: Boolean) { instance?.setMuted(muted) }
         fun setAudioRoute(route: Int) { instance?.setAudioRoute(route) }
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        instance = this
+        serviceScope.launch {
+            isActivityVisible.collect {
+                _currentCallSession.value?.call?.let { currentCall ->
+                    updateNotification(currentCall)
+                }
+            }
+        }
     }
 
     private val callCallback = object : Call.Callback() {
@@ -184,7 +218,10 @@ class CallService : InCallService() {
 
         // Missed Call Notification
         // Need to create a Receiver (android.telecom.action.SHOW_MISSED_CALLS_NOTIFICATION) to prevent the system notification from being duplicated
-//        if (call.state == Call.STATE_RINGING || (cause != null && cause.code == DisconnectCause.MISSED)) {
+//        val wasNeverConnected = call.details.connectTimeMillis == 0L
+//        val isIncoming = call.details.callDirection == Call.Details.DIRECTION_INCOMING
+//
+//        if (isIncoming && wasNeverConnected && (cause?.code == DisconnectCause.MISSED || cause?.code == DisconnectCause.REMOTE || cause?.code == DisconnectCause.REJECTED)) {
 //            if (!isNumberBlocked(number) || preferenceManager.getInt(PreferenceManager.KEY_BLOCK_LOG_VISIBILITY, 0) == 1) {
 //                showMissedCallNotification(call)
 //            }
@@ -232,10 +269,10 @@ class CallService : InCallService() {
     private fun showMissedCallNotification(call: Call) {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        val channel = NotificationChannel(CHANNEL_ID, "Calls", NotificationManager.IMPORTANCE_HIGH).apply {
+        val channel = NotificationChannel(MISSED_CHANNEL_ID, "Missed Calls", NotificationManager.IMPORTANCE_DEFAULT).apply {
             lockscreenVisibility = Notification.VISIBILITY_PUBLIC
             enableVibration(true)
-            setSound(null, null)
+            setShowBadge(true)
         }
         notificationManager.createNotificationChannel(channel)
 
@@ -262,9 +299,9 @@ class CallService : InCallService() {
         }
         val pendingIntent = PendingIntent.getActivity(this, 10, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
-        val timeString = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault()).format(java.util.Date())
+        val timeString = android.text.format.DateFormat.getTimeFormat(this).format(java.util.Date())
 
-        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
+        val builder = NotificationCompat.Builder(this, MISSED_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_phone)
             .setContentTitle("Missed Call")
             .setContentText("Missed call from $contactName at $timeString${if (simLabel != null) " via $simLabel" else ""}")
@@ -288,10 +325,11 @@ class CallService : InCallService() {
             _preferredCall.value = null
         }
 
-        // Priority: Preferred > Ringing > Dialing/Connecting > Active > Holding > Others
+        // Priority: Ringing > Preferred > Dialing/Connecting > Active > Holding > Others
         val activePreferred = if (preferred != null && preferred.state != Call.STATE_DISCONNECTED && preferred.state != Call.STATE_HOLDING) preferred else null
 
-        val priorityCall = activePreferred
+        val priorityCall = calls.find { it.state == Call.STATE_RINGING }
+            ?: activePreferred
             ?: calls.find { it.state == Call.STATE_RINGING }
             ?: calls.find { it.state == Call.STATE_DIALING || it.state == Call.STATE_CONNECTING }
             ?: calls.find { it.state == Call.STATE_ACTIVE }
@@ -318,6 +356,7 @@ class CallService : InCallService() {
     override fun onCallAdded(call: Call) {
         super.onCallAdded(call)
         instance = this
+        redialCount = 0
         call.registerCallback(callCallback)
 
         val number = call.details.handle?.schemeSpecificPart ?: ""
@@ -329,24 +368,12 @@ class CallService : InCallService() {
         updateCallState()
         updateNotification(call)
 
-        serviceScope.launch {
-            isActivityVisible.collect {
-                _currentCallSession.value?.call?.let { currentCall ->
-                    updateNotification(currentCall)
-                }
-            }
+        val intent = Intent(this, CallActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP)
         }
-
-        // If it's an incoming call, we rely on setFullScreenIntent in the notification.
-        // Android will automatically decide:
-        // - If the device is locked: launch the full-screen activity.
-        // - If the user is actively using the device: show a heads-up notification.
-        // This satisfies the requirement: "If the user is actively using device only then the full screen intent wont come but notification will"
-        if (call.state != Call.STATE_RINGING) {
-            val intent = Intent(this, CallActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-            }
+        try {
             startActivity(intent)
+        } catch (e: Exception) {
         }
     }
 
@@ -354,9 +381,12 @@ class CallService : InCallService() {
         super.onCallRemoved(call)
         call.unregisterCallback(callCallback)
         updateCallState()
-        if ((calls?.size ?: 0) == 0) {
+        val calls = calls ?: emptyList()
+        if (calls.isEmpty()) {
             removeForeground()
             cancelNotification()
+        } else {
+            _currentCallSession.value?.call?.let { updateNotification(it) }
         }
     }
 
@@ -369,10 +399,16 @@ class CallService : InCallService() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
-            "ANSWER_CALL" -> answerCall()
+            "ANSWER_CALL" -> {
+                answerCall()
+                val activityIntent = Intent(this, CallActivity::class.java).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                }
+                startActivity(activityIntent)
+            }
             "DECLINE_CALL" -> declineCall()
             "TOGGLE_MUTE" -> toggleMute()
-            "TOGGLE_SPEAKER" -> toggleSpeaker()
+            "TOGGLE_SPEAKER" -> cycleAudioRoute()
             "NOTES_CALL"   -> {
                 val name   = intent.getStringExtra("contact_name") ?: "Unknown"
                 val number = intent.getStringExtra("phone_number") ?: ""
@@ -389,7 +425,7 @@ class CallService : InCallService() {
 
         val isRinging = call.state == Call.STATE_RINGING
         val channel = if (isRinging) {
-            NotificationChannel(CHANNEL_INCOMING_ID, "Incoming Calls", NotificationManager.IMPORTANCE_HIGH).apply {
+            NotificationChannel(INCOMING_CHANNEL_ID, "Incoming Calls", NotificationManager.IMPORTANCE_HIGH).apply {
                 lockscreenVisibility = Notification.VISIBILITY_PUBLIC
                 enableVibration(true)
                 setBypassDnd(true)
@@ -398,7 +434,6 @@ class CallService : InCallService() {
             NotificationChannel(CHANNEL_ID, "Ongoing Calls", NotificationManager.IMPORTANCE_LOW).apply {
                 lockscreenVisibility = Notification.VISIBILITY_PUBLIC
                 enableVibration(false)
-                setSound(null, null)
             }
         }
         notificationManager.createNotificationChannel(channel)
@@ -429,9 +464,14 @@ class CallService : InCallService() {
         }
 
         val fullScreenIntent = Intent(this, CallActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP)
         }
-        val fullScreenPendingIntent = PendingIntent.getActivity(this, 0, fullScreenIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val fullScreenPendingIntent = PendingIntent.getActivity(
+            this,
+            if (isRinging) call.hashCode() else 0,
+            fullScreenIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
 
         val answerIntent = Intent(this, CallService::class.java).apply { action = "ANSWER_CALL" }
         val answerPendingIntent = PendingIntent.getService(this, 1, answerIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
@@ -446,13 +486,26 @@ class CallService : InCallService() {
         val mutePendingIntent = PendingIntent.getService(this, 5, muteIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
         val isMuted   = _audioState.value?.isMuted ?: false
-        val isSpeaker = _audioState.value?.route == CallAudioState.ROUTE_SPEAKER
+        val audioState = _audioState.value
+        val audioRoute = audioState?.route ?: CallAudioState.ROUTE_EARPIECE
+        val audioLabel = when (audioRoute) {
+            CallAudioState.ROUTE_SPEAKER -> this.getString(R.string.speaker)
+            CallAudioState.ROUTE_BLUETOOTH -> {
+                try {
+                    audioState?.activeBluetoothDevice?.name ?: "Bluetooth"
+                } catch (e: SecurityException) {
+                    "Bluetooth"
+                }
+            }
+            CallAudioState.ROUTE_WIRED_HEADSET -> "Earpiece"
+            else -> "Handset"
+        }
 
         val contentText = buildString {
             if (isRinging) append("Incoming call") else append("Active call")
             if (!simLabel.isNullOrEmpty()) append(" via $simLabel")
         }
-        val channelId = if (isRinging) CHANNEL_INCOMING_ID else CHANNEL_ID
+        val channelId = if (isRinging) INCOMING_CHANNEL_ID else CHANNEL_ID
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             // For Android 12 and later, we use the native CallStyle
@@ -469,11 +522,11 @@ class CallService : InCallService() {
                 .setContentTitle(contactName)
                 .setContentText(contentText)
                 .setCategory(Notification.CATEGORY_CALL)
-                .setFullScreenIntent(fullScreenPendingIntent, !isActivityVisible.value)
+                .setFullScreenIntent(fullScreenPendingIntent, true)
                 .setContentIntent(fullScreenPendingIntent)
                 .setOngoing(true)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setOnlyAlertOnce(true)
+                .setOnlyAlertOnce(!isRinging)
                 .setUsesChronometer(true)
                 .setStyle(
                     if (isRinging) {
@@ -506,7 +559,7 @@ class CallService : InCallService() {
                 builder.addAction(
                     Notification.Action.Builder(
                         Icon.createWithResource(this, R.drawable.ic_notif_speaker),
-                        if (isSpeaker) "Earpiece" else "Speaker",
+                        audioLabel,
                         speakerPendingIntent
                     ).build()
                 )
@@ -542,15 +595,15 @@ class CallService : InCallService() {
                 .setSmallIcon(R.drawable.ic_phone)
                 .setContentTitle(contactName)
                 .setContentText(contentText)
-                .setPriority(if (isActivityVisible.value) NotificationCompat.PRIORITY_DEFAULT else NotificationCompat.PRIORITY_MAX)
+                .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setCategory(NotificationCompat.CATEGORY_CALL)
-                .setFullScreenIntent(fullScreenPendingIntent, !isActivityVisible.value)
+                .setFullScreenIntent(fullScreenPendingIntent, true)
                 .setContentIntent(fullScreenPendingIntent)
                 .setOngoing(true)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setAutoCancel(false)
                 .setSilent(call.state != Call.STATE_RINGING)
-                .setOnlyAlertOnce(true)
+                .setOnlyAlertOnce(!isRinging)
                 .setDefaults(if (isRinging) NotificationCompat.DEFAULT_ALL else 0)
                 .setStyle(
                     if (isRinging) {
@@ -584,7 +637,7 @@ class CallService : InCallService() {
                 builder.addAction(
                     NotificationCompat.Action.Builder(
                         R.drawable.ic_notif_speaker,
-                        if (isSpeaker) "Earpiece" else "Speaker",
+                        audioLabel,
                         speakerPendingIntent
                     ).build()
                 )
@@ -629,6 +682,7 @@ class CallService : InCallService() {
 
     override fun onDestroy() {
         super.onDestroy()
+        if (instance == this) instance = null
         serviceScope.cancel()
     }
 

@@ -23,6 +23,7 @@ import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.MoveUp
 import androidx.compose.material.icons.rounded.Palette
+import androidx.compose.material.icons.rounded.PeopleAlt
 import androidx.compose.material.icons.rounded.VolunteerActivism
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -444,8 +445,8 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                                 headline = "Interface",
                                 supporting = "Themes, colors, and layout",
                                 leadingIcon = Icons.Rounded.Palette,
-                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
-                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkCyan,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorCyan,
                                 trailingIcon = Icons.Default.ChevronRight,
                                 onClick = { navigator.navigate(InterfaceScreenDestination) })
                             RillListItem(
@@ -453,8 +454,8 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                                 supporting = "Tab visibility, tab style, and default tab",
                                 leadingIcon = Icons.Rounded.MoveUp,
                                 modifierLeadingIcon = Modifier.rotate(90f),
-                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
-                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkCyan,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorCyan,
                                 trailingIcon = Icons.Default.ChevronRight,
                                 onClick = { navigator.navigate(NavigationScreenDestination) })
                         }
@@ -553,6 +554,25 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
 //                                CallRecordingDialog(onDismiss = { showRecordingDialog = false })
 //                            }
 //                        }
+                    }
+                }
+            }
+
+            // ── Contacts ────────────────────────────────────────────────────────
+            item {
+                RillAnimatedSection(delayMs = 300L) {
+                    Column {
+                        SettingsSectionLabel(stringResource(R.string.contacts))
+                        RillExpressiveCard {
+                            RillListItem(
+                                headline = "Manage Contacts",
+                                supporting = "Private contacts and clean up your list",
+                                leadingIcon = Icons.Rounded.PeopleAlt,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
+                                trailingIcon = Icons.Default.ChevronRight,
+                                onClick = { navigator.navigate(ContactManagementScreenDestination) })
+                        }
                     }
                 }
             }

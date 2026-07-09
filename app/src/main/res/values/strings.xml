@@ -55,6 +55,7 @@
     <string name="about">About</string>
 
     <!-- Settings -->
+    <string name="calling_accounts">Calling accounts</string>
     <string name="blocked_numbers">Blocked numbers</string>
     <string name="manage_blocked">Manage blocked</string>
     <string name="manage_blocked_subtitle">Manage blocked calls and spam</string>
@@ -109,10 +110,13 @@
 
     <!-- Contacts -->
     <string name="contacts">Contacts</string>
+    <string name="view_contacts">View contacts</string>
     <string name="contacts_settings">Contact settings</string>
     <string name="create_contact">Create Contact</string>
     <string name="edit_contact">Edit Contact</string>
     <string name="favorites">Favorites</string>
+    <string name="edit">Edit</string>
+    <string name="done">Done</string>
     <string name="add_to_favourites">Add to Favorites</string>
     <string name="remove_from_favourites">Remove from Favourites</string>
     <string name="move_to_another_account">Move to another account</string>
@@ -126,6 +130,8 @@
     <string name="last_name">Last name</string>
     <string name="suffix">Suffix</string>
     <string name="suffix_description">Jr., Sr., III, etc.</string>
+    <string name="nickname">Nickname</string>
+    <string name="nickname_description">Nickname, short name or alias</string>
     <string name="company">Company</string>
     <string name="job_title">Job title</string>
     <string name="job_title_description">Position at the company</string>

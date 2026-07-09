@@ -75,9 +75,12 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.core.net.toUri
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import coil.compose.rememberAsyncImagePainter
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.bottomBarHeight
 import dev.goodwy.rphone.cardCornerBig
@@ -93,10 +96,16 @@ import dev.goodwy.rphone.view.theme.color_call_button
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
+import com.ramcosta.composedestinations.generated.destinations.ContactEditScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.FavoritesScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.NotesScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.RecentScreenDestination
+import dev.goodwy.rphone.controller.util.SocialUtils
+import dev.goodwy.rphone.controller.util.SocialUtils.getInstalledMessenger
+import dev.goodwy.rphone.controller.util.SocialUtils.messengerPackages
+import dev.goodwy.rphone.view.components.RillDialog
+import dev.goodwy.rphone.view.components.RillExpressiveButton
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
@@ -180,7 +189,8 @@ fun DialPadScreen(
             .pointerInput(Unit) {
                 awaitPointerEventScope {
                     while (true) {
-                        val down = awaitPointerEvent(PointerEventPass.Final).changes.firstOrNull() ?: continue
+                        val down = awaitPointerEvent(PointerEventPass.Final).changes.firstOrNull()
+                            ?: continue
                         if (!down.pressed) continue
                         val startX = down.position.x
                         val startY = down.position.y
@@ -205,7 +215,9 @@ fun DialPadScreen(
                                     }
                                     scope.launch {
                                         navController.navigate(route) {
-                                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
                                             launchSingleTop = true; restoreState = true
                                         }
                                     }
@@ -216,7 +228,9 @@ fun DialPadScreen(
                                     }
                                     scope.launch {
                                         navController.navigate(route) {
-                                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
                                             launchSingleTop = true; restoreState = true
                                         }
                                     }
@@ -238,7 +252,8 @@ fun DialPadScreen(
                 initialNumber = initialNumber,
                 navigator = navigator,
                 onDismiss = { navigator.navigateUp() },
-                modifier = Modifier.padding(bottom = if (pillNav) 88.dp else bottomBarHeight - 12.dp)
+                modifier = Modifier
+                    .padding(bottom = if (pillNav) 88.dp else bottomBarHeight - 12.dp)
                     .navigationBarsPadding()
             )
         }
@@ -274,6 +289,19 @@ fun DialPadContent(
         val logs by logsViewModel.allCallLogs.collectAsState()
         var number by remember { mutableStateOf(initialNumber ?: "") }
         val soundPool = remember { buildDtmfSoundPool(context) }
+
+        var showSocialDialog by remember { mutableStateOf(false) }
+        val installedWhatsApp = messengerPackages["WhatsApp"]?.let { context.getInstalledMessenger(it) }
+        val installedTelegram = messengerPackages["Telegram"]?.let { context.getInstalledMessenger(it) }
+        val installedSignal = messengerPackages["Signal"]?.let { context.getInstalledMessenger(it) }
+        val initiateMessage = { number: String ->
+            context.startActivity(
+                Intent(
+                    Intent.ACTION_VIEW,
+                    "sms:$number".toUri()
+                )
+            )
+        }
 
         val t9Enabled = prefs.getBoolean(PreferenceManager.KEY_T9_DIALING, true)
         var showSimPicker by remember { mutableStateOf(false) }
@@ -332,7 +360,8 @@ fun DialPadContent(
                             }
                             val matchesName =
                                 t9Enabled && T9Matcher.isMatch(contact.displayName, cleanQuery)
-                            matchesNumber || matchesName
+                            val matchesNickname = t9Enabled && contact.nickname.let { T9Matcher.isMatch(it, cleanQuery) } ?: false
+                            matchesNumber || matchesName || matchesNickname
                         }
                         .take(take)
                         .toList()
@@ -455,6 +484,76 @@ fun DialPadContent(
                     showSimPicker = false
                 }
             )
+        }
+
+        if (showSocialDialog) {
+            RillDialog(
+                onDismissRequest = { showSocialDialog = false },
+                title = "Connect via Social",
+                icon = ImageVector.vectorResource(id = R.drawable.ic_message_outline),
+                confirmButton = {
+                    TextButton(onClick = { showSocialDialog = false }) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                }
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (installedWhatsApp != null) {
+                        RillExpressiveButton(
+                            modifier = Modifier.weight(1f),
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_whatsapp),
+                            label = "WhatsApp",
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                            iconSize = 32.dp,
+                            onClick = {
+                                SocialUtils.openWhatsApp(context, number)
+                                showSocialDialog = false
+                            }
+                        )
+                    }
+                    if (installedTelegram != null) {
+                        RillExpressiveButton(
+                            modifier = Modifier.weight(1f),
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_telegram),
+                            label = "Telegram",
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                            iconSize = 32.dp,
+                            onClick = {
+                                SocialUtils.openTelegram(context, number)
+                                showSocialDialog = false
+                            }
+                        )
+                    }
+                    if (installedSignal != null) {
+                        RillExpressiveButton(
+                            modifier = Modifier.weight(1f),
+                            icon = ImageVector.vectorResource(id = R.drawable.ic_signal),
+                            label = "Signal",
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                            iconSize = 32.dp,
+                            onClick = {
+                                SocialUtils.openSignal(context, number)
+                                showSocialDialog = false
+                            }
+                        )
+                    }
+                    RillExpressiveButton(
+                        modifier = Modifier.weight(1f),
+                        icon = ImageVector.vectorResource(id = R.drawable.ic_message_outline),
+                        label = "SMS",
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        iconSize = 32.dp,
+                        onClick = {
+                            initiateMessage(number)
+                            showSocialDialog = false
+                        }
+                    )
+                }
+            }
         }
 
         val configuration = LocalConfiguration.current
@@ -710,7 +809,8 @@ fun DialPadContent(
                         // Number display
                         Box(
                             modifier = Modifier
-                                .fillMaxWidth().fillMaxWidth()
+                                .fillMaxWidth()
+                                .fillMaxWidth()
                                 .weight(1.2f)
                                 .clip(RoundedCornerShape(16.dp))
 //                        .background(
@@ -755,7 +855,9 @@ fun DialPadContent(
                         )
                         keys.forEach { row ->
                             Row(
-                                modifier = Modifier.fillMaxWidth().fillMaxWidth()
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .fillMaxWidth()
                                     .weight(1f),
                                 horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
@@ -768,7 +870,9 @@ fun DialPadContent(
                                         onClick = { digit -> number += digit },
                                         onLongClick = { digit -> number += digit },
                                         compact = true,
-                                        modifier = Modifier.fillMaxWidth().fillMaxWidth()
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .fillMaxWidth()
                                             .weight(1f)
                                     )
                                 }
@@ -777,7 +881,8 @@ fun DialPadContent(
                         // Action row — below the keys
                         Row(
                             modifier = Modifier
-                                .fillMaxWidth().fillMaxWidth()
+                                .fillMaxWidth()
+                                .fillMaxWidth()
                                 .weight(1.2f)
                                 .padding(vertical = 2.dp),
                             verticalAlignment = Alignment.CenterVertically,
@@ -786,17 +891,18 @@ fun DialPadContent(
                             FadeScaleBox(visible = number.isNotEmpty()) {
                                 DialerActionExpressive(
                                     onClick = {
-                                        val intent =
-                                            android.content.Intent(android.content.Intent.ACTION_INSERT)
-                                                .apply {
-                                                    type =
-                                                        android.provider.ContactsContract.RawContacts.CONTENT_TYPE
-                                                    putExtra(
-                                                        android.provider.ContactsContract.Intents.Insert.PHONE,
-                                                        number
-                                                    )
-                                                }
-                                        context.startActivity(intent)
+//                                        val intent = Intent(Intent.ACTION_INSERT)
+//                                                .apply {
+//                                                    type = ContactsContract.RawContacts.CONTENT_TYPE
+//                                                    putExtra(ContactsContract.Intents.Insert.PHONE, number)
+//                                                }
+//                                        context.startActivity(intent)
+                                        navigator?.navigate(
+                                            ContactEditScreenDestination(
+                                                initialPhone = number
+                                            )
+                                        )
+
                                     },
                                     icon = Icons.Default.PersonAdd,
                                     contentDescription = "Add Contact",
@@ -849,7 +955,8 @@ fun DialPadContent(
             LaunchedEffect(Unit) { focusManager.clearFocus() }
 
             BoxWithConstraints(
-                modifier = modifier.fillMaxSize()
+                modifier = modifier
+                    .fillMaxSize()
                     .then(if (!isBottomSheet) Modifier.statusBarsPadding() else Modifier)
 //            .padding(top = 16.dp)
             ) {
@@ -931,7 +1038,8 @@ fun DialPadContent(
                         Column(
                             modifier = Modifier
 //                        .weight(1f)
-                                .fillMaxSize().navigationBarsPadding()
+                                .fillMaxSize()
+                                .navigationBarsPadding()
                                 .verticalScroll(listScrollState),
                             verticalArrangement = Arrangement.Top
                         ) {
@@ -1031,19 +1139,16 @@ fun DialPadContent(
                                             )
                                         }
                                     }
+
                                     Surface(
                                         onClick = {
                                             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                            val intent =
-                                                Intent(Intent.ACTION_INSERT_OR_EDIT).apply {
-                                                    type =
-                                                        ContactsContract.Contacts.CONTENT_ITEM_TYPE
-                                                    putExtra(
-                                                        ContactsContract.Intents.Insert.PHONE,
-                                                        number
-                                                    )
-                                                }
-                                            context.startActivity(intent)
+                                            if (
+                                                installedWhatsApp != null ||
+                                                installedTelegram != null ||
+                                                installedSignal != null
+                                            ) showSocialDialog = true
+                                            else initiateMessage(number)
                                         },
                                         shape = RoundedCornerShape(50.dp),
                                         color = MaterialTheme.colorScheme.primaryContainer,
@@ -1291,7 +1396,8 @@ fun DialPadContent(
                             prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD, true)
                         val fabShape = RoundedCornerShape(17.dp)
                         FloatingActionButton(
-                            modifier = Modifier.padding(bottom = if (pillNav) 0.dp else 24.dp)
+                            modifier = Modifier
+                                .padding(bottom = if (pillNav) 0.dp else 24.dp)
                                 .then(
                                     if (dialpadTab) Modifier
                                         .padding(horizontal = 16.dp, vertical = 4.dp)
@@ -1374,7 +1480,9 @@ fun DialPadContent(
                                     .background(if (isBottomSheet) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surface)
                             )
                             Surface(
-                                modifier = Modifier.fillMaxWidth().padding(bottom = if (pillNav) 0.dp else 24.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = if (pillNav) 0.dp else 24.dp),
                                 shape = RoundedCornerShape(32.dp),
                                 color = dialpadColor, //MaterialTheme.colorScheme.surfaceContainerLow,
 //                            shadowElevation = 2.dp

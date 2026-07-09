@@ -80,7 +80,7 @@
             android:windowSoftInputMode="adjustNothing"
             android:directBootAware="true"
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden"
-            android:theme="@style/Theme.RillPhone">
+            android:theme="@style/Theme.App.Starting">
             <intent-filter>
                 <action android:name="android.intent.action.DIAL" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -133,11 +133,11 @@
         <activity
             android:name=".controller.CallActivity"
             android:exported="true"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTask"
+            android:excludeFromRecents="true"
             android:showForAllUsers="true"
             android:showWhenLocked="true"
             android:turnScreenOn="true"
-            android:excludeFromRecents="true"
             android:taskAffinity=""
             android:directBootAware="true"
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden"

@@ -36,14 +36,17 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PauseCircle
 import androidx.compose.material.icons.rounded.AddIcCall
+import androidx.compose.material.icons.rounded.Bluetooth
 import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.CallEnd
 import androidx.compose.material.icons.rounded.Cancel
 import androidx.compose.material.icons.rounded.Dialpad
+import androidx.compose.material.icons.rounded.Headset
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material.icons.rounded.Mic
 import androidx.compose.material.icons.rounded.MicOff
+import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.SwapCalls
 import androidx.compose.material3.*
@@ -143,7 +146,6 @@ fun ExpressiveCallScreen(
         }
     }
     val isMuted = audioState?.isMuted ?: false
-    val isSpeakerOn = audioState?.route == CallAudioState.ROUTE_SPEAKER
 
     var callDuration by remember { mutableLongStateOf(0L) }
     var showKeypad by remember { mutableStateOf(false) }
@@ -605,18 +607,38 @@ fun ExpressiveCallScreen(
                                 CallService.mute(!isMuted)
                             }
 
+                            val audioRoute = audioState?.route ?: CallAudioState.ROUTE_EARPIECE
+                            val audioIcon = when (audioRoute) {
+                                CallAudioState.ROUTE_SPEAKER -> Icons.AutoMirrored.Rounded.VolumeUp
+                                CallAudioState.ROUTE_BLUETOOTH -> Icons.Rounded.Bluetooth
+                                CallAudioState.ROUTE_WIRED_HEADSET -> Icons.Rounded.Headset
+                                else -> Icons.AutoMirrored.Rounded.VolumeDown //Icons.Rounded.Phone
+                            }
+
+                            val audioLabel = when (audioRoute) {
+                                CallAudioState.ROUTE_SPEAKER -> stringResource(R.string.speaker)
+                                CallAudioState.ROUTE_BLUETOOTH -> {
+                                    try {
+                                        audioState?.activeBluetoothDevice?.name ?: "Bluetooth"
+                                    } catch (e: SecurityException) {
+                                        "Bluetooth"
+                                    }
+                                }
+                                CallAudioState.ROUTE_WIRED_HEADSET -> "Earpiece"
+                                else -> "Handset"
+                            }
                             AnimatedCallButton(
                                 modifier = Modifier.weight(1f),
-                                icon = if (isSpeakerOn) Icons.AutoMirrored.Rounded.VolumeUp else Icons.AutoMirrored.Rounded.VolumeDown,
-                                isActive = isSpeakerOn,
-                                label = stringResource(R.string.speaker),
+                                icon = audioIcon,
+                                isActive = audioRoute == CallAudioState.ROUTE_SPEAKER || audioRoute == CallAudioState.ROUTE_BLUETOOTH,
+                                label = audioLabel,
                                 btnColor = controlBtnColor,
                                 activeBtnColor = controlBtnActiveColor,
                                 fgColor = controlBtnFg,
                                 activeFgColor = controlBtnActiveFg
                             ) {
                                 view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                                CallService.setSpeaker(!isSpeakerOn)
+                                CallService.cycleAudioRoute()
                             }
 
                             AnimatedCallButton(

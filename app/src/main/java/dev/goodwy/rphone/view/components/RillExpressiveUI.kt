@@ -376,7 +376,7 @@ fun RillExpressiveCard(
 @Composable
 fun RillSectionHeader(
     title: String,
-    modifier: Modifier = Modifier.fillMaxWidth().padding(horizontal = 36.dp, vertical = 4.dp)
+    modifier: Modifier = Modifier.fillMaxWidth().padding(horizontal = 36.dp, vertical = 8.dp)
 ) {
     Text(
         text = title,
@@ -1410,7 +1410,7 @@ fun <T> RillSelectionDialog(
     icon: ImageVector? = null,
     iconContainerColor: Color? = null,
     iconBgContainerColor: Color? = null,
-    itemIcon: ((T) -> ImageVector)? = null,
+    itemIcon: @Composable ((T) -> ImageVector)? = null,
     isSelected: (T) -> Boolean = { false },
 ) {
     RillDialog(
@@ -1445,13 +1445,13 @@ fun <T> RillSelectionDialog(
                 interactionSource = interactionSource
             ) {
                 Row(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = if (itemIcon != null) 8.dp else 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (itemIcon != null) {
                         Surface(
                             modifier = Modifier.size(44.dp),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = CircleShape, //RoundedCornerShape(12.dp),
                             color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer.copy(
                                 alpha = 0.5f
                             )

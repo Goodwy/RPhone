@@ -35,7 +35,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -57,12 +56,10 @@ import com.ramcosta.composedestinations.generated.destinations.DialPadScreenDest
 import com.ramcosta.composedestinations.generated.destinations.FavoritesScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.NotesScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import android.os.Build
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.gestures.scrollBy
 import dev.goodwy.rphone.bottomBarHeight
 import dev.goodwy.rphone.cardCornerBig
 import dev.goodwy.rphone.cardCornerSmall
@@ -77,7 +74,6 @@ import java.util.Calendar
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -86,7 +82,6 @@ import dev.goodwy.rphone.controller.ContactsViewModel
 import dev.goodwy.rphone.modal.data.CallLogEntry
 import dev.goodwy.rphone.modal.data.Contact
 import com.ramcosta.composedestinations.generated.destinations.CallLogFullScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.CallLogFullScreenDestination.invoke
 import kotlin.collections.component1
 import kotlin.collections.component2
 
@@ -107,7 +102,7 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
 
     val prefs = koinInject<PreferenceManager>()
     val pillNav = remember { prefs.getBoolean(PreferenceManager.KEY_PILL_NAV, false) }
-    val favouritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, true)
+    val favoritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, true)
     val contactsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS, true)
     val dialpadEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD, true)
     val notesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES, true)
@@ -117,10 +112,8 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-    //Drag-and-drop state retrieved from CallLogFullContent
-    var draggedFavoriteId by remember { mutableStateOf<String?>(null) }
-    // `rememberUpdatedState` is needed so that `pointerInput(Unit)` can see the current value without having to be recreated
-    val currentDraggedFavoriteId by rememberUpdatedState(draggedFavoriteId)
+    var isDraggingFavorite by remember { mutableStateOf(false) }
+    val currentIsDraggingFavorite by rememberUpdatedState(isDraggingFavorite)
 
     var selectedEntries by remember { mutableStateOf(setOf<CallLogEntry>()) }
 
@@ -190,7 +183,7 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
         }
     }
 
-    val showBottomBar = favouritesEnabled || contactsEnabled || dialpadEnabled ||notesEnabled
+    val showBottomBar = favoritesEnabled || contactsEnabled || dialpadEnabled ||notesEnabled
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -214,7 +207,7 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
                             val change = event.changes.firstOrNull() ?: break
 
                             // If dragging begins DURING the swipe gesture, we cancel it
-                            if (currentDraggedFavoriteId != null) {
+                            if (currentIsDraggingFavorite) {
                                 triggered = false // We're resetting it so the navigation definitely won't work
                                 break // We exit the swipe loop; the outer loop will take over and wait for the button to be released
                             }
@@ -248,7 +241,7 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
                                         }
                                     } else {
                                         val route = when {
-                                            favouritesEnabled -> FavoritesScreenDestination.route
+                                            favoritesEnabled -> FavoritesScreenDestination.route
                                             notesEnabled -> NotesScreenDestination.route
                                             dialpadEnabled -> DialPadScreenDestination().route
                                             else -> ContactScreenDestination.route
@@ -452,7 +445,6 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
         contentWindowInsets = WindowInsets(0)
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
-            val showFavorite = !favouritesEnabled && !contactsEnabled
             CallLogFullContent(
                 navController = navController,
                 navigator = navigator,
@@ -467,9 +459,8 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
                         selectedEntries + entry
                     }
                 },
-                showFavorite = showFavorite,
-                draggedFavoriteId = draggedFavoriteId,
-                onDraggedFavoriteIdChange = { draggedFavoriteId = it },
+                isDraggingFavorite = currentIsDraggingFavorite,
+                onDraggingFavoriteChange = { isDraggingFavorite = it },
             )
 
             ScrollToTopButton(
@@ -507,14 +498,14 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
 //    }
 //}
 
-private fun todayStartMillis(): Long {
-    val cal = Calendar.getInstance()
-    cal.set(Calendar.HOUR_OF_DAY, 0)
-    cal.set(Calendar.MINUTE, 0)
-    cal.set(Calendar.SECOND, 0)
-    cal.set(Calendar.MILLISECOND, 0)
-    return cal.timeInMillis
-}
+//private fun todayStartMillis(): Long {
+//    val cal = Calendar.getInstance()
+//    cal.set(Calendar.HOUR_OF_DAY, 0)
+//    cal.set(Calendar.MINUTE, 0)
+//    cal.set(Calendar.SECOND, 0)
+//    cal.set(Calendar.MILLISECOND, 0)
+//    return cal.timeInMillis
+//}
 
 @Composable
 fun CallLogFullContent(
@@ -525,14 +516,12 @@ fun CallLogFullContent(
     listState: LazyListState,
     selectedEntries: Set<CallLogEntry>,
     onToggleSelection: (CallLogEntry) -> Unit,
-    showFavorite: Boolean,
-    draggedFavoriteId: String? = null,
-    onDraggedFavoriteIdChange: (String?) -> Unit = {}
+    isDraggingFavorite: Boolean = false,
+    onDraggingFavoriteChange: (Boolean) -> Unit = {},
 ) {
     val prefs = koinInject<PreferenceManager>()
-//    val settingsVersion by prefs.settingsChanged.collectAsState()
-//    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
-    val currentDraggedFavoriteId by rememberUpdatedState(draggedFavoriteId)
+    val favouritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, true)
+    val contactsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS, true)
 
     if (isGranted) {
         val viewModel: CallLogViewModel = koinActivityViewModel()
@@ -542,13 +531,26 @@ fun CallLogFullContent(
         val telecomManager = remember { context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager }
 
         val contactsVM: ContactsViewModel = koinActivityViewModel()
-        val settingsVersion by prefs.settingsChanged.collectAsState()
-        LaunchedEffect(settingsVersion) {
+        val settingsState by prefs.settingsChanged.collectAsState()
+        LaunchedEffect(settingsState) {
             contactsVM.fetchContacts()
         }
 
         val allContacts by contactsVM.allContacts.collectAsState()
-        val favorites = remember(allContacts) { allContacts.filter { it.isFavorite } }
+//        val favorites = remember(allContacts) { allContacts.filter { it.isFavorite } }
+        val favorites = remember(allContacts, settingsState) {
+            val favContacts = allContacts.filter { it.isFavorite }
+            val order = prefs.getFavoritesOrder()
+            favContacts.sortedWith(compareBy<Contact> { contact ->
+                val index = order.indexOf(contact.id)
+                if (index != -1) index else Int.MAX_VALUE
+            }.thenBy { it.name })
+        }
+        var isEditingFavorites by remember { mutableStateOf(false) }
+
+        LaunchedEffect(selectedFilter) {
+            isEditingFavorites = false
+        }
 
         // Drag-to-reorder state — declared first so LaunchedEffect can reference draggedContactId
         var draggedContactId       by remember { mutableStateOf<String?>(null) }
@@ -559,20 +561,23 @@ fun CallLogFullContent(
         var expectedDraggedCenter  by remember { mutableStateOf(Offset.Zero) }
 
         // Ordered favorites — persists custom drag-to-reorder order
-        val orderedFavorites = remember { mutableStateListOf<Contact>() }
-        LaunchedEffect(favorites) {
-            // Don't touch the list while the user is actively dragging
-            if (draggedContactId != null) return@LaunchedEffect
-            val savedIds = prefs.getString(PreferenceManager.KEY_FAVORITES_ORDER, null)
-                ?.split(",")?.filter { it.isNotEmpty() } ?: emptyList()
-            val favMap   = favorites.associateBy { it.id }
-            val ordered  = savedIds.mapNotNull { favMap[it] }
-            val newList  = ordered + favorites.filter { it.id !in savedIds.toSet() }
-            val toRemove = orderedFavorites.filter { o -> newList.none { it.id == o.id } }
-            toRemove.forEach { orderedFavorites.remove(it) }
-            newList.filter { n -> orderedFavorites.none { it.id == n.id } }
-                .forEach { orderedFavorites.add(it) }
-        }
+//        val orderedFavorites = remember { mutableStateListOf<Contact>() }
+//        LaunchedEffect(favorites) {
+//            // Don't touch the list while the user is actively dragging
+//            if (draggedContactId != null) return@LaunchedEffect
+//            val savedIds = prefs.getString(PreferenceManager.KEY_FAVORITES_ORDER, null)
+//                ?.split(",")?.filter { it.isNotEmpty() } ?: emptyList()
+//            val favMap   = favorites.associateBy { it.id }
+//            val ordered  = savedIds.mapNotNull { favMap[it] }
+//            val newList  = ordered + favorites.filter { it.id !in savedIds.toSet() }
+//            val toRemove = orderedFavorites.filter { o -> newList.none { it.id == o.id } }
+//            toRemove.forEach { orderedFavorites.remove(it) }
+//            newList.filter { n -> orderedFavorites.none { it.id == n.id } }
+//                .forEach { orderedFavorites.add(it) }
+//        }
+//        fun saveFavoritesOrder() {
+//            prefs.setString(PreferenceManager.KEY_FAVORITES_ORDER, orderedFavorites.joinToString(",") { it.id })
+//        }
 
         val lazyRowState = rememberLazyListState()
 
@@ -592,46 +597,10 @@ fun CallLogFullContent(
                 }
             }
         }
-        val currentFingerAbsPos by rememberUpdatedState(fingerAbsPos)
-        val currentDraggedFavoriteIdForScroll by rememberUpdatedState(draggedFavoriteId)
-        LaunchedEffect(currentDraggedFavoriteIdForScroll) {
-            if (currentDraggedFavoriteIdForScroll != null) {
-                val threshold = 260f // Auto-scroll trigger zone at the edges (in pixels))
-                val maxScrollSpeed = 35f // Maximum frame-by-frame scroll speed
-
-                while (true) {
-                    val pos = currentFingerAbsPos
-                    val bounds = lazyRowBounds
-
-                    if (bounds != null) {
-                        // The distance from the finger to the left and right edges of LazyRow
-                        val distToLeft = pos.x - bounds.left
-                        val distToRight = bounds.right - pos.x
-
-                        // Smooth scrolling: the closer your finger is to the edge, the faster the scroll speed
-                        if (distToLeft < threshold) {
-                            val speed = (1f - distToLeft / threshold) * maxScrollSpeed
-                            lazyRowState.scrollBy(-speed)
-                        } else if (distToRight < threshold) {
-                            val speed = (1f - distToRight / threshold) * maxScrollSpeed
-                            lazyRowState.scrollBy(speed)
-                        }
-                    }
-
-                    delay(16) // Pause for ~60 FPS
-
-                    // Exit the loop if the drag is over
-                    if (currentDraggedFavoriteIdForScroll == null) break
-                }
-            }
-        }
-        fun saveFavoritesOrder() {
-            prefs.setString(PreferenceManager.KEY_FAVORITES_ORDER, orderedFavorites.joinToString(",") { it.id })
-        }
 
         var showSimPicker by remember { mutableStateOf(false) }
         var pendingNumber by remember { mutableStateOf<String?>(null) }
-        val simPref = remember(settingsVersion) { prefs.getInt("default_sim", 0) }
+        val simPref = remember(settingsState) { prefs.getInt("default_sim", 0) }
 
         // Track previous filter index for slide direction
         val filterEntries = CallLogFilter.entries
@@ -692,10 +661,10 @@ fun CallLogFullContent(
             Column(modifier = Modifier.fillMaxSize()) {
 
                 // Stat cards – visibility controlled by Call UI settings
-//                val showToday    = remember(settingsVersion) { prefs.getBoolean(PreferenceManager.KEY_CALL_UI_SHOW_TODAY, true) }
-//                val showMissed   = remember(settingsVersion) { prefs.getBoolean(PreferenceManager.KEY_CALL_UI_SHOW_MISSED, true) }
-//                val showOutgoing = remember(settingsVersion) { prefs.getBoolean(PreferenceManager.KEY_CALL_UI_SHOW_OUTGOING, true) }
-//                val showCallTime = remember(settingsVersion) { prefs.getBoolean(PreferenceManager.KEY_CALL_UI_SHOW_CALL_TIME, true) }
+//                val showToday    = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_CALL_UI_SHOW_TODAY, true) }
+//                val showMissed   = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_CALL_UI_SHOW_MISSED, true) }
+//                val showOutgoing = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_CALL_UI_SHOW_OUTGOING, true) }
+//                val showCallTime = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_CALL_UI_SHOW_CALL_TIME, true) }
 
                 // In portrait, render stat cards and pills above the list (sticky)
                 // In landscape, they go inside the LazyColumn so they scroll with content
@@ -788,27 +757,39 @@ fun CallLogFullContent(
 //                                }
 //                            }
 //                        }
-
-                        if (showFavorite && currentFilter == CallLogFilter.All && favorites.isNotEmpty()) {
-                            item(key = "favorites_pills", contentType = "favoritesPills") {
-                                Column(
+                        if (!favouritesEnabled && favorites.isNotEmpty() && selectedFilter == CallLogFilter.All) {
+                            item {
+//                                RivoSectionHeader(
+//                                    title = stringResource(R.string.favorites),
+//                                    trailingContent = {
+//                                        TextButton(
+//                                            onClick = { isEditingFavorites = !isEditingFavorites },
+//                                            modifier = Modifier.padding(end = 8.dp)
+//                                        ) {
+//                                            Text(
+//                                                text = if (isEditingFavorites) "Done" else "Edit",
+//                                                style = MaterialTheme.typography.labelLarge,
+//                                                fontWeight = FontWeight.Bold,
+//                                                color = MaterialTheme.colorScheme.primary
+//                                            )
+//                                        }
+//                                    }
+//                                )
+                                Row(
                                     modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(bottom = 2.dp)
+                                        .fillMaxWidth().padding(end = 16.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+//                                    horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth().padding(end = 16.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        Text(
-                                            text = "Favorites",
-                                            style = MaterialTheme.typography.labelLarge,
-                                            color = MaterialTheme.colorScheme.primary,
-                                            fontWeight = FontWeight.Bold,
-                                            modifier = Modifier.padding(horizontal = 36.dp, vertical = 4.dp)
-                                        )
+                                    Text(
+                                        text = stringResource(R.string.favorites),
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(horizontal = 36.dp, vertical = 4.dp)
+                                    )
+                                    Spacer(Modifier.weight(1f))
+                                    if (!contactsEnabled) {
                                         Surface(
                                             modifier = Modifier.combinedClickable(
                                                 onClick = {
@@ -827,128 +808,233 @@ fun CallLogFullContent(
                                             color = MaterialTheme.colorScheme.surfaceContainerHigh
                                         ) {
                                             Text(
-                                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp),
-                                                text = "View contacts",
+                                                modifier = Modifier.padding(
+                                                    horizontal = 16.dp,
+                                                    vertical = 5.dp
+                                                ),
+                                                text = stringResource(R.string.view_contacts),
                                                 style = MaterialTheme.typography.labelMedium,
                                                 fontWeight = FontWeight.SemiBold,
                                                 color = MaterialTheme.colorScheme.onPrimaryContainer
                                             )
                                         }
+                                        Spacer(Modifier.width(12.dp))
                                     }
-                                    LazyRow(
-                                        state = lazyRowState,
-                                        userScrollEnabled = draggedFavoriteId == null,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(108.dp)
-                                            .onGloballyPositioned { coords ->
-                                                lazyRowLayoutCoords = coords
-                                            },
-                                        contentPadding = PaddingValues(
-                                            horizontal = 24.dp,
-                                            vertical = 12.dp
+                                    Surface(
+                                        modifier = Modifier.combinedClickable(
+                                            onClick = { isEditingFavorites = !isEditingFavorites },
+                                            interactionSource = null,
+                                            indication = null,
                                         ),
-                                        horizontalArrangement = Arrangement.spacedBy(20.dp)
+                                        shape = RoundedCornerShape(20.dp),
+                                        color = MaterialTheme.colorScheme.surfaceContainerHigh
                                     ) {
-                                        items(orderedFavorites, key = { it.id }) { contact ->
-                                            RillScrollAnimatedItem(
-                                                modifier = Modifier.zIndex(
-                                                    if (currentDraggedFavoriteId == contact.id) 10f else 0f
-                                                )
-                                            ) {
-                                                FavoriteContactCard(
-                                                    modifier = Modifier
-                                                        .width(60.dp)
-                                                        .wrapContentHeight(),
-                                                    contact = contact,
-                                                    navigator = navigator,
-                                                    context = context,
-                                                    isDragging = currentDraggedFavoriteId == contact.id,
-                                                    dragOffset = if (currentDraggedFavoriteId == contact.id) dragOffset else null,
-                                                    onBoundsChanged = { bounds -> itemBoundsMap[contact.id] = bounds },
-                                                    onDragStart = { _ ->
-                                                        onDraggedFavoriteIdChange(contact.id)
-                                                        dragOffset = Offset.Zero
-                                                        val center = itemBoundsMap[contact.id]?.center ?: Offset.Zero
-                                                        fingerAbsPos = center
-                                                        expectedDraggedCenter = center
-                                                        lastSwapTargetId = null
-                                                    },
-                                                    onDrag = { amt ->
-                                                        if (currentDraggedFavoriteId == contact.id) {
-                                                            fingerAbsPos += amt
-                                                            // dragOffset = finger position minus expected card center
-                                                            // expectedDraggedCenter is updated synchronously on swap,
-                                                            // eliminating the 1-frame position jump that causes flicker
-                                                            dragOffset = fingerAbsPos - expectedDraggedCenter
-
-                                                            val targetId = itemBoundsMap.entries
-                                                                .filter { it.key != currentDraggedFavoriteId }
-                                                                .firstOrNull { (_, b) -> b.contains(fingerAbsPos) }
-                                                                ?.key
-
-                                                            if (targetId != null && targetId != lastSwapTargetId) {
-                                                                // Update expectedDraggedCenter to target's current bounds BEFORE swap
-                                                                // so dragOffset compensates immediately in this same frame
-                                                                val targetCenter = itemBoundsMap[targetId]?.center
-                                                                if (targetCenter != null) {
-                                                                    expectedDraggedCenter = targetCenter
-                                                                    dragOffset = fingerAbsPos - expectedDraggedCenter
-                                                                }
-                                                                lastSwapTargetId = targetId
-                                                                val fromIdx = orderedFavorites.indexOfFirst { it.id == currentDraggedFavoriteId }
-                                                                val toIdx   = orderedFavorites.indexOfFirst { it.id == targetId }
-                                                                if (fromIdx != -1 && toIdx != -1) {
-                                                                    orderedFavorites.add(toIdx, orderedFavorites.removeAt(fromIdx))
-                                                                }
-                                                            }
-                                                        }
-                                                    },
-                                                    onDragEnd = {
-                                                        onDraggedFavoriteIdChange(null)
-                                                        dragOffset = Offset.Zero
-                                                        fingerAbsPos = Offset.Zero
-                                                        expectedDraggedCenter = Offset.Zero
-                                                        lastSwapTargetId = null
-                                                        saveFavoritesOrder()
-                                                    },
-                                                    onDragCancel = {
-                                                        onDraggedFavoriteIdChange(null)
-                                                        dragOffset = Offset.Zero
-                                                        fingerAbsPos = Offset.Zero
-                                                        expectedDraggedCenter = Offset.Zero
-                                                        lastSwapTargetId = null
-                                                    },
-                                                    onClick = {
-                                                        val phoneNumber =
-                                                            contact.phoneNumbers.firstOrNull()
-                                                        if (phoneNumber != null) {
-                                                            placeCallWithSimPreference(
-                                                                context,
-                                                                phoneNumber,
-                                                                simPref
-                                                            ) {
-                                                                pendingNumber =
-                                                                    phoneNumber; showSimPicker = true
-                                                            }
-                                                        } else {
-                                                            navigator.navigate(
-                                                                ContactDetailsScreenDestination(
-                                                                    contactId = contact.id
-                                                                )
-                                                            )
-                                                        }
-                                                    },
-                                                    onToggleFavorite = {
-                                                        contactsVM.toggleFavorite(contact)
-                                                    }
-                                                )
-                                            }
-                                        }
+                                        Text(
+                                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp),
+                                            text = if (isEditingFavorites) stringResource(R.string.done)
+                                                    else stringResource(R.string.edit),
+                                            style = MaterialTheme.typography.labelMedium,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                                        )
                                     }
                                 }
+                                IPhoneFavoritesRow(
+                                    favorites = favorites,
+                                    isEditing = isEditingFavorites,
+                                    onUnfavorite = { contact ->
+                                        contactsVM.toggleFavorite(contact)
+                                    },
+                                    onSaveOrder = { newOrder ->
+                                        prefs.setFavoritesOrder(newOrder)
+                                    },
+                                    onClick = { contact ->
+//                                        callLauncher.dial(contact.phoneNumbers.firstOrNull() ?: "", contact)
+                                        val phoneNumber =
+                                            contact.phoneNumbers.firstOrNull()
+                                        if (phoneNumber != null) {
+                                            placeCallWithSimPreference(
+                                                context,
+                                                phoneNumber,
+                                                simPref
+                                            ) {
+                                                pendingNumber =
+                                                    phoneNumber; showSimPicker = true
+                                            }
+                                        } else {
+                                            navigator.navigate(
+                                                ContactDetailsScreenDestination(
+                                                    contactId = contact.id
+                                                )
+                                            )
+                                        }
+                                    },
+                                    isDragging = isDraggingFavorite,
+                                    onDraggingChange = onDraggingFavoriteChange
+                                )
                             }
                         }
+
+//                        if (showFavorite && currentFilter == CallLogFilter.All && favorites.isNotEmpty()) {
+//                            item(key = "favorites_pills", contentType = "favoritesPills") {
+//                                Column(
+//                                    modifier = Modifier
+//                                        .fillMaxSize()
+//                                        .padding(bottom = 2.dp)
+//                                ) {
+//                                    Row(
+//                                        modifier = Modifier
+//                                            .fillMaxWidth().padding(end = 16.dp),
+//                                        verticalAlignment = Alignment.CenterVertically,
+//                                        horizontalArrangement = Arrangement.SpaceBetween
+//                                    ) {
+//                                        Text(
+//                                            text = stringResource(R.string.favorites),
+//                                            style = MaterialTheme.typography.labelLarge,
+//                                            color = MaterialTheme.colorScheme.primary,
+//                                            fontWeight = FontWeight.Bold,
+//                                            modifier = Modifier.padding(horizontal = 36.dp, vertical = 4.dp)
+//                                        )
+//                                        Surface(
+//                                            modifier = Modifier.combinedClickable(
+//                                                onClick = {
+//                                                    navController.navigate(ContactScreenDestination.route) {
+//                                                        popUpTo(navController.graph.findStartDestination().id) {
+//                                                            saveState = true
+//                                                        }
+//                                                        launchSingleTop = true
+//                                                        restoreState = true
+//                                                    }
+//                                                },
+//                                                interactionSource = null,
+//                                                indication = null,
+//                                            ),
+//                                            shape = RoundedCornerShape(20.dp),
+//                                            color = MaterialTheme.colorScheme.surfaceContainerHigh
+//                                        ) {
+//                                            Text(
+//                                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp),
+//                                                text = stringResource(R.string.view_contacts),
+//                                                style = MaterialTheme.typography.labelMedium,
+//                                                fontWeight = FontWeight.SemiBold,
+//                                                color = MaterialTheme.colorScheme.onPrimaryContainer
+//                                            )
+//                                        }
+//                                    }
+//                                    LazyRow(
+//                                        state = lazyRowState,
+//                                        userScrollEnabled = draggedFavoriteId == null,
+//                                        modifier = Modifier
+//                                            .fillMaxWidth()
+//                                            .height(108.dp)
+//                                            .onGloballyPositioned { coords ->
+//                                                lazyRowLayoutCoords = coords
+//                                            },
+//                                        contentPadding = PaddingValues(
+//                                            horizontal = 24.dp,
+//                                            vertical = 12.dp
+//                                        ),
+//                                        horizontalArrangement = Arrangement.spacedBy(20.dp)
+//                                    ) {
+//                                        items(orderedFavorites, key = { it.id }) { contact ->
+//                                            RillScrollAnimatedItem(
+//                                                modifier = Modifier.zIndex(
+//                                                    if (currentDraggedFavoriteId == contact.id) 10f else 0f
+//                                                )
+//                                            ) {
+//                                                FavoriteContactCard(
+//                                                    modifier = Modifier
+//                                                        .width(60.dp)
+//                                                        .wrapContentHeight(),
+//                                                    contact = contact,
+//                                                    navigator = navigator,
+//                                                    context = context,
+//                                                    isDragging = currentDraggedFavoriteId == contact.id,
+//                                                    dragOffset = if (currentDraggedFavoriteId == contact.id) dragOffset else null,
+//                                                    onBoundsChanged = { bounds -> itemBoundsMap[contact.id] = bounds },
+//                                                    onDragStart = { _ ->
+//                                                        onDraggedFavoriteIdChange(contact.id)
+//                                                        dragOffset = Offset.Zero
+//                                                        val center = itemBoundsMap[contact.id]?.center ?: Offset.Zero
+//                                                        fingerAbsPos = center
+//                                                        expectedDraggedCenter = center
+//                                                        lastSwapTargetId = null
+//                                                    },
+//                                                    onDrag = { amt ->
+//                                                        if (currentDraggedFavoriteId == contact.id) {
+//                                                            fingerAbsPos += amt
+//                                                            // dragOffset = finger position minus expected card center
+//                                                            // expectedDraggedCenter is updated synchronously on swap,
+//                                                            // eliminating the 1-frame position jump that causes flicker
+//                                                            dragOffset = fingerAbsPos - expectedDraggedCenter
+//
+//                                                            val targetId = itemBoundsMap.entries
+//                                                                .filter { it.key != currentDraggedFavoriteId }
+//                                                                .firstOrNull { (_, b) -> b.contains(fingerAbsPos) }
+//                                                                ?.key
+//
+//                                                            if (targetId != null && targetId != lastSwapTargetId) {
+//                                                                // Update expectedDraggedCenter to target's current bounds BEFORE swap
+//                                                                // so dragOffset compensates immediately in this same frame
+//                                                                val targetCenter = itemBoundsMap[targetId]?.center
+//                                                                if (targetCenter != null) {
+//                                                                    expectedDraggedCenter = targetCenter
+//                                                                    dragOffset = fingerAbsPos - expectedDraggedCenter
+//                                                                }
+//                                                                lastSwapTargetId = targetId
+//                                                                val fromIdx = orderedFavorites.indexOfFirst { it.id == currentDraggedFavoriteId }
+//                                                                val toIdx   = orderedFavorites.indexOfFirst { it.id == targetId }
+//                                                                if (fromIdx != -1 && toIdx != -1) {
+//                                                                    orderedFavorites.add(toIdx, orderedFavorites.removeAt(fromIdx))
+//                                                                }
+//                                                            }
+//                                                        }
+//                                                    },
+//                                                    onDragEnd = {
+//                                                        onDraggedFavoriteIdChange(null)
+//                                                        dragOffset = Offset.Zero
+//                                                        fingerAbsPos = Offset.Zero
+//                                                        expectedDraggedCenter = Offset.Zero
+//                                                        lastSwapTargetId = null
+//                                                        saveFavoritesOrder()
+//                                                    },
+//                                                    onDragCancel = {
+//                                                        onDraggedFavoriteIdChange(null)
+//                                                        dragOffset = Offset.Zero
+//                                                        fingerAbsPos = Offset.Zero
+//                                                        expectedDraggedCenter = Offset.Zero
+//                                                        lastSwapTargetId = null
+//                                                    },
+//                                                    onClick = {
+//                                                        val phoneNumber =
+//                                                            contact.phoneNumbers.firstOrNull()
+//                                                        if (phoneNumber != null) {
+//                                                            placeCallWithSimPreference(
+//                                                                context,
+//                                                                phoneNumber,
+//                                                                simPref
+//                                                            ) {
+//                                                                pendingNumber =
+//                                                                    phoneNumber; showSimPicker = true
+//                                                            }
+//                                                        } else {
+//                                                            navigator.navigate(
+//                                                                ContactDetailsScreenDestination(
+//                                                                    contactId = contact.id
+//                                                                )
+//                                                            )
+//                                                        }
+//                                                    },
+//                                                    onToggleFavorite = {
+//                                                        contactsVM.toggleFavorite(contact)
+//                                                    }
+//                                                )
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
 
                         val directCall = prefs.getBoolean(PreferenceManager.KEY_DIRECT_CALL_ON_TAP, false)
                         currentGroupedLogs.forEach { (header, logsInGroup) ->

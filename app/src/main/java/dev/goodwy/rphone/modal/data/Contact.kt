@@ -10,6 +10,7 @@ data class Contact(
     val middleName: String = "",
     val familyName: String = "",
     val nameSuffix: String = "",
+    val nickname: String = "",
     val company: String = "",
     val jobTitle: String = "",
     val phoneNumbers: List<String> = emptyList(),
@@ -22,6 +23,7 @@ data class Contact(
     val customRingtone: String? = null,
     val accountName: String? = null,
     val accountType: String? = null,
+    val isPrivate: Boolean = false
 ) {
     val displayName: String
         get() = getDisplayName(this)
@@ -88,7 +90,10 @@ fun getDisplayName(contact: Contact): String {
             if (isNotEmpty()) append(", ")
             append(contact.nameSuffix)
         }
-        // If there is no name, use "company" or "phone"
+        // If there is no name, use "nickname", "company" or "phone"
+        if (isEmpty() && contact.nickname.isNotBlank()) {
+            append(contact.nickname)
+        }
         if (isEmpty() && contact.company.isNotBlank()) {
             append(contact.company)
         }

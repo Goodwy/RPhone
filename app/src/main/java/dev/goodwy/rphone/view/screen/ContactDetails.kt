@@ -72,6 +72,7 @@ import androidx.compose.material.icons.rounded.PersonAdd
 import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material.icons.rounded.QrCode2
 import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material.icons.rounded.Videocam
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -98,7 +99,6 @@ import dev.goodwy.rphone.controller.util.getEmailTypeText
 import dev.goodwy.rphone.controller.util.getEventTypeText
 import dev.goodwy.rphone.controller.util.getPhoneTypeText
 import dev.goodwy.rphone.controller.util.isPackageInstalled
-import dev.goodwy.rphone.controller.util.launchSendWhatsAppIntent
 import dev.goodwy.rphone.controller.util.normalizePhoneNumber
 import dev.goodwy.rphone.controller.util.toast
 import dev.goodwy.rphone.modal.data.Contact
@@ -106,6 +106,10 @@ import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import dev.goodwy.rphone.view.theme.customColors
 import com.ramcosta.composedestinations.generated.destinations.CallLogFullScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactEditScreenDestination
+import dev.goodwy.rphone.controller.util.SocialUtils
+import dev.goodwy.rphone.controller.util.SocialUtils.launchSendWhatsAppIntent
+import dev.goodwy.rphone.device_only
+import dev.goodwy.rphone.private_only
 import java.util.Calendar
 
 @SuppressLint("ConfigurationScreenWidthHeight")
@@ -160,10 +164,11 @@ fun ContactDetailsScreen(
         contact!!.jobTitle.isNotBlank() -> contact!!.jobTitle
         else -> ""
     }
-    val displayName = contact?.name ?: phoneNumber ?: "Unknown"
+    val displayName = contact?.displayName ?: phoneNumber ?: "Unknown"
 
     val context = LocalContext.current
     val defaultPhone = remember(contact) { derivedStateOf { contact?.phoneDetails?.firstOrNull { it.isPrimary } } }.value
+    val videoLauncher = rememberVideoLauncher()
 
     fun updateDefaultPhone(phoneNumber: String, isPrimary: Boolean) {
         contactsViewModel.setDefaultPhoneNumber(
@@ -272,6 +277,9 @@ fun ContactDetailsScreen(
         }
     }
 
+    val openWhatsApp = { num: String -> SocialUtils.openWhatsApp(context, num) }
+    val openTelegram = { num: String -> SocialUtils.openTelegram(context, num) }
+    val openSignal = { num: String -> SocialUtils.openSignal(context, num) }
 
     val shareText = stringResource(R.string.share)
     val shareContact = {
@@ -404,8 +412,9 @@ fun ContactDetailsScreen(
                         }) { Icon(Icons.Rounded.Edit, "Edit") }
                     } else if (phoneNumber != null && phoneNumber != "Unknown") {
                         IconButton(onClick = {
-                            val intent = Intent(Intent.ACTION_INSERT).apply { type = ContactsContract.RawContacts.CONTENT_TYPE; putExtra(ContactsContract.Intents.Insert.PHONE, phoneNumber) }
-                            context.startActivity(intent)
+//                            val intent = Intent(Intent.ACTION_INSERT).apply { type = ContactsContract.RawContacts.CONTENT_TYPE; putExtra(ContactsContract.Intents.Insert.PHONE, phoneNumber) }
+//                            context.startActivity(intent)
+                            navigator.navigate(ContactEditScreenDestination(initialPhone = phoneNumber))
                         }) { Icon(Icons.Rounded.PersonAdd, "Add Contact") }
                     }
 //                    IconButton(onClick = { showQrDialog = true }) { Icon(Icons.Rounded.QrCode2, "QR Code") }
@@ -447,7 +456,8 @@ fun ContactDetailsScreen(
                     ) {
                         // Left column - avatar
                         Box(
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier
+                                .weight(1f)
                                 .then(
                                     if (isRotation90) Modifier.navigationBarsPadding()
                                     else Modifier
@@ -467,7 +477,9 @@ fun ContactDetailsScreen(
                         // Right column contains all other content
                         LazyColumn(
                             state = listState,
-                            modifier = Modifier.fillMaxSize().weight(1.7f),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .weight(1.7f),
                             contentPadding = PaddingValues(16.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -483,6 +495,16 @@ fun ContactDetailsScreen(
                                         fontWeight = FontWeight.Bold,
                                         textAlign = TextAlign.Center
                                     )
+                                    if (contact?.nickname != "") {
+                                        contact?.nickname?.let {
+                                            Spacer(modifier = Modifier.height(12.dp))
+                                            Text(
+                                                text = it,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                textAlign = TextAlign.Center,
+                                            )
+                                        }
+                                    }
                                     if (companyAndJob != "") {
                                         Spacer(modifier = Modifier.height(12.dp))
                                         Text(
@@ -550,10 +572,7 @@ fun ContactDetailsScreen(
 
                             // Contact Info
                             item {
-                                RillExpressiveCard(
-                                    title = "Contact Info",
-//                        icon = Icons.Outlined.Info
-                                ) {
+                                RillExpressiveCard(title = "Contact Info") {
                                     val configuration = LocalConfiguration.current
                                     val screenWidth = configuration.screenWidthDp.dp
                                     val middleOfScreen = screenWidth / 3
@@ -1049,16 +1068,18 @@ fun ContactDetailsScreen(
                                         MoveSingleContactDialog(
                                             contact = contact!!,
                                             availableAccounts = availableAccountsForMoving,
-                                            currentAccountKey = if (contact!!.accountName == null && contact!!.accountType == null) null
+                                            currentAccountKey = if (contact!!.accountName == null && contact!!.accountType == null && contact!!.isPrivate) private_only
+                                                                else if (contact!!.accountName == null && contact!!.accountType == null) device_only
                                                                 else "${contact!!.accountName}|${contact!!.accountType}",
                                             contactsViewModel = contactsViewModel,
                                             onDismiss = { showMoveDialog = false },
-                                            onSuccess = { selectedAccount ->
+                                            onSuccess = { selectedAccount, isPrivate ->
                                                 context.toast("Contact moved successfully")
                                                 // Updating local data
                                                 contact = contact!!.copy(
                                                     accountName = selectedAccount?.name,
-                                                    accountType = selectedAccount?.type
+                                                    accountType = selectedAccount?.type,
+                                                    isPrivate = isPrivate
                                                 )
                                                 contactAccount = selectedAccount
                                             }
@@ -1072,9 +1093,10 @@ fun ContactDetailsScreen(
                                 item {
                                     RillExpressiveCard {
                                         RillListItem(
-                                            headline = if (contactAccount != null) ContactUtils.getAccountName(contactAccount!!) else ContactUtils.getAccountType(contactAccount),
+                                            headline = if (contactAccount != null) ContactUtils.getAccountName(contactAccount!!)
+                                                        else ContactUtils.getAccountType(null, contact!!.isPrivate),
                                             supporting = if (contactAccount != null) ContactUtils.getAccountType(contactAccount) else null,
-                                            leadingIcon = ContactUtils.getAccountIcon(contactAccount),
+                                            leadingIcon = ContactUtils.getAccountIcon(contactAccount, contact!!.isPrivate),
                                             onClick = {}
                                         )
                                     }
@@ -1148,6 +1170,16 @@ fun ContactDetailsScreen(
                                     fontWeight = FontWeight.Bold,
                                     textAlign = TextAlign.Center
                                 )
+                                if (contact?.nickname != "") {
+                                    contact?.nickname?.let {
+                                        Spacer(modifier = Modifier.height(12.dp))
+                                        Text(
+                                            text = it,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            textAlign = TextAlign.Center,
+                                        )
+                                    }
+                                }
                                 if (companyAndJob != "") {
                                     Spacer(modifier = Modifier.height(12.dp))
                                     Text(
@@ -1197,6 +1229,17 @@ fun ContactDetailsScreen(
                                             true
                                         else if (displayPhone != "Unknown") initiateMessage(displayPhone)
                                     })
+                                val videoImageVector: ImageVector =
+                                    ImageVector.vectorResource(id = R.drawable.ic_video_camera)
+                                RillExpressiveButton(
+                                    modifier = Modifier.weight(1f),
+                                    icon = videoImageVector,
+                                    label = "Video",
+                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                    enabled = (contact != null && contact!!.phoneNumbers.isNotEmpty()) || displayPhone != "Unknown",
+                                    onClick = {
+                                        videoLauncher.startVideoCall(displayPhone, contact)
+                                    })
                                 RillExpressiveButton(
                                     modifier = Modifier.weight(1f),
                                     icon = Icons.Rounded.Email,
@@ -1230,121 +1273,214 @@ fun ContactDetailsScreen(
                                         ImageVector.vectorResource(id = R.drawable.ic_whatsapp)
                                     val numberSize = contact!!.phoneDetails.size
                                     val whatsappInstall =
-                                        context.isPackageInstalled("com.whatsapp") || context.isPackageInstalled("com.whatsapp.w4b")
-                                    contact!!.phoneDetails.forEachIndexed { index, phoneDetail ->
-                                        val recent =
-                                            if (normalizePhoneNumber(phoneDetail.number) == phoneNumber) " • Recent" else ""
-                                        val isDefault =
-                                            defaultPhone != null && phoneDetail.number == defaultPhone.number
-                                        val label =
-                                            if (isDefault) getPhoneTypeText(
-                                                context,
-                                                phoneDetail.type,
-                                                phoneDetail.label
-                                            ) + " • Default" + recent
-                                            else getPhoneTypeText(
-                                                context,
-                                                phoneDetail.type,
-                                                phoneDetail.label
-                                            ) + recent
-                                        Box {
-                                            var showOverflowMenu by remember { mutableStateOf(false) }
-                                            RillListItem(
-                                                headline = phoneDetail.number,
-                                                supporting = label,
-                                                leadingIcon = Icons.Rounded.Phone,
-                                                iconContainerColor =
-                                                    if (isDefault) MaterialTheme.colorScheme.onSecondaryContainer else null,
-                                                iconBgContainerColor =
-                                                    if (isDefault) MaterialTheme.colorScheme.primaryContainer else null,
-                                                preTrailingIcon = if (whatsappInstall) whatsappImageVector else null,
-                                                modifierPreTrailingIcon = Modifier
-                                                    .padding(end = 8.dp)
-                                                    .size(24.dp)
-                                                    .combinedClickable(
-                                                        interactionSource = null,
-                                                        indication = ripple(
-                                                            bounded = false,
-                                                            radius = 24.dp
-                                                        ),
-                                                        onClick = { context.launchSendWhatsAppIntent(phoneDetail.number) }),
-                                                trailingIcon = messageImageVector,
-                                                modifierTrailingIcon = Modifier
-                                                    .padding(end = 8.dp)
-                                                    .size(24.dp)
-                                                    .combinedClickable(
-                                                        interactionSource = null,
-                                                        indication = ripple(
-                                                            bounded = false,
-                                                            radius = 24.dp
-                                                        ),
-                                                        onClick = { initiateMessage(phoneDetail.number) }),
-                                                onClick = { initiateCall(phoneDetail.number) },
-                                                onLongClick = { showOverflowMenu = true }
-                                            )
-                                            // Dropdown menu
-                                            DropdownMenu(
-                                                shape = RoundedCornerShape(16.dp),
-                                                expanded = showOverflowMenu,
-                                                onDismissRequest = { showOverflowMenu = false },
-                                                offset = offsetMenu,
-                                            ) {
-                                                DropdownMenuItem(
-                                                    contentPadding = PaddingValues(horizontal = 24.dp),
-                                                    text = {
-                                                        Text(
-                                                            phoneDetail.number,
-                                                            style = MaterialTheme.typography.bodyLarge,
-                                                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                                        )
+                                        context.isPackageInstalled("com.whatsapp") || context.isPackageInstalled(
+                                            "com.whatsapp.w4b"
+                                        )
+                                    if (contact!!.phoneDetails.isNotEmpty()) {
+                                        contact!!.phoneDetails.forEachIndexed { index, phoneDetail ->
+                                            val recent =
+                                                if (normalizePhoneNumber(phoneDetail.number) == phoneNumber) " • Recent" else ""
+                                            val isDefault =
+                                                defaultPhone != null && phoneDetail.number == defaultPhone.number
+                                            val label =
+                                                if (isDefault) getPhoneTypeText(
+                                                    context,
+                                                    phoneDetail.type,
+                                                    phoneDetail.label
+                                                ) + " • Default" + recent
+                                                else getPhoneTypeText(
+                                                    context,
+                                                    phoneDetail.type,
+                                                    phoneDetail.label
+                                                ) + recent
+                                            Box {
+                                                var showOverflowMenu by remember {
+                                                    mutableStateOf(
+                                                        false
+                                                    )
+                                                }
+                                                RillListItem(
+                                                    headline = phoneDetail.number,
+                                                    supporting = label,
+                                                    leadingIcon = Icons.Rounded.Phone,
+                                                    iconContainerColor =
+                                                        if (isDefault) MaterialTheme.colorScheme.onSecondaryContainer else null,
+                                                    iconBgContainerColor =
+                                                        if (isDefault) MaterialTheme.colorScheme.primaryContainer else null,
+                                                    preTrailingIcon = if (whatsappInstall) whatsappImageVector else null,
+                                                    modifierPreTrailingIcon = Modifier
+                                                        .padding(end = 8.dp)
+                                                        .size(24.dp)
+                                                        .combinedClickable(
+                                                            interactionSource = null,
+                                                            indication = ripple(
+                                                                bounded = false,
+                                                                radius = 24.dp
+                                                            ),
+                                                            onClick = {
+                                                                context.launchSendWhatsAppIntent(
+                                                                    phoneDetail.number
+                                                                )
+                                                            }),
+                                                    trailingIcon = messageImageVector,
+                                                    modifierTrailingIcon = Modifier
+                                                        .padding(end = 8.dp)
+                                                        .size(24.dp)
+                                                        .combinedClickable(
+                                                            interactionSource = null,
+                                                            indication = ripple(
+                                                                bounded = false,
+                                                                radius = 24.dp
+                                                            ),
+                                                            onClick = {
+                                                                initiateMessage(
+                                                                    phoneDetail.number
+                                                                )
+                                                            }),
+                                                    onClick = { initiateCall(phoneDetail.number) },
+                                                    onLongClick = { showOverflowMenu = true }
+                                                )
+                                                // Dropdown menu
+                                                DropdownMenu(
+                                                    shape = RoundedCornerShape(16.dp),
+                                                    expanded = showOverflowMenu,
+                                                    onDismissRequest = {
+                                                        showOverflowMenu = false
                                                     },
-                                                    onClick = { },
-                                                    enabled = false
-                                                )
-                                                DropdownMenuItem(
-                                                    contentPadding = PaddingValues(horizontal = 24.dp),
-                                                    text = { Text(stringResource(R.string.add_note)) },
-                                                    onClick = {
-                                                        showOverflowMenu = false
-                                                        editingNoteNumber = phoneDetail.number
-                                                        showNoteEditor = true
-                                                    }
-                                                )
-                                                DropdownMenuItem(
-                                                    contentPadding = PaddingValues(horizontal = 24.dp),
-                                                    text = { Text(stringResource(R.string.copy)) },
-                                                    onClick = {
-                                                        showOverflowMenu = false
-                                                        context.copyToClipboard(phoneDetail.number)
-                                                    }
-                                                )
-                                                if (numberSize > 1) {
-                                                    if (phoneDetail.number == defaultPhone?.number) {
-                                                        DropdownMenuItem(
-                                                            contentPadding = PaddingValues(horizontal = 24.dp),
-                                                            text = { Text(stringResource(R.string.clear_default)) },
-                                                            onClick = {
-                                                                showOverflowMenu = false
-                                                                updateDefaultPhone(phoneDetail.number, false)
-                                                                context.toast("Default phone number cleared")
-                                                            }
-                                                        )
-                                                    } else {
-                                                        val message = stringResource(
-                                                            R.string.default_phone_set,
-                                                            phoneDetail.number
-                                                        )
-                                                        DropdownMenuItem(
-                                                            contentPadding = PaddingValues(horizontal = 24.dp),
-                                                            text = { Text(stringResource(R.string.set_as_default)) },
-                                                            onClick = {
-                                                                showOverflowMenu = false
-                                                                updateDefaultPhone(phoneDetail.number, true)
-                                                                context.toast(message)
-                                                            }
-                                                        )
+                                                    offset = offsetMenu,
+                                                ) {
+                                                    DropdownMenuItem(
+                                                        contentPadding = PaddingValues(
+                                                            horizontal = 24.dp
+                                                        ),
+                                                        text = {
+                                                            Text(
+                                                                phoneDetail.number,
+                                                                style = MaterialTheme.typography.bodyLarge,
+                                                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                                            )
+                                                        },
+                                                        onClick = { },
+                                                        enabled = false
+                                                    )
+                                                    DropdownMenuItem(
+                                                        contentPadding = PaddingValues(
+                                                            horizontal = 24.dp
+                                                        ),
+                                                        text = { Text(stringResource(R.string.add_note)) },
+                                                        onClick = {
+                                                            showOverflowMenu = false
+                                                            editingNoteNumber =
+                                                                phoneDetail.number
+                                                            showNoteEditor = true
+                                                        }
+                                                    )
+                                                    DropdownMenuItem(
+                                                        contentPadding = PaddingValues(
+                                                            horizontal = 24.dp
+                                                        ),
+                                                        text = { Text(stringResource(R.string.copy)) },
+                                                        onClick = {
+                                                            showOverflowMenu = false
+                                                            context.copyToClipboard(phoneDetail.number)
+                                                        }
+                                                    )
+                                                    if (numberSize > 1) {
+                                                        if (phoneDetail.number == defaultPhone?.number) {
+                                                            DropdownMenuItem(
+                                                                contentPadding = PaddingValues(
+                                                                    horizontal = 24.dp
+                                                                ),
+                                                                text = { Text(stringResource(R.string.clear_default)) },
+                                                                onClick = {
+                                                                    showOverflowMenu = false
+                                                                    updateDefaultPhone(
+                                                                        phoneDetail.number,
+                                                                        false
+                                                                    )
+                                                                    context.toast("Default phone number cleared")
+                                                                }
+                                                            )
+                                                        } else {
+                                                            val message = stringResource(
+                                                                R.string.default_phone_set,
+                                                                phoneDetail.number
+                                                            )
+                                                            DropdownMenuItem(
+                                                                contentPadding = PaddingValues(
+                                                                    horizontal = 24.dp
+                                                                ),
+                                                                text = { Text(stringResource(R.string.set_as_default)) },
+                                                                onClick = {
+                                                                    showOverflowMenu = false
+                                                                    updateDefaultPhone(
+                                                                        phoneDetail.number,
+                                                                        true
+                                                                    )
+                                                                    context.toast(message)
+                                                                }
+                                                            )
+                                                        }
                                                     }
                                                 }
+                                            }
+                                        }
+                                    } else if (contact!!.phoneNumbers.isNotEmpty()) {
+                                        contact!!.phoneNumbers.forEachIndexed { index, number ->
+                                            val recent =
+                                                if (normalizePhoneNumber(number) == phoneNumber) "Recent" else ""
+                                            val isDefault =
+                                                defaultPhone != null && number == defaultPhone.number
+                                            val label =
+                                                if (isDefault) " • Default$recent"
+                                                else recent
+                                            Box {
+                                                var showOverflowMenu by remember {
+                                                    mutableStateOf(
+                                                        false
+                                                    )
+                                                }
+                                                RillListItem(
+                                                    headline = number,
+                                                    supporting = label.ifBlank { null },
+                                                    leadingIcon = Icons.Rounded.Phone,
+                                                    iconContainerColor =
+                                                        if (isDefault) MaterialTheme.colorScheme.onSecondaryContainer else null,
+                                                    iconBgContainerColor =
+                                                        if (isDefault) MaterialTheme.colorScheme.primaryContainer else null,
+                                                    preTrailingIcon = if (whatsappInstall) whatsappImageVector else null,
+                                                    modifierPreTrailingIcon = Modifier
+                                                        .padding(end = 8.dp)
+                                                        .size(24.dp)
+                                                        .combinedClickable(
+                                                            interactionSource = null,
+                                                            indication = ripple(
+                                                                bounded = false,
+                                                                radius = 24.dp
+                                                            ),
+                                                            onClick = {
+                                                                context.launchSendWhatsAppIntent(
+                                                                    number
+                                                                )
+                                                            }),
+                                                    trailingIcon = messageImageVector,
+                                                    modifierTrailingIcon = Modifier
+                                                        .padding(end = 8.dp)
+                                                        .size(24.dp)
+                                                        .combinedClickable(
+                                                            interactionSource = null,
+                                                            indication = ripple(
+                                                                bounded = false,
+                                                                radius = 24.dp
+                                                            ),
+                                                            onClick = {
+                                                                initiateMessage(
+                                                                    number
+                                                                )
+                                                            }),
+                                                    onClick = { initiateCall(number) },
+//                                                        onLongClick = { showOverflowMenu = true }
+                                                )
                                             }
                                         }
                                     }
@@ -1728,16 +1864,18 @@ fun ContactDetailsScreen(
                                     MoveSingleContactDialog(
                                         contact = contact!!,
                                         availableAccounts = availableAccountsForMoving,
-                                        currentAccountKey = if (contact!!.accountName == null && contact!!.accountType == null) null
+                                        currentAccountKey = if (contact!!.accountName == null && contact!!.accountType == null && contact!!.isPrivate) private_only
+                                                            else if (contact!!.accountName == null && contact!!.accountType == null) device_only
                                                             else "${contact!!.accountName}|${contact!!.accountType}",
                                         contactsViewModel = contactsViewModel,
                                         onDismiss = { showMoveDialog = false },
-                                        onSuccess = { selectedAccount ->
+                                        onSuccess = { selectedAccount, isPrivate ->
                                             context.toast("Contact moved successfully")
                                             // Updating local data
                                             contact = contact!!.copy(
                                                 accountName = selectedAccount?.name,
-                                                accountType = selectedAccount?.type
+                                                accountType = selectedAccount?.type,
+                                                isPrivate = isPrivate
                                             )
                                             contactAccount = selectedAccount
                                         }
@@ -1751,9 +1889,10 @@ fun ContactDetailsScreen(
                             item {
                                 RillExpressiveCard {
                                     RillListItem(
-                                        headline = if (contactAccount != null) ContactUtils.getAccountName(contactAccount!!) else ContactUtils.getAccountType(null),
+                                        headline = if (contactAccount != null) ContactUtils.getAccountName(contactAccount!!)
+                                                    else ContactUtils.getAccountType(null, contact!!.isPrivate),
                                         supporting = if (contactAccount != null) ContactUtils.getAccountType(contactAccount) else null,
-                                        leadingIcon = ContactUtils.getAccountIcon(contactAccount),
+                                        leadingIcon = ContactUtils.getAccountIcon(contactAccount, contact!!.isPrivate),
                                         onClick = {}
                                     )
                                 }
@@ -1796,7 +1935,9 @@ fun QrCodeDialog(name: String, phone: String?, email: String?, onDismiss: () -> 
                 Text(name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, textAlign = TextAlign.Center)
                 Text(phone ?: "", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.height(24.dp))
-                Button(onClick = onDismiss, modifier = Modifier.fillMaxWidth().padding(horizontal = 2.dp), shape = RoundedCornerShape(12.dp)) { Text("Close") }
+                Button(onClick = onDismiss, modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 2.dp), shape = RoundedCornerShape(12.dp)) { Text("Close") }
             }
         }
     }

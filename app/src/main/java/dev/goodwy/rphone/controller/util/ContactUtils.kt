@@ -4,6 +4,7 @@ import android.accounts.Account
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Android
 import androidx.compose.material.icons.rounded.CloudOff
+import androidx.compose.material.icons.rounded.LockPerson
 import androidx.compose.material.icons.rounded.SimCard
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -19,8 +20,9 @@ object ContactUtils {
         }
     }
 
-    fun getAccountType(account: Account?): String {
+    fun getAccountType(account: Account?, isPrivate: Boolean = false): String {
         return when {
+            isPrivate -> "Private (App Only)"
             account == null -> "Local (Device Only)"
             account.type == "com.google" -> "Google"
             account.type == "com.whatsapp" -> "WhatsApp"
@@ -33,8 +35,9 @@ object ContactUtils {
     }
 
     @Composable
-    fun getAccountIcon(account: Account?): ImageVector {
+    fun getAccountIcon(account: Account?, isPrivate: Boolean = false): ImageVector {
         return when {
+            isPrivate ->  Icons.Rounded.LockPerson
             account == null -> Icons.Rounded.CloudOff
             account.type == "com.google" -> ImageVector.vectorResource(id = R.drawable.ic_google)
             account.type == "com.whatsapp" -> ImageVector.vectorResource(id = R.drawable.ic_whatsapp)

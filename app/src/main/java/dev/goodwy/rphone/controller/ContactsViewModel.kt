@@ -2,12 +2,14 @@ package dev.goodwy.rphone.controller
 
 import android.accounts.Account
 import android.app.Application
+import android.net.Uri
 import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.device_only
 import dev.goodwy.rphone.modal.data.Contact
+import dev.goodwy.rphone.private_only
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -45,20 +47,15 @@ class ContactsViewModel(
     private val _showOnlyDeviceContacts = MutableStateFlow(false)
     val showOnlyDeviceContacts = _showOnlyDeviceContacts.asStateFlow()
 
-//    val filteredContacts = combine(_allContacts, _selectedAccount) { contacts, account ->
-//        if (account == null) {
-//            contacts
-//        } else if (account.name == "device_only") {
-//            contacts.filter { it.accountName == null && it.accountType == null }
-//        } else {
-//            contacts.filter { it.accountName == account.name && it.accountType == account.type }
-//        }
-//    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    private val _showPrivateOnly = MutableStateFlow(false)
+    val showPrivateOnly = _showPrivateOnly.asStateFlow()
 
-    val filteredContacts = combine(_allContacts, _selectedAccount, _showOnlyDeviceContacts) {
-            contacts, account, showDeviceOnly ->
+    val filteredContacts =
+        combine(_allContacts, _selectedAccount, _showOnlyDeviceContacts, _showPrivateOnly) {
+            contacts, account, showDeviceOnly, privateOnly ->
         when {
-            showDeviceOnly -> contacts.filter { it.accountName == null && it.accountType == null }
+            privateOnly -> contacts.filter { it.isPrivate }
+            showDeviceOnly -> contacts.filter { it.accountName == null && it.accountType == null && !it.isPrivate }
             account == null -> contacts
             else -> contacts.filter { it.accountName == account.name && it.accountType == account.type }
         }
@@ -114,26 +111,42 @@ class ContactsViewModel(
         }
     }
 
-//    fun selectAccount(account: Account?) {
-//        _selectedAccount.value = account
-//    }
     fun selectAccount(account: Account?) {
         _selectedAccount.value = account
         if (account != null) {
             _showOnlyDeviceContacts.value = false
+            _showPrivateOnly.value = false
         }
     }
 
     fun setShowOnlyDeviceContacts(show: Boolean) {
         _showOnlyDeviceContacts.value = show
-        if (show) {
-            _selectedAccount.value = null
-        }
+        if (show) _selectedAccount.value = null
+    }
+
+    fun setShowPrivateOnly(show: Boolean) {
+        _showPrivateOnly.value = show
+        if (show) _selectedAccount.value = null
     }
 
     fun toggleFavorite(contact: Contact, add: Boolean = false) {
         viewModelScope.launch(Dispatchers.IO) {
-            contactsRepo.toggleFavorite(contact.id, if (add) true else !contact.isFavorite)
+            val newFavStatus = !contact.isFavorite
+            contactsRepo.toggleFavorite(contact.id, if (add) true else newFavStatus)
+
+            val currentOrder = preferenceManager.getFavoritesOrder().toMutableList()
+            if (newFavStatus) {
+                if (!currentOrder.contains(contact.id)) {
+                    currentOrder.add(contact.id)
+                    preferenceManager.setFavoritesOrder(currentOrder)
+                }
+            } else {
+                if (currentOrder.contains(contact.id)) {
+                    currentOrder.remove(contact.id)
+                    preferenceManager.setFavoritesOrder(currentOrder)
+                }
+            }
+
             fetchContacts()
         }
     }
@@ -149,23 +162,26 @@ class ContactsViewModel(
         withContext(Dispatchers.IO) {
             contactsRepo.saveContact(contact)
 
-            preferenceManager.setString(PreferenceManager.KEY_LAST_USED_ACCOUNT_NAME, contact.accountName ?: device_only)
-            preferenceManager.setString(PreferenceManager.KEY_LAST_USED_ACCOUNT_TYPE, contact.accountType ?: device_only)
+            if (contact.isPrivate) {
+                preferenceManager.setString(PreferenceManager.KEY_LAST_USED_ACCOUNT_NAME, contact.accountName ?: private_only)
+                preferenceManager.setString(PreferenceManager.KEY_LAST_USED_ACCOUNT_TYPE, contact.accountType ?: private_only)
+            } else {
+                preferenceManager.setString(PreferenceManager.KEY_LAST_USED_ACCOUNT_NAME, contact.accountName ?: device_only)
+                preferenceManager.setString(PreferenceManager.KEY_LAST_USED_ACCOUNT_TYPE, contact.accountType ?: device_only)
+            }
+
 
             fetchContacts()
         }
     }
 
     fun getLastUsedAccount(): Account? {
-//        val name = preferenceManager.getString(PreferenceManager.KEY_LAST_USED_ACCOUNT_NAME, "-1")
-//        val type = preferenceManager.getString(PreferenceManager.KEY_LAST_USED_ACCOUNT_TYPE, "-1")
-//        return if (name != null && type != null) {
-//            Account(name, type)
-//        } else {
-//            null
-//        }
         val lastUsedName = preferenceManager.getString(PreferenceManager.KEY_LAST_USED_ACCOUNT_NAME, null)
         val lastUsedType = preferenceManager.getString(PreferenceManager.KEY_LAST_USED_ACCOUNT_TYPE, null)
+
+        if (lastUsedName == private_only && lastUsedType == private_only) {
+            return Account(private_only, private_only)
+        }
 
         if (lastUsedName == device_only && lastUsedType == device_only) {
             return null
@@ -208,6 +224,13 @@ class ContactsViewModel(
     fun deleteContact(contactId: String) {
         viewModelScope.launch(Dispatchers.IO) {
             contactsRepo.deleteContact(contactId)
+
+            val currentOrder = preferenceManager.getFavoritesOrder().toMutableList()
+            if (currentOrder.contains(contactId)) {
+                currentOrder.remove(contactId)
+                preferenceManager.setFavoritesOrder(currentOrder)
+            }
+
             fetchContacts()
         }
     }
@@ -215,6 +238,19 @@ class ContactsViewModel(
     fun deleteContacts(contactIds: List<String>) {
         viewModelScope.launch(Dispatchers.IO) {
             contactsRepo.deleteContacts(contactIds)
+
+            val currentOrder = preferenceManager.getFavoritesOrder().toMutableList()
+            var changed = false
+            contactIds.forEach { id ->
+                if (currentOrder.contains(id)) {
+                    currentOrder.remove(id)
+                    changed = true
+                }
+            }
+            if (changed) {
+                preferenceManager.setFavoritesOrder(currentOrder)
+            }
+
             fetchContacts()
         }
     }
@@ -256,6 +292,33 @@ class ContactsViewModel(
             }
             fetchContacts()
             _standardizeProgress.value = null
+        }
+    }
+
+    fun makeContactPrivate(contactId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            contactsRepo.makeContactPrivate(contactId)
+            fetchContacts()
+        }
+    }
+
+    fun makeContactPublic(contactId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            contactsRepo.makeContactPublic(contactId)
+            fetchContacts()
+        }
+    }
+
+    fun exportPrivateContacts(uri: Uri) {
+        viewModelScope.launch(Dispatchers.IO) {
+            contactsRepo.exportPrivateContacts(uri)
+        }
+    }
+
+    fun importPrivateContacts(uri: Uri) {
+        viewModelScope.launch(Dispatchers.IO) {
+            contactsRepo.importPrivateContacts(uri)
+            fetchContacts()
         }
     }
 

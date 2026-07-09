@@ -71,6 +71,7 @@ import androidx.compose.material.icons.rounded.AccessTimeFilled
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.Dp
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -87,6 +88,7 @@ import com.ramcosta.composedestinations.generated.destinations.BlurEffectsElemen
 import com.ramcosta.composedestinations.generated.destinations.CallAccountsScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.CallSettingsScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.CallerUIScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.ContactManagementScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContributorsScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.DefaultDialerScreenDestination
@@ -96,6 +98,7 @@ import com.ramcosta.composedestinations.generated.destinations.InterfaceScreenDe
 import com.ramcosta.composedestinations.generated.destinations.LiquidGlassElementsScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.NavigationScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.NotesScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.PrivateContactsScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.RecentScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.SoundVibrationScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.SpamScreenDestination
@@ -113,6 +116,7 @@ class MainActivity : FragmentActivity() {
     private var intentState by mutableStateOf<Intent?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         intentState = intent
         // enableEdgeToEdge() triggers Adreno GPU driver SIGSEGV on first RenderThread draw.
@@ -613,7 +617,8 @@ class MainActivity : FragmentActivity() {
                                                                 it.route == CallerUIScreenDestination.route || it.route == CallSettingsScreenDestination.route ||
                                                                 it.route == ContributorsScreenDestination.route || it.route == InterfaceScreenDestination.route ||
                                                                 it.route == LiquidGlassElementsScreenDestination.route || it.route == NavigationScreenDestination.route ||
-                                                                it.route == SoundVibrationScreenDestination.route || it.route == SpamScreenDestination.route
+                                                                it.route == SoundVibrationScreenDestination.route || it.route == SpamScreenDestination.route ||
+                                                                it.route == ContactManagementScreenDestination.route || it.route == PrivateContactsScreenDestination.route
                                                     } == true,
                                                     icon = { sel ->
                                                         Icon(

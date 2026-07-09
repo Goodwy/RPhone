@@ -64,6 +64,15 @@ class PreferenceManager(context: Context) {
         return prefs.getString("favorite_email_$contactId", null)
     }
 
+    fun getFavoritesOrder(): List<String> {
+        val orderStr = getString(KEY_FAVORITES_ORDER, null) ?: return emptyList()
+        return orderStr.split(",").filter { it.isNotEmpty() }
+    }
+
+    fun setFavoritesOrder(order: List<String>) {
+        setString(KEY_FAVORITES_ORDER, order.joinToString(","))
+    }
+
     companion object {
         const val KEY_DYNAMIC_COLORS        = "dynamic_colors"
         const val KEY_AMOLED_MODE           = "amoled_mode"
@@ -119,6 +128,7 @@ class PreferenceManager(context: Context) {
         const val KEY_ONBOARDING_SHOWN = "onboarding_shown"
         const val KEY_LAST_USED_ACCOUNT_NAME = "last_used_account_name"
         const val KEY_LAST_USED_ACCOUNT_TYPE = "last_used_account_type"
+        const val KEY_FAVORITES_ORDER = "favorites_order"
 
         const val KEY_BLOCK_UNKNOWN         = "block_unknown_callers"
         const val KEY_BLOCK_HIDDEN          = "block_hidden_callers"
@@ -170,7 +180,6 @@ class PreferenceManager(context: Context) {
         const val KEY_BLUR_CONTACTS_FAB        = "blur_contacts_fab"
         const val KEY_BLUR_RECENTS_FAB         = "blur_recents_fab"
         const val KEY_AUTO_SPEAKER             = "auto_speaker"
-        const val KEY_FAVORITES_ORDER          = "favorites_order"
         const val KEY_FLOATING_CALL            = "floating_ongoing_call"
         // Tab Sections visibility
         const val KEY_TAB_SHOW_FAVORITES       = "tab_show_favorites"

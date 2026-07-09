@@ -115,7 +115,7 @@ fun AZListContent(
 ) {
     val prefs = koinInject<PreferenceManager>()
     val settingsState by prefs.settingsChanged.collectAsState()
-    val showFavorites = !prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, true)
+    val showFavorites = false //!prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, true)
 
 //    val haptic = LocalHapticFeedback.current
 //    val hapticScrollEnabled = prefs.getBoolean(PreferenceManager.KEY_HAPTIC_LIST_SCROLL, false)
@@ -128,7 +128,15 @@ fun AZListContent(
     val finalGrouped = remember(contacts, grouped) {
         if (grouped != null && !showFavorites) return@remember grouped
 
-        val favorites = if (showFavorites) contacts.filter { it.isFavorite } else emptyList()
+        val favorites = if (showFavorites) {
+//            contacts.filter { it.isFavorite }
+            val favContacts = contacts.filter { it.isFavorite }
+            val order = prefs.getFavoritesOrder()
+            favContacts.sortedWith(compareBy<Contact> { contact ->
+                val index = order.indexOf(contact.id)
+                if (index != -1) index else Int.MAX_VALUE
+            }.thenBy { it.name })
+        } else emptyList()
         val nonFavs = if (showFavorites) contacts.filter { !it.isFavorite } else contacts
         val mainGroups = nonFavs.groupBy {
             val firstChar = it.displayName.firstOrNull()?.uppercaseChar() ?: '#'
@@ -253,8 +261,7 @@ fun AZListContent(
 
         val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
         if (!isLandscape) {
-            val prefs_ui = koinInject<PreferenceManager>()
-            val pillNav = remember { prefs_ui.getBoolean(PreferenceManager.KEY_PILL_NAV, false) }
+            val pillNav = remember { prefs.getBoolean(PreferenceManager.KEY_PILL_NAV, false) }
             val paddingBottom = if (pillNav) 0.dp else bottomBarHeight
             AlphabetSideBar(
                 alphabet = alphabetIndices.keys.toList(),
@@ -724,7 +731,7 @@ fun AlphabetSideBar(
                         fontSize = 10.sp,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                         color = if (isSelected) MaterialTheme.colorScheme.onPrimary
-                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
                     )
                 }
             }

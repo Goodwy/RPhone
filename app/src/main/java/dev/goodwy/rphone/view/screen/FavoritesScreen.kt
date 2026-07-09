@@ -583,7 +583,7 @@ fun FavoriteContactCard(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Box(modifier = Modifier.fillMaxWidth().aspectRatio(1f)) {
                 RillAvatar(
-                    name = contact.name,
+                    name = contact.displayName,
                     photoUri = contact.photoUri,
                     modifier = Modifier.fillMaxSize().padding(2.dp),
                     shape = CircleShape

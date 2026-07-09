@@ -24,7 +24,7 @@ android {
         applicationId = "dev.goodwy.rphone"
         minSdk = 26
         targetSdk = 35
-        versionCode = 13
+        versionCode = 14
         versionName = "0.1.RC"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -120,6 +120,7 @@ dependencies {
 
     // Core Android / Kotlin
     implementation 'androidx.core:core-ktx:1.15.0'
+    implementation 'androidx.core:core-splashscreen:1.2.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.7'
 
     // Navigation & Serialization
@@ -141,6 +142,12 @@ dependencies {
     implementation platform("io.insert-koin:koin-bom:4.1.1")
     implementation "io.insert-koin:koin-android"
     implementation "io.insert-koin:koin-androidx-compose"
+
+    // Room
+    def room_version = "2.6.1"
+    implementation "androidx.room:room-runtime:$room_version"
+    implementation "androidx.room:room-ktx:$room_version"
+    ksp "androidx.room:room-compiler:$room_version"
 
     // Image & Utility
     implementation "io.coil-kt:coil-compose:2.7.0"

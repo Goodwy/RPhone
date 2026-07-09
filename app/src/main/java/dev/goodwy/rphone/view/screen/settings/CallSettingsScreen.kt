@@ -1,16 +1,10 @@
 package dev.goodwy.rphone.view.screen.settings
 
-import android.Manifest
 import android.accounts.Account
-import android.accounts.AccountManager
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.net.Uri
-import android.os.Build
-import java.io.File
 import android.provider.Settings
-import android.telephony.SubscriptionManager
+import android.telecom.TelecomManager
 import android.view.Surface
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -22,8 +16,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.rounded.Backpack
-import androidx.compose.material.icons.rounded.Contacts
 import androidx.compose.material.icons.rounded.PictureInPicture
+import androidx.compose.material.icons.rounded.SettingsPhone
 import androidx.compose.material.icons.rounded.SimCard
 import androidx.compose.material.icons.rounded.SpatialTracking
 import androidx.compose.material.icons.rounded.TouchApp
@@ -33,23 +27,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
+import dev.goodwy.rphone.R
+import dev.goodwy.rphone.controller.ContactsViewModel
+import dev.goodwy.rphone.controller.util.ContactUtils
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillAnimatedSection
 import dev.goodwy.rphone.view.components.RillExpressiveCard
 import dev.goodwy.rphone.view.components.RillListItem
 import dev.goodwy.rphone.view.components.RillSwitchListItem
+import dev.goodwy.rphone.view.theme.customColors
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.compose.koinInject
 import androidx.core.net.toUri
-import dev.goodwy.rphone.controller.ContactsViewModel
-import dev.goodwy.rphone.controller.util.ContactUtils
-import dev.goodwy.rphone.view.theme.customColors
 import org.koin.compose.viewmodel.koinActivityViewModel
 
 // ─── Contacts to Display Dialog ───────────────────────────────────────────────
@@ -251,6 +246,36 @@ fun CallSettingsScreen(navigator: DestinationsNavigator) {
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
                                 trailingIcon = Icons.Default.ChevronRight,
                                 onClick = { showSimDialog = true }
+                            )
+                            RillListItem(
+                                headline = stringResource(R.string.calling_accounts),
+//                                supporting = "Configure carrier settings (Call Waiting, Forwarding, etc.)",
+                                leadingIcon = Icons.Rounded.SettingsPhone,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
+                                trailingIcon = Icons.Default.ChevronRight,
+                                onClick = {
+                                    try {
+                                        val intent = Intent(TelecomManager.ACTION_CHANGE_PHONE_ACCOUNTS).apply {
+                                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                        }
+                                        context.startActivity(intent)
+                                    } catch (e: Exception) {
+                                        try {
+                                            val intent = Intent("android.telecom.action.SHOW_CALL_SETTINGS").apply {
+                                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                            }
+                                            context.startActivity(intent)
+                                        } catch (e2: Exception) {
+                                            try {
+                                                val intent = Intent(android.provider.Settings.ACTION_SETTINGS).apply {
+                                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                                }
+                                                context.startActivity(intent)
+                                            } catch (e3: Exception) {}
+                                        }
+                                    }
+                                }
                             )
 //                            RillListItem(
 //                                headline = "Contacts to display",

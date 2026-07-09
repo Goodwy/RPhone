@@ -2,8 +2,8 @@ package dev.goodwy.rphone.view.screen
 
 import android.Manifest
 import android.accounts.Account
-import dev.goodwy.rphone.view.theme.TabTransitionStyle
 import android.content.Intent
+import android.content.res.Configuration
 import androidx.compose.animation.core.*
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -26,7 +26,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.draw.scale
-import android.content.res.Configuration
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -47,6 +46,8 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.automirrored.filled.StarHalf
@@ -56,8 +57,10 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material.icons.rounded.PeopleAlt
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -75,9 +78,11 @@ import dev.goodwy.rphone.bottomBarHeight
 import dev.goodwy.rphone.controller.util.ContactUtils
 import dev.goodwy.rphone.device_only
 import dev.goodwy.rphone.view.theme.customColors
+import dev.goodwy.rphone.view.theme.TabTransitionStyle
 import com.ramcosta.composedestinations.generated.destinations.ContactEditScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.DialPadScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.FavoritesScreenDestination
+import dev.goodwy.rphone.private_only
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinActivityViewModel
@@ -98,7 +103,7 @@ fun ContactScreen(navController: NavController, navigator: DestinationsNavigator
 
     val prefs = koinInject<PreferenceManager>()
     val pillNav = remember { prefs.getBoolean(PreferenceManager.KEY_PILL_NAV, false) }
-    val favouritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, true)
+    val favoritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, true)
     val dialpadEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD, true)
     val notesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES, true)
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
@@ -149,7 +154,7 @@ fun ContactScreen(navController: NavController, navigator: DestinationsNavigator
                                     val route = when {
                                         dialpadEnabled -> DialPadScreenDestination().route
                                         notesEnabled -> NotesScreenDestination.route
-                                        favouritesEnabled -> FavoritesScreenDestination.route
+                                        favoritesEnabled -> FavoritesScreenDestination.route
                                         else -> RecentScreenDestination.route
                                     }
                                     scope.launch {
@@ -193,13 +198,17 @@ fun ContactScreen(navController: NavController, navigator: DestinationsNavigator
                     val currentAccountKey = remember(selectedIds) {
                         if (selectedContacts.isNotEmpty()) {
                             val firstAccount = if (selectedContacts.first().accountName == null &&
-                                selectedContacts.first().accountType == null) {
+                                selectedContacts.first().accountType == null && !selectedContacts.first().isPrivate) {
                                 device_only
+                            } else if (selectedContacts.first().accountName == null &&
+                                selectedContacts.first().accountType == null && selectedContacts.first().isPrivate) {
+                                private_only
                             } else {
                                 "${selectedContacts.first().accountName}|${selectedContacts.first().accountType}"
                             }
                             val allSameAccount = selectedContacts.all {
-                                val account = if (it.accountName == null && it.accountType == null) device_only
+                                val account = if (it.accountName == null && it.accountType == null && !it.isPrivate) device_only
+                                else if (it.accountName == null && it.accountType == null && it.isPrivate) private_only
                                 else "${it.accountName}|${it.accountType}"
                                 account == firstAccount
                             }
@@ -217,6 +226,10 @@ fun ContactScreen(navController: NavController, navigator: DestinationsNavigator
                         },
                         onMove = { account ->
                             contactsVM.moveContacts(selectedIds.toList(), account)
+                            selectedIds = emptySet()
+                        },
+                        onMoveToPrivate = {
+                            selectedIds.forEach { contactsVM.makeContactPrivate(it) }
                             selectedIds = emptySet()
                         },
                         onAddToFav = {
@@ -360,6 +373,7 @@ fun AccountFilterBar(
     val accounts by viewModel.availableAccounts.collectAsState()
     val selectedAccount by viewModel.selectedAccount.collectAsState()
     val showOnlyDeviceContacts by viewModel.showOnlyDeviceContacts.collectAsState()
+    val showPrivateOnly by viewModel.showPrivateOnly.collectAsState()
     LaunchedEffect(Unit) { viewModel.fetchAccounts() }
 
 //    if (accounts.isNotEmpty()) {
@@ -404,8 +418,13 @@ fun AccountFilterBar(
     var showAccountSheet by remember { mutableStateOf(false) }
 
     val contactsCountText = when {
+        showPrivateOnly -> {
+            val privateOnlyCount = allContacts.count { it.isPrivate }
+            val privateOnly = ContactUtils.getAccountType(null, true)
+            "$privateOnly · $privateOnlyCount"
+        }
         showOnlyDeviceContacts -> {
-            val deviceOnlyCount = allContacts.count { it.accountName == null && it.accountType == null }
+            val deviceOnlyCount = allContacts.count { it.accountName == null && it.accountType == null && !it.isPrivate }
             val deviceOnly = ContactUtils.getAccountType(null)
             "$deviceOnly · $deviceOnlyCount"
         }
@@ -424,14 +443,22 @@ fun AccountFilterBar(
             .scale(chipScale),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        val interactionSource = remember { MutableInteractionSource() }
+        val isPressed by interactionSource.collectIsPressedAsState()
+        val cornerRadius by animateDpAsState(
+            if (isPressed) 8.dp else 20.dp,
+            spring(stiffness = Spring.StiffnessMediumLow),
+            label = "ButtonShapeAnimation"
+        )
         Surface(
             modifier = Modifier.combinedClickable(
                 onClick = { showAccountSheet = true },
-                interactionSource = null,
+                interactionSource = interactionSource,
                 indication = null,
             ),
-            shape = RoundedCornerShape(20.dp),
+            shape = RoundedCornerShape(cornerRadius),
             color = when {
+                showPrivateOnly -> MaterialTheme.colorScheme.tertiaryContainer
                 showOnlyDeviceContacts -> MaterialTheme.colorScheme.tertiaryContainer
                 selectedAccount != null -> MaterialTheme.colorScheme.secondaryContainer
                 else -> MaterialTheme.colorScheme.primaryContainer
@@ -448,10 +475,16 @@ fun AccountFilterBar(
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Icon(
-                    if (showOnlyDeviceContacts) ContactUtils.getAccountIcon(null) else Icons.Rounded.People,
+                    imageVector = when {
+                        showPrivateOnly -> ContactUtils.getAccountIcon(null, true)
+                        showOnlyDeviceContacts -> ContactUtils.getAccountIcon(null)
+                        selectedAccount != null -> ContactUtils.getAccountIcon(selectedAccount)
+                        else -> Icons.Rounded.PeopleAlt
+                    },
                     contentDescription = null,
                     modifier = Modifier.size(14.dp),
                     tint = when {
+                        showPrivateOnly -> MaterialTheme.colorScheme.onTertiaryContainer
                         showOnlyDeviceContacts -> MaterialTheme.colorScheme.onTertiaryContainer
                         selectedAccount != null -> MaterialTheme.colorScheme.onSecondaryContainer
                         else -> MaterialTheme.colorScheme.onPrimaryContainer
@@ -462,6 +495,7 @@ fun AccountFilterBar(
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = when {
+                        showPrivateOnly -> MaterialTheme.colorScheme.onTertiaryContainer
                         showOnlyDeviceContacts -> MaterialTheme.colorScheme.onTertiaryContainer
                         selectedAccount != null -> MaterialTheme.colorScheme.onSecondaryContainer
                         else -> MaterialTheme.colorScheme.onPrimaryContainer
@@ -474,6 +508,7 @@ fun AccountFilterBar(
                     contentDescription = null,
                     modifier = Modifier.size(16.dp),
                     tint = when {
+                        showPrivateOnly -> MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f)
                         showOnlyDeviceContacts -> MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f)
                         selectedAccount != null -> MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
                         else -> MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
@@ -489,13 +524,20 @@ fun AccountFilterBar(
 //            val intent = Intent(Intent.ACTION_INSERT, ContactsContract.Contacts.CONTENT_URI)
 //            context.startActivity(intent)
 //        }
+        val interactionSourceAdd = remember { MutableInteractionSource() }
+        val isPressedAdd by interactionSourceAdd.collectIsPressedAsState()
+        val cornerRadiusAdd by animateDpAsState(
+            if (isPressedAdd) 8.dp else 20.dp,
+            spring(stiffness = Spring.StiffnessMediumLow),
+            label = "ButtonAddShapeAnimation"
+        )
         Surface(
             modifier = Modifier.combinedClickable(
                 onClick = onAddContact,
-                interactionSource = null,
+                interactionSource = interactionSourceAdd,
                 indication = null,
             ),
-            shape = RoundedCornerShape(20.dp),
+            shape = RoundedCornerShape(cornerRadiusAdd),
             color = MaterialTheme.colorScheme.primaryContainer
         ) {
             Row(
@@ -522,12 +564,14 @@ fun AccountFilterBar(
                 )
             }
         }
+
         if (showAccountSheet) {
             val countMap = viewModel.contactCountByAccount
             AccountSwitcherSheet(
                 accounts = accounts,
                 selectedAccount = selectedAccount,
-                showOnlyDeviceContacts = showOnlyDeviceContacts,
+                showDeviceOnly = showOnlyDeviceContacts,
+                showPrivateOnly = showPrivateOnly,
                 totalCount = allContacts.size,
                 contactCountByAccount = { accountName, accountType ->
                     if (accountName == null) {
@@ -536,18 +580,27 @@ fun AccountFilterBar(
                         countMap["$accountName|$accountType"] ?: 0
                     }
                 },
+                contactCountByPrivate = allContacts.count { it.isPrivate },
                 onSelectAll = {
                     showAccountSheet = false
                     viewModel.setShowOnlyDeviceContacts(false)
+                    viewModel.setShowPrivateOnly(false)
                     viewModel.selectAccount(null)
                 },
                 onSelectDeviceOnly = {
                     showAccountSheet = false
                     viewModel.setShowOnlyDeviceContacts(true)
+                    viewModel.setShowPrivateOnly(false)
+                },
+                onSelectPrivateOnly = {
+                    showAccountSheet = false
+                    viewModel.setShowOnlyDeviceContacts(false)
+                    viewModel.setShowPrivateOnly(true)
                 },
                 onSelectAccount = { account ->
                     showAccountSheet = false
                     viewModel.setShowOnlyDeviceContacts(false)
+                    viewModel.setShowPrivateOnly(false)
                     viewModel.selectAccount(account)
                 },
                 onDismiss = { showAccountSheet = false }
@@ -563,6 +616,7 @@ fun BatchActionBar(
     onClear: () -> Unit,
     onDelete: () -> Unit,
     onMove: ((Account?) -> Unit)? = null,
+    onMoveToPrivate: (() -> Unit)? = null,
     availableAccounts: List<Account>,
     currentAccountKey: String? = null,
     onShare: () -> Unit,
@@ -712,8 +766,9 @@ fun BatchActionBar(
             availableAccounts = availableAccounts,
             currentAccountKey = currentAccountKey,
             onDismiss = { showMoveDialog = false },
-            onAccountSelected = { account ->
-                onMove?.invoke(account)
+            onAccountSelected = { account, isPrivate ->
+                if (isPrivate) onMoveToPrivate?.invoke()
+                else onMove?.invoke(account)
                 showMoveDialog = false
             }
         )
@@ -806,11 +861,14 @@ fun ContactContent(
 private fun AccountSwitcherSheet(
     accounts: List<Account>,
     selectedAccount: Account?,
-    showOnlyDeviceContacts: Boolean,
+    showDeviceOnly: Boolean,
+    showPrivateOnly: Boolean,
     totalCount: Int,
     contactCountByAccount: (String?, String?) -> Int,
+    contactCountByPrivate: Int,
     onSelectAll: () -> Unit,
     onSelectDeviceOnly: () -> Unit,
+    onSelectPrivateOnly: () -> Unit,
     onSelectAccount: (Account) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -846,22 +904,33 @@ private fun AccountSwitcherSheet(
                 // "All Contacts" row
                 item {
                     AccountRow(
-                        icon = Icons.Rounded.People,
+                        icon = Icons.Rounded.PeopleAlt,
                         name = "All Contacts",
                         subtitle = pluralStringResource(R.plurals.contacts_count, totalCount, totalCount),
-                        isSelected = !showOnlyDeviceContacts && selectedAccount == null,
+                        isSelected = !showDeviceOnly && !showPrivateOnly && selectedAccount == null,
                         onClick = onSelectAll
+                    )
+                }
+
+                // "Private only" row - for contacts without an account (app contacts)
+                item {
+                    AccountRow(
+                        icon = ContactUtils.getAccountIcon(null, true),
+                        name = ContactUtils.getAccountType(null, true),
+                        subtitle = pluralStringResource(R.plurals.contacts_count, contactCountByPrivate, contactCountByPrivate),
+                        isSelected = showPrivateOnly,
+                        onClick = onSelectPrivateOnly
                     )
                 }
 
                 // "Device only" row - for contacts without an account (local device contacts)
                 item {
-                    val deviceOnlyCount = contactCountByAccount(null, null)
+                    val deviceOnlyCount = contactCountByAccount(null, null) - contactCountByPrivate
                     AccountRow(
                         icon = ContactUtils.getAccountIcon(null),
                         name = ContactUtils.getAccountType(null),
                         subtitle = pluralStringResource(R.plurals.contacts_count, deviceOnlyCount, deviceOnlyCount),
-                        isSelected = showOnlyDeviceContacts,
+                        isSelected = showDeviceOnly,
                         onClick = onSelectDeviceOnly
                     )
                 }
@@ -873,7 +942,7 @@ private fun AccountSwitcherSheet(
                             icon = ContactUtils.getAccountIcon(account),
                             name = ContactUtils.getAccountName(account),
                             subtitle = pluralStringResource(R.plurals.contacts_count, count, count),
-                            isSelected = !showOnlyDeviceContacts && selectedAccount?.name == account.name,
+                            isSelected = !showDeviceOnly && !showPrivateOnly && selectedAccount?.name == account.name,
                             onClick = { onSelectAccount(account) }
                         )
                     }
@@ -899,10 +968,10 @@ private fun AccountRow(
     Surface(
         onClick = onClick,
         color = bgColor,
-        modifier = androidx.compose.ui.Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth()
     ) {
         Row(
-            modifier = androidx.compose.ui.Modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -912,19 +981,19 @@ private fun AccountRow(
                 shape = RoundedCornerShape(12.dp),
                 color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                 else MaterialTheme.colorScheme.surfaceVariant,
-                modifier = androidx.compose.ui.Modifier.size(44.dp)
+                modifier = Modifier.size(44.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         icon,
                         contentDescription = null,
-                        modifier = androidx.compose.ui.Modifier.size(22.dp),
+                        modifier = Modifier.size(22.dp),
                         tint = if (isSelected) MaterialTheme.colorScheme.primary
                         else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
-            Column(modifier = androidx.compose.ui.Modifier.weight(1f)) {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     name,
                     style = MaterialTheme.typography.bodyMedium,
@@ -932,7 +1001,7 @@ private fun AccountRow(
                     color = if (isSelected) MaterialTheme.colorScheme.primary
                     else MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
-                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     subtitle,
@@ -949,7 +1018,7 @@ private fun AccountRow(
                     Icons.Rounded.CheckCircle,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = androidx.compose.ui.Modifier.size(22.dp)
+                    modifier = Modifier.size(22.dp)
                 )
             }
         }

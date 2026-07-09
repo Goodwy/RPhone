@@ -123,8 +123,15 @@ fun ContactSearchContent(
     val filteredContacts = remember(query, contacts) {
         if (query.isBlank()) emptyList()
         else contacts.filter {
-            it.name.contains(query, ignoreCase = true) ||
-                    it.phoneNumbers.any { number -> number.replace(" ", "").contains(query.replace(" ", "")) }
+            it.displayName.contains(query, ignoreCase = true) ||
+                    it.nickname.contains(query, ignoreCase = true) ||
+                    it.company.contains(query, ignoreCase = true) ||
+                    it.jobTitle.contains(query, ignoreCase = true) ||
+                    it.phoneNumbers.any { number -> number.replace(" ", "").contains(query.replace(" ", "")) } ||
+                    it.emails.any { email -> email.value.replace(" ", "").contains(query.replace(" ", "")) } ||
+                    it.addresses.any { address -> address.formattedAddress.replace(" ", "").contains(query.replace(" ", "")) } ||
+                    it.events.any { event -> event.date.replace(" ", "").replace("-", "").replace(".", "")
+                        .contains(query.replace(" ", "").replace("-", "").replace(".", "")) }
         }
     }
 
@@ -154,16 +161,16 @@ fun ContactSearchContent(
     // Automatic activation of voice search
     LaunchedEffect(Unit) {
         if (autoStartVoiceSearch && !isVoiceSearchTriggered) {
-            // Даем время на полную инициализацию UI
+            // Allow time for the UI to fully initialize
             delay(300)
 
             if (micPermissionState.status == PermissionStatus.Granted) {
                 isVoiceSearchTriggered = true
                 voiceSearchLauncher.launch(Unit)
             } else {
-                // Если нет разрешения, запрашиваем его и после запроса запускаем голосовой поиск
+                // Allow time for the UI to fully initialize
                 micPermissionState.launchPermissionRequest()
-                // Можно подождать результат разрешения или обработать в отдельном LaunchedEffect
+                // You can wait for the resolution result or handle it in a separate LaunchedEffect
             }
         }
     }

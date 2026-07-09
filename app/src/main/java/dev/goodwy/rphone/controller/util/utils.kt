@@ -21,6 +21,7 @@ import android.provider.ContactsContract.CommonDataKinds.Event
 import android.telecom.PhoneAccountHandle
 import android.telecom.TelecomManager
 import android.telephony.PhoneNumberUtils
+import android.telephony.TelephonyManager
 import android.text.Html
 import android.text.format.DateUtils
 import android.view.Gravity
@@ -73,7 +74,7 @@ fun Context.formatDateHeader(timestamp: Long): String {
 fun Context.formatDate(timestamp: Long, onlyTime: Boolean = false): String {
     val relative = getRelativeDay(timestamp)
     val isJustNow = isJustNow(timestamp)
-    val time = isJustNow ?: SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date(timestamp))
+    val time = isJustNow ?: android.text.format.DateFormat.getTimeFormat(this).format(Date(timestamp))
     return if (onlyTime) time
             else if (isJustNow != null) time
             else if (relative != null) "$relative, $time"
@@ -106,18 +107,94 @@ fun areNumbersEqual(num1: String?, num2: String?): Boolean {
     return PhoneNumberUtils.compare(num1, num2)
 }
 
-fun makeCall(context: Context, number: String, accountHandle: PhoneAccountHandle? = null) {
-    val sanitized = number.trim().replace(" ", "").replace("-", "").replace("(", "").replace(")", "")
-    if (sanitized.isEmpty()) return
-    val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
-    val uri = Uri.fromParts("tel", sanitized, null)
-    val extras = Bundle()
-    if (accountHandle != null) {
-        extras.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, accountHandle)
+fun deduplicateNumbers(numbers: List<String>): List<String> {
+    val unique = mutableListOf<String>()
+    numbers.forEach { number ->
+        val existingIndex = unique.indexOfFirst { areNumbersEqual(it, number) }
+        if (existingIndex == -1) {
+            unique.add(number)
+        } else {
+            // Prefer the number with a '+' or the longer one (usually more complete)
+            val existing = unique[existingIndex]
+            if (number.contains("+") && !existing.contains("+")) {
+                unique[existingIndex] = number
+            } else if (number.length > existing.length && (number.contains("+") == existing.contains("+"))) {
+                unique[existingIndex] = number
+            }
+        }
     }
+    return unique
+}
+
+fun getSystemVoicemailNumber(context: Context): String? {
+    val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
+    if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+        try {
+            val accounts = telecomManager.callCapablePhoneAccounts
+            val defaultHandle =
+                telecomManager.getDefaultOutgoingPhoneAccount(Uri.fromParts("tel", "123", null).scheme)
+
+            val handle = defaultHandle ?: accounts.firstOrNull()
+            if (handle != null) {
+                val num = telecomManager.getVoiceMailNumber(handle)
+                if (!num.isNullOrEmpty()) return num
+            }
+        } catch (e: SecurityException) {
+        } catch (e: Exception) {}
+
+        try {
+            val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+            val num = tm.voiceMailNumber
+            if (!num.isNullOrEmpty()) return num
+        } catch (e: SecurityException) {
+        } catch (e: Exception) {}
+    }
+    return null
+}
+
+fun makeCall(context: Context, number: String, accountHandle: PhoneAccountHandle? = null, contactId: String? = null) {
+    val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
+    val uri = if (number.startsWith("voicemail:")) {
+        number.toUri()
+    } else {
+        Uri.fromParts("tel", number, null)
+    }
+    val extras = Bundle()
+
+    val prefs = PreferenceManager(context)
+    if (contactId != null) {
+        prefs.setLastUsedNumber(contactId, number)
+    }
+
+    var preferredHandle = accountHandle
+    if (preferredHandle == null) {
+        val accounts = if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+            try { telecomManager.callCapablePhoneAccounts } catch (e: SecurityException) { emptyList() }
+        } else emptyList()
+
+        val favSim = contactId?.let { prefs.getFavoriteSim(it) }
+        val favNum = contactId?.let { prefs.getFavoriteNumber(it) }
+
+        preferredHandle = if (favSim != null && areNumbersEqual(number, favNum)) {
+            accounts.find { it.id == favSim }
+        } else null
+
+        if (preferredHandle == null) {
+            val defaultSim = prefs.getInt("default_sim", 0)
+            if (defaultSim > 0 && accounts.size >= defaultSim) {
+                preferredHandle = accounts[defaultSim - 1]
+            }
+        }
+    }
+
+    if (preferredHandle != null) {
+        extras.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, preferredHandle)
+    }
+
     if (ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
         telecomManager.placeCall(uri, extras)
     } else {
+
         val intent = Intent(Intent.ACTION_DIAL, uri)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         context.startActivity(intent)
@@ -140,9 +217,9 @@ fun placeCallWithSimPreference(
     if (hasPhoneState) {
         val accounts = telecomManager.callCapablePhoneAccounts
         if (accounts.size > 1) {
-            when {
-                simPref == 1 && accounts.isNotEmpty() -> makeCall(context, number, accounts[0])
-                simPref == 2 && accounts.size >= 2 -> makeCall(context, number, accounts[1])
+            when (simPref) {
+                1 -> makeCall(context, number, accounts[0])
+                2 -> makeCall(context, number, accounts[1])
                 else -> onShowSimPicker()
             }
         } else {
@@ -365,31 +442,35 @@ fun Color.darken(amount: Float = 0.2f): Color {
 //    }
 //}
 fun stringToMillis(dateString: String): Long? {
-    return when {
-        // Date format: YYYY-MM-DD
-        dateString.matches(Regex("\\d{4}-\\d{2}-\\d{2}")) -> {
-            try {
+    if (dateString.isBlank()) return null
+
+    return try {
+        when {
+            // Date format: YYYY-MM-DD
+            dateString.matches(Regex("\\d{4}-\\d{2}-\\d{2}")) -> {
                 val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                 sdf.parse(dateString)?.time
-            } catch (e: Exception) {
-                null
             }
-        }
-        // Date format without the year: --MM-DD
-        dateString.matches(Regex("--\\d{2}-\\d{2}")) -> {
-            // For dates without a year, you can use the current year or any other year
-            val month = dateString.substring(3, 5)
-            val day = dateString.substring(6, 8)
-            val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-            val dateWithYear = "$currentYear-$month-$day"
-            try {
-                val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                sdf.parse(dateWithYear)?.time
-            } catch (e: Exception) {
-                null
+            // Date format without the year: --MM-DD
+            dateString.matches(Regex("--\\d{2}-\\d{2}")) -> {
+                // We use `split` instead of `substring` for security reasons
+                val datePart = dateString.substring(2) // "10-22"
+                val parts = datePart.split("-")
+                if (parts.size == 2) {
+                    val month = parts[0]
+                    val day = parts[1]
+                    val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+                    val dateWithYear = "$currentYear-$month-$day"
+                    val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                    sdf.parse(dateWithYear)?.time
+                } else {
+                    null
+                }
             }
+            else -> null
         }
-        else -> null
+    } catch (e: Exception) {
+        null
     }
 }
 
@@ -487,27 +568,15 @@ fun Cursor.getLongValue(key: String) = getLong(getColumnIndexOrThrow(key))
 
 fun Cursor.getStringValue(key: String) = getString(getColumnIndexOrThrow(key))
 
-fun Context.launchSendWhatsAppIntent(phoneNumber: String) {
-    val digits = phoneNumber.filter { it.isDigit() }
-    if (digits.isEmpty()) {
-        toast("No valid app found")
-        return
-    }
-    val pkg = listOf("com.whatsapp", "com.whatsapp.w4b").firstOrNull { isPackageInstalled(it) }
-    val intent = Intent(Intent.ACTION_VIEW, "https://wa.me/$digits".toUri())
-    if (pkg != null) intent.setPackage(pkg)
-    try {
-        startActivity(intent)
-    } catch (_: android.content.ActivityNotFoundException) {
-        toast("No valid app found")
-    }
-}
-
 fun Context.isPackageInstalled(packageName: String?): Boolean {
-    val packageManager = packageManager
-    val intent = packageManager.getLaunchIntentForPackage(packageName!!) ?: return false
-    val list = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
-    return !list.isEmpty()
+    if (packageName == null) return false
+    return try {
+        val packageManager = packageManager
+        val intent = packageManager.getLaunchIntentForPackage(packageName)
+        intent != null && packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).isNotEmpty()
+    } catch (e: Exception) {
+        false
+    }
 }
 
 @Composable

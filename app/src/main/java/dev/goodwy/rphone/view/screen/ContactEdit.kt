@@ -1,5 +1,6 @@
 package dev.goodwy.rphone.view.screen
 
+import android.accounts.Account
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
@@ -37,6 +38,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.OpenInNew
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.rounded.CrueltyFree
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material.icons.rounded.PostAdd
@@ -83,6 +85,8 @@ import dev.goodwy.rphone.view.theme.customColors
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import dev.goodwy.rphone.device_only
+import dev.goodwy.rphone.private_only
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinActivityViewModel
 
@@ -121,21 +125,44 @@ fun ContactEditScreen(
     var middleName by remember(existingContact) { mutableStateOf(existingContact?.middleName ?: "") }
     var familyName by remember(existingContact) { mutableStateOf(existingContact?.familyName ?: "") }
     var nameSuffix by remember(existingContact) { mutableStateOf(existingContact?.nameSuffix ?: "") }
+    var nickname by remember(existingContact) { mutableStateOf(existingContact?.nickname ?: "") }
     var company by remember(existingContact) { mutableStateOf(existingContact?.company ?: "") }
     var jobTitle by remember(existingContact) { mutableStateOf(existingContact?.jobTitle ?: "") }
     var photoUri by remember(existingContact) { mutableStateOf<String?>(existingContact?.photoUri) }
     var isFavorite by remember(existingContact) { mutableStateOf<Boolean>(existingContact?.isFavorite ?: false) }
 
+    var isPrivate by remember(existingContact) { mutableStateOf(existingContact?.isPrivate ?: false) }
     var selectedAccount by remember(existingContact, availableAccounts) {
         val lastUsed = contactsVM.getLastUsedAccount()
         mutableStateOf(
-            if (contactId == null && lastUsed != null) {
-                availableAccounts.find {
-                    it.name == lastUsed.name && it.type == lastUsed.type
+            when {
+                // If you're editing an existing private contact
+                existingContact?.isPrivate == true -> {
+                    isPrivate = true
+                    availableAccounts.find {
+                        it.name == existingContact.accountName && it.type == existingContact.accountType
+                    }
                 }
-            } else {
-                availableAccounts.find {
-                    it.name == existingContact?.accountName && it.type == existingContact.accountType
+                // If you're editing an existing public contact
+                existingContact != null && !existingContact.isPrivate -> {
+                    isPrivate = false
+                    availableAccounts.find {
+                        it.name == existingContact.accountName && it.type == existingContact.accountType
+                    }
+                }
+                // New contact from the most recently used account
+                lastUsed != null && lastUsed.name == private_only -> {
+                    isPrivate = true
+                    null
+                }
+                lastUsed != null -> {
+                    isPrivate = false
+                    availableAccounts.find { it.name == lastUsed.name && it.type == lastUsed.type }
+                }
+                // Default: device
+                else -> {
+                    isPrivate = false
+                    null
                 }
             }
         )
@@ -193,7 +220,7 @@ fun ContactEditScreen(
     val scope = rememberCoroutineScope()
 
     val currentContactForPreview = remember(
-        namePrefix, givenName, middleName, familyName, nameSuffix, company
+        namePrefix, givenName, middleName, familyName, nameSuffix, nickname, company, jobTitle
     ) {
         Contact(
             id = "",
@@ -202,6 +229,7 @@ fun ContactEditScreen(
             middleName = middleName,
             familyName = familyName,
             nameSuffix = nameSuffix,
+            nickname = nickname,
             company = company,
             jobTitle = jobTitle,
             phoneNumbers = phoneNumbers.filter { it.isNotBlank() }
@@ -223,6 +251,7 @@ fun ContactEditScreen(
             middleName = middleName,
             familyName = familyName,
             nameSuffix = nameSuffix,
+            nickname = nickname,
             company = company,
             jobTitle = jobTitle,
             phoneNumbers = phoneNumbers.filter { it.isNotBlank() },
@@ -234,7 +263,8 @@ fun ContactEditScreen(
             isFavorite = isFavorite,
 //            customRingtone=null,
             accountName = selectedAccount?.name,
-            accountType = selectedAccount?.type
+            accountType = selectedAccount?.type,
+            isPrivate = isPrivate
         )
 
         val originalContact = existingContact ?: Contact(
@@ -244,6 +274,7 @@ fun ContactEditScreen(
             middleName = "",
             familyName = "",
             nameSuffix = "",
+            nickname = "",
             company = "",
             jobTitle = "",
             phoneNumbers = if (!initialPhone.isNullOrBlank()) listOf(initialPhone) else emptyList(),
@@ -252,7 +283,8 @@ fun ContactEditScreen(
             addresses = emptyList(),
             events = emptyList(),
             photoUri = null,
-            isFavorite = false
+            isFavorite = false,
+            isPrivate = false
         )
 
 //        context.copyToClipboard(currentContact.toString() +"\n" + originalContact.toString())
@@ -278,6 +310,7 @@ fun ContactEditScreen(
             middleName = middleName,
             familyName = familyName,
             nameSuffix = nameSuffix,
+            nickname = nickname,
             company = company,
             jobTitle = jobTitle,
             phoneNumbers = phoneNumbers.filter { it.isNotBlank() },
@@ -289,10 +322,22 @@ fun ContactEditScreen(
             isFavorite = isFavorite,
 //            customRingtone=null,
             accountName = selectedAccount?.name,
-            accountType = selectedAccount?.type
+            accountType = selectedAccount?.type,
+            isPrivate = isPrivate
         )
         scope.launch {
-            contactsVM.saveContact(contactToSave)
+//            contactsVM.saveContact(contactToSave)
+//            navigator.navigateUp()
+
+            // If a contact becomes private and previously had a public ID
+            if (isPrivate && contactId != null && contactId != "0" && !contactId.startsWith("p")) {
+                // First, save it as private
+                contactsVM.saveContact(contactToSave)
+                // Next, we delete the public version
+                contactsVM.deleteContact(contactId)
+            } else {
+                contactsVM.saveContact(contactToSave)
+            }
             navigator.navigateUp()
         }
     }
@@ -339,16 +384,19 @@ fun ContactEditScreen(
     var showNamePrefix by remember { mutableStateOf(false) }
     var showMiddleName by remember { mutableStateOf(false) }
     var showNameSuffix by remember { mutableStateOf(false) }
+    var showNickname by remember { mutableStateOf(false) }
     var showJobTitle by remember { mutableStateOf(false) }
 
     val hasNamePrefix = namePrefix.isNotBlank()
     val hasMiddleName = middleName.isNotBlank()
     val hasNameSuffix = nameSuffix.isNotBlank()
+    val hasNickname = nickname.isNotBlank()
     val hasJobTitle = jobTitle.isNotBlank()
 
     LaunchedEffect(hasNamePrefix) { if (hasNamePrefix) showNamePrefix = true }
     LaunchedEffect(hasMiddleName) { if (hasMiddleName) showMiddleName = true }
     LaunchedEffect(hasNameSuffix) { if (hasNameSuffix) showNameSuffix = true }
+    LaunchedEffect(hasNickname) { if (hasNickname) showNickname = true }
     LaunchedEffect(hasJobTitle) { if (hasJobTitle) showJobTitle = true }
 
     if (showFieldsDialog) {
@@ -415,6 +463,13 @@ fun ContactEditScreen(
                             onToggle = { showNameSuffix = !showNameSuffix }
                         )
                         FieldOption(
+                            title = stringResource(R.string.nickname),
+                            description = stringResource(R.string.nickname_description),
+                            icon = Icons.Rounded.CrueltyFree,
+                            isSelected = showNickname,
+                            onToggle = { showNickname = !showNickname }
+                        )
+                        FieldOption(
                             title = stringResource(R.string.job_title),
                             description = stringResource(R.string.job_title_description),
                             icon = Icons.Rounded.Work,
@@ -440,17 +495,24 @@ fun ContactEditScreen(
     }
 
     var showPicker by remember { mutableStateOf(false) }
-    if (showPicker) {
+    // We only show this selection for new contacts
+    val isNewContact = contactId == null || contactId == "0" || contactId == "null"
+    if (showPicker && isNewContact) {
         MoveToAccountDialog(
             title = stringResource(R.string.save_to_account),
             icon = Icons.Rounded.SwitchAccount,
             availableAccounts = availableAccountsForMoving,
-            currentAccountKey =
-                if (selectedAccount == null || (selectedAccount?.name == null && selectedAccount?.type == null)) null
-                else "${selectedAccount!!.name}|${selectedAccount!!.type}",
+            currentAccountKey = if (isPrivate) private_only
+                                else if (selectedAccount == null || (selectedAccount?.name == null && selectedAccount?.type == null)) device_only
+                                else "${selectedAccount!!.name}|${selectedAccount!!.type}",
             onDismiss = { showPicker = false },
-            onAccountSelected = { account ->
+            onAccountSelected = { account, private ->
                 selectedAccount = account
+                isPrivate = private
+                // If a contact becomes private, we reset the account
+                if (private) {
+                    selectedAccount = null
+                }
                 showPicker = false
             }
         )
@@ -520,8 +582,8 @@ fun ContactEditScreen(
                             }
                         },
                         enabled = (namePrefix.isNotBlank() || givenName.isNotBlank() || middleName.isNotBlank() ||
-                                familyName.isNotBlank() || nameSuffix.isNotBlank() || company.isNotBlank() ||
-                                jobTitle.isNotBlank()) && phoneNumbers.any { it.isNotBlank() },
+                                familyName.isNotBlank() || nameSuffix.isNotBlank() || nickname.isNotBlank() ||
+                                company.isNotBlank() || jobTitle.isNotBlank()) && phoneNumbers.any { it.isNotBlank() },
                         modifier = Modifier.then(if (contactId == null) Modifier.padding(end = 12.dp) else Modifier),
                         shape = RoundedCornerShape(24.dp),
                         elevation = ButtonDefaults.buttonElevation(0.dp)
@@ -871,6 +933,43 @@ fun ContactEditScreen(
                                     }
                                 }
                             }
+                            AnimatedVisibility(
+                                visible = showNickname,
+                                enter = expandVertically() + fadeIn(),
+                                exit = shrinkVertically() + fadeOut()
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    OutlinedTextField(
+                                        value = nickname,
+                                        onValueChange = { nickname = it },
+                                        label = { Text(stringResource(R.string.nickname)) },
+                                        modifier = Modifier.weight(1f)
+                                            .fillMaxWidth()
+                                            .padding(start = paddingHorizontal),
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = OutlinedTextFieldDefaults.colors(
+                                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                                            focusedBorderColor = MaterialTheme.colorScheme.primary
+                                        )
+                                    )
+                                    IconButton(
+                                        modifier = Modifier.padding(top = 8.dp),
+                                        onClick = {
+                                            nickname = ""
+                                            showNickname = false
+                                        }
+                                    ) {
+                                        Icon(
+                                            Icons.Rounded.RemoveCircleOutline,
+                                            null,
+                                            tint = MaterialTheme.colorScheme.error
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
 
@@ -1209,7 +1308,7 @@ fun ContactEditScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(
-                                    imageVector = ContactUtils.getAccountIcon(selectedAccount),
+                                    imageVector = ContactUtils.getAccountIcon(selectedAccount, isPrivate),
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.primary
                                 )
@@ -1221,7 +1320,8 @@ fun ContactEditScreen(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                     Text(
-                                        text = if (selectedAccount != null) ContactUtils.getAccountName(selectedAccount!!) else ContactUtils.getAccountType(null),
+                                        text = if (selectedAccount != null) ContactUtils.getAccountName(selectedAccount!!)
+                                                else ContactUtils.getAccountType(null, isPrivate),
                                         style = MaterialTheme.typography.bodyLarge,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -1471,6 +1571,43 @@ fun ContactEditScreen(
                                     onClick = {
                                         nameSuffix = ""
                                         showNameSuffix = false
+                                    }
+                                ) {
+                                    Icon(
+                                        Icons.Rounded.RemoveCircleOutline,
+                                        null,
+                                        tint = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            }
+                        }
+                        AnimatedVisibility(
+                            visible = showNickname,
+                            enter = expandVertically() + fadeIn(),
+                            exit = shrinkVertically() + fadeOut()
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                OutlinedTextField(
+                                    value = nickname,
+                                    onValueChange = { nickname = it },
+                                    label = { Text(stringResource(R.string.nickname)) },
+                                    modifier = Modifier.weight(1f)
+                                        .fillMaxWidth()
+                                        .padding(start = paddingHorizontal),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                                        focusedBorderColor = MaterialTheme.colorScheme.primary
+                                    )
+                                )
+                                IconButton(
+                                    modifier = Modifier.padding(top = 8.dp),
+                                    onClick = {
+                                        nickname = ""
+                                        showNickname = false
                                     }
                                 ) {
                                     Icon(
@@ -1806,6 +1943,7 @@ fun ContactEditScreen(
                 }
 
                 item {
+                    val isNewContact = contactId == null || contactId == "0" || contactId == "null"
                     Surface(
                         modifier = Modifier.padding(horizontal = paddingHorizontal),
                         onClick = { showPicker = true },
@@ -1819,7 +1957,7 @@ fun ContactEditScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                imageVector = ContactUtils.getAccountIcon(selectedAccount),
+                                imageVector = ContactUtils.getAccountIcon(selectedAccount, isPrivate),
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary
                             )
@@ -1831,12 +1969,13 @@ fun ContactEditScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Text(
-                                    text = if (selectedAccount != null) ContactUtils.getAccountName(selectedAccount!!) else ContactUtils.getAccountType(null),
+                                    text = if (selectedAccount != null) ContactUtils.getAccountName(selectedAccount!!)
+                                            else ContactUtils.getAccountType(null, isPrivate),
                                     style = MaterialTheme.typography.bodyLarge,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
-                            Icon(Icons.Default.ArrowDropDown, null)
+                            if (isNewContact) Icon(Icons.Default.ArrowDropDown, null)
                         }
                     }
                 }

@@ -18,16 +18,18 @@ import androidx.compose.ui.unit.dp
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.ContactsViewModel
 import dev.goodwy.rphone.controller.util.ContactUtils
+import dev.goodwy.rphone.device_only
 import dev.goodwy.rphone.modal.data.Contact
+import dev.goodwy.rphone.private_only
 
 @Composable
 fun MoveToAccountDialog(
     title: String = stringResource(R.string.move_to_another_account),
     icon: ImageVector? = Icons.AutoMirrored.Rounded.DriveFileMove,
     availableAccounts: List<Account>,
-    currentAccountKey: String? = "-1", // null is a local account
+    currentAccountKey: String? = "-1",
     onDismiss: () -> Unit,
-    onAccountSelected: (Account?) -> Unit
+    onAccountSelected: (Account?, isPrivate: Boolean) -> Unit
 ) {
     RillDialog(
         onDismissRequest = onDismiss,
@@ -42,11 +44,51 @@ fun MoveToAccountDialog(
         Surface(
             onClick = {
                 if (currentAccountKey != null) {
-                    onAccountSelected(null)
+                    onAccountSelected(null, true)
                 }
             },
             shape = RoundedCornerShape(16.dp),
-            color = if (currentAccountKey == null) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+            color = if (currentAccountKey == private_only) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp, horizontal = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Surface(
+                    modifier = Modifier.size(40.dp),
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surfaceVariant
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            ContactUtils.getAccountIcon(null, true),
+                            ContactUtils.getAccountType(null, true),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+                Spacer(Modifier.width(16.dp))
+                Column {
+                    Text(
+                        ContactUtils.getAccountType(null, true),
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+        }
+
+        Surface(
+            onClick = {
+                if (currentAccountKey != null) {
+                    onAccountSelected(null, false)
+                }
+            },
+            shape = RoundedCornerShape(16.dp),
+            color = if (currentAccountKey == device_only) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
             modifier = Modifier.fillMaxWidth()
         ) {
             Row(
@@ -85,7 +127,7 @@ fun MoveToAccountDialog(
             Surface(
                 onClick = {
                     if (!isCurrentAccount) {
-                        onAccountSelected(account)
+                        onAccountSelected(account, false)
                     }
                 },
                 shape = RoundedCornerShape(16.dp),
@@ -137,16 +179,20 @@ fun MoveSingleContactDialog(
     currentAccountKey: String? = null,
     contactsViewModel: ContactsViewModel,
     onDismiss: () -> Unit,
-    onSuccess: (Account?) -> Unit = {}
+    onSuccess: (Account?, isPrivate: Boolean) -> Unit = {_, _ -> }
 ) {
     MoveToAccountDialog(
         availableAccounts = availableAccounts,
         currentAccountKey = currentAccountKey,
         onDismiss = onDismiss,
-        onAccountSelected = { account ->
-            val list = listOf(contact.id)
-            contactsViewModel.moveContacts(list, account)
-            onSuccess(account)
+        onAccountSelected = { account, isPrivate ->
+            if (isPrivate) {
+                contactsViewModel.makeContactPrivate(contact.id)
+            } else {
+                val list = listOf(contact.id)
+                contactsViewModel.moveContacts(list, account)
+            }
+            onSuccess(account, isPrivate)
             onDismiss()
         }
     )
@@ -159,15 +205,19 @@ fun MoveMultipleContactsDialog(
     currentAccountKey: String? = null,
     contactsViewModel: ContactsViewModel,
     onDismiss: () -> Unit,
-    onSuccess: (Account?) -> Unit = {}
+    onSuccess: (Account?, isPrivate: Boolean) -> Unit = {_, _ -> }
 ) {
     MoveToAccountDialog(
         availableAccounts = availableAccounts,
         currentAccountKey = currentAccountKey,
         onDismiss = onDismiss,
-        onAccountSelected = { account ->
-            contactsViewModel.moveContacts(contactIds, account)
-            onSuccess(account)
+        onAccountSelected = { account, isPrivate ->
+            if (isPrivate) {
+                contactIds.forEach { contactsViewModel.makeContactPrivate(it) }
+            } else {
+                contactsViewModel.moveContacts(contactIds, account)
+            }
+            onSuccess(account, isPrivate)
             onDismiss()
         }
     )
