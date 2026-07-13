@@ -74,7 +74,9 @@ import dev.goodwy.rphone.view.theme.customColors
 import com.ramcosta.composedestinations.generated.destinations.ContactDetailsScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactEditScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import dev.goodwy.rphone.controller.util.ContactUtils
 import dev.goodwy.rphone.controller.util.toast
+import dev.goodwy.rphone.modal.data.getDisplayName
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinActivityViewModel
@@ -117,39 +119,36 @@ fun AZListContent(
     val settingsState by prefs.settingsChanged.collectAsState()
     val showFavorites = false //!prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, true)
 
-//    val haptic = LocalHapticFeedback.current
-//    val hapticScrollEnabled = prefs.getBoolean(PreferenceManager.KEY_HAPTIC_LIST_SCROLL, false)
-//    if (hapticScrollEnabled) {
-//        LaunchedEffect(listState.firstVisibleItemIndex) {
-//            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-//        }
-//    }
+    val haptic = LocalHapticFeedback.current
+    val hapticScrollEnabled = prefs.getBoolean(PreferenceManager.KEY_HAPTIC_LIST_SCROLL, false)
+    val displayOrder = remember(settingsState) { prefs.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0) }
+    val sortOrder = remember(settingsState) { prefs.getInt(PreferenceManager.KEY_CONTACT_SORT_ORDER, 0) }
+
+    if (hapticScrollEnabled) {
+        LaunchedEffect(listState.firstVisibleItemIndex) {
+            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+        }
+    }
 
     val finalGrouped = remember(contacts, grouped) {
-        if (grouped != null && !showFavorites) return@remember grouped
+        if (grouped != null) return@remember grouped
 
-        val favorites = if (showFavorites) {
-//            contacts.filter { it.isFavorite }
-            val favContacts = contacts.filter { it.isFavorite }
-            val order = prefs.getFavoritesOrder()
-            favContacts.sortedWith(compareBy<Contact> { contact ->
-                val index = order.indexOf(contact.id)
-                if (index != -1) index else Int.MAX_VALUE
-            }.thenBy { it.name })
-        } else emptyList()
-        val nonFavs = if (showFavorites) contacts.filter { !it.isFavorite } else contacts
-        val mainGroups = nonFavs.groupBy {
-            val firstChar = it.displayName.firstOrNull()?.uppercaseChar() ?: '#'
+        val mainGroups = contacts.groupBy {
+            val firstChar =
+                if (sortOrder == 1) it.familyName.ifBlank { it.displayName }.firstOrNull()?.uppercaseChar() ?: '#'
+                else it.givenName.ifBlank { it.displayName }.firstOrNull()?.uppercaseChar() ?: '#'
             if (firstChar.isLetter()) firstChar else '#'
         }.toMutableMap()
 
         val finalMap = linkedMapOf<Char, List<Contact>>()
-        if (favorites.isNotEmpty()) finalMap['❤'] = favorites
+
         mainGroups.keys.filter { it.isLetter() }.sorted().forEach { char ->
             finalMap[char] = mainGroups[char]!!
         }
+
         val hashGroup = mainGroups['#']
         if (hashGroup != null) finalMap['#'] = hashGroup
+
         finalMap
     }
 
@@ -245,6 +244,7 @@ fun AZListContent(
                                     navigator = navigator,
                                     selectionMode = selectionMode,
                                     isSelected = isSelected,
+                                    displayOrder = displayOrder,
                                     onSelectToggle = { onToggleSelection(contact.id) }
                                 )
                             }
@@ -307,6 +307,7 @@ private fun ContactListItem(
     navigator: DestinationsNavigator,
     selectionMode: Boolean = false,
     isSelected: Boolean = false,
+    displayOrder: Int,
     onSelectToggle: () -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -324,7 +325,7 @@ private fun ContactListItem(
         label = "contactItemScale"
     )
 
-    val headline = contact.displayName
+    val headline = getDisplayName(contact, displayOrder)
 
     // Delete confirmation dialog
     if (showDeleteConfirm) {
@@ -535,7 +536,7 @@ private fun ContactListItem(
                         showMenu = false
                         val intent = Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
-                            putExtra(Intent.EXTRA_TEXT, "${contact.name}\n${contact.phoneNumbers.joinToString(", ")}")
+                            putExtra(Intent.EXTRA_TEXT, "${contact.displayName}\n${contact.phoneNumbers.joinToString(", ")}")
                         }
                         context.startActivity(Intent.createChooser(intent, "Share contact"))
                     }

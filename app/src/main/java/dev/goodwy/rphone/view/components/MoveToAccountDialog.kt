@@ -65,7 +65,7 @@ fun MoveToAccountDialog(
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             ContactUtils.getAccountIcon(null, true),
-                            ContactUtils.getAccountType(null, true),
+                            ContactUtils.getFriendlyAccountName(null, true),
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -73,7 +73,7 @@ fun MoveToAccountDialog(
                 Spacer(Modifier.width(16.dp))
                 Column {
                     Text(
-                        ContactUtils.getAccountType(null, true),
+                        ContactUtils.getFriendlyAccountName(null, true),
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -105,7 +105,7 @@ fun MoveToAccountDialog(
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             ContactUtils.getAccountIcon(null),
-                            ContactUtils.getAccountType(null),
+                            ContactUtils.getFriendlyAccountName(null),
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -113,7 +113,7 @@ fun MoveToAccountDialog(
                 Spacer(Modifier.width(16.dp))
                 Column {
                     Text(
-                        ContactUtils.getAccountType(null),
+                        ContactUtils.getFriendlyAccountName(null),
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -161,7 +161,7 @@ fun MoveToAccountDialog(
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(
-                            ContactUtils.getAccountType(account),
+                            ContactUtils.getFriendlyAccountName(account),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

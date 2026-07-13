@@ -45,6 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import android.view.WindowManager
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.platform.LocalView
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
@@ -71,8 +72,10 @@ import androidx.compose.material.icons.rounded.People
 import androidx.compose.material.icons.rounded.SearchOff
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -80,7 +83,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.core.net.toUri
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import coil.compose.rememberAsyncImagePainter
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.bottomBarHeight
 import dev.goodwy.rphone.cardCornerBig
@@ -101,13 +103,25 @@ import com.ramcosta.composedestinations.generated.destinations.ContactScreenDest
 import com.ramcosta.composedestinations.generated.destinations.FavoritesScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.NotesScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.RecentScreenDestination
+import dev.goodwy.rphone.controller.UssdRepository
 import dev.goodwy.rphone.controller.util.SocialUtils
 import dev.goodwy.rphone.controller.util.SocialUtils.getInstalledMessenger
 import dev.goodwy.rphone.controller.util.SocialUtils.messengerPackages
+import dev.goodwy.rphone.modal.data.getDisplayName
 import dev.goodwy.rphone.view.components.RillDialog
 import dev.goodwy.rphone.view.components.RillExpressiveButton
 import kotlinx.coroutines.launch
 import kotlin.math.abs
+
+/**
+ * Keeps the in-progress dialed digits alive across the dialpad bottom sheet being dismissed
+ * (e.g. by swiping down on the drag handle) and reopened. The sheet's composable is fully torn
+ * down on dismiss, so a plain `remember` loses the typed number; this small in-memory holder
+ * survives that as long as the process is alive, matching what users expect from a dialer.
+ */
+private object DialpadDraftHolder {
+    var pendingNumber: String = ""
+}
 
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Destination<RootGraph>(style = TabTransitionStyle::class)
@@ -135,6 +149,11 @@ fun DialPadScreen(
             window?.setSoftInputMode(prevMode)
         }
     }
+
+    var number by remember { mutableStateOf(initialNumber?.ifBlank { DialpadDraftHolder.pendingNumber } ?: DialpadDraftHolder.pendingNumber) }
+    // Keep the draft holder in sync so dismissing the sheet (including swipe-down-to-dismiss)
+    // and reopening it restores whatever digits were typed, instead of clearing them.
+    LaunchedEffect(number) { DialpadDraftHolder.pendingNumber = number }
 
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
@@ -179,68 +198,68 @@ fun DialPadScreen(
 //        )
 //    }
 
-    val scope = rememberCoroutineScope()
-    val favouritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, true)
-    val contactsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS, true)
-    val notesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES, true)
+//    val scope = rememberCoroutineScope()
+//    val favouritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, true)
+//    val contactsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS, true)
+//    val notesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES, false)
     Scaffold(
         modifier = Modifier
-            .fillMaxSize()
-            .pointerInput(Unit) {
-                awaitPointerEventScope {
-                    while (true) {
-                        val down = awaitPointerEvent(PointerEventPass.Final).changes.firstOrNull()
-                            ?: continue
-                        if (!down.pressed) continue
-                        val startX = down.position.x
-                        val startY = down.position.y
-                        val startTime = System.currentTimeMillis()
-                        var triggered = false
-                        while (true) {
-                            val event = awaitPointerEvent(PointerEventPass.Final)
-                            val change = event.changes.firstOrNull() ?: break
-                            val dx = change.position.x - startX
-                            val dy = change.position.y - startY
-                            val elapsed = System.currentTimeMillis() - startTime
-                            if (!triggered && elapsed >= 150L &&
-                                abs(dx) > 700f &&
-                                abs(dx) > abs(dy) * 5.5f
-                            ) {
-                                triggered = true
-                                if (dx < 0) {
-                                    val route = when {
-                                        notesEnabled -> NotesScreenDestination.route
-                                        favouritesEnabled -> FavoritesScreenDestination.route
-                                        else -> RecentScreenDestination.route
-                                    }
-                                    scope.launch {
-                                        navController.navigate(route) {
-                                            popUpTo(navController.graph.findStartDestination().id) {
-                                                saveState = true
-                                            }
-                                            launchSingleTop = true; restoreState = true
-                                        }
-                                    }
-                                } else {
-                                    val route = when {
-                                        contactsEnabled -> ContactScreenDestination.route
-                                        else -> RecentScreenDestination.route
-                                    }
-                                    scope.launch {
-                                        navController.navigate(route) {
-                                            popUpTo(navController.graph.findStartDestination().id) {
-                                                saveState = true
-                                            }
-                                            launchSingleTop = true; restoreState = true
-                                        }
-                                    }
-                                }
-                            }
-                            if (!change.pressed) break
-                        }
-                    }
-                }
-            },
+            .fillMaxSize(),
+//            .pointerInput(Unit) {
+//                awaitPointerEventScope {
+//                    while (true) {
+//                        val down = awaitPointerEvent(PointerEventPass.Final).changes.firstOrNull()
+//                            ?: continue
+//                        if (!down.pressed) continue
+//                        val startX = down.position.x
+//                        val startY = down.position.y
+//                        val startTime = System.currentTimeMillis()
+//                        var triggered = false
+//                        while (true) {
+//                            val event = awaitPointerEvent(PointerEventPass.Final)
+//                            val change = event.changes.firstOrNull() ?: break
+//                            val dx = change.position.x - startX
+//                            val dy = change.position.y - startY
+//                            val elapsed = System.currentTimeMillis() - startTime
+//                            if (!triggered && elapsed >= 150L &&
+//                                abs(dx) > 700f &&
+//                                abs(dx) > abs(dy) * 5.5f
+//                            ) {
+//                                triggered = true
+//                                if (dx < 0) {
+//                                    val route = when {
+//                                        notesEnabled -> NotesScreenDestination.route
+//                                        favouritesEnabled -> FavoritesScreenDestination.route
+//                                        else -> RecentScreenDestination.route
+//                                    }
+//                                    scope.launch {
+//                                        navController.navigate(route) {
+//                                            popUpTo(navController.graph.findStartDestination().id) {
+//                                                saveState = true
+//                                            }
+//                                            launchSingleTop = true; restoreState = true
+//                                        }
+//                                    }
+//                                } else {
+//                                    val route = when {
+//                                        contactsEnabled -> ContactScreenDestination.route
+//                                        else -> RecentScreenDestination.route
+//                                    }
+//                                    scope.launch {
+//                                        navController.navigate(route) {
+//                                            popUpTo(navController.graph.findStartDestination().id) {
+//                                                saveState = true
+//                                            }
+//                                            launchSingleTop = true; restoreState = true
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                            if (!change.pressed) break
+//                        }
+//                    }
+//                }
+//            },
         containerColor = MaterialTheme.colorScheme.surface,
         contentWindowInsets = WindowInsets(0)
     ) { innerPadding ->
@@ -249,7 +268,7 @@ fun DialPadScreen(
             .padding(innerPadding)
             .fillMaxSize()) {
             DialPadContent(
-                initialNumber = initialNumber,
+                initialNumber = number,
                 navigator = navigator,
                 onDismiss = { navigator.navigateUp() },
                 modifier = Modifier
@@ -284,10 +303,65 @@ fun DialPadContent(
         val logsViewModel: CallLogViewModel = koinActivityViewModel()
         val prefs = koinInject<PreferenceManager>()
         val settingsState by prefs.settingsChanged.collectAsState()
+        val displayOrder by remember(settingsState) {
+            mutableIntStateOf(prefs.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0))
+        }
 
         val allContacts by contactsVM.allContacts.collectAsState()
         val logs by logsViewModel.allCallLogs.collectAsState()
-        var number by remember { mutableStateOf(initialNumber ?: "") }
+        var number by remember { mutableStateOf(initialNumber?.ifBlank { DialpadDraftHolder.pendingNumber } ?: DialpadDraftHolder.pendingNumber) }
+        // Where new digits get inserted / backspace deletes from. Defaults to the end of the number
+        // (normal typing behaviour), but the user can tap anywhere in the number to move it, so they
+        // can fill in a missing digit in the middle without having to delete and retype everything.
+        var cursorPosition by remember { mutableIntStateOf(number.length) }
+
+        // Route every edit through these so the cursor position stays correct and consistent no
+        // matter where the edit originates from (dialpad keys, backspace, paste, clipboard banner,
+        // clearing on secret-code detection, etc.)
+        fun insertAtCursor(text: String) {
+            val at = cursorPosition.coerceIn(0, number.length)
+            number = number.substring(0, at) + text + number.substring(at)
+            cursorPosition = at + text.length
+        }
+        fun backspaceAtCursor() {
+            val at = cursorPosition.coerceIn(0, number.length)
+            if (at > 0) {
+                number = number.removeRange(at - 1, at)
+                cursorPosition = at - 1
+            }
+        }
+        fun replaceNumber(text: String) {
+            number = text
+            cursorPosition = text.length
+        }
+        // Keep the draft holder in sync so dismissing the sheet (including swipe-down-to-dismiss)
+        // and reopening it restores whatever digits were typed, instead of clearing them.
+        LaunchedEffect(number) { DialpadDraftHolder.pendingNumber = number }
+
+        // Collect USSD / MMI responses from CallService and show inline dialog
+        val ussdResult by UssdRepository.response.collectAsState()
+        DisposableEffect(Unit) { onDispose { UssdRepository.clear() } }
+
+        ussdResult?.let { (request, response) ->
+            AlertDialog(
+                onDismissRequest = { UssdRepository.clear() },
+                title = {
+                    Text(
+                        request,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                    )
+                },
+                text = { Text(response, style = MaterialTheme.typography.bodyMedium) },
+                confirmButton = {
+                    TextButton(onClick = { UssdRepository.clear() }) {
+                        Text("OK")
+                    }
+                },
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(24.dp)
+            )
+        }
+
         val soundPool = remember { buildDtmfSoundPool(context) }
 
         var showSocialDialog by remember { mutableStateOf(false) }
@@ -316,12 +390,12 @@ fun DialPadContent(
                 val simPref = prefs.getInt("default_sim", 0)
                 when {
                     simPref == 1 && accounts.isNotEmpty() -> {
-                        number = ""
+                        replaceNumber("")
                         makeCall(context, num, accounts[0])
                     }
 
                     simPref == 2 && accounts.size >= 2 -> {
-                        number = ""
+                        replaceNumber("")
                         makeCall(context, num, accounts[1])
                     }
 
@@ -331,7 +405,7 @@ fun DialPadContent(
                     }
                 }
             } else {
-                number = ""
+                replaceNumber("")
                 makeCall(context, num)
             }
         }
@@ -352,11 +426,11 @@ fun DialPadContent(
             derivedStateOf {
                 if (number.isEmpty()) emptyList()
                 else {
-                    val cleanQuery = number.replace(" ", "")
+                    val cleanQuery = number.replace(" ", "").replace("-", "")
                     allContacts.asSequence()
                         .filter { contact ->
                             val matchesNumber = contact.phoneNumbers.any {
-                                it.replace(" ", "").contains(cleanQuery)
+                                it.replace(" ", "").replace("-", "").contains(cleanQuery)
                             }
                             val matchesName =
                                 t9Enabled && T9Matcher.isMatch(contact.displayName, cleanQuery)
@@ -374,10 +448,10 @@ fun DialPadContent(
             derivedStateOf {
                 if (number.isEmpty()) emptyList()
                 else {
-                    val cleanQuery = number.replace(" ", "")
+                    val cleanQuery = number.replace(" ", "").replace("-", "")
                     val filtered = logs.asSequence()
                         .filter { log ->
-                            val matchesNumber = log.number.replace(" ", "").contains(cleanQuery)
+                            val matchesNumber = log.number.replace(" ", "").replace("-", "").contains(cleanQuery)
                             val matchesName =
                                 t9Enabled && T9Matcher.isMatch(log.name ?: "", cleanQuery)
                             matchesNumber || matchesName
@@ -386,7 +460,7 @@ fun DialPadContent(
                         .toList()
                     // Then, keep only unique numbers (latest call per number)
                     filtered
-                        .groupBy { it.number.replace(" ", "") } // Group by normalized number
+                        .groupBy { it.number.replace(" ", "").replace("-", "") } // Group by normalized number
                         .map { (_, logsGroup) ->
                             logsGroup.maxByOrNull { it.date } // Take the latest call
                         }
@@ -399,7 +473,7 @@ fun DialPadContent(
         // Create a set of all phone numbers and names from contacts for quick searching
         val contactNumbers = remember(allContacts) {
             allContacts.flatMap { contact ->
-                contact.phoneNumbers.map { it.replace(" ", "") }
+                contact.phoneNumbers.map { it.replace(" ", "").replace("-", "") }
             }.toSet()
         }
 
@@ -410,7 +484,7 @@ fun DialPadContent(
         // Filtering logs
         val filteredSearchLogsResults = remember(searchLogsResults, contactNumbers, contactNames) {
             searchLogsResults.filter { log ->
-                val logNumber = log.number.replace(" ", "")
+                val logNumber = log.number.replace(" ", "").replace("-", "")
                 val logName = log.name?.lowercase() ?: ""
 
                 // Exclude if the number is in contacts OR the name is in contacts
@@ -437,7 +511,7 @@ fun DialPadContent(
                 if (hasPhoneState) {
                     placeCallWithSimPreference(numToCall)
                 } else {
-                    number = ""
+                    replaceNumber("")
                     makeCall(context, numToCall)
                 }
             } else {
@@ -445,32 +519,101 @@ fun DialPadContent(
             }
         }
 
+        // Auto-process Android hidden/secret codes and MMI codes as the user types
+        fun processSecretCodeIfNeeded(input: String): Boolean {
+            val code = input.trim()
+            if (code.length < 3) return false
+
+            // ── Pattern 1: *#*#DIGITS#*#*  (Android secret activity codes, e.g. testing menu) ──
+            // These end with #*#* so a plain endsWith("#") check misses them entirely
+            val secretMatch = Regex("^\\*#\\*#(\\d+)#\\*#\\*$").find(code)
+            if (secretMatch != null) {
+                val digits = secretMatch.groupValues[1]
+                try {
+                    // The officially documented way for a default-dialer app to trigger these codes.
+                    // Manually broadcasting "android.provider.Telephony.SECRET_CODE" ourselves is
+                    // unreliable on Android 8+ — background-broadcast restrictions silently drop it
+                    // unless the app is privileged. sendDialerSpecialCode() is the real entry point
+                    // AOSP's own Dialer/Phone app calls internally, and it works correctly as long as
+                    // this app is set as the default dialer.
+                    val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as? android.telephony.TelephonyManager
+                    telephonyManager?.sendDialerSpecialCode(digits)
+                } catch (_: Exception) {
+                    // Fallback for devices/OEMs where sendDialerSpecialCode isn't wired up —
+                    // some ROMs still listen for the classic broadcasts directly.
+                    val uri = "android_secret_code://$digits".toUri()
+                    try {
+                        context.sendBroadcast(
+                            Intent("android.provider.Telephony.SECRET_CODE", uri).apply {
+                                addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+                            }
+                        )
+                        context.sendBroadcast(
+                            Intent("android.telephony.action.SECRET_CODE", uri).apply {
+                                addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+                            }
+                        )
+                    } catch (_: Exception) {}
+                }
+                return true
+            }
+
+            // ── Pattern 2: USSD / MMI codes  ──────────────────────────────────────────
+            // *124#  *123#  *199#  *#06#  ##002#  *21*N#  *#21#  *#62#
+            val decoded = try { android.net.Uri.decode(code) } catch (_: Exception) { code }
+            if (!((decoded.startsWith("*") || decoded.startsWith("#")) &&
+                        decoded.endsWith("#"))) return false
+
+            // Direct trigger — same philosophy as sendDialerSpecialCode for *#*#...#*#* codes:
+            // one API call, no extra layers. # must be %23 so Uri.parse() doesn't treat it
+            // as a fragment separator (e.g. "tel:*124%23" not "tel:*124#").
+            val encodedCode = decoded.replace("#", "%23")
+            val telUri = "tel:$encodedCode".toUri()
+
+            return if (ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE)
+                == PackageManager.PERMISSION_GRANTED) {
+                try {
+                    context.startActivity(
+                        Intent(Intent.ACTION_CALL, telUri).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        }
+                    )
+                    true
+                } catch (_: Exception) { false }
+            } else {
+                // No CALL_PHONE permission — open dialer pre-filled so user can dial manually
+                try {
+                    context.startActivity(
+                        Intent(Intent.ACTION_DIAL, telUri).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        }
+                    )
+                    true
+                } catch (_: Exception) { false }
+            }
+        }
+
         fun initiateCall(num: String) {
             val cleanNum = num.trim()
             if (cleanNum.isEmpty() || cleanNum == "Unknown") return
-            if (ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.CALL_PHONE
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
-                val hasPhoneState = ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.READ_PHONE_STATE
-                ) == PackageManager.PERMISSION_GRANTED
+            // MMI/USSD codes (*#06#, *#*#4636#*#*, *21*1234#, *124#, ##002#, etc.) are handled
+            // by processSecretCodeIfNeeded which uses telecomManager.placeCall() with the raw URI
+            // for proper carrier-stack routing without looping back to this app.
+            if (processSecretCodeIfNeeded(cleanNum)) {
+                replaceNumber("")
+                return
+            }
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
+                val hasPhoneState = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED
                 if (hasPhoneState) {
                     placeCallWithSimPreference(cleanNum)
                 } else {
-                    number = ""
+                    replaceNumber("")
                     makeCall(context, cleanNum)
                 }
             } else {
                 pendingSearchCallNumber = cleanNum
-                callPermissionLauncher.launch(
-                    arrayOf(
-                        Manifest.permission.CALL_PHONE,
-                        Manifest.permission.READ_PHONE_STATE
-                    )
-                )
+                callPermissionLauncher.launch(arrayOf(Manifest.permission.CALL_PHONE, Manifest.permission.READ_PHONE_STATE))
             }
         }
 
@@ -478,7 +621,7 @@ fun DialPadContent(
             SimPickerDialog(
                 onDismissRequest = { showSimPicker = false },
                 onSimSelected = { handle ->
-                    number = ""
+                    replaceNumber("")
                     makeCall(context, pendingSearchCallNumber ?: number, handle)
                     pendingSearchCallNumber = null
                     showSimPicker = false
@@ -577,81 +720,6 @@ fun DialPadContent(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Search bar
-//                OutlinedTextField(
-//                    value = searchQuery,
-//                    onValueChange = { searchQuery = it },
-//                    modifier = Modifier
-//                        .fillMaxWidth(),
-//                    placeholder = { Text("Search contacts...") },
-//                    leadingIcon = {
-//                        Row {
-//                            Spacer(modifier = Modifier.size(8.dp))
-//                            Icon(
-//                                Icons.Default.Search,
-//                                null,
-//                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-//                            )
-//                        }
-//                    },
-//                    trailingIcon = {
-//                        if (searchQuery.isNotEmpty()) {
-//                            Row {
-//                                IconButton(onClick = { searchQuery = "" }) {
-//                                    Icon(Icons.Default.Close, null)
-//                                }
-//                                Spacer(modifier = Modifier.size(4.dp))
-//                            }
-//                        }
-//                    },
-//                    singleLine = true,
-//                    shape = RoundedCornerShape(cardCornerBig),
-//                    colors = OutlinedTextFieldDefaults.colors(
-//                        focusedBorderColor = cardColor, //MaterialTheme.colorScheme.primary,
-//                        unfocusedBorderColor = cardColor, //MaterialTheme.colorScheme.outlineVariant,
-//                        focusedContainerColor = cardColor,
-//                        unfocusedContainerColor = cardColor,
-//                    ),
-//                    keyboardOptions = KeyboardOptions(
-//                        keyboardType = KeyboardType.Text,
-//                        showKeyboardOnFocus = false
-//                    )
-//                )
-
-                    // Number display — below search bar
-//                Box(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .clip(RoundedCornerShape(16.dp))
-////                        .background(
-////                            if (number.isNotEmpty())
-////                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-////                            else Color.Transparent
-////                        )
-//                        .animateContentSize(
-//                            animationSpec = spring(
-//                                stiffness = Spring.StiffnessLow,
-//                                dampingRatio = Spring.DampingRatioMediumBouncy
-//                            )
-//                        )
-//                        .padding(vertical = 8.dp, horizontal = 12.dp),
-//                    contentAlignment = Alignment.Center
-//                ) {
-//                    val numberLength = number.length
-//                    DialpadNumberDisplay(
-//                        number = number,
-//                        fontSize = when  {
-//                            numberLength > 32 -> 12
-//                            numberLength > 28 -> 14
-//                            numberLength > 25 -> 16
-//                            numberLength > 22 -> 18
-//                            numberLength > 16 -> 20
-//                            numberLength > 11 -> 24
-//                            else -> 30
-//                        }
-//                    )
-//                }
-
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -701,7 +769,7 @@ fun DialPadContent(
                                         searchResults.forEach { contact ->
                                             val defaultOrFirstPhone = contact.phoneDetails.firstOrNull { it.isPrimary }?.number ?: contact.phoneNumbers.firstOrNull()
                                             SingleTile(
-                                                title = contact.displayName,
+                                                title = getDisplayName(contact, displayOrder), //contact.displayName,
                                                 subtitle = contact.phoneNumbers.firstOrNull(),
                                                 photoUri = contact.photoUri,
                                                 phoneNumber = defaultOrFirstPhone,
@@ -840,6 +908,12 @@ fun DialPadContent(
                                     numberLength > 16 -> 20
                                     numberLength > 11 -> 24
                                     else -> 30
+                                },
+                                cursorPosition = cursorPosition,
+                                onCursorPositionChange = { cursorPosition = it },
+                                onLongPress = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    showOverflowMenu = true
                                 }
                             )
                         }
@@ -867,8 +941,8 @@ fun DialPadContent(
                                         letters = subKeys[key] ?: "",
                                         soundPool = soundPool,
                                         context = context,
-                                        onClick = { digit -> number += digit },
-                                        onLongClick = { digit -> number += digit },
+                                        onClick = { digit -> insertAtCursor(digit) },
+                                        onLongClick = { digit -> insertAtCursor(digit) },
                                         compact = true,
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -936,10 +1010,10 @@ fun DialPadContent(
                             FadeScaleBox(visible = number.isNotEmpty()) {
                                 DialerActionExpressive(
                                     onLongClick = {
-                                        number = ""
+                                        replaceNumber("")
                                     },
                                     onClick = {
-                                        number = number.dropLast(1)
+                                        backspaceAtCursor()
                                     },
                                     icon = Icons.AutoMirrored.Outlined.Backspace,
                                     contentDescription = "Backspace",
@@ -1184,7 +1258,7 @@ fun DialPadContent(
 
                             val configuration = LocalConfiguration.current
                             val screenHeightDp = configuration.screenHeightDp.dp
-                            val searchResultsBottomPadding = screenHeightDp * 0.16f
+                            val searchResultsBottomPadding = screenHeightDp * 0.50f
                             val searchResultsPadding =
                                 if (filteredSearchLogsResults.isNotEmpty()) 16.dp else searchResultsBottomPadding
                             // Search contacts results
@@ -1227,7 +1301,7 @@ fun DialPadContent(
                                             searchResults.forEach { contact ->
                                                 val defaultOrFirstPhone = contact.phoneDetails.firstOrNull { it.isPrimary }?.number ?: contact.phoneNumbers.firstOrNull()
                                                 SingleTile(
-                                                    title = contact.displayName,
+                                                    title = getDisplayName(contact, displayOrder), //contact.displayName,
                                                     subtitle = contact.phoneNumbers.firstOrNull(),
                                                     photoUri = contact.photoUri,
                                                     phoneNumber = defaultOrFirstPhone,
@@ -1467,7 +1541,7 @@ fun DialPadContent(
 
                             val keyWidth: Dp = (108 * scaleFactor).dp
                             val keyHeight: Dp = (56 * scaleFactor).dp //58
-                            val actionSize: Dp = (64 * scaleFactor).dp
+//                            val actionSize: Dp = (64 * scaleFactor).dp
                             val callW: Dp = (108 * scaleFactor).dp
                             val callH: Dp = (58 * scaleFactor).dp
                             val spacing = if (isBottomSheet) 8 else 6
@@ -1642,7 +1716,13 @@ fun DialPadContent(
                                                             numberLength > 14 -> 24
                                                             numberLength > 11 -> 28
                                                             else -> 36
-                                                        }) * scaleFactor).coerceIn(8f, 40f).toInt()
+                                                        }) * scaleFactor).coerceIn(8f, 40f).toInt(),
+                                                cursorPosition = cursorPosition,
+                                                onCursorPositionChange = { cursorPosition = it },
+                                                onLongPress = {
+                                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                    showOverflowMenu = true
+                                                }
                                             )
                                         }
 
@@ -1659,8 +1739,8 @@ fun DialPadContent(
                                                 ),
                                                 modifier = Modifier
                                                     .combinedClickable(
-                                                        onClick = { number = number.dropLast(1) },
-                                                        onLongClick = { number = "" },
+                                                        onClick = { backspaceAtCursor() },
+                                                        onLongClick = { replaceNumber("") },
                                                         interactionSource = backspaceSource,
                                                         indication = ripple(
                                                             bounded = false,
@@ -1703,8 +1783,8 @@ fun DialPadContent(
                                                     letters = subKeys[key] ?: "",
                                                     soundPool = soundPool,
                                                     context = context,
-                                                    onClick = { digit -> number += digit },
-                                                    onLongClick = { digit -> number += digit },
+                                                    onClick = { digit -> insertAtCursor(digit) },
+                                                    onLongClick = { digit -> insertAtCursor(digit) },
                                                     overrideWidth = keyWidth,
                                                     overrideHeight = keyHeight,
                                                     scaleFactor = scaleFactor
@@ -1790,17 +1870,6 @@ fun DialPadContent(
                                             liquidGlassEnabled = lgDialpadEnabled,
                                             blurEnabled = blurDialpadEnabled
                                         )
-
-//                                    FadeScaleBox(visible = number.isNotEmpty()) {
-//                                        DialerActionExpressive(
-//                                            onLongClick = { number = "" },
-//                                            onClick = { number = number.dropLast(1) },
-//                                            icon = Icons.Default.Backspace,
-//                                            contentDescription = "Backspace",
-//                                            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-//                                            modifier = Modifier.size(actionSize)
-//                                        )
-//                                    }
                                     }
                                 }
                             }
@@ -2099,7 +2168,10 @@ fun DialPadKey(
 @Composable
 private fun DialpadNumberDisplay(
     number: String,
-    fontSize: Int
+    fontSize: Int,
+    cursorPosition: Int = number.length,
+    onCursorPositionChange: (Int) -> Unit = {},
+    onLongPress: () -> Unit = {}
 ) {
     val easeOutExpo = CubicBezierEasing(0.16f, 1f, 0.3f, 1f)
     val textColor = MaterialTheme.colorScheme.onSurface
@@ -2115,24 +2187,49 @@ private fun DialpadNumberDisplay(
 
     LaunchedEffect(number) {
         val current = stableChars.map { it.second }.joinToString("")
-        if (number.length > current.length) {
-            // Characters appended
-            val added = number.drop(current.length)
-            added.forEach { ch ->
-                stableChars.add(Pair(idCounter.value++, ch))
-            }
-        } else if (number.length < current.length) {
-            // Characters removed from end (backspace)
-            val removeCount = current.length - number.length
-            repeat(removeCount) {
-                if (stableChars.isNotEmpty()) stableChars.removeAt(stableChars.lastIndex)
-            }
-        } else if (number != current) {
-            // Full replacement (e.g. paste) — rebuild
-            stableChars.clear()
-            number.forEach { ch -> stableChars.add(Pair(idCounter.value++, ch)) }
+        if (number == current) return@LaunchedEffect
+
+        // Diff by common prefix/suffix so an insert or delete anywhere in the middle of the
+        // string (not just at the end) only touches the characters that actually changed —
+        // everything else keeps its stable id and simply slides over.
+        val minLen = minOf(current.length, number.length)
+        var prefixLen = 0
+        while (prefixLen < minLen && current[prefixLen] == number[prefixLen]) prefixLen++
+
+        var suffixLen = 0
+        val maxSuffix = minLen - prefixLen
+        while (suffixLen < maxSuffix &&
+            current[current.length - 1 - suffixLen] == number[number.length - 1 - suffixLen]
+        ) suffixLen++
+
+        val removeCount = current.length - prefixLen - suffixLen
+        repeat(removeCount) {
+            if (stableChars.size > prefixLen) stableChars.removeAt(prefixLen)
+        }
+        val insertText = number.substring(prefixLen, number.length - suffixLen)
+        insertText.forEachIndexed { i, ch ->
+            stableChars.add(prefixLen + i, Pair(idCounter.value++, ch))
         }
     }
+
+    // Blinking caret alpha
+    val cursorBlink = rememberInfiniteTransition(label = "cursorBlink")
+    val cursorAlpha by cursorBlink.animateFloat(
+        initialValue = 1f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = keyframes {
+                durationMillis = 1000
+                1f at 0
+                1f at 500
+                0f at 501
+                0f at 999
+            }
+        ),
+        label = "cursorAlpha"
+    )
+
+    val clampedCursor = cursorPosition.coerceIn(0, stableChars.size)
 
     LazyRow(
         horizontalArrangement = Arrangement.Center,
@@ -2140,10 +2237,16 @@ private fun DialpadNumberDisplay(
         userScrollEnabled = false,
         modifier = Modifier.fillMaxWidth()
     ) {
+        // Leading spacer matching the trailing tap zone's width below, so the digits (and the
+        // cursor) are actually centered in the box instead of being pulled off-center by an
+        // unbalanced zone that only exists on the trailing side.
+        item(key = "leading_cursor_area") {
+            Box(modifier = Modifier.width(28.dp))
+        }
         itemsIndexed(
             items = stableChars,
             key = { _, pair -> pair.first }
-        ) { _, pair ->
+        ) { index, pair ->
             var appeared by remember { mutableStateOf(false) }
             LaunchedEffect(Unit) { appeared = true }
 
@@ -2169,23 +2272,74 @@ private fun DialpadNumberDisplay(
                 label = "charScale"
             )
 
-            Text(
-                text = pair.second.toString(),
-                style = textStyle,
-                color = textColor,
-                modifier = Modifier
-                    .animateItem(
-                        placementSpec = spring(
-                            stiffness = Spring.StiffnessMediumLow,
-                            dampingRatio = Spring.DampingRatioMediumBouncy
-                        ),
-                        fadeInSpec = tween(360, easing = easeOutExpo),
-                        fadeOutSpec = tween(220)
+            Box(contentAlignment = Alignment.CenterStart) {
+                // A thin blinking bar rendered just before this character when the cursor sits
+                // here, so it visually sits between the two adjacent digits.
+                if (clampedCursor == index) {
+                    Box(
+                        modifier = Modifier
+                            .offset(x = (-2).dp)
+                            .width(2.dp)
+                            .height(with(LocalDensity.current) { textStyle.fontSize.toDp() * 0.9f })
+                            .align(Alignment.CenterStart)
+                            .graphicsLayer { this.alpha = cursorAlpha }
+                            .background(MaterialTheme.colorScheme.primary)
                     )
-                    .offset(y = offsetY)
-                    .alpha(alpha)
-                    .scale(scale)
-            )
+                }
+                Text(
+                    text = pair.second.toString(),
+                    style = textStyle,
+                    color = textColor,
+                    modifier = Modifier
+                        .animateItem(
+                            placementSpec = spring(
+                                stiffness = Spring.StiffnessMediumLow,
+                                dampingRatio = Spring.DampingRatioMediumBouncy
+                            ),
+                            fadeInSpec = tween(360, easing = easeOutExpo),
+                            fadeOutSpec = tween(220)
+                        )
+                        .offset(y = offsetY)
+                        .alpha(alpha)
+                        .scale(scale)
+                        .pointerInput(pair.first) {
+                            detectTapGestures(
+                                onLongPress = { onLongPress() }
+                            ) { tapOffset ->
+                                // Tapping the left half of a digit places the cursor before it,
+                                // the right half places it after — like a normal text field.
+                                val newPos = if (tapOffset.x < size.width / 2f) index else index + 1
+                                onCursorPositionChange(newPos)
+                            }
+                        }
+                )
+            }
+        }
+
+        if (number.isNotEmpty()) {
+            item(key = "trailing_cursor_area") {
+                Box(
+                    modifier = Modifier
+                        .width(28.dp)
+                        .height(with(LocalDensity.current) { textStyle.fontSize.toDp() * 1.4f })
+                        .pointerInput(stableChars.size) {
+                            detectTapGestures(
+                                onLongPress = { onLongPress() }
+                            ) { onCursorPositionChange(stableChars.size) }
+                        },
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    if (clampedCursor == stableChars.size) {
+                        Box(
+                            modifier = Modifier
+                                .width(2.dp)
+                                .height(with(LocalDensity.current) { textStyle.fontSize.toDp() * 0.9f })
+                                .graphicsLayer { this.alpha = cursorAlpha }
+                                .background(MaterialTheme.colorScheme.primary)
+                        )
+                    }
+                }
+            }
         }
     }
 }

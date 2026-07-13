@@ -57,7 +57,8 @@ fun CallLogTileSimple(
     onLongClick: () -> Unit = {},
     onCallClick: () -> Unit = {},
     selected: Boolean = false,
-    showNumber: Boolean
+    showNumber: Boolean,
+    showSimLabel: Boolean
 ) {
     val icon = when (log.type) {
         CallLog.Calls.INCOMING_TYPE -> Icons.AutoMirrored.Filled.CallReceived
@@ -77,9 +78,10 @@ fun CallLogTileSimple(
         else                        -> stringResource(R.string.call)
     }
     val headlineText = if (showNumber) log.number + "  •  " + typeText else typeText
+    val simLabel = if (showSimLabel && log.simLabel != null) " • " + log.simLabel else ""
     CallLogListItemSimple(
         headline = headlineText,
-        supporting = context.formatDate(log.date),
+        supporting = context.formatDate(log.date) + simLabel,
 //        trailing = if (log.duration > 0) "${android.text.format.DateUtils.formatElapsedTime(log.duration)}" else "",
         trailing = if (log.duration > 0) context.formatSecondsToShortTimeString(log.duration.toInt()) else "",
         leadingIcon = icon,
@@ -101,12 +103,14 @@ fun CallLogTile(
     onDelete: (() -> Unit)? = null,
     onShowHistory: () -> Unit,
     isSelected: Boolean = false,
-    selectionMode: Boolean = false
+    selectionMode: Boolean = false,
+    showSimLabel: Boolean
 ) {
     val context   = LocalContext.current
     var showMenu  by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxWidth()) {
+        val simLabel = if (showSimLabel && log.simLabel != null) " • " + log.simLabel else ""
         CallLogListItem(
             headline = buildString {
                 append(log.name ?: log.number)
@@ -116,9 +120,9 @@ fun CallLogTile(
                 if (log.name != null && log.name != log.number) {
                     val typeLabel = getPhoneTypeText(context, log.phoneType, log.phoneLabel)
                     val number = typeLabel ?: log.number
-                    append(number + " • " + context.formatDate(log.date, true))
+                    append(number + " • " + context.formatDate(log.date, true) + simLabel)
                 }
-                else append(context.formatDate(log.date, true))
+                else append(context.formatDate(log.date, true) + simLabel)
             },
             avatarName  = log.name ?: log.number,
             photoUri    = log.photoUri,

@@ -84,6 +84,29 @@ private val TAB_ROUTES = setOf(
 //    SearchScreenDestination.route
 )
 
+/** Describes a single bottom-navigation tab, driving both the pill-style and standard nav bars. */
+data class TabSpec(
+    val key: String,
+    val route: String,
+    val label: String,
+    val selectedIcon: ImageVector,
+    val unselectedIcon: ImageVector,
+    val selected: Boolean,
+    val onClick: () -> Unit
+)
+
+/** Parses the user-configured tab order preference into an ordered list of tab keys. */
+fun parseTabOrder(raw: String?): List<String> {
+    val fallback = PreferenceManager.DEFAULT_TAB_ORDER.split(",")
+    if (raw.isNullOrBlank()) return fallback
+    val parsed = raw.split(",").map { it.trim() }.filter { it.isNotBlank() }
+    // Ensure any tab keys missing from a stale/older saved order are still appended,
+    // so newly-added tabs (like Recordings) always show up even for existing users.
+    val merged = parsed.toMutableList()
+    fallback.forEach { key -> if (key !in merged) merged.add(key) }
+    return merged.filter { it in fallback }
+}
+
 @Composable
 fun BottomBar(navController: NavController) {
     val configuration = LocalConfiguration.current
@@ -100,11 +123,12 @@ fun BottomBar(navController: NavController) {
     val lgBottomNav         = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_LG_BOTTOM_NAV, true) }
     val blurEffects         = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_BLUR_EFFECTS, false) }
     val blurBottomNav       = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_BLUR_BOTTOM_NAV, true) }
-    val showFavoritesTab    = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, true) }
+    val showFavoritesTab    = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, false) }
     val showCallsTab        = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CALLS,     true) }
     val showContactsTab     = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS,  true) }
     val showDialpadTab      = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD, true) }
-    val showNotesTab        = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES,     true) }
+    val showNotesTab        = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES,     false) }
+    val tabOrder            = remember(settingsState) { parseTabOrder(prefs.getString(PreferenceManager.KEY_TAB_ORDER, null)) }
     val labelStyle: TextStyle = MaterialTheme.typography.labelMedium
 
     val navBackStackEntry  by navController.currentBackStackEntryAsState()
@@ -130,20 +154,35 @@ fun BottomBar(navController: NavController) {
         }
     }
 
-    // Only render pill when a visible tab screen is active
-    val isOnTabScreen = visibleTabRoutes.any { currentRoute.contains(it, ignoreCase = true) }
+    // Only render pill when a visible tab screen is active, and not while a tab screen
+    // (e.g. Recordings) is showing its own full-screen onboarding content.
+    val isOnTabScreen = visibleTabRoutes.any { currentRoute.contains(it, ignoreCase = true) } &&
+            !NavBarVisibilityState.hideForOnboarding &&
+            !NavBarVisibilityState.hideForSelectionMode
 
-    // If current tab is now hidden, redirect to first visible tab
-    val isOnHiddenTab = TAB_ROUTES.any { currentRoute.contains(it, ignoreCase = true) } && !isOnTabScreen
+    // If current tab is now hidden, redirect to first visible tab. This must only fire for
+    // tabs the user actually disabled in Settings > Tab Sections — not for a visible tab that's
+    // just temporarily hiding the nav bar for its own onboarding content (e.g. Recordings'
+    // disclaimer/permissions gate), otherwise tapping that tab would immediately get redirected
+    // away again in a loop.
+    val isOnHiddenTab = TAB_ROUTES.any { currentRoute.contains(it, ignoreCase = true) } &&
+            visibleTabRoutes.none { currentRoute.contains(it, ignoreCase = true) }
+    fun routeForTabKey(key: String): String? = when (key) {
+        "favorites"  -> FavoritesScreenDestination.route
+        "calls"      -> RecentScreenDestination.route
+        "contacts"   -> ContactScreenDestination.route
+        "dialpad"    -> DialPadScreenDestination.route
+        "notes"      -> NotesScreenDestination.route
+        else         -> null
+    }
+
     LaunchedEffect(isOnHiddenTab) {
         if (isOnHiddenTab) {
-            val firstVisible = when {
-                showCallsTab     -> RecentScreenDestination.route
-                showFavoritesTab -> FavoritesScreenDestination.route
-                showContactsTab  -> ContactScreenDestination.route
-                showNotesTab     -> NotesScreenDestination.route
-                else             -> RecentScreenDestination.route
-            }
+            val firstVisible = tabOrder
+                .asSequence()
+                .mapNotNull { routeForTabKey(it) }
+                .firstOrNull { it in visibleTabRoutes }
+                ?: RecentScreenDestination.route
             navController.navigate(firstVisible) {
                 popUpTo(navController.graph.findStartDestination().id) { saveState = false }
                 launchSingleTop = true
@@ -193,6 +232,63 @@ fun BottomBar(navController: NavController) {
         }
     }
 
+    val houseIcon = ImageVector.vectorResource(id = R.drawable.ic_house_fill)
+    val orderedTabs: List<TabSpec> = remember(
+        tabOrder, showFavoritesTab, showCallsTab, showContactsTab, showDialpadTab, showNotesTab,
+        isFavoritesSelected, isRecentsSelected, isContactsSelected, isDialpadSelected, isNotesSelected
+    ) {
+        tabOrder.mapNotNull { key ->
+            when (key) {
+                "favorites" -> if (showFavoritesTab) TabSpec(
+                    key             = key,
+                    route           = FavoritesScreenDestination.route,
+                    selected        = isFavoritesSelected,
+                    selectedIcon    = Icons.Filled.Star,
+                    unselectedIcon  = Icons.Outlined.StarOutline,
+                    label           = "Favourites",
+                    onClick         = { doHaptic(); navigate(FavoritesScreenDestination.route) }
+                ) else null
+                "calls" -> if (showCallsTab) TabSpec(
+                    key             = key,
+                    route           = RecentScreenDestination.route,
+                    selected        = isRecentsSelected,
+                    selectedIcon    = if (!showFavoritesTab && !showContactsTab) houseIcon else Icons.Rounded.AccessTimeFilled,
+                    unselectedIcon  = if (!showFavoritesTab && !showContactsTab) houseIcon else Icons.Rounded.AccessTime,
+                    label           = if (!showFavoritesTab && !showContactsTab) "Home" else "Calls",
+                    onClick         = { doHaptic(); navigate(RecentScreenDestination.route) }
+                ) else null
+                "contacts" -> if (showContactsTab) TabSpec(
+                    key             = key,
+                    route           = ContactScreenDestination.route,
+                    selected        = isContactsSelected,
+                    selectedIcon    = Icons.Filled.AccountCircle,
+                    unselectedIcon  = Icons.Outlined.AccountCircle,
+                    label           = "Contacts",
+                    onClick         = { doHaptic(); navigate(ContactScreenDestination.route) }
+                ) else null
+                "dialpad" -> if (showDialpadTab) TabSpec(
+                    key = key,
+                    route = DialPadScreenDestination(initialNumber = "").route,
+                    selected       = isDialpadSelected,
+                    selectedIcon   = Icons.Filled.Dialpad,
+                    unselectedIcon = Icons.Filled.Dialpad,
+                    label          = "Keypad",
+                    onClick        = { doHaptic(); navigate(DialPadScreenDestination(initialNumber = "").route) }
+                ) else null
+                "notes" -> if (showNotesTab) TabSpec(
+                    key            = key,
+                    route          = NotesScreenDestination.route,
+                    selected       = isNotesSelected,
+                    selectedIcon   = Icons.AutoMirrored.Filled.StickyNote2,
+                    unselectedIcon = Icons.AutoMirrored.Outlined.StickyNote2,
+                    label          = "Notes",
+                    onClick        = { doHaptic(); navigate(NotesScreenDestination.route) }
+                ) else null
+                else -> null
+            }
+        }
+    }
+
     if (pillNav) {
         if (!isOnTabScreen && !pillVisible) return
 
@@ -221,66 +317,20 @@ fun BottomBar(navController: NavController) {
                 val pillContent: @Composable () -> Unit = {
                     Row(
                         modifier = Modifier
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                            .padding(horizontal = 9.dp, vertical = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                         verticalAlignment     = Alignment.CenterVertically
                     ) {
-                        if (showFavoritesTab) {
+                        orderedTabs.forEach { tab ->
                             PillNavItem(
-                                selected = isFavoritesSelected,
-                                selectedIcon = Icons.Filled.Star,
-                                unselectedIcon = Icons.Outlined.StarOutline,
-                                label = "Favourites",
+                                selected = tab.selected,
+                                selectedIcon = tab.selectedIcon,
+                                unselectedIcon = tab.unselectedIcon,
+                                label = tab.label,
                                 iconOnly = iconOnly,
-                                onClick = { doHaptic(); navigate(FavoritesScreenDestination.route) }
+                                onClick = tab.onClick
                             )
                         }
-                        PillNavItem(
-                            selected       = isRecentsSelected,
-                            selectedIcon   = if (!showFavoritesTab && !showContactsTab) ImageVector.vectorResource(id = R.drawable.ic_house_fill) else Icons.Rounded.AccessTimeFilled,
-                            unselectedIcon = if (!showFavoritesTab && !showContactsTab) ImageVector.vectorResource(id = R.drawable.ic_house_fill) else Icons.Rounded.AccessTime,
-                            label          = if (!showFavoritesTab && !showContactsTab) "Home" else "Calls",
-                            iconOnly       = iconOnly,
-                            onClick        = { doHaptic(); navigate(RecentScreenDestination.route) }
-                        )
-                        if (showContactsTab) {
-                            PillNavItem(
-                                selected = isContactsSelected,
-                                selectedIcon = Icons.Filled.AccountCircle,
-                                unselectedIcon = Icons.Outlined.AccountCircle,
-                                label = "Contacts",
-                                iconOnly = iconOnly,
-                                onClick = { doHaptic(); navigate(ContactScreenDestination.route) }
-                            )
-                        }
-                        if (showDialpadTab) {
-                            PillNavItem(
-                                selected       = isDialpadSelected,
-                                selectedIcon   = Icons.Filled.Dialpad,
-                                unselectedIcon = Icons.Filled.Dialpad,
-                                label          = "Keypad",
-                                iconOnly       = iconOnly,
-                                onClick        = { doHaptic(); navigate(DialPadScreenDestination(initialNumber = "").route) }
-                            )
-                        }
-                        if (showNotesTab) {
-                            PillNavItem(
-                                selected       = isNotesSelected,
-                                selectedIcon   = Icons.AutoMirrored.Filled.StickyNote2,
-                                unselectedIcon = Icons.AutoMirrored.Outlined.StickyNote2,
-                                label          = "Notes",
-                                iconOnly       = iconOnly,
-                                onClick        = { doHaptic(); navigate(NotesScreenDestination.route) }
-                            )
-                        }
-//                        PillNavItem(
-//                            selected       = isSettingsSelected,
-//                            selectedIcon   = Icons.Default.Settings,
-//                            unselectedIcon = Icons.Default.Settings,
-//                            label          = "Settings",
-//                            iconOnly       = iconOnly,
-//                            onClick        = { doHaptic(); navigate(SettingsScreenDestination.route) }
-//                        )
                     }
                 }
 
@@ -385,68 +435,17 @@ fun BottomBar(navController: NavController) {
                         .graphicsLayer { alpha = navBarAlpha }
                 ) {
                     Spacer(Modifier.width(12.dp))
-                    if (showFavoritesTab) {
+                    orderedTabs.forEach { tab ->
                         AnimatedNavBarItem(
-                            selected = isFavoritesSelected,
-                            selectedIcon = Icons.Filled.Star,
-                            unselectedIcon = Icons.Outlined.StarOutline,
-                            label = "Favourites",
-                            iconOnly = iconOnly,
-                            labelStyle = labelStyle,
-                            onClick = { doHaptic(); navigate(FavoritesScreenDestination.route) }
+                            selected       = tab.selected,
+                            selectedIcon   = tab.selectedIcon,
+                            unselectedIcon = tab.unselectedIcon,
+                            label          = tab.label,
+                            iconOnly       = iconOnly,
+                            labelStyle     = labelStyle,
+                            onClick        = tab.onClick
                         )
                     }
-                    AnimatedNavBarItem(
-                        selected = isRecentsSelected,
-                        selectedIcon = if (!showFavoritesTab && !showContactsTab) ImageVector.vectorResource(id = R.drawable.ic_house_fill) else Icons.Rounded.AccessTimeFilled,
-                        unselectedIcon = if (!showFavoritesTab && !showContactsTab) ImageVector.vectorResource(id = R.drawable.ic_house_fill) else Icons.Rounded.AccessTime,
-                        label = if (!showFavoritesTab && !showContactsTab) "Home" else "Calls",
-                        iconOnly = iconOnly,
-                        labelStyle = labelStyle,
-                        onClick = { doHaptic(); navigate(RecentScreenDestination.route) }
-                    )
-                    if (showContactsTab) {
-                        AnimatedNavBarItem(
-                            selected = isContactsSelected,
-                            selectedIcon = Icons.Filled.AccountCircle,
-                            unselectedIcon = Icons.Outlined.AccountCircle,
-                            label = "Contacts",
-                            iconOnly = iconOnly,
-                            labelStyle = labelStyle,
-                            onClick = { doHaptic(); navigate(ContactScreenDestination.route) }
-                        )
-                    }
-                    if (showDialpadTab) {
-                        AnimatedNavBarItem(
-                            selected = isDialpadSelected,
-                            selectedIcon = Icons.Filled.Dialpad,
-                            unselectedIcon = Icons.Filled.Dialpad,
-                            label = "Keypad",
-                            iconOnly = iconOnly,
-                            labelStyle = labelStyle,
-                            onClick = { doHaptic(); navigate(DialPadScreenDestination(initialNumber = "").route) }
-                        )
-                    }
-                    if (showNotesTab) {
-                        AnimatedNavBarItem(
-                            selected = isNotesSelected,
-                            selectedIcon = Icons.AutoMirrored.Filled.StickyNote2,
-                            unselectedIcon = Icons.AutoMirrored.Outlined.StickyNote2,
-                            label = "Notes",
-                            iconOnly = iconOnly,
-                            labelStyle = labelStyle,
-                            onClick = { doHaptic(); navigate(NotesScreenDestination.route) }
-                        )
-                    }
-//                AnimatedNavBarItem(
-//                    selected = isSettingsSelected,
-//                    selectedIcon = Icons.Default.Settings,
-//                    unselectedIcon = Icons.Default.Settings,
-//                    label = "Settings",
-//                    iconOnly = iconOnly,
-//                    labelStyle = labelStyle,
-//                    onClick = { doHaptic(); navigate(SettingsScreenDestination.route) }
-//                )
                     Spacer(Modifier.width(12.dp))
                 }
             }
@@ -507,7 +506,7 @@ private fun RowScope.AnimatedNavBarItem(
             }
         },
         label           = if (iconOnly) null
-                          else ({ Text(label, style = labelStyle, maxLines = 1, overflow = TextOverflow.Ellipsis) }),
+        else ({ Text(label, style = labelStyle, maxLines = 1, overflow = TextOverflow.Ellipsis) }),
         alwaysShowLabel = !iconOnly,
         selected        = selected,
         interactionSource = interactionSource,

@@ -10,6 +10,8 @@ import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.device_only
 import dev.goodwy.rphone.modal.data.Contact
 import dev.goodwy.rphone.private_only
+import dev.goodwy.rphone.view.screen.settings.NumberChangeExample
+import dev.goodwy.rphone.view.screen.settings.StandardizeStats
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -44,26 +46,82 @@ class ContactsViewModel(
     private val _selectedAccount = MutableStateFlow<Account?>(null)
     val selectedAccount = _selectedAccount.asStateFlow()
 
-    private val _showOnlyDeviceContacts = MutableStateFlow(false)
-    val showOnlyDeviceContacts = _showOnlyDeviceContacts.asStateFlow()
-
     private val _showPrivateOnly = MutableStateFlow(false)
     val showPrivateOnly = _showPrivateOnly.asStateFlow()
 
-    val filteredContacts =
-        combine(_allContacts, _selectedAccount, _showOnlyDeviceContacts, _showPrivateOnly) {
-            contacts, account, showDeviceOnly, privateOnly ->
-        when {
-            privateOnly -> contacts.filter { it.isPrivate }
-            showDeviceOnly -> contacts.filter { it.accountName == null && it.accountType == null && !it.isPrivate }
-            account == null -> contacts
-            else -> contacts.filter { it.accountName == account.name && it.accountType == account.type }
+    private val _showLocalOnly = MutableStateFlow(false)
+    val showLocalOnly = _showLocalOnly.asStateFlow()
+
+    private val _visibleAccounts = MutableStateFlow<Set<String>?>(preferenceManager.getVisibleAccounts())
+    val visibleAccountsFlow = _visibleAccounts.asStateFlow()
+
+    private val _sortOrder = MutableStateFlow(preferenceManager.getInt(PreferenceManager.KEY_CONTACT_SORT_ORDER, 0))
+    val sortOrder = _sortOrder.asStateFlow()
+
+    private val _displayOrder = MutableStateFlow(preferenceManager.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0))
+    val displayOrder = _displayOrder.asStateFlow()
+
+    val filteredAvailableAccounts: StateFlow<List<Account>> = combine(
+        _availableAccounts,
+        _visibleAccounts
+    ) { accounts, visibleAccounts ->
+        if (visibleAccounts == null) {
+            accounts
+        } else {
+            accounts.filter { account ->
+                val key = "${account.type}|${account.name}"
+                visibleAccounts.contains(key)
+            }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val groupedContacts = filteredContacts.combine(MutableStateFlow(Unit)) { contacts, _ ->
+    val filteredContacts = combine(
+        _allContacts,
+        _selectedAccount,
+        _showPrivateOnly,
+        _showLocalOnly,
+        _visibleAccounts,
+        _sortOrder
+    ) { args ->
+        val contacts = args[0] as List<Contact>
+        val account = args[1] as Account?
+        val privateOnly = args[2] as Boolean
+        val localOnly = args[3] as Boolean
+        val visibleAccounts = args[4] as Set<String>?
+        val sortOrder = args[5] as Int
+
+        val baseFiltered = when {
+            privateOnly -> contacts.filter { it.isPrivate }
+            localOnly -> contacts.filter { it.accountName == null && it.accountType == null && !it.isPrivate }
+            account == null -> {
+                if (visibleAccounts == null) contacts
+                else contacts.filter { contact ->
+                    val key = if (contact.accountType == null && contact.accountName == null) "local|local" else "${contact.accountType}|${contact.accountName}"
+                    visibleAccounts.contains(key) || contact.isPrivate
+                }
+            }
+            else -> contacts.filter { it.accountName == account.name && it.accountType == account.type }
+        }
+
+        if (sortOrder == 1) {
+            baseFiltered.sortedBy {
+                it.familyName.lowercase().ifBlank { it.displayName.lowercase() }
+            }
+        } else {
+            baseFiltered.sortedBy {
+                it.givenName.lowercase().ifBlank { it.displayName.lowercase() }
+            }
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val groupedContacts = combine(filteredContacts, _sortOrder) { contacts, sortOrder ->
         val mainGroups = contacts.groupBy {
-            val firstChar = it.name.firstOrNull()?.uppercaseChar() ?: '#'
+            val nameToUse = if (sortOrder == 1) {
+                it.familyName.ifBlank { it.displayName }
+            } else {
+                it.givenName.ifBlank { it.displayName }
+            }
+            val firstChar = nameToUse.firstOrNull()?.uppercaseChar() ?: '#'
             if (firstChar.isLetter()) firstChar else '#'
         }.toMutableMap()
 
@@ -114,19 +172,43 @@ class ContactsViewModel(
     fun selectAccount(account: Account?) {
         _selectedAccount.value = account
         if (account != null) {
-            _showOnlyDeviceContacts.value = false
+            _showPrivateOnly.value = false
+            _showLocalOnly.value = false
+        }
+    }
+    fun setShowPrivateOnly(show: Boolean) {
+        _showPrivateOnly.value = show
+        if (show) {
+            _selectedAccount.value = null
+            _showLocalOnly.value = false
+        }
+    }
+
+    fun setShowLocalOnly(show: Boolean) {
+        _showLocalOnly.value = show
+        if (show) {
+            _selectedAccount.value = null
             _showPrivateOnly.value = false
         }
     }
 
-    fun setShowOnlyDeviceContacts(show: Boolean) {
-        _showOnlyDeviceContacts.value = show
-        if (show) _selectedAccount.value = null
+    fun setVisibleAccounts(accounts: Set<String>?) {
+        if (accounts == null) {
+            preferenceManager.setString(PreferenceManager.KEY_VISIBLE_ACCOUNTS, null)
+        } else {
+            preferenceManager.setVisibleAccounts(accounts)
+        }
+        _visibleAccounts.value = accounts
     }
 
-    fun setShowPrivateOnly(show: Boolean) {
-        _showPrivateOnly.value = show
-        if (show) _selectedAccount.value = null
+    fun setSortOrder(order: Int) {
+        preferenceManager.setInt(PreferenceManager.KEY_CONTACT_SORT_ORDER, order)
+        _sortOrder.value = order
+    }
+
+    fun setDisplayOrder(order: Int) {
+        preferenceManager.setInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, order)
+        _displayOrder.value = order
     }
 
     fun toggleFavorite(contact: Contact, add: Boolean = false) {
@@ -292,6 +374,49 @@ class ContactsViewModel(
             }
             fetchContacts()
             _standardizeProgress.value = null
+        }
+    }
+
+    fun previewStandardize(onResult: (StandardizeStats) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val allContacts = contactsRepo.getContacts()
+            var contactsWithChanges = 0
+            var totalNumbersChanged = 0
+            val examples = mutableListOf<NumberChangeExample>()
+
+            allContacts.forEach { contact ->
+                val formattedPhoneNumbers = contact.phoneNumbers.map { it.replace(" ", "") }
+                val changed = contact.phoneNumbers.zip(formattedPhoneNumbers)
+                    .filter { it.first != it.second }
+
+                if (changed.isNotEmpty()) {
+                    contactsWithChanges++
+                    totalNumbersChanged += changed.size
+
+                    if (examples.size < 3) {
+                        changed.take(3).forEach { (oldNum, newNum) ->
+                            examples.add(
+                                NumberChangeExample(
+                                    contactName = contact.displayName,
+                                    oldNumber = oldNum,
+                                    newNumber = newNum
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+
+            val stats = StandardizeStats(
+                totalContacts = allContacts.size,
+                contactsWithChanges = contactsWithChanges,
+                totalNumbersChanged = totalNumbersChanged,
+                examples = examples
+            )
+
+            withContext(Dispatchers.Main) {
+                onResult(stats)
+            }
         }
     }
 

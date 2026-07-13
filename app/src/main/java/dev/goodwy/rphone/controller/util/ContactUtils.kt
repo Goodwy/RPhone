@@ -20,7 +20,7 @@ object ContactUtils {
         }
     }
 
-    fun getAccountType(account: Account?, isPrivate: Boolean = false): String {
+    fun getFriendlyAccountName(account: Account?, isPrivate: Boolean = false): String {
         return when {
             isPrivate -> "Private (App Only)"
             account == null -> "Local (Device Only)"

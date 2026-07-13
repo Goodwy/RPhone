@@ -3,7 +3,6 @@ package dev.goodwy.rphone.view.components
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
@@ -15,24 +14,19 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.zIndex
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
@@ -40,8 +34,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import dev.goodwy.rphone.modal.data.Contact
+import dev.goodwy.rphone.modal.data.getDisplayName
 import dev.goodwy.rphone.view.theme.color_call_end
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -54,7 +48,8 @@ fun IPhoneFavoritesRow(
     onSaveOrder: (List<String>) -> Unit,
     onClick: (Contact) -> Unit,
     isDragging: Boolean = false,
-    onDraggingChange: (Boolean) -> Unit = {}
+    onDraggingChange: (Boolean) -> Unit = {},
+    displayOrder: Int
 ) {
     val favoritesList = remember(favorites) {
         mutableStateListOf<Contact>().apply {
@@ -82,7 +77,7 @@ fun IPhoneFavoritesRow(
         initialValue = -1.2f,
         targetValue = 1.2f,
         animationSpec = infiniteRepeatable(
-            animation = tween(140, easing = LinearEasing),
+            animation = tween(160, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "wiggleRotation"
@@ -91,7 +86,7 @@ fun IPhoneFavoritesRow(
         initialValue = -0.8f,
         targetValue = 0.8f,
         animationSpec = infiniteRepeatable(
-            animation = tween(120, easing = LinearEasing),
+            animation = tween(140, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "wiggleTranslation"
@@ -238,77 +233,6 @@ fun IPhoneFavoritesRow(
 //                        border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.15f)),
                         tonalElevation = animatedElevation / 3
                     ) {
-//                        Box(modifier = Modifier.fillMaxSize()) {
-//                            // Background
-//                            if (!contact.photoUri.isNullOrEmpty()) {
-//                                AsyncImage(
-//                                    model = contact.photoUri,
-//                                    contentDescription = null,
-//                                    modifier = Modifier.fillMaxSize(),
-//                                    contentScale = ContentScale.Crop
-//                                )
-//                            } else {
-//                                val colorPair = getModernGradient(contact.displayName)
-//                                Box(
-//                                    modifier = Modifier
-//                                        .fillMaxSize()
-//                                        .background(Brush.verticalGradient(listOf(colorPair.first, colorPair.second))),
-//                                    contentAlignment = Alignment.Center
-//                                ) {
-//                                    Text(
-//                                        text = contact.displayName.trim().take(1).uppercase(),
-//                                        style = MaterialTheme.typography.displayLarge.copy(
-//                                            fontWeight = FontWeight.Black,
-//                                            color = Color.White.copy(alpha = 0.7f)
-//                                        ),
-//                                        modifier = Modifier.padding(bottom = 12.dp)
-//                                    )
-//                                }
-//                            }
-//
-//                            // Label Overlay
-//                            Box(
-//                                modifier = Modifier
-//                                    .align(Alignment.BottomCenter)
-//                                    .fillMaxWidth()
-//                                    .fillMaxHeight(0.45f)
-//                                    .background(
-//                                        Brush.verticalGradient(
-//                                            listOf(Color.Transparent, Color.Black.copy(alpha = 0.7f))
-//                                        )
-//                                    ),
-//                                contentAlignment = Alignment.BottomStart
-//                            ) {
-//                                Column(
-//                                    modifier = Modifier.padding(12.dp)
-//                                ) {
-//                                    Text(
-//                                        text = contact.displayName,
-//                                        style = MaterialTheme.typography.titleSmall.copy(
-//                                            fontWeight = FontWeight.Bold,
-//                                            color = Color.White,
-//                                            letterSpacing = (-0.2).sp
-//                                        ),
-//                                        maxLines = 1,
-//                                        overflow = TextOverflow.Ellipsis
-//                                    )
-//                                    Row(verticalAlignment = Alignment.CenterVertically) {
-//                                        Icon(
-//                                            imageVector = Icons.Default.Call,
-//                                            contentDescription = null,
-//                                            tint = Color.White.copy(alpha = 0.7f),
-//                                            modifier = Modifier.size(10.dp)
-//                                        )
-//                                        Spacer(modifier = Modifier.width(4.dp))
-//                                        Text(
-//                                            text = "Mobile",
-//                                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-//                                            color = Color.White.copy(alpha = 0.7f)
-//                                        )
-//                                    }
-//                                }
-//                            }
-//                        }
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Box(modifier = Modifier.fillMaxWidth().aspectRatio(1f)) {
                                 RillAvatar(
@@ -318,8 +242,9 @@ fun IPhoneFavoritesRow(
                                     shape = CircleShape
                                 )
                             }
+                            val displayName = getDisplayName(contact, displayOrder)
                             Text(
-                                text = contact.name,
+                                text = displayName, //contact.displayName,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
                                 style = MaterialTheme.typography.labelMedium,
                                 fontSize = 11.sp,
@@ -333,23 +258,36 @@ fun IPhoneFavoritesRow(
                     }
 
                     // Floating Delete Button (Fixed & Scaled)
-                    AnimatedVisibility(
-                        visible = isEditing,
-                        enter = scaleIn() + fadeIn(),
-                        exit = scaleOut() + fadeOut(),
-                        modifier = Modifier
-                            .align(Alignment.TopStart)
-                            .zIndex(110f) // Ensure it's above everything
-                    ) {
+                    if (isEditing) {
+                        var appeared by remember { mutableStateOf(false) }
+                        LaunchedEffect(Unit) { appeared = true }
+                        val iconScale by animateFloatAsState(
+                            targetValue = if (appeared) 1f else 0.5f,
+                            animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                            label = "iconScale"
+                        )
+                        val iconAlpha by animateFloatAsState(
+                            targetValue = if (appeared) 1f else 0f,
+                            animationSpec = tween(250),
+                            label = "iconAlpha"
+                        )
                         Surface(
                             onClick = { onUnfavorite(contact) },
                             modifier = Modifier
                                 .size(22.dp)
-                                .offset(x = (-2).dp, y = (-2).dp),
+                                .offset(x = (-2).dp, y = (-2).dp)
+                                .scale(iconScale)
+                                .alpha(iconAlpha)
+                                .graphicsLayer {
+                                    if (isEditing && !isDragged) {
+                                        rotationZ = rotation
+                                        this.translationY = translationY * density.density
+                                    }
+                                },
                             shape = CircleShape,
                             color = color_call_end,
                             shadowElevation = 4.dp,
-                            border = BorderStroke(1.5.dp, Color.White)
+                            border = BorderStroke(1.dp, Color.White)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Remove,

@@ -21,6 +21,7 @@ import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.rounded.Call
+import androidx.compose.material.icons.rounded.Fingerprint
 import androidx.compose.material.icons.rounded.MoveUp
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.PeopleAlt
@@ -496,24 +497,24 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                                 trailingIcon = Icons.Default.ChevronRight,
                                 onClick = { navigator.navigate(BlockedNumbersScreenDestination) }
                             )
-//                            val biometricsType = remember(prefs.settingsChanged.collectAsState().value) {
-//                                prefs.getString(PreferenceManager.KEY_BIOMETRICS_TYPE, "") ?: ""
-//                            }
-//                            val biometricsLabel = when (biometricsType) {
-//                                "system"   -> "System Biometrics"
-//                                "pin"      -> "Custom PIN"
-//                                "password" -> "Custom Password"
-//                                else       -> "Not configured"
-//                            }
-//                            RillListItem(
-//                                headline   = "Biometrics",
-//                                supporting = biometricsLabel,
-//                                leadingIcon = Icons.Rounded.Fingerprint,
-//                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
-//                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
-//                                trailingIcon = Icons.Default.ChevronRight,
-//                                onClick = { navigator.navigate(BiometricScreenDestination) }
-//                            )
+                            val biometricsType = remember(prefs.settingsChanged.collectAsState().value) {
+                                prefs.getString(PreferenceManager.KEY_BIOMETRICS_TYPE, "") ?: ""
+                            }
+                            val biometricsLabel = when (biometricsType) {
+                                "system"   -> "System Biometrics"
+                                "pin"      -> "Custom PIN"
+                                "password" -> "Custom Password"
+                                else       -> "Not configured"
+                            }
+                            RillListItem(
+                                headline   = "Authentication",
+                                supporting = biometricsLabel,
+                                leadingIcon = Icons.Rounded.Fingerprint,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
+                                trailingIcon = Icons.Default.ChevronRight,
+                                onClick = { navigator.navigate(BiometricScreenDestination) }
+                            )
                         }
 
 //                        Spacer(modifier = Modifier.height(8.dp))

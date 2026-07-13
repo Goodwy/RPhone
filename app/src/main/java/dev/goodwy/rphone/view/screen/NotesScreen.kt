@@ -157,65 +157,65 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator) 
         )
     }
 
-    val coroutineScope = rememberCoroutineScope()
-
-    val pillNav = remember { prefs.getBoolean(PreferenceManager.KEY_PILL_NAV, false) }
-    val favouritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, true)
-    val contactsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS, true)
-    val dialpadEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD, true)
+//    val coroutineScope = rememberCoroutineScope()
+//
+//    val pillNav = remember { prefs.getBoolean(PreferenceManager.KEY_PILL_NAV, false) }
+//    val favouritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, false)
+//    val contactsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS, true)
+//    val dialpadEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD, true)
 
     Scaffold(
         modifier = Modifier
-            .fillMaxSize()
-            .pointerInput(Unit) {
-                awaitPointerEventScope {
-                    while (true) {
-                        val down = awaitPointerEvent(PointerEventPass.Final).changes.firstOrNull() ?: continue
-                        if (!down.pressed) continue
-                        val startX = down.position.x
-                        val startY = down.position.y
-                        val startTime = System.currentTimeMillis()
-                        var triggered = false
-                        while (true) {
-                            val event = awaitPointerEvent(PointerEventPass.Final)
-                            val change = event.changes.firstOrNull() ?: break
-                            val dx = change.position.x - startX
-                            val dy = change.position.y - startY
-                            val elapsed = System.currentTimeMillis() - startTime
-                            if (!triggered && elapsed >= 150L && !change.isConsumed && abs(dx) > 700f && abs(dx) > abs(dy) * 5.5f) {
-                                triggered = true
-                                if (dx > 0) {
-                                    val route = when {
-                                        dialpadEnabled -> DialPadScreenDestination().route
-                                        contactsEnabled -> ContactScreenDestination.route
-                                        else -> RecentScreenDestination.route
-                                    }
-                                    // swipe right from Notes → Contacts
-                                    coroutineScope.launch {
-                                        navController.navigate(route) {
-                                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                            launchSingleTop = true; restoreState = true
-                                        }
-                                    }
-                                } else {
-                                    val route = when {
-                                        favouritesEnabled -> FavoritesScreenDestination.route
-                                        else -> RecentScreenDestination.route
-                                    }
-                                    // swipe left from Notes → Favorites (wrap)
-                                    coroutineScope.launch {
-                                        navController.navigate(route) {
-                                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                            launchSingleTop = true; restoreState = true
-                                        }
-                                    }
-                                }
-                            }
-                            if (!change.pressed) break
-                        }
-                    }
-                }
-            },
+            .fillMaxSize(),
+//            .pointerInput(Unit) {
+//                awaitPointerEventScope {
+//                    while (true) {
+//                        val down = awaitPointerEvent(PointerEventPass.Final).changes.firstOrNull() ?: continue
+//                        if (!down.pressed) continue
+//                        val startX = down.position.x
+//                        val startY = down.position.y
+//                        val startTime = System.currentTimeMillis()
+//                        var triggered = false
+//                        while (true) {
+//                            val event = awaitPointerEvent(PointerEventPass.Final)
+//                            val change = event.changes.firstOrNull() ?: break
+//                            val dx = change.position.x - startX
+//                            val dy = change.position.y - startY
+//                            val elapsed = System.currentTimeMillis() - startTime
+//                            if (!triggered && elapsed >= 150L && !change.isConsumed && abs(dx) > 700f && abs(dx) > abs(dy) * 5.5f) {
+//                                triggered = true
+//                                if (dx > 0) {
+//                                    val route = when {
+//                                        dialpadEnabled -> DialPadScreenDestination().route
+//                                        contactsEnabled -> ContactScreenDestination.route
+//                                        else -> RecentScreenDestination.route
+//                                    }
+//                                    // swipe right from Notes → Contacts
+//                                    coroutineScope.launch {
+//                                        navController.navigate(route) {
+//                                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+//                                            launchSingleTop = true; restoreState = true
+//                                        }
+//                                    }
+//                                } else {
+//                                    val route = when {
+//                                        favouritesEnabled -> FavoritesScreenDestination.route
+//                                        else -> RecentScreenDestination.route
+//                                    }
+//                                    // swipe left from Notes → Favorites (wrap)
+//                                    coroutineScope.launch {
+//                                        navController.navigate(route) {
+//                                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+//                                            launchSingleTop = true; restoreState = true
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                            if (!change.pressed) break
+//                        }
+//                    }
+//                }
+//            },
         topBar = {
             AnimatedContent(
                 targetState = selectedNotes.isNotEmpty(),

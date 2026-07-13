@@ -82,6 +82,7 @@ import dev.goodwy.rphone.controller.ContactsViewModel
 import dev.goodwy.rphone.modal.data.CallLogEntry
 import dev.goodwy.rphone.modal.data.Contact
 import com.ramcosta.composedestinations.generated.destinations.CallLogFullScreenDestination
+import dev.goodwy.rphone.controller.util.hasDualSim
 import kotlin.collections.component1
 import kotlin.collections.component2
 
@@ -102,10 +103,10 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
 
     val prefs = koinInject<PreferenceManager>()
     val pillNav = remember { prefs.getBoolean(PreferenceManager.KEY_PILL_NAV, false) }
-    val favoritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, true)
+    val favoritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, false)
     val contactsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS, true)
     val dialpadEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD, true)
-    val notesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES, true)
+    val notesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES, false)
 
     var showDialpad by remember { mutableStateOf(false) }
     var fabVisible by remember { mutableStateOf(false) }
@@ -187,85 +188,85 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .nestedScroll(nestedScrollConnection)
-            .pointerInput(Unit) {
-                // Use PointerEventPass.Final so children (LazyColumn) get events first.
-                // Only trigger navigation when the horizontal movement clearly dominates
-                // vertical movement, preventing accidental swipes during scrolling.
-                awaitPointerEventScope {
-                    while (true) {
-                        val down = awaitPointerEvent(PointerEventPass.Final).changes.firstOrNull()
-                            ?: continue
-                        if (!down.pressed) continue
-                        val startX = down.position.x
-                        val startY = down.position.y
-                        val startTime = System.currentTimeMillis()
-                        var triggered = false
-                        childHScrolling = false // reset at start of each gesture
-                        while (true) {
-                            val event = awaitPointerEvent(PointerEventPass.Final)
-                            val change = event.changes.firstOrNull() ?: break
-
-                            // If dragging begins DURING the swipe gesture, we cancel it
-                            if (currentIsDraggingFavorite) {
-                                triggered = false // We're resetting it so the navigation definitely won't work
-                                break // We exit the swipe loop; the outer loop will take over and wait for the button to be released
-                            }
-
-                            val dx = change.position.x - startX
-                            val dy = change.position.y - startY
-                            val elapsed = System.currentTimeMillis() - startTime
-                            if (!triggered &&
-                                !childHScrolling &&
-                                elapsed >= 150L &&
-                                kotlin.math.abs(dx) > 700f &&
-                                kotlin.math.abs(dx) > kotlin.math.abs(dy) * 5.5f
-                            ) {
-                                triggered = true
-                                if (showBottomBar) {
-                                    if (dx < 0) {
-                                        val route = when {
-                                            contactsEnabled -> ContactScreenDestination.route
-                                            dialpadEnabled -> DialPadScreenDestination().route
-                                            notesEnabled -> NotesScreenDestination.route
-                                            else -> FavoritesScreenDestination.route
-                                        }
-                                        scope.launch {
-                                            navController.navigate(route) {
-                                                popUpTo(navController.graph.findStartDestination().id) {
-                                                    saveState = true
-                                                }
-                                                launchSingleTop = true
-                                                restoreState = true
-                                            }
-                                        }
-                                    } else {
-                                        val route = when {
-                                            favoritesEnabled -> FavoritesScreenDestination.route
-                                            notesEnabled -> NotesScreenDestination.route
-                                            dialpadEnabled -> DialPadScreenDestination().route
-                                            else -> ContactScreenDestination.route
-                                        }
-                                        scope.launch {
-                                            navController.navigate(route) {
-                                                popUpTo(navController.graph.findStartDestination().id) {
-                                                    saveState = true
-                                                }
-                                                launchSingleTop = true
-                                                restoreState = true
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            if (!change.pressed) {
-                                childHScrolling = false
-                                break
-                            }
-                        }
-                    }
-                }
-            },
+            .nestedScroll(nestedScrollConnection),
+//            .pointerInput(Unit) {
+//                // Use PointerEventPass.Final so children (LazyColumn) get events first.
+//                // Only trigger navigation when the horizontal movement clearly dominates
+//                // vertical movement, preventing accidental swipes during scrolling.
+//                awaitPointerEventScope {
+//                    while (true) {
+//                        val down = awaitPointerEvent(PointerEventPass.Final).changes.firstOrNull()
+//                            ?: continue
+//                        if (!down.pressed) continue
+//                        val startX = down.position.x
+//                        val startY = down.position.y
+//                        val startTime = System.currentTimeMillis()
+//                        var triggered = false
+//                        childHScrolling = false // reset at start of each gesture
+//                        while (true) {
+//                            val event = awaitPointerEvent(PointerEventPass.Final)
+//                            val change = event.changes.firstOrNull() ?: break
+//
+//                            // If dragging begins DURING the swipe gesture, we cancel it
+//                            if (currentIsDraggingFavorite) {
+//                                triggered = false // We're resetting it so the navigation definitely won't work
+//                                break // We exit the swipe loop; the outer loop will take over and wait for the button to be released
+//                            }
+//
+//                            val dx = change.position.x - startX
+//                            val dy = change.position.y - startY
+//                            val elapsed = System.currentTimeMillis() - startTime
+//                            if (!triggered &&
+//                                !childHScrolling &&
+//                                elapsed >= 150L &&
+//                                kotlin.math.abs(dx) > 700f &&
+//                                kotlin.math.abs(dx) > kotlin.math.abs(dy) * 5.5f
+//                            ) {
+//                                triggered = true
+//                                if (showBottomBar) {
+//                                    if (dx < 0) {
+//                                        val route = when {
+//                                            contactsEnabled -> ContactScreenDestination.route
+//                                            dialpadEnabled -> DialPadScreenDestination().route
+//                                            notesEnabled -> NotesScreenDestination.route
+//                                            else -> FavoritesScreenDestination.route
+//                                        }
+//                                        scope.launch {
+//                                            navController.navigate(route) {
+//                                                popUpTo(navController.graph.findStartDestination().id) {
+//                                                    saveState = true
+//                                                }
+//                                                launchSingleTop = true
+//                                                restoreState = true
+//                                            }
+//                                        }
+//                                    } else {
+//                                        val route = when {
+//                                            favoritesEnabled -> FavoritesScreenDestination.route
+//                                            notesEnabled -> NotesScreenDestination.route
+//                                            dialpadEnabled -> DialPadScreenDestination().route
+//                                            else -> ContactScreenDestination.route
+//                                        }
+//                                        scope.launch {
+//                                            navController.navigate(route) {
+//                                                popUpTo(navController.graph.findStartDestination().id) {
+//                                                    saveState = true
+//                                                }
+//                                                launchSingleTop = true
+//                                                restoreState = true
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                            if (!change.pressed) {
+//                                childHScrolling = false
+//                                break
+//                            }
+//                        }
+//                    }
+//                }
+//            },
         topBar = {
             AnimatedContent(
                 targetState = selectedEntries.isNotEmpty(),
@@ -306,7 +307,7 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
                                 CallLogFilter.Incoming -> baseLogs.filter { it.type == CallLog.Calls.INCOMING_TYPE }
                                 CallLogFilter.Outgoing -> baseLogs.filter { it.type == CallLog.Calls.OUTGOING_TYPE }
                                 CallLogFilter.Rejected -> baseLogs.filter { it.type == CallLog.Calls.REJECTED_TYPE }
-                                CallLogFilter.Contacts -> baseLogs.filter { it.name != null && it.name != it.number }
+                                CallLogFilter.Contacts -> baseLogs.filter { it.contactId != null }
                             }
                         }
                         BatchCallLogActionBar(
@@ -402,7 +403,7 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
                             .navigationBarsPadding()
                             .padding(bottom = if (showBottomBar) 90.dp else 0.dp)
                         else Modifier
-                            .padding(bottom = if (showBottomBar) bottomBarHeight else 0.dp)
+                            .padding(bottom = if (showBottomBar) bottomBarHeight + 24.dp else 0.dp)
                             .then( if (showBottomBar) Modifier else Modifier.navigationBarsPadding())
                     )
                 if (useLiquidGlass) {
@@ -463,18 +464,19 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
                 onDraggingFavoriteChange = { isDraggingFavorite = it },
             )
 
+            val endPadding = if (!dialpadEnabled) 86.dp else 32.dp
             ScrollToTopButton(
                 modifier = Modifier
                     .then(
                         if (isLandscape) Modifier
                             .navigationBarsPadding()
-                            .padding(bottom = 16.dp, end = 32.dp)
+                            .padding(bottom = 12.dp, end = endPadding)
                         else if (pillNav) Modifier
                             .navigationBarsPadding()
-                            .padding(bottom = 92.dp + 8.dp, end = 32.dp)
+                            .padding(bottom = 92.dp + 8.dp, end = endPadding)
                         else Modifier
                             .navigationBarsPadding()
-                            .padding(bottom = bottomBarHeight + 8.dp, end = 32.dp)
+                            .padding(bottom = bottomBarHeight + 12.dp, end = endPadding)
                     ),
                 visible = showButton,
                 onClick = {
@@ -520,7 +522,7 @@ fun CallLogFullContent(
     onDraggingFavoriteChange: (Boolean) -> Unit = {},
 ) {
     val prefs = koinInject<PreferenceManager>()
-    val favouritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, true)
+    val favouritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, false)
     val contactsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS, true)
 
     if (isGranted) {
@@ -532,6 +534,9 @@ fun CallLogFullContent(
 
         val contactsVM: ContactsViewModel = koinActivityViewModel()
         val settingsState by prefs.settingsChanged.collectAsState()
+        val displayOrder by remember(settingsState) {
+            mutableIntStateOf(prefs.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0))
+        }
         LaunchedEffect(settingsState) {
             contactsVM.fetchContacts()
         }
@@ -544,42 +549,13 @@ fun CallLogFullContent(
             favContacts.sortedWith(compareBy<Contact> { contact ->
                 val index = order.indexOf(contact.id)
                 if (index != -1) index else Int.MAX_VALUE
-            }.thenBy { it.name })
+            }.thenBy { it.displayName })
         }
         var isEditingFavorites by remember { mutableStateOf(false) }
 
         LaunchedEffect(selectedFilter) {
             isEditingFavorites = false
         }
-
-        // Drag-to-reorder state — declared first so LaunchedEffect can reference draggedContactId
-        var draggedContactId       by remember { mutableStateOf<String?>(null) }
-        var dragOffset             by remember { mutableStateOf(Offset.Zero) }
-        val itemBoundsMap          = remember { mutableStateMapOf<String, Rect>() }
-        var lastSwapTargetId       by remember { mutableStateOf<String?>(null) }
-        var fingerAbsPos           by remember { mutableStateOf(Offset.Zero) }
-        var expectedDraggedCenter  by remember { mutableStateOf(Offset.Zero) }
-
-        // Ordered favorites — persists custom drag-to-reorder order
-//        val orderedFavorites = remember { mutableStateListOf<Contact>() }
-//        LaunchedEffect(favorites) {
-//            // Don't touch the list while the user is actively dragging
-//            if (draggedContactId != null) return@LaunchedEffect
-//            val savedIds = prefs.getString(PreferenceManager.KEY_FAVORITES_ORDER, null)
-//                ?.split(",")?.filter { it.isNotEmpty() } ?: emptyList()
-//            val favMap   = favorites.associateBy { it.id }
-//            val ordered  = savedIds.mapNotNull { favMap[it] }
-//            val newList  = ordered + favorites.filter { it.id !in savedIds.toSet() }
-//            val toRemove = orderedFavorites.filter { o -> newList.none { it.id == o.id } }
-//            toRemove.forEach { orderedFavorites.remove(it) }
-//            newList.filter { n -> orderedFavorites.none { it.id == n.id } }
-//                .forEach { orderedFavorites.add(it) }
-//        }
-//        fun saveFavoritesOrder() {
-//            prefs.setString(PreferenceManager.KEY_FAVORITES_ORDER, orderedFavorites.joinToString(",") { it.id })
-//        }
-
-        val lazyRowState = rememberLazyListState()
 
         var lazyRowLayoutCoords by remember { mutableStateOf<LayoutCoordinates?>(null) }
         val density = LocalDensity.current
@@ -616,7 +592,7 @@ fun CallLogFullContent(
                 CallLogFilter.Incoming -> baseLogs.filter { it.type == CallLog.Calls.INCOMING_TYPE }
                 CallLogFilter.Outgoing -> baseLogs.filter { it.type == CallLog.Calls.OUTGOING_TYPE }
                 CallLogFilter.Rejected -> baseLogs.filter { it.type == CallLog.Calls.REJECTED_TYPE }
-                CallLogFilter.Contacts -> baseLogs.filter { it.name != null && it.name != it.number }
+                CallLogFilter.Contacts -> baseLogs.filter { it.contactId != null }
             }
         }
         val groupedLogs = remember(filteredLogs) { filteredLogs.groupBy { context.formatDateHeader(it.date) } }
@@ -870,7 +846,8 @@ fun CallLogFullContent(
                                         }
                                     },
                                     isDragging = isDraggingFavorite,
-                                    onDraggingChange = onDraggingFavoriteChange
+                                    onDraggingChange = onDraggingFavoriteChange,
+                                    displayOrder = displayOrder
                                 )
                             }
                         }
@@ -1037,6 +1014,7 @@ fun CallLogFullContent(
 //                        }
 
                         val directCall = prefs.getBoolean(PreferenceManager.KEY_DIRECT_CALL_ON_TAP, false)
+                        val showSimLabel = hasDualSim(context)
                         currentGroupedLogs.forEach { (header, logsInGroup) ->
                             // Section header as its own item
                             item(key = "header_$header", contentType = "sectionHeader") {
@@ -1114,6 +1092,7 @@ fun CallLogFullContent(
                                                             phoneNumber = phoneNumber
                                                         ))
                                                     },
+                                                    showSimLabel = showSimLabel,
                                                 )
                                             }
                                         }

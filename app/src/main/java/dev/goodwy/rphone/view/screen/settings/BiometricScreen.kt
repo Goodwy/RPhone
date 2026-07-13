@@ -1,6 +1,7 @@
 package dev.goodwy.rphone.view.screen.settings
 
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -18,7 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
@@ -34,22 +34,43 @@ import dev.goodwy.rphone.controller.util.PreferenceManager
 import androidx.compose.ui.window.Dialog
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.automirrored.rounded.Backspace
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Deselect
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Fingerprint
 import androidx.compose.material.icons.rounded.Key
+import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.LockOpen
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.PersonOff
 import androidx.compose.material.icons.rounded.PhonePaused
 import androidx.compose.material.icons.rounded.Pin
+import androidx.compose.material.icons.rounded.SelectAll
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.VisibilityOff
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.window.DialogProperties
 import dev.goodwy.rphone.cardCornerMedium
 import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillExpressiveCard
@@ -60,6 +81,12 @@ import dev.goodwy.rphone.view.theme.customColors
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import dev.goodwy.rphone.R
+import dev.goodwy.rphone.cardCornerBig
+import dev.goodwy.rphone.cardCornerSmall
+import dev.goodwy.rphone.modal.data.Contact
+import dev.goodwy.rphone.modal.`interface`.IContactsRepository
+import dev.goodwy.rphone.view.components.RillAvatar
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -69,12 +96,32 @@ import org.koin.compose.koinInject
 @Composable
 fun BiometricScreen(navigator: DestinationsNavigator) {
     val prefs: PreferenceManager = koinInject()
+    val contactsRepo: IContactsRepository = koinInject()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
     var biometricsType by remember { mutableStateOf(prefs.getString(PreferenceManager.KEY_BIOMETRICS_TYPE, "") ?: "") }
     var appLockEnabled by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK, false)) }
     var callLockEnabled by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_CALL_LOCK, false)) }
+    var callLockMode by remember { mutableStateOf(prefs.getString(PreferenceManager.KEY_BIOMETRICS_CALL_LOCK_MODE, "all") ?: "all") }
+    var callLockNumbers by remember { mutableStateOf(prefs.getString(PreferenceManager.KEY_BIOMETRICS_CALL_LOCK_NUMBERS, "") ?: "") }
+    var showContactPicker by remember { mutableStateOf(false) }
+    var allContacts by remember { mutableStateOf(emptyList<Contact>()) }
+
+    LaunchedEffect(Unit) {
+        allContacts = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            contactsRepo.getContacts()
+        }
+    }
+
+    val selectedNumbers = remember(callLockNumbers) {
+        if (callLockNumbers.isBlank()) emptySet()
+        else callLockNumbers.split(",").map { it.trim() }.filter { it.isNotEmpty() }.toSet()
+    }
+
+    val selectedContactCount = remember(selectedNumbers, allContacts) {
+        allContacts.count { c -> c.phoneNumbers.any { n -> selectedNumbers.any { s -> n.filter(Char::isDigit).takeLast(10) == s.filter(Char::isDigit).takeLast(10) } } }
+    }
 
     var showTypeSheet by remember { mutableStateOf(false) }
     var showPinSetup by remember { mutableStateOf(false) }
@@ -122,7 +169,7 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
                     if (isRotation90) WindowInsetsSides.Top + WindowInsetsSides.Horizontal
                     else WindowInsetsSides.Top
                 ),
-                title = { Text("Biometrics", fontWeight = FontWeight.ExtraBold) },
+                title = { Text("Authentication", fontWeight = FontWeight.ExtraBold) },
                 navigationIcon = {
                     NavigationIcon(onClick = { navigateBack() })
                 }
@@ -147,10 +194,10 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
         ) {
             // ── Authentication Method card ─────────────────────────────────
             item {
-                SettingsSectionLabel("Authentication Method")
+//                SettingsSectionLabel("Authentication Method")
                 RillExpressiveCard {
                     RillListItem(
-                        headline = "Biometric Method",
+                        headline = "Authentication Method",
                         supporting = typeLabel,
                         leadingIcon = Icons.Rounded.Fingerprint,
                         iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
@@ -169,7 +216,7 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
                     exit = fadeOut(tween(200)) + shrinkVertically(tween(200))
                 ) {
                     Column {
-                        SettingsSectionLabel("Biometrics")
+                        SettingsSectionLabel("Authentication")
                         RillExpressiveCard {
                             RillSwitchListItem(
                                 headline = "Lock App on Open",
@@ -181,7 +228,6 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
                                 onCheckedChange = {
                                     appLockEnabled = it
                                     prefs.setBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK, it)
-
                                 }
                             )
                             RillSwitchListItem(
@@ -197,6 +243,231 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
 
                                 }
                             )
+                        }
+                    }
+                }
+            }
+
+            item {
+                AnimatedVisibility(
+                    visible = biometricsType.isNotEmpty() && callLockEnabled,
+                    enter = fadeIn(tween(250)) + expandVertically(tween(250)),
+                    exit  = fadeOut(tween(200)) + shrinkVertically(tween(200))
+                ) {
+                    Column {
+                        SettingsSectionLabel("Lock Scope")
+                        RillExpressiveCard {
+                            // Modern segmented control
+//                            SingleChoiceSegmentedButtonRow(
+//                                modifier = Modifier
+//                                    .background(
+//                                        color = cardColor,
+//                                        shape = RoundedCornerShape(cardCornerSmall)
+//                                    )
+//                                    .padding(12.dp)
+//                                    .fillMaxWidth()
+//                            ) {
+//                                SegmentedButton(
+//                                    selected = callLockMode == "all",
+//                                    onClick = {
+//                                        callLockMode = "all"
+//                                        prefs.setString(PreferenceManager.KEY_BIOMETRICS_CALL_LOCK_MODE, "all")
+//                                    },
+//                                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 3),
+//                                    icon = { SegmentedButtonDefaults.ActiveIcon() }
+//                                ) { Text("All Calls", maxLines = 1) }
+//                                SegmentedButton(
+//                                    selected = callLockMode == "specified",
+//                                    onClick = {
+//                                        callLockMode = "specified"
+//                                        prefs.setString(PreferenceManager.KEY_BIOMETRICS_CALL_LOCK_MODE, "specified")
+//                                        showContactPicker = true
+//                                    },
+//                                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 3),
+//                                    icon = { SegmentedButtonDefaults.ActiveIcon() }
+//                                ) { Text("Specified", maxLines = 1) }
+//                                SegmentedButton(
+//                                    selected = callLockMode == "skip_specified",
+//                                    onClick = {
+//                                        callLockMode = "skip_specified"
+//                                        prefs.setString(PreferenceManager.KEY_BIOMETRICS_CALL_LOCK_MODE, "skip_specified")
+//                                        showContactPicker = true
+//                                    },
+//                                    shape = SegmentedButtonDefaults.itemShape(index = 2, count = 3),
+//                                    icon = { SegmentedButtonDefaults.ActiveIcon() }
+//                                ) { Text("Exclude", maxLines = 1) }
+//                            }
+
+                            data class CallLockMode(val key: String, val label: String)
+                            val callLockModes = listOf(
+                                CallLockMode("all",            "All Calls"),
+                                CallLockMode("specified",      "Specified"),
+                                CallLockMode("skip_specified", "Exclude")
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = cardColor,
+                                        shape = RoundedCornerShape(cardCornerSmall)
+                                    )
+                                    .padding(12.dp)
+                            ) {
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(2.dp),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    callLockModes.forEachIndexed { index, mode ->
+                                        val selected = callLockMode == mode.key
+                                        val interactionSource =
+                                            remember { MutableInteractionSource() }
+                                        val isPressed by interactionSource.collectIsPressedAsState()
+                                        val cornerRadius by animateDpAsState(
+                                            targetValue = if (isPressed || selected) 20.dp else 8.dp,
+                                            animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                                            label = "ButtonShape"
+                                        )
+                                        val outsideCornerRadius by animateDpAsState(
+                                            targetValue = if (isPressed || selected) 20.dp else 16.dp,
+                                            animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                                            label = "ButtonShape"
+                                        )
+                                        val shape = remember(cornerRadius, index) {
+                                            when (index) {
+                                                0 -> RoundedCornerShape(
+                                                    topStart = outsideCornerRadius,
+                                                    topEnd = cornerRadius,
+                                                    bottomEnd = cornerRadius,
+                                                    bottomStart = outsideCornerRadius
+                                                )
+
+                                                2 -> RoundedCornerShape(
+                                                    topStart = cornerRadius,
+                                                    topEnd = outsideCornerRadius,
+                                                    bottomEnd = outsideCornerRadius,
+                                                    bottomStart = cornerRadius
+                                                )
+
+                                                else -> RoundedCornerShape(cornerRadius)
+                                            }
+                                        }
+
+                                        Surface(
+                                            onClick = {
+                                                callLockMode = mode.key
+                                                prefs.setString(PreferenceManager.KEY_BIOMETRICS_CALL_LOCK_MODE, mode.key)
+                                                if (mode.key != "all") showContactPicker = true
+                                            },
+                                            shape = shape,
+                                            color = if (selected) MaterialTheme.colorScheme.primary
+                                            else MaterialTheme.colorScheme.surfaceContainerHigh,
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .height(38.dp),
+                                            interactionSource = interactionSource,
+                                        ) {
+                                            Box(contentAlignment = Alignment.Center) {
+                                                Text(
+                                                    mode.label,
+                                                    style = MaterialTheme.typography.labelMedium,
+                                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                                                    color = if (selected) MaterialTheme.colorScheme.onPrimary
+                                                    else MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Description card
+                            AnimatedContent(targetState = callLockMode, label = "lockModeDesc") { mode ->
+                                Row(
+                                    modifier = Modifier
+                                        .combinedClickable(
+                                            enabled = callLockMode != "all",
+                                            onClick = { showContactPicker = true },
+                                        )
+                                        .background(
+                                            color = cardColor,
+                                            shape = RoundedCornerShape(cardCornerSmall)
+                                        )
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 14.dp),
+//                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Surface(
+                                        shape = RoundedCornerShape(10.dp),
+                                        color = when (mode) {
+                                            "all" -> MaterialTheme.colorScheme.customColors.colorRed
+                                            "specified" -> MaterialTheme.colorScheme.customColors.colorOrange
+                                            else -> MaterialTheme.colorScheme.customColors.colorGreen
+                                        },
+                                        modifier = Modifier.size(36.dp)
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(
+                                                imageVector = when (mode) {
+                                                    "all" -> Icons.Rounded.Lock
+                                                    "specified" -> Icons.Rounded.Person
+                                                    else -> Icons.Rounded.PersonOff
+                                                },
+                                                contentDescription = null,
+                                                tint = when (mode) {
+                                                    "all" -> MaterialTheme.colorScheme.customColors.colorDarkRed
+                                                    "specified" -> MaterialTheme.colorScheme.customColors.colorDarkOrange
+                                                    else -> MaterialTheme.colorScheme.customColors.colorDarkGreen
+                                                },
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.width(16.dp))
+                                    Text(
+                                        modifier = Modifier.weight(1f),
+                                        text = when (mode) {
+                                            "all" -> "Biometric required for every incoming call"
+                                            "specified" -> if (selectedContactCount > 0)
+                                                "$selectedContactCount contact${if (selectedContactCount != 1) "s" else ""} will require biometric to answer"
+                                            else "Choose contacts that require biometric to answer"
+                                            else -> if (selectedContactCount > 0)
+                                                "$selectedContactCount contact${if (selectedContactCount != 1) "s" else ""} excluded from biometric lock"
+                                            else "Choose contacts to skip the biometric lock"
+                                        },
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    if (mode != "all") {
+                                        Spacer(modifier = Modifier.width(16.dp))
+                                        Icon(
+                                            Icons.Rounded.Edit, null,
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                            modifier = Modifier.size(20.dp),
+                                        )
+                                    }
+                                }
+                            }
+
+                            // Edit selection button
+//                            AnimatedVisibility(
+//                                visible = callLockMode != "all",
+//                                enter = fadeIn(tween(200)) + expandVertically(tween(200)),
+//                                exit  = fadeOut(tween(150)) + shrinkVertically(tween(150))
+//                            ) {
+//                                FilledTonalButton(
+//                                    onClick = { showContactPicker = true },
+//                                    modifier = Modifier.fillMaxWidth(),
+//                                    shape = RoundedCornerShape(cardCornerSmall)
+//                                ) {
+//                                    Icon(Icons.Rounded.Edit, null, modifier = Modifier.size(16.dp))
+//                                    Spacer(Modifier.width(8.dp))
+//                                    Text(
+//                                        if (selectedContactCount > 0)
+//                                            "Edit Selection  ·  $selectedContactCount selected"
+//                                        else "Select Contacts"
+//                                    )
+//                                }
+//                            }
                         }
                     }
                 }
@@ -261,6 +532,326 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
             },
             onDismiss = { showPasswordSetup = false }
         )
+    }
+
+    // ── Contact Picker ─────────────────────────────────────────────────────
+    if (showContactPicker) {
+        ContactPickerDialog(
+            contacts = allContacts,
+            initialSelectedNumbers = selectedNumbers,
+            onDone = { newNumbers ->
+                val joined = newNumbers.joinToString(",")
+                callLockNumbers = joined
+                prefs.setString(PreferenceManager.KEY_BIOMETRICS_CALL_LOCK_NUMBERS, joined)
+                showContactPicker = false
+            },
+            onDismiss = { showContactPicker = false }
+        )
+    }
+}
+
+// ─── Contact Picker Dialog ────────────────────────────────────────────────────
+
+@Composable
+private fun ContactPickerDialog(
+    contacts: List<Contact>,
+    initialSelectedNumbers: Set<String>,
+    onDone: (Set<String>) -> Unit,
+    onDismiss: () -> Unit
+) {
+    // working copy — normalised to last-10-digit strings for matching
+    var selectedNumbers by remember {
+        mutableStateOf(initialSelectedNumbers.map { it.filter(Char::isDigit).takeLast(10) }.toSet())
+    }
+    var searchQuery by remember { mutableStateOf("") }
+
+    fun normalise(n: String) = n.filter(Char::isDigit).takeLast(10)
+
+    fun isContactSelected(contact: Contact) =
+        contact.phoneNumbers.any { normalise(it) in selectedNumbers }
+
+    fun toggleContact(contact: Contact) {
+        val nums = contact.phoneNumbers.map(::normalise).filter { it.isNotEmpty() }.toSet()
+        selectedNumbers = if (isContactSelected(contact)) selectedNumbers - nums
+        else selectedNumbers + nums
+    }
+
+    fun selectAll() {
+        selectedNumbers = contacts.flatMap { c -> c.phoneNumbers.map(::normalise) }.filter { it.isNotEmpty() }.toSet()
+    }
+
+    fun unselectAll() {
+        selectedNumbers = emptySet()
+    }
+
+    val filteredContacts = remember(contacts, searchQuery) {
+//        if (searchQuery.isBlank()) contacts.sortedBy { it.displayName.lowercase() }
+//        else contacts.filter { c ->
+//            c.displayName.contains(searchQuery, ignoreCase = true) ||
+//                    c.phoneNumbers.any { it.contains(searchQuery) }
+//        }.sortedBy { it.displayName.lowercase() }
+        if (searchQuery.isBlank()) contacts.sortedBy { it.displayName.lowercase() }
+        else contacts.filter {
+            it.displayName.contains(searchQuery, ignoreCase = true) ||
+                    it.nickname.contains(searchQuery, ignoreCase = true) ||
+                    it.company.contains(searchQuery, ignoreCase = true) ||
+                    it.jobTitle.contains(searchQuery, ignoreCase = true) ||
+                    it.phoneNumbers.any { number -> number.replace(" ", "").replace("-", "").contains(searchQuery.replace(" ", "").replace("-", "")) } ||
+                    it.emails.any { email -> email.value.replace(" ", "").contains(searchQuery.replace(" ", "")) } ||
+                    it.addresses.any { address -> address.formattedAddress.replace(" ", "").contains(searchQuery.replace(" ", "")) } ||
+                    it.events.any { event -> event.date.replace(" ", "").replace("-", "").replace(".", "")
+                        .contains(searchQuery.replace(" ", "").replace("-", "").replace(".", "")) }
+        }.sortedBy { it.displayName.lowercase() }
+    }
+
+    val selectedContactCount = contacts.count(::isContactSelected)
+
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        shape = RoundedCornerShape(topStart = 38.dp, topEnd = 38.dp),
+        containerColor = MaterialTheme.colorScheme.surface,
+        tonalElevation = 4.dp,
+//        scrimColor = Color.Transparent,
+        contentWindowInsets = {
+            if (isLandscape) {
+                WindowInsets.systemBars.only(
+                    WindowInsetsSides.Top + WindowInsetsSides.Horizontal
+                )
+            } else BottomSheetDefaults.windowInsets
+        },
+        dragHandle = {
+            if (isLandscape) null
+            else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp, bottom = 12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(3.dp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                        modifier = Modifier.size(width = 36.dp, height = 4.dp)
+                    ) {}
+                }
+            }
+        },
+        modifier = Modifier.statusBarsPadding()
+    ) {
+        Surface(
+//            shape = RoundedCornerShape(24.dp),
+            modifier = Modifier.fillMaxSize(),
+            color = Color.Transparent
+        ) {
+            Scaffold(
+                topBar = {
+                    Column {
+                        TopAppBar(
+                            colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+                            title = { Text("Select Contacts", fontWeight = FontWeight.Bold) },
+//                            navigationIcon = {
+//                                NavigationIcon(onClick = onDismiss)
+//                            },
+                            actions = {
+                                IconButton(onClick = ::selectAll) {
+                                    Icon(Icons.Rounded.SelectAll, "Select All")
+                                }
+                                IconButton(onClick = ::unselectAll) {
+                                    Icon(Icons.Rounded.Deselect, "Unselect All")
+                                }
+                                Spacer(modifier = Modifier.size(6.dp))
+//                                TextButton(onClick = ::selectAll) {
+//                                    Text("Select All", fontWeight = FontWeight.SemiBold)
+//                                }
+//                                TextButton(onClick = ::unselectAll) {
+//                                    Text("Unselect All", fontWeight = FontWeight.SemiBold)
+//                                }
+                            }
+                        )
+                        // Search bar
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            placeholder = { Text(stringResource(R.string.search_contacts)) },
+                            leadingIcon = {
+                                Icon(Icons.Default.Search, contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier
+                                        .padding(start = 12.dp)
+                                )
+                            },
+                            trailingIcon = {
+                                AnimatedVisibility(visible = searchQuery.isNotEmpty()) {
+                                    IconButton(onClick = { searchQuery = "" },
+                                        modifier = Modifier
+                                            .padding(end = 4.dp)
+                                    ) {
+                                        Icon(Icons.Default.Close, contentDescription = "Clear",
+                                            modifier = Modifier.size(18.dp))
+                                    }
+                                }
+                            },
+                            singleLine = true,
+                            shape = RoundedCornerShape(28.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = cardColor,
+                                unfocusedContainerColor = cardColor,
+                                focusedBorderColor = cardColor,
+                                unfocusedBorderColor = cardColor
+                            )
+                        )
+                    }
+                },
+                containerColor = MaterialTheme.colorScheme.surface
+            ) { padding ->
+                Box(Modifier.fillMaxSize()
+                    .padding(
+                        top = padding.calculateTopPadding(),
+                        start = 0.dp,
+                        end = 0.dp,
+                        bottom = 0.dp
+                    )
+                ) {
+                    if (contacts.isEmpty()) {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator()
+                        }
+                    } else if (filteredContacts.isEmpty()) {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Icon(Icons.Default.SearchOff, contentDescription = null,
+                                    modifier = Modifier.size(48.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                                Text("No contacts found", color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    style = MaterialTheme.typography.bodyLarge)
+                            }
+                        }
+                    } else {
+                        Surface(
+                            color = Color.Transparent,
+                            modifier = Modifier.padding(horizontal = 16.dp).fillMaxSize(),
+                            shape = RoundedCornerShape(cardCornerBig),
+                        ) {
+                            LazyColumn(
+//                                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+                                contentPadding = PaddingValues(bottom = 96.dp),
+                                verticalArrangement = Arrangement.spacedBy(2.dp)
+                            ) {
+                                items(filteredContacts, key = { it.id }) { contact ->
+                                    val checked = isContactSelected(contact)
+                                    val rowBg by animateColorAsState(
+                                        if (checked) MaterialTheme.colorScheme.primaryContainer
+                                        else cardColor,
+                                        tween(180), label = "cb${contact.id}"
+                                    )
+                                    val interactionSource = remember { MutableInteractionSource() }
+                                    val isPressed by interactionSource.collectIsPressedAsState()
+                                    val cornerRadius by animateDpAsState(
+                                        if (checked || isPressed) 50.dp else cardCornerSmall,
+                                        spring(stiffness = Spring.StiffnessMediumLow),
+                                        label = "cr${contact.id}"
+                                    )
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .background(
+                                                rowBg,
+                                                shape = RoundedCornerShape(cornerRadius)
+                                            )
+                                            .clickable(
+                                                indication = null,
+                                                interactionSource = interactionSource,
+                                                onClick = { toggleContact(contact) }
+                                            )
+                                            .padding(horizontal = 16.dp, vertical = 10.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(14.dp)
+                                    ) {
+                                        RillAvatar(
+                                            name = contact.displayName,
+                                            photoUri = contact.photoUri,
+                                            modifier = Modifier.size(46.dp)
+                                        )
+                                        Column(Modifier.weight(1f)) {
+                                            Text(
+                                                text = contact.displayName.ifBlank { "Unknown" },
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                fontWeight = if (checked) FontWeight.SemiBold else FontWeight.Normal,
+                                                maxLines = 1,
+                                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                            )
+                                            if (contact.phoneNumbers.isNotEmpty()) {
+                                                Text(
+                                                    text = contact.phoneNumbers.first(),
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    maxLines = 1
+                                                )
+                                            }
+                                        }
+                                        Checkbox(
+                                            checked = checked,
+                                            onCheckedChange = { toggleContact(contact) }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // ── Floating Done pill ─────────────────────────────────
+//                    AnimatedVisibility(
+//                        visible = selectedContactCount > 0,
+//                        enter = slideInVertically { it } + fadeIn(tween(200)),
+//                        exit  = slideOutVertically { it } + fadeOut(tween(150)),
+//                        modifier = Modifier
+//                            .align(Alignment.BottomCenter)
+//                            .padding(bottom = 28.dp)
+//                    ) {
+                    val donePillAlpha by animateFloatAsState(
+                        targetValue   = if (selectedContactCount > 0) 1f else 0f,
+                        animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
+                        label         = "donePillFadeIn"
+                    )
+                        Button(
+                            onClick = {
+                                val finalNumbers = contacts
+                                    .filter(::isContactSelected)
+                                    .flatMap { c -> c.phoneNumbers.map { it.filter(Char::isDigit).takeLast(10) } }
+                                    .filter { it.isNotEmpty() }
+                                    .toSet()
+                                onDone(finalNumbers)
+                            },
+                            shape = RoundedCornerShape(50),
+                            modifier = Modifier
+                                .graphicsLayer { alpha = donePillAlpha }
+                                .align(Alignment.BottomCenter)
+                                .padding(bottom = 28.dp).height(52.dp),
+                            elevation = ButtonDefaults.buttonElevation(
+                                defaultElevation = 0.dp,
+                                pressedElevation = 0.dp,
+                                hoveredElevation = 0.dp
+                            )
+                        ) {
+                            Icon(Icons.Default.Check, null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(10.dp))
+                            Text(
+                                text = "Done  ·  $selectedContactCount selected",
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+//                    }
+                }
+            }
+        }
     }
 }
 
@@ -425,7 +1016,7 @@ private fun BiometricOptionRow(
 // ─── PIN Setup Dialog ────────────────────────────────────────────────────────
 
 @Composable
-fun PinSetupDialog(
+fun PinDialogContent(
     onConfirm: (String) -> Unit,
     onDismiss: () -> Unit,
     title: String = "Set PIN",
@@ -522,53 +1113,63 @@ fun PinSetupDialog(
         }
     }
 
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
-            shape = RoundedCornerShape(28.dp),
-            color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 6.dp
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    if (isLandscape) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 6.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Column(
-                Modifier
-                    .padding(24.dp)
+                Modifier.weight(1f)
+                    .padding(horizontal = 24.dp)
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(20.dp)
+                verticalArrangement = Arrangement.spacedBy(32.dp)
             ) {
                 // Header
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Surface(
+                        modifier = Modifier.size(34.dp),
+                        shape = RoundedCornerShape(10.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Rounded.Lock,
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp),
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
                     Text(
-                        modifier = Modifier.padding(start = 4.dp),
                         text = when {
                             isVerify -> title
-                            phase == 0 -> "Enter PIN"
+                            phase == 0 -> "Set PIN"
                             else -> "Confirm PIN"
                         },
+                        color = Color.White,
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
-                    IconButton(
-                        onClick = onDismiss,
-                        modifier = Modifier
-                            .size(32.dp)
-                            .background(
-                                MaterialTheme.colorScheme.onSurface.copy(0.3f),
-                                RoundedCornerShape(50)
-                            )
-                            .padding(2.dp)
-                    ) {
-                        Icon(Icons.Rounded.Close, null)
-                    }
                 }
 
                 if (!isVerify) {
                     Text(
                         text = if (errorMessage != null) errorMessage ?: ""
-                               else if (phase == 0) "Enter a 4-digit PIN"
-                               else "Re-enter your PIN to confirm",
-                        style = MaterialTheme.typography.bodySmall,
+                        else if (phase == 0) "Enter a 4-digit PIN"
+                        else "Re-enter your PIN to confirm",
+                        style = MaterialTheme.typography.bodyMedium,
                         color = if (errorMessage != null) MaterialTheme.colorScheme.error
-                                else MaterialTheme.colorScheme.onSurfaceVariant,
+                        else Color.White.copy(0.7f),
                         textAlign = TextAlign.Center
                     )
                 }
@@ -587,7 +1188,7 @@ fun PinSetupDialog(
                         )
                         Box(
                             Modifier
-                                .size(14.dp)
+                                .size(16.dp)
                                 .scale(scale)
                                 .clip(CircleShape)
                                 .background(
@@ -619,14 +1220,177 @@ fun PinSetupDialog(
                         modifier = Modifier.padding(horizontal = 16.dp)
                     )
                 }
+                Spacer(modifier = Modifier.height(24.dp))
+            }
 
+            Column(
+                Modifier.weight(1f)
+                    .padding(horizontal = 24.dp)
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 // Numpad
                 PinNumpad(
                     currentPin = pin,
                     onDigit = ::onDigit,
                     onBackspace = ::onBackspace,
                     onSubmit = ::onSubmit,
-                    maxLength = 4
+                    maxLength = 4,
+                    buttonHeight = 56.dp
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+                    TextButton(onClick = onDismiss) {
+                        Text(
+                            stringResource(R.string.cancel),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                }
+            }
+        }
+    } else {
+        Column(
+            Modifier
+                .padding(24.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(32.dp)
+        ) {
+            Surface(
+                modifier = Modifier.size(64.dp),
+                shape = RoundedCornerShape(20.dp),
+                color = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Rounded.Lock,
+                        contentDescription = null,
+                        modifier = Modifier.size(32.dp),
+                    )
+                }
+            }
+            Text(
+                text = when {
+                    isVerify -> title
+                    phase == 0 -> "Set PIN"
+                    else -> "Confirm PIN"
+                },
+                color = Color.White,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+
+            if (!isVerify) {
+                Text(
+                    text = if (errorMessage != null) errorMessage ?: ""
+                    else if (phase == 0) "Enter a 4-digit PIN"
+                    else "Re-enter your PIN to confirm",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (errorMessage != null) MaterialTheme.colorScheme.error
+                    else Color.White.copy(0.7f),
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            // PIN dots indicator
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.padding(vertical = 6.dp).offset(x = if (shakeState > 0) shake else 0.dp)
+            ) {
+                repeat(4) { i ->
+                    val filled = i < pin.length
+                    val scale by animateFloatAsState(
+                        targetValue = if (filled) 1f else 0.6f,
+                        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                        label = "dot$i"
+                    )
+                    Box(
+                        Modifier
+                            .size(20.dp)
+                            .scale(scale)
+                            .clip(CircleShape)
+                            .background(
+                                if (filled) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.outlineVariant
+                            )
+                    )
+                }
+            }
+
+            // Error message
+            AnimatedVisibility(
+                visible = errorMessage != null && isVerify,
+                enter = fadeIn(animationSpec = tween(200)) + slideInVertically(
+                    initialOffsetY = { -it / 2 },
+                    animationSpec = tween(200)
+                ),
+                exit = fadeOut(animationSpec = tween(150)) + slideOutVertically(
+                    targetOffsetY = { -it / 2 },
+                    animationSpec = tween(150)
+                )
+            ) {
+                Text(
+                    text = errorMessage ?: "",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+            }
+
+            // Numpad
+            PinNumpad(
+                currentPin = pin,
+                onDigit = ::onDigit,
+                onBackspace = ::onBackspace,
+                onSubmit = ::onSubmit,
+                maxLength = 4
+            )
+
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun PinSetupDialog(
+    onConfirm: (String) -> Unit,
+    onDismiss: () -> Unit,
+    title: String = "Set PIN",
+    isVerify: Boolean = false,
+    expectedPin: String = "",
+    showCloseButton: Boolean = true
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            dismissOnBackPress = showCloseButton,
+            dismissOnClickOutside = showCloseButton
+        )
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxSize().systemBarsPadding().padding(16.dp),
+            shape = RoundedCornerShape(28.dp),
+            color = Color.Transparent,//MaterialTheme.colorScheme.surface,
+            tonalElevation = 6.dp
+        ) {
+            Box(
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                PinDialogContent(
+                    onConfirm = onConfirm,
+                    onDismiss = onDismiss,
+                    title = title,
+                    isVerify = isVerify,
+                    expectedPin = expectedPin
                 )
             }
         }
@@ -639,7 +1403,8 @@ private fun PinNumpad(
     onDigit: (String) -> Unit,
     onBackspace: () -> Unit,
     onSubmit: () -> Unit,
-    maxLength: Int = 4
+    maxLength: Int = 4,
+    buttonHeight: Dp = 62.dp
 ) {
     val keys = listOf(
         listOf("1", "2", "3"),
@@ -675,12 +1440,15 @@ private fun PinNumpad(
                                         color = Color.Transparent,
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .height(56.dp)
+                                            .height(buttonHeight)
                                             .scale(scale),
                                         interactionSource = interaction
                                     ) {
                                         Box(contentAlignment = Alignment.Center) {
-                                            Icon(Icons.AutoMirrored.Rounded.Backspace, null, modifier = Modifier.size(20.dp))
+                                            Icon(
+                                                Icons.AutoMirrored.Rounded.Backspace, null,
+                                                tint = Color.White.copy(0.7f),
+                                                modifier = Modifier.size(24.dp))
                                         }
                                     }
                                 }
@@ -697,7 +1465,7 @@ private fun PinNumpad(
                                 color = MaterialTheme.colorScheme.surfaceContainerLow,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(56.dp)
+                                    .height(buttonHeight)
                                     .scale(scale),
                                 interactionSource = interaction
                             ) {
@@ -716,12 +1484,13 @@ private fun PinNumpad(
 // ─── Password Setup Dialog ───────────────────────────────────────────────────
 
 @Composable
-fun PasswordSetupDialog(
+fun PasswordDialogContent(
     onConfirm: (String) -> Unit,
     onDismiss: () -> Unit,
     title: String = "Set Password",
     isVerify: Boolean = false,
-    expectedPassword: String = ""
+    expectedPassword: String = "",
+    showCloseButton: Boolean = true
 ) {
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -729,109 +1498,136 @@ fun PasswordSetupDialog(
     var showConfirm by remember { mutableStateOf(false) }
     var errorText by remember { mutableStateOf("") }
 
-    Dialog(onDismissRequest = onDismiss) {
+    Column(
+        Modifier
+            .padding(24.dp)
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                modifier = Modifier.padding(start = 4.dp),
+                text = if (isVerify) title else "Set Password",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            if (showCloseButton) {
+                IconButton(
+                    onClick = onDismiss,
+                    modifier = Modifier
+                        .size(32.dp)
+                        .background(
+                            MaterialTheme.colorScheme.onSurface.copy(0.3f),
+                            RoundedCornerShape(50)
+                        )
+                        .padding(2.dp)
+                ) {
+                    Icon(Icons.Rounded.Close, null)
+                }
+            }
+        }
+
+        if (!isVerify) {
+            Text(
+                "Enter any password. Supports letters, numbers and special characters.",
+                modifier = Modifier.padding(horizontal = 4.dp),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it; errorText = "" },
+            label = { Text(if (isVerify) "Password" else "Enter Password") },
+            singleLine = true,
+            visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            trailingIcon = {
+                IconButton(onClick = { showPassword = !showPassword }) {
+                    Icon(if (showPassword) Icons.Rounded.VisibilityOff else Icons.Rounded.Visibility, null)
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(14.dp),
+            isError = errorText.isNotEmpty()
+        )
+
+        if (!isVerify) {
+            OutlinedTextField(
+                value = confirmPassword,
+                onValueChange = { confirmPassword = it; errorText = "" },
+                label = { Text("Confirm Password") },
+                singleLine = true,
+                visualTransformation = if (showConfirm) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                trailingIcon = {
+                    IconButton(onClick = { showConfirm = !showConfirm }) {
+                        Icon(if (showConfirm) Icons.Rounded.VisibilityOff else Icons.Rounded.Visibility, null)
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp),
+                isError = errorText.isNotEmpty()
+            )
+        }
+
+        AnimatedVisibility(visible = errorText.isNotEmpty()) {
+            Text(errorText, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+        }
+
+        Row(Modifier
+            .fillMaxWidth()
+            .padding(top = 6.dp, end = 1.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            TextButton(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text("Cancel") }
+            Button(
+                onClick = {
+                    when {
+                        isVerify -> {
+                            if (password == expectedPassword) onConfirm(password)
+                            else errorText = "Incorrect password"
+                        }
+                        password.length < 4 -> errorText = "Password must be at least 4 characters"
+                        password != confirmPassword -> errorText = "Passwords don't match"
+                        else -> onConfirm(password)
+                    }
+                },
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(50)
+            ) { Text("Confirm") }
+        }
+    }
+}
+
+@Composable
+fun PasswordSetupDialog(
+    onConfirm: (String) -> Unit,
+    onDismiss: () -> Unit,
+    title: String = "Set Password",
+    isVerify: Boolean = false,
+    expectedPassword: String = "",
+    showCloseButton: Boolean = true
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            dismissOnBackPress = showCloseButton,
+            dismissOnClickOutside = showCloseButton
+        )
+    ) {
         Surface(
             shape = RoundedCornerShape(28.dp),
             color = MaterialTheme.colorScheme.surface,
             tonalElevation = 6.dp
         ) {
-            Column(
-                Modifier
-                    .padding(24.dp)
-                    .fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        modifier = Modifier.padding(start = 4.dp),
-                        text = if (isVerify) title else "Set Password",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                    IconButton(
-                        onClick = onDismiss,
-                        modifier = Modifier
-                            .size(32.dp)
-                            .background(
-                                MaterialTheme.colorScheme.onSurface.copy(0.3f),
-                                RoundedCornerShape(50)
-                            )
-                            .padding(2.dp)
-                    ) {
-                        Icon(Icons.Rounded.Close, null)
-                    }
-                }
-
-                if (!isVerify) {
-                    Text(
-                        "Enter any password. Supports letters, numbers and special characters.",
-                        modifier = Modifier.padding(horizontal = 4.dp),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it; errorText = "" },
-                    label = { Text(if (isVerify) "Password" else "Enter Password") },
-                    singleLine = true,
-                    visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    trailingIcon = {
-                        IconButton(onClick = { showPassword = !showPassword }) {
-                            Icon(if (showPassword) Icons.Rounded.VisibilityOff else Icons.Rounded.Visibility, null)
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp),
-                    isError = errorText.isNotEmpty()
-                )
-
-                if (!isVerify) {
-                    OutlinedTextField(
-                        value = confirmPassword,
-                        onValueChange = { confirmPassword = it; errorText = "" },
-                        label = { Text("Confirm Password") },
-                        singleLine = true,
-                        visualTransformation = if (showConfirm) VisualTransformation.None else PasswordVisualTransformation(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                        trailingIcon = {
-                            IconButton(onClick = { showConfirm = !showConfirm }) {
-                                Icon(if (showConfirm) Icons.Rounded.VisibilityOff else Icons.Rounded.Visibility, null)
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(14.dp),
-                        isError = errorText.isNotEmpty()
-                    )
-                }
-
-                AnimatedVisibility(visible = errorText.isNotEmpty()) {
-                    Text(errorText, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
-                }
-
-                Row(Modifier
-                    .fillMaxWidth()
-                    .padding(top = 6.dp, end = 1.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TextButton(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text("Cancel") }
-                    Button(
-                        onClick = {
-                            when {
-                                isVerify -> {
-                                    if (password == expectedPassword) onConfirm(password)
-                                    else errorText = "Incorrect password"
-                                }
-                                password.length < 4 -> errorText = "Password must be at least 4 characters"
-                                password != confirmPassword -> errorText = "Passwords don't match"
-                                else -> onConfirm(password)
-                            }
-                        },
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(50)
-                    ) { Text("Confirm") }
-                }
-            }
+            PasswordDialogContent(
+                onConfirm = onConfirm,
+                onDismiss = onDismiss,
+                title = title,
+                isVerify = isVerify,
+                expectedPassword = expectedPassword,
+                showCloseButton = showCloseButton
+            )
         }
     }
 }

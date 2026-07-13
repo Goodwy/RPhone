@@ -151,13 +151,14 @@ class CallLogViewModel(
                 obj.put("photoUri", e.photoUri ?: "")
                 obj.put("contactId", e.contactId ?: "")
                 obj.put("simLabel", e.simLabel ?: "")
-                obj.put("isBlocked", e.isBlocked ?: "")
+                obj.put("isBlocked", e.isBlocked)
                 val typesArr = JSONArray()
                 e.types.forEach { typesArr.put(it) }
                 obj.put("types", typesArr)
                 val idsArr = JSONArray()
                 e.ids.forEach { idsArr.put(it) }
                 obj.put("ids", idsArr)
+                obj.put("isCallerIdName", e.isCallerIdName)
                 obj.put("phoneType", e.phoneType ?: -1)
                 obj.put("phoneLabel", e.phoneLabel ?: "")
                 arr.put(obj)
@@ -197,6 +198,7 @@ class CallLogViewModel(
                         isBlocked = obj.getBoolean("isBlocked"),
                         types = types,
                         ids = ids,
+                        isCallerIdName = obj.optBoolean("isCallerIdName", false),
                         phoneType = obj.getInt("phoneType"),
                         phoneLabel = obj.getString("phoneLabel").ifEmpty { null }
                     )

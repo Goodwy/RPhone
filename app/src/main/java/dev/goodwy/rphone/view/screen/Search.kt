@@ -127,7 +127,7 @@ fun ContactSearchContent(
                     it.nickname.contains(query, ignoreCase = true) ||
                     it.company.contains(query, ignoreCase = true) ||
                     it.jobTitle.contains(query, ignoreCase = true) ||
-                    it.phoneNumbers.any { number -> number.replace(" ", "").contains(query.replace(" ", "")) } ||
+                    it.phoneNumbers.any { number -> number.replace(" ", "").replace("-", "").contains(query.replace(" ", "").replace("-", "")) } ||
                     it.emails.any { email -> email.value.replace(" ", "").contains(query.replace(" ", "")) } ||
                     it.addresses.any { address -> address.formattedAddress.replace(" ", "").contains(query.replace(" ", "")) } ||
                     it.events.any { event -> event.date.replace(" ", "").replace("-", "").replace(".", "")
@@ -194,7 +194,7 @@ fun ContactSearchContent(
                 value = textFieldValue,
                 onValueChange = { textFieldValue = it },
                 modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
-                placeholder = { Text("Search contacts or numbers") },
+                placeholder = { Text(stringResource(R.string.search_contacts)) },
                 leadingIcon = {
                     IconButton(onClick = { navigator.navigateUp() }) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
@@ -304,7 +304,7 @@ fun ContactSearchContent(
                             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
                         )
                         Text(
-                            "Search contacts or numbers",
+                            stringResource(R.string.search_contacts),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

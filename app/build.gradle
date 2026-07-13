@@ -1,9 +1,8 @@
 plugins {
-    id 'com.android.application' version '8.13.2'
-    id 'org.jetbrains.kotlin.android' version '2.1.0'
-    id 'org.jetbrains.kotlin.plugin.compose' version '2.1.0'
-    id 'org.jetbrains.kotlin.plugin.serialization' version '2.1.0'
-    id 'com.google.devtools.ksp' version '2.1.0-1.0.29'
+    id 'com.android.application' version '9.1.1'
+    id 'org.jetbrains.kotlin.plugin.compose' version '2.3.21'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '2.3.21'
+    id 'com.google.devtools.ksp' version '2.3.9'
 }
 
 def localProperties = new Properties()
@@ -13,8 +12,8 @@ if (localPropertiesFile.exists()) {
 }
 
 def productId = localProperties.getProperty('PRODUCT_ID_X1', '')
-def subscriptionId = localProperties.getProperty('SUBSCRIPTION_ID_X1', 'https://default.url')
-def subscriptionYearId = localProperties.getProperty('SUBSCRIPTION_YEAR_ID_X1', 'false')
+def subscriptionId = localProperties.getProperty('SUBSCRIPTION_ID_X1', '')
+def subscriptionYearId = localProperties.getProperty('SUBSCRIPTION_YEAR_ID_X1', '')
 
 android {
     namespace = 'dev.goodwy.rphone'
@@ -22,9 +21,9 @@ android {
 
     defaultConfig {
         applicationId = "dev.goodwy.rphone"
-        minSdk = 26
+        minSdk = 29
         targetSdk = 35
-        versionCode = 14
+        versionCode = 15
         versionName = "0.1.RC"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -32,19 +31,10 @@ android {
         buildConfigField "String", "PRODUCT_ID_X1", "\"$productId\""
         buildConfigField "String", "SUBSCRIPTION_ID_X1", "\"$subscriptionId\""
         buildConfigField "String", "SUBSCRIPTION_YEAR_ID_X1", "\"$subscriptionYearId\""
+    }
 
-        applicationVariants.configureEach { variant ->
-            if (variant.buildType.name == "release") { // Default Activity not found
-                variant.outputs.configureEach { output ->
-                    def baseAppName = "rill-phone"
-                    def newName = "${baseAppName}-${variant.versionCode}"
-                    newName += "-${variant.flavorName}"
-                    newName += "-${variant.buildType.name}"
-                    def originalExtension = outputFileName.substring(outputFileName.lastIndexOf('.'))
-                    outputFileName = newName + originalExtension
-                }
-            }
-        }
+    base {
+        archivesName = "rill-phone-${defaultConfig.versionCode}"
     }
 
     signingConfigs {
@@ -77,13 +67,13 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlin {
         compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
 
             freeCompilerArgs.addAll(
                 "-opt-in=androidx.compose.material3.ExperimentalMaterial3ExpressiveApi",
@@ -95,16 +85,6 @@ android {
     buildFeatures {
         compose = true
         buildConfig true
-    }
-
-    splits {
-        abi {
-            enable = false
-            //     reset()
-            //     include("armeabi-v7a", "arm64-v8a", "x86_64")
-            //     // CRITICAL: Set to true so GitHub Action finds at least one "universal" APK
-            //     universalApk = true
-        }
     }
 }
 
@@ -125,6 +105,7 @@ dependencies {
 
     // Navigation & Serialization
     implementation 'androidx.navigation:navigation-compose:2.8.5'
+    implementation 'androidx.preference:preference-ktx:1.2.1'
 
     // Biometrics
     implementation 'androidx.biometric:biometric:1.2.0-alpha05'

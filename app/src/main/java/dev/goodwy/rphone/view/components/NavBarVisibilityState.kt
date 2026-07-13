@@ -1,0 +1,22 @@
+package dev.goodwy.rphone.view.components
+
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+
+/**
+ * Shared flag that lets a tab screen (e.g. the Recordings tab while it's showing the
+ * bundled Ever Call Recorder's disclaimer/permissions onboarding) temporarily hide the
+ * bottom navigation bar (pill or standard), since those onboarding screens have their
+ * own bottom-anchored "Continue" button that the nav bar would otherwise cover.
+ */
+object NavBarVisibilityState {
+    var hideForOnboarding by mutableStateOf(false)
+
+    /**
+     * True while the Recordings tab's own selection pill (Favourite / Recover / Assign
+     * contact / Recordings / Share, shown on long-pressing a recording) is visible, so the
+     * bottom nav pill can smoothly slide away instead of overlapping it.
+     */
+    var hideForSelectionMode by mutableStateOf(false)
+}

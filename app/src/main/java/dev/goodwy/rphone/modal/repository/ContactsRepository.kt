@@ -24,7 +24,6 @@ import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 import androidx.core.net.toUri
 import androidx.core.graphics.scale
 import dev.goodwy.rphone.controller.util.areNumbersEqual
-import dev.goodwy.rphone.controller.util.copyToClipboard
 import dev.goodwy.rphone.controller.util.deduplicateNumbers
 import dev.goodwy.rphone.modal.db.PrivateContactEntity
 import kotlinx.serialization.encodeToString
@@ -823,8 +822,18 @@ class ContactsRepository(
             privateContactDao.deleteById(id)
             return
         }
-        val uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, contactId)
-        contentResolver.delete(uri, null, null)
+
+        try {
+            val uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, contactId)
+            contentResolver.delete(uri, null, null)
+        } catch (e: SecurityException) {
+            e.printStackTrace()
+        } catch (e: IllegalArgumentException) {
+            // Invalid URI—ignore
+        } catch (e: UnsupportedOperationException) {
+            // The contact has already been deleted or is unavailable
+            e.printStackTrace()
+        }
     }
 
     override fun deleteContacts(contactIds: List<String>) {

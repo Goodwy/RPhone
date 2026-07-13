@@ -1,12 +1,10 @@
 package dev.goodwy.rphone.view.screen
 
-import android.accounts.Account
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.provider.ContactsContract
-import android.provider.ContactsContract.CommonDataKinds.BaseTypes
 import android.provider.ContactsContract.CommonDataKinds.Email
 import android.provider.ContactsContract.CommonDataKinds.Event
 import android.provider.ContactsContract.CommonDataKinds.Phone
@@ -1321,7 +1319,7 @@ fun ContactEditScreen(
                                     )
                                     Text(
                                         text = if (selectedAccount != null) ContactUtils.getAccountName(selectedAccount!!)
-                                                else ContactUtils.getAccountType(null, isPrivate),
+                                                else ContactUtils.getFriendlyAccountName(null, isPrivate),
                                         style = MaterialTheme.typography.bodyLarge,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -1970,7 +1968,7 @@ fun ContactEditScreen(
                                 )
                                 Text(
                                     text = if (selectedAccount != null) ContactUtils.getAccountName(selectedAccount!!)
-                                            else ContactUtils.getAccountType(null, isPrivate),
+                                            else ContactUtils.getFriendlyAccountName(null, isPrivate),
                                     style = MaterialTheme.typography.bodyLarge,
                                     fontWeight = FontWeight.Bold
                                 )

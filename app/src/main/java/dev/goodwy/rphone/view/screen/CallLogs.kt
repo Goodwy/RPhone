@@ -54,6 +54,7 @@ import dev.goodwy.rphone.view.theme.color_call_button
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import dev.goodwy.rphone.controller.util.hasDualSim
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinActivityViewModel
 import org.koin.compose.koinInject
@@ -186,7 +187,7 @@ fun CallLogFullScreen(
                             CallLogFilter.Incoming -> filteredLogsByContact.filter { it.type == CallLog.Calls.INCOMING_TYPE }
                             CallLogFilter.Outgoing -> filteredLogsByContact.filter { it.type == CallLog.Calls.OUTGOING_TYPE }
                             CallLogFilter.Rejected -> filteredLogsByContact.filter { it.type == CallLog.Calls.REJECTED_TYPE }
-                            CallLogFilter.Contacts -> filteredLogsByContact.filter { it.name != null && it.name != it.number }
+                            CallLogFilter.Contacts -> filteredLogsByContact.filter { it.contactId != null }
                         }
                     }
                     BatchCallLogActionBar(
@@ -243,10 +244,11 @@ fun CallLogFullScreen(
                             CallLogFilter.Incoming -> filteredLogsByContact.filter { it.type == CallLog.Calls.INCOMING_TYPE }
                             CallLogFilter.Outgoing -> filteredLogsByContact.filter { it.type == CallLog.Calls.OUTGOING_TYPE }
                             CallLogFilter.Rejected -> filteredLogsByContact.filter { it.type == CallLog.Calls.REJECTED_TYPE }
-                            CallLogFilter.Contacts -> filteredLogsByContact.filter { it.name != null && it.name != it.number }
+                            CallLogFilter.Contacts -> filteredLogsByContact.filter { it.contactId != null }
                         }
                     }
 
+                    val showSimLabel = hasDualSim(context)
                     val groupedLogs = remember(finalLogs) { finalLogs.groupBy { context.formatDateHeader(it.date) } }
 
                     ScrollHapticsEffect(listState = listState)
@@ -303,7 +305,8 @@ fun CallLogFullScreen(
 //                                                }
                                             },
                                             selected = selectedEntries.any { it.id == lg.id },
-                                            showNumber = hasMultipleNumbers
+                                            showNumber = hasMultipleNumbers,
+                                            showSimLabel = showSimLabel,
                                         )
                                     }
                                 }

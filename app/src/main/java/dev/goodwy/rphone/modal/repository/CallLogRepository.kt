@@ -18,6 +18,7 @@ import dev.goodwy.rphone.modal.data.CallLogEntry
 import dev.goodwy.rphone.modal.data.Contact
 import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 import androidx.core.net.toUri
+import dev.goodwy.rphone.modal.data.getDisplayName
 
 class CallLogRepository(
     private val contentResolver: ContentResolver,
@@ -127,6 +128,8 @@ class CallLogRepository(
         val tempLogs = mutableListOf<CallLogEntry>()
         val simCache = mutableMapOf<String, String>()
 
+        val displayOrder = preferenceManager.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0)
+
         while (cursor.moveToNext()) {
             val callId = cursor.getLong(idIdx)
             val number = cursor.getString(numberIdx) ?: "Unknown"
@@ -164,7 +167,7 @@ class CallLogRepository(
             val lookupKey = if (normalizedNum.length >= 10) normalizedNum.takeLast(10) else normalizedNum
             val matchedContact = contactMap[lookupKey]
 
-//            val displayName = matchedContact?.name ?: cursor.getString(cachedNameIdx)
+//            val displayName = matchedContact?.displayName ?: cursor.getString(cachedNameIdx)
             val photoUri = matchedContact?.photoUri ?: cursor.getString(cachedPhotoIdx)
             val contactId = matchedContact?.id ?: cursor.getString(cachedLookupIdx)?.let {
                 try {
@@ -172,7 +175,7 @@ class CallLogRepository(
                 } catch (_: Exception) { null }
             }
 
-            val contactName = matchedContact?.name // the current name from your contacts
+            val contactName = if (matchedContact != null) getDisplayName(matchedContact, displayOrder) else null //matchedContact?.displayName
             val cachedName = cursor.getString(cachedNameIdx) // cached name from CallLog
             val phoneDetails = matchedContact?.phoneDetails?.firstOrNull { normalizePhoneNumber(it.number) == normalizedNum }
             val phoneType = phoneDetails?.type
@@ -197,7 +200,7 @@ class CallLogRepository(
                     CallLogEntry(
                         id = callId,
                         number = number,
-                        name = displayName ?: number,
+                        name = displayName,
                         type = type,
                         date = date,
                         duration = duration,

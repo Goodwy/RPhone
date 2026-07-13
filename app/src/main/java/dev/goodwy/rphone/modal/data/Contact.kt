@@ -64,32 +64,67 @@ data class ContactAddress(
     val formattedAddress: String
 )
 
-fun getDisplayName(contact: Contact): String {
+fun getDisplayName(contact: Contact, order: Int = 0): String {
     return buildString {
-        // Prefix (Mr., Mrs., Dr., etc.)
-        if (contact.namePrefix.isNotBlank()) {
-            append(contact.namePrefix)
+        when (order) {
+            0 -> {
+                // Prefix (Mr., Mrs., Dr., etc.)
+                if (contact.namePrefix.isNotBlank()) {
+                    append(contact.namePrefix)
+                }
+                // Given name (First name)
+                if (contact.givenName.isNotBlank()) {
+                    if (isNotEmpty()) append(" ")
+                    append(contact.givenName)
+                }
+                // Middle name
+                if (contact.middleName.isNotBlank()) {
+                    if (isNotEmpty()) append(" ")
+                    append(contact.middleName)
+                }
+                // Family name (Last name)
+                if (contact.familyName.isNotBlank()) {
+                    if (isNotEmpty()) append(" ")
+                    append(contact.familyName)
+                }
+                // Suffix (Jr., Sr., III, etc.) - with comma before it like Google Contacts
+                if (contact.nameSuffix.isNotBlank()) {
+                    if (isNotEmpty()) append(", ")
+                    append(contact.nameSuffix)
+                }
+            }
+
+            1 -> {
+                // Family name (Last name)
+                if (contact.familyName.isNotBlank()) {
+                    append(contact.familyName)
+                }
+                // Suffix (Jr., Sr., III, etc.) - with comma before suffix
+                if (contact.nameSuffix.isNotBlank()) {
+                    if (isNotEmpty()) append(", ")
+                    append(contact.nameSuffix)
+                }
+                // Separator (comma) between last name + suffix and first name
+                if (contact.givenName.isNotBlank() || contact.middleName.isNotBlank() || contact.namePrefix.isNotBlank()) {
+                    if (isNotEmpty()) append(", ")
+                }
+                // Prefix (Mr., Mrs., Dr., etc.)
+                if (contact.namePrefix.isNotBlank()) {
+                    append(contact.namePrefix)
+                }
+                // Given name (First name)
+                if (contact.givenName.isNotBlank()) {
+                    if (isNotEmpty()) append(" ")
+                    append(contact.givenName)
+                }
+                // Middle name
+                if (contact.middleName.isNotBlank()) {
+                    if (isNotEmpty()) append(" ")
+                    append(contact.middleName)
+                }
+            }
         }
-        // Given name (First name)
-        if (contact.givenName.isNotBlank()) {
-            if (isNotEmpty()) append(" ")
-            append(contact.givenName)
-        }
-        // Middle name
-        if (contact.middleName.isNotBlank()) {
-            if (isNotEmpty()) append(" ")
-            append(contact.middleName)
-        }
-        // Family name (Last name)
-        if (contact.familyName.isNotBlank()) {
-            if (isNotEmpty()) append(" ")
-            append(contact.familyName)
-        }
-        // Suffix (Jr., Sr., III, etc.) - with comma before it like Google Contacts
-        if (contact.nameSuffix.isNotBlank()) {
-            if (isNotEmpty()) append(", ")
-            append(contact.nameSuffix)
-        }
+
         // If there is no name, use "nickname", "company" or "phone"
         if (isEmpty() && contact.nickname.isNotBlank()) {
             append(contact.nickname)

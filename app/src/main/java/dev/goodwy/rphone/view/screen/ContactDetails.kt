@@ -12,7 +12,6 @@ import android.net.Uri
 import android.provider.ContactsContract
 import android.telecom.TelecomManager
 import android.view.Surface
-import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
@@ -72,7 +71,6 @@ import androidx.compose.material.icons.rounded.PersonAdd
 import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material.icons.rounded.QrCode2
 import androidx.compose.material.icons.rounded.Share
-import androidx.compose.material.icons.rounded.Videocam
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -89,7 +87,6 @@ import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinActivityViewModel
 import org.koin.compose.koinInject
 import androidx.core.net.toUri
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import dev.goodwy.rphone.cardCornerBig
 import dev.goodwy.rphone.cardCornerSmall
 import dev.goodwy.rphone.controller.util.ContactUtils
@@ -108,7 +105,9 @@ import com.ramcosta.composedestinations.generated.destinations.CallLogFullScreen
 import com.ramcosta.composedestinations.generated.destinations.ContactEditScreenDestination
 import dev.goodwy.rphone.controller.util.SocialUtils
 import dev.goodwy.rphone.controller.util.SocialUtils.launchSendWhatsAppIntent
+import dev.goodwy.rphone.controller.util.hasDualSim
 import dev.goodwy.rphone.device_only
+import dev.goodwy.rphone.modal.data.getDisplayName
 import dev.goodwy.rphone.private_only
 import java.util.Calendar
 
@@ -164,7 +163,6 @@ fun ContactDetailsScreen(
         contact!!.jobTitle.isNotBlank() -> contact!!.jobTitle
         else -> ""
     }
-    val displayName = contact?.displayName ?: phoneNumber ?: "Unknown"
 
     val context = LocalContext.current
     val defaultPhone = remember(contact) { derivedStateOf { contact?.phoneDetails?.firstOrNull { it.isPrimary } } }.value
@@ -192,6 +190,10 @@ fun ContactDetailsScreen(
     val telecomManager = remember { context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager }
     val prefs = koinInject<PreferenceManager>()
     val simPref = remember { prefs.getInt("default_sim", 0) }
+    val displayOrder by remember {
+        mutableIntStateOf(prefs.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0))
+    }
+    val displayName = contact?.let { getDisplayName(it, displayOrder) } ?: phoneNumber ?: "Unknown"
 
     var showSimPicker by remember { mutableStateOf(false) }
     var showNumberPicker by remember { mutableStateOf(false) }
@@ -276,6 +278,8 @@ fun ContactDetailsScreen(
             }
         }
     }
+
+    val showSimLabel = hasDualSim(context)
 
     val openWhatsApp = { num: String -> SocialUtils.openWhatsApp(context, num) }
     val openTelegram = { num: String -> SocialUtils.openTelegram(context, num) }
@@ -953,7 +957,7 @@ fun ContactDetailsScreen(
                                     ) {
                                         Column(modifier = Modifier.animateContentSize()) {
                                             contactLogs.take(3).forEachIndexed { index, log ->
-                                                CallLogTileSimple(log, showNumber = hasMultipleNumbers)
+                                                CallLogTileSimple(log, showNumber = hasMultipleNumbers, showSimLabel = showSimLabel)
                                                 if (index < 2 && index < contactLogs.size - 1) {
                                                     Spacer(modifier = Modifier.height(2.dp))
                                                 }
@@ -1094,8 +1098,8 @@ fun ContactDetailsScreen(
                                     RillExpressiveCard {
                                         RillListItem(
                                             headline = if (contactAccount != null) ContactUtils.getAccountName(contactAccount!!)
-                                                        else ContactUtils.getAccountType(null, contact!!.isPrivate),
-                                            supporting = if (contactAccount != null) ContactUtils.getAccountType(contactAccount) else null,
+                                                        else ContactUtils.getFriendlyAccountName(null, contact!!.isPrivate),
+                                            supporting = if (contactAccount != null) ContactUtils.getFriendlyAccountName(contactAccount) else null,
                                             leadingIcon = ContactUtils.getAccountIcon(contactAccount, contact!!.isPrivate),
                                             onClick = {}
                                         )
@@ -1749,7 +1753,7 @@ fun ContactDetailsScreen(
                                 ) {
                                     Column(modifier = Modifier.animateContentSize()) {
                                         contactLogs.take(3).forEachIndexed { index, log ->
-                                            CallLogTileSimple(log, showNumber = hasMultipleNumbers)
+                                            CallLogTileSimple(log, showNumber = hasMultipleNumbers, showSimLabel = showSimLabel)
                                             if (index < 2 && index < contactLogs.size - 1) {
                                                 Spacer(modifier = Modifier.height(2.dp))
                                             }
@@ -1890,8 +1894,8 @@ fun ContactDetailsScreen(
                                 RillExpressiveCard {
                                     RillListItem(
                                         headline = if (contactAccount != null) ContactUtils.getAccountName(contactAccount!!)
-                                                    else ContactUtils.getAccountType(null, contact!!.isPrivate),
-                                        supporting = if (contactAccount != null) ContactUtils.getAccountType(contactAccount) else null,
+                                                    else ContactUtils.getFriendlyAccountName(null, contact!!.isPrivate),
+                                        supporting = if (contactAccount != null) ContactUtils.getFriendlyAccountName(contactAccount) else null,
                                         leadingIcon = ContactUtils.getAccountIcon(contactAccount, contact!!.isPrivate),
                                         onClick = {}
                                     )

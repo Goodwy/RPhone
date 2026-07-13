@@ -32,6 +32,23 @@ class PreferenceManager(context: Context) {
     fun getFloat(key: String, defaultValue: Float)     = prefs.getFloat(key, defaultValue)
     fun setFloat(key: String, value: Float)            { prefs.edit { putFloat(key, value) } }
 
+    /** Returns true if an incoming call from [phoneNumber] should be gated behind biometric. */
+    fun shouldGateCallWithBiometric(phoneNumber: String?): Boolean {
+        if (!getBoolean(KEY_BIOMETRICS_CALL_LOCK, false)) return false
+        if ((getString(KEY_BIOMETRICS_TYPE, "") ?: "").isEmpty()) return false
+        val mode = getString(KEY_BIOMETRICS_CALL_LOCK_MODE, "all") ?: "all"
+        if (mode == "all") return true
+        if (phoneNumber.isNullOrBlank()) return mode == "skip_specified"
+        val stored = getString(KEY_BIOMETRICS_CALL_LOCK_NUMBERS, "") ?: ""
+        if (stored.isBlank()) return mode == "skip_specified"
+        val incoming = phoneNumber.filter { it.isDigit() }.takeLast(10)
+        val match = stored.split(",").any { raw ->
+            val n = raw.trim().filter { it.isDigit() }.takeLast(10)
+            n.isNotEmpty() && (incoming.endsWith(n) || n.endsWith(incoming))
+        }
+        return if (mode == "specified") match else !match
+    }
+
     fun setLastUsedNumber(contactId: String, number: String) {
         prefs.edit { putString("last_used_number_$contactId", number) }
     }
@@ -71,6 +88,15 @@ class PreferenceManager(context: Context) {
 
     fun setFavoritesOrder(order: List<String>) {
         setString(KEY_FAVORITES_ORDER, order.joinToString(","))
+    }
+
+    fun getVisibleAccounts(): Set<String>? {
+        val str = getString(KEY_VISIBLE_ACCOUNTS, null) ?: return null
+        return str.split(",").filter { it.isNotEmpty() }.toSet()
+    }
+
+    fun setVisibleAccounts(accounts: Set<String>) {
+        setString(KEY_VISIBLE_ACCOUNTS, accounts.joinToString(","))
     }
 
     companion object {
@@ -129,6 +155,10 @@ class PreferenceManager(context: Context) {
         const val KEY_LAST_USED_ACCOUNT_NAME = "last_used_account_name"
         const val KEY_LAST_USED_ACCOUNT_TYPE = "last_used_account_type"
         const val KEY_FAVORITES_ORDER = "favorites_order"
+        const val KEY_VISIBLE_ACCOUNTS = "visible_accounts"
+        const val KEY_CONTACT_SORT_ORDER = "contact_sort_order"
+        const val KEY_CONTACT_DISPLAY_ORDER = "contact_display_order"
+        const val KEY_PATREON_PROMPT_SHOWN = "patreon_prompt_shown"
 
         const val KEY_BLOCK_UNKNOWN         = "block_unknown_callers"
         const val KEY_BLOCK_HIDDEN          = "block_hidden_callers"
@@ -187,12 +217,19 @@ class PreferenceManager(context: Context) {
         const val KEY_TAB_SHOW_CONTACTS        = "tab_show_contacts"
         const val KEY_TAB_SHOW_DIALPAD         = "tab_show_dialpad"
         const val KEY_TAB_SHOW_NOTES           = "tab_show_notes"
+        const val KEY_TAB_SHOW_SETTINGS           = "tab_show_setting"
+        // Comma-separated list of tab keys (favorites, calls, contacts, notes)
+        // describing the order tabs appear in the bottom navigation bar.
+        const val KEY_TAB_ORDER                = "tab_order"
+        const val DEFAULT_TAB_ORDER            = "favorites,calls,contacts,dialpad,notes"
         // Biometrics
         const val KEY_BIOMETRICS_TYPE          = "biometrics_type"         // "system" | "pin" | "password" | ""
         const val KEY_BIOMETRICS_PIN           = "biometrics_pin"
         const val KEY_BIOMETRICS_PASSWORD      = "biometrics_password"
         const val KEY_BIOMETRICS_APP_LOCK      = "biometrics_app_lock"
         const val KEY_BIOMETRICS_CALL_LOCK     = "biometrics_call_lock"
+        const val KEY_BIOMETRICS_CALL_LOCK_MODE    = "biometrics_call_lock_mode"    // "all" | "specified" | "skip_specified"
+        const val KEY_BIOMETRICS_CALL_LOCK_NUMBERS = "biometrics_call_lock_numbers" // comma-separated phone numbers
 
 
         // Goodwy

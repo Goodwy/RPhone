@@ -17,4 +17,10 @@
         <item name="windowSplashScreenAnimatedIcon">@drawable/splash</item>
         <item name="postSplashScreenTheme">@style/Theme.RillPhone</item>
     </style>
+
+    <style name="Theme.BiometricCallFloat" parent="Theme.RillPhone">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
 </resources>

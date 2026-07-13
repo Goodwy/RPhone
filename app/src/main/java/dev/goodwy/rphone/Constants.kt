@@ -14,8 +14,8 @@ val GITHUB_API_RELEASES = "https://api.github.com/repos/Goodwy/RPhone/releases/l
 val PRIVACY_POLICY = "https://www.goodwy.dev/privacy-policy/privacy-policy-rill-dialer"
 
 // Goodwy
-const val device_only = "device_only"
-const val private_only = "private_only"
+const val device_only = "local"
+const val private_only = "private"
 
 val bottomBarHeight = 64.dp
 

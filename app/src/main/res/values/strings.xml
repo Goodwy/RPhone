@@ -1,7 +1,7 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name" translatable="false">Rill Phone</string>
     <string name="widget_description">Recent calls with quick dial</string>
-    <string name="copy">Copy</string>
+    <string name="copy" tools:ignore="PrivateResource">Copy</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
     <string name="open">Open</string>
@@ -9,6 +9,9 @@
     <string name="close">Close</string>
     <string name="select">Select</string>
     <string name="share">Share</string>
+
+    <!-- Search -->
+    <string name="search_contacts">Search contacts</string>
 
     <!-- Billing -->
     <string name="no_connection">No connection</string>

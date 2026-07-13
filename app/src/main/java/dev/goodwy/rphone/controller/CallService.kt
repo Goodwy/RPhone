@@ -22,25 +22,26 @@ import android.telecom.VideoProfile
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.IconCompat
+import androidx.core.net.toUri
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.modal.`interface`.IContactsRepository
+import dev.goodwy.rphone.view.screen.BiometricCallActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import org.koin.android.ext.android.inject
-import androidx.core.net.toUri
-import dev.goodwy.rphone.view.theme.MyColors
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 
 data class CallSession(
     val call: Call,
     val state: Int,
-    val updateTime: Long = System.currentTimeMillis()
+    val updateTime: Long = System.currentTimeMillis(),
+    val connectTimeMillis: Long = 0L
 )
 
 class CallService : InCallService() {
@@ -128,7 +129,7 @@ class CallService : InCallService() {
         }
 
         fun mergeCalls() {
-            val calls = instance?.getCalls() ?: return
+            val calls = instance?.calls ?: return
             if (calls.size >= 2) {
                 val activeCall = calls.find { it.state == Call.STATE_ACTIVE }
                 val heldCall = calls.find { it.state == Call.STATE_HOLDING }
@@ -172,6 +173,19 @@ class CallService : InCallService() {
     }
 
     private val callCallback = object : Call.Callback() {
+        override fun onConnectionEvent(call: Call, event: String, extras: android.os.Bundle?) {
+            super.onConnectionEvent(call, event, extras)
+            val number = call.details?.handle?.schemeSpecificPart?.let { android.net.Uri.decode(it) } ?: ""
+            if (isUssdNumber(number)) {
+                val resp = extras?.let { b ->
+                    b.getString("ussdResult") ?: b.getString("android.telecom.extra.ussd_message")
+                    ?: b.getString("android.telephony.extra.USSD_RESPONSE")
+                    ?: b.getString("response") ?: b.getString("result") ?: b.getString("data") ?: b.getString("message")
+                }
+                if (!resp.isNullOrBlank()) UssdRepository.post(number, resp)
+            }
+        }
+
         override fun onStateChanged(call: Call, state: Int) {
             super.onStateChanged(call, state)
             updateCallState()
@@ -338,7 +352,14 @@ class CallService : InCallService() {
             ?: calls.firstOrNull { it.state != Call.STATE_DISCONNECTED }
 
         if (priorityCall != null) {
-            _currentCallSession.value = CallSession(priorityCall, priorityCall.state)
+            val connectTime = if (priorityCall.state == Call.STATE_ACTIVE) {
+                if (priorityCall.details.connectTimeMillis > 0) {
+                    priorityCall.details.connectTimeMillis
+                } else {
+                    System.currentTimeMillis()
+                }
+            } else 0L
+            _currentCallSession.value = CallSession(priorityCall, priorityCall.state, connectTimeMillis = connectTime)
         } else {
             _currentCallSession.value = null
         }
@@ -353,13 +374,30 @@ class CallService : InCallService() {
         }
     }
 
+    private fun launchBiometricCallActivity(action: String) {
+        val intent = Intent(this, BiometricCallActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            putExtra("NOTIFICATION_PENDING_ACTION", action)
+        }
+        startActivity(intent)
+    }
+
     override fun onCallAdded(call: Call) {
         super.onCallAdded(call)
         instance = this
         redialCount = 0
         call.registerCallback(callCallback)
 
-        val number = call.details.handle?.schemeSpecificPart ?: ""
+        val number = call.details.handle?.schemeSpecificPart ?.let { android.net.Uri.decode(it) } ?: ""
+
+        // ── USSD / MMI outgoing calls ────────────────────────────────────────
+        // Do NOT launch CallActivity for codes like *124# *#06# ##002# *21*N#.
+        // com.android.phone owns MMI/USSD processing at the RIL level and shows
+        // its own system dialog — just return and let it handle everything.
+        val isUssd = call.state != Call.STATE_RINGING && isUssdNumber(number)
+        if (isUssd) return
+        // ────────────────────────────────────────────────────────────────────
+
         if (isNumberBlocked(number)) {
             handleBlockedCall(call, number)
             return
@@ -368,12 +406,14 @@ class CallService : InCallService() {
         updateCallState()
         updateNotification(call)
 
-        val intent = Intent(this, CallActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-        }
-        try {
-            startActivity(intent)
-        } catch (e: Exception) {
+        if (call.state != Call.STATE_RINGING) {
+            val intent = Intent(this, CallActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            }
+            try {
+                startActivity(intent)
+            } catch (_: Exception) {
+            }
         }
     }
 
@@ -400,13 +440,26 @@ class CallService : InCallService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             "ANSWER_CALL" -> {
-                answerCall()
-                val activityIntent = Intent(this, CallActivity::class.java).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                val phoneNumber = _currentCallSession.value?.call?.details?.handle?.schemeSpecificPart
+                if (preferenceManager.shouldGateCallWithBiometric(phoneNumber)) {
+                    launchBiometricCallActivity("ANSWER")
+                } else {
+                    answerCall()
+                    val intent = Intent(this, CallActivity::class.java).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                        putExtra("ANSWERED_FROM_NOTIFICATION", true)
+                    }
+                    startActivity(intent)
                 }
-                startActivity(activityIntent)
             }
-            "DECLINE_CALL" -> declineCall()
+            "DECLINE_CALL" -> {
+                val phoneNumber = _currentCallSession.value?.call?.details?.handle?.schemeSpecificPart
+                if (preferenceManager.shouldGateCallWithBiometric(phoneNumber)) {
+                    launchBiometricCallActivity("DECLINE")
+                } else {
+                    declineCall()
+                }
+            }
             "TOGGLE_MUTE" -> toggleMute()
             "TOGGLE_SPEAKER" -> cycleAudioRoute()
             "NOTES_CALL"   -> {
@@ -690,5 +743,12 @@ class CallService : InCallService() {
         if (!preferenceManager.getBoolean(PreferenceManager.KEY_FLOATING_CALL, false)) return
         if (!android.provider.Settings.canDrawOverlays(this)) return
         FloatingCallService.start(this, contactName, number)
+    }
+
+    /** Returns true for any MMI / USSD code like *124# *#06# ##002# *21*N# */
+    private fun isUssdNumber(number: String): Boolean {
+        if (number.isBlank()) return false
+        val n = android.net.Uri.decode(number).trim()
+        return (n.startsWith("*") || n.startsWith("#")) && n.endsWith("#")
     }
 }

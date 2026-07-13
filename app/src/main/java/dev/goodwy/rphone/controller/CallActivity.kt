@@ -24,6 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.fragment.app.FragmentActivity
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 import dev.goodwy.rphone.view.screen.ExpressiveCallScreen
@@ -31,7 +32,7 @@ import dev.goodwy.rphone.view.theme.Rill4Theme
 import kotlinx.coroutines.delay
 import org.koin.android.ext.android.inject
 
-class CallActivity : ComponentActivity() {
+class CallActivity : FragmentActivity() { //ComponentActivity()
 
     private val contactsRepo: IContactsRepository by inject()
     private val preferenceManager: PreferenceManager by inject()
@@ -155,13 +156,15 @@ class CallActivity : ComponentActivity() {
                         },
                         label = "CallSwitch"
                     ) { targetCall ->
+                        val answeredFromNotification = intent?.getBooleanExtra("ANSWERED_FROM_NOTIFICATION", false) ?: false
                         ExpressiveCallScreen(
                             call = targetCall,
                             callState = if (targetCall == call) session?.state ?: Call.STATE_ACTIVE else targetCall.state,
                             contactName = if (targetCall == call) contactName else (targetCall.details.handle?.schemeSpecificPart ?: "Unknown"),
                             phoneNumber = targetCall.details.handle?.schemeSpecificPart ?: "",
                             photoUri = if (targetCall == call) photoUri else null,
-                            audioState = audioState
+                            audioState = audioState,
+                            skipIncomingScreen = answeredFromNotification
                         )
                     }
                 } else {

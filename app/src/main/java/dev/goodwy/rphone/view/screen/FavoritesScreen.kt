@@ -57,12 +57,8 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.CheckBox
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.SelectAll
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.ui.geometry.Offset
@@ -94,8 +90,6 @@ import kotlin.math.abs
 import androidx.core.net.toUri
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.view.components.PlaceholderView
-import com.ramcosta.composedestinations.generated.destinations.ContactEditScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.ContactEditScreenDestination.invoke
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 
@@ -148,9 +142,9 @@ fun FavoritesScreen(navController: NavController, navigator: DestinationsNavigat
     fun saveFavoritesOrder() {
         prefs.setString(PreferenceManager.KEY_FAVORITES_ORDER, orderedFavorites.joinToString(",") { it.id })
     }
-    val contactsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS, true)
-    val dialpadEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD, true)
-    val notesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES, true)
+//    val contactsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS, true)
+//    val dialpadEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD, true)
+//    val notesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES, false)
     val context = LocalContext.current
 
     var showSimPicker by remember { mutableStateOf(false) }
@@ -189,58 +183,58 @@ fun FavoritesScreen(navController: NavController, navigator: DestinationsNavigat
     val pillNav = remember { prefs.getBoolean(PreferenceManager.KEY_PILL_NAV, false) }
     Scaffold(
         modifier = Modifier
-            .fillMaxSize()
-            .pointerInput(Unit) {
-                awaitPointerEventScope {
-                    while (true) {
-                        val down = awaitPointerEvent(PointerEventPass.Final).changes.firstOrNull() ?: continue
-                        if (!down.pressed) continue
-                        val startX = down.position.x
-                        val startY = down.position.y
-                        val startTime = System.currentTimeMillis()
-                        var triggered = false
-                        while (true) {
-                            val event = awaitPointerEvent(PointerEventPass.Final)
-                            val change = event.changes.firstOrNull() ?: break
-
-                            // Never swipe tabs while a drag-to-reorder is in progress
-                            if (draggedContactId != null) { if (!change.pressed) break; continue }
-
-                            val dx = change.position.x - startX
-                            val dy = change.position.y - startY
-                            val elapsed = System.currentTimeMillis() - startTime
-                            if (!triggered && elapsed >= 150L &&
-                                abs(dx) > 700f &&
-                                abs(dx) > abs(dy) * 5.5f
-                            ) {
-                                triggered = true
-                                if (dx < 0) {
-                                    scope.launch {
-                                        navController.navigate(RecentScreenDestination.route) {
-                                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                            launchSingleTop = true; restoreState = true
-                                        }
-                                    }
-                                } else {
-                                    val route = when {
-                                        notesEnabled -> NotesScreenDestination.route
-                                        dialpadEnabled -> DialPadScreenDestination().route
-                                        contactsEnabled -> ContactScreenDestination.route
-                                        else -> RecentScreenDestination.route
-                                    }
-                                    scope.launch {
-                                        navController.navigate(route) {
-                                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                            launchSingleTop = true; restoreState = true
-                                        }
-                                    }
-                                }
-                            }
-                            if (!change.pressed) break
-                        }
-                    }
-                }
-            },
+            .fillMaxSize(),
+//            .pointerInput(Unit) {
+//                awaitPointerEventScope {
+//                    while (true) {
+//                        val down = awaitPointerEvent(PointerEventPass.Final).changes.firstOrNull() ?: continue
+//                        if (!down.pressed) continue
+//                        val startX = down.position.x
+//                        val startY = down.position.y
+//                        val startTime = System.currentTimeMillis()
+//                        var triggered = false
+//                        while (true) {
+//                            val event = awaitPointerEvent(PointerEventPass.Final)
+//                            val change = event.changes.firstOrNull() ?: break
+//
+//                            // Never swipe tabs while a drag-to-reorder is in progress
+//                            if (draggedContactId != null) { if (!change.pressed) break; continue }
+//
+//                            val dx = change.position.x - startX
+//                            val dy = change.position.y - startY
+//                            val elapsed = System.currentTimeMillis() - startTime
+//                            if (!triggered && elapsed >= 150L &&
+//                                abs(dx) > 700f &&
+//                                abs(dx) > abs(dy) * 5.5f
+//                            ) {
+//                                triggered = true
+//                                if (dx < 0) {
+//                                    scope.launch {
+//                                        navController.navigate(RecentScreenDestination.route) {
+//                                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+//                                            launchSingleTop = true; restoreState = true
+//                                        }
+//                                    }
+//                                } else {
+//                                    val route = when {
+//                                        notesEnabled -> NotesScreenDestination.route
+//                                        dialpadEnabled -> DialPadScreenDestination().route
+//                                        contactsEnabled -> ContactScreenDestination.route
+//                                        else -> RecentScreenDestination.route
+//                                    }
+//                                    scope.launch {
+//                                        navController.navigate(route) {
+//                                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+//                                            launchSingleTop = true; restoreState = true
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                            if (!change.pressed) break
+//                        }
+//                    }
+//                }
+//            },
         topBar = {
             AnimatedContent(
                 targetState = selectedIds.isNotEmpty(),

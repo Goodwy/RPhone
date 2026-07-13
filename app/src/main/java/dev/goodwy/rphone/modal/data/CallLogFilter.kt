@@ -13,7 +13,7 @@ enum class CallLogFilter {
             val filteredList = when (type) {
                 All -> logs
                 Missed -> logs.filter { it.type == android.provider.CallLog.Calls.MISSED_TYPE }
-                Contacts -> logs.filter { !it.name.isNullOrEmpty() }
+                Contacts -> logs.filter { it.contactId != null }
                 Incoming -> logs.filter { it.type == android.provider.CallLog.Calls.INCOMING_TYPE }
                 Outgoing -> logs.filter { it.type == android.provider.CallLog.Calls.OUTGOING_TYPE }
                 Rejected -> logs.filter { it.type == android.provider.CallLog.Calls.REJECTED_TYPE }

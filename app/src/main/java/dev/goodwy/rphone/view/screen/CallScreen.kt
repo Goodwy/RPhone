@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
 import android.media.ToneGenerator
+import android.os.Build
 import android.telecom.Call
 import android.telecom.TelecomManager
 import android.telecom.CallAudioState
@@ -46,7 +47,6 @@ import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material.icons.rounded.Mic
 import androidx.compose.material.icons.rounded.MicOff
-import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.SwapCalls
 import androidx.compose.material3.*
@@ -83,28 +83,33 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
+import androidx.fragment.app.FragmentActivity
 import coil.compose.AsyncImage
+import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.CallService
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.modal.`interface`.IContactsRepository
+import dev.goodwy.rphone.cardCornerSmall
+import dev.goodwy.rphone.controller.util.NoteManager
+import dev.goodwy.rphone.modal.data.getDisplayName
+import dev.goodwy.rphone.view.components.RillExpressiveCard
+import dev.goodwy.rphone.view.components.RillIconBox
+import dev.goodwy.rphone.view.screen.onboarding.wavyCircleShape
+import dev.goodwy.rphone.view.screen.settings.PasswordSetupDialog
+import dev.goodwy.rphone.view.screen.settings.PinSetupDialog
+import dev.goodwy.rphone.view.theme.MyColors.bottomBarColor
+import dev.goodwy.rphone.view.theme.MyColors.cardColor
+import dev.goodwy.rphone.view.theme.MyColors.dialpadKeyColor
+import dev.goodwy.rphone.view.theme.color_call_button
+import dev.goodwy.rphone.view.theme.color_call_end
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.roundToInt
-import androidx.core.net.toUri
-import dev.goodwy.rphone.R
-import dev.goodwy.rphone.cardCornerSmall
-import dev.goodwy.rphone.controller.util.NoteManager
-import dev.goodwy.rphone.view.components.RillExpressiveCard
-import dev.goodwy.rphone.view.components.RillIconBox
-import dev.goodwy.rphone.view.screen.onboarding.wavyCircleShape
-import dev.goodwy.rphone.view.theme.MyColors.bottomBarColor
-import dev.goodwy.rphone.view.theme.MyColors.cardColor
-import dev.goodwy.rphone.view.theme.MyColors.dialpadKeyColor
-import dev.goodwy.rphone.view.theme.color_call_button
-import dev.goodwy.rphone.view.theme.color_call_end
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun ExpressiveCallScreen(
@@ -113,7 +118,8 @@ fun ExpressiveCallScreen(
     contactName: String,
     phoneNumber: String,
     photoUri: String?,
-    audioState: CallAudioState?
+    audioState: CallAudioState?,
+    skipIncomingScreen: Boolean = false
 ) {
     val view = LocalView.current
     val context = LocalContext.current
@@ -123,6 +129,7 @@ fun ExpressiveCallScreen(
     
     val allCalls by CallService.allCalls.collectAsState()
     val otherCall = remember(allCalls, call) {
+        @Suppress("DEPRECATION")
         allCalls.find { it != call && it.state != Call.STATE_DISCONNECTED }
     }
 
@@ -158,12 +165,12 @@ fun ExpressiveCallScreen(
     }
 
     val connectTime = remember(call) { call.details.connectTimeMillis }
-//    LaunchedEffect(callState) {
+//    LaunchedEffect(callState, call.details.connectTimeMillis) {
 //        if (callState == Call.STATE_ACTIVE) {
-//            val startTime = System.currentTimeMillis() - (callDuration * 1000)
+//            val connectTime = if (call.details.connectTimeMillis > 0) call.details.connectTimeMillis else System.currentTimeMillis()
 //            while (true) {
-//                callDuration = (System.currentTimeMillis() - startTime) / 1000
-//                delay(1000)
+//                callDuration = (System.currentTimeMillis() - connectTime) / 1000
+//                delay(1.seconds)
 //            }
 //        }
 //    }
@@ -190,6 +197,26 @@ fun ExpressiveCallScreen(
     // Call notes --->
     var showNoteWindow by remember { mutableStateOf(false) }
     var noteText by remember { mutableStateOf("") }
+
+    // ── Call-lock biometric ────────────────────────────────────────────────
+    val callLockEnabled = remember {
+        preferenceManager.shouldGateCallWithBiometric(phoneNumber)
+    }
+    var callBiometricUnlocked by remember { mutableStateOf(!callLockEnabled || skipIncomingScreen) }
+
+    var showCallBiometricUnlock by remember { mutableStateOf(false) }
+    var biometricGatesScreen by remember { mutableStateOf(false) }
+    var pendingAction by remember { mutableStateOf<(() -> Unit)?>(null) }
+
+    // Gate the incoming call screen behind biometric when call arrives ringing
+    LaunchedEffect(callState) {
+        if (callLockEnabled && !callBiometricUnlocked && !showCallBiometricUnlock) {
+            if (callState == Call.STATE_RINGING) {
+                biometricGatesScreen = true
+                showCallBiometricUnlock = true
+            }
+        }
+    }
 
     LaunchedEffect(phoneNumber) {
         if (phoneNumber.isNotEmpty() && noteText.isBlank()) {
@@ -220,7 +247,8 @@ fun ExpressiveCallScreen(
 
     Box(modifier = Modifier
         .fillMaxSize()
-        .background(MaterialTheme.colorScheme.surface)) {
+        .background(MaterialTheme.colorScheme.surface)
+    ) {
         if (!photoUri.isNullOrEmpty()) ExpressiveBackground(photoUri)
         FloatingParticles()
 
@@ -240,11 +268,12 @@ fun ExpressiveCallScreen(
             ) {
                 otherCall?.let { oc ->
                     var ocName by remember(oc) { mutableStateOf(oc.details.handle?.schemeSpecificPart ?: "Unknown") }
+                    val displayOrder = preferenceManager.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0)
                     LaunchedEffect(oc) {
                         val number = oc.details.handle?.schemeSpecificPart ?: ""
                         if (number.isNotEmpty()) {
                             val contact = try { contactsRepo.getContactByNumber(number) } catch (_: Exception) { null }
-                            if (contact != null) ocName = contact.displayName
+                            if (contact != null) ocName = getDisplayName(contact, displayOrder) //contact.displayName
                         }
                     }
                     
@@ -503,10 +532,8 @@ fun ExpressiveCallScreen(
                                             )
                                             MoreItem(
                                                 headline = if (otherCall != null) stringResource(R.string.swap)
-                                                else if (callState == Call.STATE_HOLDING) stringResource(
-                                                    R.string.resume
-                                                )
-                                                else stringResource(R.string.hold),
+                                                            else if (callState == Call.STATE_HOLDING) stringResource(R.string.resume)
+                                                            else stringResource(R.string.hold),
                                                 leadingIcon = if (otherCall != null) Icons.Rounded.SwapCalls
                                                 else if (callState == Call.STATE_HOLDING) Icons.Rounded.PlayArrow
                                                 else Icons.Default.Pause,
@@ -860,16 +887,58 @@ fun ExpressiveCallScreen(
                             }
                         )
                         useCustomUI == 3 -> VerticalSwipeToAnswer(
-                            onAnswer = { try { call.answer(VideoProfile.STATE_AUDIO_ONLY) } catch (_: Exception) {} },
-                            onDecline = { try { call.disconnect() } catch (_: Exception) {} }
+                            onAnswer = {
+                                if (callBiometricUnlocked) {
+                                    try { call.answer(VideoProfile.STATE_AUDIO_ONLY) } catch (_: Exception) {}
+                                } else {
+                                    pendingAction = { try { call.answer(VideoProfile.STATE_AUDIO_ONLY) } catch (_: Exception) {} }
+                                    showCallBiometricUnlock = true
+                                }
+                            },
+                            onDecline = {
+                                if (callBiometricUnlocked) {
+                                    try { call.disconnect() } catch (_: Exception) {}
+                                } else {
+                                    pendingAction = { try { call.disconnect() } catch (_: Exception) {} }
+                                    showCallBiometricUnlock = true
+                                }
+                            }
                         )
                         useCustomUI == 0 -> HorizontalSwipeToAnswer(
-                            onAnswer = { try { call.answer(VideoProfile.STATE_AUDIO_ONLY) } catch (_: Exception) {} },
-                            onDecline = { try { call.disconnect() } catch (_: Exception) {} }
+                            onAnswer = {
+                                if (callBiometricUnlocked) {
+                                    try { call.answer(VideoProfile.STATE_AUDIO_ONLY) } catch (_: Exception) {}
+                                } else {
+                                    pendingAction = { try { call.answer(VideoProfile.STATE_AUDIO_ONLY) } catch (_: Exception) {} }
+                                    showCallBiometricUnlock = true
+                                }
+                            },
+                            onDecline = {
+                                if (callBiometricUnlocked) {
+                                    try { call.disconnect() } catch (_: Exception) {}
+                                } else {
+                                    pendingAction = { try { call.disconnect() } catch (_: Exception) {} }
+                                    showCallBiometricUnlock = true
+                                }
+                            }
                         )
                         else -> DefaultSwipeToAnswer(
-                            onAnswer = { try { call.answer(VideoProfile.STATE_AUDIO_ONLY) } catch (_: Exception) {} },
-                            onDecline = { try { call.disconnect() } catch (_: Exception) {} },
+                            onAnswer = {
+                                if (callBiometricUnlocked) {
+                                    try { call.answer(VideoProfile.STATE_AUDIO_ONLY) } catch (_: Exception) {}
+                                } else {
+                                    pendingAction = { try { call.answer(VideoProfile.STATE_AUDIO_ONLY) } catch (_: Exception) {} }
+                                    showCallBiometricUnlock = true
+                                }
+                            },
+                            onDecline = {
+                                if (callBiometricUnlocked) {
+                                    try { call.disconnect() } catch (_: Exception) {}
+                                } else {
+                                    pendingAction = { try { call.disconnect() } catch (_: Exception) {} }
+                                    showCallBiometricUnlock = true
+                                }
+                            },
                             onMessage = {
                                 view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                                 try { call.disconnect() } catch (_: Exception) {}
@@ -881,6 +950,72 @@ fun ExpressiveCallScreen(
                         )
                     }
                 }
+            }
+        }
+    }
+
+    // ── Call biometric — direct prompt, no overlay ────────────────────
+    if (showCallBiometricUnlock) {
+        val biometricType = preferenceManager.getString(PreferenceManager.KEY_BIOMETRICS_TYPE, "") ?: ""
+        val callActivity   = LocalContext.current as? FragmentActivity
+        fun onBiometricFail() {
+            showCallBiometricUnlock = false
+            pendingAction = null
+            // Don't disconnect — let the call keep ringing so the user can retry
+        }
+        when (biometricType) {
+            "system" -> {
+                LaunchedEffect(showCallBiometricUnlock) {
+                    val activity = callActivity ?: run { onBiometricFail(); return@LaunchedEffect }
+                    val executor = androidx.core.content.ContextCompat.getMainExecutor(activity)
+                    val prompt = androidx.biometric.BiometricPrompt(
+                        activity, executor,
+                        object : androidx.biometric.BiometricPrompt.AuthenticationCallback() {
+                            override fun onAuthenticationSucceeded(result: androidx.biometric.BiometricPrompt.AuthenticationResult) {
+                                callBiometricUnlocked = true
+                                biometricGatesScreen = false
+                                showCallBiometricUnlock = false
+                                pendingAction?.invoke(); pendingAction = null
+                            }
+                            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) { onBiometricFail() }
+                            override fun onAuthenticationFailed() { /* keep prompt open */ }
+                        }
+                    )
+                    prompt.authenticate(
+                        androidx.biometric.BiometricPrompt.PromptInfo.Builder()
+                            .setTitle("Ever Dialer")
+                            .setSubtitle("Verify your identity to access this call")
+                            .setNegativeButtonText("Cancel")
+                            .setAllowedAuthenticators(androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK)
+                            .build()
+                    )
+                }
+            }
+            "pin" -> {
+                PinSetupDialog(
+                    title = "Enter PIN", isVerify = true,
+                    expectedPin = preferenceManager.getString(PreferenceManager.KEY_BIOMETRICS_PIN, "") ?: "",
+                    showCloseButton = !biometricGatesScreen,
+                    onConfirm = {
+                        callBiometricUnlocked = true; biometricGatesScreen = false
+                        showCallBiometricUnlock = false
+                        pendingAction?.invoke(); pendingAction = null
+                    },
+                    onDismiss = { onBiometricFail() }
+                )
+            }
+            "password" -> {
+                PasswordSetupDialog(
+                    title = "Enter Password", isVerify = true,
+                    expectedPassword = preferenceManager.getString(PreferenceManager.KEY_BIOMETRICS_PASSWORD, "") ?: "",
+                    showCloseButton = !biometricGatesScreen,
+                    onConfirm = {
+                        callBiometricUnlocked = true; biometricGatesScreen = false
+                        showCallBiometricUnlock = false
+                        pendingAction?.invoke(); pendingAction = null
+                    },
+                    onDismiss = { onBiometricFail() }
+                )
             }
         }
     }
@@ -1482,12 +1617,20 @@ fun HorizontalSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit) {
                             coroutineScope.launch {
                                 when {
                                     offsetX.value > triggerThreshold -> {
-                                        view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                            view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+                                        } else {
+                                            view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                                        }
                                         onAnswer()
                                     }
 
                                     offsetX.value < -triggerThreshold -> {
-                                        view.performHapticFeedback(HapticFeedbackConstants.REJECT)
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                            view.performHapticFeedback(HapticFeedbackConstants.REJECT)
+                                        } else {
+                                            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                                        }
                                         onDecline()
                                     }
 
@@ -1671,12 +1814,20 @@ fun VerticalSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit) {
                                 coroutineScope.launch {
                                     when {
                                         offsetY.value < -triggerThreshold -> {
-                                            view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                                view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+                                            } else {
+                                                view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                                            }
                                             onAnswer()
                                         }
 
                                         offsetY.value > triggerThreshold -> {
-                                            view.performHapticFeedback(HapticFeedbackConstants.REJECT)
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                                view.performHapticFeedback(HapticFeedbackConstants.REJECT)
+                                            } else {
+                                                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                                            }
                                             onDecline()
                                         }
 
@@ -1878,7 +2029,11 @@ fun IPhoneSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit, onMessage: 
                             onDragEnd = {
                                 coroutineScope.launch {
                                     if (offsetX.value > maxDrag * 0.85f) {
-                                        view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                            view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+                                        } else {
+                                            view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                                        }
                                         onAnswer()
                                     } else {
                                         offsetX.animateTo(0f, spring(dampingRatio = 0.8f))
@@ -2259,7 +2414,11 @@ fun DefaultSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit, onMessage:
                             onDragEnd = {
                                 coroutineScope.launch {
                                     if (offsetX.value > maxDrag * 0.85f) {
-                                        view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                            view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+                                        } else {
+                                            view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                                        }
                                         onAnswer()
                                     } else {
                                         offsetX.animateTo(0f, spring(dampingRatio = 0.8f))

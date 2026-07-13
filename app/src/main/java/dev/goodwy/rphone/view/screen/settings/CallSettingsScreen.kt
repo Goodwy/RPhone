@@ -103,7 +103,7 @@ fun ContactsToDisplayDialog(
                                 style = MaterialTheme.typography.bodyLarge
                             )
                             Text(
-                                text = ContactUtils.getAccountType(source),
+                                text = ContactUtils.getFriendlyAccountName(source),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

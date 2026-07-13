@@ -80,6 +80,7 @@ import dev.goodwy.rphone.device_only
 import dev.goodwy.rphone.view.theme.customColors
 import dev.goodwy.rphone.view.theme.TabTransitionStyle
 import com.ramcosta.composedestinations.generated.destinations.ContactEditScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.ContactVisibilityScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.DialPadScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.FavoritesScreenDestination
 import dev.goodwy.rphone.private_only
@@ -103,9 +104,9 @@ fun ContactScreen(navController: NavController, navigator: DestinationsNavigator
 
     val prefs = koinInject<PreferenceManager>()
     val pillNav = remember { prefs.getBoolean(PreferenceManager.KEY_PILL_NAV, false) }
-    val favoritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, true)
-    val dialpadEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD, true)
-    val notesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES, true)
+//    val favoritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, true)
+//    val dialpadEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD, true)
+//    val notesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES, false)
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     val contactsVM: ContactsViewModel = koinActivityViewModel()
@@ -118,60 +119,60 @@ fun ContactScreen(navController: NavController, navigator: DestinationsNavigator
 
     Scaffold(
         modifier = Modifier
-            .fillMaxSize()
-            .pointerInput(Unit) {
-                awaitPointerEventScope {
-                    while (true) {
-                        val down = awaitPointerEvent(PointerEventPass.Final).changes.firstOrNull()
-                            ?: continue
-                        if (!down.pressed) continue
-                        val startX = down.position.x
-                        val startY = down.position.y
-                        val startTime = System.currentTimeMillis()
-                        var triggered = false
-                        while (true) {
-                            val event = awaitPointerEvent(PointerEventPass.Final)
-                            val change = event.changes.firstOrNull() ?: break
-                            val dx = change.position.x - startX
-                            val dy = change.position.y - startY
-                            val elapsed = System.currentTimeMillis() - startTime
-                            if (!triggered && elapsed >= 150L && !change.isConsumed && kotlin.math.abs(
-                                    dx
-                                ) > 700f && kotlin.math.abs(dx) > kotlin.math.abs(dy) * 5.5f
-                            ) {
-                                triggered = true
-                                if (dx > 0) {
-                                    scope.launch {
-                                        navController.navigate(RecentScreenDestination.route) {
-                                            popUpTo(navController.graph.findStartDestination().id) {
-                                                saveState = true
-                                            }
-                                            launchSingleTop = true; restoreState = true
-                                        }
-                                    }
-                                } else {
-                                    // swipe left from Contacts → Notes (wrap around)
-                                    val route = when {
-                                        dialpadEnabled -> DialPadScreenDestination().route
-                                        notesEnabled -> NotesScreenDestination.route
-                                        favoritesEnabled -> FavoritesScreenDestination.route
-                                        else -> RecentScreenDestination.route
-                                    }
-                                    scope.launch {
-                                        navController.navigate(route) {
-                                            popUpTo(navController.graph.findStartDestination().id) {
-                                                saveState = true
-                                            }
-                                            launchSingleTop = true; restoreState = true
-                                        }
-                                    }
-                                }
-                            }
-                            if (!change.pressed) break
-                        }
-                    }
-                }
-            },
+            .fillMaxSize(),
+//            .pointerInput(Unit) {
+//                awaitPointerEventScope {
+//                    while (true) {
+//                        val down = awaitPointerEvent(PointerEventPass.Final).changes.firstOrNull()
+//                            ?: continue
+//                        if (!down.pressed) continue
+//                        val startX = down.position.x
+//                        val startY = down.position.y
+//                        val startTime = System.currentTimeMillis()
+//                        var triggered = false
+//                        while (true) {
+//                            val event = awaitPointerEvent(PointerEventPass.Final)
+//                            val change = event.changes.firstOrNull() ?: break
+//                            val dx = change.position.x - startX
+//                            val dy = change.position.y - startY
+//                            val elapsed = System.currentTimeMillis() - startTime
+//                            if (!triggered && elapsed >= 150L && !change.isConsumed && kotlin.math.abs(
+//                                    dx
+//                                ) > 700f && kotlin.math.abs(dx) > kotlin.math.abs(dy) * 5.5f
+//                            ) {
+//                                triggered = true
+//                                if (dx > 0) {
+//                                    scope.launch {
+//                                        navController.navigate(RecentScreenDestination.route) {
+//                                            popUpTo(navController.graph.findStartDestination().id) {
+//                                                saveState = true
+//                                            }
+//                                            launchSingleTop = true; restoreState = true
+//                                        }
+//                                    }
+//                                } else {
+//                                    // swipe left from Contacts → Notes (wrap around)
+//                                    val route = when {
+//                                        dialpadEnabled -> DialPadScreenDestination().route
+//                                        notesEnabled -> NotesScreenDestination.route
+//                                        favoritesEnabled -> FavoritesScreenDestination.route
+//                                        else -> RecentScreenDestination.route
+//                                    }
+//                                    scope.launch {
+//                                        navController.navigate(route) {
+//                                            popUpTo(navController.graph.findStartDestination().id) {
+//                                                saveState = true
+//                                            }
+//                                            launchSingleTop = true; restoreState = true
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                            if (!change.pressed) break
+//                        }
+//                    }
+//                }
+//            },
         topBar = {
             AnimatedContent(
                 targetState = selectedIds.isNotEmpty(),
@@ -184,6 +185,7 @@ fun ContactScreen(navController: NavController, navigator: DestinationsNavigator
                     Column {
                         TopBar(navController, navigator)
                         AccountFilterBar(
+                            navigator = navigator,
                             viewModel = contactsVM,
                             onAddContact = {
                                 navigator.navigate(ContactEditScreenDestination())
@@ -346,13 +348,13 @@ fun ContactScreen(navController: NavController, navigator: DestinationsNavigator
                     .then(
                         if (isLandscape) Modifier
                             .navigationBarsPadding()
-                            .padding(bottom = 16.dp, end = 32.dp)
+                            .padding(bottom = 12.dp, end = 32.dp)
                         else if (pillNav) Modifier
                             .navigationBarsPadding()
                             .padding(bottom = 92.dp + 8.dp, end = 32.dp)
                         else Modifier
                             .navigationBarsPadding()
-                            .padding(bottom = bottomBarHeight + 8.dp, end = 32.dp)
+                            .padding(bottom = bottomBarHeight + 12.dp, end = 32.dp)
                     ),
                 visible = showButton && selectedIds.isEmpty(),
                 onClick = {
@@ -367,13 +369,16 @@ fun ContactScreen(navController: NavController, navigator: DestinationsNavigator
 
 @Composable
 fun AccountFilterBar(
+    navigator: DestinationsNavigator,
     viewModel: ContactsViewModel,
     onAddContact: () -> Unit,
 ) {
-    val accounts by viewModel.availableAccounts.collectAsState()
+    val accounts by viewModel.filteredAvailableAccounts.collectAsState()
     val selectedAccount by viewModel.selectedAccount.collectAsState()
-    val showOnlyDeviceContacts by viewModel.showOnlyDeviceContacts.collectAsState()
+    val showLocalOnly by viewModel.showLocalOnly.collectAsState()
     val showPrivateOnly by viewModel.showPrivateOnly.collectAsState()
+    val visibleAccounts by viewModel.visibleAccountsFlow.collectAsState()
+    val showLocalOnlyAccount = visibleAccounts?.contains("local|local") ?: true
     LaunchedEffect(Unit) { viewModel.fetchAccounts() }
 
 //    if (accounts.isNotEmpty()) {
@@ -385,9 +390,21 @@ fun AccountFilterBar(
 //            horizontalArrangement = Arrangement.spacedBy(8.dp)
 //        ) {
 //            item {
-//                RillFilterChip("All", selectedAccount == null, {
+//                RillFilterChip("All", selectedAccount == null && !showPrivateOnly && !showLocalOnly, {
 //                        _ ->
 //                    viewModel.selectAccount(null)
+//                    viewModel.setShowPrivateOnly(false)
+//                    viewModel.setShowLocalOnly(false)
+//                })
+//            }
+//            item {
+//                RillFilterChip("Local Memory", showLocalOnly, {
+//                    viewModel.setShowLocalOnly(true)
+//                })
+//            }
+//            item {
+//                RillFilterChip("Private", showPrivateOnly, {
+//                    viewModel.setShowPrivateOnly(true)
 //                })
 //            }
 //            items(accounts) { account ->
@@ -420,12 +437,12 @@ fun AccountFilterBar(
     val contactsCountText = when {
         showPrivateOnly -> {
             val privateOnlyCount = allContacts.count { it.isPrivate }
-            val privateOnly = ContactUtils.getAccountType(null, true)
+            val privateOnly = ContactUtils.getFriendlyAccountName(null, true)
             "$privateOnly · $privateOnlyCount"
         }
-        showOnlyDeviceContacts -> {
+        showLocalOnly -> {
             val deviceOnlyCount = allContacts.count { it.accountName == null && it.accountType == null && !it.isPrivate }
-            val deviceOnly = ContactUtils.getAccountType(null)
+            val deviceOnly = ContactUtils.getFriendlyAccountName(null)
             "$deviceOnly · $deviceOnlyCount"
         }
         selectedAccount != null -> {
@@ -453,13 +470,14 @@ fun AccountFilterBar(
         Surface(
             modifier = Modifier.combinedClickable(
                 onClick = { showAccountSheet = true },
+                onLongClick = { navigator.navigate(ContactVisibilityScreenDestination) },
                 interactionSource = interactionSource,
                 indication = null,
             ),
             shape = RoundedCornerShape(cornerRadius),
             color = when {
                 showPrivateOnly -> MaterialTheme.colorScheme.tertiaryContainer
-                showOnlyDeviceContacts -> MaterialTheme.colorScheme.tertiaryContainer
+                showLocalOnly -> MaterialTheme.colorScheme.tertiaryContainer
                 selectedAccount != null -> MaterialTheme.colorScheme.secondaryContainer
                 else -> MaterialTheme.colorScheme.primaryContainer
             }
@@ -477,7 +495,7 @@ fun AccountFilterBar(
                 Icon(
                     imageVector = when {
                         showPrivateOnly -> ContactUtils.getAccountIcon(null, true)
-                        showOnlyDeviceContacts -> ContactUtils.getAccountIcon(null)
+                        showLocalOnly -> ContactUtils.getAccountIcon(null)
                         selectedAccount != null -> ContactUtils.getAccountIcon(selectedAccount)
                         else -> Icons.Rounded.PeopleAlt
                     },
@@ -485,7 +503,7 @@ fun AccountFilterBar(
                     modifier = Modifier.size(14.dp),
                     tint = when {
                         showPrivateOnly -> MaterialTheme.colorScheme.onTertiaryContainer
-                        showOnlyDeviceContacts -> MaterialTheme.colorScheme.onTertiaryContainer
+                        showLocalOnly -> MaterialTheme.colorScheme.onTertiaryContainer
                         selectedAccount != null -> MaterialTheme.colorScheme.onSecondaryContainer
                         else -> MaterialTheme.colorScheme.onPrimaryContainer
                     }
@@ -496,7 +514,7 @@ fun AccountFilterBar(
                     fontWeight = FontWeight.SemiBold,
                     color = when {
                         showPrivateOnly -> MaterialTheme.colorScheme.onTertiaryContainer
-                        showOnlyDeviceContacts -> MaterialTheme.colorScheme.onTertiaryContainer
+                        showLocalOnly -> MaterialTheme.colorScheme.onTertiaryContainer
                         selectedAccount != null -> MaterialTheme.colorScheme.onSecondaryContainer
                         else -> MaterialTheme.colorScheme.onPrimaryContainer
                     },
@@ -509,7 +527,7 @@ fun AccountFilterBar(
                     modifier = Modifier.size(16.dp),
                     tint = when {
                         showPrivateOnly -> MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f)
-                        showOnlyDeviceContacts -> MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f)
+                        showLocalOnly -> MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f)
                         selectedAccount != null -> MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
                         else -> MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                     }
@@ -570,9 +588,10 @@ fun AccountFilterBar(
             AccountSwitcherSheet(
                 accounts = accounts,
                 selectedAccount = selectedAccount,
-                showDeviceOnly = showOnlyDeviceContacts,
+                showLocalOnly = showLocalOnly,
+                showLocalOnlyAccount = showLocalOnlyAccount,
                 showPrivateOnly = showPrivateOnly,
-                totalCount = allContacts.size,
+                totalCount = filteredContacts.size,
                 contactCountByAccount = { accountName, accountType ->
                     if (accountName == null) {
                         allContacts.count { it.accountName == null && it.accountType == null }
@@ -583,23 +602,23 @@ fun AccountFilterBar(
                 contactCountByPrivate = allContacts.count { it.isPrivate },
                 onSelectAll = {
                     showAccountSheet = false
-                    viewModel.setShowOnlyDeviceContacts(false)
+                    viewModel.setShowLocalOnly(false)
                     viewModel.setShowPrivateOnly(false)
                     viewModel.selectAccount(null)
                 },
                 onSelectDeviceOnly = {
                     showAccountSheet = false
-                    viewModel.setShowOnlyDeviceContacts(true)
+                    viewModel.setShowLocalOnly(true)
                     viewModel.setShowPrivateOnly(false)
                 },
                 onSelectPrivateOnly = {
                     showAccountSheet = false
-                    viewModel.setShowOnlyDeviceContacts(false)
+                    viewModel.setShowLocalOnly(false)
                     viewModel.setShowPrivateOnly(true)
                 },
                 onSelectAccount = { account ->
                     showAccountSheet = false
-                    viewModel.setShowOnlyDeviceContacts(false)
+                    viewModel.setShowLocalOnly(false)
                     viewModel.setShowPrivateOnly(false)
                     viewModel.selectAccount(account)
                 },
@@ -861,7 +880,8 @@ fun ContactContent(
 private fun AccountSwitcherSheet(
     accounts: List<Account>,
     selectedAccount: Account?,
-    showDeviceOnly: Boolean,
+    showLocalOnly: Boolean,
+    showLocalOnlyAccount: Boolean,
     showPrivateOnly: Boolean,
     totalCount: Int,
     contactCountByAccount: (String?, String?) -> Int,
@@ -907,7 +927,7 @@ private fun AccountSwitcherSheet(
                         icon = Icons.Rounded.PeopleAlt,
                         name = "All Contacts",
                         subtitle = pluralStringResource(R.plurals.contacts_count, totalCount, totalCount),
-                        isSelected = !showDeviceOnly && !showPrivateOnly && selectedAccount == null,
+                        isSelected = !showLocalOnly && !showPrivateOnly && selectedAccount == null,
                         onClick = onSelectAll
                     )
                 }
@@ -916,7 +936,7 @@ private fun AccountSwitcherSheet(
                 item {
                     AccountRow(
                         icon = ContactUtils.getAccountIcon(null, true),
-                        name = ContactUtils.getAccountType(null, true),
+                        name = ContactUtils.getFriendlyAccountName(null, true),
                         subtitle = pluralStringResource(R.plurals.contacts_count, contactCountByPrivate, contactCountByPrivate),
                         isSelected = showPrivateOnly,
                         onClick = onSelectPrivateOnly
@@ -924,15 +944,22 @@ private fun AccountSwitcherSheet(
                 }
 
                 // "Device only" row - for contacts without an account (local device contacts)
-                item {
-                    val deviceOnlyCount = contactCountByAccount(null, null) - contactCountByPrivate
-                    AccountRow(
-                        icon = ContactUtils.getAccountIcon(null),
-                        name = ContactUtils.getAccountType(null),
-                        subtitle = pluralStringResource(R.plurals.contacts_count, deviceOnlyCount, deviceOnlyCount),
-                        isSelected = showDeviceOnly,
-                        onClick = onSelectDeviceOnly
-                    )
+                if (showLocalOnlyAccount) {
+                    item {
+                        val deviceOnlyCount =
+                            contactCountByAccount(null, null) - contactCountByPrivate
+                        AccountRow(
+                            icon = ContactUtils.getAccountIcon(null),
+                            name = ContactUtils.getFriendlyAccountName(null),
+                            subtitle = pluralStringResource(
+                                R.plurals.contacts_count,
+                                deviceOnlyCount,
+                                deviceOnlyCount
+                            ),
+                            isSelected = showLocalOnly,
+                            onClick = onSelectDeviceOnly
+                        )
+                    }
                 }
 
                 if (accounts.isNotEmpty()) {
@@ -942,7 +969,7 @@ private fun AccountSwitcherSheet(
                             icon = ContactUtils.getAccountIcon(account),
                             name = ContactUtils.getAccountName(account),
                             subtitle = pluralStringResource(R.plurals.contacts_count, count, count),
-                            isSelected = !showDeviceOnly && !showPrivateOnly && selectedAccount?.name == account.name,
+                            isSelected = !showLocalOnly && !showPrivateOnly && selectedAccount?.name == account.name,
                             onClick = { onSelectAccount(account) }
                         )
                     }

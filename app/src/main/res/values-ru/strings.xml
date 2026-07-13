@@ -9,6 +9,13 @@
     <string name="select">Выбрать</string>
     <string name="share">Поделиться</string>
 
+    <!-- Search -->
+    <string name="search_contacts">Поиск в контактах</string>
+
+    <!-- Billing -->
+    <string name="no_connection">Нет связи</string>
+    <string name="loading_price">Загрузка…</string>
+
     <!-- Project support -->
     <string name="project_support">Поддержка проекта</string>
     <string name="project_support_summary">Приобретите приложение для поддержки будущих разработок и получения дополнительных функций</string>
@@ -45,10 +52,6 @@
     <string name="your_donation_ensures_2">✅ Добавлять новые функции и улучшения</string>
     <string name="your_donation_ensures_3">✅ Обеспечивать бесплатный доступ для всех</string>
     <string name="your_donation_ensures_4">✅ Продолжать разработку с открытым исходным кодом</string>
-
-    <!-- Billing -->
-    <string name="no_connection">Нет связи</string>
-    <string name="loading_price">Загрузка…</string>
 
     <!-- About -->
     <string name="about">О приложении</string>

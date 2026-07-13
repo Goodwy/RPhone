@@ -3,10 +3,6 @@
     android:enableOnBackInvokedCallback="true"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-feature
-        android:name="android.hardware.telephony"
-        android:required="false" />
-
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
@@ -30,16 +26,16 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="28" />
+        android:maxSdkVersion="29"
+        tools:replace="android:maxSdkVersion" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission
-        android:name="android.permission.QUERY_ALL_PACKAGES"
-        tools:node="remove"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
+    <uses-feature android:name="android.hardware.telephony" android:required="false" />
+    <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="false" />
+    <uses-feature android:name="android.hardware.sensor.proximity" android:required="false" />
+
     <queries>
-        <package android:name="com.whatsapp" />
-        <package android:name="com.whatsapp.w4b" />
         <intent>
             <action android:name="android.intent.action.DIAL" />
             <data android:scheme="tel" />
@@ -59,6 +55,34 @@
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="content" />
+        </intent>
+        <package android:name="com.whatsapp" />
+        <package android:name="com.whatsapp.w4b" />
+        <package android:name="org.telegram.messenger" />
+        <package android:name="org.telegram.plus" />
+        <package android:name="org.thunderdog.challegram" />
+        <package android:name="com.ghost.telegram" />
+        <package android:name="nekox.messenger" />
+        <package android:name="it.feed.android" />
+        <package android:name="org.thoughtcrime.securesms" />
+        <package android:name="com.viber.voip" />
+        <package android:name="com.tencent.mm" />
+        <package android:name="jp.naver.line.android" />
+        <package android:name="com.microsoft.teams" />
+        <package android:name="com.discord" />
+        <package android:name="com.slack" />
+        <package android:name="com.facebook.orca" />
+        <package android:name="com.snapchat.android" />
+        <package android:name="com.kakao.talk" />
+        <package android:name="ch.threema.app" />
+        <package android:name="com.wire" />
+        <package android:name="im.tox.tox" />
+        <package android:name="im.vector.app" />
+        <package android:name="us.zoom.videomeetings" />
+        <package android:name="com.google.android.apps.meetings" />
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="tg" />
         </intent>
     </queries>
 
@@ -128,6 +152,11 @@
                 <action android:name="android.intent.action.SEARCH" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.dir/calls" />
+            </intent-filter>
         </activity>
 
         <activity
@@ -143,6 +172,17 @@
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.RillPhone" />
+
+        <activity
+            android:name=".view.screen.BiometricCallActivity"
+            android:exported="false"
+            android:launchMode="singleTop"
+            android:showForAllUsers="true"
+            android:showOnLockScreen="true"
+            android:turnScreenOn="true"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.BiometricCallFloat" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

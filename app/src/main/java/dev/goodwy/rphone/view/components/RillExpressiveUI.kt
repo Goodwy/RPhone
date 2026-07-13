@@ -1,6 +1,7 @@
 package dev.goodwy.rphone.view.components
 
 import android.annotation.SuppressLint
+import android.content.res.Configuration
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -22,7 +23,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
@@ -58,6 +58,7 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Shape
@@ -69,6 +70,7 @@ import dev.goodwy.rphone.controller.util.PreferenceManager
 import kotlinx.coroutines.delay
 import org.koin.compose.koinInject
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -1088,6 +1090,9 @@ fun RillSelectListItem(
         label = "SelectItemScale"
     )
     var showSelectionScreen by remember { mutableStateOf(false) }
+    val currentOption = remember(selectedValue, options) {
+        options.find { it.second == selectedValue }?.first ?: options.firstOrNull()?.first ?: ""
+    }
 
     Surface(
         onClick = {
@@ -1130,9 +1135,10 @@ fun RillSelectListItem(
                     lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
 //                    fontWeight = FontWeight.SemiBold
                 )
-                if (supporting != null) {
+                val displaySupporting = supporting ?: currentOption
+                if (displaySupporting.isNotBlank()) {
                     Text(
-                        text = supporting,
+                        text = displaySupporting,
                         style = MaterialTheme.typography.bodyMedium,
                         lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -1140,12 +1146,12 @@ fun RillSelectListItem(
                 }
             }
 
-            Icon(
-                imageVector = Icons.Default.ChevronRight,
-                contentDescription = "Select option",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                modifier = Modifier.size(20.dp)
-            )
+//            Icon(
+//                imageVector = Icons.Default.ChevronRight,
+//                contentDescription = "Select option",
+//                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+//                modifier = Modifier.size(20.dp)
+//            )
         }
     }
 
@@ -1169,12 +1175,15 @@ fun RillDialog(
     onDismissRequest: () -> Unit,
     title: String? = null,
     icon: ImageVector? = null,
+    modifierIcon: Modifier = Modifier,
     iconContainerColor: Color? = null,
     iconBgContainerColor: Color? = null,
     confirmButton: (@Composable () -> Unit)? = null,
     dismissButton: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     val showState = remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { showState.value = true }
     val prefs = koinInject<PreferenceManager>()
@@ -1220,40 +1229,82 @@ fun RillDialog(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // Header Area
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 32.dp, bottom = 16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        if (icon != null) {
-                            Surface(
-                                modifier = Modifier.size(64.dp),
-                                shape = RoundedCornerShape(20.dp),
-                                color = iconBgContainerColor ?: MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(
-                                        imageVector = icon,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(32.dp),
-                                        tint = iconContainerColor ?: LocalContentColor.current
-                                    )
+                    if (isLandscape) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 16.dp, bottom = 16.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (icon != null) {
+                                Surface(
+                                    modifier = Modifier.size(44.dp),
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = iconBgContainerColor
+                                        ?: MaterialTheme.colorScheme.primaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Icon(
+                                            imageVector = icon,
+                                            contentDescription = null,
+                                            modifier = modifierIcon.size(24.dp),
+                                            tint = iconContainerColor ?: LocalContentColor.current
+                                        )
+                                    }
                                 }
+                                Spacer(modifier = Modifier.height(16.dp))
                             }
-                            Spacer(modifier = Modifier.height(16.dp))
-                        }
 
-                        if (title != null) {
-                            Text(
-                                text = title,
-                                style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.padding(horizontal = 24.dp)
-                            )
+                            if (title != null) {
+                                Text(
+                                    text = title,
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(horizontal = 24.dp)
+                                )
+                            }
+                        }
+                    } else {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 32.dp, bottom = 16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            if (icon != null) {
+                                Surface(
+                                    modifier = Modifier.size(64.dp),
+                                    shape = RoundedCornerShape(20.dp),
+                                    color = iconBgContainerColor
+                                        ?: MaterialTheme.colorScheme.primaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Icon(
+                                            imageVector = icon,
+                                            contentDescription = null,
+                                            modifier = modifierIcon.size(32.dp),
+                                            tint = iconContainerColor ?: LocalContentColor.current
+                                        )
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(16.dp))
+                            }
+
+                            if (title != null) {
+                                Text(
+                                    text = title,
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(horizontal = 24.dp)
+                                )
+                            }
                         }
                     }
 
@@ -1460,7 +1511,7 @@ fun <T> RillSelectionDialog(
                                 Icon(
                                     itemIcon(item),
                                     null,
-                                    tint = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer,
+                                    tint = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSecondaryContainer,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
@@ -1474,7 +1525,7 @@ fun <T> RillSelectionDialog(
                             itemLabel(item),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold,
-                            color = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
+                            color = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSecondaryContainer
                         )
                         if (itemSupporting != null) {
                             Text(
