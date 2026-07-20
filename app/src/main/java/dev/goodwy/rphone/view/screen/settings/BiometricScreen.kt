@@ -34,11 +34,9 @@ import dev.goodwy.rphone.controller.util.PreferenceManager
 import androidx.compose.ui.window.Dialog
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -69,6 +67,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.window.DialogProperties
 import dev.goodwy.rphone.cardCornerMedium
@@ -87,6 +86,7 @@ import dev.goodwy.rphone.cardCornerSmall
 import dev.goodwy.rphone.modal.data.Contact
 import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 import dev.goodwy.rphone.view.components.RillAvatar
+import dev.goodwy.rphone.view.components.Title
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -153,10 +153,10 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
     }
 
     val typeLabel = when (biometricsType) {
-        "system" -> "System Biometrics"
-        "pin"    -> "Custom PIN"
-        "password" -> "Custom Password"
-        else     -> "Not Set"
+        "system"   -> stringResource(R.string.system_biometrics)
+        "pin"      -> stringResource(R.string.custom_pin)
+        "password" -> stringResource(R.string.custom_password)
+        else       -> stringResource(R.string.not_configured)
     }
 
     val rotation =
@@ -169,7 +169,7 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
                     if (isRotation90) WindowInsetsSides.Top + WindowInsetsSides.Horizontal
                     else WindowInsetsSides.Top
                 ),
-                title = { Text("Authentication", fontWeight = FontWeight.ExtraBold) },
+                title = { Title(stringResource(R.string.authentication)) },
                 navigationIcon = {
                     NavigationIcon(onClick = { navigateBack() })
                 }
@@ -197,7 +197,7 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
 //                SettingsSectionLabel("Authentication Method")
                 RillExpressiveCard {
                     RillListItem(
-                        headline = "Authentication Method",
+                        headline = stringResource(R.string.authentication_method),
                         supporting = typeLabel,
                         leadingIcon = Icons.Rounded.Fingerprint,
                         iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
@@ -216,11 +216,11 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
                     exit = fadeOut(tween(200)) + shrinkVertically(tween(200))
                 ) {
                     Column {
-                        SettingsSectionLabel("Authentication")
+                        SettingsSectionLabel(stringResource(R.string.authentication))
                         RillExpressiveCard {
                             RillSwitchListItem(
-                                headline = "Lock App on Open",
-                                supporting = "Require authentication when opening Rill Phone",
+                                headline = stringResource(R.string.lock_app_on_open),
+                                supporting = stringResource(R.string.lock_app_on_open_subtitle),
                                 leadingIcon = Icons.Rounded.LockOpen,
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
@@ -231,8 +231,8 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
                                 }
                             )
                             RillSwitchListItem(
-                                headline = "Lock Call Actions",
-                                supporting = "Require authentication to answer or reject incoming calls",
+                                headline = stringResource(R.string.lock_call_actions),
+                                supporting = stringResource(R.string.lock_call_actions_subtitle),
                                 leadingIcon = Icons.Rounded.PhonePaused,
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
@@ -255,54 +255,13 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
                     exit  = fadeOut(tween(200)) + shrinkVertically(tween(200))
                 ) {
                     Column {
-                        SettingsSectionLabel("Lock Scope")
+                        SettingsSectionLabel(stringResource(R.string.lock_scope))
                         RillExpressiveCard {
-                            // Modern segmented control
-//                            SingleChoiceSegmentedButtonRow(
-//                                modifier = Modifier
-//                                    .background(
-//                                        color = cardColor,
-//                                        shape = RoundedCornerShape(cardCornerSmall)
-//                                    )
-//                                    .padding(12.dp)
-//                                    .fillMaxWidth()
-//                            ) {
-//                                SegmentedButton(
-//                                    selected = callLockMode == "all",
-//                                    onClick = {
-//                                        callLockMode = "all"
-//                                        prefs.setString(PreferenceManager.KEY_BIOMETRICS_CALL_LOCK_MODE, "all")
-//                                    },
-//                                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 3),
-//                                    icon = { SegmentedButtonDefaults.ActiveIcon() }
-//                                ) { Text("All Calls", maxLines = 1) }
-//                                SegmentedButton(
-//                                    selected = callLockMode == "specified",
-//                                    onClick = {
-//                                        callLockMode = "specified"
-//                                        prefs.setString(PreferenceManager.KEY_BIOMETRICS_CALL_LOCK_MODE, "specified")
-//                                        showContactPicker = true
-//                                    },
-//                                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 3),
-//                                    icon = { SegmentedButtonDefaults.ActiveIcon() }
-//                                ) { Text("Specified", maxLines = 1) }
-//                                SegmentedButton(
-//                                    selected = callLockMode == "skip_specified",
-//                                    onClick = {
-//                                        callLockMode = "skip_specified"
-//                                        prefs.setString(PreferenceManager.KEY_BIOMETRICS_CALL_LOCK_MODE, "skip_specified")
-//                                        showContactPicker = true
-//                                    },
-//                                    shape = SegmentedButtonDefaults.itemShape(index = 2, count = 3),
-//                                    icon = { SegmentedButtonDefaults.ActiveIcon() }
-//                                ) { Text("Exclude", maxLines = 1) }
-//                            }
-
                             data class CallLockMode(val key: String, val label: String)
                             val callLockModes = listOf(
-                                CallLockMode("all",            "All Calls"),
-                                CallLockMode("specified",      "Specified"),
-                                CallLockMode("skip_specified", "Exclude")
+                                CallLockMode("all",            stringResource(R.string.all_calls)),
+                                CallLockMode("specified",      stringResource(R.string.blacklist)),
+                                CallLockMode("skip_specified", stringResource(R.string.whitelist))
                             )
                             Box(
                                 modifier = Modifier
@@ -359,7 +318,7 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
                                             },
                                             shape = shape,
                                             color = if (selected) MaterialTheme.colorScheme.primary
-                                            else MaterialTheme.colorScheme.surfaceContainerHigh,
+                                                    else MaterialTheme.colorScheme.surfaceContainerHigh,
                                             modifier = Modifier
                                                 .weight(1f)
                                                 .height(38.dp),
@@ -371,7 +330,10 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
                                                     style = MaterialTheme.typography.labelMedium,
                                                     fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
                                                     color = if (selected) MaterialTheme.colorScheme.onPrimary
-                                                    else MaterialTheme.colorScheme.onSurfaceVariant
+                                                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis,
+                                                    modifier = Modifier.padding(horizontal = 8.dp)
                                                 )
                                             }
                                         }
@@ -426,13 +388,13 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
                                     Text(
                                         modifier = Modifier.weight(1f),
                                         text = when (mode) {
-                                            "all" -> "Biometric required for every incoming call"
+                                            "all" -> stringResource(R.string.all_calls_subtitle)
                                             "specified" -> if (selectedContactCount > 0)
-                                                "$selectedContactCount contact${if (selectedContactCount != 1) "s" else ""} will require biometric to answer"
-                                            else "Choose contacts that require biometric to answer"
+                                                stringResource(R.string.blacklist_count, selectedContactCount)
+                                            else stringResource(R.string.blacklist_subtitle)
                                             else -> if (selectedContactCount > 0)
-                                                "$selectedContactCount contact${if (selectedContactCount != 1) "s" else ""} excluded from biometric lock"
-                                            else "Choose contacts to skip the biometric lock"
+                                                stringResource(R.string.whitelist_count, selectedContactCount)
+                                            else stringResource(R.string.whitelist_subtitle)
                                         },
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -447,33 +409,12 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
                                     }
                                 }
                             }
-
-                            // Edit selection button
-//                            AnimatedVisibility(
-//                                visible = callLockMode != "all",
-//                                enter = fadeIn(tween(200)) + expandVertically(tween(200)),
-//                                exit  = fadeOut(tween(150)) + shrinkVertically(tween(150))
-//                            ) {
-//                                FilledTonalButton(
-//                                    onClick = { showContactPicker = true },
-//                                    modifier = Modifier.fillMaxWidth(),
-//                                    shape = RoundedCornerShape(cardCornerSmall)
-//                                ) {
-//                                    Icon(Icons.Rounded.Edit, null, modifier = Modifier.size(16.dp))
-//                                    Spacer(Modifier.width(8.dp))
-//                                    Text(
-//                                        if (selectedContactCount > 0)
-//                                            "Edit Selection  ·  $selectedContactCount selected"
-//                                        else "Select Contacts"
-//                                    )
-//                                }
-//                            }
                         }
                     }
                 }
             }
 
-            item { Spacer(modifier = Modifier.height(80.dp)) }
+            item { Spacer(modifier = Modifier.height(80.dp).navigationBarsPadding()) }
         }
     }
 
@@ -651,24 +592,18 @@ private fun ContactPickerDialog(
                     Column {
                         TopAppBar(
                             colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
-                            title = { Text("Select Contacts", fontWeight = FontWeight.Bold) },
+                            title = { Text(stringResource(R.string.select_contacts), fontWeight = FontWeight.Bold) },
 //                            navigationIcon = {
 //                                NavigationIcon(onClick = onDismiss)
 //                            },
                             actions = {
                                 IconButton(onClick = ::selectAll) {
-                                    Icon(Icons.Rounded.SelectAll, "Select All")
+                                    Icon(Icons.Rounded.SelectAll, stringResource(R.string.select_all))
                                 }
                                 IconButton(onClick = ::unselectAll) {
-                                    Icon(Icons.Rounded.Deselect, "Unselect All")
+                                    Icon(Icons.Rounded.Deselect, stringResource(R.string.deselect_all))
                                 }
                                 Spacer(modifier = Modifier.size(6.dp))
-//                                TextButton(onClick = ::selectAll) {
-//                                    Text("Select All", fontWeight = FontWeight.SemiBold)
-//                                }
-//                                TextButton(onClick = ::unselectAll) {
-//                                    Text("Unselect All", fontWeight = FontWeight.SemiBold)
-//                                }
                             }
                         )
                         // Search bar
@@ -729,7 +664,7 @@ private fun ContactPickerDialog(
                                 Icon(Icons.Default.SearchOff, contentDescription = null,
                                     modifier = Modifier.size(48.dp),
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
-                                Text("No contacts found", color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                Text(stringResource(R.string.no_contacts_found), color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     style = MaterialTheme.typography.bodyLarge)
                             }
                         }
@@ -785,7 +720,7 @@ private fun ContactPickerDialog(
                                                 style = MaterialTheme.typography.bodyLarge,
                                                 fontWeight = if (checked) FontWeight.SemiBold else FontWeight.Normal,
                                                 maxLines = 1,
-                                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                                overflow = TextOverflow.Ellipsis
                                             )
                                             if (contact.phoneNumbers.isNotEmpty()) {
                                                 Text(
@@ -807,48 +742,39 @@ private fun ContactPickerDialog(
                     }
 
                     // ── Floating Done pill ─────────────────────────────────
-//                    AnimatedVisibility(
-//                        visible = selectedContactCount > 0,
-//                        enter = slideInVertically { it } + fadeIn(tween(200)),
-//                        exit  = slideOutVertically { it } + fadeOut(tween(150)),
-//                        modifier = Modifier
-//                            .align(Alignment.BottomCenter)
-//                            .padding(bottom = 28.dp)
-//                    ) {
                     val donePillAlpha by animateFloatAsState(
                         targetValue   = if (selectedContactCount > 0) 1f else 0f,
                         animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
                         label         = "donePillFadeIn"
                     )
-                        Button(
-                            onClick = {
-                                val finalNumbers = contacts
-                                    .filter(::isContactSelected)
-                                    .flatMap { c -> c.phoneNumbers.map { it.filter(Char::isDigit).takeLast(10) } }
-                                    .filter { it.isNotEmpty() }
-                                    .toSet()
-                                onDone(finalNumbers)
-                            },
-                            shape = RoundedCornerShape(50),
-                            modifier = Modifier
-                                .graphicsLayer { alpha = donePillAlpha }
-                                .align(Alignment.BottomCenter)
-                                .padding(bottom = 28.dp).height(52.dp),
-                            elevation = ButtonDefaults.buttonElevation(
-                                defaultElevation = 0.dp,
-                                pressedElevation = 0.dp,
-                                hoveredElevation = 0.dp
-                            )
-                        ) {
-                            Icon(Icons.Default.Check, null, modifier = Modifier.size(18.dp))
-                            Spacer(Modifier.width(10.dp))
-                            Text(
-                                text = "Done  ·  $selectedContactCount selected",
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-//                    }
+                    Button(
+                        onClick = {
+                            val finalNumbers = contacts
+                                .filter(::isContactSelected)
+                                .flatMap { c -> c.phoneNumbers.map { it.filter(Char::isDigit).takeLast(10) } }
+                                .filter { it.isNotEmpty() }
+                                .toSet()
+                            onDone(finalNumbers)
+                        },
+                        shape = RoundedCornerShape(50),
+                        modifier = Modifier
+                            .graphicsLayer { alpha = donePillAlpha }
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = 28.dp).height(52.dp),
+                        elevation = ButtonDefaults.buttonElevation(
+                            defaultElevation = 0.dp,
+                            pressedElevation = 0.dp,
+                            hoveredElevation = 0.dp
+                        )
+                    ) {
+                        Icon(Icons.Default.Check, null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(10.dp))
+                        Text(
+                            text = stringResource(R.string.done) + "  ·  " + stringResource(R.string.selected_items, selectedContactCount),
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
             }
         }
@@ -892,17 +818,15 @@ private fun BiometricTypeSheet(
             }
             Spacer(modifier = Modifier.height(8.dp))
 
-//            Text("Choose Method", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-
             // System Biometrics option
             RillExpressiveCard(shape = RoundedCornerShape(cardCornerMedium)) {
                 BiometricOptionRow(
                     icon = Icons.Rounded.Fingerprint,
                     iconTint = MaterialTheme.colorScheme.customColors.colorDarkPurple,
                     iconBgTint = MaterialTheme.colorScheme.customColors.colorPurple,
-                    title = "System Biometrics",
-                    subtitle = if (systemAvailable) "Fingerprint, face unlock, or device credentials"
-                                else "Not available on this device",
+                    title = stringResource(R.string.system_biometrics),
+                    subtitle = if (systemAvailable) stringResource(R.string.system_biometrics_subtitle)
+                                else stringResource(R.string.system_biometrics_not_available),
                     isSelected = currentType == "system",
                     enabled = systemAvailable,
                     onClick = { if (systemAvailable) onSelect("system") }
@@ -910,14 +834,14 @@ private fun BiometricTypeSheet(
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            SettingsSectionLabel("Custom Biometrics")
+            SettingsSectionLabel(stringResource(R.string.custom_biometrics))
             RillExpressiveCard(shape = RoundedCornerShape(cardCornerMedium)) {
                 BiometricOptionRow(
                     icon = Icons.Rounded.Pin,
                     iconTint = MaterialTheme.colorScheme.customColors.colorDarkBlue,
                     iconBgTint = MaterialTheme.colorScheme.customColors.colorBlue,
-                    title = "PIN",
-                    subtitle = "Set a numeric PIN of any length",
+                    title = stringResource(R.string.pin),
+                    subtitle = stringResource(R.string.pin_subtitle),
                     isSelected = currentType == "pin",
                     onClick = { onSelect("pin") }
                 )
@@ -926,8 +850,8 @@ private fun BiometricTypeSheet(
                     icon = Icons.Rounded.Key,
                     iconTint = MaterialTheme.colorScheme.customColors.colorDarkGreen,
                     iconBgTint = MaterialTheme.colorScheme.customColors.colorGreen,
-                    title = "Password",
-                    subtitle = "Set a custom alphanumeric password",
+                    title = stringResource(R.string.password),
+                    subtitle = stringResource(R.string.password_subtitle),
                     isSelected = currentType == "password",
                     onClick = { onSelect("password") }
                 )
@@ -948,7 +872,7 @@ private fun BiometricTypeSheet(
                     ) {
                         Icon(Icons.Rounded.LockOpen, null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(20.dp))
                         Spacer(modifier = Modifier.width(12.dp))
-                        Text("Remove Biometric Lock", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Medium)
+                        Text(stringResource(R.string.remove_biometric), color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Medium)
                         Spacer(modifier = Modifier.width(6.dp))
                     }
                 }
@@ -998,7 +922,10 @@ private fun BiometricOptionRow(
                     Icon(icon, null, tint = iconTint, modifier = Modifier.size(22.dp))
                 }
             }
-            Column(Modifier.weight(1f)) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
                 Text(title, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
                 Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
@@ -1019,7 +946,7 @@ private fun BiometricOptionRow(
 fun PinDialogContent(
     onConfirm: (String) -> Unit,
     onDismiss: () -> Unit,
-    title: String = "Set PIN",
+    title: String = stringResource(R.string.set_pin),
     isVerify: Boolean = false,
     expectedPin: String = ""
 ) {
@@ -1079,6 +1006,8 @@ fun PinDialogContent(
         }
     }
 
+    val incorrectPin = stringResource(R.string.incorrect_pin)
+    val pinDontMatch = stringResource(R.string.pin_dont_match)
     fun onSubmit() {
         when {
             pin.length < 4 -> { shakeState++; vibError() }
@@ -1088,7 +1017,7 @@ fun PinDialogContent(
                     pin = ""
                     shakeState++
                     vibError()
-                    errorMessage = "Incorrect PIN. Please try again."
+                    errorMessage = incorrectPin
                 }
             }
             phase == 0 -> {
@@ -1107,7 +1036,7 @@ fun PinDialogContent(
                     phase = 0
                     shakeState++
                     vibError()
-                    errorMessage = "PINs don't match. Please start over."
+                    errorMessage = pinDontMatch
                 }
             }
         }
@@ -1153,8 +1082,8 @@ fun PinDialogContent(
                     Text(
                         text = when {
                             isVerify -> title
-                            phase == 0 -> "Set PIN"
-                            else -> "Confirm PIN"
+                            phase == 0 -> stringResource(R.string.set_pin)
+                            else -> stringResource(R.string.confirm_pin)
                         },
                         color = Color.White,
                         style = MaterialTheme.typography.titleLarge,
@@ -1165,8 +1094,8 @@ fun PinDialogContent(
                 if (!isVerify) {
                     Text(
                         text = if (errorMessage != null) errorMessage ?: ""
-                        else if (phase == 0) "Enter a 4-digit PIN"
-                        else "Re-enter your PIN to confirm",
+                        else if (phase == 0) stringResource(R.string.set_pin_subtitle)
+                        else stringResource(R.string.confirm_pin_subtitle),
                         style = MaterialTheme.typography.bodyMedium,
                         color = if (errorMessage != null) MaterialTheme.colorScheme.error
                         else Color.White.copy(0.7f),
@@ -1274,8 +1203,8 @@ fun PinDialogContent(
             Text(
                 text = when {
                     isVerify -> title
-                    phase == 0 -> "Set PIN"
-                    else -> "Confirm PIN"
+                    phase == 0 -> stringResource(R.string.set_pin)
+                    else -> stringResource(R.string.confirm_pin)
                 },
                 color = Color.White,
                 style = MaterialTheme.typography.titleLarge,
@@ -1285,8 +1214,8 @@ fun PinDialogContent(
             if (!isVerify) {
                 Text(
                     text = if (errorMessage != null) errorMessage ?: ""
-                    else if (phase == 0) "Enter a 4-digit PIN"
-                    else "Re-enter your PIN to confirm",
+                    else if (phase == 0) stringResource(R.string.set_pin_subtitle)
+                    else stringResource(R.string.confirm_pin_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
                     color = if (errorMessage != null) MaterialTheme.colorScheme.error
                     else Color.White.copy(0.7f),
@@ -1363,7 +1292,7 @@ fun PinDialogContent(
 fun PinSetupDialog(
     onConfirm: (String) -> Unit,
     onDismiss: () -> Unit,
-    title: String = "Set PIN",
+    title: String = stringResource(R.string.set_pin),
     isVerify: Boolean = false,
     expectedPin: String = "",
     showCloseButton: Boolean = true
@@ -1487,7 +1416,7 @@ private fun PinNumpad(
 fun PasswordDialogContent(
     onConfirm: (String) -> Unit,
     onDismiss: () -> Unit,
-    title: String = "Set Password",
+    title: String = stringResource(R.string.set_password),
     isVerify: Boolean = false,
     expectedPassword: String = "",
     showCloseButton: Boolean = true
@@ -1500,14 +1429,18 @@ fun PasswordDialogContent(
 
     Column(
         Modifier
-            .padding(24.dp)
+            .padding(horizontal = 24.dp, vertical = 16.dp)
             .fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(
                 modifier = Modifier.padding(start = 4.dp),
-                text = if (isVerify) title else "Set Password",
+                text = if (isVerify) title else stringResource(R.string.set_password),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -1529,7 +1462,7 @@ fun PasswordDialogContent(
 
         if (!isVerify) {
             Text(
-                "Enter any password. Supports letters, numbers and special characters.",
+                stringResource(R.string.set_password_subtitle),
                 modifier = Modifier.padding(horizontal = 4.dp),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -1539,7 +1472,7 @@ fun PasswordDialogContent(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it; errorText = "" },
-            label = { Text(if (isVerify) "Password" else "Enter Password") },
+            label = { Text(if (isVerify) stringResource(R.string.password) else stringResource(R.string.enter_password)) },
             singleLine = true,
             visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -1557,7 +1490,7 @@ fun PasswordDialogContent(
             OutlinedTextField(
                 value = confirmPassword,
                 onValueChange = { confirmPassword = it; errorText = "" },
-                label = { Text("Confirm Password") },
+                label = { Text(stringResource(R.string.confirm_password)) },
                 singleLine = true,
                 visualTransformation = if (showConfirm) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -1576,25 +1509,42 @@ fun PasswordDialogContent(
             Text(errorText, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
         }
 
+        val incorrectPassword = stringResource(R.string.incorrect_password)
+        val incorrectPasswordSubtitle = stringResource(R.string.incorrect_password_subtitle)
+        val passwordDontMatch = stringResource(R.string.password_dont_match)
         Row(Modifier
             .fillMaxWidth()
-            .padding(top = 6.dp, end = 1.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            TextButton(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text("Cancel") }
+            .padding(top = 6.dp, end = 1.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    stringResource(R.string.cancel),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis)
+            }
             Button(
                 onClick = {
                     when {
                         isVerify -> {
                             if (password == expectedPassword) onConfirm(password)
-                            else errorText = "Incorrect password"
+                            else errorText = incorrectPassword
                         }
-                        password.length < 4 -> errorText = "Password must be at least 4 characters"
-                        password != confirmPassword -> errorText = "Passwords don't match"
+                        password.length < 4 -> errorText = incorrectPasswordSubtitle
+                        password != confirmPassword -> errorText = passwordDontMatch
                         else -> onConfirm(password)
                     }
                 },
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1.2f),
                 shape = RoundedCornerShape(50)
-            ) { Text("Confirm") }
+            ) {
+                Text(
+                stringResource(R.string.confirm),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis)
+            }
         }
     }
 }
@@ -1603,7 +1553,7 @@ fun PasswordDialogContent(
 fun PasswordSetupDialog(
     onConfirm: (String) -> Unit,
     onDismiss: () -> Unit,
-    title: String = "Set Password",
+    title: String = stringResource(R.string.set_password),
     isVerify: Boolean = false,
     expectedPassword: String = "",
     showCloseButton: Boolean = true

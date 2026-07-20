@@ -13,7 +13,6 @@ import android.provider.ContactsContract
 import android.provider.ContactsContract.CommonDataKinds
 import android.telephony.SubscriptionManager
 import androidx.core.content.ContextCompat
-import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.modal.data.Contact
 import dev.goodwy.rphone.modal.data.ContactAddress
 import dev.goodwy.rphone.modal.data.ContactEmail
@@ -23,9 +22,12 @@ import dev.goodwy.rphone.modal.db.PrivateContactDao
 import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 import androidx.core.net.toUri
 import androidx.core.graphics.scale
+import dev.goodwy.rphone.controller.util.ContactDumpUtils
 import dev.goodwy.rphone.controller.util.areNumbersEqual
 import dev.goodwy.rphone.controller.util.deduplicateNumbers
+import dev.goodwy.rphone.device_only
 import dev.goodwy.rphone.modal.db.PrivateContactEntity
+import dev.goodwy.rphone.private_only
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -35,20 +37,49 @@ class ContactsRepository(
 ) : IContactsRepository {
 
     private val contentResolver: ContentResolver = context.contentResolver
-    private val preferenceManager = PreferenceManager(context)
-
-    private fun formatName(rawName: String): String {
-        return rawName
-    }
+//    private val preferenceManager = PreferenceManager(context)
 
     override fun getContacts(includePrivate: Boolean): List<Contact> {
         val contactsMap = mutableMapOf<String, Contact>()
+        val rawContactsMap = mutableMapOf<String, MutableList<String>>()
 
         if (includePrivate) {
             privateContactDao.getAll().forEach {
                 val contact = it.toContact()
                 contactsMap[contact.id] = contact
             }
+        }
+
+        // Get all RawContacts for each contact
+        val rawProjection = arrayOf(
+            ContactsContract.RawContacts.CONTACT_ID,
+            ContactsContract.RawContacts._ID,
+            ContactsContract.RawContacts.ACCOUNT_NAME,
+            ContactsContract.RawContacts.ACCOUNT_TYPE
+        )
+
+        try {
+            contentResolver.query(
+                ContactsContract.RawContacts.CONTENT_URI,
+                rawProjection,
+                null,
+                null,
+                null
+            )?.use { cursor ->
+                val contactIdIdx = cursor.getColumnIndex(ContactsContract.RawContacts.CONTACT_ID)
+                val rawIdIdx = cursor.getColumnIndex(ContactsContract.RawContacts._ID)
+
+                while (cursor.moveToNext()) {
+                    val contactId = cursor.getString(contactIdIdx)
+                    val rawId = cursor.getString(rawIdIdx)
+
+                    if (contactId != null && rawId != null) {
+                        rawContactsMap.getOrPut(contactId) { mutableListOf() }.add(rawId)
+                    }
+                }
+            }
+        } catch (e: SecurityException) {
+            e.printStackTrace()
         }
 
         val projection = arrayOf(
@@ -90,7 +121,7 @@ class ContactsRepository(
                 val data3Idx = cursor.getColumnIndex(ContactsContract.Data.DATA3)
                 val isPrimaryIdx = cursor.getColumnIndex(ContactsContract.Data.IS_PRIMARY)
                 val starredIdx = cursor.getColumnIndex(ContactsContract.Data.STARRED)
-                val rawIdIdx = cursor.getColumnIndex(ContactsContract.Data.RAW_CONTACT_ID)
+//                val rawIdIdx = cursor.getColumnIndex(ContactsContract.Data.RAW_CONTACT_ID)
                 val accountNameIdx = cursor.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_NAME)
                 val accountTypeIdx = cursor.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_TYPE)
 
@@ -108,7 +139,9 @@ class ContactsRepository(
                             photoUri = cursor.getString(photoIdx),
                             isFavorite = isStarred,
                             accountName = accountName,
-                            accountType = accountType
+                            accountType = accountType,
+                            rawContactIds = rawContactsMap[id] ?: emptyList(),
+                            hasMultipleSources = (rawContactsMap[id]?.size ?: 0) > 1
                         )
                     }
 
@@ -194,7 +227,7 @@ class ContactsRepository(
         }
 
         return contactsMap.values.toList()
-            .filter { it.phoneNumbers.isNotEmpty() || it.emails.isNotEmpty() }
+//            .filter { it.phoneNumbers.isNotEmpty() || it.emails.isNotEmpty() }
             .sortedBy { it.displayName.lowercase() }
     }
 
@@ -504,6 +537,10 @@ class ContactsRepository(
                 ContentProviderOperation.newInsert(ContactsContract.RawContacts.CONTENT_URI)
                     .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, contact.accountType)
                     .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, contact.accountName)
+                    .withValue(
+                        ContactsContract.RawContacts.AGGREGATION_MODE,
+                        ContactsContract.RawContacts.AGGREGATION_MODE_DISABLED
+                    )
                     .build()
             )
 
@@ -828,7 +865,7 @@ class ContactsRepository(
             contentResolver.delete(uri, null, null)
         } catch (e: SecurityException) {
             e.printStackTrace()
-        } catch (e: IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
             // Invalid URI—ignore
         } catch (e: UnsupportedOperationException) {
             // The contact has already been deleted or is unavailable
@@ -1066,13 +1103,26 @@ class ContactsRepository(
 
     override fun findDuplicates(): List<List<Contact>> {
         val allContacts = getContacts()
+        val availableAccounts = getAvailableAccountsForMoving()
+        val validAccounts = availableAccounts.map { it.name to it.type }.toSet()
+        val allContactsFiltered = allContacts.filter { contact ->
+            contact.accountName != null &&
+            contact.accountType != null &&
+            contact.accountName != private_only &&
+            contact.accountType != private_only &&
+            contact.accountName != device_only &&
+            contact.accountType != device_only &&
+            !contact.accountName.contains("sim", ignoreCase = true) &&
+            !contact.accountType.contains("sim", ignoreCase = true) &&
+            validAccounts.contains(contact.accountName to contact.accountType)
+        }
         val duplicates = mutableListOf<List<Contact>>()
 
-        val byName = allContacts.groupBy { it.displayName.lowercase().trim() }
+        val byName = allContactsFiltered.groupBy { it.displayName.lowercase().trim() }
             .filter { it.value.size > 1 }
 
         val byNumber = mutableMapOf<String, MutableSet<Contact>>()
-        allContacts.forEach { contact ->
+        allContactsFiltered.forEach { contact ->
             contact.phoneNumbers.forEach { number ->
                 val normalized = number.replace(Regex("[^0-9+]"), "")
                 if (normalized.length >= 7) {
@@ -1099,35 +1149,35 @@ class ContactsRepository(
         return duplicates
     }
 
-    override fun mergeContacts(targetContactId: String, sourceContactIds: List<String>) {
-        val targetContact = getContactById(targetContactId) ?: return
-        val ops = ArrayList<ContentProviderOperation>()
-
-        sourceContactIds.forEach { sourceId ->
-            if (sourceId == targetContactId) return@forEach
-            val sourceContact = getContactById(sourceId) ?: return@forEach
-
-            sourceContact.phoneNumbers.forEach { number ->
-                if (!targetContact.phoneNumbers.contains(number)) {
-                    ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
-                        .withValue(ContactsContract.Data.RAW_CONTACT_ID, getRawContactId(targetContactId))
-                        .withValue(ContactsContract.Data.MIMETYPE, CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
-                        .withValue(CommonDataKinds.Phone.NUMBER, number)
-                        .withValue(CommonDataKinds.Phone.TYPE, CommonDataKinds.Phone.TYPE_MOBILE)
-                        .build())
-                }
-            }
-
-            ops.add(ContentProviderOperation.newDelete(Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, sourceId))
-                .build())
-        }
-
-        try {
-            contentResolver.applyBatch(ContactsContract.AUTHORITY, ops)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
+//    override fun mergeContacts(targetContactId: String, sourceContactIds: List<String>) {
+//        val targetContact = getContactById(targetContactId) ?: return
+//        val ops = ArrayList<ContentProviderOperation>()
+//
+//        sourceContactIds.forEach { sourceId ->
+//            if (sourceId == targetContactId) return@forEach
+//            val sourceContact = getContactById(sourceId) ?: return@forEach
+//
+//            sourceContact.phoneNumbers.forEach { number ->
+//                if (!targetContact.phoneNumbers.contains(number)) {
+//                    ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+//                        .withValue(ContactsContract.Data.RAW_CONTACT_ID, getRawContactId(targetContactId))
+//                        .withValue(ContactsContract.Data.MIMETYPE, CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+//                        .withValue(CommonDataKinds.Phone.NUMBER, number)
+//                        .withValue(CommonDataKinds.Phone.TYPE, CommonDataKinds.Phone.TYPE_MOBILE)
+//                        .build())
+//                }
+//            }
+//
+//            ops.add(ContentProviderOperation.newDelete(Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, sourceId))
+//                .build())
+//        }
+//
+//        try {
+//            contentResolver.applyBatch(ContactsContract.AUTHORITY, ops)
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//        }
+//    }
 
     override fun setCustomRingtone(contactId: String, ringtoneUri: String?) {
         if (contactId.startsWith("p")) {
@@ -1154,18 +1204,17 @@ class ContactsRepository(
         allContacts.forEachIndexed { index, contact ->
             onProgress?.invoke(index + 1, total)
 
-            // Formatting numbers: Remove all spaces
-            val formattedPhoneNumbers = contact.phoneNumbers.map { it.replace(" ", "") }
-            val formattedPhoneDetails = contact.phoneDetails.map {
-                it.copy(number = it.number.replace(" ", ""))
-            }
+            if (contact.isPrivate) {
+                // Для приватных контактов - обновляем в локальной БД
+                val formattedPhoneNumbers = contact.phoneNumbers.map { it.replace(" ", "") }
+                val formattedPhoneDetails = contact.phoneDetails.map {
+                    it.copy(number = it.number.replace(" ", ""))
+                }
 
-            // Let's check to see if the numbers have changed
-            val phoneNumbersChanged = formattedPhoneNumbers != contact.phoneNumbers
-            val phoneDetailsChanged = formattedPhoneDetails != contact.phoneDetails
+                val phoneNumbersChanged = formattedPhoneNumbers != contact.phoneNumbers
+                val phoneDetailsChanged = formattedPhoneDetails != contact.phoneDetails
 
-            if (phoneNumbersChanged || phoneDetailsChanged) {
-                if (contact.isPrivate) {
+                if (phoneNumbersChanged || phoneDetailsChanged) {
                     val id = contact.id.substring(1).toLongOrNull()
                     if (id != null) {
                         privateContactDao.getById(id)?.let { entity ->
@@ -1176,39 +1225,58 @@ class ContactsRepository(
                             privateContactDao.update(updatedEntity)
                         }
                     }
-                } else {
-                    contact.phoneDetails.forEachIndexed { i, phoneDetail ->
-                        val newNum = formattedPhoneDetails[i].number
-                        val oldNum = phoneDetail.number
-                        if (newNum != oldNum) {
-                            val rawId = getRawContactId(contact.id)
-                            if (rawId != null) {
-                                ops.add(
-                                    ContentProviderOperation.newUpdate(ContactsContract.Data.CONTENT_URI)
-                                        .withSelection(
-                                            "${ContactsContract.Data.RAW_CONTACT_ID}=? AND ${ContactsContract.Data.MIMETYPE}=? AND ${ContactsContract.CommonDataKinds.Phone.NUMBER}=?",
-                                            arrayOf(rawId, CommonDataKinds.Phone.CONTENT_ITEM_TYPE, oldNum)
-                                        )
-                                        .withValue(CommonDataKinds.Phone.NUMBER, newNum)
-                                        .build()
-                                )
-                            }
-                        }
-                    }
+                }
+            } else {
+                // Для обычных контактов - обрабатываем каждый RawContact отдельно
+                val rawContactIds = getRawContactIds(contact.id)
 
-                    if (contact.phoneNumbers.isNotEmpty() && contact.phoneDetails.isEmpty()) {
-                        contact.phoneNumbers.forEachIndexed { i, oldNum ->
-                            val newNum = formattedPhoneNumbers[i]
-                            if (newNum != oldNum) {
-                                val rawId = getRawContactId(contact.id)
-                                if (rawId != null) {
+                rawContactIds.forEach { rawId ->
+                    // Получаем данные конкретного RawContact
+                    val rawContact = getRawContactData(rawId)
+                    if (rawContact != null) {
+                        val formattedPhoneNumbers = rawContact.phoneNumbers.map { it.replace(" ", "") }
+                        val formattedPhoneDetails = rawContact.phoneDetails.map {
+                            it.copy(number = it.number.replace(" ", ""))
+                        }
+
+                        val phoneNumbersChanged = formattedPhoneNumbers != rawContact.phoneNumbers
+                        val phoneDetailsChanged = formattedPhoneDetails != rawContact.phoneDetails
+
+                        if (phoneNumbersChanged || phoneDetailsChanged) {
+                            // Обновляем телефоны в этом RawContact
+                            // Сначала удаляем старые телефоны
+                            ops.add(
+                                ContentProviderOperation.newDelete(ContactsContract.Data.CONTENT_URI)
+                                    .withSelection(
+                                        "${ContactsContract.Data.RAW_CONTACT_ID} = ? AND " +
+                                                "${ContactsContract.Data.MIMETYPE} = ?",
+                                        arrayOf(rawId, CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                                    )
+                                    .build()
+                            )
+
+                            // Добавляем отформатированные телефоны
+                            if (formattedPhoneDetails.isNotEmpty()) {
+                                formattedPhoneDetails.forEach { phoneDetail ->
                                     ops.add(
-                                        ContentProviderOperation.newUpdate(ContactsContract.Data.CONTENT_URI)
-                                            .withSelection(
-                                                "${ContactsContract.Data.RAW_CONTACT_ID}=? AND ${ContactsContract.Data.MIMETYPE}=? AND ${ContactsContract.CommonDataKinds.Phone.NUMBER}=?",
-                                                arrayOf(rawId, CommonDataKinds.Phone.CONTENT_ITEM_TYPE, oldNum)
-                                            )
-                                            .withValue(CommonDataKinds.Phone.NUMBER, newNum)
+                                        ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                                            .withValue(ContactsContract.Data.RAW_CONTACT_ID, rawId)
+                                            .withValue(ContactsContract.Data.MIMETYPE, CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                                            .withValue(CommonDataKinds.Phone.NUMBER, phoneDetail.number)
+                                            .withValue(CommonDataKinds.Phone.TYPE, phoneDetail.type)
+                                            .withValue(CommonDataKinds.Phone.LABEL, phoneDetail.label)
+                                            .withValue(CommonDataKinds.Phone.IS_PRIMARY, if (phoneDetail.isPrimary) 1 else 0)
+                                            .build()
+                                    )
+                                }
+                            } else if (formattedPhoneNumbers.isNotEmpty()) {
+                                formattedPhoneNumbers.forEach { number ->
+                                    ops.add(
+                                        ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                                            .withValue(ContactsContract.Data.RAW_CONTACT_ID, rawId)
+                                            .withValue(ContactsContract.Data.MIMETYPE, CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                                            .withValue(CommonDataKinds.Phone.NUMBER, number)
+                                            .withValue(CommonDataKinds.Phone.TYPE, CommonDataKinds.Phone.TYPE_MOBILE)
                                             .build()
                                     )
                                 }
@@ -1368,7 +1436,7 @@ class ContactsRepository(
                             val base64 = android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP)
                             append("PHOTO;ENCODING=B;TYPE=JPEG:$base64\n")
                         }
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                     }
                 }
 
@@ -1658,7 +1726,7 @@ class ContactsRepository(
                                     val file = java.io.File(context.filesDir, fileName)
                                     file.writeBytes(bytes)
                                     photoUri = file.toUri().toString()
-                                } catch (e: Exception) {
+                                } catch (_: Exception) {
                                 }
                             }
                         }
@@ -1704,5 +1772,743 @@ class ContactsRepository(
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    // Goodwy
+    data class ContactSource(
+        val accountName: String?,
+        val accountType: String?,
+        val isPrimary: Boolean = false,
+        val rawContactId: String
+    )
+
+    data class RawContactInfo(
+        val rawContactId: String,
+        val accountName: String?,
+        val accountType: String?,
+        val contactId: String
+    )
+
+    override fun getRawContactsForContact(contactId: String): List<RawContactInfo> {
+        val rawContacts = mutableListOf<RawContactInfo>()
+
+        val projection = arrayOf(
+            ContactsContract.RawContacts._ID,
+            ContactsContract.RawContacts.ACCOUNT_NAME,
+            ContactsContract.RawContacts.ACCOUNT_TYPE,
+            ContactsContract.RawContacts.SOURCE_ID,
+            ContactsContract.RawContacts.VERSION,
+            ContactsContract.RawContacts.CONTACT_ID,
+            ContactsContract.RawContacts.DIRTY,
+            ContactsContract.RawContacts.DELETED
+        )
+
+        try {
+            contentResolver.query(
+                ContactsContract.RawContacts.CONTENT_URI,
+                projection,
+                "${ContactsContract.RawContacts.CONTACT_ID} = ?",
+                arrayOf(contactId),
+                null
+            )?.use { cursor ->
+                val idIdx = cursor.getColumnIndex(ContactsContract.RawContacts._ID)
+                val accountNameIdx = cursor.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_NAME)
+                val accountTypeIdx = cursor.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_TYPE)
+                val contactIdIdx = cursor.getColumnIndex(ContactsContract.RawContacts.CONTACT_ID)
+
+                while (cursor.moveToNext()) {
+                    val rawId = cursor.getString(idIdx)
+                    val accountName = cursor.getString(accountNameIdx)
+                    val accountType = cursor.getString(accountTypeIdx)
+                    val contactId = cursor.getString(contactIdIdx)
+
+                    rawContacts.add(
+                        RawContactInfo(
+                            rawContactId = rawId,
+                            accountName = accountName,
+                            accountType = accountType,
+                            contactId = contactId
+                        )
+                    )
+                }
+            }
+        } catch (e: SecurityException) {
+            e.printStackTrace()
+        }
+
+        return rawContacts
+    }
+
+    // We use Android's aggregation mechanism to avoid data loss.
+    override fun mergeContacts(targetContactId: String, sourceContactIds: List<String>) {
+        if (targetContactId.startsWith("p")) return
+
+        val targetRawIds = getRawContactIds(targetContactId)
+        if (targetRawIds.isEmpty()) return
+
+        val ops = ArrayList<ContentProviderOperation>()
+
+        sourceContactIds.forEach { sourceId ->
+            if (sourceId == targetContactId || sourceId.startsWith("p")) return@forEach
+
+            val sourceRawIds = getRawContactIds(sourceId)
+
+            targetRawIds.forEach { tIdStr ->
+                val tId = tIdStr.toLong()
+                sourceRawIds.forEach { sIdStr ->
+                    val sId = sIdStr.toLong()
+                    if (tId == sId) return@forEach
+                    val id1 = minOf(tId, sId)
+                    val id2 = maxOf(tId, sId)
+
+                    ops.add(
+                        ContentProviderOperation.newUpdate(ContactsContract.AggregationExceptions.CONTENT_URI)
+                            .withValue(ContactsContract.AggregationExceptions.TYPE, ContactsContract.AggregationExceptions.TYPE_KEEP_TOGETHER)
+                            .withValue(ContactsContract.AggregationExceptions.RAW_CONTACT_ID1, id1)
+                            .withValue(ContactsContract.AggregationExceptions.RAW_CONTACT_ID2, id2)
+                            .build()
+                    )
+                }
+            }
+        }
+
+        try {
+            if (ops.isNotEmpty()) {
+                context.contentResolver.applyBatch(ContactsContract.AUTHORITY, ops)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+//    override fun unlinkContact(contactId: String, rawContactIdToSeparate: String) {
+//        val ops = ArrayList<ContentProviderOperation>()
+//
+//        // Remove aggregation for the specified RawContact
+//        ops.add(
+//            ContentProviderOperation.newUpdate(ContactsContract.AggregationExceptions.CONTENT_URI)
+//                .withValue(
+//                    ContactsContract.AggregationExceptions.TYPE,
+//                    ContactsContract.AggregationExceptions.TYPE_KEEP_SEPARATE
+//                )
+//                .withValue(
+//                    ContactsContract.AggregationExceptions.RAW_CONTACT_ID1,
+//                    getRawContactId(contactId)
+//                )
+//                .withValue(
+//                    ContactsContract.AggregationExceptions.RAW_CONTACT_ID2,
+//                    rawContactIdToSeparate
+//                )
+//                .build()
+//        )
+//
+//        try {
+//            contentResolver.applyBatch(ContactsContract.AUTHORITY, ops)
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//        }
+//    }
+
+    override fun unmergeAllSources(contactId: String) {
+        if (contactId.startsWith("p")) return
+
+        val rawIds = getRawContactIds(contactId).map { it.toLong() }
+        if (rawIds.size < 2) return
+
+        val ops = ArrayList<ContentProviderOperation>()
+
+        for (i in 0 until rawIds.size) {
+            for (j in i + 1 until rawIds.size) {
+                val id1 = minOf(rawIds[i], rawIds[j])
+                val id2 = maxOf(rawIds[i], rawIds[j])
+
+                ops.add(
+                    ContentProviderOperation.newUpdate(ContactsContract.AggregationExceptions.CONTENT_URI)
+                        .withValue(ContactsContract.AggregationExceptions.TYPE, ContactsContract.AggregationExceptions.TYPE_KEEP_SEPARATE)
+                        .withValue(ContactsContract.AggregationExceptions.RAW_CONTACT_ID1, id1)
+                        .withValue(ContactsContract.AggregationExceptions.RAW_CONTACT_ID2, id2)
+                        .build()
+                )
+            }
+        }
+
+        try {
+            if (ops.isNotEmpty()) {
+                context.contentResolver.applyBatch(ContactsContract.AUTHORITY, ops)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    override fun getRawContactData(rawContactId: String): Contact? {
+        val projection = arrayOf(
+            ContactsContract.Data.CONTACT_ID,
+            ContactsContract.Data.DISPLAY_NAME_PRIMARY,
+            ContactsContract.Data.PHOTO_URI,
+            ContactsContract.Data.MIMETYPE,
+            ContactsContract.Data.DATA1,
+            ContactsContract.Data.DATA2,
+            ContactsContract.Data.DATA3,
+            ContactsContract.Data.DATA4,
+            ContactsContract.Data.IS_PRIMARY,
+            ContactsContract.Data.STARRED,
+            CommonDataKinds.StructuredName.PREFIX,
+            CommonDataKinds.StructuredName.GIVEN_NAME,
+            CommonDataKinds.StructuredName.MIDDLE_NAME,
+            CommonDataKinds.StructuredName.FAMILY_NAME,
+            CommonDataKinds.StructuredName.SUFFIX,
+            CommonDataKinds.Organization.COMPANY,
+            CommonDataKinds.Organization.TITLE,
+            ContactsContract.RawContacts.ACCOUNT_NAME,
+            ContactsContract.RawContacts.ACCOUNT_TYPE,
+            ContactsContract.Data.PHOTO_ID
+        )
+
+        var contact: Contact? = null
+        var contactId: String? = null
+        var photoUri: String? = null
+
+        try {
+            contentResolver.query(
+                ContactsContract.Data.CONTENT_URI,
+                projection,
+                "${ContactsContract.Data.RAW_CONTACT_ID} = ?",
+                arrayOf(rawContactId),
+                null
+            )?.use { cursor ->
+                val idIdx = cursor.getColumnIndex(ContactsContract.Data.CONTACT_ID)
+                val photoIdx = cursor.getColumnIndex(ContactsContract.Data.PHOTO_URI)
+                val mimeIdx = cursor.getColumnIndex(ContactsContract.Data.MIMETYPE)
+                val data1Idx = cursor.getColumnIndex(ContactsContract.Data.DATA1)
+                val data2Idx = cursor.getColumnIndex(ContactsContract.Data.DATA2)
+                val data3Idx = cursor.getColumnIndex(ContactsContract.Data.DATA3)
+                val isPrimaryIdx = cursor.getColumnIndex(ContactsContract.Data.IS_PRIMARY)
+                val starredIdx = cursor.getColumnIndex(ContactsContract.Data.STARRED)
+                val accountNameIdx = cursor.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_NAME)
+                val accountTypeIdx = cursor.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_TYPE)
+
+                while (cursor.moveToNext()) {
+                    val id = cursor.getString(idIdx)
+                    if (contactId == null) contactId = id
+                    val mimeType = cursor.getString(mimeIdx)
+                    val data1 = cursor.getString(data1Idx) ?: continue
+                    val isStarred = cursor.getInt(starredIdx) == 1
+                    val accountName = cursor.getString(accountNameIdx)
+                    val accountType = cursor.getString(accountTypeIdx)
+
+                    if (mimeType == CommonDataKinds.Photo.CONTENT_ITEM_TYPE) {
+                        photoUri = cursor.getString(photoIdx)
+                        continue
+                    }
+
+                    val currentContact = contact ?: Contact(
+                        id = id ?: "",
+                        photoUri = null,
+                        isFavorite = isStarred,
+                        accountName = accountName,
+                        accountType = accountType
+                    )
+
+                    contact = when (mimeType) {
+                        CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE -> {
+                            val prefixIndex = cursor.getColumnIndex(CommonDataKinds.StructuredName.PREFIX)
+                            val givenNameIndex = cursor.getColumnIndex(CommonDataKinds.StructuredName.GIVEN_NAME)
+                            val middleNameIndex = cursor.getColumnIndex(CommonDataKinds.StructuredName.MIDDLE_NAME)
+                            val familyNameIndex = cursor.getColumnIndex(CommonDataKinds.StructuredName.FAMILY_NAME)
+                            val suffixIndex = cursor.getColumnIndex(CommonDataKinds.StructuredName.SUFFIX)
+
+                            val prefix = if (prefixIndex >= 0) cursor.getString(prefixIndex) ?: "" else ""
+                            val givenName = if (givenNameIndex >= 0) cursor.getString(givenNameIndex) ?: "" else ""
+                            val middleName = if (middleNameIndex >= 0) cursor.getString(middleNameIndex) ?: "" else ""
+                            val familyName = if (familyNameIndex >= 0) cursor.getString(familyNameIndex) ?: "" else ""
+                            val suffix = if (suffixIndex >= 0) cursor.getString(suffixIndex) ?: "" else ""
+
+                            currentContact.copy(
+                                namePrefix = prefix,
+                                givenName = givenName,
+                                middleName = middleName,
+                                familyName = familyName,
+                                nameSuffix = suffix
+                            )
+                        }
+                        CommonDataKinds.Nickname.CONTENT_ITEM_TYPE -> {
+                            currentContact.copy(nickname = data1)
+                        }
+                        CommonDataKinds.Phone.CONTENT_ITEM_TYPE -> {
+                            val type = cursor.getInt(data2Idx)
+                            val label = cursor.getString(data3Idx)
+                            val isPrimary = cursor.getInt(isPrimaryIdx) == 1
+
+                            val phoneDetail = ContactPhoneDetail(
+                                number = data1,
+                                type = type,
+                                label = label,
+                                isPrimary = isPrimary
+                            )
+
+                            currentContact.copy(
+                                phoneNumbers = deduplicateNumbers(currentContact.phoneNumbers + data1),
+                                phoneDetails = (currentContact.phoneDetails + phoneDetail).distinctBy { it.number }
+                            )
+                        }
+                        CommonDataKinds.Email.CONTENT_ITEM_TYPE -> {
+                            val type = cursor.getInt(data2Idx)
+                            val label = cursor.getString(data3Idx)
+                            val email = ContactEmail(type, label, data1)
+                            currentContact.copy(emails = (currentContact.emails + email).distinct())
+                        }
+                        CommonDataKinds.StructuredPostal.CONTENT_ITEM_TYPE -> {
+                            val type = cursor.getInt(data2Idx)
+                            val label = cursor.getString(data3Idx)
+                            val address = ContactAddress(type, label, data1)
+                            currentContact.copy(addresses = (currentContact.addresses + address).distinct())
+                        }
+                        CommonDataKinds.Event.CONTENT_ITEM_TYPE -> {
+                            val type = cursor.getInt(data2Idx)
+                            val label = cursor.getString(data3Idx)
+                            val event = ContactEvent(type, label, data1)
+                            currentContact.copy(events = (currentContact.events + event).distinct())
+                        }
+                        CommonDataKinds.Organization.CONTENT_ITEM_TYPE -> {
+                            val companyIndex = cursor.getColumnIndex(CommonDataKinds.Organization.COMPANY)
+                            val titleIndex = cursor.getColumnIndex(CommonDataKinds.Organization.TITLE)
+
+                            val company = if (companyIndex >= 0) cursor.getString(companyIndex) ?: "" else ""
+                            val jobTitle = if (titleIndex >= 0) cursor.getString(titleIndex) ?: "" else ""
+
+                            currentContact.copy(
+                                company = company,
+                                jobTitle = jobTitle
+                            )
+                        }
+                        else -> currentContact
+                    }
+                }
+            }
+        } catch (e: SecurityException) {
+            e.printStackTrace()
+        }
+
+        return contact?.copy(photoUri = getPhotoUriForRawContact(rawContactId) ?: photoUri)
+    }
+
+    // A method for retrieving a photo associated with a specific RawContact
+    private fun getPhotoUriForRawContact(rawContactId: String): String? {
+        var photoUri: String? = null
+
+        try {
+            val projection = arrayOf(
+                ContactsContract.Data.PHOTO_URI,
+                ContactsContract.Data._ID
+            )
+
+            contentResolver.query(
+                ContactsContract.Data.CONTENT_URI,
+                projection,
+                "${ContactsContract.Data.RAW_CONTACT_ID} = ? AND " +
+                        "${ContactsContract.Data.MIMETYPE} = ?",
+                arrayOf(rawContactId, CommonDataKinds.Photo.CONTENT_ITEM_TYPE),
+                null
+            )?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val photoUriIdx = cursor.getColumnIndex(ContactsContract.Data.PHOTO_URI)
+                    photoUri = cursor.getString(photoUriIdx)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        return photoUri
+    }
+
+    override fun updateRawContact(rawContactId: String, contact: Contact) {
+        val ops = ArrayList<ContentProviderOperation>()
+
+        // 1. StructuredName
+        val nameSelection = "${ContactsContract.Data.RAW_CONTACT_ID} = ? AND " +
+                "${ContactsContract.Data.MIMETYPE} = ?"
+        val nameArgs = arrayOf(rawContactId, CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+
+        // Check if a name already exists
+        val hasName = checkIfDataExists(rawContactId, CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+
+        if (hasName) {
+            // Updating an existing name
+            val nameBuilder = ContentProviderOperation.newUpdate(ContactsContract.Data.CONTENT_URI)
+                .withSelection(nameSelection, nameArgs)
+                .withValue(CommonDataKinds.StructuredName.DISPLAY_NAME, contact.displayName)
+
+            if (contact.namePrefix.isNotBlank()) {
+                nameBuilder.withValue(CommonDataKinds.StructuredName.PREFIX, contact.namePrefix)
+            }
+            if (contact.givenName.isNotBlank()) {
+                nameBuilder.withValue(CommonDataKinds.StructuredName.GIVEN_NAME, contact.givenName)
+            }
+            if (contact.middleName.isNotBlank()) {
+                nameBuilder.withValue(CommonDataKinds.StructuredName.MIDDLE_NAME, contact.middleName)
+            }
+            if (contact.familyName.isNotBlank()) {
+                nameBuilder.withValue(CommonDataKinds.StructuredName.FAMILY_NAME, contact.familyName)
+            }
+            if (contact.nameSuffix.isNotBlank()) {
+                nameBuilder.withValue(CommonDataKinds.StructuredName.SUFFIX, contact.nameSuffix)
+            }
+            ops.add(nameBuilder.build())
+        } else {
+            // Let's create a new name
+            val nameBuilder = ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                .withValue(ContactsContract.Data.RAW_CONTACT_ID, rawContactId)
+                .withValue(ContactsContract.Data.MIMETYPE, CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+                .withValue(CommonDataKinds.StructuredName.DISPLAY_NAME, contact.displayName)
+
+            if (contact.namePrefix.isNotBlank()) {
+                nameBuilder.withValue(CommonDataKinds.StructuredName.PREFIX, contact.namePrefix)
+            }
+            if (contact.givenName.isNotBlank()) {
+                nameBuilder.withValue(CommonDataKinds.StructuredName.GIVEN_NAME, contact.givenName)
+            }
+            if (contact.middleName.isNotBlank()) {
+                nameBuilder.withValue(CommonDataKinds.StructuredName.MIDDLE_NAME, contact.middleName)
+            }
+            if (contact.familyName.isNotBlank()) {
+                nameBuilder.withValue(CommonDataKinds.StructuredName.FAMILY_NAME, contact.familyName)
+            }
+            if (contact.nameSuffix.isNotBlank()) {
+                nameBuilder.withValue(CommonDataKinds.StructuredName.SUFFIX, contact.nameSuffix)
+            }
+            ops.add(nameBuilder.build())
+        }
+
+        // 2. Nickname
+        updateOrInsertData(
+            ops = ops,
+            rawContactId = rawContactId,
+            mimeType = CommonDataKinds.Nickname.CONTENT_ITEM_TYPE,
+            values = mapOf(
+                CommonDataKinds.Nickname.NAME to contact.nickname,
+                CommonDataKinds.Nickname.TYPE to CommonDataKinds.Nickname.TYPE_DEFAULT
+            ),
+            checkNotEmpty = { contact.nickname.isNotBlank() }
+        )
+
+        // 3. Organization
+        if (contact.company.isNotBlank() || contact.jobTitle.isNotBlank()) {
+            val values = mutableMapOf<String, Any>()
+            if (contact.company.isNotBlank()) {
+                values[CommonDataKinds.Organization.COMPANY] = contact.company
+            }
+            if (contact.jobTitle.isNotBlank()) {
+                values[CommonDataKinds.Organization.TITLE] = contact.jobTitle
+            }
+
+            updateOrInsertData(
+                ops = ops,
+                rawContactId = rawContactId,
+                mimeType = CommonDataKinds.Organization.CONTENT_ITEM_TYPE,
+                values = values,
+                checkNotEmpty = { true }
+            )
+        }
+
+        // 4. Photo
+        val photoBytes = contact.photoUri?.let { getPhotoBytes(it) }
+        if (photoBytes != null) {
+            updateOrInsertData(
+                ops = ops,
+                rawContactId = rawContactId,
+                mimeType = CommonDataKinds.Photo.CONTENT_ITEM_TYPE,
+                values = mapOf(CommonDataKinds.Photo.PHOTO to photoBytes),
+                checkNotEmpty = { true }
+            )
+        } else {
+            ops.add(
+                ContentProviderOperation.newDelete(ContactsContract.Data.CONTENT_URI)
+                    .withSelection(
+                        "${ContactsContract.Data.RAW_CONTACT_ID} = ? AND " +
+                                "${ContactsContract.Data.MIMETYPE} = ?",
+                        arrayOf(rawContactId, CommonDataKinds.Photo.CONTENT_ITEM_TYPE)
+                    )
+                    .build()
+            )
+        }
+
+        // 5. Phone numbers
+        ops.add(
+            ContentProviderOperation.newDelete(ContactsContract.Data.CONTENT_URI)
+                .withSelection(
+                    "${ContactsContract.Data.RAW_CONTACT_ID} = ? AND " +
+                            "${ContactsContract.Data.MIMETYPE} = ?",
+                    arrayOf(rawContactId, CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                )
+                .build()
+        )
+
+        if (contact.phoneDetails.isNotEmpty()) {
+            contact.phoneDetails.forEach { phoneDetail ->
+                ops.add(
+                    ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                        .withValue(ContactsContract.Data.RAW_CONTACT_ID, rawContactId)
+                        .withValue(ContactsContract.Data.MIMETYPE, CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                        .withValue(CommonDataKinds.Phone.NUMBER, phoneDetail.number)
+                        .withValue(CommonDataKinds.Phone.TYPE, phoneDetail.type)
+                        .withValue(CommonDataKinds.Phone.LABEL, phoneDetail.label)
+                        .withValue(CommonDataKinds.Phone.IS_PRIMARY, if (phoneDetail.isPrimary) 1 else 0)
+                        .build()
+                )
+            }
+        } else if (contact.phoneNumbers.isNotEmpty()) {
+            contact.phoneNumbers.forEach { number ->
+                ops.add(
+                    ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                        .withValue(ContactsContract.Data.RAW_CONTACT_ID, rawContactId)
+                        .withValue(ContactsContract.Data.MIMETYPE, CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                        .withValue(CommonDataKinds.Phone.NUMBER, number)
+                        .withValue(CommonDataKinds.Phone.TYPE, CommonDataKinds.Phone.TYPE_MOBILE)
+                        .build()
+                )
+            }
+        }
+
+        // 6. Email
+        ops.add(
+            ContentProviderOperation.newDelete(ContactsContract.Data.CONTENT_URI)
+                .withSelection(
+                    "${ContactsContract.Data.RAW_CONTACT_ID} = ? AND " +
+                            "${ContactsContract.Data.MIMETYPE} = ?",
+                    arrayOf(rawContactId, CommonDataKinds.Email.CONTENT_ITEM_TYPE)
+                )
+                .build()
+        )
+
+        contact.emails.forEach { email ->
+            ops.add(
+                ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                    .withValue(ContactsContract.Data.RAW_CONTACT_ID, rawContactId)
+                    .withValue(ContactsContract.Data.MIMETYPE, CommonDataKinds.Email.CONTENT_ITEM_TYPE)
+                    .withValue(CommonDataKinds.Email.ADDRESS, email.value)
+                    .withValue(CommonDataKinds.Email.TYPE, email.type)
+                    .withValue(CommonDataKinds.Email.LABEL, email.label)
+                    .build()
+            )
+        }
+
+        // 7. Addresses
+        ops.add(
+            ContentProviderOperation.newDelete(ContactsContract.Data.CONTENT_URI)
+                .withSelection(
+                    "${ContactsContract.Data.RAW_CONTACT_ID} = ? AND " +
+                            "${ContactsContract.Data.MIMETYPE} = ?",
+                    arrayOf(rawContactId, CommonDataKinds.StructuredPostal.CONTENT_ITEM_TYPE)
+                )
+                .build()
+        )
+
+        contact.addresses.forEach { address ->
+            ops.add(
+                ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                    .withValue(ContactsContract.Data.RAW_CONTACT_ID, rawContactId)
+                    .withValue(ContactsContract.Data.MIMETYPE, CommonDataKinds.StructuredPostal.CONTENT_ITEM_TYPE)
+                    .withValue(CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS, address.formattedAddress)
+                    .withValue(CommonDataKinds.StructuredPostal.TYPE, address.type)
+                    .withValue(CommonDataKinds.StructuredPostal.LABEL, address.label)
+                    .build()
+            )
+        }
+
+        // 8. Events
+        ops.add(
+            ContentProviderOperation.newDelete(ContactsContract.Data.CONTENT_URI)
+                .withSelection(
+                    "${ContactsContract.Data.RAW_CONTACT_ID} = ? AND " +
+                            "${ContactsContract.Data.MIMETYPE} = ?",
+                    arrayOf(rawContactId, CommonDataKinds.Event.CONTENT_ITEM_TYPE)
+                )
+                .build()
+        )
+
+        contact.events.forEach { event ->
+            ops.add(
+                ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                    .withValue(ContactsContract.Data.RAW_CONTACT_ID, rawContactId)
+                    .withValue(ContactsContract.Data.MIMETYPE, CommonDataKinds.Event.CONTENT_ITEM_TYPE)
+                    .withValue(CommonDataKinds.Event.START_DATE, event.date)
+                    .withValue(CommonDataKinds.Event.TYPE, event.type)
+                    .withValue(CommonDataKinds.Event.LABEL, event.label)
+                    .build()
+            )
+        }
+
+        try {
+            contentResolver.applyBatch(ContactsContract.AUTHORITY, ops)
+
+            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                val afterRawIds = if (contact.id.isNotEmpty() && !contact.id.startsWith("p")) {
+                    getRawContactIds(contact.id).map { it.toLong() }
+                } else {
+                    emptyList()
+                }
+
+                if (afterRawIds.size > 1) {
+                    // Contact is still merged!
+                } else {
+                    // We're trying to restore aggregation
+                    findAndMergeByPhoneNumber(contact.id)
+                }
+            }, 300)
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    // A helper method for updating or inserting data
+    private fun updateOrInsertData(
+        ops: ArrayList<ContentProviderOperation>,
+        rawContactId: String,
+        mimeType: String,
+        values: Map<String, Any>,
+        checkNotEmpty: () -> Boolean
+    ) {
+        if (!checkNotEmpty()) return
+
+        val hasData = checkIfDataExists(rawContactId, mimeType)
+
+        if (hasData) {
+            // Updating existing data
+            val builder = ContentProviderOperation.newUpdate(ContactsContract.Data.CONTENT_URI)
+                .withSelection(
+                    "${ContactsContract.Data.RAW_CONTACT_ID} = ? AND ${ContactsContract.Data.MIMETYPE} = ?",
+                    arrayOf(rawContactId, mimeType)
+                )
+
+            values.forEach { (key, value) ->
+                when (value) {
+                    is String -> builder.withValue(key, value)
+                    is Int -> builder.withValue(key, value)
+                    is ByteArray -> builder.withValue(key, value)
+                    else -> builder.withValue(key, value.toString())
+                }
+            }
+
+            ops.add(builder.build())
+        } else {
+            // Enter the new data
+            val builder = ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                .withValue(ContactsContract.Data.RAW_CONTACT_ID, rawContactId)
+                .withValue(ContactsContract.Data.MIMETYPE, mimeType)
+
+            values.forEach { (key, value) ->
+                when (value) {
+                    is String -> builder.withValue(key, value)
+                    is Int -> builder.withValue(key, value)
+                    is ByteArray -> builder.withValue(key, value)
+                    else -> builder.withValue(key, value.toString())
+                }
+            }
+
+            ops.add(builder.build())
+        }
+    }
+
+    // Checking Whether Data Exists
+    private fun checkIfDataExists(rawContactId: String, mimeType: String): Boolean {
+        var exists = false
+        try {
+            contentResolver.query(
+                ContactsContract.Data.CONTENT_URI,
+                arrayOf(ContactsContract.Data._ID),
+                "${ContactsContract.Data.RAW_CONTACT_ID} = ? AND ${ContactsContract.Data.MIMETYPE} = ?",
+                arrayOf(rawContactId, mimeType),
+                null
+            )?.use { cursor ->
+                exists = cursor.count > 0
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return exists
+    }
+
+    private fun findAndMergeByPhoneNumber(contactId: String) {
+        if (contactId.startsWith("p")) return
+
+        val contact = getContactById(contactId) ?: return
+        val phoneNumbers = contact.phoneNumbers.toSet()
+        if (phoneNumbers.isEmpty()) return
+
+        val allContacts = getContacts(false)
+        val matchingContacts = allContacts.filter { other ->
+            other.id != contactId &&
+                    other.phoneNumbers.any { number -> phoneNumbers.contains(number) }
+        }
+
+        if (matchingContacts.isNotEmpty()) {
+            val allRawIds = mutableListOf<Long>()
+            allRawIds.addAll(getRawContactIds(contactId).map { it.toLong() })
+
+            matchingContacts.forEach { other ->
+                allRawIds.addAll(getRawContactIds(other.id).map { it.toLong() })
+            }
+
+            if (allRawIds.size > 1) {
+                mergeRawContactsDirectly(allRawIds.distinct())
+            }
+        }
+    }
+
+    private fun mergeRawContactsDirectly(rawContactIds: List<Long>) {
+        if (rawContactIds.size < 2) return
+
+        val ops = ArrayList<ContentProviderOperation>()
+        val sortedIds = rawContactIds.sorted()
+        val primaryId = sortedIds.first()
+
+        // First, delete the old rules
+        for (i in 0 until sortedIds.size) {
+            for (j in i + 1 until sortedIds.size) {
+                val id1 = minOf(sortedIds[i], sortedIds[j])
+                val id2 = maxOf(sortedIds[i], sortedIds[j])
+
+                ops.add(
+                    ContentProviderOperation.newDelete(ContactsContract.AggregationExceptions.CONTENT_URI)
+                        .withSelection(
+                            "${ContactsContract.AggregationExceptions.RAW_CONTACT_ID1}=? AND " +
+                                    "${ContactsContract.AggregationExceptions.RAW_CONTACT_ID2}=?",
+                            arrayOf(id1.toString(), id2.toString())
+                        )
+                        .build()
+                )
+            }
+        }
+
+        // Add KEEP_TOGETHER
+        sortedIds.drop(1).forEach { otherId ->
+            val id1 = minOf(primaryId, otherId)
+            val id2 = maxOf(primaryId, otherId)
+
+            ops.add(
+                ContentProviderOperation.newInsert(ContactsContract.AggregationExceptions.CONTENT_URI)
+                    .withValue(
+                        ContactsContract.AggregationExceptions.TYPE,
+                        ContactsContract.AggregationExceptions.TYPE_KEEP_TOGETHER
+                    )
+                    .withValue(ContactsContract.AggregationExceptions.RAW_CONTACT_ID1, id1)
+                    .withValue(ContactsContract.AggregationExceptions.RAW_CONTACT_ID2, id2)
+                    .build()
+            )
+        }
+
+        try {
+            if (ops.isNotEmpty()) {
+                contentResolver.applyBatch(ContactsContract.AUTHORITY, ops)
+            }
+        } catch (_: Exception) {
+        }
+    }
+
+    override fun dumpContact(contactId: String): String {
+        return ContactDumpUtils.dumpFullContact(contentResolver, contactId)
     }
 }

@@ -23,7 +23,9 @@ data class Contact(
     val customRingtone: String? = null,
     val accountName: String? = null,
     val accountType: String? = null,
-    val isPrivate: Boolean = false
+    val isPrivate: Boolean = false,
+    val rawContactIds: List<String> = emptyList(),
+    val hasMultipleSources: Boolean = false
 ) {
     val displayName: String
         get() = getDisplayName(this)

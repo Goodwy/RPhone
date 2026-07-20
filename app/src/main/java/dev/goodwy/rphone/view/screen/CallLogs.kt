@@ -173,7 +173,7 @@ fun CallLogFullScreen(
                         ) {
                             val filters = CallLogFilter.entries - CallLogFilter.Contacts
                             items(filters) { filter ->
-                                RillFilterChip(filter.name, selectedFilter == filter, { _ ->
+                                RillFilterChip(stringResource(filter.stringRes), selectedFilter == filter, { _ ->
                                     viewModel.setFilter(filter)
                                 })
                             }

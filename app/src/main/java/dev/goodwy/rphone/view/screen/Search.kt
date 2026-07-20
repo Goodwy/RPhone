@@ -13,12 +13,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Dialpad
 import androidx.compose.material.icons.rounded.MicNone
 import androidx.compose.material.icons.rounded.People
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.SearchOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -111,7 +113,7 @@ fun ContactSearchContent(
 
     val contactsVM: ContactsViewModel = koinActivityViewModel()
     val contacts by contactsVM.allContacts.collectAsState()
-    var query by remember { mutableStateOf("") }
+    var query by rememberSaveable { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -197,7 +199,7 @@ fun ContactSearchContent(
                 placeholder = { Text(stringResource(R.string.search_contacts)) },
                 leadingIcon = {
                     IconButton(onClick = { navigator.navigateUp() }) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 trailingIcon = {
@@ -211,7 +213,7 @@ fun ContactSearchContent(
                                 query = ""
                                 textFieldValue = TextFieldValue("", selection = TextRange(0))
                             }) {
-                                Icon(Icons.Default.Clear, contentDescription = "Clear")
+                                Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.clear))
                             }
                         }
 
@@ -231,7 +233,7 @@ fun ContactSearchContent(
                             ) {
                                 Icon(
                                     imageVector = Icons.Rounded.MicNone,
-                                    contentDescription = "Voice search",
+                                    contentDescription = stringResource(R.string.voice_input),
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
@@ -264,21 +266,21 @@ fun ContactSearchContent(
                 color = MaterialTheme.colorScheme.primaryContainer
             ) {
                 Row(
-                    modifier = Modifier.padding(start = 24.dp, end = 12.dp, top = 8.dp, bottom = 8.dp),
+                    modifier = Modifier.padding(start = 24.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Icon(Icons.Default.Call, null, tint = MaterialTheme.colorScheme.primary)
                     Text(
-                        text = "Call $query",
+                        text = stringResource(R.string.call_query, query),
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.weight(1f)
                     )
-                    TextButton(onClick = {
+                    IconButton(onClick = {
                         navigator.navigate(DialPadScreenDestination(initialNumber = query))
                     }) {
-                        Text("Open Dialpad", color = MaterialTheme.colorScheme.primary)
+                        Icon(Icons.Default.Dialpad, null, tint = MaterialTheme.colorScheme.primary)
                     }
                 }
             }
@@ -288,7 +290,7 @@ fun ContactSearchContent(
             contacts.isEmpty() -> {
                 PlaceholderView(
                     icon = Icons.Rounded.People,
-                    title = "No contacts found",
+                    title = stringResource(R.string.no_contacts_found),
                 )
             }
             query.isBlank() -> {
@@ -324,7 +326,8 @@ fun ContactSearchContent(
                             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
                         )
                         Text(
-                            "No results for \"$query\"",
+//                            "No results for \"$query\"",
+                            stringResource(R.string.no_results),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center,
@@ -341,8 +344,8 @@ fun ContactSearchContent(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     item {
-                        RillSectionHeader(title = "${filteredContacts.size} Result${if (filteredContacts.size != 1) "s" else ""}")
-                        Spacer(modifier = Modifier.height(8.dp))
+//                        RillSectionHeader(title = "${filteredContacts.size} Result${if (filteredContacts.size != 1) "s" else ""}")
+//                        Spacer(modifier = Modifier.height(8.dp))
                         RillExpressiveCard {
                             filteredContacts.forEach { contact ->
                                 RillListItem(

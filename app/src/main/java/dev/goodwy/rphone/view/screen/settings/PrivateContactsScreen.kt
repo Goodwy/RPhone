@@ -11,6 +11,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -28,6 +29,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.goodwy.rphone.R
@@ -39,8 +41,12 @@ import dev.goodwy.rphone.view.components.RillLoadingIndicatorView
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import dev.goodwy.rphone.controller.util.ContactUtils.getAccountIcon
+import dev.goodwy.rphone.controller.util.toast
 import dev.goodwy.rphone.view.components.NavigationIcon
+import dev.goodwy.rphone.view.components.RillIconButton
 import dev.goodwy.rphone.view.components.ScrollHapticsEffect
+import dev.goodwy.rphone.view.components.Title
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinActivityViewModel
@@ -111,17 +117,29 @@ fun PrivateContactsScreen(
                     if (isRotation90) WindowInsetsSides.Top + WindowInsetsSides.Horizontal
                     else WindowInsetsSides.Top
                 ),
-                title = { Text("Private Contacts", fontWeight = FontWeight.ExtraBold) },
+                title = { Title(stringResource(R.string.private_contacts)) },
                 navigationIcon = {
                     NavigationIcon(onClick = { navigateBack() })
                 },
                 actions = {
-                    IconButton(onClick = { importLauncher.launch("text/vcard") }) {
-                        Icon(Icons.Default.FileDownload, "Import")
-                    }
-                    IconButton(onClick = { exportLauncher.launch("private_contacts.vcf") }) {
-                        Icon(Icons.Default.FileUpload, "Export")
-                    }
+//                    IconButton(onClick = { importLauncher.launch("text/vcard") }) {
+//                        Icon(Icons.Default.FileDownload, stringResource(R.string.import_text))
+//                    }
+//                    IconButton(onClick = { exportLauncher.launch("private_contacts.vcf") }) {
+//                        Icon(Icons.Default.FileUpload, stringResource(R.string.export_text))
+//                    }
+                    val importText = stringResource(R.string.import_text)
+                    RillIconButton(
+                        onClick = { importLauncher.launch("text/vcard") },
+                        imageVector = Icons.Default.FileDownload,
+                        contentDescription = importText
+                    )
+                    val exportText = stringResource(R.string.export_text)
+                    RillIconButton(
+                        onClick = { exportLauncher.launch("private_contacts.vcf") },
+                        imageVector = Icons.Default.FileUpload,
+                        contentDescription = exportText
+                    )
                 }
             )
         }
@@ -133,9 +151,9 @@ fun PrivateContactsScreen(
         } else if (privateContacts.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(Icons.Default.Lock, null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                    Icon(getAccountIcon(null, true), null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
                     Spacer(Modifier.height(16.dp))
-                    Text("No private contacts found", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.no_contacts_found), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         } else {
@@ -156,7 +174,7 @@ fun PrivateContactsScreen(
             ) {
                 item {
                     Text(
-                        "Manage your encrypted local contacts",
+                        stringResource(R.string.private_contacts_subtitle),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
@@ -164,12 +182,18 @@ fun PrivateContactsScreen(
                 }
 
                 items(privateContacts) { contact ->
+                    val textToast = stringResource(R.string.contact_moved_successfully)
                     PrivateContactCard(
                         contact = contact,
-                        onMoveToPublic = { viewModel.makeContactPublic(contact.id) },
+                        onMoveToPublic = {
+                            viewModel.makeContactPublic(contact.id)
+                            context.toast(textToast)
+                        },
                         onDelete = { viewModel.deleteContact(contact.id) }
                     )
                 }
+
+                item { Spacer(modifier = Modifier.height(20.dp).navigationBarsPadding()) }
             }
         }
     }
@@ -207,7 +231,7 @@ fun PrivateContactCard(
                 ) {
                     DropdownMenuItem(
                         contentPadding = PaddingValues(start = 16.dp, end = 24.dp),
-                        text = { Text("Move to Public Storage") },
+                        text = { Text(stringResource(R.string.move_to_device_storage)) },
                         onClick = {
                             showMenu = false
                             onMoveToPublic()
@@ -216,7 +240,7 @@ fun PrivateContactCard(
                     )
                     DropdownMenuItem(
                         contentPadding = PaddingValues(start = 16.dp, end = 24.dp),
-                        text = { Text(stringResource(R.string.delete)) },
+                        text = { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) },
                         onClick = {
                             showMenu = false
                             onDelete()

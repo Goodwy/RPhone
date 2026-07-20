@@ -52,9 +52,6 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.ContactDetailsScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactEditScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.DialPadScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.FavoritesScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.NotesScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -289,7 +286,7 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 items(CallLogFilter.entries) { filter ->
-                                    RillFilterChip(filter.name, selectedFilter == filter, { _ ->
+                                    RillFilterChip(stringResource(filter.stringRes), selectedFilter == filter, { _ ->
                                         viewModel.setFilter(filter)
                                     })
                                 }
@@ -576,7 +573,7 @@ fun CallLogFullContent(
 
         var showSimPicker by remember { mutableStateOf(false) }
         var pendingNumber by remember { mutableStateOf<String?>(null) }
-        val simPref = remember(settingsState) { prefs.getInt("default_sim", 0) }
+        val simPref = remember(settingsState) { prefs.getInt(PreferenceManager.KEY_DEFAULT_SIM, prefs.getDefaultSimIndexDefault()) }
 
         // Track previous filter index for slide direction
         val filterEntries = CallLogFilter.entries

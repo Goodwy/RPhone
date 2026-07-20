@@ -11,7 +11,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -72,6 +74,9 @@ fun RillAvatar(
     val showPicture     = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_SHOW_PICTURE, true) }
     val showFirstLetter = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_SHOW_FIRST_LETTER, true) }
     val colorfulAvatars = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_COLORFUL_AVATARS, true) }
+    var primaryColorAvatars     by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_PRIMARY_COLOR_AVATARS, false)) }
+    var secondaryColorAvatars     by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SECONDARY_COLOR_AVATARS, false)) }
+    var googleContactColorAvatars     by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_GOOGLE_CONTACTS_AVATARS, false)) }
     val avatarFrame = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_AVATAR_FRAME, false) }
 
     val hasName  = name.trim().isNotEmpty()
@@ -81,8 +86,9 @@ fun RillAvatar(
     val (backgroundColor, contentColor) = when {
         iconContainerColor != null -> iconContainerColor.copy(alpha = 0.18f) to iconContainerColor
         colorfulAvatars -> avatarColors[abs(colorKey.hashCode()) % avatarColors.size] to if (avatarFrame) MaterialTheme.colorScheme.onSurface else Color.White
-//        googleContacts -> Color(0xFFFFAFAB) to Color(0xFF690A08)
-        else -> MaterialTheme.colorScheme.secondaryContainer to MaterialTheme.colorScheme.onSecondaryContainer
+        googleContactColorAvatars -> Color(0xFFFFAFAB) to Color(0xFF690A08)
+        secondaryColorAvatars -> MaterialTheme.colorScheme.secondaryContainer to MaterialTheme.colorScheme.onSecondaryContainer
+        else -> MaterialTheme.colorScheme.primaryContainer to MaterialTheme.colorScheme.onPrimaryContainer
     }
 
 //    var appeared by remember { mutableStateOf(false) }

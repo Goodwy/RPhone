@@ -14,10 +14,11 @@ import com.ramcosta.composedestinations.animations.NavHostAnimatedDestinationSty
 
 private val TAB_ROUTES = listOf(
     "favorites_screen",
-    "recent_screen",
     "contact_screen",
+    "recent_screen",
     "dial_pad_screen",
-    "notes_screen"
+    "notes_screen",
+    "settings_screen"
 )
 
 private val EaseOutQuart = CubicBezierEasing(0.25f, 1f, 0.5f, 1f)

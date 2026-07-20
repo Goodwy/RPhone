@@ -58,6 +58,8 @@ import com.ramcosta.composedestinations.generated.destinations.CallSettingsScree
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.goodwy.rphone.BuildConfig
 import dev.goodwy.rphone.controller.PurchaseHelper
+import dev.goodwy.rphone.view.components.Title
+import dev.goodwy.rphone.view.theme.TabTransitionStyle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -65,7 +67,7 @@ import java.io.File
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Destination<RootGraph>
+@Destination<RootGraph>(style = TabTransitionStyle::class)
 @Composable
 fun SettingsScreen(navigator: DestinationsNavigator) {
     val context = LocalContext.current
@@ -159,21 +161,6 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
         lifecycleOwner?.lifecycle?.addObserver(observer)
         onDispose { lifecycleOwner?.lifecycle?.removeObserver(observer) }
     }
-
-    // Call recorder install state (top-level so it re-checks on resume)
-//    val recorderPkgTopLevel = "com.coolappstore.evercallrecorder.by.svhp"
-//    fun isRecorderInstalled(): Boolean = try { context.packageManager.getPackageInfo(recorderPkgTopLevel, 0); true } catch (_: Exception) { false }
-//    var recorderInstalled by remember { mutableStateOf(isRecorderInstalled()) }
-//    DisposableEffect(activity) {
-//        val recorderLifecycleOwner = activity as? androidx.lifecycle.LifecycleOwner
-//        val recorderObserver = LifecycleEventObserver { _, event ->
-//            if (event == Lifecycle.Event.ON_RESUME)
-//                recorderInstalled = isRecorderInstalled()
-//        }
-//        recorderLifecycleOwner?.lifecycle?.addObserver(recorderObserver)
-//        onDispose { recorderLifecycleOwner?.lifecycle?.removeObserver(recorderObserver) }
-//    }
-//    var showRecordingDialog by remember { mutableStateOf(false) }
 
     // ── Update Dialogs ────────────────────────────────────────────────────────
     when (val state = updateDialogState) {
@@ -327,7 +314,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                     if (isRotation90) WindowInsetsSides.Top + WindowInsetsSides.Horizontal
                     else WindowInsetsSides.Top
                 ),
-                title = { Text("Settings", fontWeight = FontWeight.ExtraBold) },
+                title = { Title(stringResource(R.string.settings)) },
                 navigationIcon = {
                     NavigationIcon(onClick = { navigateBack() })
                 }
@@ -365,94 +352,23 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 }
             }
 
-            // ── Updates ──────────────────────────────────────────────────────
-
-//            if (!isDefaultDialer) {
-//                item {
-//                    RillAnimatedSection(delayMs = 0L) {
-//                        Column {
-////                        SectionLabel("Updates")
-//                            RillExpressiveCard {
-//                            RillListItem(
-//                                headline  = "Check For Updates",
-//                                supporting = "Current version: v$appVersion",
-//                                leadingIcon = Icons.Default.SystemUpdate,
-//                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
-//                                trailingIcon = Icons.Default.ChevronRight,
-//                                onClick = {
-//                                    scope.launch {
-//                                        updateDialogState = UpdateDialogState.Checking
-//                                        val release = fetchLatestRelease(GITHUB_API_RELEASES)
-//                                        updateDialogState = when {
-//                                            release == null -> UpdateDialogState.Error
-//                                            isNewerVersion(release.tagName, appVersion) ->
-//                                                UpdateDialogState.ConfirmUpdate(release.tagName, release.apkUrl)
-//                                            else -> UpdateDialogState.UpToDate
-//                                        }
-//                                    }
-//                                }
-//                            )
-//                            RillListItem(
-//                                headline = "Rate and Review",
-//                                supporting = "Share your feedback about UC Dialer",
-//                                leadingIcon = Icons.Default.Star,
-//                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorCyan,
-//                                trailingIcon = Icons.Default.ChevronRight,
-//                                onClick = {
-//                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://docs.google.com/forms/d/e/1FAIpQLSdY2WYWDFfvLScsBBxfCWzozyA_4sHUCzfR1JycfzJKASvbfQ/viewform?usp=header"))
-//                                    context.startActivity(intent)
-//                                }
-//                            )
-//                                RillListItem(
-//                                    headline = if (isDefaultDialer) "Default Dialer" else "Set as Default Dialer",
-//                                    supporting = if (isDefaultDialer) "UC Dialer is your default phone app" else "Required for calls and call log access",
-//                                    leadingIcon = Icons.Rounded.PhoneEnabled,
-//                                    iconContainerColor = if (isDefaultDialer) MaterialTheme.colorScheme.customColors.colorDarkGreen else MaterialTheme.colorScheme.customColors.colorDarkRed,
-//                                    iconBgContainerColor = if (isDefaultDialer) MaterialTheme.colorScheme.customColors.colorGreen else MaterialTheme.colorScheme.customColors.colorRed,
-//                                    trailingIcon = if (isDefaultDialer) Icons.Default.CheckCircle else Icons.Default.ChevronRight,
-//                                    onClick = {
-//                                        if (!isDefaultDialer) {
-//                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-//                                                val roleManager =
-//                                                    context.getSystemService(android.app.role.RoleManager::class.java)
-//                                                val intent =
-//                                                    roleManager.createRequestRoleIntent(android.app.role.RoleManager.ROLE_DIALER)
-//                                                defaultDialerLauncher.launch(intent)
-//                                            } else {
-//                                                val intent =
-//                                                    Intent(android.telecom.TelecomManager.ACTION_CHANGE_DEFAULT_DIALER)
-//                                                        .putExtra(
-//                                                            android.telecom.TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME,
-//                                                            context.packageName
-//                                                        )
-//                                                defaultDialerLauncher.launch(intent)
-//                                            }
-//                                        }
-//                                    }
-//                                )
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-
             // ── Appearance ───────────────────────────────────────────────────
             item {
                 RillAnimatedSection(delayMs = 60L) {
                     Column {
-                        SettingsSectionLabel("Appearance")
+                        SettingsSectionLabel(stringResource(R.string.appearance))
                         RillExpressiveCard {
                             RillListItem(
-                                headline = "Interface",
-                                supporting = "Themes, colors, and layout",
+                                headline = stringResource(R.string.interface_settings),
+                                supporting = stringResource(R.string.interface_settings_subtitle),
                                 leadingIcon = Icons.Rounded.Palette,
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkCyan,
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorCyan,
                                 trailingIcon = Icons.Default.ChevronRight,
                                 onClick = { navigator.navigate(InterfaceScreenDestination) })
                             RillListItem(
-                                headline = "Navigations",
-                                supporting = "Tab visibility, tab style, and default tab",
+                                headline = stringResource(R.string.navigations),
+                                supporting = stringResource(R.string.navigations_subtitle),
                                 leadingIcon = Icons.Rounded.MoveUp,
                                 modifierLeadingIcon = Modifier.rotate(90f),
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkCyan,
@@ -468,11 +384,11 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
             item {
                 RillAnimatedSection(delayMs = 140L) {
                     Column {
-                        SettingsSectionLabel("Calls & System")
+                        SettingsSectionLabel(stringResource(R.string.calls_and_system))
                         RillExpressiveCard {
                             RillListItem(
-                                headline = "Call Settings",
-                                supporting = "Accounts, sensor, and pocket mode",
+                                headline = stringResource(R.string.call_settings),
+                                supporting = stringResource(R.string.call_settings_subtitle),
                                 leadingIcon = Icons.Rounded.Call,
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
@@ -480,8 +396,8 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                                 onClick = { navigator.navigate(CallSettingsScreenDestination) }
                             )
                             RillListItem(
-                                headline = "Sound & Vibration",
-                                supporting = "Ringtones, dialpad tones, and haptics across app",
+                                headline = stringResource(R.string.sound_and_vibration),
+                                supporting = stringResource(R.string.sound_and_vibration_subtitle),
                                 leadingIcon = Icons.AutoMirrored.Rounded.VolumeUp,
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
@@ -491,7 +407,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                             RillListItem(
                                 headline = stringResource(R.string.manage_blocked),
                                 supporting = stringResource(R.string.manage_blocked_subtitle),
-                                leadingIcon = Icons.Outlined.Block,
+                                leadingIcon = Icons.Outlined.DoDisturb,
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
                                 trailingIcon = Icons.Default.ChevronRight,
@@ -501,13 +417,13 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                                 prefs.getString(PreferenceManager.KEY_BIOMETRICS_TYPE, "") ?: ""
                             }
                             val biometricsLabel = when (biometricsType) {
-                                "system"   -> "System Biometrics"
-                                "pin"      -> "Custom PIN"
-                                "password" -> "Custom Password"
-                                else       -> "Not configured"
+                                "system"   -> stringResource(R.string.system_biometrics)
+                                "pin"      -> stringResource(R.string.custom_pin)
+                                "password" -> stringResource(R.string.custom_password)
+                                else       -> stringResource(R.string.not_configured)
                             }
                             RillListItem(
-                                headline   = "Authentication",
+                                headline   = stringResource(R.string.authentication),
                                 supporting = biometricsLabel,
                                 leadingIcon = Icons.Rounded.Fingerprint,
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
@@ -516,45 +432,6 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                                 onClick = { navigator.navigate(BiometricScreenDestination) }
                             )
                         }
-
-//                        Spacer(modifier = Modifier.height(8.dp))
-//
-//                        // ── Call Recording (separate card) ────────────────────
-//                        val recorderPkg = recorderPkgTopLevel
-//                        RillExpressiveCard {
-//                            RillListItem(
-//                                headline = "Call Recording",
-//                                supporting = if (recorderInstalled) "Open UC Call Recorder" else "Download the UC Call Recorder companion app",
-//                                leadingIcon = Icons.Default.FiberManualRecord,
-//                                iconContainerColor = Color(0xFFE53935),
-//                                trailingIcon = Icons.Default.ChevronRight,
-//                                onClick = {
-//                                    val isActuallyInstalled = try { context.packageManager.getPackageInfo(recorderPkg, 0); true } catch (_: Exception) { false }
-//                                    if (isActuallyInstalled) {
-//                                        val launch = Intent().apply {
-//                                            setClassName(recorderPkg, "com.coolappstore.evercallrecorder.by.svhp.ui.MainActivity")
-//                                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)
-//                                        }
-//                                        try { context.startActivity(launch) } catch (_: Exception) {}
-//                                    } else {
-//                                        showRecordingDialog = true
-//                                    }
-//                                }
-//                            )
-//                        }
-//                        if (showRecordingDialog) {
-//                            val isInstalledNow = try { context.packageManager.getPackageInfo(recorderPkg, 0); true } catch (_: Exception) { false }
-//                            if (isInstalledNow) {
-//                                showRecordingDialog = false
-//                                val launch = Intent().apply {
-//                                    setClassName(recorderPkg, "com.coolappstore.evercallrecorder.by.svhp.ui.MainActivity")
-//                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)
-//                                }
-//                                try { context.startActivity(launch) } catch (_: Exception) {}
-//                            } else {
-//                                CallRecordingDialog(onDismiss = { showRecordingDialog = false })
-//                            }
-//                        }
                     }
                 }
             }
@@ -566,8 +443,8 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                         SettingsSectionLabel(stringResource(R.string.contacts))
                         RillExpressiveCard {
                             RillListItem(
-                                headline = "Manage Contacts",
-                                supporting = "Private contacts and clean up your list",
+                                headline = stringResource(R.string.manage_contacts),
+                                supporting = stringResource(R.string.manage_contacts_subtitle),
                                 leadingIcon = Icons.Rounded.PeopleAlt,
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
@@ -577,28 +454,6 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                     }
                 }
             }
-
-            // ── Auto Check For Updates ────────────────────────────────────────
-//            item {
-//                RillAnimatedSection(delayMs = 240L) {
-//                    Column {
-//                        SectionLabel("Auto Check For Updates")
-//                        RillExpressiveCard {
-//                            RillSwitchListItem(
-//                                headline   = "Auto Check For Updates",
-//                                supporting = "Automatically check for updates when the app opens",
-//                                leadingIcon = Icons.Default.Autorenew,
-//                                iconContainerColor = ColorAmber,
-//                                checked = autoUpdateEnabled,
-//                                onCheckedChange = {
-//                                    autoUpdateEnabled = it
-//                                    prefs.setBoolean(PreferenceManager.KEY_AUTO_UPDATE_CHECK, it)
-//                                }
-//                            )
-//                        }
-//                    }
-//                }
-//            }
 
             // ── Backup & Restore ─────────────────────────────────────────────
 //            item {
@@ -659,7 +514,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 }
             }
 
-            item { Spacer(modifier = Modifier.height(80.dp)) }
+            item { Spacer(modifier = Modifier.height(80.dp).navigationBarsPadding()) }
         }
     }
 }

@@ -68,6 +68,9 @@ import com.ramcosta.composedestinations.generated.destinations.DialPadScreenDest
 import com.ramcosta.composedestinations.generated.destinations.FavoritesScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.RecentScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import dev.goodwy.rphone.view.components.RillIconButton
+import dev.goodwy.rphone.view.components.RillTextButton
+import dev.goodwy.rphone.view.components.Title
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinActivityViewModel
 import java.text.SimpleDateFormat
@@ -98,30 +101,9 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator) 
     var showOverflow by remember { mutableStateOf(false) }
 
     var selectedNotes by remember { mutableStateOf<Set<String>>(emptySet()) }
-    var showNotesSelectionMenu by remember { mutableStateOf(false) }
-    var showNotesDeleteConfirm by remember { mutableStateOf(false) }
 
     BackHandler(enabled = selectedNotes.isNotEmpty()) {
         selectedNotes = emptySet()
-    }
-
-    if (showNotesDeleteConfirm) {
-        AlertDialog(
-            onDismissRequest = { showNotesDeleteConfirm = false },
-            title = { Text("Delete ${selectedNotes.size} notes?") },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        showNotesDeleteConfirm = false
-                        notes.filter { selectedNotes.contains(it.file.absolutePath) }.forEach { it.file.delete() }
-                        selectedNotes = emptySet()
-                        notes = NoteManager.getAllNotes(context)
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                ) { Text(stringResource(R.string.delete)) }
-            },
-            dismissButton = { TextButton(onClick = { showNotesDeleteConfirm = false }) { Text(stringResource(R.string.cancel)) } }
-        )
     }
     var selectedNote by remember { mutableStateOf<NoteEntry?>(null) }
     var showEditor by remember { mutableStateOf(false) }
@@ -140,21 +122,35 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator) 
     }
 
     if (showDeleteConfirm && noteToDelete != null) {
-        AlertDialog(
+        RillDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("Delete Note") },
-            text = { Text("Delete note for ${noteToDelete!!.contactName}?") },
+            title = stringResource(R.string.delete_note),
+            icon = ImageVector.vectorResource(id = R.drawable.ic_delete),
+            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
             confirmButton = {
                 TextButton(onClick = {
                     NoteManager.deleteNoteFile(noteToDelete!!.file)
                     showDeleteConfirm = false
                     refreshNotes()
-                }) { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) }
+                }) {
+                    Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
+                }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) { Text(stringResource(R.string.cancel)) }
+                TextButton(onClick = { showDeleteConfirm = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
             }
-        )
+        ) {
+            Text(
+                stringResource(R.string.delete_note_subtitle, noteToDelete!!.contactName),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 
 //    val coroutineScope = rememberCoroutineScope()
@@ -230,7 +226,7 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator) 
                             WindowInsetsSides.Top + WindowInsetsSides.Horizontal
                         ),
                         modifier = Modifier.padding(start = 8.dp, end = 4.dp),
-                        title = { Text(stringResource(R.string.call_notes), fontWeight = FontWeight.Bold) },
+                        title = { Title(stringResource(R.string.call_notes)) },
                         actions = {
                             var showAboutNotesDialog by remember { mutableStateOf(false) }
                             if (showAboutNotesDialog) {
@@ -244,31 +240,6 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator) 
                                 IconButton(onClick = { showOverflow = true }) {
                                     Icon(Icons.Default.MoreVert, "More")
                                 }
-
-//                                RillDropdownMenu(
-//                                    expanded = showOverflow,
-//                                    onDismissRequest = { showOverflow = false }
-//                                ) {
-//                                    RillDropdownMenuItem(
-//                                        text     = stringResource(R.string.about_call_notes),
-//                                        icon     = Icons.AutoMirrored.Outlined.Help,
-//                                        iconTint = androidx.compose.ui.graphics.Color(0xFF607D8B),
-//                                        onClick  = {
-//                                            showOverflow = false
-//                                            showAboutNotesDialog = true
-//                                        }
-//                                    )
-//                                    RillDropdownMenuItem(
-//                                        text     = "Hide call notes",
-//                                        icon     = Icons.Default.VisibilityOff,
-//                                        iconTint = androidx.compose.ui.graphics.Color(0xFF607D8B),
-//                                        onClick  = {
-//                                            showOverflow = false
-//                                            prefs.setBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES, false)
-//                                            navigator.navigateUp()
-//                                        }
-//                                    )
-//                                }
                             }
 
                             AnimatedVisibility(
@@ -289,16 +260,6 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator) 
                                         onClick = {
                                             showOverflow = false
                                             showAboutNotesDialog = true
-                                        }
-                                    )
-                                    DropdownMenuItem(
-                                        contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
-                                        text = { Text("Hide call notes") },
-                                        leadingIcon = { Icon(Icons.Default.VisibilityOff, null) },
-                                        onClick = {
-                                            showOverflow = false
-                                            prefs.setBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES, false)
-                                            navigator.navigateUp()
                                         }
                                     )
                                 }
@@ -340,8 +301,8 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator) 
                 if (notes.isEmpty()) {
                     PlaceholderView(
                         icon = Icons.AutoMirrored.Outlined.StickyNote2,
-                        title = "No Notes Yet",
-                        description = "Notes taken during calls appear here"
+                        title = stringResource(R.string.no_notes_yet),
+                        description = stringResource(R.string.no_notes_yet_subtitle)
                     )
                 } else {
                     val listState = rememberLazyListState()
@@ -394,49 +355,6 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator) 
 
             // Long-press context menu
             if (selectedNote != null) {
-//                RillDropdownMenu(
-//                    expanded         = true,
-//                    onDismissRequest = { selectedNote = null }
-//                ) {
-//                    RillDropdownMenuItem(
-//                        text     = stringResource(R.string.select),
-//                        icon     = Icons.Default.CheckBox,
-//                        iconTint = androidx.compose.ui.graphics.Color(0xFF9C27B0),
-//                        onClick  = {
-//                            selectedNote?.let { selectedNotes = setOf(it.file.absolutePath) }
-//                            selectedNote = null
-//                        }
-//                    )
-//                    HorizontalDivider(
-//                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-//                        color    = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-//                    )
-//                    RillDropdownMenuItem(
-//                        text     = stringResource(R.string.share),
-//                        icon     = Icons.Default.Share,
-//                        iconTint = androidx.compose.ui.graphics.Color(0xFF2196F3),
-//                        onClick  = {
-//                            val note = selectedNote!!
-//                            val intent = Intent(Intent.ACTION_SEND).apply {
-//                                type = "text/plain"
-//                                putExtra(Intent.EXTRA_SUBJECT, "Note: ${note.contactName}")
-//                                putExtra(Intent.EXTRA_TEXT, note.content)
-//                            }
-//                            context.startActivity(Intent.createChooser(intent, "Share Note"))
-//                            selectedNote = null
-//                        }
-//                    )
-//                    RillDropdownMenuItem(
-//                        text          = stringResource(R.string.delete),
-//                        icon          = ImageVector.vectorResource(id = R.drawable.ic_delete),
-//                        isDestructive = true,
-//                        onClick       = {
-//                            noteToDelete = selectedNote
-//                            selectedNote = null
-//                            showDeleteConfirm = true
-//                        }
-//                    )
-//                }
                 AnimatedVisibility(
                     visible = true,
                     enter = slideInVertically(initialOffsetY = { -it }, animationSpec = tween(320, easing = FastOutSlowInEasing)) + fadeIn(tween(280)),
@@ -478,8 +396,8 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator) 
                         )
                         DropdownMenuItem(
                             contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
-                            text = { Text(stringResource(R.string.delete)) },
-                            leadingIcon = { Icon(ImageVector.vectorResource(id = R.drawable.ic_delete), null) },
+                            text = { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) },
+                            leadingIcon = { Icon(ImageVector.vectorResource(id = R.drawable.ic_delete), null, tint = MaterialTheme.colorScheme.error) },
                             onClick = {
                                 noteToDelete = selectedNote
                                 selectedNote = null
@@ -504,7 +422,7 @@ fun NoteCard(
     onAvatarLongClick: (() -> Unit)? = null,
 ) {
     val dateStr = remember(note.lastModified) {
-        SimpleDateFormat("MMM d, yyyy HH:mm", Locale.getDefault()).format(Date(note.lastModified))
+        SimpleDateFormat("d MMM yyyy HH:mm", Locale.getDefault()).format(Date(note.lastModified))
     }
 
     val interactionSource = remember { MutableInteractionSource() }
@@ -690,7 +608,7 @@ fun NoteEditorDialog(
                 val cornerRadiusDelete by animateDpAsState(
                     if (isDeletePressed) 12.dp else 40.dp,
                     spring(stiffness = Spring.StiffnessMediumLow),
-                    label = "ButtonShapeAnimation"
+                    label = "ButtonDeleteAnimation"
                 )
                 Button(
                     interactionSource = interactionDeleteSource,
@@ -704,22 +622,6 @@ fun NoteEditorDialog(
                     ),
                     shape = RoundedCornerShape(cornerRadiusDelete)
                 ) { Icon(ImageVector.vectorResource(id = R.drawable.ic_delete), stringResource(R.string.delete)) }
-
-                val interactionSaveSource = remember { MutableInteractionSource() }
-                val isSavePressed by interactionSaveSource.collectIsPressedAsState()
-                val cornerRadiusSave by animateDpAsState(
-                    if (isSavePressed) 12.dp else 40.dp,
-                    spring(stiffness = Spring.StiffnessMediumLow),
-                    label = "ButtonShapeAnimation"
-                )
-                Button(
-                    interactionSource = interactionSaveSource,
-                    onClick = {
-                        NoteManager.writeNote(context, contactName, phoneNumber, text)
-                        onDismiss()
-                    },
-                    shape = RoundedCornerShape(cornerRadiusSave)
-                ) { Text("Save") }
             }
             Spacer(Modifier.height(12.dp))
             OutlinedTextField(
@@ -764,32 +666,34 @@ fun BatchNotesActionBar(
                 .padding(horizontal = 8.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onClear) {
-                Icon(Icons.Default.Close, "Clear selection")
-            }
-            TextButton(
-                onClick = if (isAllSelected) onDeselect else onSelectAll
-            ) {
-                Text(
-                    text = "$selectedCount selected",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            RillIconButton(
+                onClick = onClear,
+                imageVector = Icons.Default.Close,
+                contentDescription = stringResource(R.string.cancel)
+            )
+            RillTextButton(
+                onClick = if (isAllSelected) onDeselect else onSelectAll,
+                text = stringResource(R.string.selected_items, selectedCount),
+                toast = if (isAllSelected) stringResource(R.string.deselect_all) else stringResource(R.string.select_all)
+            )
             Spacer(modifier = Modifier.weight(1f))
-            IconButton(onClick = { showDeleteConfirm = true }) {
-                Icon(ImageVector.vectorResource(id = R.drawable.ic_delete), "Delete selected")
-            }
-            IconButton(onClick = onShare) {
-                Icon(Icons.Default.Share, stringResource(R.string.share))
-            }
+            RillIconButton(
+                onClick = { showDeleteConfirm = true },
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_delete),
+                contentDescription = stringResource(R.string.delete_notes)
+            )
+            RillIconButton(
+                onClick = onShare,
+                imageVector = Icons.Default.Share,
+                contentDescription = stringResource(R.string.share)
+            )
         }
     }
 
     if (showDeleteConfirm) {
         RillDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = "Delete Notes",
+            title = stringResource(R.string.delete_notes),
             icon = ImageVector.vectorResource(id = R.drawable.ic_delete),
             iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
@@ -808,7 +712,7 @@ fun BatchNotesActionBar(
             }
         ) {
             Text(
-                "Are you sure you want to delete $selectedCount selected notes?",
+                stringResource(R.string.delete_notes_subtitle, selectedCount),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,

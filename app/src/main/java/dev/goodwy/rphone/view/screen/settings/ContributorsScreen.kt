@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.goodwy.rphone.GITHUB_DEV
@@ -20,6 +21,8 @@ import dev.goodwy.rphone.view.components.RillListItem
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import dev.goodwy.rphone.R
+import dev.goodwy.rphone.view.components.Title
 
 data class Contributor(
     val name: String,
@@ -32,8 +35,9 @@ val appContributors = listOf(
 )
 
 val otherContributors = listOf(
-    Contributor("user-grinch", "RivoPhoneApp", "https://github.com/user-grinch/RivoPhoneApp"),
-    Contributor("hari161008", "Ever-Dialer", "https://github.com/hari161008/Ever-Dialer"),
+    Contributor("RivoPhoneApp", "user-grinch", "https://github.com/user-grinch/RivoPhoneApp"),
+    Contributor("Ever-Dialer", "hari161008", "https://github.com/hari161008/Ever-Dialer"),
+    Contributor( "Phone by Google","Google LLC", "https://play.google.com/store/apps/details?id=com.google.android.dialer"),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,7 +57,7 @@ fun ContributorsScreen(
                     if (isRotation90) WindowInsetsSides.Top + WindowInsetsSides.Horizontal
                     else WindowInsetsSides.Top
                 ),
-                title = { Text("Contributors", fontWeight = FontWeight.Bold) },
+                title = { Title(stringResource(R.string.contributors)) },
                 navigationIcon = {
                     NavigationIcon(onClick = { navigator.navigateUp() })
                 }
@@ -75,7 +79,7 @@ fun ContributorsScreen(
         ) {
             item {
                 Column {
-                    SettingsSectionLabel("Development Team")
+                    SettingsSectionLabel(stringResource(R.string.development_team))
                     RillExpressiveCard {
                         appContributors.forEachIndexed { index, contributor ->
                             RillListItem(
@@ -93,7 +97,7 @@ fun ContributorsScreen(
             }
             item {
                 Column {
-                    SettingsSectionLabel("Apps That Inspired Us")
+                    SettingsSectionLabel(stringResource(R.string.apps_that_inspired_us))
                     RillExpressiveCard {
                         otherContributors.forEachIndexed { index, contributor ->
                             RillListItem(
@@ -110,9 +114,7 @@ fun ContributorsScreen(
                 }
             }
 
-            item {
-                Spacer(modifier = Modifier.height(100.dp))
-            }
+            item { Spacer(modifier = Modifier.height(80.dp).navigationBarsPadding()) }
         }
     }
 }

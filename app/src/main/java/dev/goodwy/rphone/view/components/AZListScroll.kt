@@ -6,7 +6,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
-import android.provider.CallLog
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutLinearInEasing
@@ -33,9 +32,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.StarHalf
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.rounded.AccountCircle
-import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -59,7 +58,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.net.toUri
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.bottomBarHeight
 import dev.goodwy.rphone.cardCornerBig
@@ -74,8 +72,6 @@ import dev.goodwy.rphone.view.theme.customColors
 import com.ramcosta.composedestinations.generated.destinations.ContactDetailsScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactEditScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import dev.goodwy.rphone.controller.util.ContactUtils
-import dev.goodwy.rphone.controller.util.toast
 import dev.goodwy.rphone.modal.data.getDisplayName
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -260,11 +256,12 @@ fun AZListContent(
         }
 
         val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
-        if (!isLandscape) {
+        val alphabet = alphabetIndices.keys.toList()
+        if (!isLandscape && alphabet.size > 1) {
             val pillNav = remember { prefs.getBoolean(PreferenceManager.KEY_PILL_NAV, false) }
             val paddingBottom = if (pillNav) 0.dp else bottomBarHeight
             AlphabetSideBar(
-                alphabet = alphabetIndices.keys.toList(),
+                alphabet = alphabet,
                 selectedChar = draggingChar ?: scrollingChar,
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
@@ -302,7 +299,7 @@ fun AZListContent(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ContactListItem(
+fun ContactListItem(
     contact: Contact,
     navigator: DestinationsNavigator,
     selectionMode: Boolean = false,
@@ -325,13 +322,13 @@ private fun ContactListItem(
         label = "contactItemScale"
     )
 
-    val headline = getDisplayName(contact, displayOrder)
+    val headline = contact.displayName //getDisplayName(contact, displayOrder)
 
     // Delete confirmation dialog
     if (showDeleteConfirm) {
         RillDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = "Delete Contact",
+            title = stringResource(R.string.delete_contact),
             icon = ImageVector.vectorResource(id = R.drawable.ic_delete),
             iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
@@ -350,7 +347,7 @@ private fun ContactListItem(
             }
         ) {
             Text(
-                "Are you sure you want to permanently delete \"$headline\"? This action cannot be undone.",
+                stringResource(R.string.delete_contact_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -366,14 +363,8 @@ private fun ContactListItem(
             if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
                 performAppHaptic(
                     context,
-                    prefs.getString(
-                        PreferenceManager.KEY_APP_HAPTICS_STRENGTH,
-                        "light"
-                    ) ?: "light",
-                    prefs.getFloat(
-                        PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY,
-                        0.5f
-                    )
+                    prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light",
+                    prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
                 )
             }
             navigator.navigate(ContactDetailsScreenDestination(contactId = contact.id))
@@ -387,7 +378,10 @@ private fun ContactListItem(
             .scale(scale),
         shadowElevation = 0.dp
     ) {
-        val defaultOrFirstPhone = contact.phoneDetails.firstOrNull { it.isPrimary }?.number ?: contact.phoneNumbers.firstOrNull()
+//        val defaultOrFirstPhone = contact.phoneDetails.firstOrNull { it.isPrimary }?.number ?: contact.phoneNumbers.firstOrNull()
+        val contactInfo = if (contact.phoneNumbers.isNotEmpty()) contact.phoneNumbers.joinToString(", ")
+                                else if (contact.emails.isNotEmpty()) contact.emails.joinToString(", ") { it.value }
+                                else null
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -475,9 +469,9 @@ private fun ContactListItem(
                     maxLines = 1,
                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 )
-                if (!defaultOrFirstPhone.isNullOrBlank()) {
+                if (!contactInfo.isNullOrBlank()) {
                     Text(
-                        text = defaultOrFirstPhone,
+                        text = contactInfo,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
@@ -512,7 +506,7 @@ private fun ContactListItem(
                 )
                 DropdownMenuItem(
                     contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
-                    text = { Text("View contact") },
+                    text = { Text(stringResource(R.string.view_contact)) },
                     leadingIcon = { Icon(Icons.Rounded.AccountCircle, null) },
                     onClick = {
                         showMenu = false
@@ -521,16 +515,17 @@ private fun ContactListItem(
                 )
                 DropdownMenuItem(
                     contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
-                    text = { Text("Edit contact") },
+                    text = { Text(stringResource(R.string.edit_contact)) },
                     leadingIcon = { Icon(Icons.Default.Edit, null) },
                     onClick = {
                         showMenu = false
                         navigator.navigate(ContactEditScreenDestination(contactId = contact.id))
                     }
                 )
+                val shareText = stringResource(R.string.share)
                 DropdownMenuItem(
                     contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
-                    text = { Text("Share contact") },
+                    text = { Text(shareText) },
                     leadingIcon = { Icon(Icons.Default.Share, null) },
                     onClick = {
                         showMenu = false
@@ -538,18 +533,18 @@ private fun ContactListItem(
                             type = "text/plain"
                             putExtra(Intent.EXTRA_TEXT, "${contact.displayName}\n${contact.phoneNumbers.joinToString(", ")}")
                         }
-                        context.startActivity(Intent.createChooser(intent, "Share contact"))
+                        context.startActivity(Intent.createChooser(intent, shareText))
                     }
                 )
-                if (!defaultOrFirstPhone.isNullOrBlank()) {
+                if (!contactInfo.isNullOrBlank()) {
                     DropdownMenuItem(
                         contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
-                        text = { Text("Copy number") },
+                        text = { Text(stringResource(R.string.copy)) },
                         leadingIcon = { Icon(Icons.Default.ContentCopy, null) },
                         onClick = {
                             showMenu = false
                             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                            clipboard.setPrimaryClip(ClipData.newPlainText("Phone number", defaultOrFirstPhone))
+                            clipboard.setPrimaryClip(ClipData.newPlainText("Phone number", contactInfo))
                             Toast.makeText(context, "Number copied", Toast.LENGTH_SHORT).show()
                         }
                     )
@@ -559,8 +554,8 @@ private fun ContactListItem(
                 )
                 DropdownMenuItem(
                     contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
-                    text = { Text(if (contact.isFavorite) "Remove from Favourites" else "Add to Favourites") },
-                    leadingIcon = { Icon(Icons.Default.Star, null, tint = if (contact.isFavorite) MaterialTheme.colorScheme.error else LocalContentColor.current) },
+                    text = { Text(if (contact.isFavorite) stringResource(R.string.remove_from_favorites) else stringResource(R.string.add_to_favorites)) },
+                    leadingIcon = { Icon(if (contact.isFavorite) Icons.AutoMirrored.Filled.StarHalf else Icons.Default.Star, null, tint = if (contact.isFavorite) MaterialTheme.colorScheme.error else LocalContentColor.current) },
                     onClick = {
                         showMenu = false
                         contactsVM.toggleFavorite(contact)
@@ -571,7 +566,7 @@ private fun ContactListItem(
                 )
                 DropdownMenuItem(
                     contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
-                    text = { Text("Delete contact", color = MaterialTheme.colorScheme.error) },
+                    text = { Text(stringResource(R.string.delete_contact), color = MaterialTheme.colorScheme.error) },
                     leadingIcon = { Icon(ImageVector.vectorResource(id = R.drawable.ic_delete), null, tint = MaterialTheme.colorScheme.error) },
                     onClick = {
                         showMenu = false
@@ -580,96 +575,6 @@ private fun ContactListItem(
                 )
             }
         }
-//        RillDropdownMenu(
-//            expanded         = showMenu && !selectionMode,
-//            onDismissRequest = { showMenu = false }
-//        ) {
-//            RillDropdownMenuItem(
-//                text     = stringResource(R.string.select),
-//                icon     = Icons.Default.CheckBox,
-//                iconTint = Color(0xFF9C27B0),
-//                onClick  = {
-//                    showMenu = false
-//                    onSelectToggle()
-//                }
-//            )
-//            HorizontalDivider(
-//                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-//                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-//            )
-//            RillDropdownMenuItem(
-//                text     = "View contact",
-//                icon     = Icons.Filled.AccountCircle,
-//                iconTint = Color(0xFF2196F3),
-//                onClick  = {
-//                    showMenu = false
-//                    navigator.navigate(ContactDetailsScreenDestination(contactId = contact.id))
-//                }
-//            )
-//            RillDropdownMenuItem(
-//                text     = "Edit contact",
-//                icon     = Icons.Default.Edit,
-//                iconTint = Color(0xFF00BCD4),
-//                onClick  = {
-//                    showMenu = false
-//                    navigator.navigate(ContactEditScreenDestination(contactId = contact.id))
-//                }
-//            )
-//            if (!defaultOrFirstPhone.isNullOrBlank()) {
-//                RillDropdownMenuItem(
-//                    text     = "Copy number",
-//                    icon     = Icons.Default.ContentCopy,
-//                    iconTint = Color(0xFF009688),
-//                    onClick  = {
-//                        showMenu = false
-//                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-//                        clipboard.setPrimaryClip(ClipData.newPlainText("Phone number", defaultOrFirstPhone))
-//                        Toast.makeText(context, "Number copied", Toast.LENGTH_SHORT).show()
-//                    }
-//                )
-//            }
-//            RillDropdownMenuItem(
-//                text     = "Share contact",
-//                icon     = Icons.Default.Share,
-//                iconTint = Color(0xFFFF9800),
-//                onClick  = {
-//                    showMenu = false
-//                    val intent = Intent(Intent.ACTION_SEND).apply {
-//                        type = "text/plain"
-//                        putExtra(Intent.EXTRA_TEXT, "${contact.name}\n${contact.phoneNumbers.joinToString(", ")}")
-//                    }
-//                    context.startActivity(Intent.createChooser(intent, "Share contact"))
-//                }
-//            )
-//            HorizontalDivider(
-//                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-//                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-//            )
-//            RillDropdownMenuItem(
-//                text     = if (contact.isFavorite) "Remove from Favourites" else "Add to Favourites",
-//                icon     = Icons.Default.Star,
-//                iconTint = if (contact.isFavorite) Color(0xFFF44336) else Color(0xFFE91E63),
-////                isDestructive = contact.isFavorite,
-//                onClick  = {
-//                    showMenu = false
-//                    contactsVM.toggleFavorite(contact)
-//                }
-//            )
-//            HorizontalDivider(
-//                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-//                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-//            )
-//            RillDropdownMenuItem(
-//                text     = "Delete contact",
-//                icon     = ImageVector.vectorResource(id = R.drawable.ic_delete),
-//                iconTint = Color(0xFFF44336),
-//                isDestructive = true,
-//                onClick  = {
-//                    showMenu = false
-//                    showDeleteConfirm = true
-//                }
-//            )
-//        }
     }
 } // end AZListContent
 

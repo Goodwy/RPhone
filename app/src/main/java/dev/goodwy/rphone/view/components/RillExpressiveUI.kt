@@ -328,7 +328,7 @@ fun RillExpressiveCard(
                             color = containerColor,
                             shape = RoundedCornerShape(cardCornerSmall)
                         )
-                        .padding(horizontal = 20.dp, vertical = 16.dp)
+                        .padding(horizontal = 24.dp).padding(top = 16.dp, bottom = 14.dp)
                 ) {
                     if (icon != null) {
                         Icon(
@@ -411,11 +411,6 @@ fun RillExpressiveButton(
         animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
         label = "ButtonShape"
     )
-//    val scale by animateFloatAsState(
-//        targetValue = if (isPressed && enabled) 0.91f else 1f,
-//        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-//        label = "ButtonScale"
-//    )
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier) {
         Surface(
@@ -1128,7 +1123,10 @@ fun RillSelectListItem(
                 Spacer(modifier = Modifier.width(16.dp))
             }
 
-            Column(modifier = Modifier.weight(1f)) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
                 Text(
                     text = headline,
                     style = MaterialTheme.typography.bodyLarge,
@@ -1272,8 +1270,8 @@ fun RillDialog(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(top = 32.dp, bottom = 16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                                .padding(top = 32.dp, bottom = 16.dp, start = if (icon != null) 0.dp else 12.dp),
+                            horizontalAlignment = if (icon != null) Alignment.CenterHorizontally else Alignment.Start
                         ) {
                             if (icon != null) {
                                 Surface(
@@ -1313,7 +1311,7 @@ fun RillDialog(
                             .fillMaxWidth()
                             .weight(1f, fill = false)
                             .verticalScroll(rememberScrollState())
-                            .padding(horizontal = 24.dp, vertical = 24.dp),
+                            .padding(horizontal = 24.dp, vertical = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -1391,63 +1389,6 @@ fun RillFilterChip(
         ),
         elevation = FilterChipDefaults.filterChipElevation(elevation = 0.dp)
     )
-}
-
-@Composable
-fun RillConfirmationDialog(
-    onDismissRequest: () -> Unit,
-    onConfirm: () -> Unit,
-    title: String,
-    message: String,
-    confirmLabel: String = "Confirm",
-    dismissLabel: String = stringResource(R.string.cancel),
-    icon: ImageVector? = null,
-    isDestructive: Boolean = false
-) {
-    RillDialog(
-        onDismissRequest = onDismissRequest,
-        title = title,
-        icon = icon,
-        confirmButton = {
-            Button(
-                onClick = {
-                    onConfirm()
-                    onDismissRequest()
-                },
-                colors = if (isDestructive) ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error) else ButtonDefaults.buttonColors(),
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier.fillMaxWidth().height(52.dp)
-            ) {
-                Text(
-                    confirmLabel,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        },
-        dismissButton = {
-            FilledTonalButton(
-                onClick = onDismissRequest,
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier.fillMaxWidth().height(52.dp)
-            ) {
-                Text(
-                    dismissLabel,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-    ) {
-        Text(
-            message,
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            lineHeight = TextUnit.Unspecified
-        )
-    }
 }
 
 @Composable
@@ -1566,7 +1507,12 @@ fun RillScrollAnimatedItem(
     content: @Composable () -> Unit
 ) {
     val prefs = koinInject<PreferenceManager>()
-    val scrollAnimEnabled = remember { prefs.getBoolean(PreferenceManager.KEY_SCROLL_ANIMATION, false) }
+    // Must be keyed on settingsVersion (not a bare remember{}) — otherwise a composable
+    // that was already placed in the lazy list keeps its first-read value forever and
+    // flipping the setting in InterfaceScreen has no visible effect until the process
+    // restarts or the item happens to leave/re-enter composition.
+    val settingsVersion by prefs.settingsChanged.collectAsState()
+    val scrollAnimEnabled = remember(settingsVersion) { prefs.getBoolean(PreferenceManager.KEY_SCROLL_ANIMATION, false) }
 
     if (scrollAnimEnabled) {
         // Use a key that changes each time this composable enters composition,

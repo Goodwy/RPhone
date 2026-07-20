@@ -10,8 +10,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.filled.ChevronRight
@@ -23,15 +21,12 @@ import androidx.compose.material.icons.rounded.SpatialTracking
 import androidx.compose.material.icons.rounded.TouchApp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.goodwy.rphone.R
-import dev.goodwy.rphone.controller.ContactsViewModel
 import dev.goodwy.rphone.controller.util.ContactUtils
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.view.components.NavigationIcon
@@ -45,87 +40,8 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.compose.koinInject
 import androidx.core.net.toUri
-import org.koin.compose.viewmodel.koinActivityViewModel
-
-// ─── Contacts to Display Dialog ───────────────────────────────────────────────
-
-data class ContactSourceItem(
-    val key: String,
-    val label: String,
-    val subLabel: String? = null
-)
-
-@Composable
-fun ContactsToDisplayDialog(
-    onDismiss: () -> Unit,
-    prefs: PreferenceManager
-) {
-    val context = LocalContext.current
-
-    val contactsVM: ContactsViewModel = koinActivityViewModel()
-    val sources = contactsVM.availableAccounts.collectAsState().value
-
-    // Load saved enabled keys
-    val savedKeys = remember {
-        val raw = prefs.getString(PreferenceManager.KEY_CONTACTS_DISPLAY_ACCOUNTS, null)
-        if (raw.isNullOrBlank()) sources.map { getAccountKey(it) }.toSet()
-        else raw.split(",").toSet()
-    }
-    val checkedKeys = remember { mutableStateOf(savedKeys) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Contacts to display") },
-        text = {
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                sources.forEach { source ->
-                    val isChecked = getAccountKey(source) in checkedKeys.value
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Checkbox(
-                            checked = isChecked,
-                            onCheckedChange = { checked ->
-                                checkedKeys.value = if (checked) {
-                                    checkedKeys.value + getAccountKey(source)
-                                } else {
-                                    checkedKeys.value - getAccountKey(source)
-                                }
-                            }
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Column {
-                            Text(
-                                text = ContactUtils.getAccountName(source),
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                            Text(
-                                text = ContactUtils.getFriendlyAccountName(source),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = {
-                prefs.setString(
-                    PreferenceManager.KEY_CONTACTS_DISPLAY_ACCOUNTS,
-                    checkedKeys.value.joinToString(",")
-                )
-                onDismiss()
-            }) { Text("OK") }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
-        }
-    )
-}
+import dev.goodwy.rphone.view.components.RillSelectListItem
+import dev.goodwy.rphone.view.components.Title
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Destination<RootGraph>
@@ -139,9 +55,7 @@ fun CallSettingsScreen(navigator: DestinationsNavigator) {
     var floatingCall by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_FLOATING_CALL, false)) }
     var directCallOnTap by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_DIRECT_CALL_ON_TAP, false)) }
     var autoSpeaker by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_AUTO_SPEAKER, false)) }
-    var showContactsToDisplayDialog by remember { mutableStateOf(false) }
-    var defaultSim by remember { mutableStateOf(prefs.getInt("default_sim", 0)) }
-    var showSimDialog by remember { mutableStateOf(false) }
+    var defaultSim by remember { mutableStateOf(prefs.getInt(PreferenceManager.KEY_DEFAULT_SIM, prefs.getDefaultSimIndexDefault())) }
 
     var visible by remember { mutableStateOf(false) }
     val screenAlpha by animateFloatAsState(
@@ -150,51 +64,6 @@ fun CallSettingsScreen(navigator: DestinationsNavigator) {
         label = "callSettingsAlpha"
     )
     LaunchedEffect(Unit) { visible = true }
-
-    if (showContactsToDisplayDialog) {
-        ContactsToDisplayDialog(
-            onDismiss = { showContactsToDisplayDialog = false },
-            prefs = prefs
-        )
-    }
-
-    if (showSimDialog) {
-        AlertDialog(
-            onDismissRequest = { showSimDialog = false },
-            title = { Text("Default SIM") },
-            text = {
-                Column {
-                    listOf("Ask every time", "SIM 1", "SIM 2").forEachIndexed { index, label ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            RadioButton(
-                                selected = defaultSim == index,
-                                onClick = {
-                                    defaultSim = index
-                                    prefs.setInt("default_sim", index)
-                                    showSimDialog = false
-                                }
-                            )
-                            Text(
-                                text = label,
-                                style = MaterialTheme.typography.bodyLarge,
-                                modifier = Modifier.padding(start = 8.dp)
-                            )
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showSimDialog = false }) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
 
     val rotation =
         (context.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager).defaultDisplay.rotation
@@ -206,7 +75,7 @@ fun CallSettingsScreen(navigator: DestinationsNavigator) {
                     if (isRotation90) WindowInsetsSides.Top + WindowInsetsSides.Horizontal
                     else WindowInsetsSides.Top
                 ),
-                title = { Text("Call Settings", fontWeight = FontWeight.Bold) },
+                title = { Title(stringResource(R.string.call_settings)) },
                 navigationIcon = {
                     NavigationIcon(onClick = { navigator.navigateUp() })
                 }
@@ -216,7 +85,6 @@ fun CallSettingsScreen(navigator: DestinationsNavigator) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-//                .padding(padding)
                 .padding(
                     top = padding.calculateTopPadding(),
                     start = 0.dp,
@@ -231,25 +99,27 @@ fun CallSettingsScreen(navigator: DestinationsNavigator) {
             item {
                 RillAnimatedSection(delayMs = 0L) {
                     Column {
-                        CallSettingsSectionLabel("Accounts")
+                        SettingsSectionLabel("SIM")
                         RillExpressiveCard {
-                            RillListItem(
-                                headline = "Default SIM",
-                                supporting = when(defaultSim) {
-                                    0 -> "Ask every time"
-                                    1 -> "SIM 1"
-                                    2 -> "SIM 2"
-                                    else -> "Ask every time"
-                                },
+                            RillSelectListItem(
+                                headline = stringResource(R.string.default_sim),
                                 leadingIcon = Icons.Rounded.SimCard,
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
-                                trailingIcon = Icons.Default.ChevronRight,
-                                onClick = { showSimDialog = true }
+                                options = listOf(
+                                    stringResource(R.string.ask_first) to 0,
+                                    "SIM 1" to 1,
+                                    "SIM 2" to 2
+                                ),
+                                selectedValue = defaultSim,
+                                onValueChange = { newValue: Int ->
+                                    defaultSim = newValue
+                                    prefs.setInt(PreferenceManager.KEY_DEFAULT_SIM, newValue)
+                                }
                             )
                             RillListItem(
                                 headline = stringResource(R.string.calling_accounts),
-//                                supporting = "Configure carrier settings (Call Waiting, Forwarding, etc.)",
+                                supporting = stringResource(R.string.system_settings),
                                 leadingIcon = Icons.Rounded.SettingsPhone,
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
@@ -260,32 +130,23 @@ fun CallSettingsScreen(navigator: DestinationsNavigator) {
                                             flags = Intent.FLAG_ACTIVITY_NEW_TASK
                                         }
                                         context.startActivity(intent)
-                                    } catch (e: Exception) {
+                                    } catch (_: Exception) {
                                         try {
                                             val intent = Intent("android.telecom.action.SHOW_CALL_SETTINGS").apply {
                                                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
                                             }
                                             context.startActivity(intent)
-                                        } catch (e2: Exception) {
+                                        } catch (_: Exception) {
                                             try {
                                                 val intent = Intent(android.provider.Settings.ACTION_SETTINGS).apply {
                                                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                                                 }
                                                 context.startActivity(intent)
-                                            } catch (e3: Exception) {}
+                                            } catch (_: Exception) {}
                                         }
                                     }
                                 }
                             )
-//                            RillListItem(
-//                                headline = "Contacts to display",
-//                                supporting = "Choose which accounts' contacts are shown",
-//                                leadingIcon = Icons.Rounded.Contacts,
-//                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
-//                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
-//                                trailingIcon = Icons.Default.ChevronRight,
-//                                onClick = { showContactsToDisplayDialog = true }
-//                            )
                         }
                     }
                 }
@@ -295,11 +156,11 @@ fun CallSettingsScreen(navigator: DestinationsNavigator) {
             item {
                 RillAnimatedSection(delayMs = 60L) {
                     Column {
-                        CallSettingsSectionLabel("Call Behavior")
+                        SettingsSectionLabel(stringResource(R.string.call_behavior))
                         RillExpressiveCard {
                             RillSwitchListItem(
-                                headline   = "Proximity Sensor on in background",
-                                supporting = "Turn off screen when phone is near ear during a call",
+                                headline   = stringResource(R.string.proximity_sensor),
+                                supporting = stringResource(R.string.proximity_sensor_subtitle),
                                 leadingIcon = Icons.Rounded.SpatialTracking,
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
@@ -310,8 +171,8 @@ fun CallSettingsScreen(navigator: DestinationsNavigator) {
                                 }
                             )
                             RillSwitchListItem(
-                                headline   = "Pocket Mode Prevention",
-                                supporting = "Block accidental answer/decline when phone is in pocket",
+                                headline   = stringResource(R.string.pocket_mode_prevention),
+                                supporting = stringResource(R.string.pocket_mode_prevention_subtitle),
                                 leadingIcon = Icons.Rounded.Backpack,
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
@@ -322,8 +183,8 @@ fun CallSettingsScreen(navigator: DestinationsNavigator) {
                                 }
                             )
                             RillSwitchListItem(
-                                headline   = "Floating Ongoing Call",
-                                supporting = "Show a draggable floating bubble during calls. Requires 'Display over other apps' permission.",
+                                headline   = stringResource(R.string.floating_ongoing_call),
+                                supporting = stringResource(R.string.floating_ongoing_call_subtitle),
                                 leadingIcon = Icons.Rounded.PictureInPicture,
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
@@ -343,8 +204,8 @@ fun CallSettingsScreen(navigator: DestinationsNavigator) {
                                 }
                             )
                             RillSwitchListItem(
-                                headline   = "Direct Call on Tap",
-                                supporting = "Tap a call log entry to call directly instead of viewing contact info",
+                                headline   = stringResource(R.string.direct_call_on_tap),
+                                supporting = stringResource(R.string.direct_call_on_tap_subtitle),
                                 leadingIcon = Icons.Rounded.TouchApp,
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
@@ -354,38 +215,24 @@ fun CallSettingsScreen(navigator: DestinationsNavigator) {
                                     prefs.setBoolean(PreferenceManager.KEY_DIRECT_CALL_ON_TAP, it)
                                 }
                             )
-                            RillSwitchListItem(
-                                headline   = "Auto Speaker",
-                                supporting = "Automatically switch to loudspeaker when phone is away from ear, and back to earpiece when near",
-                                leadingIcon = Icons.AutoMirrored.Rounded.VolumeUp,
-                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
-                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
-                                checked = autoSpeaker,
-                                onCheckedChange = {
-                                    autoSpeaker = it
-                                    prefs.setBoolean(PreferenceManager.KEY_AUTO_SPEAKER, it)
-                                }
-                            )
+//                            RillSwitchListItem(
+//                                headline   = stringResource(R.string.auto_speaker),
+//                                supporting = stringResource(R.string.auto_speaker_subtitle),
+//                                leadingIcon = Icons.AutoMirrored.Rounded.VolumeUp,
+//                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+//                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+//                                checked = autoSpeaker,
+//                                onCheckedChange = {
+//                                    autoSpeaker = it
+//                                    prefs.setBoolean(PreferenceManager.KEY_AUTO_SPEAKER, it)
+//                                }
+//                            )
                         }
                     }
                 }
             }
 
-            item { Spacer(modifier = Modifier.height(80.dp)) }
+            item { Spacer(modifier = Modifier.height(80.dp).navigationBarsPadding()) }
         }
     }
-}
-
-@Composable
-private fun CallSettingsSectionLabel(text: String) {
-    Text(
-        text,
-        style = MaterialTheme.typography.labelLarge,
-        modifier = Modifier.padding(start = 12.dp, bottom = 8.dp),
-        color = MaterialTheme.colorScheme.primary
-    )
-}
-
-fun getAccountKey(account: Account?): String? {
-    return ContactUtils.getAccountKey(account)
 }

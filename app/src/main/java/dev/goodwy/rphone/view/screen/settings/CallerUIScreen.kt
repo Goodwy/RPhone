@@ -3,6 +3,7 @@ package dev.goodwy.rphone.view.screen.settings
 import android.content.Context
 import android.view.Surface
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -19,7 +20,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.goodwy.rphone.R
-import dev.goodwy.rphone.cardCornerSmall
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillAnimatedSection
@@ -29,6 +29,7 @@ import dev.goodwy.rphone.view.theme.color_call_end
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import dev.goodwy.rphone.view.components.Title
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,7 +51,7 @@ fun CallerUIScreen(navigator: DestinationsNavigator) {
                     if (isRotation90) WindowInsetsSides.Top + WindowInsetsSides.Horizontal
                     else WindowInsetsSides.Top
                 ),
-                title = { Text("Caller UI", fontWeight = FontWeight.Bold) },
+                title = { Title(stringResource(R.string.сaller_ui)) },
                 navigationIcon = {
                     NavigationIcon(onClick = { navigator.navigateUp() })
                 }
@@ -60,7 +61,6 @@ fun CallerUIScreen(navigator: DestinationsNavigator) {
     ) { padding ->
         LazyColumn(
             modifier = Modifier
-//                .padding(padding)
                 .padding(
                     top = padding.calculateTopPadding(),
                     start = 0.dp,
@@ -76,7 +76,7 @@ fun CallerUIScreen(navigator: DestinationsNavigator) {
             item {
                 RillAnimatedSection(delayMs = 60L) {
                     Column {
-                        SettingsSectionLabel("Hang Up Button")
+                        SettingsSectionLabel(stringResource(R.string.end_call_button))
                         RillExpressiveCard {
                             Column(modifier = Modifier
                                 .background(color = cardColor)
@@ -102,19 +102,19 @@ fun CallerUIScreen(navigator: DestinationsNavigator) {
                                     }
                                     Column {
                                         Text(
-                                            "Customise Width",
+                                            stringResource(R.string.customize_width),
                                             style = MaterialTheme.typography.titleSmall,
                                             fontWeight = FontWeight.SemiBold
                                         )
                                         Text(
-                                            "Adjust the width of the hang up button",
+                                            stringResource(R.string.customize_width_subtitle),
                                             style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
                                 }
 
-                                Spacer(Modifier.height(20.dp))
+                                Spacer(Modifier.height(24.dp))
 
                                 // Live preview
                                 Box(
@@ -161,12 +161,6 @@ fun CallerUIScreen(navigator: DestinationsNavigator) {
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-//                                    Icon(
-//                                        Icons.Default.Remove,
-//                                        null,
-//                                        modifier = Modifier.size(18.dp),
-//                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-//                                    )
                                     Slider(
                                         value = hangupWidth,
                                         onValueChange = { hangupWidth = it },
@@ -182,20 +176,14 @@ fun CallerUIScreen(navigator: DestinationsNavigator) {
                                             inactiveTrackColor = color_call_end.copy(alpha = 0.3f)
                                         )
                                     )
-//                                    Icon(
-//                                        Icons.Default.Add,
-//                                        null,
-//                                        modifier = Modifier.size(18.dp),
-//                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-//                                    )
                                 }
 
                                 Row(
-                                    modifier = Modifier.fillMaxWidth(),
+                                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Text(
-                                        "Narrow",
+                                        "10%",
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -203,10 +191,16 @@ fun CallerUIScreen(navigator: DestinationsNavigator) {
                                         "${(hangupWidth * 100).toInt()}%",
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.primary,
-                                        fontWeight = FontWeight.Bold
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.clickable(
+                                            indication = ripple(bounded = false, radius = 24.dp),
+                                            interactionSource = null,
+                                        ) {
+                                            hangupWidth = 0.5f
+                                        }
                                     )
                                     Text(
-                                        "Full Width",
+                                        "100%",
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -216,6 +210,8 @@ fun CallerUIScreen(navigator: DestinationsNavigator) {
                     }
                 }
             }
+
+            item { Spacer(modifier = Modifier.height(20.dp).navigationBarsPadding()) }
         }
     }
 }

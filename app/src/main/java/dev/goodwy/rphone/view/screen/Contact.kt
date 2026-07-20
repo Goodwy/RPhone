@@ -23,8 +23,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -53,6 +51,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.automirrored.filled.StarHalf
 import androidx.compose.material.icons.automirrored.rounded.DriveFileMove
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.rounded.CheckCircle
@@ -70,9 +69,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.generated.destinations.RecentScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.NotesScreenDestination
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.bottomBarHeight
 import dev.goodwy.rphone.controller.util.ContactUtils
@@ -81,8 +77,6 @@ import dev.goodwy.rphone.view.theme.customColors
 import dev.goodwy.rphone.view.theme.TabTransitionStyle
 import com.ramcosta.composedestinations.generated.destinations.ContactEditScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactVisibilityScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.DialPadScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.FavoritesScreenDestination
 import dev.goodwy.rphone.private_only
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -210,8 +204,8 @@ fun ContactScreen(navController: NavController, navigator: DestinationsNavigator
                             }
                             val allSameAccount = selectedContacts.all {
                                 val account = if (it.accountName == null && it.accountType == null && !it.isPrivate) device_only
-                                else if (it.accountName == null && it.accountType == null && it.isPrivate) private_only
-                                else "${it.accountName}|${it.accountType}"
+                                            else if (it.accountName == null && it.accountType == null) private_only
+                                            else "${it.accountName}|${it.accountType}"
                                 account == firstAccount
                             }
                             if (allSameAccount) firstAccount else "-1"
@@ -219,6 +213,8 @@ fun ContactScreen(navController: NavController, navigator: DestinationsNavigator
                             "-1"
                         }
                     }
+                    val shareText = stringResource(R.string.share)
+                    val showMove = selectedContacts.none { it.hasMultipleSources } // You cannot move merged contacts
                     BatchActionBar(
                         selectedCount = selectedIds.size,
                         onClear = { selectedIds = emptySet() },
@@ -226,10 +222,10 @@ fun ContactScreen(navController: NavController, navigator: DestinationsNavigator
                             contactsVM.deleteContacts(selectedIds.toList())
                             selectedIds = emptySet()
                         },
-                        onMove = { account ->
+                        onMove = if (showMove) { account ->
                             contactsVM.moveContacts(selectedIds.toList(), account)
                             selectedIds = emptySet()
-                        },
+                        } else null,
                         onMoveToPrivate = {
                             selectedIds.forEach { contactsVM.makeContactPrivate(it) }
                             selectedIds = emptySet()
@@ -237,12 +233,15 @@ fun ContactScreen(navController: NavController, navigator: DestinationsNavigator
                         onAddToFav = {
                             filteredContacts.filter { selectedIds.contains(it.id) }.forEach { contactsVM.toggleFavorite(it, true) }
                         },
+                        onRemoveFromFav = {
+                            filteredContacts.filter { selectedIds.contains(it.id) }.forEach { contactsVM.toggleFavorite(it, false) }
+                        },
                         availableAccounts = contactsVM.availableAccountsForMoving.collectAsState().value,
                         currentAccountKey = currentAccountKey,
                         onShare = {
-                            val text = filteredContacts.filter { selectedIds.contains(it.id) }.joinToString("\n") { "${it.name}: ${it.phoneNumbers.firstOrNull() ?: ""}" }
+                            val text = filteredContacts.filter { selectedIds.contains(it.id) }.joinToString("\n") { "${it.displayName}: ${it.phoneNumbers.joinToString(", ")}" }
                             val intent = Intent(Intent.ACTION_SEND).apply { type = "text/plain"; putExtra(Intent.EXTRA_TEXT, text) }
-                            context.startActivity(Intent.createChooser(intent, "Share contacts"))
+                            context.startActivity(Intent.createChooser(intent, shareText))
                         },
                         onDeselect = {
                             selectedIds = emptySet()
@@ -303,7 +302,7 @@ fun ContactScreen(navController: NavController, navigator: DestinationsNavigator
 //                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
 //                        shape = fabShape,
 //                        elevation = FloatingActionButtonDefaults.elevation(0.dp),
-//                    ) { Icon(Icons.Default.PersonAdd, "Add Contact") }
+//                    ) { Icon(Icons.Default.PersonAdd, stringResource(R.string.add_contact)) }
 //                }
 //            } else {
 //                FloatingActionButton(
@@ -316,7 +315,7 @@ fun ContactScreen(navController: NavController, navigator: DestinationsNavigator
 //                    shape = fabShape,
 //                    elevation = FloatingActionButtonDefaults.elevation(0.dp),
 //                    modifier = baseModifier
-//                ) { Icon(Icons.Default.PersonAdd, "Add Contact") }
+//                ) { Icon(Icons.Default.PersonAdd, stringResource(R.string.add_contact)) }
 //            }
 //            }
         },
@@ -379,42 +378,8 @@ fun AccountFilterBar(
     val showPrivateOnly by viewModel.showPrivateOnly.collectAsState()
     val visibleAccounts by viewModel.visibleAccountsFlow.collectAsState()
     val showLocalOnlyAccount = visibleAccounts?.contains("local|local") ?: true
+    val showPrivateOnlyAccount = visibleAccounts?.contains("private|private") ?: true
     LaunchedEffect(Unit) { viewModel.fetchAccounts() }
-
-//    if (accounts.isNotEmpty()) {
-//        LazyRow(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(vertical = 2.dp),
-//            contentPadding = PaddingValues(horizontal = 16.dp),
-//            horizontalArrangement = Arrangement.spacedBy(8.dp)
-//        ) {
-//            item {
-//                RillFilterChip("All", selectedAccount == null && !showPrivateOnly && !showLocalOnly, {
-//                        _ ->
-//                    viewModel.selectAccount(null)
-//                    viewModel.setShowPrivateOnly(false)
-//                    viewModel.setShowLocalOnly(false)
-//                })
-//            }
-//            item {
-//                RillFilterChip("Local Memory", showLocalOnly, {
-//                    viewModel.setShowLocalOnly(true)
-//                })
-//            }
-//            item {
-//                RillFilterChip("Private", showPrivateOnly, {
-//                    viewModel.setShowPrivateOnly(true)
-//                })
-//            }
-//            items(accounts) { account ->
-//                RillFilterChip(ContactUtils.getFriendlyAccountName(account), selectedAccount == account, {
-//                        _ ->
-//                    viewModel.selectAccount(account)
-//                })
-//            }
-//        }
-//    }
 
     // ── Contact count and add pill ────────────────────────────────
     var chipVisible by remember { mutableStateOf(false) }
@@ -433,6 +398,18 @@ fun AccountFilterBar(
     LaunchedEffect(filteredContacts.size) { chipVisible = true }
 
     var showAccountSheet by remember { mutableStateOf(false) }
+
+    val totalVisibleContacts = remember(allContacts, visibleAccounts) {
+        when {
+            visibleAccounts != null -> allContacts.count { contact ->
+                val key = if (contact.accountType == null && contact.accountName == null && !contact.isPrivate) "local|local"
+                            else if (contact.accountType == null && contact.accountName == null) "private|private"
+                            else "${contact.accountType}|${contact.accountName}"
+                visibleAccounts!!.contains(key)
+            }
+            else -> allContacts.size
+        }
+    }
 
     val contactsCountText = when {
         showPrivateOnly -> {
@@ -537,11 +514,6 @@ fun AccountFilterBar(
         Spacer(Modifier.weight(1f))
         Spacer(Modifier.width(16.dp))
 
-//        val context = LocalContext.current
-//        val fabOnClick: () -> Unit = {
-//            val intent = Intent(Intent.ACTION_INSERT, ContactsContract.Contacts.CONTENT_URI)
-//            context.startActivity(intent)
-//        }
         val interactionSourceAdd = remember { MutableInteractionSource() }
         val isPressedAdd by interactionSourceAdd.collectIsPressedAsState()
         val cornerRadiusAdd by animateDpAsState(
@@ -573,7 +545,7 @@ fun AccountFilterBar(
                     tint = MaterialTheme.colorScheme.onPrimaryContainer
                 )
                 Text(
-                    text = "Add Contact",
+                    text = stringResource(R.string.add_contact),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -590,8 +562,9 @@ fun AccountFilterBar(
                 selectedAccount = selectedAccount,
                 showLocalOnly = showLocalOnly,
                 showLocalOnlyAccount = showLocalOnlyAccount,
+                showPrivateOnlyAccount = showPrivateOnlyAccount,
                 showPrivateOnly = showPrivateOnly,
-                totalCount = filteredContacts.size,
+                totalCount = totalVisibleContacts,
                 contactCountByAccount = { accountName, accountType ->
                     if (accountName == null) {
                         allContacts.count { it.accountName == null && it.accountType == null }
@@ -645,6 +618,7 @@ fun BatchActionBar(
     onSelectAll: () -> Unit,
     isAllSelected: Boolean
 ) {
+    var showSelectionMenuOuter by remember { mutableStateOf(false) }
     var showMoveDialog by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
     var showFavDeleteConfirm by remember { mutableStateOf(false) }
@@ -662,39 +636,77 @@ fun BatchActionBar(
                 .padding(horizontal = 8.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onClear) {
-                Icon(Icons.Default.Close, "Clear selection")
-            }
-            TextButton(
-                onClick = if (isAllSelected) onDeselect else onSelectAll
-            ) {
-                Text(
-                    text = "$selectedCount selected",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+            RillIconButton(
+                onClick = onClear,
+                imageVector = Icons.Default.Close,
+                contentDescription = stringResource(R.string.cancel)
+            )
+            RillTextButton(
+                onClick = if (isAllSelected) onDeselect else onSelectAll,
+                text = stringResource(R.string.selected_items, selectedCount),
+                toast = if (isAllSelected) stringResource(R.string.deselect_all) else stringResource(R.string.select_all)
+            )
+            Spacer(modifier = Modifier.weight(1f))
+//            if (onRemoveFromFav != null) {
+//                IconButton(onClick = { showFavDeleteConfirm = true }) {
+//                    Icon(Icons.AutoMirrored.Filled.StarHalf, stringResource(R.string.remove_from_favorites))
+//                }
+//            }
+//            if (onAddToFav != null) {
+//                IconButton(onClick = { showAddFavConfirm = true }) {
+//                    Icon(Icons.Default.Star, stringResource(R.string.add_to_favorites))
+//                }
+//            }
+            if (onMove != null && onMoveToPrivate != null) {
+                RillIconButton(
+                    onClick = { showMoveDialog = true },
+                    imageVector = Icons.AutoMirrored.Rounded.DriveFileMove,
+                    contentDescription = stringResource(R.string.move_to_another_account)
                 )
             }
-            Spacer(modifier = Modifier.weight(1f))
-            if (onRemoveFromFav != null) {
-                IconButton(onClick = { showFavDeleteConfirm = true }) {
-                    Icon(Icons.AutoMirrored.Filled.StarHalf, stringResource(R.string.remove_from_favourites))
+            RillIconButton(
+                onClick = { showDeleteConfirm = true },
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_delete),
+                contentDescription = stringResource(R.string.delete_contacts)
+            )
+//            IconButton(onClick = onShare) {
+//                Icon(Icons.Default.Share, stringResource(R.string.share))
+//            }
+
+            Box {
+                RillIconButton(
+                    onClick = { showSelectionMenuOuter = true },
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = stringResource(R.string.more)
+                )
+                DropdownMenu(shape = RoundedCornerShape(16.dp), expanded = showSelectionMenuOuter, onDismissRequest = { showSelectionMenuOuter = false }) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.share)) },
+                        leadingIcon = { Icon(Icons.Default.Share, null) },
+                        onClick = {
+                            showSelectionMenuOuter = false
+                            onShare()
+                        }
+                    )
+                    if (onAddToFav != null) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.add_to_favorites)) },
+                            leadingIcon = { Icon(Icons.Default.Star, null) },
+                            onClick = {
+                                showSelectionMenuOuter = false
+                                showAddFavConfirm = true
+                            }
+                        )
+                    }
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.remove_from_favorites)) },
+                        leadingIcon = { Icon(Icons.AutoMirrored.Filled.StarHalf, null) },
+                        onClick = {
+                            showSelectionMenuOuter = false
+                            showFavDeleteConfirm = true
+                        }
+                    )
                 }
-            }
-            if (onAddToFav != null) {
-                IconButton(onClick = { showAddFavConfirm = true }) {
-                    Icon(Icons.Default.Star, stringResource(R.string.add_to_favourites))
-                }
-            }
-            if (onMove != null) {
-                IconButton(onClick = { showMoveDialog = true }) {
-                    Icon(Icons.AutoMirrored.Rounded.DriveFileMove, "Move to another account")
-                }
-            }
-            IconButton(onClick = { showDeleteConfirm = true }) {
-                Icon(ImageVector.vectorResource(id = R.drawable.ic_delete), "Delete selected")
-            }
-            IconButton(onClick = onShare) {
-                Icon(Icons.Default.Share, "Share")
             }
         }
     }
@@ -713,7 +725,10 @@ fun BatchActionBar(
                     onAddToFav?.invoke()
                     showAddFavConfirm = false
                 }) {
-                    Text("Add")
+                    Text(
+                        stringResource(R.string.add_to_favorites),
+                        textAlign = TextAlign.End,
+                    )
                 }
             },
             dismissButton = {
@@ -738,7 +753,11 @@ fun BatchActionBar(
                     onRemoveFromFav?.invoke()
                     showFavDeleteConfirm = false
                 }) {
-                    Text("Remove", color = MaterialTheme.colorScheme.error)
+                    Text(
+                        stringResource(R.string.remove_from_favorites),
+                        color = MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.End,
+                    )
                 }
             },
             dismissButton = {
@@ -752,7 +771,7 @@ fun BatchActionBar(
     if (showDeleteConfirm) {
         RillDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = "Delete Contacts",
+            title = stringResource(R.string.delete_contacts),
             icon = ImageVector.vectorResource(id = R.drawable.ic_delete),
             iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
@@ -771,7 +790,7 @@ fun BatchActionBar(
             }
         ) {
             Text(
-                "Are you sure you want to delete $selectedCount selected contacts?",
+                stringResource(R.string.delete_contacts_subtitle, selectedCount),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -848,7 +867,7 @@ fun ContactContent(
                         if (contacts.isEmpty()) {
                             PlaceholderView(
                                 icon = Icons.Rounded.People,
-                                title = "No contacts found",
+                                title = stringResource(R.string.no_contacts_found),
                             )
                         } else {
                             ScrollHapticsEffect(listState = listState)
@@ -882,6 +901,7 @@ private fun AccountSwitcherSheet(
     selectedAccount: Account?,
     showLocalOnly: Boolean,
     showLocalOnlyAccount: Boolean,
+    showPrivateOnlyAccount: Boolean,
     showPrivateOnly: Boolean,
     totalCount: Int,
     contactCountByAccount: (String?, String?) -> Int,
@@ -925,7 +945,7 @@ private fun AccountSwitcherSheet(
                 item {
                     AccountRow(
                         icon = Icons.Rounded.PeopleAlt,
-                        name = "All Contacts",
+                        name = stringResource(R.string.filter_all),
                         subtitle = pluralStringResource(R.plurals.contacts_count, totalCount, totalCount),
                         isSelected = !showLocalOnly && !showPrivateOnly && selectedAccount == null,
                         onClick = onSelectAll
@@ -933,29 +953,27 @@ private fun AccountSwitcherSheet(
                 }
 
                 // "Private only" row - for contacts without an account (app contacts)
-                item {
-                    AccountRow(
-                        icon = ContactUtils.getAccountIcon(null, true),
-                        name = ContactUtils.getFriendlyAccountName(null, true),
-                        subtitle = pluralStringResource(R.plurals.contacts_count, contactCountByPrivate, contactCountByPrivate),
-                        isSelected = showPrivateOnly,
-                        onClick = onSelectPrivateOnly
-                    )
+                if (showPrivateOnlyAccount) {
+                    item {
+                        AccountRow(
+                            icon = ContactUtils.getAccountIcon(null, true),
+                            name = ContactUtils.getFriendlyAccountName(null, true),
+                            subtitle = pluralStringResource(R.plurals.contacts_count, contactCountByPrivate, contactCountByPrivate),
+                            isSelected = showPrivateOnly,
+                            onClick = onSelectPrivateOnly
+                        )
+                    }
                 }
+
 
                 // "Device only" row - for contacts without an account (local device contacts)
                 if (showLocalOnlyAccount) {
                     item {
-                        val deviceOnlyCount =
-                            contactCountByAccount(null, null) - contactCountByPrivate
+                        val deviceOnlyCount = contactCountByAccount(null, null) - contactCountByPrivate
                         AccountRow(
                             icon = ContactUtils.getAccountIcon(null),
                             name = ContactUtils.getFriendlyAccountName(null),
-                            subtitle = pluralStringResource(
-                                R.plurals.contacts_count,
-                                deviceOnlyCount,
-                                deviceOnlyCount
-                            ),
+                            subtitle = pluralStringResource(R.plurals.contacts_count, deviceOnlyCount, deviceOnlyCount),
                             isSelected = showLocalOnly,
                             onClick = onSelectDeviceOnly
                         )

@@ -19,3 +19,27 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+
+# Room persistence library
+-keep class * extends androidx.room.RoomDatabase
+-keep @androidx.room.Database class * { *; }
+-keep @androidx.room.Entity class * { *; }
+-keep @androidx.room.Dao class * { *; }
+
+# Keep the generated Room implementation classes
+-keep class **._RillDatabase_Impl { *; }
+-keep class **.RillDatabase_Impl { *; }
+
+# Keep constructors for Room generated classes
+-keepclassmembers class **.RillDatabase_Impl {
+    public <init>(...);
+}
+
+# Keep all classes in the modal.db package
+-keep class dev.goodwy.rphone.modal.db.** { *; }
+
+# Keep Room's generated code
+-keepclassmembers class * extends androidx.room.RoomDatabase {
+    <init>();
+}

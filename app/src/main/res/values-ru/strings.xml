@@ -1,16 +1,48 @@
-<resources>
-    <string name="widget_description">Recent calls with quick dial</string>
-    <string name="copy">Копировать</string>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="widget_description">Последние звонки с быстрым набором</string>
+    <string name="copy" tools:ignore="PrivateResource">Копировать</string>
+    <string name="paste">Вставить</string>
     <string name="delete">Удалить</string>
+    <string name="delete_contact">Удалить контакт</string>
+    <string name="delete_contact_subtitle">Вы уверены, что хотите удалить этот контакт? Это действие нельзя отменить.</string>
+    <string name="delete_contacts">Удалить контакты</string>
+    <string name="delete_contacts_subtitle">Вы уверены, что хотите удалить %s выбранных контактов? Это действие нельзя отменить.</string>
+    <string name="selected_items">Выбрано %s</string>
+    <string name="select">Выбрать</string>
+    <string name="select_all">Выделить всё</string>
+    <string name="deselect_all">Отменить выбор</string>
+    <string name="backspace">Удалить</string>
+    <string name="back">Назад</string>
+    <string name="edit">Изменить</string>
+    <string name="done">Готово</string>
+    <string name="ok">ОК</string>
+    <string name="on">Вкл.</string>
+    <string name="off">Выкл.</string>
     <string name="cancel">Отменить</string>
     <string name="open">Открыть</string>
     <string name="save">Сохранить</string>
+    <string name="confirm">Подтвердить</string>
     <string name="close">Закрыть</string>
-    <string name="select">Выбрать</string>
+    <string name="clear">Очистить</string>
     <string name="share">Поделиться</string>
+    <string name="share_subtitle">Отправить контактные данные другим пользователям</string>
+    <string name="use">Использовать</string>
+    <string name="connect_via_social">Подключиться через социальные сети</string>
+    <string name="import_text">Импорт</string>
+    <string name="export_text">Экспорт</string>
+    <string name="call_is_ongoing">Звонок продолжается — нажмите, чтобы вернуться</string>
+    <string name="filter_all">Все</string>
+    <string name="filter_missed">Пропущенные</string>
+    <string name="filter_incoming">Входящие</string>
+    <string name="filter_outgoing">Исходящие</string>
+    <string name="filter_rejected">Отклоненные</string>
 
     <!-- Search -->
     <string name="search_contacts">Поиск в контактах</string>
+    <string name="no_results">Результатов нет</string>
+    <string name="no_contacts_found">Контакты не найдены</string>
+    <string name="call_query">Позвонить %s</string>
+    <string name="voice_input">Голосовой ввод</string>
 
     <!-- Billing -->
     <string name="no_connection">Нет связи</string>
@@ -55,23 +87,219 @@
 
     <!-- About -->
     <string name="about">О приложении</string>
+    <string name="rate_app">Оценить приложение</string>
+    <string name="other_apps">Наши другие приложения</string>
+    <string name="source_code">Исходный код</string>
+    <string name="privacy_policy">Политика конфиденциальности</string>
+
+    <!-- Contributors -->
+    <string name="contributors">Авторы</string>
+    <string name="development_team">Команда разработчиков</string>
+    <string name="apps_that_inspired_us">Приложения, которыми мы вдохновлялись</string>
 
     <!-- Settings -->
+    <string name="settings">Настройки</string>
+    <string name="appearance">Внешний вид</string>
+    <string name="interface_settings">Интерфейс</string>
+    <string name="interface_settings_subtitle">Темы, цвета и макеты</string>
+    <string name="app_theme">Тема приложения</string>
+    <string name="theme_auto">Авто</string>
+    <string name="theme_light">Светлая</string>
+    <string name="theme_dark">Тёмная</string>
+    <string name="theme_auto_black_white">Авто Ч/Б</string>
+    <string name="theme_white">Белая</string>
+    <string name="theme_black">Чёрная</string>
+    <string name="custom_color">Пользовательский цвет</string>
+    <string name="custom_color_subtitle">Цветовая схема, основанная на пользовательском цвете</string>
+    <string name="hex_color">Hex цвет</string>
+    <string name="hex_color_subtitle">Введите действительный 6-значный Hex код цвета</string>
+    <string name="custom_font">Пользовательский шрифт</string>
+    <string name="custom_font_subtitle">Выберите файл .ttf для использования шрифта в приложении</string>
+    <string name="visual_effects">Визуальные эффекты</string>
+    <string name="not_supported_on_this_device">Не поддерживается на этом устройстве</string>
+    <string name="not_supported_on_this_device_subtitle">Для работы эффектов Размытия и Жидкого Стекла требуется Android 12 или более поздней версии</string>
+    <string name="material_liquid_you_glass">Эффект жидкого стекла</string>
+    <string name="material_liquid_you_glass_subtitle">Применить эффект жидкого стекла к панели навигации</string>
+    <string name="material_blur_effects">Эффекты размытия</string>
+    <string name="material_blur_effects_subtitle">Применить эффект размытия к панели навигации</string>
+    <string name="scroll_animation">Анимация прокрутки</string>
+    <string name="scroll_animation_device">Анимация плавного появления элементов списка при прокрутке</string>
+    <string name="call_ui">Интерфейс вызова</string>
+    <string name="incoming_call_ui">Интерфейс входящего вызова</string>
+    <string name="incoming_call_ui_subtitle">Выберите способ ответа на входящие звонки</string>
+    <string name="avatars_settings">Настройки аватаров</string>
+    <string name="avatars_settings_subtitle">Настройка цветов, рамок и других параметров</string>
+    <string name="avatar_colors">Цвета аватаров</string>
+    <string name="colorful">Разноцветные</string>
+    <string name="primary_color">Основной цвет</string>
+    <string name="secondary_color">Дополнительный цвет</string>
+    <string name="google_contacts_color">Цвет контактов Google</string>
+    <string name="show_first_letter_in_avatar">Показать первую букву в аватаре</string>
+    <string name="show_first_letter_in_avatar_subtitle">Отображать букву, если изображение отсутствует</string>
+    <string name="avatar_frame">Рамка для аватара</string>
+    <string name="avatar_frame_subtitle">Отображать рамку вокруг аватара</string>
+    <string name="show_picture_in_avatar">Показывать фото контакта</string>
+    <string name="show_picture_in_avatar_subtitle">Отображать фотографию контакта, если она имеется</string>
+
+    <string name="сaller_ui">Интерфейс экрана вызова</string>
+    <string name="сaller_ui_subtitle">Настройка экрана и элементов управления во время звонка</string>
+    <string name="end_call_button">Кнопка «Завершить звонок»</string>
+    <string name="customize_width">Настроить ширину</string>
+    <string name="customize_width_subtitle">Настройте ширину кнопки завершения звонка</string>
+
+    <string name="navigations">Навигация</string>
+    <string name="navigations_subtitle">Видимость вкладок и их стиль</string>
+    <string name="tab_sections">Вкладки</string>
+    <string name="tab_sections_subtitle">Выберите, какие вкладки будут отображаться, и перетащите, чтобы изменить их порядок в панели навигации</string>
+    <string name="navigation_style">Стиль панели навигации</string>
+    <string name="pill_style_navigation">Плавающая панель навигации</string>
+    <string name="pill_style_navigation_subtitle">Отображать плавающую панель навигации в виде таблетки вместо стандартной нижней панели</string>
+    <string name="icon_only_bottom_bar">Только значки в нижней панели</string>
+    <string name="icon_only_bottom_bar_subtitle">Удаляет текстовые метки из панели навигации</string>
+
+    <string name="calls_and_system">Звонки и система</string>
+    <string name="call_settings">Настройки вызовов</string>
+    <string name="call_settings_subtitle">Учетные записи, датчик и карманный режим</string>
+    <string name="default_sim">SIM-карта по умолчанию</string>
+    <string name="ask_first">Сначала спрашивать</string>
     <string name="calling_accounts">Аккаунты для звонков</string>
-    <string name="blocked_numbers">Заблокированные номера</string>
+    <string name="system_settings">Системные настройки</string>
+    <string name="call_behavior">Поведение при звонках</string>
+    <string name="proximity_sensor">Датчик приближения</string>
+    <string name="proximity_sensor_subtitle">Отключать экран, когда телефон находится у уха во время звонка</string>
+    <string name="pocket_mode_prevention">Карманный режим</string>
+    <string name="pocket_mode_prevention_subtitle">Блокировка случайного ответа/отклонения вызова, когда телефон находится в кармане</string>
+    <string name="floating_ongoing_call">Плавающая кнопка звонка</string>
+    <string name="floating_ongoing_call_subtitle">Во время звонков отображать плавающую кнопку, которую можно перемещать. Требуется разрешение \'Отображать поверх других приложений\'</string>
+    <string name="direct_call_on_tap">Вызов при нажатии на недавний</string>
+    <string name="direct_call_on_tap_subtitle">Нажмите на запись в журнале вызовов, чтобы сразу позвонить</string>
+    <string name="auto_speaker">Автоматически включать динамик</string>
+    <string name="auto_speaker_subtitle">Автоматически переключаться на громкую связь, когда телефон находится вдали от уха, и обратно на наушник, когда он находится рядом</string>
+
+    <string name="sound_and_vibration">Звуки и вибрация</string>
+    <string name="sound_and_vibration_subtitle">Мелодии звонка, звуки клавиатуры и тактильная обратная связь в приложении</string>
+    <string name="tap_haptics">Виброотклик</string>
+    <string name="enable_tap_haptics">Включить виброотклик</string>
+    <string name="haptics_intensity">Интенсивность</string>
+    <string name="haptics_soft">Мягкая</string>
+    <string name="haptics_strong">Сильная</string>
+    <string name="haptics_custom">Настроить</string>
+    <string name="preview_haptic">Проверить виброотклик</string>
+    <string name="ringtone_settings">Настройки мелодии звонка</string>
+    <string name="dialpad_tones">Звук при наборе номера</string>
+    <string name="dialpad_tones_subtitle">Звуковой сигнал клавиатуры, воспроизводимый при нажатии клавиш</string>
+    <string name="calls">Вызовы</string>
+    <string name="vibrate_on_answer">Вибрация при ответе на звонок</string>
+    <string name="vibrate_on_answer_subtitle">Включить вибрацию при ответе собеседника</string>
+    <string name="vibrate_on_hang_up">Вибрация при завершении звонка</string>
+    <string name="vibrate_on_hang_up_subtitle">Включить вибрацию по окончании звонка</string>
+    <string name="haptics_across_app">Виброотклик в приложении</string>
+    <string name="scroll_haptics">Виброотклик при прокрутке</string>
+    <string name="scroll_haptics_subtitle">Включить вибрацию при прокрутке в приложении</string>
+    <string name="haptic_interval">Интервал</string>
+    <string name="haptic_interval_value">1 на %.1f см</string>
+    <string name="haptic_strength">Сила</string>
+
     <string name="manage_blocked">Управление блокировками</string>
     <string name="manage_blocked_subtitle">Управление заблокированными звонками и спамом</string>
+    <string name="blocked_numbers">Заблокированные номера</string>
     <string name="block_notifications">Блокировать уведомления</string>
     <string name="block_notifications_subtitle">Отображать уведомление низкого приоритета о заблокированных звонках</string>
     <string name="block_method">Метод блокировки</string>
     <string name="block_method_subtitle">Как обрабатывать заблокированные звонки</string>
-    <string name="decline_automatically">Автоматически отказаться</string>
+    <string name="decline_automatically">Автоматически отклонять</string>
     <string name="ring_silently">Без звука</string>
     <string name="log_visibility">Видимость в истории</string>
     <string name="log_visibility_subtitle">Показывать или скрывать заблокированные звонки в списке последних звонков</string>
     <string name="hide_from_logs">Скрыть из истории</string>
     <string name="show_in_logs">Показывать в истории</string>
     <string name="blocked_size">Заблокировано: %s</string>
+
+    <string name="authentication">Аутентификация</string>
+    <string name="authentication_method">Метод аутентификации</string>
+    <string name="system_biometrics">Системная биометрия</string>
+    <string name="system_biometrics_subtitle">Отпечаток пальца, разблокировка по лицу или учетные данные устройства</string>
+    <string name="system_biometrics_not_available">Недоступно на этом устройстве</string>
+    <string name="custom_biometrics">Пользовательская биометрия</string>
+    <string name="custom_pin">Пользовательский PIN-код</string>
+    <string name="custom_password">Пользовательский пароль</string>
+    <string name="pin">PIN-код</string>
+    <string name="pin_subtitle">Установите цифровой PIN-код</string>
+    <string name="password">Пароль</string>
+    <string name="password_subtitle">Установить буквенно-цифровой пароль</string>
+    <string name="remove_biometric">Отключить аутентификацию</string>
+    <string name="not_configured">Не настроено</string>
+    <string name="lock_app_on_open">Блокировать приложение при открытии</string>
+    <string name="lock_app_on_open_subtitle">Требовать аутентификацию при запуске приложения</string>
+    <string name="lock_call_actions">Блокировать входящие вызовы</string>
+    <string name="lock_call_actions_subtitle">Требовать аутентификацию для приема или отклонения входящих вызовов</string>
+    <string name="lock_scope">Область действия аутентификации вызовов</string>
+    <string name="all_calls">Все звонки</string>
+    <string name="all_calls_subtitle">Biometric required for every incoming call</string>
+    <string name="blacklist">Черный список</string>
+    <string name="blacklist_count">Контакты для которых включена аутентификация для ответа: %s</string>
+    <string name="blacklist_subtitle">Выберите контакты, для ответа которым требуется аутентификация</string>
+    <string name="whitelist">Белый список</string>
+    <string name="whitelist_count">Контакты для которых отключена аутентификация для ответа: %s</string>
+    <string name="whitelist_subtitle">Выберите контакты, для которых будет отключена аутентификация</string>
+    <string name="select_contacts">Выбрать контакты</string>
+    <string name="set_pin">Задайте PIN-код</string>
+    <string name="set_pin_subtitle">Введите 4-значный PIN-код</string>
+    <string name="enter_pin">Введите PIN-код</string>
+    <string name="confirm_pin">Подтвердите PIN-код</string>
+    <string name="confirm_pin_subtitle">Введите PIN-код ещё раз для подтверждения</string>
+    <string name="incorrect_pin">Неверный PIN-код. Попробуйте ещё раз.</string>
+    <string name="pin_dont_match">PIN-коды не совпадают. Начните сначала.</string>
+    <string name="set_password">Задайте пароль</string>
+    <string name="set_password_subtitle">Введите любой пароль. Допускаются буквы, цифры и специальные символы.</string>
+    <string name="enter_password">Введите пароль</string>
+    <string name="confirm_password">Подтвердите пароль</string>
+    <string name="incorrect_password">Неверный пароль</string>
+    <string name="incorrect_password_subtitle">Пароль должен состоять как минимум из 4 символов</string>
+    <string name="password_dont_match">Пароли не совпадают</string>
+
+    <string name="manage_contacts">Управление контактами</string>
+    <string name="manage_contacts_subtitle">Приватные контакты, отображение учетных записей и очистка контактов</string>
+    <string name="display">Экран</string>
+    <string name="sort_by">Сортировка списка</string>
+    <string name="name_format">Формат имени и фамилии</string>
+    <string name="first_name_first">Сначала имя</string>
+    <string name="last_name_first">Сначала фамилия</string>
+    <string name="merge_and_fix">Объединить и исправить</string>
+    <string name="standardize">Унифицировать</string>
+    <string name="standardize_phone_numbers">Унифицировать телефонные номера</string>
+    <string name="standardize_phone_numbers_subtitle">Удалить пробелы и специальные символы из телефонных номеров</string>
+    <string name="total_contacts">Всего контактов</string>
+    <string name="contacts_with_changes">Контакты подлежащие изменению</string>
+    <string name="numbers_to_standardize">Номера подлежащие изменению</string>
+    <string name="all_numbers_are_already_standardized">✅ Все номера уже приведены к единому формату!</string>
+    <string name="examples_of_changes">Примеры изменений:</string>
+    <string name="and_more">И ещё %s…</string>
+
+    <string name="merging_contacts">Объединить контакты</string>
+    <string name="merging_contacts_subtitle">Поиск и объединение дубликатов контактов</string>
+    <string name="merging_contacts_description">Объединенные контакты — это несколько записей из разных аккаунтов, связанных в одну. Вы можете редактировать каждый источник отдельно или разъединить их.</string>
+    <string name="no_duplicates_found">Дубликаты не найдены</string>
+    <string name="duplicates_in">Дубликаты в: %s</string>
+    <string name="merge_duplicates">Объединить дубликаты (%s)</string>
+
+    <string name="unmerging_contacts">Разделить контакты</string>
+    <string name="unmerging_contacts_subtitle">Поиск и разделение объединенных контактов</string>
+    <string name="unmerging_contacts_description">Контактные данные получены из нескольких источников. Выберите один из них для редактирования или отвяжите все, чтобы они стали отдельными контактами.</string>
+    <string name="no_merged_contacts_found">Объединенных контактов не найдено</string>
+    <string name="merged_from_sources">Объединено из %s источников</string>
+    <string name="unlink">Разделить</string>
+    <string name="warning_cannot_be_undone">⚠️ Это действие нельзя отменить.</string>
+
+    <string name="managing_contact_sources">Управление источниками контактов</string>
+    <string name="managing_contact_sources_subtitle">Выберите, какие учетные записи отображать в списке</string>
+    <string name="managing_contact_sources_description">Выберите, какие учетные записи должны отображаться в вашем списке контактов. Если снять отметку с учетной записи, ее контакты будут скрыты, но не удалены.</string>
+    <string name="contact_sources">Источники контактов</string>
+    <string name="contacts_stored_on_app">Контакты, сохраненные в приложении</string>
+    <string name="contacts_stored_on_device">Контакты, сохраненные на устройстве</string>
+
+    <string name="private_contacts">Приватные контакты</string>
+    <string name="private_contacts_subtitle">Управление зашифрованными локальными контактами</string>
 
     <!-- Call -->
     <string name="call">Вызов</string>
@@ -88,7 +316,6 @@
     <string name="keypad">Клавиатура</string>
     <string name="mute">Без звука</string>
     <string name="unmute">Вкл. звук</string>
-    <string name="message">Сообщение</string>
     <string name="speaker">Динамик</string>
     <string name="add_call">Добавить вызов</string>
     <string name="resume">Возобновить</string>
@@ -106,24 +333,47 @@
 
     <!-- Recents -->
     <string name="recents">Недавние</string>
+    <string name="home_tab">Главный экран</string>
     <string name="call_history">История звонков</string>
     <string name="history_with">История %s</string>
     <string name="no_call_history_found">История звонков не найдена</string>
+    <string name="delete_call_logs">Удалить записи истории звонков</string>
+    <string name="delete_call_logs_selected">Вы уверены, что хотите удалить выбранные записи о звонках %s?</string>
+    <string name="deleted_from_call_log">Удалено из журнала вызовов</string>
+    <string name="could_not_delete">Не удалось удалить</string>
+    <string name="clear_all_filtered_logs">Очистить все отфильтрованные записи</string>
+    <string name="clear_all_filtered_logs_selected">Это приведет к удалению всей отображаемой истории звонков. Это действие нельзя отменить.</string>
 
     <!-- Contacts -->
     <string name="contacts">Контакты</string>
+    <string name="view_contact">Показать контакт</string>
     <string name="view_contacts">Показать контакты</string>
     <string name="contacts_settings">Настройки контакта</string>
     <string name="create_contact">Создать контакт</string>
+    <string name="add_contact">Добавить контакт</string>
+    <string name="add_to_contact">Добавить в контакт</string>
     <string name="edit_contact">Изменить контакт</string>
-    <string name="favorites">Избранное</string>
-    <string name="edit">Изменить</string>
-    <string name="done">Готово</string>
-    <string name="add_to_favourites">Добавить в избранное</string>
-    <string name="remove_from_favourites">Удалить из избранного</string>
+    <string name="contact_info">Контактная информация</string>
+    <string name="favorites">Избранные</string>
+    <string name="message">Сообщение</string>
+    <string name="video">Видеовызов</string>
+    <string name="email">Письмо</string>
+    <string name="default_number">(по умолчанию)</string>
+    <string name="recent_number">Недавние</string>
+    <string name="recent_activity">Недавние действия</string>
+    <string name="add_to_favorites">Добавить в избранное</string>
+    <string name="remove_from_favorites">Удалить из избранного</string>
+    <string name="no_favorites_yet">Пока нет избранного</string>
+    <string name="no_favorites_yet_subtitle">Отметьте контакт звездочкой, чтобы добавить его сюда</string>
+    <string name="move_contact">Переместить контакт</string>
     <string name="move_to_another_account">Переместить в другой аккаунт</string>
+    <string name="move_to_device_storage">Переместить в память устройства</string>
+    <string name="contact_moved_successfully">Контакт успешно перенесен</string>
     <string name="save_to_account">Сохранение в Аккаунте</string>
-    <string name="add_field">Добавить поле</string>
+    <string name="show_full_history">Показать всe звонки</string>
+    <string name="contact_qr">QR контакта</string>
+    <string name="phone_number">Номер</string>
+    <string name="name">Имя</string>
     <string name="prefix">Префикс</string>
     <string name="prefix_description">Форма обращения - Господин, Госпожа, Доктор и т.д.</string>
     <string name="first_name">Имя</string>
@@ -133,12 +383,19 @@
     <string name="suffix">Суффикс</string>
     <string name="suffix_description">Звание или титул - Младший, Старший, III и т.д.</string>
     <string name="nickname">Псевдоним</string>
-    <string name="nickname_description">Псевдоним, прозвище или краткое имя</string>
+    <string name="nickname_description">Прозвище или краткое имя</string>
     <string name="company">Организация</string>
     <string name="job_title">Должность</string>
     <string name="job_title_description">Должность в компании</string>
+    <string name="add_field">Добавить поле</string>
+    <string name="add_phone">Добавить номер</string>
+    <string name="add_email">Добавить почту</string>
+    <string name="add_event">Добавить событие</string>
+    <string name="add_address">Добавить адрес</string>
     <string name="add_note">Добавить заметку</string>
     <string name="contact_ringtone">Рингтон для контакта</string>
+    <string name="unsaved_changes">Несохраненные изменения</string>
+    <string name="unsaved_changes_subtitle">Хотите сохранить изменения перед выходом?</string>
     <plurals name="contacts_count">
         <item quantity="one">%d контакт</item>
         <item quantity="few">%d контакта</item>
@@ -160,33 +417,41 @@
 
     <!-- Permission -->
     <string name="allow">Разрешить</string>
-    <string name="call_history_permission">Rill Phone needs access to your call logs to show your recent activity and missed calls.</string>
-    <string name="contacts_permission">Contacts Permission Required</string>
-    <string name="contacts_permission_description">To view your contacts, allow contacts permission.</string>
-    <string name="search_contacts_permission_description">To search your contacts and identify incoming calls, allow contacts permission.</string>
+    <string name="call_history_permission">Приложению Rill Phone требуется доступ к вашим журналам вызовов, чтобы отображать вашу недавнюю активность и пропущенные звонки.</string>
+    <string name="contacts_permission">Требуется разрешение на доступ к контактам</string>
+    <string name="contacts_permission_description">Чтобы просматривать свои контакты, предоставьте разрешение на доступ к контактам.</string>
+    <string name="search_contacts_permission_description">Чтобы выполнять поиск по контактам и определять входящие звонки, предоставьте приложение доступ к контактам.</string>
 
     <!-- Default Dialer -->
+    <string name="default_phone_number_cleared">Признак номер по умолчанию удален</string>
     <string name="set_as_default">По умолчанию</string>
     <string name="clear_default">Сброс значения по умолчанию</string>
     <string name="default_phone_set">%s установлен по умолчанию</string>
     <string name="default_dialer_title">Сделать Rill Phone приложением по умолчанию</string>
     <string name="default_dialer_subtitle">Rill Phone может звонить и принимать звонки, только если это приложение выбрано для звонков по умолчанию</string>
-    <string name="default_dialer_warning">Rill Phone cannot function without this permission. Please try again.</string>
+    <string name="default_dialer_warning">Приложение не может работать без этого разрешения. Пожалуйста, попробуйте ещё раз.</string>
 
     <!-- Call notes -->
+    <string name="notes">Заметки</string>
     <string name="call_notes">Заметки о звонках</string>
     <string name="about_call_notes">Информация о заметках</string>
-    <string name="about_call_notes_subtitle">Quick notes you take during a call. They are stored locally within the app, linked to the phone number (not synced with Google Contacts). Each number has its own private note accessible only from the call log or contact details inside the app.</string>
+    <string name="about_call_notes_subtitle">Краткая информация, которую вы записываете во время звонка. Она хранится локально в приложении и привязана к номеру телефона (не синхронизируется с «Контактами Google» и другими). У каждого номера есть своя личная заметка, доступ к которой возможен только из журнала звонков в деталях контакта внутри приложения или из вкладки «Заметки о звонках».</string>
     <string name="type_your_note">Введите текст заметки…</string>
+    <string name="no_notes_yet">Пока нет заметок</string>
+    <string name="no_notes_yet_subtitle">Здесь отображаются заметки, сделанные во время звонков</string>
+    <string name="delete_notes">Удалить заметки</string>
+    <string name="delete_notes_subtitle">Вы уверены, что хотите удалить %s выбранные заметки?</string>
+    <string name="delete_note">Удалить заметку</string>
+    <string name="delete_note_subtitle">Удалить заметку для %s?"</string>
 
     <!-- Times -->
     <string name="just_now">Только что</string>
     <string name="yesterday">Вчера</string>
     <string name="today">Сегодня</string>
-    <string name="seconds_letter">%ds</string>
-    <string name="minutes_letter">%dm</string>
-    <string name="hours_letter">%dh</string>
-    <string name="days_letter">%dd</string>
+    <string name="seconds_letter">%dс</string>
+    <string name="minutes_letter">%dм</string>
+    <string name="hours_letter">%dч</string>
+    <string name="days_letter">%dд</string>
 
     <!-- Phone numbers -->
     <string name="no_label">Без ярлыка</string>
@@ -203,8 +468,13 @@
     <string name="send_whatsapp">Отправить в WhatsApp</string>
 
     <!-- Events -->
+    <string name="other_information">Дополнительная информация</string>
     <string name="birthday">День рождения</string>
     <string name="anniversary">Годовщина</string>
+
+    <!-- Dialpad -->
+    <string name="add_pause">Добавить двухсекундную паузу</string>
+    <string name="add_wait">Добавить ожидание</string>
 
     <!-- Onboarding -->
     <string name="skip">Пропустить</string>

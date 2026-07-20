@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -35,6 +36,8 @@ import dev.goodwy.rphone.view.components.NavigationIcon
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import dev.goodwy.rphone.R
+import dev.goodwy.rphone.view.components.Title
 import org.koin.compose.koinInject
 
 internal const val KEY_SELECTED_APP_ICON = "selected_app_icon"
@@ -119,7 +122,7 @@ fun AppIconScreen(navigator: DestinationsNavigator) {
                     if (isRotation90) WindowInsetsSides.Top + WindowInsetsSides.Horizontal
                     else WindowInsetsSides.Top
                 ),
-                title = { Text("App Icon") },
+                title = { Title("App Icon") },
                 navigationIcon = {
                     NavigationIcon(onClick = { navigator.navigateUp() })
                 }

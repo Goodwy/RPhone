@@ -11,15 +11,21 @@ import android.view.Surface
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.CallReceived
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.outlined.DoNotDisturb
 import androidx.compose.material.icons.rounded.Audiotrack
+import androidx.compose.material.icons.rounded.CallEnd
 import androidx.compose.material.icons.rounded.RingVolume
 import androidx.compose.material.icons.rounded.SwipeVertical
 import androidx.compose.material.icons.rounded.Vibration
@@ -31,7 +37,9 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.cardCornerSmall
@@ -47,6 +55,7 @@ import dev.goodwy.rphone.view.theme.customColors
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import dev.goodwy.rphone.view.components.Title
 import org.koin.compose.koinInject
 import kotlin.math.roundToInt
 
@@ -94,12 +103,12 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
 
         RillDialog(
             onDismissRequest = { showHapticsDialog = false },
-            title = "Tap Haptics",
+            title = stringResource(R.string.tap_haptics),
             icon = Icons.Rounded.Vibration,
             iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
             confirmButton = {
-                TextButton(onClick = { showHapticsDialog = false }) { Text("Done") }
+                TextButton(onClick = { showHapticsDialog = false }) { Text(stringResource(R.string.done)) }
             }
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -108,7 +117,7 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Enable Tap Haptics", style = MaterialTheme.typography.bodyLarge)
+                    Text(stringResource(R.string.enable_tap_haptics), style = MaterialTheme.typography.bodyLarge)
                     Switch(
                         checked = tapHapticsEnabled,
                         onCheckedChange = {
@@ -121,17 +130,21 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
                 if (tapHapticsEnabled) {
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(0.4f))
 
-                    Text("Strength", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                    Text(stringResource(R.string.haptics_intensity), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
 
                     // Three-way segmented control: Light / Strong / Custom
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(50))
-                            .background(MaterialTheme.colorScheme.surfaceVariant),
-                        horizontalArrangement = Arrangement.spacedBy(0.dp)
+                            .background(cardColor),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        listOf("light" to "Light", "strong" to "Strong", "custom" to "Custom").forEach { (key, label) ->
+                        listOf(
+                            "light" to stringResource(R.string.haptics_soft),
+                            "strong" to stringResource(R.string.haptics_strong),
+                            "custom" to stringResource(R.string.haptics_custom)
+                        ).forEach { (key, label) ->
                             val selected = hapticsStrength == key
                             Surface(
                                 onClick = {
@@ -165,8 +178,9 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
                                         label,
                                         style = MaterialTheme.typography.labelLarge,
                                         fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                                        color = if (selected) MaterialTheme.colorScheme.onPrimary
-                                        else MaterialTheme.colorScheme.onSurfaceVariant
+                                        color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                 }
                             }
@@ -174,18 +188,13 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
                     }
 
                     // Custom intensity slider — only shown when "Custom" is selected
-                    androidx.compose.animation.AnimatedVisibility(
+                    AnimatedVisibility(
                         visible = hapticsStrength == "custom",
-                        enter = androidx.compose.animation.expandVertically() + androidx.compose.animation.fadeIn(),
-                        exit = androidx.compose.animation.shrinkVertically() + androidx.compose.animation.fadeOut()
+                        enter = expandVertically() + fadeIn(),
+                        exit = shrinkVertically() + fadeOut()
                     ) {
                         var lastVibratedSegment by remember { mutableIntStateOf(-1) }
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Text(
-                                "Custom Intensity",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
                             Slider(
                                 value = customIntensity,
                                 onValueChange = { v ->
@@ -204,12 +213,7 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
                                             } else {
                                                 @Suppress("DEPRECATION")
                                                 val v2 = context.getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
-                                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                                    v2.vibrate(VibrationEffect.createOneShot(dur, amp))
-                                                } else {
-                                                    @Suppress("DEPRECATION")
-                                                    v2.vibrate(dur)
-                                                }
+                                                v2.vibrate(VibrationEffect.createOneShot(dur, amp))
                                             }
                                         } catch (_: Exception) {}
                                     }
@@ -234,13 +238,13 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
                                 steps = 15,
                                 modifier = Modifier.fillMaxWidth()
                             )
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text("Softer", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Text("Stronger", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            }
+//                            Row(
+//                                modifier = Modifier.fillMaxWidth(),
+//                                horizontalArrangement = Arrangement.SpaceBetween
+//                            ) {
+//                                Text("Softer", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+//                                Text("Stronger", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+//                            }
                         }
                     }
 
@@ -268,7 +272,7 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
                     ) {
                         Icon(Icons.Rounded.Vibration, null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text("Preview Haptic")
+                        Text(stringResource(R.string.preview_haptic))
                     }
                 }
             }
@@ -293,7 +297,7 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
                     if (isRotation90) WindowInsetsSides.Top + WindowInsetsSides.Horizontal
                     else WindowInsetsSides.Top
                 ),
-                title = { Text("Sound & Vibration", fontWeight = FontWeight.Bold) },
+                title = { Title(stringResource(R.string.sound_and_vibration)) },
                 navigationIcon = {
                     NavigationIcon(onClick = { navigator.navigateUp() })
                 }
@@ -303,7 +307,6 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-//                .padding(padding)
                 .padding(
                     top = padding.calculateTopPadding(),
                     start = 0.dp,
@@ -318,21 +321,22 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
                 RillAnimatedSection(delayMs = 80L) {
                     RillExpressiveCard {
                         RillListItem(
-                            headline = "Ringtone Settings",
-                            supporting = "Open system sound settings",
+                            headline = stringResource(R.string.ringtone_settings),
+                            supporting = stringResource(R.string.system_settings),
                             leadingIcon = Icons.Rounded.RingVolume,
                             iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
                             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+                            trailingIcon = Icons.Default.ChevronRight,
                             onClick = { context.startActivity(Intent(Settings.ACTION_SOUND_SETTINGS)) }
                         )
-                        RillListItem(
-                            headline = "Do Not Disturb",
-                            supporting = "Manage interruption settings",
-                            leadingIcon = Icons.Outlined.DoNotDisturb,
-                            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
-                            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
-                            onClick = { context.startActivity(Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)) }
-                        )
+//                        RillListItem(
+//                            headline = "Do Not Disturb",
+//                            supporting = "Manage interruption settings",
+//                            leadingIcon = Icons.Outlined.DoNotDisturb,
+//                            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+//                            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+//                            onClick = { context.startActivity(Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)) }
+//                        )
                     }
                 }
             }
@@ -341,11 +345,11 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
             item {
                 RillAnimatedSection(delayMs = 0L) {
                     Column {
-                        SettingsSectionLabel("Dialpad")
+                        SettingsSectionLabel(stringResource(R.string.keypad))
                         RillExpressiveCard {
                             RillSwitchListItem(
-                                headline = "DTMF Tone",
-                                supporting = "Dialpad tone that plays during keypress",
+                                headline = stringResource(R.string.dialpad_tones),
+                                supporting = stringResource(R.string.dialpad_tones_subtitle),
                                 leadingIcon = Icons.Rounded.Audiotrack,
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
@@ -364,12 +368,12 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
             item {
                 RillAnimatedSection(delayMs = 0L) {
                     Column {
-                        SettingsSectionLabel("Calls")
+                        SettingsSectionLabel(stringResource(R.string.calls))
                         RillExpressiveCard {
                             RillSwitchListItem(
-                                headline = "Vibrate on Answer",
-                                supporting = "Vibrate when the other party answers",
-                                leadingIcon = Icons.Rounded.Vibration,
+                                headline = stringResource(R.string.vibrate_on_answer),
+                                supporting = stringResource(R.string.vibrate_on_answer_subtitle),
+                                leadingIcon = Icons.AutoMirrored.Rounded.CallReceived,
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
                                 checked = vibrateOnAnswer,
@@ -379,9 +383,9 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
                                 }
                             )
                             RillSwitchListItem(
-                                headline = "Vibrate on Hang up",
-                                supporting = "Vibrate when the call ends",
-                                leadingIcon = Icons.Rounded.Vibration,
+                                headline = stringResource(R.string.vibrate_on_hang_up),
+                                supporting = stringResource(R.string.vibrate_on_hang_up_subtitle),
+                                leadingIcon = Icons.Rounded.CallEnd,
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
                                 checked = vibrateOnHangup,
@@ -399,11 +403,20 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
             item {
                 RillAnimatedSection(delayMs = 80L) {
                     Column {
-                        SettingsSectionLabel("Haptics Across App")
+                        SettingsSectionLabel(stringResource(R.string.haptics_across_app))
                         RillExpressiveCard {
+                            val tapHapticsValue = when(hapticsStrength) {
+                                "light" -> stringResource(R.string.haptics_soft)
+                                "strong" -> stringResource(R.string.haptics_strong)
+                                else -> (prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f) * 100)
+                                    .toString().substringBefore(".") + "%"
+                            }
+                            val tapHapticsSubtitle = if (tapHapticsEnabled) {
+                                stringResource(R.string.on) + " · " + stringResource(R.string.haptics_intensity) + ": $tapHapticsValue"
+                            } else stringResource(R.string.off)
                             RillListItem(
-                                headline   = "Tap Haptics",
-                                supporting = if (tapHapticsEnabled) "On · ${hapticsStrength.replaceFirstChar { it.uppercase() }}" else "Off",
+                                headline   = stringResource(R.string.tap_haptics),
+                                supporting = tapHapticsSubtitle,
                                 leadingIcon = Icons.Rounded.Vibration,
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
@@ -411,8 +424,8 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
                                 onClick = { showHapticsDialog = true }
                             )
                             RillSwitchListItem(
-                                headline   = "Scroll Haptics",
-                                supporting = "Vibrate on scroll gestures across the app",
+                                headline   = stringResource(R.string.scroll_haptics),
+                                supporting = stringResource(R.string.scroll_haptics_subtitle),
                                 leadingIcon = Icons.Rounded.SwipeVertical,
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
@@ -434,14 +447,14 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
                                 ) {
                                     // ── Slider: Haptic Interval ──
                                     // 1 haptic per X cm. Range 0.5–5.0 cm.
-                                    val cmLabel = "1 per %.1f cm".format(scrollCmPerHaptic)
+                                    val cmLabel = stringResource(R.string.haptic_interval_value).format(scrollCmPerHaptic)
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
                                         Text(
-                                            text = "Haptic Interval",
+                                            text = stringResource(R.string.haptic_interval),
                                             style = MaterialTheme.typography.labelMedium,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -472,7 +485,7 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
                                         },
                                         valueRange = 0.5f..5.0f,
                                         steps = 44,
-                                        modifier = Modifier.fillMaxWidth()
+                                        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
                                     )
 
                                     // ── Slider: Haptic Strength ──
@@ -482,7 +495,7 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
                                         horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
                                         Text(
-                                            text = "Haptic Strength",
+                                            text = stringResource(R.string.haptic_strength),
                                             style = MaterialTheme.typography.labelMedium,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -521,7 +534,7 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
                 }
             }
 
-            item { Spacer(modifier = Modifier.height(100.dp)) }
+            item { Spacer(modifier = Modifier.height(80.dp).navigationBarsPadding()) }
         }
     }
 }

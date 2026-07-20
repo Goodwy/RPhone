@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.view.components.NavigationIcon
@@ -21,6 +22,8 @@ import dev.goodwy.rphone.view.theme.color_call_button
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import dev.goodwy.rphone.R
+import dev.goodwy.rphone.view.components.Title
 import org.koin.compose.koinInject
 
 private data class LgElement(
@@ -92,7 +95,7 @@ fun LiquidGlassElementsScreen(navigator: DestinationsNavigator) {
                     if (isRotation90) WindowInsetsSides.Top + WindowInsetsSides.Horizontal
                     else WindowInsetsSides.Top
                 ),
-                title = { Text("Liquid Glass Elements") },
+                title = { Title("Liquid Glass Elements") },
                 navigationIcon = {
                     NavigationIcon(onClick = { navigator.navigateUp() })
                 }

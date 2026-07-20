@@ -31,7 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -41,7 +40,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import dev.goodwy.rphone.controller.ContactsViewModel
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.util.makeCall
@@ -54,9 +52,11 @@ import dev.goodwy.rphone.view.components.SimPickerDialog
 import dev.goodwy.rphone.view.components.TopBar
 import dev.goodwy.rphone.view.theme.TabTransitionStyle
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.automirrored.filled.StarHalf
 import androidx.compose.material.icons.filled.CheckBox
+import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.DropdownMenu
@@ -78,23 +78,20 @@ import androidx.compose.ui.zIndex
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.ContactDetailsScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.ContactScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.DialPadScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.RecentScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.NotesScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinActivityViewModel
-import kotlin.math.abs
 import androidx.core.net.toUri
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import com.ramcosta.composedestinations.generated.destinations.ContactScreenDestination
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.view.components.PlaceholderView
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 
-@Destination<RootGraph>(style = TabTransitionStyle::class)
 @OptIn(ExperimentalFoundationApi::class)
+@Destination<RootGraph>(style = TabTransitionStyle::class)
 @Composable
 fun FavoritesScreen(navController: NavController, navigator: DestinationsNavigator) {
     val contactsVM: ContactsViewModel = koinActivityViewModel()
@@ -142,14 +139,14 @@ fun FavoritesScreen(navController: NavController, navigator: DestinationsNavigat
     fun saveFavoritesOrder() {
         prefs.setString(PreferenceManager.KEY_FAVORITES_ORDER, orderedFavorites.joinToString(",") { it.id })
     }
-//    val contactsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS, true)
+    val contactsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS, true)
 //    val dialpadEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD, true)
 //    val notesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES, false)
     val context = LocalContext.current
 
     var showSimPicker by remember { mutableStateOf(false) }
     var pendingCallNumber by remember { mutableStateOf<String?>(null) }
-    val simPref = remember { prefs.getInt("default_sim", 0) }
+    val simPref = remember { prefs.getInt(PreferenceManager.KEY_DEFAULT_SIM, prefs.getDefaultSimIndexDefault()) }
 
     var selectedIds by remember { mutableStateOf(setOf<String>()) }
 
@@ -253,10 +250,6 @@ fun FavoritesScreen(navController: NavController, navigator: DestinationsNavigat
                             contactsVM.deleteContacts(selectedIds.toList())
                             selectedIds = emptySet()
                         },
-//                        onMove = { account ->
-//                            contactsVM.moveContacts(selectedIds.toList(), account)
-//                            selectedIds = emptySet()
-//                        },
                         onRemoveFromFav = {
                             favorites.filter { selectedIds.contains(it.id) }.forEach { contactsVM.toggleFavorite(it) }
                             selectedIds = emptySet()
@@ -277,48 +270,53 @@ fun FavoritesScreen(navController: NavController, navigator: DestinationsNavigat
                     )
                 }
             }
-
-//            AnimatedVisibility(
-//                visible = selectionMode,
-//                enter = slideInVertically(initialOffsetY = { -it }, animationSpec = tween(320, easing = FastOutSlowInEasing)) + fadeIn(animationSpec = tween(280, easing = FastOutSlowInEasing)),
-//                exit  = slideOutVertically(targetOffsetY = { -it }, animationSpec = tween(420, easing = FastOutLinearInEasing)) + fadeOut(animationSpec = tween(380, easing = FastOutLinearInEasing)),
-//                modifier = Modifier.fillMaxWidth().zIndex(10f)
-//            ) {
-//                Surface(color = MaterialTheme.colorScheme.primaryContainer, modifier = Modifier.fillMaxWidth()) {
-//                    Row(
-//                        modifier = Modifier.fillMaxWidth()
-//                            .statusBarsPadding()
-//                            .padding(horizontal = 8.dp, vertical = 4.dp),
-//                        verticalAlignment = Alignment.CenterVertically
-//                    ) {
-//                        IconButton(onClick = { selectionMode = false; selectedFavorites = emptySet() }) {
-//                            Icon(Icons.Default.Close, null, tint = MaterialTheme.colorScheme.onPrimaryContainer)
-//                        }
-//                        Text("${selectedFavorites.size} selected", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.weight(1f))
-//                        Box {
-//                            IconButton(onClick = { showFavSelectionMenu = true }) {
-//                                Icon(Icons.Default.MoreVert, null, tint = MaterialTheme.colorScheme.onPrimaryContainer)
-//                            }
-//                            DropdownMenu(shape = RoundedCornerShape(16.dp), expanded = showFavSelectionMenu, onDismissRequest = { showFavSelectionMenu = false }) {
-//                                DropdownMenuItem(text = { Text(stringResource(R.string.remove_from_favourites)) }, leadingIcon = { Icon(Icons.Default.Star, null, tint = MaterialTheme.colorScheme.error) }, onClick = { showFavSelectionMenu = false; if (selectedFavorites.isNotEmpty()) showFavDeleteConfirm = true })
-//                                DropdownMenuItem(text = { Text("Select All") }, leadingIcon = { Icon(Icons.Default.SelectAll, null) }, onClick = { showFavSelectionMenu = false; selectedFavorites = favorites.map { it.id }.toSet() })
-//                            }
-//                        }
-//                    }
-//                }
-//            }
         },
         containerColor = MaterialTheme.colorScheme.surface,
         contentWindowInsets = WindowInsets(0)
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
+        Column(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
             if (favorites.isEmpty()) {
                 PlaceholderView(
                     icon = Icons.Default.Star,
-                    title = "No Favorites Yet",
-                    description = "Star a contact to add them here"
+                    title = stringResource(R.string.no_favorites_yet),
+                    description = stringResource(R.string.no_favorites_yet_subtitle)
                 )
             } else {
+                if (!contactsEnabled) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth().padding(top = 12.dp, end = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+//                                    horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Spacer(Modifier.weight(1f))
+                        Surface(
+                            modifier = Modifier.combinedClickable(
+                                onClick = {
+                                    navController.navigate(ContactScreenDestination.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                },
+                                interactionSource = null,
+                                indication = null,
+                            ),
+                            shape = RoundedCornerShape(20.dp),
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh
+                        ) {
+                            Text(
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp),
+                                text = stringResource(R.string.view_contacts),
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                    }
+                }
                 val configuration = LocalConfiguration.current
                 val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
                 val columns = if (isLandscape) 6 else 4
@@ -326,14 +324,15 @@ fun FavoritesScreen(navController: NavController, navigator: DestinationsNavigat
                 val selectionMode = selectedIds.isNotEmpty()
                 ScrollHapticsGridEffect(gridState = gridState)
                 LazyVerticalGrid(
+//                    columns = GridCells.Adaptive(minSize = 100.dp),
                     columns = GridCells.Fixed(columns),
                     state = gridState,
                     modifier = Modifier
                         .fillMaxSize()
                         .nestedScroll(dragNestedScroll),
                     contentPadding = PaddingValues(top = 24.dp, start = 24.dp, end = 24.dp, bottom = 168.dp),
-                    verticalArrangement = Arrangement.spacedBy(24.dp),
-                    horizontalArrangement = Arrangement.spacedBy(24.dp)
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     items(orderedFavorites, key = { it.id }) { contact ->
                         RillScrollAnimatedItem(
@@ -670,7 +669,7 @@ fun FavoriteContactCard(
             }
             DropdownMenuItem(
                 contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
-                text = { Text("Call") },
+                text = { Text(stringResource(R.string.call)) },
                 leadingIcon = { Icon(Icons.Rounded.Call, null) },
                 onClick = {
                     showMenu = false
@@ -681,7 +680,7 @@ fun FavoriteContactCard(
             if (!phoneNumber.isNullOrEmpty()) {
                 DropdownMenuItem(
                     contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
-                    text = { Text("Send SMS") },
+                    text = { Text(stringResource(R.string.message)) },
                     leadingIcon = { Icon(ImageVector.vectorResource(id = R.drawable.ic_message_filled), null) },
                     onClick = {
                         showMenu = false
@@ -694,8 +693,8 @@ fun FavoriteContactCard(
             }
             DropdownMenuItem(
                 contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
-                text = { Text("View Details") },
-                leadingIcon = { Icon(Icons.Default.Info, null) },
+                text = { Text(stringResource(R.string.view_contact)) },
+                leadingIcon = { Icon(Icons.Rounded.AccountCircle, null) },
                 onClick = {
                     showMenu = false
                     navigator.navigate(ContactDetailsScreenDestination(contactId = contact.id))
@@ -706,8 +705,8 @@ fun FavoriteContactCard(
             )
             DropdownMenuItem(
                 contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
-                text = { Text(stringResource(R.string.remove_from_favourites)) },
-                leadingIcon = { Icon(Icons.Default.Star, null, tint = MaterialTheme.colorScheme.error) },
+                text = { Text(stringResource(R.string.remove_from_favorites)) },
+                leadingIcon = { Icon(Icons.AutoMirrored.Filled.StarHalf, null, tint = MaterialTheme.colorScheme.error) },
                 onClick = {
                     showMenu = false
                     onToggleFavorite()

@@ -1,6 +1,5 @@
 package dev.goodwy.rphone.view.screen.settings
 
-import android.accounts.Account
 import android.content.Context
 import android.view.Surface
 import androidx.activity.compose.BackHandler
@@ -13,16 +12,13 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CloudOff
-import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.goodwy.rphone.controller.ContactsViewModel
@@ -32,9 +28,11 @@ import dev.goodwy.rphone.view.components.RillSwitchListItem
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import dev.goodwy.rphone.R
 import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillAnimatedSection
 import dev.goodwy.rphone.view.components.ScrollHapticsEffect
+import dev.goodwy.rphone.view.components.Title
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinActivityViewModel
@@ -51,7 +49,7 @@ fun ContactVisibilityScreen(
     val visibleAccounts by viewModel.visibleAccountsFlow.collectAsState()
 
     val currentVisible = remember(visibleAccounts, accounts) {
-        visibleAccounts ?: (accounts.map { "${it.type}|${it.name}" } + "local|local").toSet()
+        visibleAccounts ?: (accounts.map { "${it.type}|${it.name}" } + "local|local" + "private|private").toSet()
     }
 
     fun toggleAccount(key: String, enabled: Boolean) {
@@ -96,7 +94,7 @@ fun ContactVisibilityScreen(
                     if (isRotation90) WindowInsetsSides.Top + WindowInsetsSides.Horizontal
                     else WindowInsetsSides.Top
                 ),
-                title = { Text("Contact Visibility", fontWeight = FontWeight.ExtraBold) },
+                title = { Title(stringResource(R.string.managing_contact_sources)) },
                 navigationIcon = {
                     NavigationIcon(onClick = { navigateBack() })
                 }
@@ -123,10 +121,10 @@ fun ContactVisibilityScreen(
             item {
                 RillAnimatedSection(delayMs = 30L) {
                     Text(
-                        text = "Select which accounts should be visible in your contact list. Deselecting an account will hide its contacts but won't delete them.",
+                        text = stringResource(R.string.managing_contact_sources_description),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 8.dp)
+                        modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
                     )
                 }
             }
@@ -134,12 +132,28 @@ fun ContactVisibilityScreen(
             item {
                 RillAnimatedSection(delayMs = 60L) {
                     Column {
-                        SettingsSectionLabel("Accounts")
+                        SettingsSectionLabel(stringResource(R.string.contact_sources))
                         RillExpressiveCard {
                             RillSwitchListItem(
+                                headline = ContactUtils.getFriendlyAccountName(null, true),
+                                supporting = stringResource(R.string.contacts_stored_on_app),
+                                leadingIcon = ContactUtils.getAccountIcon(null, true),
+                                iconContainerColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                                iconBgContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                checked = currentVisible.contains("private|private"),
+                                onCheckedChange = { isChecked: Boolean ->
+                                    toggleAccount(
+                                        "private|private",
+                                        isChecked
+                                    )
+                                }
+                            )
+                            RillSwitchListItem(
                                 headline = ContactUtils.getFriendlyAccountName(null),
-                                supporting = "Contacts stored on device",
+                                supporting = stringResource(R.string.contacts_stored_on_device),
                                 leadingIcon = ContactUtils.getAccountIcon(null),
+                                iconContainerColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                                iconBgContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
                                 checked = currentVisible.contains("local|local"),
                                 onCheckedChange = { isChecked: Boolean ->
                                     toggleAccount(
@@ -169,16 +183,18 @@ fun ContactVisibilityScreen(
                 }
             }
             
-            item {
-                RillAnimatedSection(delayMs = 90L) {
-                    TextButton(
-                        onClick = { viewModel.setVisibleAccounts(null) },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Reset to Show All")
-                    }
-                }
-            }
+//            item {
+//                RillAnimatedSection(delayMs = 90L) {
+//                    TextButton(
+//                        onClick = { viewModel.setVisibleAccounts(null) },
+//                        modifier = Modifier.fillMaxWidth()
+//                    ) {
+//                        Text("Reset to Show All")
+//                    }
+//                }
+//            }
+
+            item { Spacer(modifier = Modifier.height(20.dp).navigationBarsPadding()) }
         }
     }
 }

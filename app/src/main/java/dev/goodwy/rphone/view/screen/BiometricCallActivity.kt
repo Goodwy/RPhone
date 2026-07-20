@@ -17,9 +17,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
+import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.CallActivity
 import dev.goodwy.rphone.controller.CallService
 import dev.goodwy.rphone.controller.util.PreferenceManager
@@ -71,27 +73,27 @@ class BiometricCallActivity : FragmentActivity() {
         setContent {
             Rill4Theme {
                 val activity = this
-                BiometricFloatingUi(
+                val call = CallService.currentCallSession.collectAsState().value?.call
+                if (call != null) BiometricFloatingUi(
                     biometricType  = biometricType,
                     activity       = activity,
                     expectedPin      = prefs.getString(PreferenceManager.KEY_BIOMETRICS_PIN, "") ?: "",
                     expectedPassword = prefs.getString(PreferenceManager.KEY_BIOMETRICS_PASSWORD, "") ?: "",
                     onSuccess = {
-                        val call = CallService.currentCallSession.value?.call
                         when (action) {
                             "ANSWER" -> {
-                                try { call?.answer(VideoProfile.STATE_AUDIO_ONLY) } catch (_: Exception) {}
+                                try { call.answer(VideoProfile.STATE_AUDIO_ONLY) } catch (_: Exception) {}
                                 startActivity(Intent(activity, CallActivity::class.java).apply {
                                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
                                     putExtra("ANSWERED_FROM_NOTIFICATION", true)
                                 })
                             }
-                            "DECLINE" -> try { call?.disconnect() } catch (_: Exception) {}
+                            "DECLINE" -> try { call.disconnect() } catch (_: Exception) {}
                         }
                         finish()
                     },
                     onDismiss = { finish() }
-                )
+                ) else finish()
             }
         }
     }
@@ -153,7 +155,7 @@ private fun BiometricFloatingUi(
                         contentAlignment = Alignment.BottomCenter
                     ) {
                         PinDialogContent(
-                            title = "Enter PIN",
+                            title = stringResource(R.string.enter_pin),
                             isVerify = true,
                             expectedPin = expectedPin,
                             onConfirm = { onSuccess() },
@@ -175,7 +177,7 @@ private fun BiometricFloatingUi(
                     tonalElevation = 8.dp
                 ) {
                     PasswordDialogContent(
-                        title            = "Enter Password",
+                        title            = stringResource(R.string.enter_password),
                         isVerify         = true,
                         expectedPassword = expectedPassword,
                         showCloseButton  = true,

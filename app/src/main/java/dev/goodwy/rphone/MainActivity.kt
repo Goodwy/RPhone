@@ -52,16 +52,19 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.material.icons.automirrored.filled.StickyNote2
 import androidx.compose.material.icons.automirrored.outlined.StickyNote2
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Assistant
 import androidx.compose.material.icons.filled.Dialpad
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.Assistant
 import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.AccessTimeFilled
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.Dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -74,6 +77,7 @@ import dev.goodwy.rphone.view.screen.onboarding.MorphingOnboardingScreen
 import dev.goodwy.rphone.view.theme.MyColors.bottomBarColor
 import com.ramcosta.composedestinations.generated.destinations.AboutAppScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.AppIconScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.AvatarsPreferenceScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.BiometricScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.BlockedNumbersScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.BlurEffectsElementsScreenDestination
@@ -81,7 +85,9 @@ import com.ramcosta.composedestinations.generated.destinations.CallAccountsScree
 import com.ramcosta.composedestinations.generated.destinations.CallSettingsScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.CallerUIScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactManagementScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.ContactMergeDuplicatesScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.ContactUnmergeDuplicatesScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactVisibilityScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContributorsScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.DefaultDialerScreenDestination
@@ -246,7 +252,7 @@ class MainActivity : FragmentActivity() {
                                             modifier = Modifier.size(18.dp)
                                         )
                                         Text(
-                                            text = "Call is Ongoing — Tap to return",
+                                            text = stringResource(R.string.call_is_ongoing),
                                             style = MaterialTheme.typography.labelLarge,
                                             color = Color.White,
                                             fontWeight = FontWeight.SemiBold
@@ -351,6 +357,13 @@ class MainActivity : FragmentActivity() {
 
 
                                 val houseIcon = ImageVector.vectorResource(id = R.drawable.ic_house_fill)
+                                val labelFavorites = stringResource(R.string.favorites)
+                                val labelRecents =
+                                    if (!showFavoritesRail && !showContactsRail) stringResource(R.string.home_tab)
+                                    else stringResource(R.string.recents)
+                                val labelContacts = stringResource(R.string.contacts)
+                                val labelKeypad = stringResource(R.string.keypad)
+                                val labelNotes = stringResource(R.string.notes)
                                 val orderedTabs: List<TabSpec> = remember(
                                     tabOrder, showFavoritesRail, showCallsRail, showContactsRail, showDialpadRail, showNotesRail,
                                     isFavoritesSelected, isRecentsSelected, isContactsSelected, isDialpadSelected, isNotesSelected
@@ -361,9 +374,9 @@ class MainActivity : FragmentActivity() {
                                                 key             = key,
                                                 route           = FavoritesScreenDestination.route,
                                                 selected        = isFavoritesSelected,
-                                                selectedIcon    = Icons.Filled.Star,
-                                                unselectedIcon  = Icons.Outlined.StarOutline,
-                                                label           = "Favourites",
+                                                selectedIcon    = Icons.Filled.Assistant,
+                                                unselectedIcon  = Icons.Outlined.Assistant,
+                                                label           = labelFavorites,
                                                 onClick         = { doHaptic(); navTo(FavoritesScreenDestination.route) }
                                             ) else null
                                             "calls" -> if (showCallsRail) TabSpec(
@@ -372,7 +385,7 @@ class MainActivity : FragmentActivity() {
                                                 selected        = isRecentsSelected,
                                                 selectedIcon    = if (!showFavoritesRail && !showContactsRail) houseIcon else Icons.Rounded.AccessTimeFilled,
                                                 unselectedIcon  = if (!showFavoritesRail && !showContactsRail) houseIcon else Icons.Rounded.AccessTime,
-                                                label           = if (!showFavoritesRail && !showContactsRail) "Home" else "Calls",
+                                                label           = labelRecents,
                                                 onClick         = { doHaptic(); navTo(RecentScreenDestination.route) }
                                             ) else null
                                             "contacts" -> if (showContactsRail) TabSpec(
@@ -381,7 +394,7 @@ class MainActivity : FragmentActivity() {
                                                 selected        = isContactsSelected,
                                                 selectedIcon    = Icons.Filled.AccountCircle,
                                                 unselectedIcon  = Icons.Outlined.AccountCircle,
-                                                label           = "Contacts",
+                                                label           = labelContacts,
                                                 onClick         = { doHaptic(); navTo(ContactScreenDestination.route) }
                                             ) else null
                                             "dialpad" -> if (showDialpadRail) TabSpec(
@@ -390,7 +403,7 @@ class MainActivity : FragmentActivity() {
                                                 selected       = isDialpadSelected,
                                                 selectedIcon   = Icons.Filled.Dialpad,
                                                 unselectedIcon = Icons.Filled.Dialpad,
-                                                label          = "Keypad",
+                                                label          = labelKeypad,
                                                 onClick        = { doHaptic(); navTo(DialPadScreenDestination(initialNumber = "").route) }
                                             ) else null
                                             "notes" -> if (showNotesRail) TabSpec(
@@ -399,7 +412,7 @@ class MainActivity : FragmentActivity() {
                                                 selected       = isNotesSelected,
                                                 selectedIcon   = Icons.AutoMirrored.Filled.StickyNote2,
                                                 unselectedIcon = Icons.AutoMirrored.Outlined.StickyNote2,
-                                                label          = "Notes",
+                                                label          = labelNotes,
                                                 onClick        = { doHaptic(); navTo(NotesScreenDestination.route) }
                                             ) else null
                                             else -> null
@@ -475,17 +488,11 @@ class MainActivity : FragmentActivity() {
                                                                 modifier = Modifier.size(24.dp)
                                                             )
                                                         },
-//                                                label = "Search",
-//                                                paddingStart = railPaddingStart,
-//                                                paddingEnd = railPaddingEnd,
                                                         onClick = { navTo(com.ramcosta.composedestinations.generated.destinations.SearchScreenDestination.route) }
                                                     )
                                                     RailItem(
                                                         selected = currentDest?.hierarchy?.any {
-                                                            it.route?.contains(
-                                                                "settings",
-                                                                ignoreCase = true
-                                                            ) == true || it.route == DonateScreenDestination.route ||
+                                                            it.route?.contains("settings", ignoreCase = true) == true || it.route == DonateScreenDestination.route ||
                                                                     it.route == AboutAppScreenDestination.route || it.route == AppIconScreenDestination.route ||
                                                                     it.route == BiometricScreenDestination.route || it.route == BlockedNumbersScreenDestination.route ||
                                                                     it.route == BlurEffectsElementsScreenDestination.route || it.route == CallAccountsScreenDestination.route ||
@@ -494,20 +501,16 @@ class MainActivity : FragmentActivity() {
                                                                     it.route == LiquidGlassElementsScreenDestination.route || it.route == NavigationScreenDestination.route ||
                                                                     it.route == SoundVibrationScreenDestination.route || it.route == SpamScreenDestination.route ||
                                                                     it.route == ContactManagementScreenDestination.route || it.route == PrivateContactsScreenDestination.route ||
-                                                                    it.route == ContactVisibilityScreenDestination.route
+                                                                    it.route == ContactVisibilityScreenDestination.route || it.route == ContactMergeDuplicatesScreenDestination.route ||
+                                                                    it.route == ContactUnmergeDuplicatesScreenDestination.route || it.route == AvatarsPreferenceScreenDestination.route
                                                         } == true,
                                                         icon = { sel ->
                                                             Icon(
-                                                                if (sel) Icons.Default.Settings else ImageVector.vectorResource(
-                                                                    id = R.drawable.ic_settings
-                                                                ),
-                                                                "Settings",
+                                                                if (sel) Icons.Default.Settings else ImageVector.vectorResource(id = R.drawable.ic_settings),
+                                                                stringResource(R.string.settings),
                                                                 modifier = Modifier.size(24.dp)
                                                             )
                                                         },
-//                                                label = "Settings",
-//                                                paddingStart = railPaddingStart,
-//                                                paddingEnd = railPaddingEnd,
                                                         onClick = { navTo(com.ramcosta.composedestinations.generated.destinations.SettingsScreenDestination.route) }
                                                     )
                                                 }
@@ -615,14 +618,14 @@ class MainActivity : FragmentActivity() {
                         }
                         if (biometricType == "pin") {
                             dev.goodwy.rphone.view.screen.settings.PinSetupDialog(
-                                title = "Enter PIN", isVerify = true,
+                                title = stringResource(R.string.enter_pin), isVerify = true,
                                 expectedPin = prefs.getString(PreferenceManager.KEY_BIOMETRICS_PIN, "") ?: "",
                                 onConfirm = { isUnlocked = true }, onDismiss = { finish() }
                             )
                         } else if (biometricType == "password") {
 
                             dev.goodwy.rphone.view.screen.settings.PasswordSetupDialog(
-                                title = "Enter Password", isVerify = true,
+                                title = stringResource(R.string.enter_password), isVerify = true,
                                 expectedPassword = prefs.getString(PreferenceManager.KEY_BIOMETRICS_PASSWORD, "") ?: "",
                                 onConfirm = { isUnlocked = true }, onDismiss = { finish() }
                             )

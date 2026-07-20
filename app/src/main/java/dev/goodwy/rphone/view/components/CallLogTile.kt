@@ -5,7 +5,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.provider.CallLog
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -14,7 +13,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -24,30 +22,24 @@ import androidx.compose.material.icons.automirrored.filled.CallReceived
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.Call
-import androidx.compose.material.icons.rounded.SelectAll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import com.ramcosta.composedestinations.generated.destinations.ContactDetailsScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.ContactDetailsScreenDestination.invoke
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.formatDate
 import dev.goodwy.rphone.controller.util.formatSecondsToShortTimeString
 import dev.goodwy.rphone.controller.util.getPhoneTypeText
 import dev.goodwy.rphone.controller.util.toast
 import dev.goodwy.rphone.modal.data.CallLogEntry
-import dev.goodwy.rphone.view.theme.color_call_button
 import dev.goodwy.rphone.view.theme.customColors
 
 @Composable
@@ -119,10 +111,10 @@ fun CallLogTile(
             supporting = buildString {
                 if (log.name != null && log.name != log.number) {
                     val typeLabel = getPhoneTypeText(context, log.phoneType, log.phoneLabel)
-                    val number = typeLabel ?: log.number
-                    append(number + " • " + context.formatDate(log.date, true) + simLabel)
+                    append(typeLabel + " • " + context.formatDate(log.date, true) + simLabel)
+                } else {
+                    append(context.formatDate(log.date, true) + simLabel)
                 }
-                else append(context.formatDate(log.date, true) + simLabel)
             },
             avatarName  = log.name ?: log.number,
             photoUri    = log.photoUri,
@@ -176,7 +168,7 @@ fun CallLogTile(
                 )
                 DropdownMenuItem(
                     contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
-                    text = { Text("Call back") },
+                    text = { Text(stringResource(R.string.call)) },
                     leadingIcon = { Icon(Icons.Rounded.Call, null) },
                     onClick = { showMenu = false; onCallClick(log) }
                 )
@@ -184,7 +176,7 @@ fun CallLogTile(
                     val phoneNumber = log.number
                     DropdownMenuItem(
                         contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
-                        text = { Text("Send SMS") },
+                        text = { Text(stringResource(R.string.message)) },
                         leadingIcon = { Icon(ImageVector.vectorResource(id = R.drawable.ic_message_filled), null) },
                         onClick = {
                             showMenu = false
@@ -197,13 +189,12 @@ fun CallLogTile(
                 }
                 DropdownMenuItem(
                     contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
-                    text = { Text("Copy number") },
+                    text = { Text(stringResource(R.string.copy)) },
                     leadingIcon = { Icon(Icons.Default.ContentCopy, null) },
                     onClick = {
                         showMenu = false
                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         clipboard.setPrimaryClip(ClipData.newPlainText("Phone number", log.number))
-                        context.toast("Number copied")
                     }
                 )
 //                DropdownMenuItem(
@@ -217,7 +208,7 @@ fun CallLogTile(
 //                )
                 DropdownMenuItem(
                     contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
-                    text = { Text("Show full history") },
+                    text = { Text(stringResource(R.string.show_full_history)) },
                     leadingIcon = { Icon(Icons.Default.AccessTime, null) },
                     onClick = {
                         showMenu = false
@@ -227,9 +218,11 @@ fun CallLogTile(
                 HorizontalDivider(
                     color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                 )
-                DropdownMenuItem(
+                val deleted = stringResource(R.string.deleted_from_call_log)
+                val notDeleted = stringResource(R.string.could_not_delete)
+                    DropdownMenuItem(
                     contentPadding = PaddingValues(start = 20.dp, end = 24.dp),
-                    text = { Text("Delete from call log", color = MaterialTheme.colorScheme.error) },
+                    text = { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) },
                     leadingIcon = { Icon(ImageVector.vectorResource(id = R.drawable.ic_delete), null, tint = MaterialTheme.colorScheme.error) },
                     onClick = {
                         showMenu = false
@@ -241,91 +234,14 @@ fun CallLogTile(
                                 arrayOf(log.number, log.date.toString())
                             )
                             onDelete?.invoke()
-                            context.toast("Deleted from call log")
+                            context.toast(deleted)
                         } catch (_: Exception) {
-                            context.toast("Could not delete")
+                            context.toast(notDeleted)
                         }
                     }
                 )
             }
         }
-//        RillDropdownMenu(
-//            expanded          = showMenu,
-//            onDismissRequest  = { showMenu = false }
-//        ) {
-//            RillDropdownMenuItem(
-//                text     = stringResource(R.string.select),
-//                icon     = Icons.Default.CheckBox,
-//                iconTint = Color(0xFF9C27B0),
-//                onClick  = {
-//                    showMenu = false
-//                    onLongClick(log)
-//                }
-//            )
-//            HorizontalDivider(
-//                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-//                color    = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-//            )
-//            RillDropdownMenuItem(
-//                text     = "Call back",
-//                icon     = Icons.Default.Call,
-//                iconTint = color_call_button,
-//                onClick  = { showMenu = false; onCallClick(log) }
-//            )
-//            RillDropdownMenuItem(
-//                text     = "Copy number",
-//                icon     = Icons.Default.ContentCopy,
-//                iconTint = Color(0xFF2196F3),
-//                onClick  = {
-//                    showMenu = false
-//                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-//                    clipboard.setPrimaryClip(ClipData.newPlainText("Phone number", log.number))
-//                    Toast.makeText(context, "Number copied", Toast.LENGTH_SHORT).show()
-//                }
-//            )
-//            RillDropdownMenuItem(
-//                text     = "Block number",
-//                icon     = Icons.Default.Block,
-//                iconTint = Color(0xFFFF9800),
-//                onClick  = {
-//                    showMenu = false
-//                    Toast.makeText(context, "Number blocked", Toast.LENGTH_SHORT).show()
-//                }
-//            )
-//            RillDropdownMenuItem(
-//                text     = "Show full history",
-//                icon     = Icons.Default.AccessTime,
-//                iconTint = Color(0xFF00BCD4),
-//                onClick  = {
-//                    showMenu = false
-//                    onShowHistory()
-//                }
-//            )
-//            HorizontalDivider(
-//                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-//                color    = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-//            )
-//            RillDropdownMenuItem(
-//                text          = "Delete from call log",
-//                icon          = ImageVector.vectorResource(id = R.drawable.ic_delete),
-//                isDestructive = true,
-//                onClick       = {
-//                    showMenu = false
-//                    try {
-//                        // Delete only this specific call log entry by its exact timestamp
-//                        context.contentResolver.delete(
-//                            CallLog.Calls.CONTENT_URI,
-//                            "${CallLog.Calls.NUMBER} = ? AND ${CallLog.Calls.DATE} = ?",
-//                            arrayOf(log.number, log.date.toString())
-//                        )
-//                        onDelete?.invoke()
-//                        Toast.makeText(context, "Deleted from call log", Toast.LENGTH_SHORT).show()
-//                    } catch (e: Exception) {
-//                        Toast.makeText(context, "Could not delete", Toast.LENGTH_SHORT).show()
-//                    }
-//                }
-//            )
-//        }
     }
 }
 
@@ -356,42 +272,50 @@ fun BatchCallLogActionBar(
                 .padding(horizontal = 8.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onClearSelection) {
-                Icon(Icons.Default.Close, "Clear selection")
-            }
-            TextButton(
-                onClick = if (isAllSelected) onDeselect else onSelectAll
-            ) {
-                Text(
-                    text = "$selectedCount selected",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            RillIconButton(
+                onClick = onClearSelection,
+                imageVector = Icons.Default.Close,
+                contentDescription = stringResource(R.string.cancel)
+            )
+            RillTextButton(
+                onClick = if (isAllSelected) onDeselect else onSelectAll,
+                text = stringResource(R.string.selected_items, selectedCount),
+                toast = if (isAllSelected) stringResource(R.string.deselect_all) else stringResource(R.string.select_all)
+            )
             Spacer(modifier = Modifier.weight(1f))
             if (onCallLogs != null) {
-                IconButton(onClick = onCallLogs) {
-                    Icon(Icons.Rounded.AccessTime, "Show full history")
-                }
+                RillIconButton(
+                    onClick = onCallLogs,
+                    imageVector = Icons.Rounded.AccessTime,
+                    contentDescription = stringResource(R.string.show_full_history)
+                )
             }
             if (onClearAll != null) {
-                IconButton(onClick = { showClearAllConfirm = true }) {
-                    Icon(ImageVector.vectorResource(id = R.drawable.ic_delete_sweep), "Clear all logs")
-                }
+                RillIconButton(
+                    onClick = { showClearAllConfirm = true },
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_delete_sweep),
+                    contentDescription = stringResource(R.string.clear_all_filtered_logs)
+                )
             }
-            IconButton(onClick = { showDeleteConfirm = true }) {
-                Icon(ImageVector.vectorResource(id = R.drawable.ic_delete), "Delete selected")
-            }
+            RillIconButton(
+                onClick = { showDeleteConfirm = true },
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_delete),
+                contentDescription = stringResource(R.string.delete_call_logs)
+            )
             if (onShare != null) {
-                IconButton(onClick = onShare) {
-                    Icon(Icons.Default.Share, stringResource(R.string.share))
-                }
+                RillIconButton(
+                    onClick = onShare,
+                    imageVector = Icons.Default.Share,
+                    contentDescription = stringResource(R.string.share)
+                )
             }
 
 //            Box {
-//                IconButton(onClick = { showSelectionMenuOuter = true }) {
-//                    Icon(Icons.Default.MoreVert, null, tint = MaterialTheme.colorScheme.onPrimaryContainer)
-//                }
+//                RillIconButton(
+//                    onClick = { showSelectionMenuOuter = true },
+//                    imageVector = Icons.Default.MoreVert,
+//                    contentDescription = stringResource(R.string.more)
+//                )
 //                DropdownMenu(shape = RoundedCornerShape(16.dp), expanded = showSelectionMenuOuter, onDismissRequest = { showSelectionMenuOuter = false }) {
 //                    DropdownMenuItem(
 //                        text = { Text(stringResource(R.string.share)) },
@@ -427,7 +351,7 @@ fun BatchCallLogActionBar(
     if (showDeleteConfirm) {
         RillDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = "Delete Call Logs",
+            title = stringResource(R.string.delete_call_logs),
             icon = ImageVector.vectorResource(id = R.drawable.ic_delete),
             iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
@@ -446,7 +370,7 @@ fun BatchCallLogActionBar(
             }
         ) {
             Text(
-                "Are you sure you want to delete $selectedCount selected call logs?",
+                stringResource(R.string.delete_call_logs_selected, selectedCount),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -458,7 +382,7 @@ fun BatchCallLogActionBar(
     if (showClearAllConfirm) {
         RillDialog(
             onDismissRequest = { showClearAllConfirm = false },
-            title = "Clear all filtered logs",
+            title = stringResource(R.string.clear_all_filtered_logs),
             icon = ImageVector.vectorResource(id = R.drawable.ic_delete_sweep),
             iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
@@ -467,7 +391,7 @@ fun BatchCallLogActionBar(
                     onClearAll?.invoke()
                     showClearAllConfirm = false
                 }) {
-                    Text("Clear All", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.clear), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
@@ -477,7 +401,7 @@ fun BatchCallLogActionBar(
             }
         ) {
             Text(
-                "This will delete all displayed call history. This action cannot be undone.",
+                stringResource(R.string.clear_all_filtered_logs_selected),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,

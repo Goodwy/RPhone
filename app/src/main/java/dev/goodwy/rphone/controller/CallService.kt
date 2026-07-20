@@ -103,15 +103,19 @@ class CallService : InCallService() {
             val current = state.route
 
             val nextRoute = when (current) {
-                CallAudioState.ROUTE_EARPIECE, CallAudioState.ROUTE_WIRED_HEADSET -> {
+                CallAudioState.ROUTE_EARPIECE -> {
                     if ((supported and CallAudioState.ROUTE_BLUETOOTH) != 0) CallAudioState.ROUTE_BLUETOOTH
                     else if ((supported and CallAudioState.ROUTE_SPEAKER) != 0) CallAudioState.ROUTE_SPEAKER
+                    else current
+                }
+                CallAudioState.ROUTE_WIRED_HEADSET -> {
+                    if ((supported and CallAudioState.ROUTE_SPEAKER) != 0) CallAudioState.ROUTE_SPEAKER
+                    else if ((supported and CallAudioState.ROUTE_BLUETOOTH) != 0) CallAudioState.ROUTE_BLUETOOTH
                     else current
                 }
                 CallAudioState.ROUTE_BLUETOOTH -> {
                     if ((supported and CallAudioState.ROUTE_SPEAKER) != 0) CallAudioState.ROUTE_SPEAKER
                     else if ((supported and CallAudioState.ROUTE_EARPIECE) != 0) CallAudioState.ROUTE_EARPIECE
-                    else if ((supported and CallAudioState.ROUTE_WIRED_HEADSET) != 0) CallAudioState.ROUTE_WIRED_HEADSET
                     else current
                 }
                 CallAudioState.ROUTE_SPEAKER -> {
@@ -120,7 +124,7 @@ class CallService : InCallService() {
                     else if ((supported and CallAudioState.ROUTE_BLUETOOTH) != 0) CallAudioState.ROUTE_BLUETOOTH
                     else current
                 }
-                else -> current
+                else -> if ((supported and CallAudioState.ROUTE_SPEAKER) != 0) CallAudioState.ROUTE_SPEAKER else current
             }
 
             if (nextRoute != current) {

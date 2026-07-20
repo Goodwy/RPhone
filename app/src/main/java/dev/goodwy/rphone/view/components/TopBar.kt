@@ -12,7 +12,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.filled.Search
@@ -27,6 +26,8 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import dev.goodwy.rphone.R
@@ -67,12 +68,6 @@ fun TopBar(
     // Settings button press animation
     val settingsSource = remember { MutableInteractionSource() }
     val micSource = remember { MutableInteractionSource() }
-//    val settingsPressed by settingsSource.collectIsPressedAsState()
-//    val settingsScale by animateFloatAsState(
-//        targetValue = if (settingsPressed) 0.88f else 1f,
-//        animationSpec = spring(stiffness = Spring.StiffnessMedium),
-//        label = "settingsScale"
-//    )
 
     // Search bar press animation
     val searchSource = remember { MutableInteractionSource() }
@@ -118,7 +113,7 @@ fun TopBar(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Search,
-                        contentDescription = "Search",
+                        contentDescription = stringResource(R.string.search_contacts),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
@@ -130,7 +125,7 @@ fun TopBar(
 
                     Icon(
                         imageVector = Icons.Rounded.MicNone,
-                        contentDescription = "Voice input",
+                        contentDescription = stringResource(R.string.voice_input),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier
                             .combinedClickable(
@@ -144,52 +139,30 @@ fun TopBar(
                                 indication = ripple(bounded = false, radius = 22.dp)
                             ),
                     )
-                    Spacer(modifier = Modifier.size(1.dp))
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_settings),
-                        contentDescription = "Settings",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier
-                            .combinedClickable(
-                                onClick = {
-                                    if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                                        performAppHaptic(context, prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light", prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f))
-                                    }
-                                    navigator.navigate(SettingsScreenDestination)
-                                },
-                                interactionSource = settingsSource,
-                                indication = ripple(bounded = false, radius = 22.dp)
-                            ),
-                    )
+                    if (!prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SETTINGS, true)) {
+                        Spacer(modifier = Modifier.size(0.dp))
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_settings),
+                            contentDescription = stringResource(R.string.settings),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier
+                                .combinedClickable(
+                                    onClick = {
+                                        if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
+                                            performAppHaptic(context, prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light", prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f))
+                                        }
+                                        navigator.navigate(SettingsScreenDestination)
+                                    },
+                                    interactionSource = settingsSource,
+                                    indication = ripple(bounded = false, radius = 22.dp)
+                                ),
+                        )
+                    }
                 }
             }
-
-            // Settings button – coloured icon background
-//            Surface(
-//                onClick = {
-//                    if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-//                        performAppHaptic(context, prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light", prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f))
-//                    }
-//                    navigator.navigate(SettingsScreenDestination)
-//                },
-//                modifier = Modifier.size(52.dp).scale(settingsScale),
-//                shape = RoundedCornerShape(16.dp),
-//                color = MaterialTheme.colorScheme.primaryContainer,
-//                interactionSource = settingsSource
-//            ) {
-//                Box(contentAlignment = Alignment.Center) {
-//                    Icon(
-//                        imageVector = Icons.Default.Tune,
-//                        contentDescription = "Settings",
-//                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-//                        modifier = Modifier.size(22.dp)
-//                    )
-//                }
-//            }
         }
     }
 }
-
 
 @Composable
 fun NavigationIcon(
@@ -204,6 +177,21 @@ fun NavigationIcon(
             containerColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.08f)
         )
     ) {
-        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
+        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.back))
     }
+}
+
+@Composable
+fun Title(
+    text: String,
+    bold: Boolean = true
+) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleLarge,
+        lineHeight = MaterialTheme.typography.titleMedium.lineHeight,
+        fontWeight = if (bold) FontWeight.Bold else FontWeight.Normal,
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis
+    )
 }

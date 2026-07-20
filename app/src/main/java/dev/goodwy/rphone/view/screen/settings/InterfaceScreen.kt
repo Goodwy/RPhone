@@ -2,7 +2,6 @@ package dev.goodwy.rphone.view.screen.settings
 
 import android.app.Activity
 import android.content.Context
-import android.content.res.Configuration
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -48,30 +47,21 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.BlurOff
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.FontDownload
 import androidx.compose.material.icons.rounded.FormatSize
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.PhoneInTalk
-import androidx.compose.material.icons.rounded.Portrait
-import androidx.compose.material.icons.rounded.TextFields
-import androidx.compose.material.icons.rounded.Title
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.text.style.TextOverflow
 import dev.goodwy.rphone.cardCornerSmall
 import dev.goodwy.rphone.view.components.RillAnimatedSection
 import dev.goodwy.rphone.view.components.RillExpressiveCard
@@ -85,11 +75,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import androidx.core.graphics.toColorInt
+import com.ramcosta.composedestinations.generated.destinations.AvatarsPreferenceScreenDestination
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.cardCornerMedium
 import dev.goodwy.rphone.controller.util.darken
 import dev.goodwy.rphone.view.components.NavigationIcon
-import dev.goodwy.rphone.view.components.RillAvatar
 import dev.goodwy.rphone.view.components.RillIconBox
 import dev.goodwy.rphone.view.components.RillSelectListItem
 import dev.goodwy.rphone.view.components.SupportProjectItem
@@ -99,25 +89,17 @@ import dev.goodwy.rphone.view.theme.color_default_primary
 import dev.goodwy.rphone.view.theme.customColors
 import com.ramcosta.composedestinations.generated.destinations.DonateScreenDestination
 import dev.goodwy.rphone.controller.PurchaseHelper
+import dev.goodwy.rphone.view.components.Title
 import kotlinx.coroutines.delay
 import java.io.File
 import kotlin.math.roundToInt
 
 data class ThemeOption(val key: String, val label: String)
 
-private val themeOptions = listOf(
-    ThemeOption("auto",    "Auto"),
-    ThemeOption("light",   "Light"),
-    ThemeOption("dark",    "Dark"),
-    ThemeOption("auto_bw", "Auto B/W"),
-    ThemeOption("white",   "White"),
-    ThemeOption("black",   "Black")
-)
-
 private fun triggerRestartPrompt(
     scope: CoroutineScope,
     snackbarHostState: SnackbarHostState,
-    context: android.content.Context
+    context: Context
 ) {
     scope.launch {
         val result = snackbarHostState.showSnackbar(
@@ -145,10 +127,6 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
     val settingsState by prefs.settingsChanged.collectAsState()
     var themeMode           by remember(settingsState) { mutableStateOf(prefs.getString(PreferenceManager.KEY_THEME_MODE, "auto") ?: "auto") }
     var dynamicColors       by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_DYNAMIC_COLORS, true)) }
-    var showFirstLetter     by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SHOW_FIRST_LETTER, true)) }
-    var colorfulAvatars     by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_COLORFUL_AVATARS, true)) }
-    var avatarFrame         by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_AVATAR_FRAME, false)) }
-    var showPicture         by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SHOW_PICTURE, true)) }
     var customPrimaryColor  by remember(settingsState) { mutableStateOf(prefs.getInt("custom_primary_color", color_default_primary.toArgb())) }
     var incomingCallUI      by remember(settingsState) { mutableStateOf(prefs.getInt(PreferenceManager.KEY_INCOMING_CALL_UI_MODE, 10)) }
     var scrollAnimation     by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SCROLL_ANIMATION, false)) }
@@ -161,7 +139,6 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
     var callUIShowMissed   by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_CALL_UI_SHOW_MISSED, true)) }
     var callUIShowOutgoing by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_CALL_UI_SHOW_OUTGOING, true)) }
     var callUIShowCallTime by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_CALL_UI_SHOW_CALL_TIME, true)) }
-    var showAvatarDialog   by remember { mutableStateOf(false) }
 
     var hexInput by remember(settingsState) { mutableStateOf(String.format("%06X", 0xFFFFFF and customPrimaryColor)) }
     var hexError by remember(settingsState) { mutableStateOf(false) }
@@ -183,6 +160,15 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
 
     var enabledShake by remember { mutableStateOf(false) }
     var showSnackbar   by remember(settingsState) { mutableStateOf(false) }
+
+    val themeOptions = listOf(
+        ThemeOption("auto",    stringResource(R.string.theme_auto)),
+        ThemeOption("light",   stringResource(R.string.theme_light)),
+        ThemeOption("dark",    stringResource(R.string.theme_dark)),
+        ThemeOption("auto_bw", stringResource(R.string.theme_auto_black_white)),
+        ThemeOption("white",   stringResource(R.string.theme_white)),
+        ThemeOption("black",   stringResource(R.string.theme_black))
+    )
 
 //    val presetColors2 = listOf(
 //        Color(0xFF50D6FB), Color(0xFF74A6FF), Color(0xFFB18CFD), Color(0xFFD356FE),
@@ -217,7 +203,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
     if (showCallUIDialog) {
         AlertDialog(
             onDismissRequest = { showCallUIDialog = false },
-            icon = { Icon(Icons.Default.Dashboard, null, tint = MaterialTheme.colorScheme.customColors.colorBlue) },
+            icon = { Icon(Icons.Default.Dashboard, null, tint = MaterialTheme.colorScheme.customColors.colorCyan) },
             title = { Text("Call UI Elements") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -312,7 +298,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                     if (isRotation90) WindowInsetsSides.Top + WindowInsetsSides.Horizontal
                     else WindowInsetsSides.Top
                 ),
-                title = { Text("User Interface", fontWeight = FontWeight.Bold) },
+                title = { Title(stringResource(R.string.interface_settings)) },
                 navigationIcon = {
                     NavigationIcon(onClick = { navigator.navigateUp() })
                 }
@@ -352,7 +338,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                 item {
                     RillAnimatedSection(delayMs = 0L) {
                         Column {
-                            SettingsSectionLabel("App Theme")
+                            SettingsSectionLabel(stringResource(R.string.app_theme))
                             RillExpressiveCard {
                                 Column(
                                     modifier = Modifier
@@ -447,10 +433,16 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                                     border = borderColor,
                                                 ) {
                                                     Box(contentAlignment = Alignment.Center) {
-                                                        Text(option.label, style = MaterialTheme.typography.labelMedium,
+                                                        Text(
+                                                            option.label,
+                                                            style = MaterialTheme.typography.labelMedium,
                                                             fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
                                                             color = if (selected) MaterialTheme.colorScheme.onPrimary
-                                                                    else MaterialTheme.colorScheme.onSurfaceVariant)
+                                                                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                                                            maxLines = 1,
+                                                            overflow = TextOverflow.Ellipsis,
+                                                            modifier = Modifier.padding(horizontal = 8.dp)
+                                                        )
                                                     }
                                                 }
                                             }
@@ -458,11 +450,11 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                     }
                                 }
                                 RillSwitchListItem(
-                                    headline = "Custom Colors",
-                                    supporting = "Color scheme based on a custom color",
+                                    headline = stringResource(R.string.custom_color),
+                                    supporting = stringResource(R.string.custom_color_subtitle),
                                     leadingIcon = Icons.Rounded.Palette,
-                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
-                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkCyan,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorCyan,
                                     checked = !dynamicColors,
                                     onCheckedChange = {
                                         if (isPro) {
@@ -526,7 +518,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                         }
                                         Spacer(Modifier.height(16.dp))
                                         Row(verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(36.dp),
+                                            horizontalArrangement = Arrangement.spacedBy(16.dp),
                                             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
                                         ) {
                                             OutlinedTextField(
@@ -535,7 +527,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                                     hexInput = v.trimStart('#').uppercase().take(6)
                                                     hexError = false
                                                 },
-                                                label = { Text("Hex Color") },
+                                                label = { Text(stringResource(R.string.hex_color)) },
                                                 prefix = { Text("#") },
                                                 isError = hexError,
                                                 singleLine = true,
@@ -548,23 +540,34 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                                     keyboardController?.hide()
                                                 }),
                                                 shape = RoundedCornerShape(12.dp),
-                                                supportingText = if (hexError) {{ Text("Enter a valid 6-digit hex code") }} else null,
+                                                supportingText = if (hexError) {{ Text(stringResource(R.string.hex_color_subtitle)) }} else null,
+                                            )
+
+                                            val interactionSource = remember { MutableInteractionSource() }
+                                            val isPressed by interactionSource.collectIsPressedAsState()
+
+                                            val cornerRadius by animateDpAsState(
+                                                targetValue = if (isPressed) 12.dp else 50.dp,
+                                                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                                                label = "ButtonShape"
                                             )
                                             Button(
+                                                modifier = Modifier.height(55.dp),
                                                 onClick = {
                                                     applyHexColor(hexInput)
                                                     keyboardController?.hide()
                                                 },
-                                                shape = RoundedCornerShape(12.dp),
+                                                shape = RoundedCornerShape(cornerRadius),
                                                 colors = ButtonDefaults.buttonColors(
                                                     containerColor = try {
                                                         Color("#${hexInput.trimStart('#')}".toColorInt())
                                                     } catch (_: Exception) {
                                                         MaterialTheme.colorScheme.onSurface
                                                     }
-                                                )
+                                                ),
+                                                interactionSource = interactionSource
                                             ) {
-                                                Text("Apply")
+                                                Icon(Icons.Rounded.Check, "Apply")
                                             }
                                         }
                                     }
@@ -592,8 +595,8 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                                         RillIconBox(
                                             icon = Icons.Rounded.FontDownload,
-                                            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
-                                            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue
+                                            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkCyan,
+                                            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorCyan
                                         )
                                         Spacer(Modifier.width(16.dp))
                                         Column(
@@ -601,20 +604,20 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                             verticalArrangement = Arrangement.spacedBy(4.dp),
                                         ) {
                                             Text(
-                                                "Custom Font",
+                                                stringResource(R.string.custom_font),
                                                 style = MaterialTheme.typography.bodyLarge,
                                                 lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
-//                                                fontWeight = FontWeight.Medium
                                             )
                                             Text(
-                                                if (hasFontSet) "Custom font active · tap to change" else "Pick a .ttf file to use across the app",
+                                                if (savedFontPath != null) File(savedFontPath).name
+                                                    else stringResource(R.string.custom_font_subtitle),
                                                 style = MaterialTheme.typography.bodyMedium,
                                                 lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                         }
-                                        Spacer(Modifier.width(8.dp))
                                         if (hasFontSet) {
+                                            Spacer(Modifier.width(8.dp))
                                             IconButton(
                                                 onClick = {
                                                     prefs.setString(PreferenceManager.KEY_CUSTOM_FONT_PATH, null)
@@ -630,9 +633,9 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                                     }
                                             }) { Icon(Icons.Default.Refresh, "Revert font", tint = color_call_end) }
                                         }
-                                        IconButton(onClick = { fontPickerLauncher.launch("font/ttf") }) {
-                                            Icon(Icons.Default.FolderOpen, "Pick font", tint = MaterialTheme.colorScheme.primary)
-                                        }
+//                                        IconButton(onClick = { fontPickerLauncher.launch("font/ttf") }) {
+//                                            Icon(Icons.Default.FolderOpen, "Pick font", tint = MaterialTheme.colorScheme.primary)
+//                                        }
                                     }
                                 }
                                 Row(
@@ -652,8 +655,8 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                 ) {
                                     RillIconBox(
                                         icon = Icons.Rounded.FormatSize,
-                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
-                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue
+                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkCyan,
+                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorCyan
                                     )
                                     Slider(
                                         value = fontSizeScale,
@@ -684,30 +687,31 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                 item {
                     RillAnimatedSection(delayMs = 80L) {
                         Column {
-                            SettingsSectionLabel("Visual Effects")
-                            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                                RillExpressiveCard {
+                            SettingsSectionLabel(stringResource(R.string.visual_effects))
+                            RillExpressiveCard {
+                                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
                                     RillListItem(
-                                        headline = "Not supported on this device",
-                                        supporting = "Blur and Liquid Glass require Android 12 or higher",
+                                        headline = stringResource(R.string.not_supported_on_this_device),
+                                        supporting = stringResource(R.string.not_supported_on_this_device_subtitle),
                                         leadingIcon = Icons.Rounded.BlurOff,
                                         iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
                                         iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
                                         onClick = { }
                                     )
-                                }
-                            } else {
-                                RillExpressiveCard {
+                                } else {
                                     RillSwitchListItem(
-                                        headline = "Material Liquid You Glass",
-                                        supporting = "Apply a liquid glass refraction effect to navigation",
+                                        headline = stringResource(R.string.material_liquid_you_glass),
+                                        supporting = stringResource(R.string.material_liquid_you_glass_subtitle),
                                         leadingIcon = Icons.Outlined.Lens,
                                         iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPink,
                                         iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPink,
                                         checked = liquidGlass,
                                         onCheckedChange = {
                                             liquidGlass = it
-                                            prefs.setBoolean(PreferenceManager.KEY_LIQUID_GLASS, it)
+                                            prefs.setBoolean(
+                                                PreferenceManager.KEY_LIQUID_GLASS,
+                                                it
+                                            )
                                         }
                                     )
 //                                    if (liquidGlass) {
@@ -726,8 +730,8 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
 
                                     if (!liquidGlass) {
                                         RillSwitchListItem(
-                                            headline = "Material Blur Effects",
-                                            supporting = "Apply a background blur effect to navigation",
+                                            headline = stringResource(R.string.material_blur_effects),
+                                            supporting = stringResource(R.string.material_blur_effects_subtitle),
                                             leadingIcon = Icons.Outlined.BlurCircular,
                                             iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
                                             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
@@ -755,6 +759,18 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
 //                                        }
                                     }
                                 }
+                                RillSwitchListItem(
+                                    headline = stringResource(R.string.scroll_animation),
+                                    supporting = stringResource(R.string.scroll_animation_device),
+                                    leadingIcon = Icons.Outlined.Animation,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+                                    checked = scrollAnimation,
+                                    onCheckedChange = {
+                                        scrollAnimation = it
+                                        prefs.setBoolean(PreferenceManager.KEY_SCROLL_ANIMATION, it)
+                                    }
+                                )
                             }
                         }
                     }
@@ -764,11 +780,11 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                 item {
                     RillAnimatedSection(delayMs = 100L) {
                         Column {
-                            SettingsSectionLabel("Call UI")
+                            SettingsSectionLabel(stringResource(R.string.call_ui))
                             RillExpressiveCard {
                                 RillSelectListItem(
-                                    headline = "Incoming Call UI",
-                                    supporting = "Choose how to answer incoming calls",
+                                    headline = stringResource(R.string.incoming_call_ui),
+                                    supporting = stringResource(R.string.incoming_call_ui_subtitle),
                                     leadingIcon = Icons.Rounded.PhoneInTalk,
                                     iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
                                     iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
@@ -788,8 +804,8 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
 
                                 // ── Caller UI → separate page ─────────────────────────
                                 RillListItem(
-                                    headline = "Caller UI",
-                                    supporting = "Customize the in-call screen layout and controls",
+                                    headline = stringResource(R.string.сaller_ui),
+                                    supporting = stringResource(R.string.сaller_ui_subtitle),
                                     leadingIcon = Icons.Rounded.Person,
                                     iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
                                     iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
@@ -805,29 +821,6 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
 //                                    trailingIcon = Icons.Default.ChevronRight,
 //                                    onClick = { showCallUIDialog = true }
 //                                )
-                            }
-                        }
-                    }
-                }
-
-                // ── Animations ───────────────────────────────────────
-                item {
-                    RillAnimatedSection(delayMs = 115L) {
-                        Column {
-                            SettingsSectionLabel("Animations")
-                            RillExpressiveCard {
-                                RillSwitchListItem(
-                                    headline = "Scroll Animation",
-                                    supporting = "Fade-in animation for list items as you scroll",
-                                    leadingIcon = Icons.Outlined.Animation,
-                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
-                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
-                                    checked = scrollAnimation,
-                                    onCheckedChange = {
-                                        scrollAnimation = it
-                                        prefs.setBoolean(PreferenceManager.KEY_SCROLL_ANIMATION, it)
-                                    }
-                                )
                             }
                         }
                     }
@@ -876,15 +869,14 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
 //                                    onCheckedChange = { showPicture = it; prefs.setBoolean(PreferenceManager.KEY_SHOW_PICTURE, it) }
 //                                )
                                 RillListItem(
-                                    headline = "Avatars Settings",
-                                    supporting = "Customizing colors, frames, and more",
+                                    headline = stringResource(R.string.avatars_settings),
+                                    supporting = stringResource(R.string.avatars_settings_subtitle),
                                     leadingIcon = Icons.Rounded.AccountCircle,
-                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOliva,
-                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOliva,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
                                     trailingIcon = Icons.Default.ChevronRight,
-                                    onClick = { showAvatarDialog = true }
+                                    onClick = { navigator.navigate(AvatarsPreferenceScreenDestination) }
                                 )
-                                if (showAvatarDialog) AvatarDialog( { showAvatarDialog = false } )
                             }
                         }
                     }
@@ -909,7 +901,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
 //                    }
 //                }
 
-                item { Spacer(modifier = Modifier.height(100.dp)) }
+                item { Spacer(modifier = Modifier.height(20.dp).navigationBarsPadding()) }
             }
 
             AnimatedVisibility(
@@ -940,147 +932,6 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
                         color = MaterialTheme.colorScheme.onSurface
                     )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun AvatarDialog(
-    onDismissRequest: () -> Unit,
-) {
-    val configuration = LocalConfiguration.current
-    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-    val prefs = koinInject<PreferenceManager>()
-    val settingsState by prefs.settingsChanged.collectAsState()
-    val roundness = remember(settingsState) { prefs.getInt(PreferenceManager.KEY_CARD_ROUNDNESS, 28) }
-    var showFirstLetter     by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SHOW_FIRST_LETTER, true)) }
-    var colorfulAvatars     by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_COLORFUL_AVATARS, true)) }
-    var avatarFrame         by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_AVATAR_FRAME, false)) }
-    var showPicture         by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SHOW_PICTURE, true)) }
-
-    Dialog(
-        onDismissRequest = onDismissRequest,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .fillMaxWidth(if (isLandscape) 0.8f else 1f)
-                .padding(24.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .animateContentSize(),
-                shape = RoundedCornerShape(roundness.dp),
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                tonalElevation = 8.dp
-            ) {
-                Column(
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    horizontalAlignment = Alignment.End
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 32.dp, bottom = 16.dp),
-                        horizontalArrangement = Arrangement.Center
-                    ){
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            RillAvatar(
-                                name = "John Doe",
-                                modifier = Modifier.size(64.dp),
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "John Doe",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.padding(horizontal = 24.dp)
-                            )
-                        }
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            val context = LocalContext.current
-                            val drawableUri = "android.resource://${context.packageName}/${R.drawable.avatar}"
-                            RillAvatar(
-                                name = "Jane Doe",
-                                photoUri = drawableUri,
-                                modifier = Modifier.size(64.dp),
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "Jane Doe",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.padding(horizontal = 24.dp)
-                            )
-                        }
-                    }
-
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f, fill = false)
-                            .verticalScroll(rememberScrollState())
-                            .padding(horizontal = 16.dp)
-                    ) {
-                        RillExpressiveCard(shape = RoundedCornerShape(cardCornerMedium)) {
-                            RillSwitchListItem(
-                                headline = "Show First Letter in Avatar",
-                                supporting = "Displays letter when picture is missing",
-                                leadingIcon = if (showFirstLetter) Icons.Rounded.Title else Icons.Rounded.AccountCircle,
-                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOliva,
-                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOliva,
-                                checked = showFirstLetter,
-                                onCheckedChange = { showFirstLetter = it; prefs.setBoolean(PreferenceManager.KEY_SHOW_FIRST_LETTER, it) }
-                            )
-                            RillSwitchListItem(
-                                headline = "Use Colorful Avatars",
-                                supporting = "Random colors based on contact name",
-                                leadingIcon = Icons.Rounded.Palette,
-                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOliva,
-                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOliva,
-                                checked = colorfulAvatars,
-                                onCheckedChange = { colorfulAvatars = it; prefs.setBoolean(PreferenceManager.KEY_COLORFUL_AVATARS, it) }
-                            )
-                            RillSwitchListItem(
-                                headline = "Avatar Frame",
-                                supporting = "Show a border around the avatar",
-                                leadingIcon = if (avatarFrame) ImageVector.vectorResource(id = R.drawable.ic_person_border)
-                                                else ImageVector.vectorResource(id = R.drawable.ic_person_no_border),
-                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOliva,
-                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOliva,
-                                checked = avatarFrame,
-                                onCheckedChange = { avatarFrame = it; prefs.setBoolean(PreferenceManager.KEY_AVATAR_FRAME, it) }
-                            )
-                            RillSwitchListItem(
-                                headline = "Show Picture in Avatar",
-                                supporting = "Shows the contact picture if available",
-                                leadingIcon = if (showPicture) Icons.Rounded.Portrait else Icons.Rounded.TextFields,
-                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOliva,
-                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOliva,
-                                checked = showPicture,
-                                onCheckedChange = { showPicture = it; prefs.setBoolean(PreferenceManager.KEY_SHOW_PICTURE, it) }
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    TextButton(
-                        modifier = Modifier.padding(end = 12.dp),
-                        onClick = { onDismissRequest() }
-                    ) {
-                        Text(stringResource(R.string.close))
-                    }
                 }
             }
         }

@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.goodwy.rphone.controller.util.PreferenceManager
@@ -23,6 +24,8 @@ import dev.goodwy.rphone.view.components.ScrollToTopButton
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import dev.goodwy.rphone.R
+import dev.goodwy.rphone.view.components.Title
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
@@ -54,7 +57,7 @@ fun CallAccountsScreen(
                     if (isRotation90) WindowInsetsSides.Top + WindowInsetsSides.Horizontal
                     else WindowInsetsSides.Top
                 ),
-                title = { Text("Call Settings", fontWeight = FontWeight.Bold) },
+                title = { Title("Call Settings") },
                 navigationIcon = {
                     NavigationIcon(onClick = { navigator.navigateUp() })
                 }

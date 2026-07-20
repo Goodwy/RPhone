@@ -35,7 +35,7 @@ fun MoveToAccountDialog(
         onDismissRequest = onDismiss,
         title = title,
         icon = icon,
-        dismissButton = {
+        confirmButton = {
             TextButton(onClick = onDismiss) {
                 Text(stringResource(R.string.cancel))
             }

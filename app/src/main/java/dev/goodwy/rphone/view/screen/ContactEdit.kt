@@ -51,14 +51,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.ContactsViewModel
@@ -85,6 +84,8 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.goodwy.rphone.device_only
 import dev.goodwy.rphone.private_only
+import dev.goodwy.rphone.view.components.RillDialog
+import dev.goodwy.rphone.view.components.Title
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinActivityViewModel
 
@@ -99,6 +100,8 @@ private val paddingHorizontal = 48.dp
 @Composable
 fun ContactEditScreen(
     contactId: String? = null,
+    rawContactId: String? = null,
+    isEditingSource: Boolean = false,
     initialName: String? = null,
     initialPhone: String? = null,
     navigator: DestinationsNavigator
@@ -111,11 +114,30 @@ fun ContactEditScreen(
 
     val listState = rememberLazyListState()
     val showButton by remember { derivedStateOf { listState.firstVisibleItemIndex > 2 } }
-    
-    val existingContact = remember(contactId, allContacts) {
+
+    // Retrieving data for a specific RawContact
+    val rawContactData = remember(rawContactId) {
+        if (isEditingSource && rawContactId != null) {
+            contactsVM.getRawContactData(rawContactId)
+        } else null
+    }
+
+    val contactIdData = remember(contactId, allContacts) {
         if (contactId != null && contactId != "0" && contactId != "null") {
             allContacts.find { it.id == contactId }
         } else null
+    }
+
+//    val existingContact = remember(contactId, allContacts) {
+//        if (contactId != null && contactId != "0" && contactId != "null") {
+//            allContacts.find { it.id == contactId }
+//        } else null
+//    }
+
+    val existingContact = if (isEditingSource && rawContactData != null) {
+        rawContactData
+    } else {
+        contactIdData
     }
 
     var namePrefix by remember(existingContact) { mutableStateOf(existingContact?.namePrefix ?: "") }
@@ -262,7 +284,9 @@ fun ContactEditScreen(
 //            customRingtone=null,
             accountName = selectedAccount?.name,
             accountType = selectedAccount?.type,
-            isPrivate = isPrivate
+            isPrivate = isPrivate,
+            rawContactIds = existingContact?.rawContactIds ?: emptyList(),
+            hasMultipleSources = existingContact?.hasMultipleSources ?: false,
         )
 
         val originalContact = existingContact ?: Contact(
@@ -302,7 +326,7 @@ fun ContactEditScreen(
 
     fun saveAndExit() {
         val contactToSave = Contact(
-            id = contactId ?: "0",
+            id = if (isEditingSource) rawContactData?.id ?: "0" else contactId ?: "0",
             namePrefix = namePrefix,
             givenName = givenName,
             middleName = middleName,
@@ -321,30 +345,43 @@ fun ContactEditScreen(
 //            customRingtone=null,
             accountName = selectedAccount?.name,
             accountType = selectedAccount?.type,
-            isPrivate = isPrivate
+            isPrivate = isPrivate,
         )
         scope.launch {
-//            contactsVM.saveContact(contactToSave)
+            // If a contact becomes private and previously had a public ID
+//            if (isPrivate && contactId != null && contactId != "0" && !contactId.startsWith("p")) {
+//                // First, save it as private
+//                contactsVM.saveContact(contactToSave)
+//                // Next, we delete the public version
+//                contactsVM.deleteContact(contactId)
+//            } else {
+//                contactsVM.saveContact(contactToSave)
+//            }
 //            navigator.navigateUp()
 
-            // If a contact becomes private and previously had a public ID
-            if (isPrivate && contactId != null && contactId != "0" && !contactId.startsWith("p")) {
+            if (isEditingSource && rawContactId != null) {
+                // Update only the specific RawContact
+                contactsVM.updateRawContact(rawContactId, contactToSave)
+                navigator.navigateUp()
+            } else if (isPrivate && contactId != null && contactId != "0" && !contactId.startsWith("p")) {
+                // If a contact becomes private and previously had a public ID
                 // First, save it as private
                 contactsVM.saveContact(contactToSave)
                 // Next, we delete the public version
                 contactsVM.deleteContact(contactId)
+                navigator.navigateUp()
             } else {
                 contactsVM.saveContact(contactToSave)
+                navigator.navigateUp()
             }
-            navigator.navigateUp()
         }
     }
 
     if (showExitDialog) {
         AlertDialog(
             onDismissRequest = { showExitDialog = false },
-            title = { Text("Unsaved Changes") },
-            text = { Text("Do you want to save your changes before leaving?") },
+            title = { Text(stringResource(R.string.unsaved_changes)) },
+            text = { Text(stringResource(R.string.unsaved_changes_subtitle)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -365,7 +402,7 @@ fun ContactEditScreen(
                         exitWithoutSaving()
                     }
                 ) {
-                    Text("Discard")
+                    Text(stringResource(R.string.cancel))
                 }
             },
             icon = {
@@ -477,16 +514,6 @@ fun ContactEditScreen(
                     }
                 }
 
-//                Button(
-//                    onClick = { showFieldsDialog = false },
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(20.dp),
-//                    shape = RoundedCornerShape(16.dp)
-//                ) {
-//                    Text("Done")
-//                }
-
                 Spacer(modifier = Modifier.height(24.dp))
             }
         }
@@ -526,15 +553,7 @@ fun ContactEditScreen(
                     if (isRotation90) WindowInsetsSides.Top + WindowInsetsSides.Horizontal
                     else WindowInsetsSides.Top
                 ),
-                title = { 
-                    Text(
-                        if (contactId == null || contactId == "0") stringResource(R.string.create_contact) else stringResource(R.string.edit_contact),
-                        lineHeight = MaterialTheme.typography.titleMedium.lineHeight,
-                        fontWeight = FontWeight.Normal,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    ) 
-                },
+                title = { Title(if (contactId == null || contactId == "0") stringResource(R.string.create_contact) else stringResource(R.string.edit_contact), false) },
                 navigationIcon = {
                     NavigationIcon(onClick = {
                         if (hasChanges()) {
@@ -581,7 +600,8 @@ fun ContactEditScreen(
                         },
                         enabled = (namePrefix.isNotBlank() || givenName.isNotBlank() || middleName.isNotBlank() ||
                                 familyName.isNotBlank() || nameSuffix.isNotBlank() || nickname.isNotBlank() ||
-                                company.isNotBlank() || jobTitle.isNotBlank()) && phoneNumbers.any { it.isNotBlank() },
+                                company.isNotBlank() || jobTitle.isNotBlank()) &&
+                                (phoneNumbers.any { it.isNotBlank() } || emails.map {it.value}.any { it.isNotBlank() }),
                         modifier = Modifier.then(if (contactId == null) Modifier.padding(end = 12.dp) else Modifier),
                         shape = RoundedCornerShape(24.dp),
                         elevation = ButtonDefaults.buttonElevation(0.dp)
@@ -592,34 +612,38 @@ fun ContactEditScreen(
                     }
                     if (contactId != null) {
                         var showSelectionMenuOuter by remember { mutableStateOf(false) }
-                        val headline = getDisplayName(currentContactForPreview)
+//                        val headline = getDisplayName(currentContactForPreview)
                         // Delete confirmation dialog
                         if (showDeleteConfirm) {
-                            AlertDialog(
+                            RillDialog(
                                 onDismissRequest = { showDeleteConfirm = false },
-                                icon = { Icon(Icons.Default.DeleteForever, null, tint = Color(0xFFF44336)) },
-                                title = { Text("Delete Contact") },
-                                text = {
-                                    Text(
-                                        "Are you sure you want to permanently delete \"$headline\"? This action cannot be undone.",
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                },
+                                title = stringResource(R.string.delete_contact),
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_delete),
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
                                 confirmButton = {
-                                    TextButton(
-                                        onClick = {
-                                            showDeleteConfirm = false
-                                            contactsVM.deleteContact(contactId)
-                                            navigator.navigateUp()
-                                        }
-                                    ) {
+                                    TextButton(onClick = {
+                                        showDeleteConfirm = false
+                                        contactsVM.deleteContact(contactId)
+                                        navigator.navigateUp()
+                                    }) {
                                         Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
                                     }
                                 },
                                 dismissButton = {
-                                    TextButton(onClick = { showDeleteConfirm = false }) { Text(stringResource(R.string.cancel)) }
+                                    TextButton(onClick = { showDeleteConfirm = false }) {
+                                        Text(stringResource(R.string.cancel))
+                                    }
                                 }
-                            )
+                            ) {
+                                Text(
+                                    stringResource(R.string.delete_contact_subtitle),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
                         }
                         Box {
                             IconButton(onClick = { showSelectionMenuOuter = true }) {
@@ -753,7 +777,7 @@ fun ContactEditScreen(
                         )
                         .fillMaxSize(),
                     contentPadding = PaddingValues(vertical = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                    verticalArrangement = Arrangement.spacedBy(32.dp)
                 ) {
                     item {
                         var appeared by remember { mutableStateOf(false) }
@@ -780,20 +804,6 @@ fun ContactEditScreen(
                                 .alpha(rowAlpha),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-//                    OutlinedTextField(
-//                        value = name,
-//                        onValueChange = { name = it },
-//                        label = { Text("Full Name") },
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .padding(horizontal = paddingHorizontal),
-//                        shape = RoundedCornerShape(12.dp),
-//                        leadingIcon = { Icon(Icons.Default.Person, null) },
-//                        colors = OutlinedTextFieldDefaults.colors(
-//                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-//                            focusedBorderColor = MaterialTheme.colorScheme.primary
-//                        )
-//                    )
                             AnimatedVisibility(
                                 visible = showNamePrefix,
                                 enter = expandVertically() + fadeIn(),
@@ -1061,37 +1071,7 @@ fun ContactEditScreen(
                             ),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-//                    phoneNumbers.forEachIndexed { index, phone ->
-//                        EditField(
-//                            value = phone,
-//                            onValueChange = { phoneNumbers[index] = it },
-//                            label = "Phone",
-//                            icon = Icons.Default.Phone,
-//                            onDelete = if (phoneNumbers.size > 1) { { phoneNumbers.removeAt(index) } } else null
-//                        )
-//                    }
-//                    TextButton(
-//                        onClick = { phoneNumbers.add("") },
-//                        modifier = Modifier.align(Alignment.Start)
-//                    ) {
-//                        Icon(Icons.Default.Add, null)
-//                        Spacer(Modifier.width(8.dp))
-//                        Text("Add Phone")
-//                    }
                             phoneDetails.forEachIndexed { index, phoneDetail ->
-//                        EditField(
-//                            value = phoneDetail.number,
-//                            onValueChange = {
-//                                phoneDetails[index] = ContactPhoneDetail(phoneDetail.type, phoneDetail.label, it)
-//                                phoneNumbers[index] = it
-//                            },
-//                            label = getPhoneTypeText(context, phoneDetail.type, phoneDetail.label),
-//                            icon = Icons.Default.Phone,
-//                            onDelete = if (phoneDetails.size > 1) {
-//                                { phoneDetails.removeAt(index)
-//                                    phoneNumbers.removeAt(index) }
-//                            } else null
-//                        )
                                 EditPhoneField(
                                     value = phoneDetail.number,
                                     onValueChange = {
@@ -1127,7 +1107,7 @@ fun ContactEditScreen(
                             ) {
                                 Icon(Icons.Default.Add, null)
                                 Spacer(Modifier.width(8.dp))
-                                Text("Add Phone")
+                                Text(stringResource(R.string.add_phone))
                             }
                         }
                     }
@@ -1167,7 +1147,7 @@ fun ContactEditScreen(
                             ) {
                                 Icon(Icons.Default.Add, null)
                                 Spacer(Modifier.width(8.dp))
-                                Text("Add Email")
+                                Text(stringResource(R.string.add_email))
                             }
                         }
                     }
@@ -1183,13 +1163,6 @@ fun ContactEditScreen(
                             ),verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             events.forEachIndexed { index, event ->
-//                        EditFieldDate(
-//                            value = event.date,
-//                            onValueChange = { events[index] = ContactEvent(event.type, event.label, it) },
-//                            label = getEventTypeText(context, event.type, event.label),
-//                            icon = Icons.Default.Event,
-//                            onDelete = if (events.size > 1) { { events.removeAt(index) } } else null
-//                        )
                                 EditEventField(
                                     value = event.date,
                                     onValueChange = { events[index] = ContactEvent(event.type, event.label, it) },
@@ -1213,7 +1186,7 @@ fun ContactEditScreen(
                             ) {
                                 Icon(Icons.Default.Add, null)
                                 Spacer(Modifier.width(8.dp))
-                                Text("Add Event")
+                                Text(stringResource(R.string.add_event))
                             }
                         }
                     }
@@ -1259,7 +1232,7 @@ fun ContactEditScreen(
                             ) {
                                 Icon(Icons.Default.Add, null)
                                 Spacer(Modifier.width(8.dp))
-                                Text("Add Address")
+                                Text(stringResource(R.string.add_address))
                             }
                         }
                     }
@@ -1346,7 +1319,7 @@ fun ContactEditScreen(
                     )
                     .fillMaxSize(),
                 contentPadding = PaddingValues(vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
+                verticalArrangement = Arrangement.spacedBy(32.dp)
             ) {
                 item {
                     Column(
@@ -1428,20 +1401,6 @@ fun ContactEditScreen(
                             .alpha(rowAlpha),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-//                    OutlinedTextField(
-//                        value = name,
-//                        onValueChange = { name = it },
-//                        label = { Text("Full Name") },
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .padding(horizontal = paddingHorizontal),
-//                        shape = RoundedCornerShape(12.dp),
-//                        leadingIcon = { Icon(Icons.Default.Person, null) },
-//                        colors = OutlinedTextFieldDefaults.colors(
-//                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-//                            focusedBorderColor = MaterialTheme.colorScheme.primary
-//                        )
-//                    )
                         AnimatedVisibility(
                             visible = showNamePrefix,
                             enter = expandVertically() + fadeIn(),
@@ -1709,37 +1668,7 @@ fun ContactEditScreen(
                         ),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-//                    phoneNumbers.forEachIndexed { index, phone ->
-//                        EditField(
-//                            value = phone,
-//                            onValueChange = { phoneNumbers[index] = it },
-//                            label = "Phone",
-//                            icon = Icons.Default.Phone,
-//                            onDelete = if (phoneNumbers.size > 1) { { phoneNumbers.removeAt(index) } } else null
-//                        )
-//                    }
-//                    TextButton(
-//                        onClick = { phoneNumbers.add("") },
-//                        modifier = Modifier.align(Alignment.Start)
-//                    ) {
-//                        Icon(Icons.Default.Add, null)
-//                        Spacer(Modifier.width(8.dp))
-//                        Text("Add Phone")
-//                    }
                         phoneDetails.forEachIndexed { index, phoneDetail ->
-//                        EditField(
-//                            value = phoneDetail.number,
-//                            onValueChange = {
-//                                phoneDetails[index] = ContactPhoneDetail(phoneDetail.type, phoneDetail.label, it)
-//                                phoneNumbers[index] = it
-//                            },
-//                            label = getPhoneTypeText(context, phoneDetail.type, phoneDetail.label),
-//                            icon = Icons.Default.Phone,
-//                            onDelete = if (phoneDetails.size > 1) {
-//                                { phoneDetails.removeAt(index)
-//                                    phoneNumbers.removeAt(index) }
-//                            } else null
-//                        )
                             EditPhoneField(
                                 value = phoneDetail.number,
                                 onValueChange = {
@@ -1775,7 +1704,7 @@ fun ContactEditScreen(
                         ) {
                             Icon(Icons.Default.Add, null)
                             Spacer(Modifier.width(8.dp))
-                            Text("Add Phone")
+                            Text(stringResource(R.string.add_phone))
                         }
                     }
                 }
@@ -1815,7 +1744,7 @@ fun ContactEditScreen(
                         ) {
                             Icon(Icons.Default.Add, null)
                             Spacer(Modifier.width(8.dp))
-                            Text("Add Email")
+                            Text(stringResource(R.string.add_email))
                         }
                     }
                 }
@@ -1861,7 +1790,7 @@ fun ContactEditScreen(
                         ) {
                             Icon(Icons.Default.Add, null)
                             Spacer(Modifier.width(8.dp))
-                            Text("Add Event")
+                            Text(stringResource(R.string.add_event))
                         }
                     }
                 }
@@ -1907,7 +1836,7 @@ fun ContactEditScreen(
                         ) {
                             Icon(Icons.Default.Add, null)
                             Spacer(Modifier.width(8.dp))
-                            Text("Add Address")
+                            Text(stringResource(R.string.add_address))
                         }
                     }
                 }
@@ -2178,7 +2107,7 @@ fun EditField(
                             )
                             Icon(
                                 Icons.Default.Add,
-                                null,
+                                stringResource(R.string.custom_label),
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(18.dp)
                             )
@@ -2329,7 +2258,7 @@ fun EditFieldDate(
             ) {
                 Icon(
                     Icons.Default.ArrowDropDown,
-                    "Change event type",
+                    stringResource(R.string.change_label),
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
@@ -2350,7 +2279,7 @@ fun EditFieldDate(
                 trailingIcon = {
                     Icon(
                         Icons.Default.KeyboardArrowDown,
-                        contentDescription = "Select a date",
+                        contentDescription = stringResource(R.string.select),
                         modifier = Modifier.padding(end = 8.dp)
                     )
                 },
@@ -2501,7 +2430,7 @@ fun EditFieldDate(
                             )
                             Icon(
                                 Icons.Default.Add,
-                                null,
+                                stringResource(R.string.custom_label),
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(18.dp)
                             )
@@ -2529,7 +2458,7 @@ fun EditFieldDate(
                         showDatePicker = false
                     }
                 ) {
-                    Text("OK")
+                    Text(stringResource(R.string.ok))
                 }
             },
             dismissButton = {

@@ -10,7 +10,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.rounded.CallEnd
+import androidx.compose.material.icons.rounded.DisabledVisible
 import androidx.compose.material.icons.rounded.Gavel
+import androidx.compose.material.icons.rounded.MusicOff
 import androidx.compose.material.icons.rounded.NotificationsPaused
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material3.*
@@ -38,6 +41,7 @@ import dev.goodwy.rphone.view.theme.customColors
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import dev.goodwy.rphone.view.components.Title
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,7 +91,7 @@ fun BlockedNumbersScreen(
                     if (isRotation90) WindowInsetsSides.Top + WindowInsetsSides.Horizontal
                     else WindowInsetsSides.Top
                 ),
-                title = { Text(stringResource(R.string.manage_blocked), fontWeight = FontWeight.Bold) },
+                title = { Title(stringResource(R.string.manage_blocked)) },
                 navigationIcon = {
                     NavigationIcon(onClick = { navigator.navigateUp() })
                 }
@@ -133,7 +137,7 @@ fun BlockedNumbersScreen(
                         RillSelectListItem(
                             headline = stringResource(R.string.block_method),
                             supporting = stringResource(R.string.block_method_subtitle),
-                            leadingIcon = Icons.Rounded.Gavel,
+                            leadingIcon = if (blockMethod == 0) Icons.Rounded.CallEnd else Icons.Rounded.MusicOff,
                             iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
                             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
                             options = listOf(
@@ -149,7 +153,7 @@ fun BlockedNumbersScreen(
                         RillSelectListItem(
                             headline = stringResource(R.string.log_visibility),
                             supporting = stringResource(R.string.log_visibility_subtitle),
-                            leadingIcon = Icons.Rounded.Visibility,
+                            leadingIcon = if (logVisibility == 0) Icons.Rounded.DisabledVisible else Icons.Rounded.Visibility,
                             iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
                             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
                             options = listOf(
@@ -182,7 +186,7 @@ fun BlockedNumbersScreen(
                                 try {
                                     val intent = telecomManager.createManageBlockedNumbersIntent()
                                     context.startActivity(intent)
-                                } catch (e: Exception) {
+                                } catch (_: Exception) {
                                     // Fallback if the intent is not supported on some older/custom versions
                                 }
                             }

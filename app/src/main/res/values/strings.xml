@@ -2,16 +2,48 @@
     <string name="app_name" translatable="false">Rill Phone</string>
     <string name="widget_description">Recent calls with quick dial</string>
     <string name="copy" tools:ignore="PrivateResource">Copy</string>
+    <string name="paste">Paste</string>
     <string name="delete">Delete</string>
+    <string name="delete_contact">Delete Contact</string>
+    <string name="delete_contact_subtitle">Are you sure you want to delete this contact? This action cannot be undone.</string>
+    <string name="delete_contacts">Delete Contacts</string>
+    <string name="delete_contacts_subtitle">Are you sure you want to delete %s selected contacts? This action cannot be undone.</string>
+    <string name="selected_items">%s selected</string>
+    <string name="select">Select</string>
+    <string name="select_all">Select all</string>
+    <string name="deselect_all">Deselect all</string>
+    <string name="backspace">Backspace</string>
+    <string name="back">Back</string>
+    <string name="edit">Edit</string>
+    <string name="done">Done</string>
+    <string name="ok">OK</string>
+    <string name="on">On</string>
+    <string name="off">Off</string>
     <string name="cancel">Cancel</string>
     <string name="open">Open</string>
     <string name="save">Save</string>
+    <string name="confirm">Confirm</string>
     <string name="close">Close</string>
-    <string name="select">Select</string>
+    <string name="clear">Clear</string>
     <string name="share">Share</string>
+    <string name="share_subtitle">Send contact details to others</string>
+    <string name="use">Use</string>
+    <string name="connect_via_social">Connect via Social</string>
+    <string name="import_text">Import</string>
+    <string name="export_text">Export</string>
+    <string name="call_is_ongoing">Call is Ongoing — Tap to return</string>
+    <string name="filter_all">All</string>
+    <string name="filter_missed">Missed</string>
+    <string name="filter_incoming">Incoming</string>
+    <string name="filter_outgoing">Outgoing</string>
+    <string name="filter_rejected">Rejected</string>
 
     <!-- Search -->
     <string name="search_contacts">Search contacts</string>
+    <string name="no_results">No results</string>
+    <string name="no_contacts_found">No contacts found</string>
+    <string name="call_query">Call %s</string>
+    <string name="voice_input">Voice Input</string>
 
     <!-- Billing -->
     <string name="no_connection">No connection</string>
@@ -56,12 +88,122 @@
 
     <!-- About -->
     <string name="about">About</string>
+    <string name="rate_app">Rate app</string>
+    <string name="other_apps">Our other apps</string>
+    <string name="source_code">Source code</string>
+    <string name="privacy_policy">Privacy policy</string>
+
+    <!-- Contributors -->
+    <string name="contributors">Contributors</string>
+    <string name="development_team">Development Team</string>
+    <string name="apps_that_inspired_us">Apps That Inspired Us</string>
 
     <!-- Settings -->
+    <string name="settings">Settings</string>
+    <string name="appearance">Appearance</string>
+    <string name="interface_settings">Interface</string>
+    <string name="interface_settings_subtitle">Themes, colors, and layout</string>
+    <string name="app_theme">App Theme</string>
+    <string name="theme_auto">Auto</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_auto_black_white">Auto B/W</string>
+    <string name="theme_white">White</string>
+    <string name="theme_black">Black</string>
+    <string name="custom_color">Custom Colors</string>
+    <string name="custom_color_subtitle">Color scheme based on a custom color</string>
+    <string name="hex_color">Hex Color</string>
+    <string name="hex_color_subtitle">Enter a valid 6-digit hex code</string>
+    <string name="custom_font">Custom Font</string>
+    <string name="custom_font_subtitle">Pick a .ttf file to use across the app</string>
+    <string name="visual_effects">Visual Effects</string>
+    <string name="not_supported_on_this_device">Not supported on this device</string>
+    <string name="not_supported_on_this_device_subtitle">Blur and Liquid Glass require Android 12 or higher</string>
+    <string name="material_liquid_you_glass">Material Liquid You Glass</string>
+    <string name="material_liquid_you_glass_subtitle">Apply a liquid glass refraction effect to navigation</string>
+    <string name="material_blur_effects">Material Blur Effects</string>
+    <string name="material_blur_effects_subtitle">Apply a background blur effect to navigation</string>
+    <string name="scroll_animation">Scroll Animation</string>
+    <string name="scroll_animation_device">Fade-in animation for list items as you scroll</string>
+    <string name="call_ui">Call UI</string>
+    <string name="incoming_call_ui">Incoming Call UI</string>
+    <string name="incoming_call_ui_subtitle">Choose how to answer incoming calls</string>
+    <string name="avatars_settings">Avatars Settings</string>
+    <string name="avatars_settings_subtitle">Customizing colors, frames, and more</string>
+    <string name="avatar_colors">Avatar Colors</string>
+    <string name="colorful">Colorful</string>
+    <string name="primary_color">Primary Color</string>
+    <string name="secondary_color">Secondary Color</string>
+    <string name="google_contacts_color">Google Contacts Color</string>
+    <string name="show_first_letter_in_avatar">Show First Letter in Avatar</string>
+    <string name="show_first_letter_in_avatar_subtitle">Displays letter when picture is missing</string>
+    <string name="avatar_frame">Avatar Frame</string>
+    <string name="avatar_frame_subtitle">Show a border around the avatar</string>
+    <string name="show_picture_in_avatar">Show Picture in Avatar</string>
+    <string name="show_picture_in_avatar_subtitle">Shows the contact picture if available</string>
+
+    <string name="сaller_ui">Caller UI</string>
+    <string name="сaller_ui_subtitle">Customize the in-call screen layout and controls</string>
+    <string name="end_call_button">End Call Button</string>
+    <string name="customize_width">Customize Width</string>
+    <string name="customize_width_subtitle">Adjust the width of the end call button</string>
+
+    <string name="navigations">Navigations</string>
+    <string name="navigations_subtitle">Tab visibility and tab style</string>
+    <string name="tab_sections">Tab Sections</string>
+    <string name="tab_sections_subtitle">Choose which tabs are visible, and drag the handle to reorder them in the navigation bar</string>
+    <string name="navigation_style">Navigation Style</string>
+    <string name="pill_style_navigation">Pill Style Navigation</string>
+    <string name="pill_style_navigation_subtitle">Show a floating pill-style nav bar instead of the standard bottom bar</string>
+    <string name="icon_only_bottom_bar">Icon-Only Bottom Bar</string>
+    <string name="icon_only_bottom_bar_subtitle">Removes text labels from navigation</string>
+
+    <string name="calls_and_system">Calls &amp; System</string>
+    <string name="call_settings">Call Settings</string>
+    <string name="call_settings_subtitle">Accounts, sensor, and pocket mode</string>
+    <string name="default_sim">Default SIM</string>
+    <string name="ask_first">Ask first</string>
     <string name="calling_accounts">Calling accounts</string>
-    <string name="blocked_numbers">Blocked numbers</string>
+    <string name="system_settings">System Settings</string>
+    <string name="call_behavior">Call Behavior</string>
+    <string name="proximity_sensor">Proximity Sensor on in background</string>
+    <string name="proximity_sensor_subtitle">Turn off-screen when phone is near ear during a call</string>
+    <string name="pocket_mode_prevention">Pocket Mode Prevention</string>
+    <string name="pocket_mode_prevention_subtitle">Block accidental answer/decline when phone is in pocket</string>
+    <string name="floating_ongoing_call">Floating Ongoing Call</string>
+    <string name="floating_ongoing_call_subtitle">Show a draggable floating bubble during calls. Requires \'Display over other apps\' permission</string>
+    <string name="direct_call_on_tap">Direct Call on Tap</string>
+    <string name="direct_call_on_tap_subtitle">Tap a call log entry to call directly instead</string>
+    <string name="auto_speaker">Auto Speaker</string>
+    <string name="auto_speaker_subtitle">Automatically switch to loudspeaker when phone is away from ear, and back to earpiece when near</string>
+
+    <string name="sound_and_vibration">Sound &amp; Vibration</string>
+    <string name="sound_and_vibration_subtitle">Ringtones, dialpad tones, and haptics across app</string>
+    <string name="tap_haptics">Tap Haptics</string>
+    <string name="enable_tap_haptics">Enable Tap Haptics</string>
+    <string name="haptics_intensity">Intensity</string>
+    <string name="haptics_soft">Soft</string>
+    <string name="haptics_strong">Strong</string>
+    <string name="haptics_custom">Custom</string>
+    <string name="preview_haptic">Preview Haptic</string>
+    <string name="ringtone_settings">Ringtone Settings</string>
+    <string name="dialpad_tones">Dialpad tones</string>
+    <string name="dialpad_tones_subtitle">Dialpad tone that plays during keypress</string>
+    <string name="calls">Calls</string>
+    <string name="vibrate_on_answer">Vibrate on Answer</string>
+    <string name="vibrate_on_answer_subtitle">Vibrate when the other party answers</string>
+    <string name="vibrate_on_hang_up">Vibrate on Hang up</string>
+    <string name="vibrate_on_hang_up_subtitle">Vibrate when the call ends</string>
+    <string name="haptics_across_app">Haptics Across App</string>
+    <string name="scroll_haptics">Scroll Haptics</string>
+    <string name="scroll_haptics_subtitle">Vibrate on scroll gestures across the app</string>
+    <string name="haptic_interval">Haptic Interval</string>
+    <string name="haptic_interval_value">1 per %.1f cm</string>
+    <string name="haptic_strength">Haptic Strength</string>
+
     <string name="manage_blocked">Manage blocked</string>
     <string name="manage_blocked_subtitle">Manage blocked calls and spam</string>
+    <string name="blocked_numbers">Blocked numbers</string>
     <string name="block_notifications">Block notifications</string>
     <string name="block_notifications_subtitle">Show a low-priority alert for blocked calls</string>
     <string name="block_method">Block method</string>
@@ -73,6 +215,92 @@
     <string name="hide_from_logs">Hide from logs</string>
     <string name="show_in_logs">Show in logs</string>
     <string name="blocked_size">Blocked: %s</string>
+
+    <string name="authentication">Authentication</string>
+    <string name="authentication_method">Authentication Method</string>
+    <string name="system_biometrics">System Biometrics</string>
+    <string name="system_biometrics_subtitle">Fingerprint, face unlock, or device credentials</string>
+    <string name="system_biometrics_not_available">Not available on this device</string>
+    <string name="custom_biometrics">Custom Biometrics</string>
+    <string name="custom_pin">Custom PIN</string>
+    <string name="custom_password">Custom Password</string>
+    <string name="pin">PIN</string>
+    <string name="pin_subtitle">Set a numeric PIN</string>
+    <string name="password">Password</string>
+    <string name="password_subtitle">Set a custom alphanumeric password</string>
+    <string name="remove_biometric">Remove Biometric Lock</string>
+    <string name="not_configured">Not configured</string>
+    <string name="lock_app_on_open">Lock App on Open</string>
+    <string name="lock_app_on_open_subtitle">Require authentication when opening app</string>
+    <string name="lock_call_actions">Lock Call Actions</string>
+    <string name="lock_call_actions_subtitle">Require authentication to answer or reject incoming calls</string>
+    <string name="lock_scope">Scope of Lock Call</string>
+    <string name="all_calls">All Calls</string>
+    <string name="all_calls_subtitle">Biometric required for every incoming call</string>
+    <string name="blacklist">Blacklist</string>
+    <string name="blacklist_count">Contacts for whom call-answering authentication is enabled: %s</string>
+    <string name="blacklist_subtitle">Choose contacts that require biometric to answer</string>
+    <string name="whitelist">Whitelist</string>
+    <string name="whitelist_count">Contacts for whom call-answering authentication is disabled: %s</string>
+    <string name="whitelist_subtitle">Choose contacts to skip the biometric lock</string>
+    <string name="select_contacts">Select Contacts</string>
+    <string name="set_pin">Set PIN</string>
+    <string name="set_pin_subtitle">Enter a 4-digit PIN</string>
+    <string name="enter_pin">Enter PIN</string>
+    <string name="confirm_pin">Confirm PIN</string>
+    <string name="confirm_pin_subtitle">Re-enter your PIN to confirm</string>
+    <string name="incorrect_pin">Incorrect PIN. Please try again.</string>
+    <string name="pin_dont_match">PINs don\'t match. Please start over.</string>
+    <string name="set_password">Set Password</string>
+    <string name="set_password_subtitle">Enter any password. Supports letters, numbers and special characters.</string>
+    <string name="enter_password">Enter Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="incorrect_password">Incorrect password</string>
+    <string name="incorrect_password_subtitle">Password must be at least 4 characters</string>
+    <string name="password_dont_match">Passwords don\'t match</string>
+
+    <string name="manage_contacts">Manage Contacts</string>
+    <string name="manage_contacts_subtitle">Private contacts, Accounts to show, and clean up your list</string>
+    <string name="display">Display</string>
+    <string name="sort_by">Sort by</string>
+    <string name="name_format">Name format</string>
+    <string name="first_name_first">First name first</string>
+    <string name="last_name_first">Last name first</string>
+    <string name="merge_and_fix">Merge &amp; fix</string>
+    <string name="standardize">Standardize</string>
+    <string name="standardize_phone_numbers">Standardize phone numbers</string>
+    <string name="standardize_phone_numbers_subtitle">Remove spaces and special characters from phone numbers</string>
+    <string name="total_contacts">Total contacts</string>
+    <string name="contacts_with_changes">Contacts with changes</string>
+    <string name="numbers_to_standardize">Numbers to standardize</string>
+    <string name="all_numbers_are_already_standardized">✅ All numbers are already standardized!</string>
+    <string name="examples_of_changes">Examples of changes:</string>
+    <string name="and_more">And %s more…</string>
+
+    <string name="merging_contacts">Merging Contacts</string>
+    <string name="merging_contacts_subtitle">Finding and merging duplicate contacts</string>
+    <string name="merging_contacts_description">Merged contacts are multiple entries from different accounts linked into one. You can edit each source separately or unlink them.</string>
+    <string name="no_duplicates_found">No duplicates found</string>
+    <string name="duplicates_in">Duplicates in: %s</string>
+    <string name="merge_duplicates">Merge duplicates (%s contacts)</string>
+
+    <string name="unmerging_contacts">Unlink Contacts</string>
+    <string name="unmerging_contacts_subtitle">Finding for and unlink merged contacts</string>
+    <string name="unmerging_contacts_description">Contact info is from multiple sources. Select one to edit, or unlink all and have them as unlink Contacts.</string>
+    <string name="no_merged_contacts_found">No merged contacts found</string>
+    <string name="merged_from_sources">Merged from %s sources</string>
+    <string name="unlink">Unlink</string>
+    <string name="warning_cannot_be_undone">⚠️ This action cannot be undone.</string>
+
+    <string name="managing_contact_sources">Managing Contact Sources</string>
+    <string name="managing_contact_sources_subtitle">Choose which accounts to show in your list</string>
+    <string name="managing_contact_sources_description">Select which accounts should be visible in your contact list. Deselecting an account will hide its contacts but won\'t delete them.</string>
+    <string name="contact_sources">Contact Sources</string>
+    <string name="contacts_stored_on_app">Contacts stored on app</string>
+    <string name="contacts_stored_on_device">Contacts stored on device</string>
+
+    <string name="private_contacts">Private Contacts</string>
+    <string name="private_contacts_subtitle">Manage your encrypted local contacts</string>
 
     <!-- Call -->
     <string name="call">Call</string>
@@ -89,7 +317,6 @@
     <string name="keypad">Keypad</string>
     <string name="mute">Mute</string>
     <string name="unmute">Unmute</string>
-    <string name="message">Message</string>
     <string name="speaker">Speaker</string>
     <string name="add_call">Add call</string>
     <string name="resume">Resume</string>
@@ -107,24 +334,47 @@
 
     <!-- Recents -->
     <string name="recents">Recents</string>
-    <string name="call_history">Call History</string>
+    <string name="home_tab">Home</string>
+    <string name="call_history">Call history</string>
     <string name="history_with">History with %s</string>
     <string name="no_call_history_found">No call history found</string>
+    <string name="delete_call_logs">Delete call logs</string>
+    <string name="delete_call_logs_selected">Are you sure you want to delete %s selected call logs?</string>
+    <string name="deleted_from_call_log">Deleted from call log</string>
+    <string name="could_not_delete">Could not delete</string>
+    <string name="clear_all_filtered_logs">Clear all filtered logs</string>
+    <string name="clear_all_filtered_logs_selected">This will delete all displayed call history. This action cannot be undone.</string>
 
     <!-- Contacts -->
     <string name="contacts">Contacts</string>
+    <string name="view_contact">View contact</string>
     <string name="view_contacts">View contacts</string>
     <string name="contacts_settings">Contact settings</string>
     <string name="create_contact">Create Contact</string>
+    <string name="add_contact">Add Contact</string>
+    <string name="add_to_contact">Add to contact</string>
     <string name="edit_contact">Edit Contact</string>
+    <string name="contact_info">Contact Info</string>
     <string name="favorites">Favorites</string>
-    <string name="edit">Edit</string>
-    <string name="done">Done</string>
-    <string name="add_to_favourites">Add to Favorites</string>
-    <string name="remove_from_favourites">Remove from Favourites</string>
+    <string name="message">Message</string>
+    <string name="video">Video</string>
+    <string name="email">Email</string>
+    <string name="default_number">Default</string>
+    <string name="recent_number">Recent</string>
+    <string name="recent_activity">Recent Activity</string>
+    <string name="add_to_favorites">Add to Favorites</string>
+    <string name="remove_from_favorites">Remove from Favorites</string>
+    <string name="no_favorites_yet">No Favorites Yet</string>
+    <string name="no_favorites_yet_subtitle">Star a contact to add them here</string>
+    <string name="move_contact">Move contact</string>
     <string name="move_to_another_account">Move to another account</string>
+    <string name="move_to_device_storage">Move to Device Storage</string>
+    <string name="contact_moved_successfully">Contact moved successfully</string>
     <string name="save_to_account">Save to Account</string>
-    <string name="add_field">Add field</string>
+    <string name="show_full_history">Show full history</string>
+    <string name="contact_qr">Contact QR</string>
+    <string name="phone_number">Phone number</string>
+    <string name="name">Name</string>
     <string name="prefix">Prefix</string>
     <string name="prefix_description">Mr., Mrs., Dr., etc.</string>
     <string name="first_name">First name</string>
@@ -134,12 +384,19 @@
     <string name="suffix">Suffix</string>
     <string name="suffix_description">Jr., Sr., III, etc.</string>
     <string name="nickname">Nickname</string>
-    <string name="nickname_description">Nickname, short name or alias</string>
+    <string name="nickname_description">Short name or alias</string>
     <string name="company">Company</string>
     <string name="job_title">Job title</string>
     <string name="job_title_description">Position at the company</string>
+    <string name="add_field">Add field</string>
+    <string name="add_phone">Add Phone</string>
+    <string name="add_email">Add Email</string>
+    <string name="add_event">Add Event</string>
+    <string name="add_address">Add Address</string>
     <string name="add_note">Add note</string>
     <string name="contact_ringtone">Contact ringtone</string>
+    <string name="unsaved_changes">Unsaved Changes</string>
+    <string name="unsaved_changes_subtitle">Do you want to save your changes before leaving?</string>
     <plurals name="contacts_count">
         <item quantity="one">%d contact</item>
         <item quantity="few">%d contacts</item>
@@ -166,19 +423,27 @@
     <string name="contacts_permission_description">To view your contacts, allow contacts permission.</string>
     <string name="search_contacts_permission_description">To search your contacts and identify incoming calls, allow contacts permission.</string>
 
-    <!-- Default Dialer -->
+    <!-- Default  -->
+    <string name="default_phone_number_cleared">Default phone number cleared</string>
     <string name="set_as_default">Set as default</string>
     <string name="clear_default">Clear default</string>
     <string name="default_phone_set">%s set as default</string>
     <string name="default_dialer_title">Set Rill Phone as default</string>
     <string name="default_dialer_subtitle">Rill Phone can only start &amp; receive calls if it\'s your default phone app</string>
-    <string name="default_dialer_warning">Rill Phone cannot function without this permission. Please try again.</string>
+    <string name="default_dialer_warning">The app cannot function without this permission. Please try again.</string>
 
     <!-- Call notes -->
+    <string name="notes">Notes</string>
     <string name="call_notes">Call notes</string>
     <string name="about_call_notes">About call notes</string>
-    <string name="about_call_notes_subtitle">Quick notes you take during a call. They are stored locally within the app, linked to the phone number (not synced with Google Contacts). Each number has its own private note accessible only from the call log or contact details inside the app.</string>
+    <string name="about_call_notes_subtitle">Quick notes you take during a call. They are stored locally within the app, linked to the phone number (not synced with Google Contacts and others). Each number has its own private note, which can only be accessed from the call log in the contact details within the app or from the “Call Notes” tab.</string>
     <string name="type_your_note">Type your note…</string>
+    <string name="no_notes_yet">No Notes Yet</string>
+    <string name="no_notes_yet_subtitle">Notes taken during calls appear here</string>
+    <string name="delete_notes">Delete Notes</string>
+    <string name="delete_notes_subtitle">Are you sure you want to delete %s selected notes?</string>
+    <string name="delete_note">Delete Note</string>
+    <string name="delete_note_subtitle">Delete note for %s?"</string>
 
     <!-- Times -->
     <string name="just_now">Just now</string>
@@ -204,8 +469,13 @@
     <string name="send_whatsapp">Send WhatsApp</string>
 
     <!-- Events -->
+    <string name="other_information">Other Information</string>
     <string name="birthday">Birthday</string>
     <string name="anniversary">Anniversary</string>
+
+    <!-- Dialpad -->
+    <string name="add_pause">Add 2-sec pause</string>
+    <string name="add_wait">Add wait</string>
 
     <!-- Onboarding -->
     <string name="skip">Skip</string>

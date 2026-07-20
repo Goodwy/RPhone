@@ -993,7 +993,7 @@ fun ExpressiveCallScreen(
             }
             "pin" -> {
                 PinSetupDialog(
-                    title = "Enter PIN", isVerify = true,
+                    title = stringResource(R.string.enter_pin), isVerify = true,
                     expectedPin = preferenceManager.getString(PreferenceManager.KEY_BIOMETRICS_PIN, "") ?: "",
                     showCloseButton = !biometricGatesScreen,
                     onConfirm = {
@@ -1006,7 +1006,7 @@ fun ExpressiveCallScreen(
             }
             "password" -> {
                 PasswordSetupDialog(
-                    title = "Enter Password", isVerify = true,
+                    title = stringResource(R.string.enter_password), isVerify = true,
                     expectedPassword = preferenceManager.getString(PreferenceManager.KEY_BIOMETRICS_PASSWORD, "") ?: "",
                     showCloseButton = !biometricGatesScreen,
                     onConfirm = {

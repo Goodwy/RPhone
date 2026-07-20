@@ -11,18 +11,22 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.CallSplit
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.rounded.AutoFixHigh
 import androidx.compose.material.icons.rounded.Badge
 import androidx.compose.material.icons.rounded.FormatListNumbered
+import androidx.compose.material.icons.rounded.Handyman
 import androidx.compose.material.icons.rounded.Merge
 import androidx.compose.material.icons.rounded.PeopleAlt
 import androidx.compose.material.icons.rounded.SortByAlpha
 import androidx.compose.material3.*
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -40,15 +44,20 @@ import dev.goodwy.rphone.view.components.RillListItem
 import dev.goodwy.rphone.view.components.RillLoadingIndicatorView
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.ContactMergeDuplicatesScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.ContactUnmergeDuplicatesScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactVisibilityScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.PrivateContactsScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.goodwy.rphone.R
+import dev.goodwy.rphone.cardCornerBig
+import dev.goodwy.rphone.cardCornerSmall
 import dev.goodwy.rphone.controller.util.ContactUtils.getAccountIcon
 import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillAnimatedSection
 import dev.goodwy.rphone.view.components.RillSelectListItem
 import dev.goodwy.rphone.view.components.ScrollHapticsEffect
+import dev.goodwy.rphone.view.components.Title
 import dev.goodwy.rphone.view.theme.customColors
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -161,7 +170,7 @@ fun ContactManagementScreen(
                     if (isRotation90) WindowInsetsSides.Top + WindowInsetsSides.Horizontal
                     else WindowInsetsSides.Top
                 ),
-                title = { Text("Manage Contacts", fontWeight = FontWeight.ExtraBold) },
+                title = { Title(stringResource(R.string.manage_contacts)) },
                 navigationIcon = {
                     NavigationIcon(onClick = { navigateBack() })
                 }
@@ -192,8 +201,8 @@ fun ContactManagementScreen(
                     RillAnimatedSection(delayMs = 30L) {
                         RillExpressiveCard {
                             RillListItem(
-                                headline = "Contact Visibility",
-                                supporting = "Choose which accounts to show in your list",
+                                headline = stringResource(R.string.managing_contact_sources),
+                                supporting = stringResource(R.string.managing_contact_sources_subtitle),
                                 leadingIcon = Icons.Rounded.PeopleAlt,
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
@@ -201,8 +210,8 @@ fun ContactManagementScreen(
                                 onClick = { navigator.navigate(ContactVisibilityScreenDestination) }
                             )
                             RillListItem(
-                                headline = "Private Contacts",
-                                supporting = "Manage contacts stored only in this app",
+                                headline = stringResource(R.string.private_contacts),
+                                supporting = stringResource(R.string.private_contacts_subtitle),
                                 leadingIcon = getAccountIcon(null, true),
                                 iconContainerColor = MaterialTheme.colorScheme.onTertiaryContainer,
                                 iconBgContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
@@ -218,30 +227,28 @@ fun ContactManagementScreen(
                     val displayOrder by viewModel.displayOrder.collectAsState()
                     RillAnimatedSection(delayMs = 60L) {
                         Column {
-                            SettingsSectionLabel("Display")
+                            SettingsSectionLabel(stringResource(R.string.display))
                             RillExpressiveCard {
                                 RillSelectListItem(
-                                    headline = "Sort by",
-//                                    supporting = "Choose how contacts are ordered",
+                                    headline = stringResource(R.string.sort_by),
                                     leadingIcon = Icons.Rounded.SortByAlpha,
-                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
-                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkIndigo,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorIndigo,
                                     options = listOf(
-                                        "First Name" to 0,
-                                        "Last Name" to 1
+                                        stringResource(R.string.first_name) to 0,
+                                        stringResource(R.string.last_name) to 1
                                     ),
                                     selectedValue = sortOrder,
                                     onValueChange = { newValue: Int -> viewModel.setSortOrder(newValue) }
                                 )
                                 RillSelectListItem(
-                                    headline = "Name format",
-//                                    supporting = "Choose how names are displayed",
+                                    headline = stringResource(R.string.name_format),
                                     leadingIcon = Icons.Rounded.Badge,
-                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
-                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkIndigo,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorIndigo,
                                     options = listOf(
-                                        "First name first" to 0,
-                                        "Last name first" to 1
+                                        stringResource(R.string.first_name_first) to 0,
+                                        stringResource(R.string.last_name_first) to 1
                                     ),
                                     selectedValue = displayOrder,
                                     onValueChange = { newValue: Int -> viewModel.setDisplayOrder(newValue) }
@@ -254,14 +261,14 @@ fun ContactManagementScreen(
                 item {
                     RillAnimatedSection(delayMs = 90L) {
                         Column {
-                            SettingsSectionLabel("Quick Fixes")
+                            SettingsSectionLabel(stringResource(R.string.merge_and_fix))
                             RillExpressiveCard {
                                 RillListItem(
-                                    headline = "Standardize phone numbers",
-                                    supporting = "Remove spaces and special characters from all numbers",
-                                    leadingIcon = Icons.Rounded.FormatListNumbered,
-                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
-                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
+                                    headline = stringResource(R.string.standardize_phone_numbers),
+                                    supporting = stringResource(R.string.standardize_phone_numbers_subtitle),
+                                    leadingIcon = Icons.Rounded.Handyman,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPink,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPink,
                                     trailingIcon = Icons.Rounded.AutoFixHigh,
                                     onClick = {
                                         viewModel.previewStandardize { stats ->
@@ -269,6 +276,24 @@ fun ContactManagementScreen(
                                             showStandardizeDialog = true
                                         }
                                     }
+                                )
+                                RillListItem(
+                                    headline = stringResource(R.string.merging_contacts),
+                                    supporting = stringResource(R.string.merging_contacts_subtitle),
+                                    leadingIcon = Icons.Rounded.Merge,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
+                                    trailingIcon = Icons.Default.ChevronRight,
+                                    onClick = { navigator.navigate(ContactMergeDuplicatesScreenDestination) }
+                                )
+                                RillListItem(
+                                    headline = stringResource(R.string.unmerging_contacts),
+                                    supporting = stringResource(R.string.unmerging_contacts_subtitle),
+                                    leadingIcon = Icons.AutoMirrored.Rounded.CallSplit,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
+                                    trailingIcon = Icons.Default.ChevronRight,
+                                    onClick = { navigator.navigate(ContactUnmergeDuplicatesScreenDestination) }
                                 )
                             }
                         }
@@ -287,7 +312,7 @@ fun ContactManagementScreen(
 //                            "Found ${duplicateGroups.size} groups of duplicates",
 //                            style = MaterialTheme.typography.titleMedium,
 //                            fontWeight = FontWeight.Bold,
-//                            modifier = Modifier.padding(start = 8.dp)
+//                            modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
 //                        )
 //                    }
 //
@@ -299,6 +324,8 @@ fun ContactManagementScreen(
 //                        }
 //                    }
 //                }
+
+                item { Spacer(modifier = Modifier.height(20.dp).navigationBarsPadding()) }
             }
         }
     }
@@ -312,23 +339,25 @@ fun DuplicateGroupCard(
     RillExpressiveCard {
         group.forEachIndexed { index, contact ->
             RillListItem(
-                headline = contact.name,
+                headline = contact.displayName,
                 supporting = contact.phoneNumbers.joinToString(", "),
-                avatarName = contact.name,
+                avatarName = contact.displayName,
                 photoUri = contact.photoUri,
                 onClick = { }
             )
-            if (index < group.size - 1) {
-                HorizontalDivider(Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-            }
         }
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
+
         Button(
             onClick = { onMerge(group.first(), group.drop(1)) },
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.medium
+            modifier = Modifier
+                .fillMaxWidth()
+                .offset(x = 0.dp, y = (-4).dp),
+            shape = RoundedCornerShape(
+                topStart = cardCornerSmall,
+                topEnd = cardCornerSmall,
+                bottomStart = cardCornerBig,
+                bottomEnd = cardCornerBig
+            )
         ) {
             Icon(Icons.Rounded.Merge, null)
             Spacer(Modifier.width(8.dp))
@@ -347,52 +376,56 @@ fun StandardizeConfirmationDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                "Standardize Phone Numbers",
+                stringResource(R.string.standardize_phone_numbers),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
         },
         text = {
             Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 400.dp)
+                    .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    "This will remove all spaces and special characters from phone numbers.",
+                    stringResource(R.string.standardize_phone_numbers_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                Divider()
+                HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
 
-                // Статистика
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     StatRow(
-                        label = "Total contacts",
+                        label = stringResource(R.string.total_contacts),
                         value = stats.totalContacts.toString()
                     )
                     StatRow(
-                        label = "Contacts with changes",
+                        label = stringResource(R.string.contacts_with_changes),
                         value = stats.contactsWithChanges.toString()
                     )
                     StatRow(
-                        label = "Numbers to standardize",
+                        label = stringResource(R.string.numbers_to_standardize),
                         value = stats.totalNumbersChanged.toString()
                     )
                 }
 
                 if (stats.contactsWithChanges == 0) {
                     Text(
-                        "✅ All numbers are already standardized!",
+                        stringResource(R.string.all_numbers_are_already_standardized),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(top = 6.dp),
                     )
                 }
 
                 if (stats.examples.isNotEmpty()) {
-                    Divider()
+                    HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
 
                     Text(
-                        "Examples of changes:",
+                        stringResource(R.string.examples_of_changes),
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Medium
                     )
@@ -422,7 +455,7 @@ fun StandardizeConfirmationDialog(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                     Text(
-                                        text = "→",
+                                        text = "=>",
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.primary
                                     )
@@ -439,18 +472,20 @@ fun StandardizeConfirmationDialog(
 
                     if (stats.totalNumbersChanged > stats.examples.size) {
                         Text(
-                            "And ${stats.totalNumbersChanged - stats.examples.size} more...",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            stringResource(R.string.and_more, "${stats.totalNumbersChanged - stats.examples.size}"),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
 
                 if (stats.contactsWithChanges > 0) {
                     Text(
-                        "⚠️ This action cannot be undone.",
+                        stringResource(R.string.warning_cannot_be_undone),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(top = 6.dp)
                     )
                 }
             }
@@ -461,12 +496,12 @@ fun StandardizeConfirmationDialog(
                 enabled = stats.contactsWithChanges > 0,
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Standardize")
+                Text(stringResource(R.string.standardize))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         }
     )
@@ -479,16 +514,20 @@ private fun StatRow(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
+            modifier = Modifier.weight(1f),
             text = label,
             style = MaterialTheme.typography.bodyMedium,
+            lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+        Spacer(Modifier.width(12.dp))
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
+            lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
             fontWeight = FontWeight.Medium
         )
     }

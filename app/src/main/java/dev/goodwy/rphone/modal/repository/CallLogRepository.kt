@@ -21,13 +21,12 @@ import androidx.core.net.toUri
 import dev.goodwy.rphone.modal.data.getDisplayName
 
 class CallLogRepository(
-    private val contentResolver: ContentResolver,
     private val context: Context,
+    private val contentResolver: ContentResolver,
     private val contactsRepo: IContactsRepository
 ) : ICallLogRepository {
 
     private val preferenceManager = PreferenceManager(context)
-
     private val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as? TelecomManager
 
     override fun getCallLogs(): List<CallLogEntry> {

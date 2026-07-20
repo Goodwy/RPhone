@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.device_only
 import dev.goodwy.rphone.modal.data.Contact
+import dev.goodwy.rphone.modal.repository.ContactsRepository
 import dev.goodwy.rphone.private_only
 import dev.goodwy.rphone.view.screen.settings.NumberChangeExample
 import dev.goodwy.rphone.view.screen.settings.StandardizeStats
@@ -52,7 +53,7 @@ class ContactsViewModel(
     private val _showLocalOnly = MutableStateFlow(false)
     val showLocalOnly = _showLocalOnly.asStateFlow()
 
-    private val _visibleAccounts = MutableStateFlow<Set<String>?>(preferenceManager.getVisibleAccounts())
+    private val _visibleAccounts = MutableStateFlow(preferenceManager.getVisibleAccounts())
     val visibleAccountsFlow = _visibleAccounts.asStateFlow()
 
     private val _sortOrder = MutableStateFlow(preferenceManager.getInt(PreferenceManager.KEY_CONTACT_SORT_ORDER, 0))
@@ -96,8 +97,11 @@ class ContactsViewModel(
             account == null -> {
                 if (visibleAccounts == null) contacts
                 else contacts.filter { contact ->
-                    val key = if (contact.accountType == null && contact.accountName == null) "local|local" else "${contact.accountType}|${contact.accountName}"
-                    visibleAccounts.contains(key) || contact.isPrivate
+                    val key =
+                        if (contact.accountType == null && contact.accountName == null && !contact.isPrivate) "local|local"
+                        else if (contact.accountType == null && contact.accountName == null) "private|private"
+                        else "${contact.accountType}|${contact.accountName}"
+                    visibleAccounts.contains(key)
                 }
             }
             else -> contacts.filter { it.accountName == account.name && it.accountType == account.type }
@@ -473,4 +477,41 @@ class ContactsViewModel(
             }
             return map
         }
+
+    fun getContactSources(contactId: String): List<ContactsRepository.ContactSource> {
+        return contactsRepo.getRawContactsForContact(contactId)
+            .map { raw ->
+                ContactsRepository.ContactSource(
+                    accountName = raw.accountName,
+                    accountType = raw.accountType,
+                    isPrimary = false, // Will be updated later
+                    rawContactId = raw.rawContactId
+                )
+            }
+            .mapIndexed { index, source ->
+                source.copy(isPrimary = index == 0)
+            }
+    }
+
+    fun getRawContactData(rawContactId: String): Contact? {
+        return contactsRepo.getRawContactData(rawContactId)
+    }
+
+    fun updateRawContact(rawContactId: String, contact: Contact) {
+        viewModelScope.launch {
+            contactsRepo.updateRawContact(rawContactId, contact)
+            fetchContacts()
+        }
+    }
+
+    fun unmergeAll(contactId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            contactsRepo.unmergeAllSources(contactId)
+            fetchContacts()
+        }
+    }
+
+    fun dumpContact(contactId: String): String {
+        return contactsRepo.dumpContact(contactId)
+    }
 }

@@ -4,9 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.provider.CallLog
 import android.provider.ContactsContract
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.*
 import androidx.compose.animation.fadeIn
@@ -43,14 +41,10 @@ import androidx.compose.ui.unit.dp
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.view.components.RillAvatar
-import dev.goodwy.rphone.view.components.RillDropdownMenu
-import dev.goodwy.rphone.view.components.RillDropdownMenuItem
 import dev.goodwy.rphone.view.components.performAppHaptic
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
-import dev.goodwy.rphone.view.theme.color_call_button
 import org.koin.compose.koinInject
 import androidx.core.net.toUri
-import dev.goodwy.rphone.controller.util.toast
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -69,6 +63,7 @@ fun SingleTile(
     onAvatarClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
     isMenuOpen: Boolean = false,
+    showAddToContact: Boolean = false,
     onSelectMode: (() -> Unit)? = null,
     onClick: () -> Unit
 ) {
@@ -207,74 +202,6 @@ fun SingleTile(
             }
         }
 
-//        RillDropdownMenu(
-//            expanded         = showMenu,
-//            onDismissRequest = { showMenu = false }
-//        ) {
-//            if (onSelectMode != null) {
-//                RillDropdownMenuItem(
-//                    text     = stringResource(R.string.select),
-//                    icon     = Icons.Default.CheckBox,
-//                    iconTint = Color(0xFF9C27B0),
-//                    onClick  = {
-//                        showMenu = false
-//                        onSelectMode()
-//                    }
-//                )
-//                HorizontalDivider(
-//                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-//                    color    = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-//                )
-//            }
-//            RillDropdownMenuItem(
-//                text     = "Call",
-//                icon     = Icons.Default.Call,
-//                iconTint = color_call_button,
-//                onClick  = {
-//                    showMenu = false
-//                    onClick()
-//                }
-//            )
-//            if (!numberForMenu.isNullOrEmpty()) {
-//                RillDropdownMenuItem(
-//                    text     = "Copy number",
-//                    icon     = Icons.Default.ContentCopy,
-//                    iconTint = Color(0xFF2196F3),
-//                    onClick  = {
-//                        showMenu = false
-//                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-//                        clipboard.setPrimaryClip(ClipData.newPlainText("Phone number", numberForMenu))
-//                        Toast.makeText(context, "Number copied", Toast.LENGTH_SHORT).show()
-//                    }
-//                )
-//                RillDropdownMenuItem(
-//                    text     = "Add to contacts",
-//                    icon     = Icons.Default.PersonAdd,
-//                    iconTint = Color(0xFF9C27B0),
-//                    onClick  = {
-//                        showMenu = false
-//                        val intent = Intent(Intent.ACTION_INSERT).apply {
-//                            type = ContactsContract.RawContacts.CONTENT_TYPE
-//                            putExtra(ContactsContract.Intents.Insert.PHONE, numberForMenu)
-//                        }
-//                        context.startActivity(intent)
-//                    }
-//                )
-//                RillDropdownMenuItem(
-//                    text     = "Send SMS",
-//                    icon     = Icons.Default.Message,
-//                    iconTint = Color(0xFF009688),
-//                    onClick  = {
-//                        showMenu = false
-//                        val intent = Intent(Intent.ACTION_VIEW).apply {
-//                            data = "sms:$numberForMenu".toUri()
-//                        }
-//                        context.startActivity(intent)
-//                    }
-//                )
-//            }
-//        }
-
         AnimatedVisibility(
             visible = showMenu,
             enter = slideInVertically(initialOffsetY = { -it }, animationSpec = tween(320, easing = FastOutSlowInEasing)) + fadeIn(tween(280)),
@@ -299,14 +226,14 @@ fun SingleTile(
                 }
                 DropdownMenuItem(
                     contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
-                    text = { Text("Call") },
+                    text = { Text(stringResource(R.string.call)) },
                     leadingIcon = { Icon(Icons.Rounded.Call, null) },
                     onClick = { showMenu = false; onClick() }
                 )
                 if (!numberForMenu.isNullOrEmpty()) {
                     DropdownMenuItem(
                         contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
-                        text = { Text("Send SMS") },
+                        text = { Text(stringResource(R.string.message)) },
                         leadingIcon = { Icon(ImageVector.vectorResource(id = R.drawable.ic_message_filled), null) },
                         onClick = {
                             showMenu = false
@@ -318,28 +245,29 @@ fun SingleTile(
                     )
                     DropdownMenuItem(
                         contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
-                        text = { Text("Copy number") },
+                        text = { Text(stringResource(R.string.copy)) },
                         leadingIcon = { Icon(Icons.Default.ContentCopy, null) },
                         onClick = {
                             showMenu = false
                             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                             clipboard.setPrimaryClip(ClipData.newPlainText("Phone number", numberForMenu))
-                            Toast.makeText(context, "Number copied", Toast.LENGTH_SHORT).show()
                         }
                     )
-                    DropdownMenuItem(
-                        contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
-                        text = { Text("Add to contacts") },
-                        leadingIcon = { Icon(Icons.Default.PersonAdd, null) },
-                        onClick = {
-                            showMenu = false
-                            val intent = Intent(Intent.ACTION_INSERT).apply {
-                                type = ContactsContract.RawContacts.CONTENT_TYPE
-                                putExtra(ContactsContract.Intents.Insert.PHONE, numberForMenu)
+                    if (showAddToContact) {
+                        DropdownMenuItem(
+                            contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
+                            text = { Text(stringResource(R.string.add_to_contact)) },
+                            leadingIcon = { Icon(Icons.Default.PersonAdd, null) },
+                            onClick = {
+                                showMenu = false
+                                val intent = Intent(Intent.ACTION_INSERT).apply {
+                                    type = ContactsContract.RawContacts.CONTENT_TYPE
+                                    putExtra(ContactsContract.Intents.Insert.PHONE, numberForMenu)
+                                }
+                                context.startActivity(intent)
                             }
-                            context.startActivity(intent)
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }

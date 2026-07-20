@@ -64,6 +64,7 @@ import dev.goodwy.rphone.GP_URL
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.util.PreferenceManager.Companion.KEY_HIGH_SCORE
 import dev.goodwy.rphone.controller.util.PreferenceManager.Companion.KEY_IS_PRO_FOSS
+import dev.goodwy.rphone.view.components.Title
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -164,7 +165,7 @@ fun AboutAppScreen(navigator: DestinationsNavigator) {
                     if (isRotation90) WindowInsetsSides.Top + WindowInsetsSides.Horizontal
                     else WindowInsetsSides.Top
                 ),
-                title = { Text(stringResource(R.string.about), fontWeight = FontWeight.Bold) },
+                title = { Title(stringResource(R.string.about)) },
                 navigationIcon = {
                     NavigationIcon(onClick = { navigator.navigateUp() })
                 }
@@ -174,7 +175,6 @@ fun AboutAppScreen(navigator: DestinationsNavigator) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-//                .padding(padding)
                 .padding(
                     top = padding.calculateTopPadding(),
                     start = 0.dp,
@@ -185,9 +185,8 @@ fun AboutAppScreen(navigator: DestinationsNavigator) {
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // ── Material Expressive Logo Area ──────────────────────────
             Surface(
-                modifier = Modifier.size(120.dp).scale(scale).alpha(alpha),
+                modifier = Modifier.size(120.dp), //.scale(scale).alpha(alpha),
                 shape = RoundedCornerShape(36.dp),
                 color = Color.White,//MaterialTheme.colorScheme.primaryContainer,
                 shadowElevation = 6.dp,
@@ -253,7 +252,7 @@ fun AboutAppScreen(navigator: DestinationsNavigator) {
                     val isGPlay = BuildConfig.FLAVOR == "gplay"
                     if (isGPlay) {
                         RillListItem(
-                            headline = "Rate App",
+                            headline = stringResource(R.string.rate_app),
                             leadingIcon = Icons.Rounded.StarRate,
                             iconContainerColor = Color.Black,
                             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOliva,
@@ -262,7 +261,7 @@ fun AboutAppScreen(navigator: DestinationsNavigator) {
                         )
                     }
                     RillListItem(
-                        headline = "My Other Apps",
+                        headline = stringResource(R.string.other_apps),
                         leadingIcon = if (isGPlay) ImageVector.vectorResource(id = R.drawable.ic_google_play_vector) else ImageVector.vectorResource(id = R.drawable.ic_goodwy),
                         iconContainerColor = Color.Black,
                         iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOliva,
@@ -273,7 +272,7 @@ fun AboutAppScreen(navigator: DestinationsNavigator) {
                         }
                     )
                     RillListItem(
-                        headline = "Source Code",
+                        headline = stringResource(R.string.source_code),
                         supporting = "GitHub Repository",
                         leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_github_vector),
                         iconContainerColor = Color.Black,
@@ -289,7 +288,7 @@ fun AboutAppScreen(navigator: DestinationsNavigator) {
                         trailingIcon = Icons.Default.ChevronRight,
                         onClick = { navigator.navigate(DonateScreenDestination) })
                     RillListItem(
-                        headline = "Privacy Policy",
+                        headline = stringResource(R.string.privacy_policy),
                         leadingIcon = Icons.Rounded.PrivacyTip,
                         iconContainerColor = Color.Black,
                         iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOliva,
@@ -297,7 +296,7 @@ fun AboutAppScreen(navigator: DestinationsNavigator) {
                         onClick = { openLink(context, PRIVACY_POLICY) }
                     )
                     RillListItem(
-                        headline = "Contributors",
+                        headline = stringResource(R.string.contributors),
                         leadingIcon = Icons.Rounded.LogoDev,
                         iconContainerColor = Color.Black,
                         iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOliva,

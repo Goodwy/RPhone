@@ -19,8 +19,7 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Dialpad
 import androidx.compose.material.icons.filled.DragHandle
-import androidx.compose.material.icons.filled.ViewWeek
-import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.outlined.Assistant
 import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.CallToAction
 import androidx.compose.material.icons.rounded.Home
@@ -39,6 +38,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -57,6 +57,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.view.components.RillDialog
 import dev.goodwy.rphone.view.components.RillListItem
+import dev.goodwy.rphone.view.components.Title
 import org.koin.compose.koinInject
 import kotlin.math.roundToInt
 
@@ -74,6 +75,7 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
     var tabShowContacts     by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS, true)) }
     var tabShowDialpad      by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD, true)) }
     var tabShowNotes        by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES, false)) }
+    var tabShowSettings     by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SETTINGS, true)) }
     var iconOnlyNav         by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_ICON_ONLY_NAV, false)) }
     var openDialpadDefault  by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_OPEN_DIALPAD_DEFAULT, false)) }
 
@@ -81,12 +83,17 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
     var showDefaultTabDialog by remember { mutableStateOf(false) }
     var defaultTab           by remember { mutableStateOf(prefs.getString(PreferenceManager.KEY_DEFAULT_TAB, "calls") ?: "calls") }
     data class TabOption(val key: String, val label: String, val icon: ImageVector, val enabled: Boolean)
+    val labelRecents =
+        if (!tabShowFavorites && !tabShowContacts) stringResource(R.string.home_tab) else stringResource(R.string.recents)
+    val iconRecents =
+        if (!tabShowFavorites && !tabShowContacts) ImageVector.vectorResource(id = R.drawable.ic_house_fill) else Icons.Rounded.AccessTime
     val tabOptions = listOf(
-        TabOption("favorites", "Favourites", Icons.Outlined.Star, tabShowFavorites),
-        TabOption("calls",     "Calls",      Icons.Rounded.AccessTime, true),
-        TabOption("contacts",  "Contacts",   Icons.Filled.AccountCircle, tabShowContacts),
-        TabOption("dialpad",  "Keypad",      Icons.Default.Dialpad, tabShowDialpad),
-        TabOption("notes",     "Note",       Icons.AutoMirrored.Outlined.StickyNote2, tabShowNotes)
+        TabOption("favorites", stringResource(R.string.favorites), Icons.Outlined.Assistant, tabShowFavorites),
+        TabOption("contacts",  stringResource(R.string.contacts),   Icons.Filled.AccountCircle, tabShowContacts),
+        TabOption("calls",     labelRecents,      iconRecents, true),
+        TabOption("dialpad",   stringResource(R.string.keypad),      Icons.Default.Dialpad, tabShowDialpad),
+        TabOption("notes",     stringResource(R.string.call_notes),       Icons.AutoMirrored.Outlined.StickyNote2, tabShowNotes),
+        TabOption("settings",  stringResource(R.string.settings),       ImageVector.vectorResource(id = R.drawable.ic_settings), tabShowSettings)
     )
 
     // Custom order of tab keys, persisted as a comma-separated string. Any tab keys
@@ -220,6 +227,7 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
             "contacts"   -> tabShowContacts
             "dialpad"    -> tabShowDialpad
             "notes"      -> tabShowNotes
+            "settings"   -> tabShowSettings
             else         -> true
         }
         fun setTabChecked(key: String, value: Boolean) {
@@ -229,12 +237,13 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
                 "contacts"   -> { tabShowContacts = value;   prefs.setBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS,   value) }
                 "dialpad"    -> { tabShowDialpad = value;    prefs.setBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD,    value) }
                 "notes"      -> { tabShowNotes = value;      prefs.setBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES,      value) }
+                "settings"   -> { tabShowSettings = value;   prefs.setBoolean(PreferenceManager.KEY_TAB_SHOW_SETTINGS,   value) }
             }
         }
 
         RillDialog(
             onDismissRequest = { showTabSectionsDialog = false },
-            title = "Tab Sections",
+            title = stringResource(R.string.tab_sections),
             icon = Icons.Rounded.MoveUp,
             modifierIcon = Modifier.rotate(90f),
             iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkCyan,
@@ -245,7 +254,7 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
-                    "Choose which tabs are visible, and drag the handle to reorder them in the navigation bar.",
+                    stringResource(R.string.tab_sections_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -369,7 +378,7 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
                     if (isRotation90) WindowInsetsSides.Top + WindowInsetsSides.Horizontal
                     else WindowInsetsSides.Top
                 ),
-                title = { Text("Navigation", fontWeight = FontWeight.Bold) },
+                title = { Title(stringResource(R.string.navigations)) },
                 navigationIcon = {
                     NavigationIcon(onClick = { navigator.navigateUp() })
                 }
@@ -379,7 +388,6 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-//                .padding(padding)
                 .padding(
                     top = padding.calculateTopPadding(),
                     start = 0.dp,
@@ -395,11 +403,11 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
             item {
                 RillAnimatedSection(delayMs = 0L) {
                     Column {
-                        NavigationSectionLabel("Bottom Navigation Sections")
+//                        NavigationSectionLabel("Bottom Navigation Sections")
                         RillExpressiveCard {
                             RillListItem(
-                                headline = "Tab Sections",
-                                supporting = "Toggle and drag to reorder tabs in the navigation bar",
+                                headline = stringResource(R.string.tab_sections),
+                                supporting = stringResource(R.string.tab_sections_subtitle),
                                 leadingIcon = Icons.Rounded.MoveUp,
                                 modifierLeadingIcon = Modifier.rotate(90f),
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkCyan,
@@ -416,11 +424,11 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
             item {
                 RillAnimatedSection(delayMs = 60L) {
                     Column {
-                        NavigationSectionLabel("Navigation Style")
+                        SettingsSectionLabel(stringResource(R.string.navigation_style))
                         RillExpressiveCard {
                             RillSwitchListItem(
-                                headline = "Pill Style Navigation",
-                                supporting = "Show a floating pill-style nav bar instead of the standard bottom bar",
+                                headline = stringResource(R.string.pill_style_navigation),
+                                supporting = stringResource(R.string.pill_style_navigation_subtitle),
                                 leadingIcon = Icons.Rounded.CallToAction,
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
@@ -431,8 +439,8 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
                                 }
                             )
                             RillSwitchListItem(
-                                headline = "Icon-Only Bottom Bar",
-                                supporting = "Removes text labels from navigation",
+                                headline = stringResource(R.string.icon_only_bottom_bar),
+                                supporting = stringResource(R.string.icon_only_bottom_bar_subtitle),
                                 leadingIcon = Icons.Rounded.Interests,
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
@@ -476,17 +484,7 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
 //                }
 //            }
 
-            item { Spacer(modifier = Modifier.height(80.dp)) }
+            item { Spacer(modifier = Modifier.height(20.dp).navigationBarsPadding()) }
         }
     }
-}
-
-@Composable
-private fun NavigationSectionLabel(text: String) {
-    Text(
-        text,
-        style = MaterialTheme.typography.labelLarge,
-        modifier = Modifier.padding(start = 20.dp, bottom = 8.dp),
-        color = MaterialTheme.colorScheme.primary
-    )
 }

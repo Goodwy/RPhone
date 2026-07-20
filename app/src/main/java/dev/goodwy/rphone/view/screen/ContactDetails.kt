@@ -55,14 +55,22 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
+import androidx.compose.material.icons.automirrored.rounded.CallSplit
 import androidx.compose.material.icons.automirrored.rounded.DriveFileMove
+import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarOutline
 import androidx.compose.material.icons.outlined.Directions
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Email
 import androidx.compose.material.icons.rounded.LocationOn
@@ -71,7 +79,9 @@ import androidx.compose.material.icons.rounded.PersonAdd
 import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material.icons.rounded.QrCode2
 import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment.Companion
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -103,11 +113,14 @@ import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import dev.goodwy.rphone.view.theme.customColors
 import com.ramcosta.composedestinations.generated.destinations.CallLogFullScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactEditScreenDestination
+import dev.goodwy.rphone.cardCornerMedium
+import dev.goodwy.rphone.cardSpacedBy
 import dev.goodwy.rphone.controller.util.SocialUtils
 import dev.goodwy.rphone.controller.util.SocialUtils.launchSendWhatsAppIntent
 import dev.goodwy.rphone.controller.util.hasDualSim
 import dev.goodwy.rphone.device_only
 import dev.goodwy.rphone.modal.data.getDisplayName
+import dev.goodwy.rphone.modal.repository.ContactsRepository
 import dev.goodwy.rphone.private_only
 import java.util.Calendar
 
@@ -121,6 +134,7 @@ fun ContactDetailsScreen(
     navController: NavController,
     navigator: DestinationsNavigator
 ) {
+    val context = LocalContext.current
     val contactsViewModel: ContactsViewModel = koinActivityViewModel()
     val callLogViewModel: CallLogViewModel = koinActivityViewModel()
 
@@ -138,6 +152,20 @@ fun ContactDetailsScreen(
     var contactAccount by remember { mutableStateOf<Account?>(null) }
     var isFullLoading by remember { mutableStateOf(true) }
 
+    // Entrance / exit animation
+    var screenVisible by remember { mutableStateOf(false) }
+    var isClosing by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    fun navigateBack() {
+        isClosing = true
+        scope.launch {
+            kotlinx.coroutines.delay(420)
+            navigator.navigateUp()
+        }
+    }
+
+    val noContactsFound = stringResource(R.string.no_contacts_found)
     LaunchedEffect(contactId, phoneNumber) {
         isFullLoading = true
         contact = if (contactId != null && contactId != "null") {
@@ -148,6 +176,13 @@ fun ContactDetailsScreen(
         contactAccount = if (contact != null) availableAccounts.find {
             it.name == contact!!.accountName && it.type == contact!!.accountType
         } else null
+
+        if (contact == null && contactId != null && contactId != "null") {
+            context.toast(noContactsFound)
+            isFullLoading = false
+            navigateBack()
+            return@LaunchedEffect
+        }
         isFullLoading = false
     }
 
@@ -164,7 +199,16 @@ fun ContactDetailsScreen(
         else -> ""
     }
 
-    val context = LocalContext.current
+    var contactSources by remember { mutableStateOf<List<ContactsRepository.ContactSource>>(emptyList()) }
+    LaunchedEffect(contact) {
+        if (contact != null && !contact!!.isPrivate) {
+            val rawContacts = contactsViewModel.getContactSources(contact!!.id)
+            contactSources = rawContacts
+        } else {
+            contactSources = emptyList()
+        }
+    }
+
     val defaultPhone = remember(contact) { derivedStateOf { contact?.phoneDetails?.firstOrNull { it.isPrimary } } }.value
     val videoLauncher = rememberVideoLauncher()
 
@@ -189,7 +233,7 @@ fun ContactDetailsScreen(
 
     val telecomManager = remember { context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager }
     val prefs = koinInject<PreferenceManager>()
-    val simPref = remember { prefs.getInt("default_sim", 0) }
+    val simPref = remember { prefs.getInt(PreferenceManager.KEY_DEFAULT_SIM, prefs.getDefaultSimIndexDefault()) }
     val displayOrder by remember {
         mutableIntStateOf(prefs.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0))
     }
@@ -199,11 +243,16 @@ fun ContactDetailsScreen(
     var showNumberPicker by remember { mutableStateOf(false) }
     var showMessagePicker by remember { mutableStateOf(false) }
     var showEmailPicker by remember { mutableStateOf(false) }
+    var showAddCallNotePicker by remember { mutableStateOf(false) }
     var pendingNumber by remember { mutableStateOf<String?>(null) }
     var showQrDialog by remember { mutableStateOf(false) }
+    var showQrDialogPicker by remember { mutableStateOf(false) }
+    var pendingQrNumber by remember { mutableStateOf<String?>(null) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showNoteEditor by remember { mutableStateOf(false) }
     var showMoveDialog by remember { mutableStateOf(false) }
+    var showSharePicker by remember { mutableStateOf(false) }
+    var showSourcesDialog by remember { mutableStateOf(false) }
 
     val contactLogs = remember(contact, phoneNumber, allLogs) {
         allLogs.filter { log ->
@@ -214,20 +263,7 @@ fun ContactDetailsScreen(
 
     val isFavorite = contact?.isFavorite ?: false
     val listState = rememberLazyListState()
-    val scope = rememberCoroutineScope()
     val showButton by remember { derivedStateOf { listState.firstVisibleItemIndex > 1 } }
-
-    // Entrance / exit animation
-    var screenVisible by remember { mutableStateOf(false) }
-    var isClosing by remember { mutableStateOf(false) }
-
-    fun navigateBack() {
-        isClosing = true
-        scope.launch {
-            kotlinx.coroutines.delay(420)
-            navigator.navigateUp()
-        }
-    }
 
     val screenAlpha by animateFloatAsState(
         targetValue = if (screenVisible && !isClosing) 1f else 0f,
@@ -286,14 +322,20 @@ fun ContactDetailsScreen(
     val openSignal = { num: String -> SocialUtils.openSignal(context, num) }
 
     val shareText = stringResource(R.string.share)
-    val shareContact = {
+    val nameText = stringResource(R.string.name)
+    val phoneNumberText = stringResource(R.string.phone_number)
+    val shareContact = { number: String ->
+        val name = if (displayName != number) "$nameText: $displayName\n" else ""
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, "Name: $displayName\nPhone: $displayPhone")
+            putExtra(Intent.EXTRA_TEXT, "$name$phoneNumberText: $number")
         }
         context.startActivity(Intent.createChooser(intent, shareText))
     }
 
+    if (showSharePicker && contact != null) {
+        NumberPickerDialog(numbers = contact!!.phoneNumbers, onDismissRequest = { showSharePicker = false }, onNumberSelected = { showSharePicker = false; shareContact(it) })
+    }
     if (showNumberPicker && contact != null) {
         NumberPickerDialog(numbers = contact!!.phoneNumbers, onDismissRequest = { showNumberPicker = false }, onNumberSelected = { showNumberPicker = false; initiateCall(it) })
     }
@@ -307,23 +349,47 @@ fun ContactDetailsScreen(
         SimPickerDialog(onDismissRequest = { showSimPicker = false }, onSimSelected = { handle -> makeCall(context, pendingNumber!!, handle); showSimPicker = false })
     }
     if (showQrDialog) {
-        QrCodeDialog(name = displayName, phone = displayPhone, email = contact?.emails?.firstOrNull()?.value, onDismiss = { showQrDialog = false })
+        QrCodeDialog(name = displayName, phone = pendingQrNumber ?: displayPhone, email = contact?.emails?.firstOrNull()?.value, onDismiss = { showQrDialog = false })
+    }
+    if (showQrDialogPicker) {
+        NumberPickerDialog(
+            numbers = contact!!.phoneNumbers,
+            onDismissRequest = { showQrDialogPicker = false },
+            onNumberSelected = { pendingQrNumber = it; showQrDialogPicker = false; showQrDialog = true }
+        )
     }
     if (showDeleteDialog) {
-        RillConfirmationDialog(
+        RillDialog(
             onDismissRequest = { showDeleteDialog = false },
-            onConfirm = {
-                if (contactId != null) {
-                    contactsViewModel.deleteContact(contactId)
-                    navigator.navigateUp()
+            title = stringResource(R.string.delete_contact),
+            icon = ImageVector.vectorResource(id = R.drawable.ic_delete),
+            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
+            confirmButton = {
+                TextButton(onClick = {
+                    showDeleteDialog = false
+                    if (contactId != null) {
+                        contactsViewModel.deleteContact(contactId)
+                        navigator.navigateUp()
+                    }
+                }) {
+                    Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
                 }
             },
-            title = "Delete Contact?",
-            message = "Are you sure you want to delete this contact? This action cannot be undone.",
-            confirmLabel = stringResource(R.string.delete),
-            icon = ImageVector.vectorResource(id = R.drawable.ic_delete),
-            isDestructive = true
-        )
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        ) {
+            Text(
+                stringResource(R.string.delete_contact_subtitle),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
     var editingNoteNumber by remember { mutableStateOf<String?>(null) }
     if (showNoteEditor) {
@@ -334,6 +400,27 @@ fun ContactDetailsScreen(
                 showNoteEditor = false
                 editingNoteNumber = null
             }
+        )
+    }
+
+    val initiateAddCallNote = { number: String ->
+        if (number != "Unknown") {
+            editingNoteNumber = number
+            showNoteEditor = true
+        }
+    }
+
+    if (showAddCallNotePicker && contact != null) {
+        NumberPickerDialog(numbers = contact!!.phoneNumbers, onDismissRequest = { showAddCallNotePicker = false }, onNumberSelected = { showAddCallNotePicker = false; initiateAddCallNote(it) })
+    }
+
+    if (showSourcesDialog && contact != null) {
+        SourcesDialog(
+            contact = contact!!,
+            sources = contactSources,
+            navigator = navigator,
+            navigateBack = { navigateBack() },
+            onDismiss = { showSourcesDialog = false }
         )
     }
 
@@ -365,19 +452,20 @@ fun ContactDetailsScreen(
                             .fillMaxWidth()
                             .graphicsLayer { alpha = titleAlpha }
                     ) {
-                        Text(
-                            text = displayName,
-                            style = MaterialTheme.typography.titleLarge,
-                            lineHeight = MaterialTheme.typography.titleMedium.lineHeight,
-                            fontWeight = FontWeight.Normal,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        Title(displayName, false)
                     }
                 },
                 navigationIcon = { NavigationIcon(onClick = { navigateBack() }) },
                 actions = {
                     if (contact != null) {
+//                        IconButton(onClick = {
+//                            if (contact != null) {
+//                                val dump = contactsViewModel.dumpContact(contact!!.id)
+//                                context.copyToClipboard(dump)
+//                            }
+//                        }) {
+//                            Icon(Icons.Default.BugReport, "Dump Contact")
+//                        }
                         val interactionSource = remember { MutableInteractionSource() }
                         val isPressed by interactionSource.collectIsPressedAsState()
                         val cornerRadius by animateDpAsState(
@@ -387,10 +475,10 @@ fun ContactDetailsScreen(
                         )
                         IconButton(
                             onClick = {
-                                contact?.let { contact_ ->
-                                    val newFavorite = !contact_.isFavorite
-                                    contact = contact_.copy(isFavorite = newFavorite)
-                                    contactsViewModel.toggleFavorite(contact_)
+                                contact?.let { thisContact ->
+                                    val newFavorite = !thisContact.isFavorite
+                                    contact = thisContact.copy(isFavorite = newFavorite)
+                                    contactsViewModel.toggleFavorite(thisContact)
                                 }
                             },
                             interactionSource = interactionSource,
@@ -401,27 +489,30 @@ fun ContactDetailsScreen(
                                     containerColor = MaterialTheme.colorScheme.primaryContainer
                                 ) else IconButtonDefaults.iconButtonColors()
                         ) {
-                            Icon(if (isFavorite) Icons.Default.Star else Icons.Default.StarOutline, "Favorite")
+                            Icon(
+                                if (isFavorite) Icons.Default.Star else Icons.Default.StarOutline,
+                                stringResource(if (isFavorite) R.string.remove_from_favorites else R.string.add_to_favorites))
                         }
                         Spacer(modifier = Modifier.size(8.dp))
                         IconButton(onClick = {
-//                            val intent = Intent(Intent.ACTION_EDIT).apply {
-//                                data = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contact!!.id.toLong())
+//                            navController.navigate(ContactEditScreenDestination(contactId = contact!!.id).route) {
+//                                launchSingleTop = true
+//                                restoreState = true
 //                            }
-//                            context.startActivity(intent)
-                            navController.navigate(ContactEditScreenDestination(contactId = contact!!.id).route) {
-                                launchSingleTop = true
-                                restoreState = true
+                            if (contactSources.size > 1) {
+                                showSourcesDialog = true
+                            } else {
+                                navController.navigate(ContactEditScreenDestination(contactId = contact!!.id).route) {
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
                             }
-                        }) { Icon(Icons.Rounded.Edit, "Edit") }
+                        }) { Icon(Icons.Rounded.Edit, stringResource(R.string.edit)) }
                     } else if (phoneNumber != null && phoneNumber != "Unknown") {
                         IconButton(onClick = {
-//                            val intent = Intent(Intent.ACTION_INSERT).apply { type = ContactsContract.RawContacts.CONTENT_TYPE; putExtra(ContactsContract.Intents.Insert.PHONE, phoneNumber) }
-//                            context.startActivity(intent)
                             navigator.navigate(ContactEditScreenDestination(initialPhone = phoneNumber))
-                        }) { Icon(Icons.Rounded.PersonAdd, "Add Contact") }
+                        }) { Icon(Icons.Rounded.PersonAdd, stringResource(R.string.add_contact)) }
                     }
-//                    IconButton(onClick = { showQrDialog = true }) { Icon(Icons.Rounded.QrCode2, "QR Code") }
                     if (contact != null) {
                         IconButton(onClick = {
                             scope.launch {
@@ -531,7 +622,7 @@ fun ContactDetailsScreen(
                                     RillExpressiveButton(
                                         modifier = Modifier.weight(1f),
                                         icon = Icons.Rounded.Phone,
-                                        label = "Call",
+                                        label = stringResource(R.string.call),
                                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                                         enabled = (contact != null && contact!!.phoneNumbers.isNotEmpty()) || displayPhone != "Unknown",
                                         onClick = {
@@ -547,7 +638,7 @@ fun ContactDetailsScreen(
                                     RillExpressiveButton(
                                         modifier = Modifier.weight(1f),
                                         icon = messageImageVector,
-                                        label = "Message",
+                                        label = stringResource(R.string.message),
                                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
                                         enabled = (contact != null && contact!!.phoneNumbers.isNotEmpty()) || displayPhone != "Unknown",
                                         onClick = {
@@ -558,10 +649,21 @@ fun ContactDetailsScreen(
                                                 true
                                             else if (displayPhone != "Unknown") initiateMessage(displayPhone)
                                         })
+                                    val videoImageVector: ImageVector =
+                                        ImageVector.vectorResource(id = R.drawable.ic_video_camera)
+                                    RillExpressiveButton(
+                                        modifier = Modifier.weight(1f),
+                                        icon = videoImageVector,
+                                        label = stringResource(R.string.video),
+                                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                        enabled = (contact != null && contact!!.phoneNumbers.isNotEmpty()) || displayPhone != "Unknown",
+                                        onClick = {
+                                            videoLauncher.startVideoCall(displayPhone, contact)
+                                        })
                                     RillExpressiveButton(
                                         modifier = Modifier.weight(1f),
                                         icon = Icons.Rounded.Email,
-                                        label = "Email",
+                                        label = stringResource(R.string.email),
                                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
                                         enabled = contact != null && contact!!.emails.isNotEmpty(),
                                         onClick = {
@@ -576,7 +678,7 @@ fun ContactDetailsScreen(
 
                             // Contact Info
                             item {
-                                RillExpressiveCard(title = "Contact Info") {
+                                RillExpressiveCard(title = stringResource(R.string.contact_info)) {
                                     val configuration = LocalConfiguration.current
                                     val screenWidth = configuration.screenWidthDp.dp
                                     val middleOfScreen = screenWidth / 3
@@ -586,28 +688,20 @@ fun ContactDetailsScreen(
                                             ImageVector.vectorResource(id = R.drawable.ic_message_outline)
                                         val numberSize = contact!!.phoneDetails.size
                                         contact!!.phoneDetails.forEachIndexed { index, phoneDetail ->
-                                            val recent =
-                                                if (normalizePhoneNumber(phoneDetail.number) == phoneNumber) " • Recent" else ""
-                                            val isDefault =
-                                                defaultPhone != null && phoneDetail.number == defaultPhone.number
+                                            val recentText = stringResource(R.string.recent_number)
+                                            val recent = if (normalizePhoneNumber(phoneDetail.number) == phoneNumber) " • $recentText" else ""
+                                            val isDefault = defaultPhone != null && phoneDetail.number == defaultPhone.number
+                                            val default = stringResource(R.string.default_number)
                                             val label =
-                                                if (isDefault) getPhoneTypeText(
-                                                    context,
-                                                    phoneDetail.type,
-                                                    phoneDetail.label
-                                                ) + " • Default" + recent
-                                                else getPhoneTypeText(
-                                                    context,
-                                                    phoneDetail.type,
-                                                    phoneDetail.label
-                                                ) + recent
+                                                if (isDefault) getPhoneTypeText(context, phoneDetail.type, phoneDetail.label) + " • $default" + recent
+                                                else getPhoneTypeText(context, phoneDetail.type, phoneDetail.label) + recent
                                             val interactionSource = remember { MutableInteractionSource() }
                                             Box {
                                                 var showOverflowMenu by remember { mutableStateOf(false) }
                                                 RillListItem(
                                                     headline = phoneDetail.number,
                                                     supporting = label,
-                                                    leadingIcon = Icons.Rounded.Phone,
+                                                    leadingIcon = if (isDefault) ImageVector.vectorResource(id = R.drawable.ic_phone_star) else Icons.Rounded.Phone,
                                                     iconContainerColor =
                                                         if (isDefault) MaterialTheme.colorScheme.onSecondaryContainer else null,
                                                     iconBgContainerColor =
@@ -664,13 +758,14 @@ fun ContactDetailsScreen(
                                                     )
                                                     if (numberSize > 1) {
                                                         if (phoneDetail.number == defaultPhone?.number) {
+                                                            val textToast = stringResource(R.string.default_phone_number_cleared)
                                                             DropdownMenuItem(
                                                                 contentPadding = PaddingValues(horizontal = 24.dp),
                                                                 text = { Text(stringResource(R.string.clear_default)) },
                                                                 onClick = {
                                                                     showOverflowMenu = false
                                                                     updateDefaultPhone(phoneDetail.number, false)
-                                                                    context.toast("Default phone number cleared")
+                                                                    context.toast(textToast)
                                                                 }
                                                             )
                                                         } else {
@@ -694,8 +789,7 @@ fun ContactDetailsScreen(
                                         }
 
                                         contact!!.emails.forEachIndexed { index, email ->
-                                            val label =
-                                                getEmailTypeText(context, email.type, email.label)
+                                            val label = getEmailTypeText(context, email.type, email.label)
                                             RillListItem(
                                                 headline = email.value,
                                                 supporting = label,
@@ -704,12 +798,28 @@ fun ContactDetailsScreen(
                                                 onLongClick = { context.copyToClipboard(email.value) }
                                             )
                                         }
+
+                                        if (contact!!.phoneDetails.isEmpty() && contact!!.emails.isEmpty()) {
+                                            RillListItem(
+                                                headline = stringResource(R.string.add_phone),
+                                                leadingIcon = Icons.Rounded.Add,
+                                                onClick = {
+                                                    if (contactSources.size > 1) {
+                                                        showSourcesDialog = true
+                                                    } else {
+                                                        navController.navigate(ContactEditScreenDestination(contactId = contact!!.id).route) {
+                                                            launchSingleTop = true
+                                                            restoreState = true
+                                                        }
+                                                    }
+                                                }
+                                            )
+                                        }
                                     } else if (phoneNumber != null && phoneNumber != "Unknown") {
                                         Box {
                                             var showOverflowMenu by remember { mutableStateOf(false) }
                                             RillListItem(
                                                 headline = phoneNumber,
-                                                supporting = "Unknown Number",
                                                 leadingIcon = Icons.Rounded.Phone,
                                                 onClick = { initiateCall(phoneNumber) },
                                                 onLongClick = { showOverflowMenu = true }
@@ -786,7 +896,6 @@ fun ContactDetailsScreen(
                                 }
                                 RillExpressiveCard(
                                     title = stringResource(R.string.call_notes),
-//                        icon = Icons.AutoMirrored.Outlined.StickyNote2,
                                     trailingIcon = Icons.AutoMirrored.Outlined.HelpOutline,
                                     onTrailingIconClick = { showAboutNotesDialog = true }
                                 ) {
@@ -806,17 +915,11 @@ fun ContactDetailsScreen(
                                                 )
                                                 .combinedClickable(
                                                     onClick = {
-                                                        // To add a note, use the first number or displayPhone
-                                                        val targetNumber =
-                                                            if (phoneNumbersList.isNotEmpty()) {
-                                                                phoneNumbersList.first()
-                                                            } else {
-                                                                displayPhone
-                                                            }
-                                                        if (targetNumber != "Unknown") {
-                                                            editingNoteNumber = targetNumber
-                                                            showNoteEditor = true
-                                                        }
+                                                        if (contact != null && contact!!.phoneNumbers.size > 1) showAddCallNotePicker =
+                                                            true
+                                                        else if (displayPhone != "Unknown") initiateAddCallNote(
+                                                            displayPhone
+                                                        )
                                                     }
                                                 )
                                                 .padding(vertical = 16.dp, horizontal = 24.dp)
@@ -844,10 +947,7 @@ fun ContactDetailsScreen(
                                                         val clipboard =
                                                             context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                                                         clipboard.setPrimaryClip(
-                                                            ClipData.newPlainText(
-                                                                "Phone number",
-                                                                noteContent
-                                                            )
+                                                            ClipData.newPlainText("Phone number", noteContent)
                                                         )
                                                     }
                                                 }
@@ -857,12 +957,11 @@ fun ContactDetailsScreen(
                                 }
                             }
 
-                            // Events & More
+                            // Events & Addresses
                             if (contact != null && (contact!!.events.isNotEmpty() || contact!!.addresses.isNotEmpty())) {
                                 item {
                                     RillExpressiveCard(
-                                        title = "Events & More",
-//                            icon = Icons.Default.Event
+                                        title = stringResource(R.string.other_information),
                                     ) {
                                         contact!!.events.forEachIndexed { index, event ->
                                             val isBirthday =
@@ -952,8 +1051,7 @@ fun ContactDetailsScreen(
                                 val hasMultipleNumbers = contactLogs.distinctBy { it.number }.size > 1 || (contact?.phoneNumbers != null && contact?.phoneNumbers?.size!! > 1)
                                 item {
                                     RillExpressiveCard(
-                                        title = "Recent Activity",
-//                            icon = Icons.Rounded.AccessTime
+                                        title = stringResource(R.string.recent_activity),
                                     ) {
                                         Column(modifier = Modifier.animateContentSize()) {
                                             contactLogs.take(3).forEachIndexed { index, log ->
@@ -963,7 +1061,6 @@ fun ContactDetailsScreen(
                                                 }
                                             }
                                             if (contactLogs.size > 3) {
-                                                Spacer(modifier = Modifier.height(2.dp))
                                                 val finalContactId = if (contact?.id != null) contact!!.id else if (contactId != "null") contactId else null
                                                 val finalPhoneNumber = phoneNumber ?: contact?.phoneNumbers?.firstOrNull() ?: contactLogs.firstOrNull()?.number
                                                 TextButton(
@@ -979,7 +1076,7 @@ fun ContactDetailsScreen(
                                                         .fillMaxWidth()
                                                         .offset(
                                                             x = 0.dp,
-                                                            y = (-4).dp
+                                                            y = (-2).dp
                                                         ), // We'll make up for the indentation
                                                     colors = ButtonDefaults.textButtonColors()
                                                         .copy(containerColor = cardColor),
@@ -990,7 +1087,7 @@ fun ContactDetailsScreen(
                                                         bottomEnd = cardCornerBig
                                                     ),
                                                 ) {
-                                                    Text("Show full history")
+                                                    Text(stringResource(R.string.show_full_history))
                                                 }
                                             }
                                         }
@@ -1034,7 +1131,7 @@ fun ContactDetailsScreen(
                                     val interactionSource = remember { MutableInteractionSource() }
                                     RillListItem(
                                         headline = stringResource(R.string.share),
-                                        supporting = "Send contact details to others",
+                                        supporting = stringResource(R.string.share_subtitle),
                                         leadingIcon = Icons.Rounded.Share,
                                         trailingIcon = Icons.Rounded.QrCode2,
                                         modifierTrailingIcon = Modifier
@@ -1046,13 +1143,21 @@ fun ContactDetailsScreen(
                                                     bounded = false,
                                                     radius = 24.dp
                                                 ),
-                                                onClick = { showQrDialog = true }
+                                                onClick = {
+                                                    if (contact != null && contact!!.phoneNumbers.size > 1) showQrDialogPicker =
+                                                        true
+                                                    else {
+                                                        pendingQrNumber = null; showQrDialog = true
+                                                    }
+                                                }
                                             ),
-                                        onClick = shareContact
+                                        onClick = {
+                                            if (contact != null && contact!!.phoneNumbers.size > 1) showSharePicker = true
+                                            else shareContact(displayPhone) }
                                     )
-                                    if (contact != null) {
+                                    if (contact != null && contactSources.size < 2) {
                                         RillListItem(
-                                            headline = "Move contact",
+                                            headline = stringResource(R.string.move_contact),
                                             supporting = stringResource(R.string.move_to_another_account),
                                             leadingIcon = Icons.AutoMirrored.Rounded.DriveFileMove,
                                             onClick = { showMoveDialog = true }
@@ -1069,6 +1174,7 @@ fun ContactDetailsScreen(
                                     }
 
                                     if (showMoveDialog) {
+                                        val textToast = stringResource(R.string.contact_moved_successfully)
                                         MoveSingleContactDialog(
                                             contact = contact!!,
                                             availableAccounts = availableAccountsForMoving,
@@ -1078,7 +1184,7 @@ fun ContactDetailsScreen(
                                             contactsViewModel = contactsViewModel,
                                             onDismiss = { showMoveDialog = false },
                                             onSuccess = { selectedAccount, isPrivate ->
-                                                context.toast("Contact moved successfully")
+                                                context.toast(textToast)
                                                 // Updating local data
                                                 contact = contact!!.copy(
                                                     accountName = selectedAccount?.name,
@@ -1092,16 +1198,32 @@ fun ContactDetailsScreen(
                                 }
                             }
 
-                            // Contact Source
-                            if (contact != null) {
+                            // Contact Sources
+                            if (contact != null && contactSources.size > 1) {
                                 item {
-                                    RillExpressiveCard {
-                                        RillListItem(
-                                            headline = if (contactAccount != null) ContactUtils.getAccountName(contactAccount!!)
-                                                        else ContactUtils.getFriendlyAccountName(null, contact!!.isPrivate),
-                                            supporting = if (contactAccount != null) ContactUtils.getFriendlyAccountName(contactAccount) else null,
+                                    RillExpressiveCard(title = stringResource(R.string.contact_sources)) {
+                                        contactSources.forEachIndexed { index, source ->
+                                            val account = Account(source.accountName ?: "", source.accountType ?: "")
+                                            SourceItem(
+                                                modifier = Modifier.combinedClickable(
+                                                    onClick = { showSourcesDialog = true },
+                                                ),
+                                                leadingIcon = ContactUtils.getAccountIcon(account, contact!!.isPrivate),
+                                                headline = ContactUtils.getAccountName(account),
+                                                supporting = ContactUtils.getFriendlyAccountName(account),
+                                            )
+                                        }
+                                    }
+                                }
+                            } else if (contact != null) {
+                                item {
+                                    RillExpressiveCard(title = stringResource(R.string.contact_sources)) {
+                                        SourceItem(
+                                            modifier = Modifier,
                                             leadingIcon = ContactUtils.getAccountIcon(contactAccount, contact!!.isPrivate),
-                                            onClick = {}
+                                            headline = if (contactAccount != null) ContactUtils.getAccountName(contactAccount!!)
+                                            else ContactUtils.getFriendlyAccountName(null, contact!!.isPrivate),
+                                            supporting = if (contactAccount != null) ContactUtils.getFriendlyAccountName(contactAccount) else null,
                                         )
                                     }
                                 }
@@ -1116,9 +1238,6 @@ fun ContactDetailsScreen(
                             .fillMaxWidth()
                             .height(340.dp)
                     ) {
-//                AsyncImage(model = contact?.photoUri, contentDescription = null, modifier = Modifier
-//                    .fillMaxSize()
-//                    .blur(50.dp), contentScale = ContentScale.Crop)
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -1149,17 +1268,6 @@ fun ContactDetailsScreen(
                                     modifier = Modifier.wrapContentSize(),
                                     contentAlignment = Alignment.Center
                                 ) {
-//                            Box(modifier = Modifier
-//                                .size(240.dp)
-//                                .background(
-//                                    brush = Brush.radialGradient(
-//                                        colors = listOf(
-//                                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f),
-//                                            Color.Transparent
-//                                        )
-//                                    )
-//                                )
-//                                .blur(60.dp))
                                     RillAvatar(
                                         name = displayName,
                                         photoUri = contact?.photoUri,
@@ -1206,7 +1314,7 @@ fun ContactDetailsScreen(
                                 RillExpressiveButton(
                                     modifier = Modifier.weight(1f),
                                     icon = Icons.Rounded.Phone,
-                                    label = "Call",
+                                    label = stringResource(R.string.call),
                                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                                     enabled = (contact != null && contact!!.phoneNumbers.isNotEmpty()) || displayPhone != "Unknown",
                                     onClick = {
@@ -1222,7 +1330,7 @@ fun ContactDetailsScreen(
                                 RillExpressiveButton(
                                     modifier = Modifier.weight(1f),
                                     icon = messageImageVector,
-                                    label = "Message",
+                                    label = stringResource(R.string.message),
                                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                                     enabled = (contact != null && contact!!.phoneNumbers.isNotEmpty()) || displayPhone != "Unknown",
                                     onClick = {
@@ -1238,7 +1346,7 @@ fun ContactDetailsScreen(
                                 RillExpressiveButton(
                                     modifier = Modifier.weight(1f),
                                     icon = videoImageVector,
-                                    label = "Video",
+                                    label = stringResource(R.string.video),
                                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                                     enabled = (contact != null && contact!!.phoneNumbers.isNotEmpty()) || displayPhone != "Unknown",
                                     onClick = {
@@ -1247,7 +1355,7 @@ fun ContactDetailsScreen(
                                 RillExpressiveButton(
                                     modifier = Modifier.weight(1f),
                                     icon = Icons.Rounded.Email,
-                                    label = "Email",
+                                    label = stringResource(R.string.email),
                                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                                     enabled = contact != null && contact!!.emails.isNotEmpty(),
                                     onClick = {
@@ -1263,8 +1371,7 @@ fun ContactDetailsScreen(
                         // Contact Info
                         item {
                             RillExpressiveCard(
-                                title = "Contact Info",
-//                        icon = Icons.Outlined.Info
+                                title = stringResource(R.string.contact_info),
                             ) {
                                 val configuration = LocalConfiguration.current
                                 val screenWidth = configuration.screenWidthDp.dp
@@ -1280,211 +1387,144 @@ fun ContactDetailsScreen(
                                         context.isPackageInstalled("com.whatsapp") || context.isPackageInstalled(
                                             "com.whatsapp.w4b"
                                         )
-                                    if (contact!!.phoneDetails.isNotEmpty()) {
-                                        contact!!.phoneDetails.forEachIndexed { index, phoneDetail ->
-                                            val recent =
-                                                if (normalizePhoneNumber(phoneDetail.number) == phoneNumber) " • Recent" else ""
-                                            val isDefault =
-                                                defaultPhone != null && phoneDetail.number == defaultPhone.number
-                                            val label =
-                                                if (isDefault) getPhoneTypeText(
-                                                    context,
-                                                    phoneDetail.type,
-                                                    phoneDetail.label
-                                                ) + " • Default" + recent
-                                                else getPhoneTypeText(
-                                                    context,
-                                                    phoneDetail.type,
-                                                    phoneDetail.label
-                                                ) + recent
-                                            Box {
-                                                var showOverflowMenu by remember {
-                                                    mutableStateOf(
-                                                        false
-                                                    )
-                                                }
-                                                RillListItem(
-                                                    headline = phoneDetail.number,
-                                                    supporting = label,
-                                                    leadingIcon = Icons.Rounded.Phone,
-                                                    iconContainerColor =
-                                                        if (isDefault) MaterialTheme.colorScheme.onSecondaryContainer else null,
-                                                    iconBgContainerColor =
-                                                        if (isDefault) MaterialTheme.colorScheme.primaryContainer else null,
-                                                    preTrailingIcon = if (whatsappInstall) whatsappImageVector else null,
-                                                    modifierPreTrailingIcon = Modifier
-                                                        .padding(end = 8.dp)
-                                                        .size(24.dp)
-                                                        .combinedClickable(
-                                                            interactionSource = null,
-                                                            indication = ripple(
-                                                                bounded = false,
-                                                                radius = 24.dp
-                                                            ),
-                                                            onClick = {
-                                                                context.launchSendWhatsAppIntent(
-                                                                    phoneDetail.number
-                                                                )
-                                                            }),
-                                                    trailingIcon = messageImageVector,
-                                                    modifierTrailingIcon = Modifier
-                                                        .padding(end = 8.dp)
-                                                        .size(24.dp)
-                                                        .combinedClickable(
-                                                            interactionSource = null,
-                                                            indication = ripple(
-                                                                bounded = false,
-                                                                radius = 24.dp
-                                                            ),
-                                                            onClick = {
-                                                                initiateMessage(
-                                                                    phoneDetail.number
-                                                                )
-                                                            }),
-                                                    onClick = { initiateCall(phoneDetail.number) },
-                                                    onLongClick = { showOverflowMenu = true }
+                                    contact!!.phoneDetails.forEachIndexed { index, phoneDetail ->
+                                        val recentText = stringResource(R.string.recent_number)
+                                        val recent = if (normalizePhoneNumber(phoneDetail.number) == phoneNumber) " • $recentText" else ""
+                                        val isDefault = defaultPhone != null && phoneDetail.number == defaultPhone.number
+                                        val default = stringResource(R.string.default_number)
+                                        val label =
+                                            if (isDefault) getPhoneTypeText(context, phoneDetail.type, phoneDetail.label) + " • $default" + recent
+                                            else getPhoneTypeText(context, phoneDetail.type, phoneDetail.label) + recent
+                                        Box {
+                                            var showOverflowMenu by remember {
+                                                mutableStateOf(
+                                                    false
                                                 )
-                                                // Dropdown menu
-                                                DropdownMenu(
-                                                    shape = RoundedCornerShape(16.dp),
-                                                    expanded = showOverflowMenu,
-                                                    onDismissRequest = {
-                                                        showOverflowMenu = false
+                                            }
+                                            RillListItem(
+                                                headline = phoneDetail.number,
+                                                supporting = label,
+                                                leadingIcon = if (isDefault) ImageVector.vectorResource(id = R.drawable.ic_phone_star) else Icons.Rounded.Phone,
+                                                iconContainerColor =
+                                                    if (isDefault) MaterialTheme.colorScheme.onSecondaryContainer else null,
+                                                iconBgContainerColor =
+                                                    if (isDefault) MaterialTheme.colorScheme.primaryContainer else null,
+                                                preTrailingIcon = if (whatsappInstall) whatsappImageVector else null,
+                                                modifierPreTrailingIcon = Modifier
+                                                    .padding(end = 8.dp)
+                                                    .size(24.dp)
+                                                    .combinedClickable(
+                                                        interactionSource = null,
+                                                        indication = ripple(
+                                                            bounded = false,
+                                                            radius = 24.dp
+                                                        ),
+                                                        onClick = {
+                                                            context.launchSendWhatsAppIntent(
+                                                                phoneDetail.number
+                                                            )
+                                                        }),
+                                                trailingIcon = messageImageVector,
+                                                modifierTrailingIcon = Modifier
+                                                    .padding(end = 8.dp)
+                                                    .size(24.dp)
+                                                    .combinedClickable(
+                                                        interactionSource = null,
+                                                        indication = ripple(
+                                                            bounded = false,
+                                                            radius = 24.dp
+                                                        ),
+                                                        onClick = {
+                                                            initiateMessage(
+                                                                phoneDetail.number
+                                                            )
+                                                        }),
+                                                onClick = { initiateCall(phoneDetail.number) },
+                                                onLongClick = { showOverflowMenu = true }
+                                            )
+                                            // Dropdown menu
+                                            DropdownMenu(
+                                                shape = RoundedCornerShape(16.dp),
+                                                expanded = showOverflowMenu,
+                                                onDismissRequest = {
+                                                    showOverflowMenu = false
+                                                },
+                                                offset = offsetMenu,
+                                            ) {
+                                                DropdownMenuItem(
+                                                    contentPadding = PaddingValues(
+                                                        horizontal = 24.dp
+                                                    ),
+                                                    text = {
+                                                        Text(
+                                                            phoneDetail.number,
+                                                            style = MaterialTheme.typography.bodyLarge,
+                                                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                                        )
                                                     },
-                                                    offset = offsetMenu,
-                                                ) {
-                                                    DropdownMenuItem(
-                                                        contentPadding = PaddingValues(
-                                                            horizontal = 24.dp
-                                                        ),
-                                                        text = {
-                                                            Text(
-                                                                phoneDetail.number,
-                                                                style = MaterialTheme.typography.bodyLarge,
-                                                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                                            )
-                                                        },
-                                                        onClick = { },
-                                                        enabled = false
-                                                    )
-                                                    DropdownMenuItem(
-                                                        contentPadding = PaddingValues(
-                                                            horizontal = 24.dp
-                                                        ),
-                                                        text = { Text(stringResource(R.string.add_note)) },
-                                                        onClick = {
-                                                            showOverflowMenu = false
-                                                            editingNoteNumber =
-                                                                phoneDetail.number
-                                                            showNoteEditor = true
-                                                        }
-                                                    )
-                                                    DropdownMenuItem(
-                                                        contentPadding = PaddingValues(
-                                                            horizontal = 24.dp
-                                                        ),
-                                                        text = { Text(stringResource(R.string.copy)) },
-                                                        onClick = {
-                                                            showOverflowMenu = false
-                                                            context.copyToClipboard(phoneDetail.number)
-                                                        }
-                                                    )
-                                                    if (numberSize > 1) {
-                                                        if (phoneDetail.number == defaultPhone?.number) {
-                                                            DropdownMenuItem(
-                                                                contentPadding = PaddingValues(
-                                                                    horizontal = 24.dp
-                                                                ),
-                                                                text = { Text(stringResource(R.string.clear_default)) },
-                                                                onClick = {
-                                                                    showOverflowMenu = false
-                                                                    updateDefaultPhone(
-                                                                        phoneDetail.number,
-                                                                        false
-                                                                    )
-                                                                    context.toast("Default phone number cleared")
-                                                                }
-                                                            )
-                                                        } else {
-                                                            val message = stringResource(
-                                                                R.string.default_phone_set,
-                                                                phoneDetail.number
-                                                            )
-                                                            DropdownMenuItem(
-                                                                contentPadding = PaddingValues(
-                                                                    horizontal = 24.dp
-                                                                ),
-                                                                text = { Text(stringResource(R.string.set_as_default)) },
-                                                                onClick = {
-                                                                    showOverflowMenu = false
-                                                                    updateDefaultPhone(
-                                                                        phoneDetail.number,
-                                                                        true
-                                                                    )
-                                                                    context.toast(message)
-                                                                }
-                                                            )
-                                                        }
+                                                    onClick = { },
+                                                    enabled = false
+                                                )
+                                                DropdownMenuItem(
+                                                    contentPadding = PaddingValues(
+                                                        horizontal = 24.dp
+                                                    ),
+                                                    text = { Text(stringResource(R.string.add_note)) },
+                                                    onClick = {
+                                                        showOverflowMenu = false
+                                                        editingNoteNumber =
+                                                            phoneDetail.number
+                                                        showNoteEditor = true
+                                                    }
+                                                )
+                                                DropdownMenuItem(
+                                                    contentPadding = PaddingValues(
+                                                        horizontal = 24.dp
+                                                    ),
+                                                    text = { Text(stringResource(R.string.copy)) },
+                                                    onClick = {
+                                                        showOverflowMenu = false
+                                                        context.copyToClipboard(phoneDetail.number)
+                                                    }
+                                                )
+                                                if (numberSize > 1) {
+                                                    if (phoneDetail.number == defaultPhone?.number) {
+                                                        val textToast = stringResource(R.string.default_phone_number_cleared)
+                                                        DropdownMenuItem(
+                                                            contentPadding = PaddingValues(
+                                                                horizontal = 24.dp
+                                                            ),
+                                                            text = { Text(stringResource(R.string.clear_default)) },
+                                                            onClick = {
+                                                                showOverflowMenu = false
+                                                                updateDefaultPhone(
+                                                                    phoneDetail.number,
+                                                                    false
+                                                                )
+                                                                context.toast(textToast)
+                                                            }
+                                                        )
+                                                    } else {
+                                                        val message = stringResource(
+                                                            R.string.default_phone_set,
+                                                            phoneDetail.number
+                                                        )
+                                                        DropdownMenuItem(
+                                                            contentPadding = PaddingValues(
+                                                                horizontal = 24.dp
+                                                            ),
+                                                            text = { Text(stringResource(R.string.set_as_default)) },
+                                                            onClick = {
+                                                                showOverflowMenu = false
+                                                                updateDefaultPhone(
+                                                                    phoneDetail.number,
+                                                                    true
+                                                                )
+                                                                context.toast(message)
+                                                            }
+                                                        )
                                                     }
                                                 }
-                                            }
-                                        }
-                                    } else if (contact!!.phoneNumbers.isNotEmpty()) {
-                                        contact!!.phoneNumbers.forEachIndexed { index, number ->
-                                            val recent =
-                                                if (normalizePhoneNumber(number) == phoneNumber) "Recent" else ""
-                                            val isDefault =
-                                                defaultPhone != null && number == defaultPhone.number
-                                            val label =
-                                                if (isDefault) " • Default$recent"
-                                                else recent
-                                            Box {
-                                                var showOverflowMenu by remember {
-                                                    mutableStateOf(
-                                                        false
-                                                    )
-                                                }
-                                                RillListItem(
-                                                    headline = number,
-                                                    supporting = label.ifBlank { null },
-                                                    leadingIcon = Icons.Rounded.Phone,
-                                                    iconContainerColor =
-                                                        if (isDefault) MaterialTheme.colorScheme.onSecondaryContainer else null,
-                                                    iconBgContainerColor =
-                                                        if (isDefault) MaterialTheme.colorScheme.primaryContainer else null,
-                                                    preTrailingIcon = if (whatsappInstall) whatsappImageVector else null,
-                                                    modifierPreTrailingIcon = Modifier
-                                                        .padding(end = 8.dp)
-                                                        .size(24.dp)
-                                                        .combinedClickable(
-                                                            interactionSource = null,
-                                                            indication = ripple(
-                                                                bounded = false,
-                                                                radius = 24.dp
-                                                            ),
-                                                            onClick = {
-                                                                context.launchSendWhatsAppIntent(
-                                                                    number
-                                                                )
-                                                            }),
-                                                    trailingIcon = messageImageVector,
-                                                    modifierTrailingIcon = Modifier
-                                                        .padding(end = 8.dp)
-                                                        .size(24.dp)
-                                                        .combinedClickable(
-                                                            interactionSource = null,
-                                                            indication = ripple(
-                                                                bounded = false,
-                                                                radius = 24.dp
-                                                            ),
-                                                            onClick = {
-                                                                initiateMessage(
-                                                                    number
-                                                                )
-                                                            }),
-                                                    onClick = { initiateCall(number) },
-//                                                        onLongClick = { showOverflowMenu = true }
-                                                )
                                             }
                                         }
                                     }
@@ -1500,12 +1540,28 @@ fun ContactDetailsScreen(
                                             onLongClick = { context.copyToClipboard(email.value) }
                                         )
                                     }
+
+                                    if (contact!!.phoneDetails.isEmpty() && contact!!.emails.isEmpty()) {
+                                        RillListItem(
+                                            headline = stringResource(R.string.add_phone),
+                                            leadingIcon = Icons.Rounded.Add,
+                                            onClick = {
+                                                if (contactSources.size > 1) {
+                                                    showSourcesDialog = true
+                                                } else {
+                                                    navController.navigate(ContactEditScreenDestination(contactId = contact!!.id).route) {
+                                                        launchSingleTop = true
+                                                        restoreState = true
+                                                    }
+                                                }
+                                            }
+                                        )
+                                    }
                                 } else if (phoneNumber != null && phoneNumber != "Unknown") {
                                     Box {
                                         var showOverflowMenu by remember { mutableStateOf(false) }
                                         RillListItem(
                                             headline = phoneNumber,
-                                            supporting = "Unknown Number",
                                             leadingIcon = Icons.Rounded.Phone,
                                             onClick = { initiateCall(phoneNumber) },
                                             onLongClick = { showOverflowMenu = true }
@@ -1602,17 +1658,11 @@ fun ContactDetailsScreen(
                                             )
                                             .combinedClickable(
                                                 onClick = {
-                                                    // To add a note, use the first number or displayPhone
-                                                    val targetNumber =
-                                                        if (phoneNumbersList.isNotEmpty()) {
-                                                            phoneNumbersList.first()
-                                                        } else {
-                                                            displayPhone
-                                                        }
-                                                    if (targetNumber != "Unknown") {
-                                                        editingNoteNumber = targetNumber
-                                                        showNoteEditor = true
-                                                    }
+                                                    if (contact != null && contact!!.phoneNumbers.size > 1) showAddCallNotePicker =
+                                                        true
+                                                    else if (displayPhone != "Unknown") initiateAddCallNote(
+                                                        displayPhone
+                                                    )
                                                 }
                                             )
                                             .padding(vertical = 16.dp, horizontal = 24.dp)
@@ -1653,11 +1703,11 @@ fun ContactDetailsScreen(
                             }
                         }
 
-                        // Events & More
+                        // Events & Addresses
                         if (contact != null && (contact!!.events.isNotEmpty() || contact!!.addresses.isNotEmpty())) {
                             item {
                                 RillExpressiveCard(
-                                    title = "Events & More",
+                                    title = stringResource(R.string.other_information),
 //                            icon = Icons.Default.Event
                                 ) {
                                     contact!!.events.forEachIndexed { index, event ->
@@ -1748,8 +1798,7 @@ fun ContactDetailsScreen(
                             val hasMultipleNumbers = contactLogs.distinctBy { it.number }.size > 1 || (contact?.phoneNumbers != null && contact?.phoneNumbers?.size!! > 1)
                             item {
                                 RillExpressiveCard(
-                                    title = "Recent Activity",
-//                            icon = Icons.Rounded.AccessTime
+                                    title = stringResource(R.string.recent_activity),
                                 ) {
                                     Column(modifier = Modifier.animateContentSize()) {
                                         contactLogs.take(3).forEachIndexed { index, log ->
@@ -1759,7 +1808,6 @@ fun ContactDetailsScreen(
                                             }
                                         }
                                         if (contactLogs.size > 3) {
-                                            Spacer(modifier = Modifier.height(2.dp))
                                             val finalContactId = if (contact?.id != null) contact!!.id else if (contactId != "null") contactId else null
                                             val finalPhoneNumber = phoneNumber ?: contact?.phoneNumbers?.firstOrNull() ?: contactLogs.firstOrNull()?.number
                                             TextButton(
@@ -1775,7 +1823,7 @@ fun ContactDetailsScreen(
                                                     .fillMaxWidth()
                                                     .offset(
                                                         x = 0.dp,
-                                                        y = (-4).dp
+                                                        y = (-2).dp
                                                     ), // We'll make up for the indentation
                                                 colors = ButtonDefaults.textButtonColors()
                                                     .copy(containerColor = cardColor),
@@ -1786,7 +1834,7 @@ fun ContactDetailsScreen(
                                                     bottomEnd = cardCornerBig
                                                 ),
                                             ) {
-                                                Text("Show full history")
+                                                Text(stringResource(R.string.show_full_history))
                                             }
                                         }
                                     }
@@ -1830,7 +1878,7 @@ fun ContactDetailsScreen(
                                 val interactionSource = remember { MutableInteractionSource() }
                                 RillListItem(
                                     headline = stringResource(R.string.share),
-                                    supporting = "Send contact details to others",
+                                    supporting = stringResource(R.string.share_subtitle),
                                     leadingIcon = Icons.Rounded.Share,
                                     trailingIcon = Icons.Rounded.QrCode2,
                                     modifierTrailingIcon = Modifier
@@ -1842,13 +1890,22 @@ fun ContactDetailsScreen(
                                                 bounded = false,
                                                 radius = 24.dp
                                             ),
-                                            onClick = { showQrDialog = true }
+                                            onClick = {
+                                                if (contact != null && contact!!.phoneNumbers.size > 1) showQrDialogPicker =
+                                                    true
+                                                else {
+                                                    pendingQrNumber = null; showQrDialog = true
+                                                }
+                                            }
                                         ),
-                                    onClick = shareContact
+                                    onClick = {
+                                        if (contact != null && contact!!.phoneNumbers.size > 1) showSharePicker = true
+                                        else shareContact(displayPhone)
+                                    }
                                 )
-                                if (contact != null) {
+                                if (contact != null && contactSources.size < 2) {
                                     RillListItem(
-                                        headline = "Move contact",
+                                        headline = stringResource(R.string.move_contact),
                                         supporting = stringResource(R.string.move_to_another_account),
                                         leadingIcon = Icons.AutoMirrored.Rounded.DriveFileMove,
                                         onClick = { showMoveDialog = true }
@@ -1865,6 +1922,7 @@ fun ContactDetailsScreen(
                                 }
 
                                 if (showMoveDialog) {
+                                    val textToast = stringResource(R.string.contact_moved_successfully)
                                     MoveSingleContactDialog(
                                         contact = contact!!,
                                         availableAccounts = availableAccountsForMoving,
@@ -1874,7 +1932,7 @@ fun ContactDetailsScreen(
                                         contactsViewModel = contactsViewModel,
                                         onDismiss = { showMoveDialog = false },
                                         onSuccess = { selectedAccount, isPrivate ->
-                                            context.toast("Contact moved successfully")
+                                            context.toast(textToast)
                                             // Updating local data
                                             contact = contact!!.copy(
                                                 accountName = selectedAccount?.name,
@@ -1888,16 +1946,32 @@ fun ContactDetailsScreen(
                             }
                         }
 
-                        // Contact Source
-                        if (contact != null) {
+                        // Contact Sources
+                        if (contact != null && contactSources.size > 1) {
                             item {
-                                RillExpressiveCard {
-                                    RillListItem(
+                                RillExpressiveCard(title = stringResource(R.string.contact_sources)) {
+                                    contactSources.forEachIndexed { index, source ->
+                                        val account = Account(source.accountName ?: "", source.accountType ?: "")
+                                        SourceItem(
+                                            modifier = Modifier.combinedClickable(
+                                                onClick = { showSourcesDialog = true },
+                                            ),
+                                            leadingIcon = ContactUtils.getAccountIcon(account, contact!!.isPrivate),
+                                            headline = ContactUtils.getAccountName(account),
+                                            supporting = ContactUtils.getFriendlyAccountName(account),
+                                        )
+                                    }
+                                }
+                            }
+                        } else if (contact != null) {
+                            item {
+                                RillExpressiveCard(title = stringResource(R.string.contact_sources)) {
+                                    SourceItem(
+                                        modifier = Modifier,
+                                        leadingIcon = ContactUtils.getAccountIcon(contactAccount, contact!!.isPrivate),
                                         headline = if (contactAccount != null) ContactUtils.getAccountName(contactAccount!!)
                                                     else ContactUtils.getFriendlyAccountName(null, contact!!.isPrivate),
                                         supporting = if (contactAccount != null) ContactUtils.getFriendlyAccountName(contactAccount) else null,
-                                        leadingIcon = ContactUtils.getAccountIcon(contactAccount, contact!!.isPrivate),
-                                        onClick = {}
                                     )
                                 }
                             }
@@ -1927,7 +2001,7 @@ fun QrCodeDialog(name: String, phone: String?, email: String?, onDismiss: () -> 
     Dialog(onDismissRequest = onDismiss) {
         Card(shape = RoundedCornerShape(28.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
             Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Contact QR", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.contact_qr), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(16.dp))
                 qrBitmap?.let {
                     Image(bitmap = it.asImageBitmap(), contentDescription = "QR Code", modifier = Modifier
@@ -1941,7 +2015,7 @@ fun QrCodeDialog(name: String, phone: String?, email: String?, onDismiss: () -> 
                 Spacer(Modifier.height(24.dp))
                 Button(onClick = onDismiss, modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 2.dp), shape = RoundedCornerShape(12.dp)) { Text("Close") }
+                    .padding(horizontal = 2.dp), shape = RoundedCornerShape(12.dp)) { Text(stringResource(R.string.close)) }
             }
         }
     }
@@ -1964,5 +2038,266 @@ private fun buildClickableAnnotatedString(text: String): AnnotatedString {
             lastIdx = end
         }
         append(text.substring(lastIdx))
+    }
+}
+
+
+@Composable
+fun SourceItem(
+    modifier: Modifier,
+    leadingIcon: ImageVector,
+    headline: String,
+    supporting: String?,
+//    onClick: () -> Unit,
+) {
+    Surface(
+        modifier = modifier,
+        color = cardColor,
+        shape = RoundedCornerShape(cardCornerSmall),
+        shadowElevation = 0.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                modifier = Modifier.size(32.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = leadingIcon,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(14.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = headline,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Normal,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                if (supporting != null) {
+                    Text(
+                        text = supporting,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SourcesDialog(
+    contact: Contact,
+    sources: List<ContactsRepository.ContactSource>,
+    navigator: DestinationsNavigator,
+    navigateBack: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val contactsViewModel: ContactsViewModel = koinActivityViewModel()
+    var sourceData by remember { mutableStateOf<Map<String, Contact>>(emptyMap()) }
+    var isLoading by remember { mutableStateOf(true) }
+
+    LaunchedEffect(sources) {
+        isLoading = true
+        val data = mutableMapOf<String, Contact>()
+        sources.forEach { source ->
+            try {
+                val contactData = contactsViewModel.getRawContactData(source.rawContactId)
+                if (contactData != null) {
+                    data[source.rawContactId] = contactData
+                }
+            } catch (_: Exception) {
+            }
+        }
+        sourceData = data
+        isLoading = false
+    }
+
+    RillDialog(
+        onDismissRequest = onDismiss,
+        title = stringResource(R.string.contact_sources),
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.close))
+            }
+        }
+    ) {
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 600.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(cardSpacedBy)
+            ) {
+                Text(
+                    stringResource(R.string.unmerging_contacts_description),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 16.dp)
+                )
+
+                RillExpressiveCard(shape = RoundedCornerShape(cardCornerMedium)) {
+                    sources.forEachIndexed { _, source ->
+                        val account = Account(source.accountName ?: "", source.accountType ?: "")
+                        val contactData = sourceData[source.rawContactId]
+
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(cardCornerSmall),
+                            colors = CardDefaults.cardColors(containerColor = cardColor)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        onDismiss()
+                                        navigator.navigate(
+                                            ContactEditScreenDestination(
+                                                contactId = contact.id,
+                                                rawContactId = source.rawContactId,
+                                                isEditingSource = true
+                                            )
+                                        )
+                                    }
+                                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                if (contactData != null) {
+                                    RillAvatar(
+                                        name = contactData.displayName,
+                                        photoUri = contactData.photoUri,
+                                        modifier = Modifier.size(42.dp)
+                                    )
+                                } else {
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = MaterialTheme.colorScheme.surfaceVariant,
+                                        modifier = Modifier.size(32.dp)
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(
+                                                imageVector = ContactUtils.getAccountIcon(account, contact.isPrivate),
+                                                contentDescription = null,
+                                                modifier = Modifier.size(16.dp),
+                                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
+                                }
+
+                                if (contactData != null) {
+                                    Column(
+                                        modifier = Modifier.weight(1f).padding(start = 14.dp),
+                                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                                    ) {
+                                        if (contactData.displayName.isNotBlank()) {
+                                            Text(
+                                                modifier = Modifier.padding(start = 2.dp),
+                                                text = contactData.displayName,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                fontWeight = FontWeight.SemiBold,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis,
+                                            )
+                                        }
+
+                                        if (contactData.phoneDetails.isNotEmpty()) {
+                                            Text(
+                                                modifier = Modifier.padding(start = 2.dp),
+                                                text = contactData.phoneDetails.joinToString(", ") { it.number },
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis,
+                                            )
+                                        } else if (contactData.emails.isNotEmpty()) {
+                                            Text(
+                                                modifier = Modifier.padding(start = 2.dp),
+                                                text =  contactData.emails.joinToString(", ") { it.value },
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis,
+                                            )
+                                        }
+
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Surface(
+                                                shape = CircleShape,
+                                                color = MaterialTheme.colorScheme.secondaryContainer,
+                                                modifier = Modifier.size(16.dp)
+                                            ) {
+                                                Box(contentAlignment = Alignment.Center) {
+                                                    Icon(
+                                                        imageVector = ContactUtils.getAccountIcon(account, contact.isPrivate),
+                                                        contentDescription = null,
+                                                        modifier = Modifier.size(10.dp),
+                                                        tint = MaterialTheme.colorScheme.onSecondaryContainer
+                                                    )
+                                                }
+                                            }
+                                            Spacer(Modifier.width(6.dp))
+                                            Text(
+                                                text = ContactUtils.getAccountName(account), // + "(${ContactUtils.getFriendlyAccountName(account)})",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis,
+                                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Button(
+                        onClick = {
+                            contactsViewModel.unmergeAll(contact.id)
+                            onDismiss()
+                            navigateBack()
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .offset(x = 0.dp, y = (-4).dp),
+                        shape = RoundedCornerShape(
+                            topStart = cardCornerSmall,
+                            topEnd = cardCornerSmall,
+                            bottomStart = cardCornerMedium,
+                            bottomEnd = cardCornerMedium
+                        ),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    ) {
+                        Icon(Icons.AutoMirrored.Rounded.CallSplit, null)
+                        Spacer(Modifier.width(8.dp))
+                        Text(stringResource(R.string.unlink))
+                    }
+                }
+            }
+        }
     }
 }

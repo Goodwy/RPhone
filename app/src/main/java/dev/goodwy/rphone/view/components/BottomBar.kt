@@ -55,11 +55,15 @@ import android.content.res.Configuration
 import android.os.Build
 import androidx.compose.material.icons.automirrored.filled.StickyNote2
 import androidx.compose.material.icons.automirrored.outlined.StickyNote2
+import androidx.compose.material.icons.filled.Assistant
 import androidx.compose.material.icons.filled.Dialpad
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.Assistant
 import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.AccessTimeFilled
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import dev.goodwy.rphone.bottomBarHeight
@@ -72,15 +76,16 @@ import dev.goodwy.rphone.liquidglass.highlight.Highlight
 import dev.goodwy.rphone.liquidglass.LocalLiquidGlassBackdrop
 import dev.goodwy.rphone.view.theme.MyColors.bottomBarColor
 import com.ramcosta.composedestinations.generated.destinations.DialPadScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.SettingsScreenDestination
 
 // Tab routes — only show the bar when one of these is active
 private val TAB_ROUTES = setOf(
     FavoritesScreenDestination.route,
-    RecentScreenDestination.route,
     ContactScreenDestination.route,
+    RecentScreenDestination.route,
     NotesScreenDestination.route,
     DialPadScreenDestination.route,
-//    SettingsScreenDestination.route,
+    SettingsScreenDestination.route,
 //    SearchScreenDestination.route
 )
 
@@ -128,6 +133,7 @@ fun BottomBar(navController: NavController) {
     val showContactsTab     = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS,  true) }
     val showDialpadTab      = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD, true) }
     val showNotesTab        = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES,     false) }
+    val showSettingsTab     = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SETTINGS,     true) }
     val tabOrder            = remember(settingsState) { parseTabOrder(prefs.getString(PreferenceManager.KEY_TAB_ORDER, null)) }
     val labelStyle: TextStyle = MaterialTheme.typography.labelMedium
 
@@ -138,19 +144,21 @@ fun BottomBar(navController: NavController) {
     val isFavoritesSelected = currentDestination?.hierarchy?.any { it.route == FavoritesScreenDestination.route } == true
     val isRecentsSelected   = currentDestination?.hierarchy?.any { it.route == RecentScreenDestination.route } == true
     val isContactsSelected  = currentDestination?.hierarchy?.any { it.route == ContactScreenDestination.route } == true
-    val isDialpadSelected  = currentDestination?.hierarchy?.any { it.route == DialPadScreenDestination.route } == true
+    val isDialpadSelected   = currentDestination?.hierarchy?.any { it.route == DialPadScreenDestination.route } == true
     val isNotesSelected     = currentDestination?.hierarchy?.any { it.route == NotesScreenDestination.route } == true
-//    val isSettingsSelected     =currentDestination?.hierarchy?.any { it.route?.contains("settings", ignoreCase = true) == true } == true
+    val isSettingsSelected  = currentDestination?.hierarchy?.any { it.route == SettingsScreenDestination.route } == true //{ it.route?.contains("settings", ignoreCase = true) == true } == true
 
     // Build visible tab routes dynamically based on prefs
-    val visibleTabRoutes = remember(showFavoritesTab, showCallsTab, showContactsTab, showDialpadTab, showNotesTab) {
+    val visibleTabRoutes = remember(showFavoritesTab, showCallsTab, showContactsTab, showDialpadTab, showNotesTab, showSettingsTab) {
         buildSet {
             if (showFavoritesTab) add(FavoritesScreenDestination.route)
             if (showCallsTab)     add(RecentScreenDestination.route)
             // Add contacts if ‘Favorites’ and ‘Contacts’ are hidden to make the ‘View contacts’ button work
-            if (showContactsTab || !showFavoritesTab)  add(ContactScreenDestination.route)
+//            if (showContactsTab || !showFavoritesTab)  add(ContactScreenDestination.route)
+            add(ContactScreenDestination.route)
             if (showDialpadTab)   add(DialPadScreenDestination.route)
             if (showNotesTab)     add(NotesScreenDestination.route)
+            if (showSettingsTab)     add(SettingsScreenDestination.route)
         }
     }
 
@@ -173,6 +181,7 @@ fun BottomBar(navController: NavController) {
         "contacts"   -> ContactScreenDestination.route
         "dialpad"    -> DialPadScreenDestination.route
         "notes"      -> NotesScreenDestination.route
+        "settings"   -> SettingsScreenDestination.route
         else         -> null
     }
 
@@ -233,9 +242,18 @@ fun BottomBar(navController: NavController) {
     }
 
     val houseIcon = ImageVector.vectorResource(id = R.drawable.ic_house_fill)
+    val settingsIcon = ImageVector.vectorResource(id = R.drawable.ic_settings)
+    val labelFavorites = stringResource(R.string.favorites)
+    val labelRecents =
+        if (!showFavoritesTab && !showContactsTab) stringResource(R.string.home_tab)
+        else stringResource(R.string.recents)
+    val labelContacts = stringResource(R.string.contacts)
+    val labelKeypad = stringResource(R.string.keypad)
+    val labelNotes = stringResource(R.string.notes)
+    val labelSettings = stringResource(R.string.settings)
     val orderedTabs: List<TabSpec> = remember(
-        tabOrder, showFavoritesTab, showCallsTab, showContactsTab, showDialpadTab, showNotesTab,
-        isFavoritesSelected, isRecentsSelected, isContactsSelected, isDialpadSelected, isNotesSelected
+        tabOrder, showFavoritesTab, showCallsTab, showContactsTab, showDialpadTab, showNotesTab, showSettingsTab,
+        isFavoritesSelected, isRecentsSelected, isContactsSelected, isDialpadSelected, isNotesSelected, isSettingsSelected
     ) {
         tabOrder.mapNotNull { key ->
             when (key) {
@@ -243,9 +261,9 @@ fun BottomBar(navController: NavController) {
                     key             = key,
                     route           = FavoritesScreenDestination.route,
                     selected        = isFavoritesSelected,
-                    selectedIcon    = Icons.Filled.Star,
-                    unselectedIcon  = Icons.Outlined.StarOutline,
-                    label           = "Favourites",
+                    selectedIcon    = Icons.Filled.Assistant,
+                    unselectedIcon  = Icons.Outlined.Assistant,
+                    label           = labelFavorites,
                     onClick         = { doHaptic(); navigate(FavoritesScreenDestination.route) }
                 ) else null
                 "calls" -> if (showCallsTab) TabSpec(
@@ -254,7 +272,7 @@ fun BottomBar(navController: NavController) {
                     selected        = isRecentsSelected,
                     selectedIcon    = if (!showFavoritesTab && !showContactsTab) houseIcon else Icons.Rounded.AccessTimeFilled,
                     unselectedIcon  = if (!showFavoritesTab && !showContactsTab) houseIcon else Icons.Rounded.AccessTime,
-                    label           = if (!showFavoritesTab && !showContactsTab) "Home" else "Calls",
+                    label           = labelRecents,
                     onClick         = { doHaptic(); navigate(RecentScreenDestination.route) }
                 ) else null
                 "contacts" -> if (showContactsTab) TabSpec(
@@ -263,7 +281,7 @@ fun BottomBar(navController: NavController) {
                     selected        = isContactsSelected,
                     selectedIcon    = Icons.Filled.AccountCircle,
                     unselectedIcon  = Icons.Outlined.AccountCircle,
-                    label           = "Contacts",
+                    label           = labelContacts,
                     onClick         = { doHaptic(); navigate(ContactScreenDestination.route) }
                 ) else null
                 "dialpad" -> if (showDialpadTab) TabSpec(
@@ -272,7 +290,7 @@ fun BottomBar(navController: NavController) {
                     selected       = isDialpadSelected,
                     selectedIcon   = Icons.Filled.Dialpad,
                     unselectedIcon = Icons.Filled.Dialpad,
-                    label          = "Keypad",
+                    label          = labelKeypad,
                     onClick        = { doHaptic(); navigate(DialPadScreenDestination(initialNumber = "").route) }
                 ) else null
                 "notes" -> if (showNotesTab) TabSpec(
@@ -281,8 +299,17 @@ fun BottomBar(navController: NavController) {
                     selected       = isNotesSelected,
                     selectedIcon   = Icons.AutoMirrored.Filled.StickyNote2,
                     unselectedIcon = Icons.AutoMirrored.Outlined.StickyNote2,
-                    label          = "Notes",
+                    label          = labelNotes,
                     onClick        = { doHaptic(); navigate(NotesScreenDestination.route) }
+                ) else null
+                "settings" -> if (showSettingsTab) TabSpec(
+                    key            = key,
+                    route          = SettingsScreenDestination.route,
+                    selected       = isSettingsSelected,
+                    selectedIcon   = Icons.Default.Settings,
+                    unselectedIcon = settingsIcon,
+                    label          = labelSettings,
+                    onClick        = { doHaptic(); navigate(SettingsScreenDestination.route) }
                 ) else null
                 else -> null
             }
@@ -476,7 +503,7 @@ private fun RowScope.AnimatedNavBarItem(
     val scale by animateFloatAsState(
         targetValue   = when {
             isPressed -> 0.85f
-            selected  -> 1.04f
+            selected  -> 1f
             else      -> 1f
         },
         animationSpec = if (isPressed)

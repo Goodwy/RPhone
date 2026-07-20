@@ -21,7 +21,7 @@ val appModule = module {
         Room.databaseBuilder(
             androidContext(),
             RillDatabase::class.java,
-            "rivo_database"
+            "rill_database"
         ).allowMainThreadQueries().build()
     }
     single { get<RillDatabase>().privateContactDao() }
@@ -30,7 +30,7 @@ val appModule = module {
         ContactsRepository(androidContext(), get())
     }
     single<ICallLogRepository> {
-        CallLogRepository(androidContext().contentResolver, androidContext(), get())
+        CallLogRepository(androidContext(), androidContext().contentResolver,  get())
     }
     single {
         PreferenceManager(androidContext())
