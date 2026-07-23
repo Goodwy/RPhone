@@ -1,0 +1,486 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="widget_description">Πρόσφατες κλήσεις με γρήγορη κλήση</string>
+    <string name="copy" tools:ignore="PrivateResource">Αντιγραφή</string>
+    <string name="copy_path">Αντιγραφή διαδρομής</string>
+    <string name="paste">Επικόλληση</string>
+    <string name="delete">Διαγραφή</string>
+    <string name="delete_contact">Διαγραφή επαφής</string>
+    <string name="delete_contact_subtitle">Είστε σίγουροι ότι θέλετε να διαγράψετε αυτήν την επαφή; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.</string>
+    <string name="delete_contacts">Διαγραφή επαφών</string>
+    <string name="delete_contacts_subtitle">Είστε σίγουροι ότι θέλετε να διαγράψετε %s επιλεγμένες επαφές; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.</string>
+    <string name="selected_items">%s επιλεγμένα</string>
+    <string name="select">Επιλογή</string>
+    <string name="select_all">Επιλογή όλων</string>
+    <string name="deselect_all">Αποεπιλογή όλων</string>
+    <string name="backspace">Διαγραφή</string>
+    <string name="back">Πίσω</string>
+    <string name="edit">Επεξεργασία</string>
+    <string name="done">Ολοκληρώθηκε</string>
+    <string name="ok">ΟΚ</string>
+    <string name="on">Ενεργό</string>
+    <string name="off">Ανενεργό</string>
+    <string name="cancel">Ακύρωση</string>
+    <string name="open">Άνοιγμα</string>
+    <string name="save">Αποθήκευση</string>
+    <string name="confirm">Επιβεβαίωση</string>
+    <string name="close">Κλείσιμο</string>
+    <string name="clear">Εκκαθάριση</string>
+    <string name="share">Κοινοποίηση</string>
+    <string name="share_subtitle">Αποστολή στοιχείων επαφής σε άλλους</string>
+    <string name="use">Χρήση</string>
+    <string name="connect_via_social">Σύνδεση μέσω κοινωνικών δικτύων</string>
+    <string name="import_text">Εισαγωγή</string>
+    <string name="export_text">Εξαγωγή</string>
+    <string name="call_is_ongoing">Η κλήση είναι σε εξέλιξη — Πατήστε για επιστροφή</string>
+    <string name="filter_all">Όλες</string>
+    <string name="filter_missed">Αναπάντητες</string>
+    <string name="filter_incoming">Εισερχόμενες</string>
+    <string name="filter_outgoing">Εξερχόμενες</string>
+    <string name="filter_rejected">Απορριφθείσες</string>
+
+    <!-- Search -->
+    <string name="search">Αναζήτηση</string>
+    <string name="search_contacts">Αναζήτηση επαφών</string>
+    <string name="no_results">Κανένα αποτέλεσμα</string>
+    <string name="no_contacts_found">Δεν βρέθηκαν επαφές</string>
+    <string name="call_query">Κλήση %s</string>
+    <string name="voice_input">Φωνητική είσοδος</string>
+    <string name="filter_results">Φιλτράρισμα αποτελεσμάτων</string>
+
+    <!-- Billing -->
+    <string name="no_connection">Χωρίς σύνδεση</string>
+    <string name="loading_price">Φόρτωση…</string>
+
+    <!-- Project support -->
+    <string name="project_support">Υποστήριξη έργου</string>
+    <string name="project_support_summary">Αποκτήστε την επί πληρωμή εφαρμογή για να υποστηρίξετε μελλοντικές εξελίξεις και πρόσθετες λειτουργίες</string>
+    <string name="project_support_description">
+        <![CDATA[
+        Πιστεύουμε ότι το απόρρητο πρέπει να είναι δωρεάν. Γι\' αυτό όλες οι βασικές λειτουργίες είναι εντελώς δικές σας χωρίς να ξοδέψετε ένα ευρώ.<br>
+        Αν σας αρέσει αυτό που χτίζουμε, σκεφτείτε να μας κεράσετε έναν καφέ. Ως ευχαριστώ, θα λάβετε:<br> <b>Όλα τα θέματα, Προσαρμοσμένα χρώματα και Προσαρμοσμένες γραμματοσειρές.</b><br>
+        Αυτό δεν είναι μια premium βαθμίδα. Είναι μια χειρονομία ευγνωμοσύνης. Η υποστήριξή σας διατηρεί το Rill ανεξάρτητο, ιδιωτικό και χωρίς διαφημίσεις.
+        ]]>
+    </string>
+    <string name="support_project_to_unlock">Υποστηρίξτε το έργο για να ξεκλειδώσετε</string>
+    <string name="restore_purchase">Επαναφορά αγοράς</string>
+    <string name="continue_support">Συνέχεια</string>
+    <string name="monthly">Μηνιαία</string>
+    <string name="monthly_description">Ευελιξία για όσους θέλουν να συνεισφέρουν μηνιαία</string>
+    <string name="yearly">Ετήσια</string>
+    <string name="yearly_description">Ετήσια υποστήριξη για την καλύτερη εφαρμογή κλήσεων στον κόσμο</string>
+    <string name="lifetime">Διά βίου</string>
+    <string name="lifetime_description">Πληρώστε μια φορά και απολαύστε την απόλυτη άνεση σε όλες σας τις κλήσεις για μια ζωή</string>
+    <string name="most_flexible">Πιο ευέλικτο</string>
+    <string name="bast_value">Καλύτερη αξία</string>
+    <string name="pay_once">Πληρώστε μια φορά</string>
+    <string name="support_development">Υποστήριξη ανάπτυξης</string>
+    <string name="support_all_options">Υποστήριξη όλων των επιλογών</string>
+    <string name="support_development_description1">Το Rill Phone είναι περήφανα ανοιχτού κώδικα και εντελώς δωρεάν. Η υποστήριξή σας μας βοηθά να το διατηρήσουμε έτσι.</string>
+    <string name="support_development_description2">Με τη δωρεά σας, δεν ξεκλειδώνετε απλώς λειτουργίες — επενδύετε στο απόρρητο, τη διαφάνεια και το μέλλον της πραγματικά ανεξάρτητης ανάπτυξης.</string>
+    <string name="support_development_description3">Κάθε συνεισφορά, ανεξαρτήτως μεγέθους, κάνει τη διαφορά.</string>
+    <string name="unlock_all_features">Ξεκλείδωμα όλων των λειτουργιών</string>
+    <string name="all_features_unlocked">✨ Όλες οι λειτουργίες ξεκλειδώθηκαν! Ευχαριστούμε για την υποστήριξή σας!</string>
+    <string name="thank_you_for_your_support">Ευχαριστούμε για την υποστήριξή σας! ❤️</string>
+    <string name="features_locked">Οι λειτουργίες είναι κλειδωμένες</string>
+    <string name="your_donation_ensures">Η δωρεά σας εξασφαλίζει:</string>
+    <string name="your_donation_ensures_1">✅ Τακτικές ενημερώσεις και διορθώσεις ασφαλείας</string>
+    <string name="your_donation_ensures_2">✅ Νέες λειτουργίες και βελτιώσεις</string>
+    <string name="your_donation_ensures_3">✅ Δωρεάν πρόσβαση για όλους</string>
+    <string name="your_donation_ensures_4">✅ Ανάπτυξη ανοιχτού κώδικα</string>
+
+    <!-- About -->
+    <string name="about">Σχετικά</string>
+    <string name="rate_app">Αξιολόγηση εφαρμογής</string>
+    <string name="other_apps">Άλλες εφαρμογές μας</string>
+    <string name="source_code">Πηγαίος κώδικας</string>
+    <string name="privacy_policy">Πολιτική απορρήτου</string>
+
+    <!-- Contributors -->
+    <string name="contributors">Συντελεστές</string>
+    <string name="development_team">Ομάδα ανάπτυξης</string>
+    <string name="apps_that_inspired_us">Εφαρμογές που μας ενέπνευσαν</string>
+
+    <!-- Settings -->
+    <string name="settings">Ρυθμίσεις</string>
+    <string name="appearance">Εμφάνιση</string>
+    <string name="interface_settings">Διεπαφή</string>
+    <string name="interface_settings_subtitle">Θέματα, χρώματα και διάταξη</string>
+    <string name="app_theme">Θέμα εφαρμογής</string>
+    <string name="theme_auto">Αυτόματο</string>
+    <string name="theme_light">Ανοιχτό</string>
+    <string name="theme_dark">Σκοτεινό</string>
+    <string name="theme_auto_black_white">Αυτόματο Α/Μ</string>
+    <string name="theme_white">Λευκό</string>
+    <string name="theme_black">Μαύρο</string>
+    <string name="custom_color">Προσαρμοσμένα χρώματα</string>
+    <string name="custom_color_subtitle">Σχέδιο χρωμάτων βασισμένο σε προσαρμοσμένο χρώμα</string>
+    <string name="hex_color">Χρώμα Hex</string>
+    <string name="hex_color_subtitle">Εισαγάγετε έναν έγκυρο 6ψήφιο δεκαεξαδικό κωδικό</string>
+    <string name="custom_font">Προσαρμοσμένη γραμματοσειρά</string>
+    <string name="custom_font_subtitle">Επιλέξτε ένα αρχείο .ttf για χρήση σε όλη την εφαρμογή</string>
+    <string name="visual_effects">Οπτικά εφέ</string>
+    <string name="not_supported_on_this_device">Δεν υποστηρίζεται σε αυτήν τη συσκευή</string>
+    <string name="not_supported_on_this_device_subtitle">Το θόλωμα και το Υγρό Γυαλί απαιτούν Android 12 ή νεότερο</string>
+    <string name="material_liquid_you_glass">Υγρό Γυαλί Material You</string>
+    <string name="material_liquid_you_glass_subtitle">Εφαρμογή εφέ υγρού γυαλιού στην πλοήγηση</string>
+    <string name="material_blur_effects">Εφέ θολώματος Material</string>
+    <string name="material_blur_effects_subtitle">Εφαρμογή εφέ θολώματος φόντου στην πλοήγηση</string>
+    <string name="scroll_animation">Κίνηση κύλισης</string>
+    <string name="scroll_animation_device">Κίνηση εμφάνισης για στοιχεία λίστας κατά την κύλιση</string>
+    <string name="call_ui">Διεπαφή κλήσης</string>
+    <string name="incoming_call_ui">Διεπαφή εισερχόμενης κλήσης</string>
+    <string name="incoming_call_ui_subtitle">Επιλέξτε πώς θα απαντάτε σε εισερχόμενες κλήσεις</string>
+    <string name="avatars_settings">Ρυθμίσεις avatar</string>
+    <string name="avatars_settings_subtitle">Προσαρμογή χρωμάτων, πλαισίων και άλλων</string>
+    <string name="avatar_colors">Χρώματα avatar</string>
+    <string name="colorful">Χρωματιστά</string>
+    <string name="primary_color">Κύριο χρώμα</string>
+    <string name="secondary_color">Δευτερεύον χρώμα</string>
+    <string name="google_contacts_color">Χρώμα επαφών Google</string>
+    <string name="show_first_letter_in_avatar">Εμφάνιση πρώτου γράμματος στο avatar</string>
+    <string name="show_first_letter_in_avatar_subtitle">Εμφανίζει γράμμα όταν λείπει η εικόνα</string>
+    <string name="avatar_frame">Πλαίσιο avatar</string>
+    <string name="avatar_frame_subtitle">Εμφάνιση περιγράμματος γύρω από το avatar</string>
+    <string name="show_picture_in_avatar">Εμφάνιση εικόνας στο avatar</string>
+    <string name="show_picture_in_avatar_subtitle">Εμφανίζει τη φωτογραφία της επαφής εάν είναι διαθέσιμη</string>
+
+    <string name="сaller_ui">Διεπαφή καλούντος</string>
+    <string name="сaller_ui_subtitle">Προσαρμογή οθόνης κλήσης και στοιχείων ελέγχου</string>
+    <string name="end_call_button">Κουμπί λήξης κλήσης</string>
+    <string name="customize_width">Προσαρμογή πλάτους</string>
+    <string name="customize_width_subtitle">Προσαρμόστε το πλάτος του κουμπιού λήξης κλήσης</string>
+
+    <string name="navigations">Πλοήγηση</string>
+    <string name="navigations_subtitle">Ορατότητα καρτελών και στυλ</string>
+    <string name="tab_sections">Ενότητες καρτελών</string>
+    <string name="tab_sections_subtitle">Επιλέξτε ποιες καρτέλες είναι ορατές και σύρετε για να τις αναδιατάξετε στη γραμμή πλοήγησης</string>
+    <string name="navigation_style">Στυλ πλοήγησης</string>
+    <string name="pill_style_navigation">Πλοήγηση σε στυλ χαπιού</string>
+    <string name="pill_style_navigation_subtitle">Εμφάνιση πλωτής γραμμής πλοήγησης σε στυλ χαπιού αντί της τυπικής κάτω γραμμής</string>
+    <string name="icon_only_bottom_bar">Κάτω γραμμή μόνο με εικονίδια</string>
+    <string name="icon_only_bottom_bar_subtitle">Καταργεί τις ετικέτες κειμένου από την πλοήγηση</string>
+
+    <string name="calls_and_system">Κλήσεις &amp; Σύστημα</string>
+    <string name="call_settings">Ρυθμίσεις κλήσεων</string>
+    <string name="call_settings_subtitle">Λογαριασμοί, αισθητήρας και λειτουργία τσέπης</string>
+    <string name="default_sim">Προεπιλεγμένη SIM</string>
+    <string name="ask_first">Ρώτα πρώτα</string>
+    <string name="calling_accounts">Λογαριασμοί κλήσεων</string>
+    <string name="system_settings">Ρυθμίσεις συστήματος</string>
+    <string name="call_behavior">Συμπεριφορά κλήσεων</string>
+    <string name="proximity_sensor">Αισθητήρας εγγύτητας στο παρασκήνιο</string>
+    <string name="proximity_sensor_subtitle">Απενεργοποίηση οθόνης όταν το τηλέφωνο είναι κοντά στο αυτί κατά τη διάρκεια κλήσης</string>
+    <string name="pocket_mode_prevention">Λειτουργία τσέπης</string>
+    <string name="pocket_mode_prevention_subtitle">Αποτροπή τυχαίας απάντησης/απόρριψης όταν το τηλέφωνο είναι στην τσέπη</string>
+    <string name="floating_ongoing_call">Πλωτή κλήση σε εξέλιξη</string>
+    <string name="floating_ongoing_call_subtitle">Εμφάνιση πλωτής φυσαλίδας κατά τις κλήσεις. Απαιτεί την άδεια \"Εμφάνιση πάνω από άλλες εφαρμογές\"</string>
+    <string name="direct_call_on_tap">Άμεση κλήση με άγγιγμα</string>
+    <string name="direct_call_on_tap_subtitle">Πατήστε μια καταχώρηση αρχείου κλήσεων για άμεση κλήση</string>
+    <string name="auto_speaker">Αυτόματο ηχείο</string>
+    <string name="auto_speaker_subtitle">Αυτόματη εναλλαγή σε μεγάφωνο όταν το τηλέφωνο είναι μακριά από το αυτί και πίσω στο ακουστικό όταν είναι κοντά</string>
+
+    <string name="sound_and_vibration">Ήχος &amp; Δόνηση</string>
+    <string name="sound_and_vibration_subtitle">Ήχοι κλήσης, ήχοι πληκτρολογίου και απτική ανάδραση σε όλη την εφαρμογή</string>
+    <string name="tap_haptics">Απτική αφής</string>
+    <string name="enable_tap_haptics">Ενεργοποίηση απτικής αφής</string>
+    <string name="haptics_intensity">Ένταση</string>
+    <string name="haptics_soft">Απαλή</string>
+    <string name="haptics_strong">Δυνατή</string>
+    <string name="haptics_custom">Προσαρμοσμένη</string>
+    <string name="preview_haptic">Προεπισκόπηση απτικής</string>
+    <string name="ringtone_settings">Ρυθμίσεις ήχου κλήσης</string>
+    <string name="dialpad_tones">Ήχοι πληκτρολογίου</string>
+    <string name="dialpad_tones_subtitle">Ήχος πληκτρολογίου που παίζεται κατά το πάτημα πλήκτρων</string>
+    <string name="calls">Κλήσεις</string>
+    <string name="vibrate_on_answer">Δόνηση κατά την απάντηση</string>
+    <string name="vibrate_on_answer_subtitle">Δόνηση όταν ο άλλος συμμετέχων απαντά</string>
+    <string name="vibrate_on_hang_up">Δόνηση κατά το κλείσιμο</string>
+    <string name="vibrate_on_hang_up_subtitle">Δόνηση όταν τελειώνει η κλήση</string>
+    <string name="haptics_across_app">Απτική σε όλη την εφαρμογή</string>
+    <string name="scroll_haptics">Απτική κύλισης</string>
+    <string name="scroll_haptics_subtitle">Δόνηση κατά τις χειρονομίες κύλισης στην εφαρμογή</string>
+    <string name="haptic_interval">Διάστημα απτικής</string>
+    <string name="haptic_interval_value">1 ανά %.1f cm</string>
+    <string name="haptic_strength">Ένταση απτικής</string>
+
+    <string name="manage_blocked">Διαχείριση αποκλεισμένων</string>
+    <string name="manage_blocked_subtitle">Διαχείριση αποκλεισμένων κλήσεων και ανεπιθύμητων</string>
+    <string name="blocked_numbers">Αποκλεισμένοι αριθμοί</string>
+    <string name="block_notifications">Αποκλεισμός ειδοποιήσεων</string>
+    <string name="block_notifications_subtitle">Εμφάνιση ειδοποίησης χαμηλής προτεραιότητας για αποκλεισμένες κλήσεις</string>
+    <string name="block_method">Μέθοδος αποκλεισμού</string>
+    <string name="block_method_subtitle">Πώς αντιμετωπίζονται οι αποκλεισμένες κλήσεις</string>
+    <string name="decline_automatically">Αυτόματη απόρριψη</string>
+    <string name="ring_silently">Σίγαση κλήσης</string>
+    <string name="log_visibility">Ορατότητα στο αρχείο</string>
+    <string name="log_visibility_subtitle">Εμφάνιση ή απόκρυψη αποκλεισμένων κλήσεων στα πρόσφατα</string>
+    <string name="hide_from_logs">Απόκρυψη από τα αρχεία</string>
+    <string name="show_in_logs">Εμφάνιση στα αρχεία</string>
+    <string name="blocked_size">Αποκλεισμένες: %s</string>
+
+    <string name="authentication">Έλεγχος ταυτότητας</string>
+    <string name="authentication_method">Μέθοδος ελέγχου ταυτότητας</string>
+    <string name="system_biometrics">Βιομετρικά συστήματος</string>
+    <string name="system_biometrics_subtitle">Δακτυλικό αποτύπωμα, αναγνώριση προσώπου ή διαπιστευτήρια συσκευής</string>
+    <string name="system_biometrics_not_available">Μη διαθέσιμο σε αυτήν τη συσκευή</string>
+    <string name="custom_biometrics">Προσαρμοσμένα βιομετρικά</string>
+    <string name="custom_pin">Προσαρμοσμένο PIN</string>
+    <string name="custom_password">Προσαρμοσμένος κωδικός πρόσβασης</string>
+    <string name="pin">PIN</string>
+    <string name="pin_subtitle">Ορισμός αριθμητικού PIN</string>
+    <string name="password">Κωδικός πρόσβασης</string>
+    <string name="password_subtitle">Ορισμός προσαρμοσμένου αλφαριθμητικού κωδικού</string>
+    <string name="remove_biometric">Κατάργηση βιομετρικού κλειδώματος</string>
+    <string name="not_configured">Μη ρυθμισμένο</string>
+    <string name="lock_app_on_open">Κλείδωμα εφαρμογής κατά το άνοιγμα</string>
+    <string name="lock_app_on_open_subtitle">Απαίτηση ελέγχου ταυτότητας κατά το άνοιγμα της εφαρμογής</string>
+    <string name="lock_call_actions">Κλείδωμα ενεργειών κλήσης</string>
+    <string name="lock_call_actions_subtitle">Απαίτηση ελέγχου ταυτότητας για απάντηση ή απόρριψη εισερχόμενων κλήσεων</string>
+    <string name="lock_scope">Πεδίο εφαρμογής κλειδώματος κλήσης</string>
+    <string name="all_calls">Όλες οι κλήσεις</string>
+    <string name="all_calls_subtitle">Απαιτούνται βιομετρικά για κάθε εισερχόμενη κλήση</string>
+    <string name="blacklist">Μαύρη λίστα</string>
+    <string name="blacklist_count">Επαφές για τις οποίες είναι ενεργοποιημένος ο έλεγχος ταυτότητας για απάντηση: %s</string>
+    <string name="blacklist_subtitle">Επιλέξτε επαφές που απαιτούν βιομετρικά για απάντηση</string>
+    <string name="whitelist">Λευκή λίστα</string>
+    <string name="whitelist_count">Επαφές για τις οποίες είναι απενεργοποιημένος ο έλεγχος ταυτότητας για απάντηση: %s</string>
+    <string name="whitelist_subtitle">Επιλέξτε επαφές για παράλειψη του βιομετρικού κλειδώματος</string>
+    <string name="select_contacts">Επιλογή επαφών</string>
+    <string name="set_pin">Ορισμός PIN</string>
+    <string name="set_pin_subtitle">Εισαγάγετε ένα 4ψήφιο PIN</string>
+    <string name="enter_pin">Εισαγωγή PIN</string>
+    <string name="confirm_pin">Επιβεβαίωση PIN</string>
+    <string name="confirm_pin_subtitle">Εισαγάγετε ξανά το PIN σας για επιβεβαίωση</string>
+    <string name="incorrect_pin">Λανθασμένο PIN. Παρακαλώ δοκιμάστε ξανά.</string>
+    <string name="pin_dont_match">Τα PIN δεν ταιριάζουν. Παρακαλώ ξεκινήστε από την αρχή.</string>
+    <string name="set_password">Ορισμός κωδικού πρόσβασης</string>
+    <string name="set_password_subtitle">Εισαγάγετε οποιονδήποτε κωδικό. Επιτρέπονται γράμματα, αριθμοί και ειδικοί χαρακτήρες.</string>
+    <string name="enter_password">Εισαγωγή κωδικού</string>
+    <string name="confirm_password">Επιβεβαίωση κωδικού</string>
+    <string name="incorrect_password">Λανθασμένος κωδικός</string>
+    <string name="incorrect_password_subtitle">Ο κωδικός πρέπει να έχει τουλάχιστον 4 χαρακτήρες</string>
+    <string name="password_dont_match">Οι κωδικοί δεν ταιριάζουν</string>
+
+    <string name="manage_contacts">Διαχείριση επαφών</string>
+    <string name="manage_contacts_subtitle">Ιδιωτικές επαφές, λογαριασμοί προς εμφάνιση και καθαρισμός λίστας</string>
+    <string name="display">Εμφάνιση</string>
+    <string name="sort_by">Ταξινόμηση κατά</string>
+    <string name="name_format">Μορφή ονόματος</string>
+    <string name="first_name_first">Πρώτα το μικρό όνομα</string>
+    <string name="last_name_first">Πρώτα το επίθετο</string>
+    <string name="merge_and_fix">Συγχώνευση &amp; επιδιόρθωση</string>
+    <string name="standardize">Τυποποίηση</string>
+    <string name="standardize_phone_numbers">Τυποποίηση τηλεφωνικών αριθμών</string>
+    <string name="standardize_phone_numbers_subtitle">Αφαίρεση κενών και ειδικών χαρακτήρων από τους τηλεφωνικούς αριθμούς</string>
+    <string name="total_contacts">Σύνολο επαφών</string>
+    <string name="contacts_with_changes">Επαφές με αλλαγές</string>
+    <string name="numbers_to_standardize">Αριθμοί προς τυποποίηση</string>
+    <string name="all_numbers_are_already_standardized">✅ Όλοι οι αριθμοί είναι ήδη τυποποιημένοι!</string>
+    <string name="examples_of_changes">Παραδείγματα αλλαγών:</string>
+    <string name="and_more">Και %s ακόμη…</string>
+
+    <string name="merging_contacts">Συγχώνευση επαφών</string>
+    <string name="merging_contacts_subtitle">Εύρεση και συγχώνευση διπλότυπων επαφών</string>
+    <string name="merging_contacts_description">Οι συγχωνευμένες επαφές είναι πολλαπλές εγγραφές από διαφορετικούς λογαριασμούς που συνδέονται σε μία. Μπορείτε να επεξεργαστείτε κάθε πηγή ξεχωριστά ή να τις αποσυνδέσετε.</string>
+    <string name="no_duplicates_found">Δεν βρέθηκαν διπλότυπα</string>
+    <string name="duplicates_in">Διπλότυπα σε: %s</string>
+    <string name="merge_duplicates">Συγχώνευση διπλότυπων (%s)</string>
+
+    <string name="unmerging_contacts">Αποσύνδεση επαφών</string>
+    <string name="unmerging_contacts_subtitle">Εύρεση και αποσύνδεση συγχωνευμένων επαφών</string>
+    <string name="unmerging_contacts_description">Οι πληροφορίες επαφής προέρχονται από πολλές πηγές. Επιλέξτε μία για επεξεργασία ή αποσυνδέστε όλες για να τις έχετε ως ξεχωριστές επαφές.</string>
+    <string name="no_merged_contacts_found">Δεν βρέθηκαν συγχωνευμένες επαφές</string>
+    <string name="merged_from_sources">Συγχωνεύτηκε από %s πηγές</string>
+    <string name="unlink">Αποσύνδεση</string>
+    <string name="warning_cannot_be_undone">⚠️ Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.</string>
+
+    <string name="managing_contact_sources">Διαχείριση πηγών επαφών</string>
+    <string name="managing_contact_sources_subtitle">Επιλέξτε ποιοι λογαριασμοί θα εμφανίζονται στη λίστα σας</string>
+    <string name="managing_contact_sources_description">Επιλέξτε ποιοι λογαριασμοί πρέπει να είναι ορατοί στη λίστα επαφών σας. Η αποεπιλογή ενός λογαριασμού θα κρύψει τις επαφές του, αλλά δεν θα τις διαγράψει.</string>
+    <string name="contact_sources">Πηγές επαφών</string>
+    <string name="contacts_stored_on_app">Επαφές που αποθηκεύονται στην εφαρμογή</string>
+    <string name="contacts_stored_on_device">Επαφές που αποθηκεύονται στη συσκευή</string>
+
+    <string name="private_contacts">Ιδιωτικές επαφές</string>
+    <string name="private_contacts_subtitle">Διαχείριση κρυπτογραφημένων τοπικών επαφών σας</string>
+
+    <!-- Call -->
+    <string name="call">Κλήση</string>
+    <string name="incoming">Εισερχόμενη</string>
+    <string name="outgoing">Εξερχόμενη</string>
+    <string name="missed">Αναπάντητη</string>
+    <string name="rejected">Απορριφθείσα</string>
+    <string name="blocked">Αποκλεισμένη</string>
+    <string name="answer">Απάντηση</string>
+    <string name="decline">Απόρριψη</string>
+    <string name="answer_and_decline">Απάντηση &amp; λήξη άλλης κλήσης</string>
+    <string name="end_call">Λήξη κλήσης</string>
+    <string name="back_to_call">Επιστροφή στην κλήση</string>
+    <string name="keypad">Πληκτρολόγιο</string>
+    <string name="mute">Σίγαση</string>
+    <string name="unmute">Κατάργηση σίγασης</string>
+    <string name="speaker">Ηχείο</string>
+    <string name="add_call">Προσθήκη κλήσης</string>
+    <string name="resume">Συνέχιση</string>
+    <string name="swap">Εναλλαγή</string>
+    <string name="more">Περισσότερα</string>
+    <string name="hold">Αναμονή</string>
+    <string name="on_hold">Σε αναμονή</string>
+    <string name="call_ended">Η κλήση έληξε</string>
+    <string name="calling">Κλήση…</string>
+    <string name="incoming_call">Εισερχόμενη κλήση</string>
+    <string name="connecting">Σύνδεση…</string>
+    <string name="slide_to_answer">Σύρετε για απάντηση</string>
+    <string name="swipe_up_to_answer">Σύρετε προς τα πάνω για απάντηση</string>
+    <string name="swipe_down_to_reject">Σύρετε προς τα κάτω για απόρριψη</string>
+
+    <!-- Recents -->
+    <string name="recents">Πρόσφατες</string>
+    <string name="home_tab">Αρχική</string>
+    <string name="call_history">Ιστορικό κλήσεων</string>
+    <string name="history_with">Ιστορικό με %s</string>
+    <string name="no_call_history_found">Δεν βρέθηκε ιστορικό κλήσεων</string>
+    <string name="delete_call_logs">Διαγραφή αρχείων κλήσεων</string>
+    <string name="delete_call_logs_selected">Είστε σίγουροι ότι θέλετε να διαγράψετε %s επιλεγμένα αρχεία κλήσεων;</string>
+    <string name="deleted_from_call_log">Διαγράφηκε από το αρχείο κλήσεων</string>
+    <string name="could_not_delete">Δεν ήταν δυνατή η διαγραφή</string>
+    <string name="clear_all_filtered_logs">Εκκαθάριση όλων των φιλτραρισμένων αρχείων</string>
+    <string name="clear_all_filtered_logs_selected">Αυτό θα διαγράψει ολόκληρο το εμφανιζόμενο ιστορικό κλήσεων. Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.</string>
+
+    <!-- Contacts -->
+    <string name="contacts">Επαφές</string>
+    <string name="view_contact">Προβολή επαφής</string>
+    <string name="view_contacts">Προβολή επαφών</string>
+    <string name="contacts_settings">Ρυθμίσεις επαφών</string>
+    <string name="create_contact">Δημιουργία επαφής</string>
+    <string name="add_contact">Προσθήκη επαφής</string>
+    <string name="add_to_contact">Προσθήκη σε επαφή</string>
+    <string name="edit_contact">Επεξεργασία επαφής</string>
+    <string name="contact_info">Πληροφορίες επαφής</string>
+    <string name="favorites">Αγαπημένες</string>
+    <string name="message">Μήνυμα</string>
+    <string name="video">Βίντεο</string>
+    <string name="email">Email</string>
+    <string name="default_number">Προεπιλεγμένο</string>
+    <string name="recent_number">Πρόσφατο</string>
+    <string name="recent_activity">Πρόσφατη δραστηριότητα</string>
+    <string name="add_to_favorites">Προσθήκη στα αγαπημένα</string>
+    <string name="remove_from_favorites">Αφαίρεση από τα αγαπημένα</string>
+    <string name="no_favorites_yet">Δεν υπάρχουν ακόμη αγαπημένες</string>
+    <string name="no_favorites_yet_subtitle">Βάλτε αστέρι σε μια επαφή για να την προσθέσετε εδώ</string>
+    <string name="move_contact">Μετακίνηση επαφής</string>
+    <string name="move_to_another_account">Μετακίνηση σε άλλο λογαριασμό</string>
+    <string name="move_to_device_storage">Μετακίνηση στην αποθήκευση της συσκευής</string>
+    <string name="contact_moved_successfully">Η επαφή μετακινήθηκε με επιτυχία</string>
+    <string name="save_to_account">Αποθήκευση σε λογαριασμό</string>
+    <string name="show_full_history">Εμφάνιση πλήρους ιστορικού</string>
+    <string name="contact_qr">QR επαφής</string>
+    <string name="phone_number">Αριθμός τηλεφώνου</string>
+    <string name="name">Όνομα</string>
+    <string name="prefix">Πρόθεμα</string>
+    <string name="prefix_description">Κος, Κα, Δρ, κλπ.</string>
+    <string name="first_name">Μικρό όνομα</string>
+    <string name="middle_name">Δεύτερο όνομα</string>
+    <string name="middle_name_description">Δεύτερο όνομα ή αρχικό</string>
+    <string name="last_name">Επίθετο</string>
+    <string name="suffix">Επίθεμα</string>
+    <string name="suffix_description">Jr., Sr., III, κλπ.</string>
+    <string name="nickname">Ψευδώνυμο</string>
+    <string name="nickname_description">Σύντομο όνομα ή ψευδώνυμο</string>
+    <string name="company">Εταιρεία</string>
+    <string name="job_title">Θέση εργασίας</string>
+    <string name="job_title_description">Θέση στην εταιρεία</string>
+    <string name="add_field">Προσθήκη πεδίου</string>
+    <string name="add_phone">Προσθήκη τηλεφώνου</string>
+    <string name="add_email">Προσθήκη email</string>
+    <string name="add_event">Προσθήκη εκδήλωσης</string>
+    <string name="add_address">Προσθήκη διεύθυνσης</string>
+    <string name="add_note">Προσθήκη σημείωσης</string>
+    <string name="contact_ringtone">Ήχος κλήσης επαφής</string>
+    <string name="unsaved_changes">Μη αποθηκευμένες αλλαγές</string>
+    <string name="unsaved_changes_subtitle">Θέλετε να αποθηκεύσετε τις αλλαγές σας πριν φύγετε;</string>
+    <plurals name="contacts_count">
+        <item quantity="one">%d επαφή</item>
+        <item quantity="other">%d επαφές</item>
+    </plurals>
+    <plurals name="add_to_favorites_confirmation">
+        <item quantity="one">Προσθήκη %d επαφής στα αγαπημένα;</item>
+        <item quantity="other">Προσθήκη %d επαφών στα αγαπημένα;</item>
+    </plurals>
+    <plurals name="remove_from_favorites_confirmation">
+        <item quantity="one">Αφαίρεση %d επαφής από τα αγαπημένα;</item>
+        <item quantity="other">Αφαίρεση %d επαφών από τα αγαπημένα;</item>
+    </plurals>
+
+    <!-- Permission -->
+    <string name="allow">Να επιτρέπεται</string>
+    <string name="call_history_permission">Το Rill Phone χρειάζεται πρόσβαση στα αρχεία κλήσεών σας για να εμφανίζει την πρόσφατη δραστηριότητά σας και τις αναπάντητες κλήσεις.</string>
+    <string name="contacts_permission">Απαιτείται άδεια πρόσβασης σε επαφές</string>
+    <string name="contacts_permission_description">Για να προβάλετε τις επαφές σας, επιτρέψτε την πρόσβαση στις επαφές.</string>
+    <string name="search_contacts_permission_description">Για να αναζητήσετε τις επαφές σας και να αναγνωρίζετε εισερχόμενες κλήσεις, επιτρέψτε την πρόσβαση στις επαφές.</string>
+
+    <!-- Default Dialer -->
+    <string name="default_phone_number_cleared">Ο προεπιλεγμένος αριθμός τηλεφώνου διαγράφηκε</string>
+    <string name="set_as_default">Ορισμός ως προεπιλεγμένου</string>
+    <string name="clear_default">Εκκαθάριση προεπιλογής</string>
+    <string name="default_phone_set">Ορίστηκε το %s ως προεπιλεγμένο</string>
+    <string name="default_dialer_title">Ορισμός Rill Phone ως προεπιλεγμένης εφαρμογής</string>
+    <string name="default_dialer_subtitle">Το Rill Phone μπορεί να πραγματοποιεί και να λαμβάνει κλήσεις μόνο εάν είναι η προεπιλεγμένη εφαρμογή τηλεφώνου σας</string>
+    <string name="default_dialer_warning">Η εφαρμογή δεν μπορεί να λειτουργήσει χωρίς αυτήν την άδεια. Παρακαλώ δοκιμάστε ξανά.</string>
+
+    <!-- Call notes -->
+    <string name="notes">Σημειώσεις</string>
+    <string name="call_notes">Σημειώσεις κλήσεων</string>
+    <string name="about_call_notes">Σχετικά με τις σημειώσεις κλήσεων</string>
+    <string name="about_call_notes_subtitle">Γρήγορες σημειώσεις που κρατάτε κατά τη διάρκεια μιας κλήσης. Αποθηκεύονται τοπικά στα αρχεία της εφαρμογής, συνδεδεμένες με τον αριθμό τηλεφώνου (δεν συγχρονίζονται με τις Επαφές Google και άλλες). Κάθε αριθμός έχει τη δική του ιδιωτική σημείωση, στην οποία μπορείτε να έχετε πρόσβαση μόνο από το αρχείο κλήσεων στις λεπτομέρειες της επαφής εντός της εφαρμογής ή από την καρτέλα \"Σημειώσεις κλήσεων\".</string>
+    <string name="type_your_note">Πληκτρολογήστε τη σημείωσή σας…</string>
+    <string name="no_notes_yet">Δεν υπάρχουν ακόμη σημειώσεις</string>
+    <string name="no_notes_yet_subtitle">Οι σημειώσεις που λαμβάνονται κατά τη διάρκεια κλήσεων εμφανίζονται εδώ</string>
+    <string name="delete_notes">Διαγραφή σημειώσεων</string>
+    <string name="delete_notes_subtitle">Είστε σίγουροι ότι θέλετε να διαγράψετε %s επιλεγμένες σημειώσεις;</string>
+    <string name="delete_note">Διαγραφή σημείωσης</string>
+    <string name="delete_note_subtitle">Διαγραφή σημείωσης για %s;"</string>
+
+    <!-- Times -->
+    <string name="just_now">Μόλις τώρα</string>
+    <string name="yesterday">Χθες</string>
+    <string name="today">Σήμερα</string>
+    <string name="seconds_letter">%dδ</string>
+    <string name="minutes_letter">%dλ</string>
+    <string name="hours_letter">%dω</string>
+    <string name="days_letter">%dημ</string>
+
+    <!-- Phone numbers -->
+    <string name="no_label">Χωρίς ετικέτα</string>
+    <string name="custom_label">Προσαρμοσμένη ετικέτα</string>
+    <string name="change_label">Αλλαγή ετικέτας</string>
+    <string name="mobile">Κινητό</string>
+    <string name="main_number">Κύριο</string>
+    <string name="home">Σπίτι</string>
+    <string name="work">Δουλειά</string>
+    <string name="work_fax">Φαξ εργασίας</string>
+    <string name="home_fax">Φαξ σπιτιού</string>
+    <string name="pager">Βομβητής</string>
+    <string name="other">Άλλο</string>
+    <string name="send_whatsapp">Αποστολή μέσω WhatsApp</string>
+
+    <!-- Events -->
+    <string name="other_information">Άλλες πληροφορίες</string>
+    <string name="birthday">Γενέθλια</string>
+    <string name="anniversary">Επέτειος</string>
+
+    <!-- Dialpad -->
+    <string name="add_pause">Προσθήκη παύσης 2 δευτ.</string>
+    <string name="add_wait">Προσθήκη αναμονής</string>
+
+    <!-- Onboarding -->
+    <string name="skip">Παράλειψη</string>
+    <string name="page_title_one">Ιδιωτικότητα εξ αρχής</string>
+    <string name="page_subtitle_one">Οι επαφές σας παραμένουν στη συσκευή σας. Ποτέ δεν ανεβάζουμε, δεν παρακολουθούμε ή μοιραζόμαστε τα δεδομένα σας με κανέναν. Ποτέ.</string>
+    <string name="page_title_two">Ανοιχτός κώδικας &amp; Διαφάνεια</string>
+    <string name="page_subtitle_two">Μηδενική τηλεμετρία. Μηδενικές διαφημίσεις. Μηδενική παρακολούθηση. Πλήρης έλεγχος της επικοινωνίας σας.</string>
+    <string name="page_title_three">Γρήγορη &amp; Αξιόπιστη</string>
+    <string name="page_subtitle_three">Άμεση αναζήτηση T9, ομαλές κινήσεις και εξαιρετικά γρήγορες κλήσεις. Απλώς μια εφαρμογή τηλεφώνου που λειτουργεί.</string>
+    <string name="page_title_warning">Υπό ανάπτυξη</string>
+    <string name="page_subtitle_warning">Αυτή η εφαρμογή είναι ακόμη υπό ανάπτυξη. Ορισμένες λειτουργίες ενδέχεται να μην λειτουργούν όπως αναμένεται. Παρακαλώ χρησιμοποιήστε την με προσοχή και αναφέρετε τυχόν προβλήματα που αντιμετωπίζετε.</string>
+</resources>

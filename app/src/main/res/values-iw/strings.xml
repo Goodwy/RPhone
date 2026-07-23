@@ -1,0 +1,490 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" dir="rtl">
+    <string name="widget_description">שיחות אחרונות עם חיוג מהיר</string>
+    <string name="copy" tools:ignore="PrivateResource">העתק</string>
+    <string name="copy_path">העתק נתיב</string>
+    <string name="paste">הדבק</string>
+    <string name="delete">מחק</string>
+    <string name="delete_contact">מחק איש קשר</string>
+    <string name="delete_contact_subtitle">האם אתה בטוח שברצונך למחוק איש קשר זה? לא ניתן לבטל פעולה זו.</string>
+    <string name="delete_contacts">מחק אנשי קשר</string>
+    <string name="delete_contacts_subtitle">האם אתה בטוח שברצונך למחוק %s אנשי קשר שנבחרו? לא ניתן לבטל פעולה זו.</string>
+    <string name="selected_items">%s נבחרו</string>
+    <string name="select">בחר</string>
+    <string name="select_all">בחר הכול</string>
+    <string name="deselect_all">בטל בחירת הכול</string>
+    <string name="backspace">מחק</string>
+    <string name="back">חזור</string>
+    <string name="edit">ערוך</string>
+    <string name="done">בוצע</string>
+    <string name="ok">אישור</string>
+    <string name="on">פועל</string>
+    <string name="off">כבוי</string>
+    <string name="cancel">ביטול</string>
+    <string name="open">פתח</string>
+    <string name="save">שמור</string>
+    <string name="confirm">אשר</string>
+    <string name="close">סגור</string>
+    <string name="clear">נקה</string>
+    <string name="share">שתף</string>
+    <string name="share_subtitle">שלח פרטי איש קשר לאחרים</string>
+    <string name="use">השתמש</string>
+    <string name="connect_via_social">התחבר באמצעות רשתות חברתיות</string>
+    <string name="import_text">ייבא</string>
+    <string name="export_text">ייצא</string>
+    <string name="call_is_ongoing">שיחה מתבצעת — הקש לחזרה</string>
+    <string name="filter_all">הכל</string>
+    <string name="filter_missed">החמצות</string>
+    <string name="filter_incoming">נכנסות</string>
+    <string name="filter_outgoing">יוצאות</string>
+    <string name="filter_rejected">נדחו</string>
+
+    <!-- Search -->
+    <string name="search">חיפוש</string>
+    <string name="search_contacts">חיפוש אנשי קשר</string>
+    <string name="no_results">אין תוצאות</string>
+    <string name="no_contacts_found">לא נמצאו אנשי קשר</string>
+    <string name="call_query">התקשר ל-%s</string>
+    <string name="voice_input">קלט קולי</string>
+    <string name="filter_results">סנן תוצאות</string>
+
+    <!-- Billing -->
+    <string name="no_connection">אין חיבור</string>
+    <string name="loading_price">טוען…</string>
+
+    <!-- Project support -->
+    <string name="project_support">תמיכה בפרויקט</string>
+    <string name="project_support_summary">קבל את האפליקציה בתשלום כדי לתמוך בפיתוחים עתידיים ובתכונות נוספות</string>
+    <string name="project_support_description">
+        <![CDATA[
+        אנו מאמינים שפרטיות צריכה להיות בחינם. לכן כל התכונות החיוניות הן לגמרי שלך מבלי להוציא אגורה.<br>
+        אם אתה אוהב את מה שאנו בונים, שקול לקנות לנו קפה. כתודה, תקבל:<br> <b>כל הערכות הנושא, צבעים מותאמים אישית וגופנים מותאמים אישית.</b><br>
+        זו לא שכבה פרימיום. זו מחווה של תודה. התמיכה שלך שומרת על Rill עצמאי, פרטי וללא פרסומות.
+        ]]>
+    </string>
+    <string name="support_project_to_unlock">תמוך בפרויקט כדי לפתוח</string>
+    <string name="restore_purchase">שחזר רכישה</string>
+    <string name="continue_support">המשך</string>
+    <string name="monthly">חודשי</string>
+    <string name="monthly_description">גמישות למי שרוצה לתרום תרומות חודשיות</string>
+    <string name="yearly">שנתי</string>
+    <string name="yearly_description">תמיכה שנתית לאפליקציית השיחות הטובה בעולם</string>
+    <string name="lifetime">לכל החיים</string>
+    <string name="lifetime_description">שלם פעם אחת ותהנה מנוחות אולטימטיבית בכל השיחות שלך לכל החיים</string>
+    <string name="most_flexible">הגמיש ביותר</string>
+    <string name="bast_value">הערך הטוב ביותר</string>
+    <string name="pay_once">שלם פעם אחת</string>
+    <string name="support_development">תמוך בפיתוח</string>
+    <string name="support_all_options">תמוך בכל האפשרויות</string>
+    <string name="support_development_description1">Rill Phone גאה להיות בקוד פתוח ובחינם לחלוטין. התמיכה שלך עוזרת לנו לשמור על כך.</string>
+    <string name="support_development_description2">בתרומה, אתה לא רק פותח תכונות — אתה משקיע בפרטיות, בשקיפות ובעתיד של פיתוח עצמאי באמת.</string>
+    <string name="support_development_description3">כל תרומה, ללא קשר לגודלה, עושה את ההבדל.</string>
+    <string name="unlock_all_features">פתח את כל התכונות</string>
+    <string name="all_features_unlocked">✨ כל התכונות נפתחו! תודה על התמיכה שלך!</string>
+    <string name="thank_you_for_your_support">תודה על התמיכה שלך! ❤️</string>
+    <string name="features_locked">התכונות נעולות</string>
+    <string name="your_donation_ensures">התרומה שלך מבטיחה:</string>
+    <string name="your_donation_ensures_1">✅ עדכונים שוטפים ותיקוני אבטחה</string>
+    <string name="your_donation_ensures_2">✅ תכונות ושיפורים חדשים</string>
+    <string name="your_donation_ensures_3">✅ גישה חינם לכולם</string>
+    <string name="your_donation_ensures_4">✅ פיתוח בקוד פתוח</string>
+
+    <!-- About -->
+    <string name="about">אודות</string>
+    <string name="rate_app">דרג את האפליקציה</string>
+    <string name="other_apps">האפליקציות הנוספות שלנו</string>
+    <string name="source_code">קוד מקור</string>
+    <string name="privacy_policy">מדיניות פרטיות</string>
+
+    <!-- Contributors -->
+    <string name="contributors">תורמים</string>
+    <string name="development_team">צוות הפיתוח</string>
+    <string name="apps_that_inspired_us">אפליקציות שנתנו לנו השראה</string>
+
+    <!-- Settings -->
+    <string name="settings">הגדרות</string>
+    <string name="appearance">מראה</string>
+    <string name="interface_settings">ממשק</string>
+    <string name="interface_settings_subtitle">ערכות נושא, צבעים ופריסה</string>
+    <string name="app_theme">ערכת נושא של האפליקציה</string>
+    <string name="theme_auto">אוטומטי</string>
+    <string name="theme_light">בהיר</string>
+    <string name="theme_dark">כהה</string>
+    <string name="theme_auto_black_white">אוטומטי שחור/לבן</string>
+    <string name="theme_white">לבן</string>
+    <string name="theme_black">שחור</string>
+    <string name="custom_color">צבעים מותאמים אישית</string>
+    <string name="custom_color_subtitle">סכמת צבעים המבוססת על צבע מותאם אישית</string>
+    <string name="hex_color">צבע הקסדצימלי</string>
+    <string name="hex_color_subtitle">הזן קוד הקסדצימלי תקין של 6 ספרות</string>
+    <string name="custom_font">גופן מותאם אישית</string>
+    <string name="custom_font_subtitle">בחר קובץ .ttf לשימוש באפליקציה</string>
+    <string name="visual_effects">אפקטים ויזואליים</string>
+    <string name="not_supported_on_this_device">לא נתמך במכשיר זה</string>
+    <string name="not_supported_on_this_device_subtitle">טשטוש וזכוכית נוזלית דורשים Android 12 ומעלה</string>
+    <string name="material_liquid_you_glass">זכוכית נוזלית Material You</string>
+    <string name="material_liquid_you_glass_subtitle">החל אפקט זכוכית נוזלית על הניווט</string>
+    <string name="material_blur_effects">אפקטי טשטוש Material</string>
+    <string name="material_blur_effects_subtitle">החל אפקט טשטוש רקע על הניווט</string>
+    <string name="scroll_animation">אנימציית גלילה</string>
+    <string name="scroll_animation_device">אנימציית הופעה לפריטי רשימה בעת הגלילה</string>
+    <string name="call_ui">ממשק שיחה</string>
+    <string name="incoming_call_ui">ממשק שיחה נכנסת</string>
+    <string name="incoming_call_ui_subtitle">בחר כיצד לענות לשיחות נכנסות</string>
+    <string name="avatars_settings">הגדרות אווטאר</string>
+    <string name="avatars_settings_subtitle">התאמה אישית של צבעים, מסגרות ועוד</string>
+    <string name="avatar_colors">צבעי אווטאר</string>
+    <string name="colorful">צבעוני</string>
+    <string name="primary_color">צבע ראשי</string>
+    <string name="secondary_color">צבע משני</string>
+    <string name="google_contacts_color">צבע אנשי קשר של Google</string>
+    <string name="show_first_letter_in_avatar">הצג אות ראשונה באווטאר</string>
+    <string name="show_first_letter_in_avatar_subtitle">מציג אות כאשר התמונה חסרה</string>
+    <string name="avatar_frame">מסגרת אווטאר</string>
+    <string name="avatar_frame_subtitle">הצג גבול סביב האווטאר</string>
+    <string name="show_picture_in_avatar">הצג תמונה באווטאר</string>
+    <string name="show_picture_in_avatar_subtitle">מציג את תמונת איש הקשר אם זמינה</string>
+
+    <string name="сaller_ui">ממשק מתקשר</string>
+    <string name="сaller_ui_subtitle">התאמה אישית של מסך השיחה והפקדים</string>
+    <string name="end_call_button">כפתור סיום שיחה</string>
+    <string name="customize_width">התאמת רוחב</string>
+    <string name="customize_width_subtitle">התאם את רוחב כפתור סיום השיחה</string>
+
+    <string name="navigations">ניווט</string>
+    <string name="navigations_subtitle">נראות וסגנון לשוניות</string>
+    <string name="tab_sections">קטעי לשוניות</string>
+    <string name="tab_sections_subtitle">בחר אילו לשוניות גלויות, וגרור את הידית כדי לסדר אותן מחדש בסרגל הניווט</string>
+    <string name="navigation_style">סגנון ניווט</string>
+    <string name="pill_style_navigation">ניווט בסגנון גלולה</string>
+    <string name="pill_style_navigation_subtitle">הצג סרגל ניווט צף בסגנון גלולה במקום הסרגל התחתון הסטנדרטי</string>
+    <string name="icon_only_bottom_bar">סרגל תחתון עם סמלים בלבד</string>
+    <string name="icon_only_bottom_bar_subtitle">מסיר תוויות טקסט מהניווט</string>
+
+    <string name="calls_and_system">שיחות ומערכת</string>
+    <string name="call_settings">הגדרות שיחות</string>
+    <string name="call_settings_subtitle">חשבונות, חיישן ומצב כיס</string>
+    <string name="default_sim">SIM ברירת מחדל</string>
+    <string name="ask_first">שאל קודם</string>
+    <string name="calling_accounts">חשבונות שיחות</string>
+    <string name="system_settings">הגדרות מערכת</string>
+    <string name="call_behavior">התנהגות שיחה</string>
+    <string name="proximity_sensor">חיישן קירבה ברקע</string>
+    <string name="proximity_sensor_subtitle">כבה את המסך כאשר הטלפון קרוב לאוזן במהלך שיחה</string>
+    <string name="pocket_mode_prevention">מצב כיס</string>
+    <string name="pocket_mode_prevention_subtitle">מניעת מענה/דחייה מקרית כאשר הטלפון נמצא בכיס</string>
+    <string name="floating_ongoing_call">בועת שיחה צפה</string>
+    <string name="floating_ongoing_call_subtitle">הצג בועה צפה הניתנת לגרירה במהלך שיחות. דורש הרשאת \'הצג מעל אפליקציות אחרות\'</string>
+    <string name="direct_call_on_tap">שיחה ישירה בהקשה</string>
+    <string name="direct_call_on_tap_subtitle">הקש על רשומה ביומן השיחות כדי להתקשר ישירות</string>
+    <string name="auto_speaker">רמקול אוטומטי</string>
+    <string name="auto_speaker_subtitle">עבור אוטומטית לרמקול כאשר הטלפון רחוק מהאוזן, ובחזרה לאפרכסת כאשר הוא קרוב</string>
+
+    <string name="sound_and_vibration">צליל ורעידות</string>
+    <string name="sound_and_vibration_subtitle">צלילי רינגטון, צלילי חיוג ומשוב הפטי בכל האפליקציה</string>
+    <string name="tap_haptics">משוב הפטי להקשה</string>
+    <string name="enable_tap_haptics">הפעל משוב הפטי להקשה</string>
+    <string name="haptics_intensity">עוצמה</string>
+    <string name="haptics_soft">רך</string>
+    <string name="haptics_strong">חזק</string>
+    <string name="haptics_custom">מותאם אישית</string>
+    <string name="preview_haptic">תצוגה מקדימה של המשוב ההפטי</string>
+    <string name="ringtone_settings">הגדרות רינגטון</string>
+    <string name="dialpad_tones">צלילי חיוג</string>
+    <string name="dialpad_tones_subtitle">צליל לוח החיוג המושמע בעת לחיצה על מקשים</string>
+    <string name="calls">שיחות</string>
+    <string name="vibrate_on_answer">רעידה במענה</string>
+    <string name="vibrate_on_answer_subtitle">רעידה כאשר הצד השני עונה</string>
+    <string name="vibrate_on_hang_up">רעידה בסיום שיחה</string>
+    <string name="vibrate_on_hang_up_subtitle">רעידה כאשר השיחה מסתיימת</string>
+    <string name="haptics_across_app">משוב הפטי בכל האפליקציה</string>
+    <string name="scroll_haptics">משוב הפטי לגלילה</string>
+    <string name="scroll_haptics_subtitle">רעידה בתנועות גלילה באפליקציה</string>
+    <string name="haptic_interval">מרווח משוב הפטי</string>
+    <string name="haptic_interval_value">1 לכל %.1f ס"מ</string>
+    <string name="haptic_strength">עוצמת משוב הפטי</string>
+
+    <string name="manage_blocked">ניהול חסומים</string>
+    <string name="manage_blocked_subtitle">ניהול שיחות חסומות וספאם</string>
+    <string name="blocked_numbers">מספרים חסומים</string>
+    <string name="block_notifications">חסום התראות</string>
+    <string name="block_notifications_subtitle">הצג התראה בעדיפות נמוכה לשיחות חסומות</string>
+    <string name="block_method">שיטת חסימה</string>
+    <string name="block_method_subtitle">כיצד מטפלים בשיחות חסומות</string>
+    <string name="decline_automatically">דחה אוטומטית</string>
+    <string name="ring_silently">צלצל בשקט</string>
+    <string name="log_visibility">נראות ביומן</string>
+    <string name="log_visibility_subtitle">הצג או הסתר שיחות חסומות באחרונות</string>
+    <string name="hide_from_logs">הסתר מיומנים</string>
+    <string name="show_in_logs">הצג ביומנים</string>
+    <string name="blocked_size">חסומים: %s</string>
+
+    <string name="authentication">אימות</string>
+    <string name="authentication_method">שיטת אימות</string>
+    <string name="system_biometrics">ביומטריה מערכתית</string>
+    <string name="system_biometrics_subtitle">טביעת אצבע, זיהוי פנים או אישורי התקן</string>
+    <string name="system_biometrics_not_available">לא זמין במכשיר זה</string>
+    <string name="custom_biometrics">ביומטריה מותאמת אישית</string>
+    <string name="custom_pin">קוד PIN מותאם אישית</string>
+    <string name="custom_password">סיסמה מותאמת אישית</string>
+    <string name="pin">קוד PIN</string>
+    <string name="pin_subtitle">הגדר קוד PIN מספרי</string>
+    <string name="password">סיסמה</string>
+    <string name="password_subtitle">הגדר סיסמה אלפאנומרית מותאמת אישית</string>
+    <string name="remove_biometric">הסר נעילה ביומטרית</string>
+    <string name="not_configured">לא הוגדר</string>
+    <string name="lock_app_on_open">נעל אפליקציה בפתיחה</string>
+    <string name="lock_app_on_open_subtitle">דרוש אימות בעת פתיחת האפליקציה</string>
+    <string name="lock_call_actions">נעל פעולות שיחה</string>
+    <string name="lock_call_actions_subtitle">דרוש אימות כדי לענות או לדחות שיחות נכנסות</string>
+    <string name="lock_scope">היקף נעילת השיחה</string>
+    <string name="all_calls">כל השיחות</string>
+    <string name="all_calls_subtitle">ביומטריה נדרשת לכל שיחה נכנסת</string>
+    <string name="blacklist">רשימה שחורה</string>
+    <string name="blacklist_count">אנשי קשר שלגביהם אימות מענה מופעל: %s</string>
+    <string name="blacklist_subtitle">בחר אנשי קשר הדורשים ביומטריה כדי לענות</string>
+    <string name="whitelist">רשימה לבנה</string>
+    <string name="whitelist_count">אנשי קשר שלגביהם אימות מענה מושבת: %s</string>
+    <string name="whitelist_subtitle">בחר אנשי קשר לדילוג על הנעילה הביומטרית</string>
+    <string name="select_contacts">בחר אנשי קשר</string>
+    <string name="set_pin">הגדר קוד PIN</string>
+    <string name="set_pin_subtitle">הזן קוד PIN בן 4 ספרות</string>
+    <string name="enter_pin">הזן קוד PIN</string>
+    <string name="confirm_pin">אשר קוד PIN</string>
+    <string name="confirm_pin_subtitle">הזן שוב את קוד ה-PIN שלך לאישור</string>
+    <string name="incorrect_pin">קוד PIN שגוי. אנא נסה שוב.</string>
+    <string name="pin_dont_match">קודי ה-PIN אינם תואמים. אנא התחל מחדש.</string>
+    <string name="set_password">הגדר סיסמה</string>
+    <string name="set_password_subtitle">הזן כל סיסמה. תומכת באותיות, מספרים ותווים מיוחדים.</string>
+    <string name="enter_password">הזן סיסמה</string>
+    <string name="confirm_password">אשר סיסמה</string>
+    <string name="incorrect_password">סיסמה שגויה</string>
+    <string name="incorrect_password_subtitle">על הסיסמה להכיל לפחות 4 תווים</string>
+    <string name="password_dont_match">הסיסמאות אינן תואמות</string>
+
+    <string name="manage_contacts">ניהול אנשי קשר</string>
+    <string name="manage_contacts_subtitle">אנשי קשר פרטיים, חשבונות להצגה, וניקוי הרשימה</string>
+    <string name="display">תצוגה</string>
+    <string name="sort_by">מיין לפי</string>
+    <string name="name_format">פורמט שם</string>
+    <string name="first_name_first">שם פרטי קודם</string>
+    <string name="last_name_first">שם משפחה קודם</string>
+    <string name="merge_and_fix">מיזוג ותיקון</string>
+    <string name="standardize">תקנן</string>
+    <string name="standardize_phone_numbers">תקנן מספרי טלפון</string>
+    <string name="standardize_phone_numbers_subtitle">הסר רווחים ותווים מיוחדים ממספרי הטלפון</string>
+    <string name="total_contacts">סה"כ אנשי קשר</string>
+    <string name="contacts_with_changes">אנשי קשר עם שינויים</string>
+    <string name="numbers_to_standardize">מספרים לתקנון</string>
+    <string name="all_numbers_are_already_standardized">✅ כל המספרים כבר תקינים!</string>
+    <string name="examples_of_changes">דוגמאות לשינויים:</string>
+    <string name="and_more">ועוד %s…</string>
+
+    <string name="merging_contacts">מיזוג אנשי קשר</string>
+    <string name="merging_contacts_subtitle">איתור ומיזוג אנשי קשר כפולים</string>
+    <string name="merging_contacts_description">אנשי קשר ממוזגים הם רשומות מרובות מחשבונות שונים המקושרות לאחת. ניתן לערוך כל מקור בנפרד או לבטל את הקישור ביניהן.</string>
+    <string name="no_duplicates_found">לא נמצאו כפילים</string>
+    <string name="duplicates_in">כפילים ב: %s</string>
+    <string name="merge_duplicates">מזג כפילים (%s אנשי קשר)</string>
+
+    <string name="unmerging_contacts">בטל קישור אנשי קשר</string>
+    <string name="unmerging_contacts_subtitle">איתור וביטול קישור של אנשי קשר ממוזגים</string>
+    <string name="unmerging_contacts_description">מידע איש הקשר ממספר מקורות. בחר אחד לעריכה, או בטל את הקישור של כולם כדי לקבל אותם כאנשי קשר נפרדים.</string>
+    <string name="no_merged_contacts_found">לא נמצאו אנשי קשר ממוזגים</string>
+    <string name="merged_from_sources">מוזג מ-%s מקורות</string>
+    <string name="unlink">בטל קישור</string>
+    <string name="warning_cannot_be_undone">⚠️ לא ניתן לבטל פעולה זו.</string>
+
+    <string name="managing_contact_sources">ניהול מקורות אנשי קשר</string>
+    <string name="managing_contact_sources_subtitle">בחר אילו חשבונות להציג ברשימה שלך</string>
+    <string name="managing_contact_sources_description">בחר אילו חשבונות צריכים להיות גלויים ברשימת אנשי הקשר שלך. ביטול בחירה של חשבון יסתיר את אנשי הקשר שלו אך לא ימחק אותם.</string>
+    <string name="contact_sources">מקורות אנשי קשר</string>
+    <string name="contacts_stored_on_app">אנשי קשר המאוחסנים באפליקציה</string>
+    <string name="contacts_stored_on_device">אנשי קשר המאוחסנים במכשיר</string>
+
+    <string name="private_contacts">אנשי קשר פרטיים</string>
+    <string name="private_contacts_subtitle">נהל את אנשי הקשר המקומיים המוצפנים שלך</string>
+
+    <!-- Call -->
+    <string name="call">שיחה</string>
+    <string name="incoming">נכנסת</string>
+    <string name="outgoing">יוצאת</string>
+    <string name="missed">החמצה</string>
+    <string name="rejected">נדחתה</string>
+    <string name="blocked">חסומה</string>
+    <string name="answer">ענה</string>
+    <string name="decline">דחה</string>
+    <string name="answer_and_decline">ענה וסיים שיחה אחרת</string>
+    <string name="end_call">סיים שיחה</string>
+    <string name="back_to_call">חזור לשיחה</string>
+    <string name="keypad">לוח מקשים</string>
+    <string name="mute">השתק</string>
+    <string name="unmute">בטל השתקה</string>
+    <string name="speaker">רמקול</string>
+    <string name="add_call">הוסף שיחה</string>
+    <string name="resume">המשך</string>
+    <string name="swap">החלף</string>
+    <string name="more">עוד</string>
+    <string name="hold">העמדת המתנה</string>
+    <string name="on_hold">בהמתנה</string>
+    <string name="call_ended">השיחה הסתיימה</string>
+    <string name="calling">מתקשר…</string>
+    <string name="incoming_call">שיחה נכנסת</string>
+    <string name="connecting">מתחבר…</string>
+    <string name="slide_to_answer">גלול כדי לענות</string>
+    <string name="swipe_up_to_answer">החלק למעלה כדי לענות</string>
+    <string name="swipe_down_to_reject">החלק למטה כדי לדחות</string>
+
+    <!-- Recents -->
+    <string name="recents">אחרונות</string>
+    <string name="home_tab">בית</string>
+    <string name="call_history">היסטוריית שיחות</string>
+    <string name="history_with">היסטוריה עם %s</string>
+    <string name="no_call_history_found">לא נמצאה היסטוריית שיחות</string>
+    <string name="delete_call_logs">מחק יומני שיחות</string>
+    <string name="delete_call_logs_selected">האם אתה בטוח שברצונך למחוק %s יומני שיחות שנבחרו?</string>
+    <string name="deleted_from_call_log">נמחק מיומן השיחות</string>
+    <string name="could_not_delete">לא ניתן למחוק</string>
+    <string name="clear_all_filtered_logs">נקה את כל היומנים המסוננים</string>
+    <string name="clear_all_filtered_logs_selected">פעולה זו תמחק את כל היסטוריית השיחות המוצגת. לא ניתן לבטל פעולה זו.</string>
+
+    <!-- Contacts -->
+    <string name="contacts">אנשי קשר</string>
+    <string name="view_contact">הצג איש קשר</string>
+    <string name="view_contacts">הצג אנשי קשר</string>
+    <string name="contacts_settings">הגדרות אנשי קשר</string>
+    <string name="create_contact">צור איש קשר</string>
+    <string name="add_contact">הוסף איש קשר</string>
+    <string name="add_to_contact">הוסף לאיש קשר</string>
+    <string name="edit_contact">ערוך איש קשר</string>
+    <string name="contact_info">פרטי איש קשר</string>
+    <string name="favorites">מועדפים</string>
+    <string name="message">הודעה</string>
+    <string name="video">וידאו</string>
+    <string name="email">אימייל</string>
+    <string name="default_number">ברירת מחדל</string>
+    <string name="recent_number">אחרון</string>
+    <string name="recent_activity">פעילות אחרונה</string>
+    <string name="add_to_favorites">הוסף למועדפים</string>
+    <string name="remove_from_favorites">הסר מהמועדפים</string>
+    <string name="no_favorites_yet">אין עדיין מועדפים</string>
+    <string name="no_favorites_yet_subtitle">סמן איש קשר בכוכב כדי להוסיף אותו לכאן</string>
+    <string name="move_contact">העבר איש קשר</string>
+    <string name="move_to_another_account">העבר לחשבון אחר</string>
+    <string name="move_to_device_storage">העבר לאחסון המכשיר</string>
+    <string name="contact_moved_successfully">איש הקשר הועבר בהצלחה</string>
+    <string name="save_to_account">שמור בחשבון</string>
+    <string name="show_full_history">הצג היסטוריה מלאה</string>
+    <string name="contact_qr">קוד QR של איש הקשר</string>
+    <string name="phone_number">מספר טלפון</string>
+    <string name="name">שם</string>
+    <string name="prefix">קידומת</string>
+    <string name="prefix_description">מר, גברת, ד"ר, וכו'.</string>
+    <string name="first_name">שם פרטי</string>
+    <string name="middle_name">שם אמצעי</string>
+    <string name="middle_name_description">שם אמצעי או ראשי תיבות</string>
+    <string name="last_name">שם משפחה</string>
+    <string name="suffix">סיומת</string>
+    <string name="suffix_description">ג\'וניור, סניור, III, וכו\'.</string>
+    <string name="nickname">כינוי</string>
+    <string name="nickname_description">שם קצר או כינוי</string>
+    <string name="company">חברה</string>
+    <string name="job_title">תפקיד</string>
+    <string name="job_title_description">תפקיד בחברה</string>
+    <string name="add_field">הוסף שדה</string>
+    <string name="add_phone">הוסף טלפון</string>
+    <string name="add_email">הוסף אימייל</string>
+    <string name="add_event">הוסף אירוע</string>
+    <string name="add_address">הוסף כתובת</string>
+    <string name="add_note">הוסף הערה</string>
+    <string name="contact_ringtone">רינגטון איש קשר</string>
+    <string name="unsaved_changes">שינויים לא שמורים</string>
+    <string name="unsaved_changes_subtitle">האם ברצונך לשמור את השינויים שלך לפני היציאה?</string>
+    <plurals name="contacts_count">
+        <item quantity="one">איש קשר אחד</item>
+        <item quantity="two">שני אנשי קשר</item>
+        <item quantity="other">%d אנשי קשר</item>
+    </plurals>
+    <plurals name="add_to_favorites_confirmation">
+        <item quantity="one">להוסיף איש קשר אחד למועדפים?</item>
+        <item quantity="two">להוסיף שני אנשי קשר למועדפים?</item>
+        <item quantity="other">להוסיף %d אנשי קשר למועדפים?</item>
+    </plurals>
+    <plurals name="remove_from_favorites_confirmation">
+        <item quantity="one">להסיר איש קשר אחד מהמועדפים?</item>
+        <item quantity="two">להסיר שני אנשי קשר מהמועדפים?</item>
+        <item quantity="other">להסיר %d אנשי קשר מהמועדפים?</item>
+    </plurals>
+
+    <!-- Permission -->
+    <string name="allow">אפשר</string>
+    <string name="call_history_permission">Rill Phone צריך גישה ליומני השיחות שלך כדי להציג את הפעילות האחרונה שלך ושיחות שהוחמצו.</string>
+    <string name="contacts_permission">נדרשת הרשאת אנשי קשר</string>
+    <string name="contacts_permission_description">כדי להציג את אנשי הקשר שלך, אפשר הרשאת אנשי קשר.</string>
+    <string name="search_contacts_permission_description">כדי לחפש באנשי הקשר שלך ולזהות שיחות נכנסות, אפשר הרשאת אנשי קשר.</string>
+
+    <!-- Default Dialer -->
+    <string name="default_phone_number_cleared">מספר הטלפון המוגדר כברירת מחדל נמחק</string>
+    <string name="set_as_default">הגדר כברירת מחדל</string>
+    <string name="clear_default">נקה ברירת מחדל</string>
+    <string name="default_phone_set">%s הוגדר כברירת מחדל</string>
+    <string name="default_dialer_title">הגדר את Rill Phone כברירת מחדל</string>
+    <string name="default_dialer_subtitle">Rill Phone יכול להתחיל ולקבל שיחות רק אם היא אפליקציית הטלפון המוגדרת כברירת מחדל שלך</string>
+    <string name="default_dialer_warning">האפליקציה לא יכולה לפעול ללא הרשאה זו. אנא נסה שוב.</string>
+
+    <!-- Call notes -->
+    <string name="notes">הערות</string>
+    <string name="call_notes">הערות שיחה</string>
+    <string name="about_call_notes">אודות הערות שיחה</string>
+    <string name="about_call_notes_subtitle">הערות מהירות שאתה רושם במהלך שיחה. הן מאוחסנות באופן מקומי בקבצי האפליקציה, המקושרים למספר הטלפון (לא מסונכרנות עם אנשי קשר של Google ואחרים). לכל מספר יש הערה פרטית משלו, שניתן לגשת אליה רק מיומן השיחות בפרטי איש הקשר בתוך האפליקציה או מהלשונית "הערות שיחה".</string>
+    <string name="type_your_note">הקלד את ההערה שלך…</string>
+    <string name="no_notes_yet">אין עדיין הערות</string>
+    <string name="no_notes_yet_subtitle">הערות שנרשמו במהלך שיחות מופיעות כאן</string>
+    <string name="delete_notes">מחק הערות</string>
+    <string name="delete_notes_subtitle">האם אתה בטוח שברצונך למחוק %s הערות שנבחרו?</string>
+    <string name="delete_note">מחק הערה</string>
+    <string name="delete_note_subtitle">למחוק הערה עבור %s?"</string>
+
+    <!-- Times -->
+    <string name="just_now">עכשיו</string>
+    <string name="yesterday">אתמול</string>
+    <string name="today">היום</string>
+    <string name="seconds_letter">%dש</string>
+    <string name="minutes_letter">%dד</string>
+    <string name="hours_letter">%dש</string>
+    <string name="days_letter">%dי</string>
+
+    <!-- Phone numbers -->
+    <string name="no_label">ללא תווית</string>
+    <string name="custom_label">תווית מותאמת אישית</string>
+    <string name="change_label">שנה תווית</string>
+    <string name="mobile">נייד</string>
+    <string name="main_number">ראשי</string>
+    <string name="home">בית</string>
+    <string name="work">עבודה</string>
+    <string name="work_fax">פקס בעבודה</string>
+    <string name="home_fax">פקס בבית</string>
+    <string name="pager">זימונית</string>
+    <string name="other">אחר</string>
+    <string name="send_whatsapp">שלח ב-WhatsApp</string>
+
+    <!-- Events -->
+    <string name="other_information">מידע נוסף</string>
+    <string name="birthday">יום הולדת</string>
+    <string name="anniversary">יום נישואין</string>
+
+    <!-- Dialpad -->
+    <string name="add_pause">הוסף הפסקה של 2 שניות</string>
+    <string name="add_wait">הוסף המתנה</string>
+
+    <!-- Onboarding -->
+    <string name="skip">דלג</string>
+    <string name="page_title_one">פרטי מעיצוב</string>
+    <string name="page_subtitle_one">אנשי הקשר שלך נשארים במכשיר שלך. לעולם איננו מעלים, עוקבים או משתפים את הנתונים שלך עם אף אחד. לעולם.</string>
+    <string name="page_title_two">קוד פתוח ושקוף</string>
+    <string name="page_subtitle_two">אפס טלמטריה. אפס פרסומות. אפס מעקב. שליטה מלאה על התקשורת שלך.</string>
+    <string name="page_title_three">מהיר ואמין</string>
+    <string name="page_subtitle_three">חיפוש T9 מיידי, אנימציות חלקות ושיחות מהירות ברק. רק אפליקציית טלפון שעובדת.</string>
+    <string name="page_title_warning">בפיתוח</string>
+    <string name="page_subtitle_warning">אפליקציה זו עדיין בפיתוח. ייתכן שחלק מהתכונות לא יפעלו כמצופה. אנא השתמש בזהירות ודווח על בעיות שאתה נתקל בהן.</string>
+</resources>

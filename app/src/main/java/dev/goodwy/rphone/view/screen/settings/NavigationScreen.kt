@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Dialpad
 import androidx.compose.material.icons.filled.DragHandle
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Assistant
 import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.CallToAction
@@ -75,6 +76,7 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
     var tabShowContacts     by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS, true)) }
     var tabShowDialpad      by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD, true)) }
     var tabShowNotes        by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES, false)) }
+    var tabShowSearch       by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SEARCH, false)) }
     var tabShowSettings     by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SETTINGS, true)) }
     var iconOnlyNav         by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_ICON_ONLY_NAV, false)) }
     var openDialpadDefault  by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_OPEN_DIALPAD_DEFAULT, false)) }
@@ -82,18 +84,19 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
     // Default Tab dialog
     var showDefaultTabDialog by remember { mutableStateOf(false) }
     var defaultTab           by remember { mutableStateOf(prefs.getString(PreferenceManager.KEY_DEFAULT_TAB, "calls") ?: "calls") }
-    data class TabOption(val key: String, val label: String, val icon: ImageVector, val enabled: Boolean)
+    data class TabOption(val key: String, val label: String, val icon: ImageVector, val enabled: Boolean, val clickable: Boolean)
     val labelRecents =
         if (!tabShowFavorites && !tabShowContacts) stringResource(R.string.home_tab) else stringResource(R.string.recents)
     val iconRecents =
         if (!tabShowFavorites && !tabShowContacts) ImageVector.vectorResource(id = R.drawable.ic_house_fill) else Icons.Rounded.AccessTime
     val tabOptions = listOf(
-        TabOption("favorites", stringResource(R.string.favorites), Icons.Outlined.Assistant, tabShowFavorites),
-        TabOption("contacts",  stringResource(R.string.contacts),   Icons.Filled.AccountCircle, tabShowContacts),
-        TabOption("calls",     labelRecents,      iconRecents, true),
-        TabOption("dialpad",   stringResource(R.string.keypad),      Icons.Default.Dialpad, tabShowDialpad),
-        TabOption("notes",     stringResource(R.string.call_notes),       Icons.AutoMirrored.Outlined.StickyNote2, tabShowNotes),
-        TabOption("settings",  stringResource(R.string.settings),       ImageVector.vectorResource(id = R.drawable.ic_settings), tabShowSettings)
+        TabOption("favorites", stringResource(R.string.favorites),  Icons.Outlined.Assistant,       tabShowFavorites, true),
+        TabOption("contacts",  stringResource(R.string.contacts),   Icons.Filled.AccountCircle,     tabShowContacts, true),
+        TabOption("calls",     labelRecents,                        iconRecents,                    true, false),
+        TabOption("dialpad",   stringResource(R.string.keypad),     Icons.Default.Dialpad, tabShowDialpad, true),
+        TabOption("notes",     stringResource(R.string.call_notes), Icons.AutoMirrored.Outlined.StickyNote2, tabShowNotes, true),
+        TabOption("search",    stringResource(R.string.search),     Icons.Default.Search,           tabShowSearch, true),
+        TabOption("settings",  stringResource(R.string.settings),   ImageVector.vectorResource(id = R.drawable.ic_settings), tabShowSettings, true)
     )
 
     // Custom order of tab keys, persisted as a comma-separated string. Any tab keys
@@ -161,8 +164,7 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
                                     prefs.setString(PreferenceManager.KEY_DEFAULT_TAB, option.key)
                                 },
                                 shape = RoundedCornerShape(cornerRadius),
-                                color = if (isSelected) MaterialTheme.colorScheme.primaryContainer
-                                else cardColor,
+                                color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else cardColor,
                                 modifier = Modifier.fillMaxWidth().alpha(if (option.enabled) 1f else 0.5f),
                                 interactionSource = interactionSource
                             ) {
@@ -227,6 +229,7 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
             "contacts"   -> tabShowContacts
             "dialpad"    -> tabShowDialpad
             "notes"      -> tabShowNotes
+            "search"     -> tabShowSearch
             "settings"   -> tabShowSettings
             else         -> true
         }
@@ -237,6 +240,7 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
                 "contacts"   -> { tabShowContacts = value;   prefs.setBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS,   value) }
                 "dialpad"    -> { tabShowDialpad = value;    prefs.setBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD,    value) }
                 "notes"      -> { tabShowNotes = value;      prefs.setBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES,      value) }
+                "search"     -> { tabShowSearch = value;     prefs.setBoolean(PreferenceManager.KEY_TAB_SHOW_SEARCH,     value) }
                 "settings"   -> { tabShowSettings = value;   prefs.setBoolean(PreferenceManager.KEY_TAB_SHOW_SETTINGS,   value) }
             }
         }
@@ -305,6 +309,7 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
                                         modifier = Modifier.weight(1f)
                                     )
                                     Checkbox(
+                                        enabled = option.clickable,
                                         checked = tabChecked(tabKey),
                                         onCheckedChange = { setTabChecked(tabKey, it) },
                                         colors = CheckboxDefaults.colors(

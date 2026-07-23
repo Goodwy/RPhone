@@ -197,7 +197,7 @@ fun AboutAppScreen(navigator: DestinationsNavigator) {
                         painter = painterResource(id = R.drawable.ic_phone),
                         contentDescription = null,
                         modifier = Modifier.size(86.dp),
-                        tint = Color(0xFF2196F3) //MaterialTheme.colorScheme.primary
+                        tint = Color(0xFF2196F3)
                     )
                 }
             }

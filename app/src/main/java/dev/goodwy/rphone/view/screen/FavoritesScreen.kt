@@ -100,6 +100,7 @@ fun FavoritesScreen(navController: NavController, navigator: DestinationsNavigat
     val scope = rememberCoroutineScope()
     val prefs = koinInject<PreferenceManager>()
     val settingsVersion by prefs.settingsChanged.collectAsState()
+    val searchEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SEARCH, false)
 
     LaunchedEffect(settingsVersion) {
         contactsVM.fetchContacts()
@@ -241,7 +242,7 @@ fun FavoritesScreen(navController: NavController, navigator: DestinationsNavigat
                 label = "TopBarTransition"
             ) { isSelecting ->
                 if (!isSelecting) {
-                    TopBar(navController, navigator)
+                    if (!searchEnabled) TopBar(navController, navigator)
                 } else {
                     BatchActionBar(
                         selectedCount = selectedIds.size,
@@ -274,7 +275,14 @@ fun FavoritesScreen(navController: NavController, navigator: DestinationsNavigat
         containerColor = MaterialTheme.colorScheme.surface,
         contentWindowInsets = WindowInsets(0)
     ) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
+        Column(modifier = Modifier
+            .padding(innerPadding)
+            .fillMaxSize()
+            .then(
+                if (searchEnabled) Modifier.windowInsetsPadding(WindowInsets.statusBars)
+                else Modifier
+            )
+        ) {
             if (favorites.isEmpty()) {
                 PlaceholderView(
                     icon = Icons.Default.Star,

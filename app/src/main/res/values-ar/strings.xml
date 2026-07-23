@@ -1,0 +1,499 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" dir="rtl">
+    <string name="widget_description">المكالمات الأخيرة مع الاتصال السريع</string>
+    <string name="copy" tools:ignore="PrivateResource">نسخ</string>
+    <string name="copy_path">نسخ المسار</string>
+    <string name="paste">لصق</string>
+    <string name="delete">حذف</string>
+    <string name="delete_contact">حذف جهة الاتصال</string>
+    <string name="delete_contact_subtitle">هل أنت متأكد من رغبتك في حذف جهة الاتصال هذه؟ لا يمكن التراجع عن هذا الإجراء.</string>
+    <string name="delete_contacts">حذف جهات الاتصال</string>
+    <string name="delete_contacts_subtitle">هل أنت متأكد من رغبتك في حذف %s جهات اتصال محددة؟ لا يمكن التراجع عن هذا الإجراء.</string>
+    <string name="selected_items">تم تحديد %s</string>
+    <string name="select">تحديد</string>
+    <string name="select_all">تحديد الكل</string>
+    <string name="deselect_all">إلغاء تحديد الكل</string>
+    <string name="backspace">مسح</string>
+    <string name="back">رجوع</string>
+    <string name="edit">تحرير</string>
+    <string name="done">تم</string>
+    <string name="ok">موافق</string>
+    <string name="on">تشغيل</string>
+    <string name="off">إيقاف</string>
+    <string name="cancel">إلغاء</string>
+    <string name="open">فتح</string>
+    <string name="save">حفظ</string>
+    <string name="confirm">تأكيد</string>
+    <string name="close">إغلاق</string>
+    <string name="clear">مسح</string>
+    <string name="share">مشاركة</string>
+    <string name="share_subtitle">إرسال تفاصيل جهة الاتصال للآخرين</string>
+    <string name="use">استخدام</string>
+    <string name="connect_via_social">الاتصال عبر وسائل التواصل الاجتماعي</string>
+    <string name="import_text">استيراد</string>
+    <string name="export_text">تصدير</string>
+    <string name="call_is_ongoing">المكالمة جارية — انقر للعودة</string>
+    <string name="filter_all">الكل</string>
+    <string name="filter_missed">فوائت</string>
+    <string name="filter_incoming">واردة</string>
+    <string name="filter_outgoing">صادرة</string>
+    <string name="filter_rejected">مرفوضة</string>
+
+    <!-- Search -->
+    <string name="search">بحث</string>
+    <string name="search_contacts">بحث في جهات الاتصال</string>
+    <string name="no_results">لا توجد نتائج</string>
+    <string name="no_contacts_found">لم يتم العثور على جهات اتصال</string>
+    <string name="call_query">الاتصال بـ %s</string>
+    <string name="voice_input">إدخال صوتي</string>
+    <string name="filter_results">تصفية النتائج</string>
+
+    <!-- Billing -->
+    <string name="no_connection">لا يوجد اتصال</string>
+    <string name="loading_price">جاري التحميل…</string>
+
+    <!-- Project support -->
+    <string name="project_support">دعم المشروع</string>
+    <string name="project_support_summary">احصل على التطبيق المدفوع لدعم التطويرات المستقبلية والميزات الإضافية</string>
+    <string name="project_support_description">
+        <![CDATA[
+        نؤمن بأن الخصوصية يجب أن تكون مجانية. لهذا السبب جميع الميزات الأساسية ملك لك بالكامل دون إنفاق فلس واحد.<br>
+        إذا كنت تحب ما نقوم ببنائه، ففكر في شراء قهوة لنا. كشكر لك، ستحصل على:<br> <b>جميع السمات والألوان المخصصة والخطوط المخصصة.</b><br>
+        هذه ليست طبقة متميزة. إنها لفتة شكر. دعمك يحافظ على استقلالية Rill وخصوصيته وخالٍ من الإعلانات.
+        ]]>
+    </string>
+    <string name="support_project_to_unlock">ادعم المشروع لفتح</string>
+    <string name="restore_purchase">استعادة الشراء</string>
+    <string name="continue_support">متابعة</string>
+    <string name="monthly">شهري</string>
+    <string name="monthly_description">مرونة لمن يرغب في تقديم مساهمات شهرية</string>
+    <string name="yearly">سنوي</string>
+    <string name="yearly_description">دعم سنوي لأفضل تطبيق للمكالمات في العالم</string>
+    <string name="lifetime">مدى الحياة</string>
+    <string name="lifetime_description">ادفع مرة واحدة واستمتع بالراحة القصوى في جميع مكالماتك مدى الحياة</string>
+    <string name="most_flexible">الأكثر مرونة</string>
+    <string name="bast_value">أفضل قيمة</string>
+    <string name="pay_once">ادفع مرة واحدة</string>
+    <string name="support_development">دعم التطوير</string>
+    <string name="support_all_options">دعم جميع الخيارات</string>
+    <string name="support_development_description1">تطبيق Rill Phone مفتوح المصدر ومجاني تمامًا. دعمك يساعدنا في الحفاظ على ذلك.</string>
+    <string name="support_development_description2">بالتبرع، أنت لا تفتح الميزات فقط — بل تستثمر في الخصوصية والشفافية ومستقبل التطوير المستقل حقًا.</string>
+    <string name="support_development_description3">كل مساهمة، بغض النظر عن حجمها، تحدث فرقًا.</string>
+    <string name="unlock_all_features">فتح جميع الميزات</string>
+    <string name="all_features_unlocked">✨ تم فتح جميع الميزات! شكرًا لدعمك!</string>
+    <string name="thank_you_for_your_support">شكرًا لدعمك! ❤️</string>
+    <string name="features_locked">الميزات مقفلة</string>
+    <string name="your_donation_ensures">تبرعك يضمن:</string>
+    <string name="your_donation_ensures_1">✅ تحديثات منتظمة وتصحيحات أمنية</string>
+    <string name="your_donation_ensures_2">✅ ميزات وتحسينات جديدة</string>
+    <string name="your_donation_ensures_3">✅ وصول مجاني للجميع</string>
+    <string name="your_donation_ensures_4">✅ تطوير مفتوح المصدر</string>
+
+    <!-- About -->
+    <string name="about">حول</string>
+    <string name="rate_app">تقييم التطبيق</string>
+    <string name="other_apps">تطبيقاتنا الأخرى</string>
+    <string name="source_code">الكود المصدري</string>
+    <string name="privacy_policy">سياسة الخصوصية</string>
+
+    <!-- Contributors -->
+    <string name="contributors">المساهمون</string>
+    <string name="development_team">فريق التطوير</string>
+    <string name="apps_that_inspired_us">التطبيقات التي ألهمتنا</string>
+
+    <!-- Settings -->
+    <string name="settings">الإعدادات</string>
+    <string name="appearance">المظهر</string>
+    <string name="interface_settings">الواجهة</string>
+    <string name="interface_settings_subtitle">السمات والألوان والتخطيط</string>
+    <string name="app_theme">سمة التطبيق</string>
+    <string name="theme_auto">تلقائي</string>
+    <string name="theme_light">فاتح</string>
+    <string name="theme_dark">داكن</string>
+    <string name="theme_auto_black_white">تلقائي أبيض/أسود</string>
+    <string name="theme_white">أبيض</string>
+    <string name="theme_black">أسود</string>
+    <string name="custom_color">ألوان مخصصة</string>
+    <string name="custom_color_subtitle">مخطط ألوان يعتمد على لون مخصص</string>
+    <string name="hex_color">لون Hex</string>
+    <string name="hex_color_subtitle">أدخل رمز سداسي عشري صالح من 6 أرقام</string>
+    <string name="custom_font">خط مخصص</string>
+    <string name="custom_font_subtitle">اختر ملف .ttf لاستخدامه في جميع أنحاء التطبيق</string>
+    <string name="visual_effects">تأثيرات بصرية</string>
+    <string name="not_supported_on_this_device">غير مدعوم على هذا الجهاز</string>
+    <string name="not_supported_on_this_device_subtitle">يتطلب تأثير التمويه والزجاج السائل Android 12 أو أحدث</string>
+    <string name="material_liquid_you_glass">الزجاج السائل Material You</string>
+    <string name="material_liquid_you_glass_subtitle">تطبيق تأثير زجاج سائل على التنقل</string>
+    <string name="material_blur_effects">تأثيرات التمويه Material</string>
+    <string name="material_blur_effects_subtitle">تطبيق تأثير تمويه الخلفية على التنقل</string>
+    <string name="scroll_animation">رسوم متحركة للتمرير</string>
+    <string name="scroll_animation_device">رسوم متحركة للظهور لعناصر القائمة أثناء التمرير</string>
+    <string name="call_ui">واجهة المكالمة</string>
+    <string name="incoming_call_ui">واجهة المكالمة الواردة</string>
+    <string name="incoming_call_ui_subtitle">اختر كيفية الرد على المكالمات الواردة</string>
+    <string name="avatars_settings">إعدادات الصور الرمزية</string>
+    <string name="avatars_settings_subtitle">تخصيص الألوان والإطارات والمزيد</string>
+    <string name="avatar_colors">ألوان الصورة الرمزية</string>
+    <string name="colorful">ملونة</string>
+    <string name="primary_color">اللون الأساسي</string>
+    <string name="secondary_color">اللون الثانوي</string>
+    <string name="google_contacts_color">لون جهات اتصال Google</string>
+    <string name="show_first_letter_in_avatar">إظهار الحرف الأول في الصورة الرمزية</string>
+    <string name="show_first_letter_in_avatar_subtitle">يعرض الحرف عند فقدان الصورة</string>
+    <string name="avatar_frame">إطار الصورة الرمزية</string>
+    <string name="avatar_frame_subtitle">إظهار حد حول الصورة الرمزية</string>
+    <string name="show_picture_in_avatar">إظهار الصورة في الصورة الرمزية</string>
+    <string name="show_picture_in_avatar_subtitle">يعرض صورة جهة الاتصال إذا كانت متوفرة</string>
+
+    <string name="сaller_ui">واجهة المتصل</string>
+    <string name="сaller_ui_subtitle">تخصيص شاشة المكالمة وعناصر التحكم</string>
+    <string name="end_call_button">زر إنهاء المكالمة</string>
+    <string name="customize_width">تخصيص العرض</string>
+    <string name="customize_width_subtitle">ضبط عرض زر إنهاء المكالمة</string>
+
+    <string name="navigations">التنقل</string>
+    <string name="navigations_subtitle">رؤية علامات التبويب ونمطها</string>
+    <string name="tab_sections">أقسام علامات التبويب</string>
+    <string name="tab_sections_subtitle">اختر علامات التبويب المرئية، واسحب المقبض لإعادة ترتيبها في شريط التنقل</string>
+    <string name="navigation_style">نمط التنقل</string>
+    <string name="pill_style_navigation">تنقل على شكل حبة</string>
+    <string name="pill_style_navigation_subtitle">إظهار شريط تنقل عائم على شكل حبة بدلاً من الشريط السفلي القياسي</string>
+    <string name="icon_only_bottom_bar">شريط سفلي بأيقونات فقط</string>
+    <string name="icon_only_bottom_bar_subtitle">يزيل تسميات النص من التنقل</string>
+
+    <string name="calls_and_system">المكالمات والنظام</string>
+    <string name="call_settings">إعدادات المكالمات</string>
+    <string name="call_settings_subtitle">الحسابات والمستشعر ووضع الجيب</string>
+    <string name="default_sim">بطاقة SIM الافتراضية</string>
+    <string name="ask_first">اسأل أولاً</string>
+    <string name="calling_accounts">حسابات المكالمات</string>
+    <string name="system_settings">إعدادات النظام</string>
+    <string name="call_behavior">سلوك المكالمة</string>
+    <string name="proximity_sensor">مستشعر القرب في الخلفية</string>
+    <string name="proximity_sensor_subtitle">إيقاف تشغيل الشاشة عندما يكون الهاتف بالقرب من الأذن أثناء المكالمة</string>
+    <string name="pocket_mode_prevention">وضع الجيب</string>
+    <string name="pocket_mode_prevention_subtitle">منع الرد/الرفض العرضي عندما يكون الهاتف في الجيب</string>
+    <string name="floating_ongoing_call">فقاعة المكالمة العائمة</string>
+    <string name="floating_ongoing_call_subtitle">إظهار فقاعة عائمة قابلة للسحب أثناء المكالمات. يتطلب إذن \'العرض فوق التطبيقات الأخرى\'</string>
+    <string name="direct_call_on_tap">اتصال مباشر عند النقر</string>
+    <string name="direct_call_on_tap_subtitle">انقر على إدخال سجل المكالمات للاتصال مباشرة</string>
+    <string name="auto_speaker">مكبر صوت تلقائي</string>
+    <string name="auto_speaker_subtitle">التبديل تلقائيًا إلى مكبر الصوت عندما يكون الهاتف بعيدًا عن الأذن، والعودة إلى سماعة الأذن عندما يكون قريبًا</string>
+
+    <string name="sound_and_vibration">الصوت والاهتزاز</string>
+    <string name="sound_and_vibration_subtitle">نغمات الرنين، ونغمات لوحة المفاتيح، والاهتزازات اللمسية في جميع أنحاء التطبيق</string>
+    <string name="tap_haptics">الاستجابة اللمسية للنقر</string>
+    <string name="enable_tap_haptics">تمكين الاستجابة اللمسية للنقر</string>
+    <string name="haptics_intensity">الشدة</string>
+    <string name="haptics_soft">ناعمة</string>
+    <string name="haptics_strong">قوية</string>
+    <string name="haptics_custom">مخصصة</string>
+    <string name="preview_haptic">معاينة الاستجابة اللمسية</string>
+    <string name="ringtone_settings">إعدادات نغمة الرنين</string>
+    <string name="dialpad_tones">نغمات لوحة المفاتيح</string>
+    <string name="dialpad_tones_subtitle">نغمة لوحة المفاتيح التي يتم تشغيلها أثناء الضغط على المفاتيح</string>
+    <string name="calls">المكالمات</string>
+    <string name="vibrate_on_answer">الاهتزاز عند الرد</string>
+    <string name="vibrate_on_answer_subtitle">الاهتزاز عندما يرد الطرف الآخر</string>
+    <string name="vibrate_on_hang_up">الاهتزاز عند إنهاء المكالمة</string>
+    <string name="vibrate_on_hang_up_subtitle">الاهتزاز عند انتهاء المكالمة</string>
+    <string name="haptics_across_app">الاستجابة اللمسية في جميع أنحاء التطبيق</string>
+    <string name="scroll_haptics">الاستجابة اللمسية للتمرير</string>
+    <string name="scroll_haptics_subtitle">الاهتزاز عند إيماءات التمرير في التطبيق</string>
+    <string name="haptic_interval">فاصل الاستجابة اللمسية</string>
+    <string name="haptic_interval_value">1 لكل %.1f سم</string>
+    <string name="haptic_strength">قوة الاستجابة اللمسية</string>
+
+    <string name="manage_blocked">إدارة المحظورين</string>
+    <string name="manage_blocked_subtitle">إدارة المكالمات المحظورة والبريد العشوائي</string>
+    <string name="blocked_numbers">الأرقام المحظورة</string>
+    <string name="block_notifications">حظر الإشعارات</string>
+    <string name="block_notifications_subtitle">إظهار تنبيه منخفض الأولوية للمكالمات المحظورة</string>
+    <string name="block_method">طريقة الحظر</string>
+    <string name="block_method_subtitle">كيفية معالجة المكالمات المحظورة</string>
+    <string name="decline_automatically">رفض تلقائيًا</string>
+    <string name="ring_silently">رن بصمت</string>
+    <string name="log_visibility">رؤية السجل</string>
+    <string name="log_visibility_subtitle">إظهار أو إخفاء المكالمات المحظورة في الحديثة</string>
+    <string name="hide_from_logs">إخفاء من السجلات</string>
+    <string name="show_in_logs">إظهار في السجلات</string>
+    <string name="blocked_size">محظور: %s</string>
+
+    <string name="authentication">المصادقة</string>
+    <string name="authentication_method">طريقة المصادقة</string>
+    <string name="system_biometrics">القياسات الحيوية للنظام</string>
+    <string name="system_biometrics_subtitle">بصمة الإصبع، أو فتح الوجه، أو بيانات اعتماد الجهاز</string>
+    <string name="system_biometrics_not_available">غير متوفر على هذا الجهاز</string>
+    <string name="custom_biometrics">قياسات حيوية مخصصة</string>
+    <string name="custom_pin">رمز PIN مخصص</string>
+    <string name="custom_password">كلمة مرور مخصصة</string>
+    <string name="pin">رمز PIN</string>
+    <string name="pin_subtitle">تعيين رمز PIN رقمي</string>
+    <string name="password">كلمة المرور</string>
+    <string name="password_subtitle">تعيين كلمة مرور أبجدية رقمية مخصصة</string>
+    <string name="remove_biometric">إزالة القفل الحيوي</string>
+    <string name="not_configured">غير مهيأ</string>
+    <string name="lock_app_on_open">قفل التطبيق عند الفتح</string>
+    <string name="lock_app_on_open_subtitle">طلب المصادقة عند فتح التطبيق</string>
+    <string name="lock_call_actions">قفل إجراءات المكالمة</string>
+    <string name="lock_call_actions_subtitle">طلب المصادقة للرد على المكالمات الواردة أو رفضها</string>
+    <string name="lock_scope">نطاق قفل المكالمة</string>
+    <string name="all_calls">جميع المكالمات</string>
+    <string name="all_calls_subtitle">القياسات الحيوية مطلوبة لكل مكالمة واردة</string>
+    <string name="blacklist">القائمة السوداء</string>
+    <string name="blacklist_count">جهات الاتصال التي تم تمكين مصادقة الرد لها: %s</string>
+    <string name="blacklist_subtitle">اختر جهات الاتصال التي تتطلب قياسات حيوية للرد</string>
+    <string name="whitelist">القائمة البيضاء</string>
+    <string name="whitelist_count">جهات الاتصال التي تم تعطيل مصادقة الرد لها: %s</string>
+    <string name="whitelist_subtitle">اختر جهات الاتصال لتخطي القفل الحيوي</string>
+    <string name="select_contacts">تحديد جهات الاتصال</string>
+    <string name="set_pin">تعيين رمز PIN</string>
+    <string name="set_pin_subtitle">أدخل رمز PIN مكونًا من 4 أرقام</string>
+    <string name="enter_pin">أدخل رمز PIN</string>
+    <string name="confirm_pin">تأكيد رمز PIN</string>
+    <string name="confirm_pin_subtitle">أعد إدخال رمز PIN الخاص بك للتأكيد</string>
+    <string name="incorrect_pin">رمز PIN غير صحيح. يرجى المحاولة مرة أخرى.</string>
+    <string name="pin_dont_match">رموز PIN غير متطابقة. يرجى البدء من جديد.</string>
+    <string name="set_password">تعيين كلمة المرور</string>
+    <string name="set_password_subtitle">أدخل أي كلمة مرور. تدعم الأحرف والأرقام والرموز الخاصة.</string>
+    <string name="enter_password">أدخل كلمة المرور</string>
+    <string name="confirm_password">تأكيد كلمة المرور</string>
+    <string name="incorrect_password">كلمة مرور غير صحيحة</string>
+    <string name="incorrect_password_subtitle">يجب أن تتكون كلمة المرور من 4 أحرف على الأقل</string>
+    <string name="password_dont_match">كلمات المرور غير متطابقة</string>
+
+    <string name="manage_contacts">إدارة جهات الاتصال</string>
+    <string name="manage_contacts_subtitle">جهات الاتصال الخاصة، والحسابات المراد عرضها، وتنظيف قائمتك</string>
+    <string name="display">العرض</string>
+    <string name="sort_by">الترتيب حسب</string>
+    <string name="name_format">تنسيق الاسم</string>
+    <string name="first_name_first">الاسم الأول أولاً</string>
+    <string name="last_name_first">اسم العائلة أولاً</string>
+    <string name="merge_and_fix">دمج وإصلاح</string>
+    <string name="standardize">توحيد</string>
+    <string name="standardize_phone_numbers">توحيد أرقام الهواتف</string>
+    <string name="standardize_phone_numbers_subtitle">إزالة المسافات والأحرف الخاصة من أرقام الهواتف</string>
+    <string name="total_contacts">إجمالي جهات الاتصال</string>
+    <string name="contacts_with_changes">جهات الاتصال مع التغييرات</string>
+    <string name="numbers_to_standardize">الأرقام المراد توحيدها</string>
+    <string name="all_numbers_are_already_standardized">✅ جميع الأرقام موحدة بالفعل!</string>
+    <string name="examples_of_changes">أمثلة على التغييرات:</string>
+    <string name="and_more">و %s أكثر…</string>
+
+    <string name="merging_contacts">دمج جهات الاتصال</string>
+    <string name="merging_contacts_subtitle">العثور على جهات الاتصال المكررة ودمجها</string>
+    <string name="merging_contacts_description">جهات الاتصال المدمجة هي إدخالات متعددة من حسابات مختلفة مرتبطة في واحدة. يمكنك تحرير كل مصدر على حدة أو فك ارتباطها.</string>
+    <string name="no_duplicates_found">لم يتم العثور على مكررات</string>
+    <string name="duplicates_in">المكررات في: %s</string>
+    <string name="merge_duplicates">دمج المكررات (%s جهة اتصال)</string>
+
+    <string name="unmerging_contacts">فك ارتباط جهات الاتصال</string>
+    <string name="unmerging_contacts_subtitle">البحث عن جهات الاتصال المدمجة وفك ارتباطها</string>
+    <string name="unmerging_contacts_description">معلومات جهة الاتصال من مصادر متعددة. حدد مصدرًا للتحرير، أو فك ارتباط الكل للحصول عليها كجهات اتصال منفصلة.</string>
+    <string name="no_merged_contacts_found">لم يتم العثور على جهات اتصال مدمجة</string>
+    <string name="merged_from_sources">مدمج من %s مصادر</string>
+    <string name="unlink">فك الارتباط</string>
+    <string name="warning_cannot_be_undone">⚠️ لا يمكن التراجع عن هذا الإجراء.</string>
+
+    <string name="managing_contact_sources">إدارة مصادر جهات الاتصال</string>
+    <string name="managing_contact_sources_subtitle">اختر الحسابات المراد عرضها في قائمتك</string>
+    <string name="managing_contact_sources_description">حدد الحسابات التي يجب أن تكون مرئية في قائمة جهات الاتصال الخاصة بك. سيؤدي إلغاء تحديد حساب إلى إخفاء جهات الاتصال الخاصة به ولكن لن يحذفها.</string>
+    <string name="contact_sources">مصادر جهات الاتصال</string>
+    <string name="contacts_stored_on_app">جهات الاتصال المخزنة في التطبيق</string>
+    <string name="contacts_stored_on_device">جهات الاتصال المخزنة على الجهاز</string>
+
+    <string name="private_contacts">جهات الاتصال الخاصة</string>
+    <string name="private_contacts_subtitle">إدارة جهات الاتصال المحلية المشفرة الخاصة بك</string>
+
+    <!-- Call -->
+    <string name="call">اتصال</string>
+    <string name="incoming">واردة</string>
+    <string name="outgoing">صادرة</string>
+    <string name="missed">فوائت</string>
+    <string name="rejected">مرفوضة</string>
+    <string name="blocked">محظورة</string>
+    <string name="answer">رد</string>
+    <string name="decline">رفض</string>
+    <string name="answer_and_decline">الرد وإنهاء المكالمة الأخرى</string>
+    <string name="end_call">إنهاء المكالمة</string>
+    <string name="back_to_call">العودة إلى المكالمة</string>
+    <string name="keypad">لوحة المفاتيح</string>
+    <string name="mute">كتم</string>
+    <string name="unmute">إلغاء الكتم</string>
+    <string name="speaker">مكبر الصوت</string>
+    <string name="add_call">إضافة مكالمة</string>
+    <string name="resume">استئناف</string>
+    <string name="swap">تبديل</string>
+    <string name="more">المزيد</string>
+    <string name="hold">تعليق</string>
+    <string name="on_hold">معلقة</string>
+    <string name="call_ended">انتهت المكالمة</string>
+    <string name="calling">جاري الاتصال…</string>
+    <string name="incoming_call">مكالمة واردة</string>
+    <string name="connecting">جاري الاتصال…</string>
+    <string name="slide_to_answer">اسحب للرد</string>
+    <string name="swipe_up_to_answer">اسحب لأعلى للرد</string>
+    <string name="swipe_down_to_reject">اسحب لأسفل للرفض</string>
+
+    <!-- Recents -->
+    <string name="recents">الأخيرة</string>
+    <string name="home_tab">الرئيسية</string>
+    <string name="call_history">سجل المكالمات</string>
+    <string name="history_with">السجل مع %s</string>
+    <string name="no_call_history_found">لم يتم العثور على سجل مكالمات</string>
+    <string name="delete_call_logs">حذف سجلات المكالمات</string>
+    <string name="delete_call_logs_selected">هل أنت متأكد من رغبتك في حذف %s سجلات مكالمات محددة؟</string>
+    <string name="deleted_from_call_log">تم الحذف من سجل المكالمات</string>
+    <string name="could_not_delete">تعذر الحذف</string>
+    <string name="clear_all_filtered_logs">مسح جميع السجلات المصفاة</string>
+    <string name="clear_all_filtered_logs_selected">سيؤدي هذا إلى حذف جميع سجل المكالمات المعروض. لا يمكن التراجع عن هذا الإجراء.</string>
+
+    <!-- Contacts -->
+    <string name="contacts">جهات الاتصال</string>
+    <string name="view_contact">عرض جهة الاتصال</string>
+    <string name="view_contacts">عرض جهات الاتصال</string>
+    <string name="contacts_settings">إعدادات جهات الاتصال</string>
+    <string name="create_contact">إنشاء جهة اتصال</string>
+    <string name="add_contact">إضافة جهة اتصال</string>
+    <string name="add_to_contact">إضافة إلى جهة اتصال</string>
+    <string name="edit_contact">تحرير جهة الاتصال</string>
+    <string name="contact_info">معلومات جهة الاتصال</string>
+    <string name="favorites">المفضلة</string>
+    <string name="message">رسالة</string>
+    <string name="video">فيديو</string>
+    <string name="email">البريد الإلكتروني</string>
+    <string name="default_number">افتراضي</string>
+    <string name="recent_number">حديث</string>
+    <string name="recent_activity">النشاط الحديث</string>
+    <string name="add_to_favorites">إضافة إلى المفضلة</string>
+    <string name="remove_from_favorites">إزالة من المفضلة</string>
+    <string name="no_favorites_yet">لا توجد مفضلة بعد</string>
+    <string name="no_favorites_yet_subtitle">ضع نجمة على جهة اتصال لإضافتها هنا</string>
+    <string name="move_contact">نقل جهة الاتصال</string>
+    <string name="move_to_another_account">نقل إلى حساب آخر</string>
+    <string name="move_to_device_storage">نقل إلى تخزين الجهاز</string>
+    <string name="contact_moved_successfully">تم نقل جهة الاتصال بنجاح</string>
+    <string name="save_to_account">حفظ في الحساب</string>
+    <string name="show_full_history">عرض السجل الكامل</string>
+    <string name="contact_qr">رمز QR لجهة الاتصال</string>
+    <string name="phone_number">رقم الهاتف</string>
+    <string name="name">الاسم</string>
+    <string name="prefix">بادئة</string>
+    <string name="prefix_description">السيد، السيدة، الدكتور، إلخ.</string>
+    <string name="first_name">الاسم الأول</string>
+    <string name="middle_name">الاسم الأوسط</string>
+    <string name="middle_name_description">الاسم الأوسط أو الحرف الأول</string>
+    <string name="last_name">اسم العائلة</string>
+    <string name="suffix">لاحقة</string>
+    <string name="suffix_description">الابن، الأب، الثالث، إلخ.</string>
+    <string name="nickname">اللقب</string>
+    <string name="nickname_description">اسم قصير أو اسم مستعار</string>
+    <string name="company">الشركة</string>
+    <string name="job_title">المسمى الوظيفي</string>
+    <string name="job_title_description">المنصب في الشركة</string>
+    <string name="add_field">إضافة حقل</string>
+    <string name="add_phone">إضافة هاتف</string>
+    <string name="add_email">إضافة بريد إلكتروني</string>
+    <string name="add_event">إضافة حدث</string>
+    <string name="add_address">إضافة عنوان</string>
+    <string name="add_note">إضافة ملاحظة</string>
+    <string name="contact_ringtone">نغمة رنين جهة الاتصال</string>
+    <string name="unsaved_changes">تغييرات غير محفوظة</string>
+    <string name="unsaved_changes_subtitle">هل تريد حفظ تغييراتك قبل المغادرة؟</string>
+    <plurals name="contacts_count">
+        <item quantity="zero">لا جهات اتصال</item>
+        <item quantity="one">جهة اتصال واحدة</item>
+        <item quantity="two">جهتا اتصال</item>
+        <item quantity="few">%d جهات اتصال</item>
+        <item quantity="many">%d جهة اتصال</item>
+        <item quantity="other">%d جهات اتصال</item>
+    </plurals>
+    <plurals name="add_to_favorites_confirmation">
+        <item quantity="zero">لا توجد جهات اتصال للإضافة</item>
+        <item quantity="one">إضافة جهة اتصال واحدة إلى المفضلة؟</item>
+        <item quantity="two">إضافة جهتي اتصال إلى المفضلة؟</item>
+        <item quantity="few">إضافة %d جهات اتصال إلى المفضلة؟</item>
+        <item quantity="many">إضافة %d جهة اتصال إلى المفضلة؟</item>
+        <item quantity="other">إضافة %d جهات اتصال إلى المفضلة؟</item>
+    </plurals>
+    <plurals name="remove_from_favorites_confirmation">
+        <item quantity="zero">لا توجد جهات اتصال للإزالة</item>
+        <item quantity="one">إزالة جهة اتصال واحدة من المفضلة؟</item>
+        <item quantity="two">إزالة جهتي اتصال من المفضلة؟</item>
+        <item quantity="few">إزالة %d جهات اتصال من المفضلة؟</item>
+        <item quantity="many">إزالة %d جهة اتصال من المفضلة؟</item>
+        <item quantity="other">إزالة %d جهات اتصال من المفضلة؟</item>
+    </plurals>
+
+    <!-- Permission -->
+    <string name="allow">السماح</string>
+    <string name="call_history_permission">يحتاج تطبيق Rill Phone إلى الوصول إلى سجلات المكالمات الخاصة بك لعرض نشاطك الحديث والمكالمات الفائتة.</string>
+    <string name="contacts_permission">إذن جهات الاتصال مطلوب</string>
+    <string name="contacts_permission_description">لعرض جهات الاتصال الخاصة بك، اسمح بإذن جهات الاتصال.</string>
+    <string name="search_contacts_permission_description">للبحث في جهات الاتصال الخاصة بك وتحديد المكالمات الواردة، اسمح بإذن جهات الاتصال.</string>
+
+    <!-- Default Dialer -->
+    <string name="default_phone_number_cleared">تم مسح رقم الهاتف الافتراضي</string>
+    <string name="set_as_default">تعيين كافتراضي</string>
+    <string name="clear_default">مسح الافتراضي</string>
+    <string name="default_phone_set">تم تعيين %s كافتراضي</string>
+    <string name="default_dialer_title">تعيين Rill Phone كتطبيق افتراضي</string>
+    <string name="default_dialer_subtitle">يمكن لتطبيق Rill Phone بدء واستقبال المكالمات فقط إذا كان تطبيق الهاتف الافتراضي الخاص بك</string>
+    <string name="default_dialer_warning">لا يمكن للتطبيق العمل بدون هذا الإذن. يرجى المحاولة مرة أخرى.</string>
+
+    <!-- Call notes -->
+    <string name="notes">ملاحظات</string>
+    <string name="call_notes">ملاحظات المكالمات</string>
+    <string name="about_call_notes">حول ملاحظات المكالمات</string>
+    <string name="about_call_notes_subtitle">ملاحظات سريعة تدونها أثناء المكالمة. يتم تخزينها محليًا في ملفات التطبيق، ومرتبطة برقم الهاتف (غير متزامنة مع جهات اتصال Google وغيرها). لكل رقم ملاحظته الخاصة، والتي لا يمكن الوصول إليها إلا من سجل المكالمات في تفاصيل جهة الاتصال داخل التطبيق أو من علامة التبويب \"ملاحظات المكالمات\".</string>
+    <string name="type_your_note">اكتب ملاحظتك…</string>
+    <string name="no_notes_yet">لا توجد ملاحظات بعد</string>
+    <string name="no_notes_yet_subtitle">تظهر الملاحظات المدونة أثناء المكالمات هنا</string>
+    <string name="delete_notes">حذف الملاحظات</string>
+    <string name="delete_notes_subtitle">هل أنت متأكد من رغبتك في حذف %s ملاحظات محددة؟</string>
+    <string name="delete_note">حذف الملاحظة</string>
+    <string name="delete_note_subtitle">حذف ملاحظة %s؟"</string>
+
+    <!-- Times -->
+    <string name="just_now">الآن</string>
+    <string name="yesterday">أمس</string>
+    <string name="today">اليوم</string>
+    <string name="seconds_letter">%dث</string>
+    <string name="minutes_letter">%dد</string>
+    <string name="hours_letter">%dس</string>
+    <string name="days_letter">%dي</string>
+
+    <!-- Phone numbers -->
+    <string name="no_label">بدون تسمية</string>
+    <string name="custom_label">تسمية مخصصة</string>
+    <string name="change_label">تغيير التسمية</string>
+    <string name="mobile">جوال</string>
+    <string name="main_number">رئيسي</string>
+    <string name="home">المنزل</string>
+    <string name="work">العمل</string>
+    <string name="work_fax">فاكس العمل</string>
+    <string name="home_fax">فاكس المنزل</string>
+    <string name="pager">جهاز النداء</string>
+    <string name="other">أخرى</string>
+    <string name="send_whatsapp">إرسال عبر WhatsApp</string>
+
+    <!-- Events -->
+    <string name="other_information">معلومات أخرى</string>
+    <string name="birthday">عيد الميلاد</string>
+    <string name="anniversary">ذكرى سنوية</string>
+
+    <!-- Dialpad -->
+    <string name="add_pause">إضافة توقف لمدة ثانيتين</string>
+    <string name="add_wait">إضافة انتظار</string>
+
+    <!-- Onboarding -->
+    <string name="skip">تخطي</string>
+    <string name="page_title_one">خاص بالتصميم</string>
+    <string name="page_subtitle_one">تبقى جهات الاتصال الخاصة بك على جهازك. نحن لا نقوم أبدًا بتحميل أو تتبع أو مشاركة بياناتك مع أي شخص. أبدًا.</string>
+    <string name="page_title_two">مفتوح المصدر وشفاف</string>
+    <string name="page_subtitle_two">صفر تليمتري. صفر إعلانات. صفر تتبع. سيطرة كاملة على اتصالاتك.</string>
+    <string name="page_title_three">سريع وموثوق</string>
+    <string name="page_subtitle_three">بحث T9 فوري، ورسوم متحركة سلسة، ومكالمات سريعة للغاية. مجرد تطبيق هاتف يعمل.</string>
+    <string name="page_title_warning">قيد التطوير</string>
+    <string name="page_subtitle_warning">هذا التطبيق لا يزال قيد التطوير. قد لا تعمل بعض الميزات كما هو متوقع. يرجى استخدامه بحذر والإبلاغ عن أي مشاكل تواجهها.</string>
+</resources>

@@ -552,10 +552,10 @@ private fun ContactPickerDialog(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        shape = RoundedCornerShape(topStart = 38.dp, topEnd = 38.dp),
-        containerColor = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         tonalElevation = 4.dp,
-//        scrimColor = Color.Transparent,
+        scrimColor = Color.Transparent,
         contentWindowInsets = {
             if (isLandscape) {
                 WindowInsets.systemBars.only(
@@ -563,218 +563,211 @@ private fun ContactPickerDialog(
                 )
             } else BottomSheetDefaults.windowInsets
         },
-        dragHandle = {
-            if (isLandscape) null
-            else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 12.dp, bottom = 12.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Surface(
-                        shape = RoundedCornerShape(3.dp),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
-                        modifier = Modifier.size(width = 36.dp, height = 4.dp)
-                    ) {}
-                }
-            }
-        },
+        dragHandle = null,
         modifier = Modifier.statusBarsPadding()
     ) {
-        Surface(
-//            shape = RoundedCornerShape(24.dp),
-            modifier = Modifier.fillMaxSize(),
-            color = Color.Transparent
-        ) {
-            Scaffold(
-                topBar = {
-                    Column {
-                        TopAppBar(
-                            colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
-                            title = { Text(stringResource(R.string.select_contacts), fontWeight = FontWeight.Bold) },
+        Scaffold(
+            topBar = {
+                Column {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 12.dp, bottom = 12.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Surface(
+                            shape = RoundedCornerShape(3.dp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                            modifier = Modifier.size(width = 36.dp, height = 4.dp)
+                        ) {}
+                    }
+                    TopAppBar(
+                        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+                        title = { Text(stringResource(R.string.select_contacts), fontWeight = FontWeight.Bold) },
 //                            navigationIcon = {
 //                                NavigationIcon(onClick = onDismiss)
 //                            },
-                            actions = {
-                                IconButton(onClick = ::selectAll) {
-                                    Icon(Icons.Rounded.SelectAll, stringResource(R.string.select_all))
-                                }
-                                IconButton(onClick = ::unselectAll) {
-                                    Icon(Icons.Rounded.Deselect, stringResource(R.string.deselect_all))
-                                }
-                                Spacer(modifier = Modifier.size(6.dp))
+                        actions = {
+                            IconButton(onClick = ::selectAll) {
+                                Icon(Icons.Rounded.SelectAll, stringResource(R.string.select_all))
                             }
-                        )
-                        // Search bar
-                        OutlinedTextField(
-                            value = searchQuery,
-                            onValueChange = { searchQuery = it },
-                            placeholder = { Text(stringResource(R.string.search_contacts)) },
-                            leadingIcon = {
-                                Icon(Icons.Default.Search, contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier
-                                        .padding(start = 12.dp)
-                                )
-                            },
-                            trailingIcon = {
-                                AnimatedVisibility(visible = searchQuery.isNotEmpty()) {
-                                    IconButton(onClick = { searchQuery = "" },
-                                        modifier = Modifier
-                                            .padding(end = 4.dp)
-                                    ) {
-                                        Icon(Icons.Default.Close, contentDescription = "Clear",
-                                            modifier = Modifier.size(18.dp))
-                                    }
-                                }
-                            },
-                            singleLine = true,
-                            shape = RoundedCornerShape(28.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedContainerColor = cardColor,
-                                unfocusedContainerColor = cardColor,
-                                focusedBorderColor = cardColor,
-                                unfocusedBorderColor = cardColor
+                            IconButton(onClick = ::unselectAll) {
+                                Icon(Icons.Rounded.Deselect, stringResource(R.string.deselect_all))
+                            }
+                            Spacer(modifier = Modifier.size(6.dp))
+                        }
+                    )
+                    // Search bar
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        placeholder = { Text(stringResource(R.string.search_contacts)) },
+                        leadingIcon = {
+                            Icon(Icons.Default.Search, contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier
+                                    .padding(start = 12.dp)
                             )
+                        },
+                        trailingIcon = {
+                            AnimatedVisibility(visible = searchQuery.isNotEmpty()) {
+                                IconButton(onClick = { searchQuery = "" },
+                                    modifier = Modifier
+                                        .padding(end = 4.dp)
+                                ) {
+                                    Icon(Icons.Default.Close, contentDescription = stringResource(R.string.clear),
+                                        modifier = Modifier.size(18.dp))
+                                }
+                            }
+                        },
+                        singleLine = true,
+                        shape = RoundedCornerShape(28.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = cardColor,
+                            unfocusedContainerColor = cardColor,
+                            focusedBorderColor = cardColor,
+                            unfocusedBorderColor = cardColor
                         )
+                    )
+                }
+            },
+            containerColor = Color.Transparent
+        ) { padding ->
+            Box(Modifier.fillMaxSize()
+                .padding(
+                    top = padding.calculateTopPadding(),
+                    start = 0.dp,
+                    end = 0.dp,
+                    bottom = 0.dp
+                )
+            ) {
+                if (contacts.isEmpty()) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
                     }
-                },
-                containerColor = MaterialTheme.colorScheme.surface
-            ) { padding ->
-                Box(Modifier.fillMaxSize()
-                    .padding(
-                        top = padding.calculateTopPadding(),
-                        start = 0.dp,
-                        end = 0.dp,
-                        bottom = 0.dp
+                } else if (filteredContacts.isEmpty()) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Icon(Icons.Default.SearchOff, contentDescription = null,
+                                modifier = Modifier.size(48.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                            Text(stringResource(R.string.no_contacts_found), color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.bodyLarge)
+                        }
+                    }
+                } else {
+                    Surface(
+                        color = Color.Transparent,
+                        modifier = Modifier.padding(horizontal = 16.dp).padding(top = 8.dp).fillMaxSize(),
+                        shape = RoundedCornerShape(cardCornerBig),
+                    ) {
+                        LazyColumn(
+//                                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+                            contentPadding = PaddingValues(bottom = 96.dp),
+                            verticalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            items(filteredContacts, key = { it.id }) { contact ->
+                                val checked = isContactSelected(contact)
+                                val rowBg by animateColorAsState(
+                                    if (checked) MaterialTheme.colorScheme.primaryContainer
+                                    else cardColor,
+                                    tween(180), label = "cb${contact.id}"
+                                )
+                                val interactionSource = remember { MutableInteractionSource() }
+                                val isPressed by interactionSource.collectIsPressedAsState()
+                                val cornerRadius by animateDpAsState(
+                                    if (checked || isPressed) 50.dp else cardCornerSmall,
+                                    spring(stiffness = Spring.StiffnessMediumLow),
+                                    label = "cr${contact.id}"
+                                )
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(
+                                            rowBg,
+                                            shape = RoundedCornerShape(cornerRadius)
+                                        )
+                                        .clickable(
+                                            indication = null,
+                                            interactionSource = interactionSource,
+                                            onClick = { toggleContact(contact) }
+                                        )
+                                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+                                ) {
+                                    RillAvatar(
+                                        name = contact.displayName,
+                                        photoUri = contact.photoUri,
+                                        modifier = Modifier.size(46.dp)
+                                    )
+                                    Column(
+                                        modifier = Modifier.weight(1f),
+                                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Text(
+                                            text = contact.displayName.ifBlank { "Unknown" },
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            fontWeight = if (checked) FontWeight.SemiBold else FontWeight.Normal,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        if (contact.phoneNumbers.isNotEmpty()) {
+                                            Text(
+                                                text = contact.phoneNumbers.joinToString(", "),
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                maxLines = 1
+                                            )
+                                        }
+                                    }
+                                    Checkbox(
+                                        checked = checked,
+                                        onCheckedChange = { toggleContact(contact) }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // ── Floating Done pill ─────────────────────────────────
+                val donePillAlpha by animateFloatAsState(
+                    targetValue   = if (selectedContactCount > 0) 1f else 0f,
+                    animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
+                    label         = "donePillFadeIn"
+                )
+                Button(
+                    onClick = {
+                        val finalNumbers = contacts
+                            .filter(::isContactSelected)
+                            .flatMap { c -> c.phoneNumbers.map { it.filter(Char::isDigit).takeLast(10) } }
+                            .filter { it.isNotEmpty() }
+                            .toSet()
+                        onDone(finalNumbers)
+                    },
+                    shape = RoundedCornerShape(50),
+                    modifier = Modifier
+                        .graphicsLayer { alpha = donePillAlpha }
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 28.dp).height(52.dp),
+                    elevation = ButtonDefaults.buttonElevation(
+                        defaultElevation = 0.dp,
+                        pressedElevation = 0.dp,
+                        hoveredElevation = 0.dp
                     )
                 ) {
-                    if (contacts.isEmpty()) {
-                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator()
-                        }
-                    } else if (filteredContacts.isEmpty()) {
-                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Icon(Icons.Default.SearchOff, contentDescription = null,
-                                    modifier = Modifier.size(48.dp),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
-                                Text(stringResource(R.string.no_contacts_found), color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    style = MaterialTheme.typography.bodyLarge)
-                            }
-                        }
-                    } else {
-                        Surface(
-                            color = Color.Transparent,
-                            modifier = Modifier.padding(horizontal = 16.dp).fillMaxSize(),
-                            shape = RoundedCornerShape(cardCornerBig),
-                        ) {
-                            LazyColumn(
-//                                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
-                                contentPadding = PaddingValues(bottom = 96.dp),
-                                verticalArrangement = Arrangement.spacedBy(2.dp)
-                            ) {
-                                items(filteredContacts, key = { it.id }) { contact ->
-                                    val checked = isContactSelected(contact)
-                                    val rowBg by animateColorAsState(
-                                        if (checked) MaterialTheme.colorScheme.primaryContainer
-                                        else cardColor,
-                                        tween(180), label = "cb${contact.id}"
-                                    )
-                                    val interactionSource = remember { MutableInteractionSource() }
-                                    val isPressed by interactionSource.collectIsPressedAsState()
-                                    val cornerRadius by animateDpAsState(
-                                        if (checked || isPressed) 50.dp else cardCornerSmall,
-                                        spring(stiffness = Spring.StiffnessMediumLow),
-                                        label = "cr${contact.id}"
-                                    )
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .background(
-                                                rowBg,
-                                                shape = RoundedCornerShape(cornerRadius)
-                                            )
-                                            .clickable(
-                                                indication = null,
-                                                interactionSource = interactionSource,
-                                                onClick = { toggleContact(contact) }
-                                            )
-                                            .padding(horizontal = 16.dp, vertical = 10.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(14.dp)
-                                    ) {
-                                        RillAvatar(
-                                            name = contact.displayName,
-                                            photoUri = contact.photoUri,
-                                            modifier = Modifier.size(46.dp)
-                                        )
-                                        Column(Modifier.weight(1f)) {
-                                            Text(
-                                                text = contact.displayName.ifBlank { "Unknown" },
-                                                style = MaterialTheme.typography.bodyLarge,
-                                                fontWeight = if (checked) FontWeight.SemiBold else FontWeight.Normal,
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
-                                            if (contact.phoneNumbers.isNotEmpty()) {
-                                                Text(
-                                                    text = contact.phoneNumbers.first(),
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                    maxLines = 1
-                                                )
-                                            }
-                                        }
-                                        Checkbox(
-                                            checked = checked,
-                                            onCheckedChange = { toggleContact(contact) }
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    // ── Floating Done pill ─────────────────────────────────
-                    val donePillAlpha by animateFloatAsState(
-                        targetValue   = if (selectedContactCount > 0) 1f else 0f,
-                        animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
-                        label         = "donePillFadeIn"
+                    Icon(Icons.Default.Check, null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(10.dp))
+                    Text(
+                        text = stringResource(R.string.done) + "  ·  " + stringResource(R.string.selected_items, selectedContactCount),
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.SemiBold
                     )
-                    Button(
-                        onClick = {
-                            val finalNumbers = contacts
-                                .filter(::isContactSelected)
-                                .flatMap { c -> c.phoneNumbers.map { it.filter(Char::isDigit).takeLast(10) } }
-                                .filter { it.isNotEmpty() }
-                                .toSet()
-                            onDone(finalNumbers)
-                        },
-                        shape = RoundedCornerShape(50),
-                        modifier = Modifier
-                            .graphicsLayer { alpha = donePillAlpha }
-                            .align(Alignment.BottomCenter)
-                            .padding(bottom = 28.dp).height(52.dp),
-                        elevation = ButtonDefaults.buttonElevation(
-                            defaultElevation = 0.dp,
-                            pressedElevation = 0.dp,
-                            hoveredElevation = 0.dp
-                        )
-                    ) {
-                        Icon(Icons.Default.Check, null, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(10.dp))
-                        Text(
-                            text = stringResource(R.string.done) + "  ·  " + stringResource(R.string.selected_items, selectedContactCount),
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
                 }
             }
         }

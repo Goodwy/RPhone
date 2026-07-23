@@ -1,0 +1,486 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="widget_description">Senaste samtal med snabbnummer</string>
+    <string name="copy" tools:ignore="PrivateResource">Kopiera</string>
+    <string name="copy_path">Kopiera sökväg</string>
+    <string name="paste">Klistra in</string>
+    <string name="delete">Ta bort</string>
+    <string name="delete_contact">Ta bort kontakt</string>
+    <string name="delete_contact_subtitle">Är du säker på att du vill ta bort den här kontakten? Den här åtgärden kan inte ångras.</string>
+    <string name="delete_contacts">Ta bort kontakter</string>
+    <string name="delete_contacts_subtitle">Är du säker på att du vill ta bort %s valda kontakter? Den här åtgärden kan inte ångras.</string>
+    <string name="selected_items">%s valda</string>
+    <string name="select">Välj</string>
+    <string name="select_all">Välj alla</string>
+    <string name="deselect_all">Avmarkera alla</string>
+    <string name="backspace">Radera</string>
+    <string name="back">Tillbaka</string>
+    <string name="edit">Redigera</string>
+    <string name="done">Klar</string>
+    <string name="ok">OK</string>
+    <string name="on">På</string>
+    <string name="off">Av</string>
+    <string name="cancel">Avbryt</string>
+    <string name="open">Öppna</string>
+    <string name="save">Spara</string>
+    <string name="confirm">Bekräfta</string>
+    <string name="close">Stäng</string>
+    <string name="clear">Rensa</string>
+    <string name="share">Dela</string>
+    <string name="share_subtitle">Skicka kontaktuppgifter till andra</string>
+    <string name="use">Använd</string>
+    <string name="connect_via_social">Anslut via sociala medier</string>
+    <string name="import_text">Importera</string>
+    <string name="export_text">Exportera</string>
+    <string name="call_is_ongoing">Samtal pågår — Tryck för att återgå</string>
+    <string name="filter_all">Alla</string>
+    <string name="filter_missed">Missade</string>
+    <string name="filter_incoming">Inkommande</string>
+    <string name="filter_outgoing">Utgående</string>
+    <string name="filter_rejected">Avvisade</string>
+
+    <!-- Search -->
+    <string name="search">Sök</string>
+    <string name="search_contacts">Sök kontakter</string>
+    <string name="no_results">Inga resultat</string>
+    <string name="no_contacts_found">Inga kontakter hittades</string>
+    <string name="call_query">Ring %s</string>
+    <string name="voice_input">Röstinmatning</string>
+    <string name="filter_results">Filtrera resultat</string>
+
+    <!-- Billing -->
+    <string name="no_connection">Ingen anslutning</string>
+    <string name="loading_price">Laddar…</string>
+
+    <!-- Project support -->
+    <string name="project_support">Projektstöd</string>
+    <string name="project_support_summary">Skaffa den betalda appen för att stödja framtida utveckling och extra funktioner</string>
+    <string name="project_support_description">
+        <![CDATA[
+        Vi tror att integritet borde vara gratis. Det är därför alla viktiga funktioner är helt dina utan att du behöver spendera en krona.<br>
+        Om du gillar vad vi bygger, överväg att bjuda oss på en kaffe. Som tack får du:<br> <b>Alla teman, Anpassade färger och Anpassade typsnitt.</b><br>
+        Detta är inte en premiumnivå. Det är en tacksamhetsgest. Ditt stöd håller Rill oberoende, privat och reklamfritt.
+        ]]>
+    </string>
+    <string name="support_project_to_unlock">Stöd projektet för att låsa upp</string>
+    <string name="restore_purchase">Återställ köp</string>
+    <string name="continue_support">Fortsätt</string>
+    <string name="monthly">Månadsvis</string>
+    <string name="monthly_description">Flexibilitet för den som vill göra månatliga bidrag</string>
+    <string name="yearly">Årligen</string>
+    <string name="yearly_description">Årligt stöd för världens bästa samtalsapp</string>
+    <string name="lifetime">Livstid</string>
+    <string name="lifetime_description">Betala en gång och njut av ultimat bekvämlighet i alla dina samtal för livet</string>
+    <string name="most_flexible">Mest flexibel</string>
+    <string name="bast_value">Bästa värde</string>
+    <string name="pay_once">Betala en gång</string>
+    <string name="support_development">Stöd utvecklingen</string>
+    <string name="support_all_options">Stöd alla alternativ</string>
+    <string name="support_development_description1">Rill Phone är stolt open-source och helt gratis. Ditt stöd hjälper oss att hålla det så.</string>
+    <string name="support_development_description2">Genom att donera låser du inte bara upp funktioner — du investerar i integritet, transparens och framtiden för verkligt oberoende utveckling.</string>
+    <string name="support_development_description3">Varje bidrag, oavsett storlek, gör skillnad.</string>
+    <string name="unlock_all_features">Lås upp alla funktioner</string>
+    <string name="all_features_unlocked">✨ Alla funktioner upplåsta! Tack för ditt stöd!</string>
+    <string name="thank_you_for_your_support">Tack för ditt stöd! ❤️</string>
+    <string name="features_locked">Funktioner låsta</string>
+    <string name="your_donation_ensures">Din donation säkerställer:</string>
+    <string name="your_donation_ensures_1">✅ Regelbundna uppdateringar och säkerhetskorrigeringar</string>
+    <string name="your_donation_ensures_2">✅ Nya funktioner och förbättringar</string>
+    <string name="your_donation_ensures_3">✅ Gratis tillgång för alla</string>
+    <string name="your_donation_ensures_4">✅ Open-source-utveckling</string>
+
+    <!-- About -->
+    <string name="about">Om</string>
+    <string name="rate_app">Betygsätt appen</string>
+    <string name="other_apps">Våra andra appar</string>
+    <string name="source_code">Källkod</string>
+    <string name="privacy_policy">Integritetspolicy</string>
+
+    <!-- Contributors -->
+    <string name="contributors">Bidragsgivare</string>
+    <string name="development_team">Utvecklingsteam</string>
+    <string name="apps_that_inspired_us">Appar som inspirerade oss</string>
+
+    <!-- Settings -->
+    <string name="settings">Inställningar</string>
+    <string name="appearance">Utseende</string>
+    <string name="interface_settings">Gränssnitt</string>
+    <string name="interface_settings_subtitle">Teman, färger och layout</string>
+    <string name="app_theme">Apptem</string>
+    <string name="theme_auto">Auto</string>
+    <string name="theme_light">Ljus</string>
+    <string name="theme_dark">Mörk</string>
+    <string name="theme_auto_black_white">Auto S/V</string>
+    <string name="theme_white">Vit</string>
+    <string name="theme_black">Svart</string>
+    <string name="custom_color">Anpassade färger</string>
+    <string name="custom_color_subtitle">Färgschema baserat på en anpassad färg</string>
+    <string name="hex_color">Hex-färg</string>
+    <string name="hex_color_subtitle">Ange en giltig 6-siffrig hex-kod</string>
+    <string name="custom_font">Anpassat typsnitt</string>
+    <string name="custom_font_subtitle">Välj en .ttf-fil för användning i appen</string>
+    <string name="visual_effects">Visuella effekter</string>
+    <string name="not_supported_on_this_device">Stöds inte på den här enheten</string>
+    <string name="not_supported_on_this_device_subtitle">Oskärpa och Liquid Glass kräver Android 12 eller senare</string>
+    <string name="material_liquid_you_glass">Liquid Glass Material You</string>
+    <string name="material_liquid_you_glass_subtitle">Applicera en flytande glaseffekt på navigeringen</string>
+    <string name="material_blur_effects">Material oskärpeeffekter</string>
+    <string name="material_blur_effects_subtitle">Applicera en bakgrundsoskärpa på navigeringen</string>
+    <string name="scroll_animation">Rullningsanimation</string>
+    <string name="scroll_animation_device">Inmatningsanimation för listobjekt när du rullar</string>
+    <string name="call_ui">Samtalsgränssnitt</string>
+    <string name="incoming_call_ui">Gränssnitt för inkommande samtal</string>
+    <string name="incoming_call_ui_subtitle">Välj hur du vill svara på inkommande samtal</string>
+    <string name="avatars_settings">Avatar-inställningar</string>
+    <string name="avatars_settings_subtitle">Anpassa färger, ramar och mer</string>
+    <string name="avatar_colors">Avatar-färger</string>
+    <string name="colorful">Färgglada</string>
+    <string name="primary_color">Primärfärg</string>
+    <string name="secondary_color">Sekundärfärg</string>
+    <string name="google_contacts_color">Google Kontakter-färg</string>
+    <string name="show_first_letter_in_avatar">Visa första bokstaven i avatar</string>
+    <string name="show_first_letter_in_avatar_subtitle">Visar bokstaven när bild saknas</string>
+    <string name="avatar_frame">Avatar-ram</string>
+    <string name="avatar_frame_subtitle">Visa en kant runt avataren</string>
+    <string name="show_picture_in_avatar">Visa bild i avatar</string>
+    <string name="show_picture_in_avatar_subtitle">Visar kontaktbilden om tillgänglig</string>
+
+    <string name="сaller_ui">Samtalsgränssnitt</string>
+    <string name="сaller_ui_subtitle">Anpassa samtalsmenyn och kontrollerna</string>
+    <string name="end_call_button">Avsluta-samtal-knapp</string>
+    <string name="customize_width">Anpassa bredd</string>
+    <string name="customize_width_subtitle">Justera bredden på Avsluta-samtal-knappen</string>
+
+    <string name="navigations">Navigering</string>
+    <string name="navigations_subtitle">Flikars synlighet och stil</string>
+    <string name="tab_sections">Flikavsnitt</string>
+    <string name="tab_sections_subtitle">Välj vilka flikar som är synliga och dra för att ordna om dem i navigeringsfältet</string>
+    <string name="navigation_style">Navigeringsstil</string>
+    <string name="pill_style_navigation">Piller-formad navigering</string>
+    <string name="pill_style_navigation_subtitle">Visa en flytande pillerformad navigering istället för standardfältet längst ner</string>
+    <string name="icon_only_bottom_bar">Endast ikoner i nedre fältet</string>
+    <string name="icon_only_bottom_bar_subtitle">Tar bort textetiketter från navigeringen</string>
+
+    <string name="calls_and_system">Samtal och system</string>
+    <string name="call_settings">Samtalsinställningar</string>
+    <string name="call_settings_subtitle">Konton, sensor och fickläge</string>
+    <string name="default_sim">Standard-SIM</string>
+    <string name="ask_first">Fråga först</string>
+    <string name="calling_accounts">Samtalskonton</string>
+    <string name="system_settings">Systeminställningar</string>
+    <string name="call_behavior">Samtalsbeteende</string>
+    <string name="proximity_sensor">Närhetssensor i bakgrunden</string>
+    <string name="proximity_sensor_subtitle">Stäng av skärmen när telefonen är nära örat under ett samtal</string>
+    <string name="pocket_mode_prevention">Fickläge</string>
+    <string name="pocket_mode_prevention_subtitle">Förhindra oavsiktlig svar/avvisning när telefonen är i fickan</string>
+    <string name="floating_ongoing_call">Flytande pågående samtal</string>
+    <string name="floating_ongoing_call_subtitle">Visa en flytande bubbla under samtal. Kräver behörigheten \"Visa över andra appar\"</string>
+    <string name="direct_call_on_tap">Direktsamtal vid tryck</string>
+    <string name="direct_call_on_tap_subtitle">Tryck på en post i samtalsloggen för att ringa direkt</string>
+    <string name="auto_speaker">Automatisk högtalare</string>
+    <string name="auto_speaker_subtitle">Växla automatiskt till högtalare när telefonen är borta från örat, och tillbaka till hörluren när den är nära</string>
+
+    <string name="sound_and_vibration">Ljud och vibration</string>
+    <string name="sound_and_vibration_subtitle">Signaltoner, knappljud och haptik i hela appen</string>
+    <string name="tap_haptics">Tryckhaptik</string>
+    <string name="enable_tap_haptics">Aktivera tryckhaptik</string>
+    <string name="haptics_intensity">Intensitet</string>
+    <string name="haptics_soft">Mjuk</string>
+    <string name="haptics_strong">Stark</string>
+    <string name="haptics_custom">Anpassad</string>
+    <string name="preview_haptic">Förhandsgranska haptik</string>
+    <string name="ringtone_settings">Signalton-inställningar</string>
+    <string name="dialpad_tones">Knappljud</string>
+    <string name="dialpad_tones_subtitle">Knappljud som spelas vid knapptryck</string>
+    <string name="calls">Samtal</string>
+    <string name="vibrate_on_answer">Vibrera vid svar</string>
+    <string name="vibrate_on_answer_subtitle">Vibrera när den andra parten svarar</string>
+    <string name="vibrate_on_hang_up">Vibrera vid avslut</string>
+    <string name="vibrate_on_hang_up_subtitle">Vibrera när samtalet avslutas</string>
+    <string name="haptics_across_app">Haptik i hela appen</string>
+    <string name="scroll_haptics">Rullningshaptik</string>
+    <string name="scroll_haptics_subtitle">Vibrera vid rullningsgester i appen</string>
+    <string name="haptic_interval">Haptik-intervall</string>
+    <string name="haptic_interval_value">1 per %.1f cm</string>
+    <string name="haptic_strength">Haptik-styrka</string>
+
+    <string name="manage_blocked">Hantera blockerade</string>
+    <string name="manage_blocked_subtitle">Hantera blockerade samtal och skräppost</string>
+    <string name="blocked_numbers">Blockerade nummer</string>
+    <string name="block_notifications">Blockera aviseringar</string>
+    <string name="block_notifications_subtitle">Visa en avisering med låg prioritet för blockerade samtal</string>
+    <string name="block_method">Blockeringmetod</string>
+    <string name="block_method_subtitle">Hur blockerade samtal hanteras</string>
+    <string name="decline_automatically">Avvisa automatiskt</string>
+    <string name="ring_silently">Ring tyst</string>
+    <string name="log_visibility">Synlighet i loggen</string>
+    <string name="log_visibility_subtitle">Visa eller dölj blockerade samtal i senaste</string>
+    <string name="hide_from_logs">Dölj i loggar</string>
+    <string name="show_in_logs">Visa i loggar</string>
+    <string name="blocked_size">Blockerade: %s</string>
+
+    <string name="authentication">Autentisering</string>
+    <string name="authentication_method">Autentiseringsmetod</string>
+    <string name="system_biometrics">Systembiometri</string>
+    <string name="system_biometrics_subtitle">Fingeravtryck, ansiktsigenkänning eller enhetsuppgifter</string>
+    <string name="system_biometrics_not_available">Inte tillgänglig på den här enheten</string>
+    <string name="custom_biometrics">Anpassad biometri</string>
+    <string name="custom_pin">Anpassad PIN-kod</string>
+    <string name="custom_password">Anpassat lösenord</string>
+    <string name="pin">PIN-kod</string>
+    <string name="pin_subtitle">Ange en numerisk PIN-kod</string>
+    <string name="password">Lösenord</string>
+    <string name="password_subtitle">Ange ett anpassat alfanumeriskt lösenord</string>
+    <string name="remove_biometric">Ta bort biometriskt lås</string>
+    <string name="not_configured">Inte konfigurerad</string>
+    <string name="lock_app_on_open">Lås app vid öppning</string>
+    <string name="lock_app_on_open_subtitle">Kräv autentisering när appen öppnas</string>
+    <string name="lock_call_actions">Lås samtalsåtgärder</string>
+    <string name="lock_call_actions_subtitle">Kräv autentisering för att svara på eller avvisa inkommande samtal</string>
+    <string name="lock_scope">Omfattning av samtalslås</string>
+    <string name="all_calls">Alla samtal</string>
+    <string name="all_calls_subtitle">Biometri krävs för alla inkommande samtal</string>
+    <string name="blacklist">Svartlista</string>
+    <string name="blacklist_count">Kontakter för vilka autentisering för svar är aktiverad: %s</string>
+    <string name="blacklist_subtitle">Välj kontakter som kräver biometri för att svara</string>
+    <string name="whitelist">Vitlista</string>
+    <string name="whitelist_count">Kontakter för vilka autentisering för svar är inaktiverad: %s</string>
+    <string name="whitelist_subtitle">Välj kontakter för att hoppa över det biometriska låset</string>
+    <string name="select_contacts">Välj kontakter</string>
+    <string name="set_pin">Ange PIN-kod</string>
+    <string name="set_pin_subtitle">Ange en 4-siffrig PIN-kod</string>
+    <string name="enter_pin">Ange PIN-kod</string>
+    <string name="confirm_pin">Bekräfta PIN-kod</string>
+    <string name="confirm_pin_subtitle">Ange din PIN-kod igen för bekräftelse</string>
+    <string name="incorrect_pin">Felaktig PIN-kod. Försök igen.</string>
+    <string name="pin_dont_match">PIN-koderna matchar inte. Börja om.</string>
+    <string name="set_password">Ange lösenord</string>
+    <string name="set_password_subtitle">Ange valfritt lösenord. Bokstäver, siffror och specialtecken tillåts.</string>
+    <string name="enter_password">Ange lösenord</string>
+    <string name="confirm_password">Bekräfta lösenord</string>
+    <string name="incorrect_password">Felaktigt lösenord</string>
+    <string name="incorrect_password_subtitle">Lösenordet måste innehålla minst 4 tecken</string>
+    <string name="password_dont_match">Lösenorden matchar inte</string>
+
+    <string name="manage_contacts">Hantera kontakter</string>
+    <string name="manage_contacts_subtitle">Privata kontakter, konton att visa och rensa din lista</string>
+    <string name="display">Skärm</string>
+    <string name="sort_by">Sortera efter</string>
+    <string name="name_format">Namnformat</string>
+    <string name="first_name_first">Förnamn först</string>
+    <string name="last_name_first">Efternamn först</string>
+    <string name="merge_and_fix">Sammanfoga och åtgärda</string>
+    <string name="standardize">Standardisera</string>
+    <string name="standardize_phone_numbers">Standardisera telefonnummer</string>
+    <string name="standardize_phone_numbers_subtitle">Ta bort mellanslag och specialtecken från telefonnummer</string>
+    <string name="total_contacts">Totalt antal kontakter</string>
+    <string name="contacts_with_changes">Kontakter med ändringar</string>
+    <string name="numbers_to_standardize">Nummer att standardisera</string>
+    <string name="all_numbers_are_already_standardized">✅ Alla nummer är redan standardiserade!</string>
+    <string name="examples_of_changes">Exempel på ändringar:</string>
+    <string name="and_more">Och %s till…</string>
+
+    <string name="merging_contacts">Sammanfoga kontakter</string>
+    <string name="merging_contacts_subtitle">Hitta och sammanfoga dubblettkontakter</string>
+    <string name="merging_contacts_description">Sammanfogade kontakter är flera poster från olika konton som är länkade till en. Du kan redigera varje källa separat eller ta bort länken mellan dem.</string>
+    <string name="no_duplicates_found">Inga dubbletter hittades</string>
+    <string name="duplicates_in">Dubbletter i: %s</string>
+    <string name="merge_duplicates">Sammanfoga dubbletter (%s)</string>
+
+    <string name="unmerging_contacts">Ta bort länk mellan kontakter</string>
+    <string name="unmerging_contacts_subtitle">Hitta och ta bort länk mellan sammanfogade kontakter</string>
+    <string name="unmerging_contacts_description">Kontaktinformationen kommer från flera källor. Välj en att redigera, eller ta bort alla länkar för att ha dem som separata kontakter.</string>
+    <string name="no_merged_contacts_found">Inga sammanfogade kontakter hittades</string>
+    <string name="merged_from_sources">Sammanfogad från %s källor</string>
+    <string name="unlink">Ta bort länk</string>
+    <string name="warning_cannot_be_undone">⚠️ Den här åtgärden kan inte ångras.</string>
+
+    <string name="managing_contact_sources">Hantera kontaktkällor</string>
+    <string name="managing_contact_sources_subtitle">Välj vilka konton som ska visas i din lista</string>
+    <string name="managing_contact_sources_description">Välj vilka konton som ska vara synliga i din kontaktlista. Om du avmarkerar ett konto döljs dess kontakter men de tas inte bort.</string>
+    <string name="contact_sources">Kontaktkällor</string>
+    <string name="contacts_stored_on_app">Kontakter som lagras i appen</string>
+    <string name="contacts_stored_on_device">Kontakter som lagras på enheten</string>
+
+    <string name="private_contacts">Privata kontakter</string>
+    <string name="private_contacts_subtitle">Hantera dina krypterade lokala kontakter</string>
+
+    <!-- Call -->
+    <string name="call">Samtal</string>
+    <string name="incoming">Inkommande</string>
+    <string name="outgoing">Utgående</string>
+    <string name="missed">Missat</string>
+    <string name="rejected">Avvisat</string>
+    <string name="blocked">Blockerat</string>
+    <string name="answer">Svara</string>
+    <string name="decline">Avvisa</string>
+    <string name="answer_and_decline">Svara och avsluta annat samtal</string>
+    <string name="end_call">Avsluta samtal</string>
+    <string name="back_to_call">Tillbaka till samtal</string>
+    <string name="keypad">Knappsats</string>
+    <string name="mute">Tyst</string>
+    <string name="unmute">Ljud på</string>
+    <string name="speaker">Högtalare</string>
+    <string name="add_call">Lägg till samtal</string>
+    <string name="resume">Återuppta</string>
+    <string name="swap">Växla</string>
+    <string name="more">Mer</string>
+    <string name="hold">Vänta</string>
+    <string name="on_hold">I vänteläge</string>
+    <string name="call_ended">Samtalet avslutat</string>
+    <string name="calling">Ringer…</string>
+    <string name="incoming_call">Inkommande samtal</string>
+    <string name="connecting">Ansluter…</string>
+    <string name="slide_to_answer">Dra för att svara</string>
+    <string name="swipe_up_to_answer">Svep uppåt för att svara</string>
+    <string name="swipe_down_to_reject">Svep nedåt för att avvisa</string>
+
+    <!-- Recents -->
+    <string name="recents">Senaste</string>
+    <string name="home_tab">Hem</string>
+    <string name="call_history">Samtalshistorik</string>
+    <string name="history_with">Historik med %s</string>
+    <string name="no_call_history_found">Ingen samtalshistorik hittades</string>
+    <string name="delete_call_logs">Ta bort samtalsloggar</string>
+    <string name="delete_call_logs_selected">Är du säker på att du vill ta bort %s valda samtalsloggar?</string>
+    <string name="deleted_from_call_log">Borttagen från samtalslogg</string>
+    <string name="could_not_delete">Kunde inte ta bort</string>
+    <string name="clear_all_filtered_logs">Rensa alla filtrerade loggar</string>
+    <string name="clear_all_filtered_logs_selected">Detta kommer att ta bort all visad samtalshistorik. Den här åtgärden kan inte ångras.</string>
+
+    <!-- Contacts -->
+    <string name="contacts">Kontakter</string>
+    <string name="view_contact">Visa kontakt</string>
+    <string name="view_contacts">Visa kontakter</string>
+    <string name="contacts_settings">Kontaktinställningar</string>
+    <string name="create_contact">Skapa kontakt</string>
+    <string name="add_contact">Lägg till kontakt</string>
+    <string name="add_to_contact">Lägg till i kontakt</string>
+    <string name="edit_contact">Redigera kontakt</string>
+    <string name="contact_info">Kontaktinformation</string>
+    <string name="favorites">Favoriter</string>
+    <string name="message">Meddelande</string>
+    <string name="video">Video</string>
+    <string name="email">E-post</string>
+    <string name="default_number">Standard</string>
+    <string name="recent_number">Senaste</string>
+    <string name="recent_activity">Senaste aktivitet</string>
+    <string name="add_to_favorites">Lägg till i favoriter</string>
+    <string name="remove_from_favorites">Ta bort från favoriter</string>
+    <string name="no_favorites_yet">Inga favoriter ännu</string>
+    <string name="no_favorites_yet_subtitle">Stjärnmärk en kontakt för att lägga till den här</string>
+    <string name="move_contact">Flytta kontakt</string>
+    <string name="move_to_another_account">Flytta till annat konto</string>
+    <string name="move_to_device_storage">Flytta till enhetens lagring</string>
+    <string name="contact_moved_successfully">Kontakten flyttades</string>
+    <string name="save_to_account">Spara i konto</string>
+    <string name="show_full_history">Visa full historik</string>
+    <string name="contact_qr">Kontakt-QR</string>
+    <string name="phone_number">Telefonnummer</string>
+    <string name="name">Namn</string>
+    <string name="prefix">Prefix</string>
+    <string name="prefix_description">Herr, Fru, Dr, etc.</string>
+    <string name="first_name">Förnamn</string>
+    <string name="middle_name">Mellannamn</string>
+    <string name="middle_name_description">Mellannamn eller initial</string>
+    <string name="last_name">Efternamn</string>
+    <string name="suffix">Suffix</string>
+    <string name="suffix_description">Jr., Sr., III, etc.</string>
+    <string name="nickname">Smeknamn</string>
+    <string name="nickname_description">Kortnamn eller alias</string>
+    <string name="company">Företag</string>
+    <string name="job_title">Titel</string>
+    <string name="job_title_description">Position på företaget</string>
+    <string name="add_field">Lägg till fält</string>
+    <string name="add_phone">Lägg till telefon</string>
+    <string name="add_email">Lägg till e-post</string>
+    <string name="add_event">Lägg till händelse</string>
+    <string name="add_address">Lägg till adress</string>
+    <string name="add_note">Lägg till anteckning</string>
+    <string name="contact_ringtone">Kontaktens signalton</string>
+    <string name="unsaved_changes">Ej sparade ändringar</string>
+    <string name="unsaved_changes_subtitle">Vill du spara dina ändringar innan du lämnar?</string>
+    <plurals name="contacts_count">
+        <item quantity="one">%d kontakt</item>
+        <item quantity="other">%d kontakter</item>
+    </plurals>
+    <plurals name="add_to_favorites_confirmation">
+        <item quantity="one">Lägg till %d kontakt i favoriter?</item>
+        <item quantity="other">Lägg till %d kontakter i favoriter?</item>
+    </plurals>
+    <plurals name="remove_from_favorites_confirmation">
+        <item quantity="one">Ta bort %d kontakt från favoriter?</item>
+        <item quantity="other">Ta bort %d kontakter från favoriter?</item>
+    </plurals>
+
+    <!-- Permission -->
+    <string name="allow">Tillåt</string>
+    <string name="call_history_permission">Rill Phone behöver åtkomst till dina samtalsloggar för att visa din senaste aktivitet och missade samtal.</string>
+    <string name="contacts_permission">Kontakttillstånd krävs</string>
+    <string name="contacts_permission_description">För att visa dina kontakter, tillåt kontakttillstånd.</string>
+    <string name="search_contacts_permission_description">För att söka efter dina kontakter och identifiera inkommande samtal, tillåt kontakttillstånd.</string>
+
+    <!-- Default Dialer -->
+    <string name="default_phone_number_cleared">Standardtelefonnummer rensat</string>
+    <string name="set_as_default">Ange som standard</string>
+    <string name="clear_default">Rensa standard</string>
+    <string name="default_phone_set">%s inställd som standard</string>
+    <string name="default_dialer_title">Ange Rill Phone som standard</string>
+    <string name="default_dialer_subtitle">Rill Phone kan bara starta och ta emot samtal om det är din standardtelefonapp</string>
+    <string name="default_dialer_warning">Appen kan inte fungera utan detta tillstånd. Försök igen.</string>
+
+    <!-- Call notes -->
+    <string name="notes">Anteckningar</string>
+    <string name="call_notes">Samtalsanteckningar</string>
+    <string name="about_call_notes">Om samtalsanteckningar</string>
+    <string name="about_call_notes_subtitle">Korta anteckningar som du gör under ett samtal. De lagras lokalt i appens filer, kopplade till telefonnumret (synkroniseras inte med Google Kontakter och andra). Varje nummer har sin egen privata anteckning, som endast kan nås från samtalsloggen i kontaktinformationen i appen eller från fliken \"Samtalsanteckningar\".</string>
+    <string name="type_your_note">Skriv din anteckning…</string>
+    <string name="no_notes_yet">Inga anteckningar ännu</string>
+    <string name="no_notes_yet_subtitle">Anteckningar som gjorts under samtal visas här</string>
+    <string name="delete_notes">Ta bort anteckningar</string>
+    <string name="delete_notes_subtitle">Är du säker på att du vill ta bort %s valda anteckningar?</string>
+    <string name="delete_note">Ta bort anteckning</string>
+    <string name="delete_note_subtitle">Ta bort anteckning för %s?"</string>
+
+    <!-- Times -->
+    <string name="just_now">Precis nu</string>
+    <string name="yesterday">Igår</string>
+    <string name="today">Idag</string>
+    <string name="seconds_letter">%ds</string>
+    <string name="minutes_letter">%dm</string>
+    <string name="hours_letter">%dt</string>
+    <string name="days_letter">%dd</string>
+
+    <!-- Phone numbers -->
+    <string name="no_label">Ingen etikett</string>
+    <string name="custom_label">Anpassad etikett</string>
+    <string name="change_label">Ändra etikett</string>
+    <string name="mobile">Mobil</string>
+    <string name="main_number">Huvudnummer</string>
+    <string name="home">Hem</string>
+    <string name="work">Arbete</string>
+    <string name="work_fax">Arbetsfax</string>
+    <string name="home_fax">Hemfax</string>
+    <string name="pager">Personsökare</string>
+    <string name="other">Annan</string>
+    <string name="send_whatsapp">Skicka med WhatsApp</string>
+
+    <!-- Events -->
+    <string name="other_information">Annan information</string>
+    <string name="birthday">Födelsedag</string>
+    <string name="anniversary">Årsdag</string>
+
+    <!-- Dialpad -->
+    <string name="add_pause">Lägg till 2-sekunders paus</string>
+    <string name="add_wait">Lägg till väntan</string>
+
+    <!-- Onboarding -->
+    <string name="skip">Hoppa över</string>
+    <string name="page_title_one">Privat av design</string>
+    <string name="page_subtitle_one">Dina kontakter stannar på din enhet. Vi laddar aldrig upp, spårar eller delar dina uppgifter med någon. Aldrig.</string>
+    <string name="page_title_two">Öppen källkod och transparent</string>
+    <string name="page_subtitle_two">Noll telemetri. Noll reklam. Noll spårning. Full kontroll över din kommunikation.</string>
+    <string name="page_title_three">Snabb och pålitlig</string>
+    <string name="page_subtitle_three">Omedelbar T9-sökning, mjuka animationer och blixtsnabba samtal. Bara en telefonapp som fungerar.</string>
+    <string name="page_title_warning">Under utveckling</string>
+    <string name="page_subtitle_warning">Den här appen är fortfarande under utveckling. Vissa funktioner kanske inte fungerar som förväntat. Använd med försiktighet och rapportera eventuella problem du stöter på.</string>
+</resources>

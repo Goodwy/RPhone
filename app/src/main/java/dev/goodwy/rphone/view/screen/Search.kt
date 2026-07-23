@@ -10,10 +10,12 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.StickyNote2
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Dialpad
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.rounded.MicNone
 import androidx.compose.material.icons.rounded.People
 import androidx.compose.material.icons.rounded.Search
@@ -27,12 +29,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import dev.goodwy.rphone.R
@@ -46,11 +50,19 @@ import dev.goodwy.rphone.view.components.*
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.generated.destinations.ContactDetailsScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.DialPadScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.NotesScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import dev.goodwy.rphone.cardCornerSmall
+import dev.goodwy.rphone.controller.CallLogViewModel
+import dev.goodwy.rphone.controller.util.NoteManager
+import dev.goodwy.rphone.controller.util.PreferenceManager
+import dev.goodwy.rphone.controller.util.normalizeNumberDigits
+import dev.goodwy.rphone.modal.data.CallLogEntry
+import dev.goodwy.rphone.view.components.tiles.SingleTile
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinActivityViewModel
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -111,19 +123,38 @@ fun ContactSearchContent(
         return
     }
 
+    val context = LocalContext.current
+    val prefs = koinInject<PreferenceManager>()
     val contactsVM: ContactsViewModel = koinActivityViewModel()
+    val callLogVM: CallLogViewModel = koinActivityViewModel()
+
     val contacts by contactsVM.allContacts.collectAsState()
-    var query by rememberSaveable { mutableStateOf("") }
+    val callLogs by callLogVM.allCallLogs.collectAsState()
+
+    val settingsVer by prefs.settingsChanged.collectAsState()
+    val filterState = remember(settingsVer) { prefs.getSearchFilterState() }
+    val displayOrder = remember(settingsVer) { prefs.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0) }
+
+    var queryFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(TextFieldValue(""))
+    }
+    val query = queryFieldValue.text
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
+    var isInitialized by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
-        keyboardController?.show()
+        if (!isInitialized) {
+            focusRequester.requestFocus()
+            queryFieldValue =
+                queryFieldValue.copy(selection = TextRange(queryFieldValue.text.length))
+            keyboardController?.show()
+            isInitialized = true
+        }
     }
 
-    val filteredContacts = remember(query, contacts) {
-        if (query.isBlank()) emptyList()
+    val filteredContacts = remember(query, contacts, filterState.contacts) {
+        if (!filterState.contacts || query.isBlank()) emptyList()
         else contacts.filter {
             it.displayName.contains(query, ignoreCase = true) ||
                     it.nickname.contains(query, ignoreCase = true) ||
@@ -137,26 +168,56 @@ fun ContactSearchContent(
         }
     }
 
-    // Voice search
-    var textFieldValue by remember { mutableStateOf(TextFieldValue("")) }
-    var isVoiceSearchTriggered by remember { mutableStateOf(false) }
-    // Synchronizing the query with textFieldValue.text
-    LaunchedEffect(textFieldValue.text) {
-        query = textFieldValue.text
+    // Numbers that show up in the call log but aren't saved as a contact — i.e. what "Non
+    // contacts" in the Filter menu refers to. Deduplicated by normalized number, keeping the
+    // most recent entry (callLogs is already date-descending).
+    val nonContactResults = remember(query, callLogs, filterState.nonContacts) {
+        if (!filterState.nonContacts || query.isBlank()) emptyList()
+        else {
+            val seen = LinkedHashMap<String, CallLogEntry>()
+            callLogs.asSequence()
+                .filter { it.contactId.isNullOrBlank() }
+                .forEach { entry ->
+                    val key = normalizeNumberDigits(entry.number).filter { it.isDigit() }.takeLast(9)
+                        .ifBlank { entry.number }
+                    seen.putIfAbsent(key, entry)
+                }
+            seen.values.filter { entry ->
+                entry.number.replace(" ", "").contains(query.replace(" ", "")) ||
+                        (entry.isCallerIdName && (entry.name?.contains(query, ignoreCase = true) == true))
+            }
+        }
     }
-    // When the query from external sources changes, we update textFieldValue
-    LaunchedEffect(query) {
-        if (textFieldValue.text != query) {
-            textFieldValue = TextFieldValue(
-                text = query,
-                selection = TextRange(query.length) // cursor to the end
-            )
+
+    var refreshNoteTrigger by remember { mutableIntStateOf(0) }
+    // Notes attached to a contact/number (from the call screen or contact info screen).
+    val contactNoteResults = remember(query, filterState.contactNotes, refreshNoteTrigger) {
+        if (!filterState.contactNotes || query.isBlank()) emptyList()
+        else NoteManager.getAllNotes(context).filter { note ->
+            note.contactName.contains(query, ignoreCase = true) ||
+                    note.phoneNumber.contains(query.filter { c -> c.isDigit() || c == '+' }.ifEmpty { query }, ignoreCase = true) ||
+                    note.content.contains(query, ignoreCase = true)
+        }
+    }
+
+    val totalResults = filteredContacts.size + nonContactResults.size + contactNoteResults.size
+    val hasAnyResults = totalResults > 0
+
+    // Voice search
+    var isVoiceSearchTriggered by rememberSaveable { mutableStateOf(false) }
+    var voiceSearchResult by remember { mutableStateOf<String?>(null) }
+    // Synchronizing the query with textFieldValue.text
+    LaunchedEffect(voiceSearchResult) {
+        voiceSearchResult?.let { result ->
+            queryFieldValue = TextFieldValue(result, selection = TextRange(result.length))
+            keyboardController?.hide()
+            voiceSearchResult = null
         }
     }
     val micPermissionState = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
     val voiceSearchLauncher = rememberLauncherForActivityResult(VoiceSearchContract()) { result ->
         result?.let {
-            query = it
+            voiceSearchResult = result
             keyboardController?.hide()
         }
     }
@@ -193,10 +254,10 @@ fun ContactSearchContent(
             shadowElevation = 0.dp
         ) {
             TextField(
-                value = textFieldValue,
-                onValueChange = { textFieldValue = it },
+                value = queryFieldValue,
+                onValueChange = { queryFieldValue = it },
                 modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
-                placeholder = { Text(stringResource(R.string.search_contacts)) },
+                placeholder = { Text(stringResource(R.string.search)) },
                 leadingIcon = {
                     IconButton(onClick = { navigator.navigateUp() }) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.back))
@@ -210,8 +271,7 @@ fun ContactSearchContent(
                             exit = fadeOut() + scaleOut()
                         ) {
                             IconButton(onClick = {
-                                query = ""
-                                textFieldValue = TextFieldValue("", selection = TextRange(0))
+                                queryFieldValue = TextFieldValue("", selection = TextRange(0))
                             }) {
                                 Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.clear))
                             }
@@ -238,6 +298,8 @@ fun ContactSearchContent(
                                 )
                             }
                         }
+
+                        SearchFilterButton()
                         Spacer(modifier = Modifier.size(4.dp))
                     }
                 },
@@ -287,12 +349,6 @@ fun ContactSearchContent(
         }
 
         when {
-            contacts.isEmpty() -> {
-                PlaceholderView(
-                    icon = Icons.Rounded.People,
-                    title = stringResource(R.string.no_contacts_found),
-                )
-            }
             query.isBlank() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(
@@ -306,14 +362,14 @@ fun ContactSearchContent(
                             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
                         )
                         Text(
-                            stringResource(R.string.search_contacts),
+                            stringResource(R.string.search),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
             }
-            filteredContacts.isEmpty() -> {
+            !hasAnyResults -> {
                 Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.Center) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -343,24 +399,125 @@ fun ContactSearchContent(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    item {
-//                        RillSectionHeader(title = "${filteredContacts.size} Result${if (filteredContacts.size != 1) "s" else ""}")
-//                        Spacer(modifier = Modifier.height(8.dp))
-                        RillExpressiveCard {
-                            filteredContacts.forEach { contact ->
-                                RillListItem(
-                                    headline = contact.name,
-                                    supporting = contact.phoneNumbers.firstOrNull(),
-                                    avatarName = contact.name,
-                                    photoUri = contact.photoUri,
-                                    onClick = {
-                                        navigator.navigate(ContactDetailsScreenDestination(contactId = contact.id))
-                                    }
-                                )
+                    if (filteredContacts.isNotEmpty()) {
+                        item {
+                            RillSectionHeader(
+                                title = stringResource(R.string.contacts),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 20.dp, vertical = 8.dp)
+                            )
+                            RillExpressiveCard {
+                                filteredContacts.forEach { contact ->
+                                    ContactListItem(
+                                        contact = contact,
+                                        navigator = navigator,
+                                        displayOrder = displayOrder
+                                    )
+                                }
                             }
                         }
                     }
-                    item { Spacer(modifier = Modifier.height(100.dp)) }
+
+                    if (nonContactResults.isNotEmpty()) {
+                        item {
+                            RillSectionHeader(
+                                title = stringResource(R.string.calls),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 20.dp, vertical = 8.dp)
+                            )
+                            RillExpressiveCard {
+                                nonContactResults.forEach { entry ->
+                                    SingleTile(
+                                        title = entry.name?.ifEmpty { entry.number } ?: entry.number,
+                                        subtitle = if (entry.name.isNullOrEmpty() || entry.name == entry.number) null else entry.number,
+                                        icon = Icons.Default.Person,
+                                        phoneNumber = entry.number,
+                                        trailingContent = {
+                                            IconButton(onClick = {
+                                                navigator.navigate(DialPadScreenDestination(initialNumber = entry.number))
+                                            }) {
+                                                Icon(Icons.Default.Call, contentDescription = "Call", tint = MaterialTheme.colorScheme.primary)
+                                            }
+                                        },
+                                        onClick = {
+                                            navigator.navigate(DialPadScreenDestination(initialNumber = entry.number))
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    if (contactNoteResults.isNotEmpty()) {
+                        item {
+                            RillSectionHeader(
+                                title = stringResource(R.string.call_notes),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 20.dp, vertical = 8.dp)
+                            )
+                            RillExpressiveCard {
+                                contactNoteResults.forEach { note ->
+                                    var showNoteEditor by remember { mutableStateOf(false) }
+                                    SingleTile(
+                                        title = note.contactName.ifBlank { note.phoneNumber.ifBlank { "Unknown" } },
+                                        subtitle = note.content,
+                                        icon = Icons.AutoMirrored.Outlined.StickyNote2,
+                                        phoneNumber = note.phoneNumber,
+                                        supportingContent = {
+                                            Text(
+                                                note.content,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                maxLines = 2,
+                                                overflow = TextOverflow.Ellipsis,
+                                                modifier = Modifier.padding(top = 4.dp)
+                                            )
+                                        },
+                                        onClick = {
+                                            showNoteEditor = true
+                                        },
+                                        useLongClick = false
+                                    )
+                                    if (showNoteEditor) {
+                                        NoteEditorDialog(
+                                            contactName = note.contactName,
+                                            phoneNumber = note.phoneNumber,
+                                            onDismiss = {
+                                                showNoteEditor = false
+                                                refreshNoteTrigger++
+                                            }
+                                        )
+                                    }
+                                }
+                                TextButton(
+                                    onClick = {
+                                        NavBarVisibilityState.hideForSearchResult = true
+                                        navigator.navigate(NotesScreenDestination(highlightQuery = query))
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .offset(
+                                            x = 0.dp,
+                                            y = (-4).dp
+                                        ), // We'll make up for the indentation
+                                    colors = ButtonDefaults.textButtonColors().copy(containerColor = cardColor),
+                                    shape = RoundedCornerShape(
+                                        topStart = cardCornerSmall,
+                                        topEnd = cardCornerSmall,
+                                        bottomStart = cardCornerBig,
+                                        bottomEnd = cardCornerBig
+                                    ),
+                                ) {
+                                    Text(stringResource(R.string.filter_all))
+                                }
+                            }
+                        }
+                    }
+
+                    item { Spacer(modifier = Modifier.height(300.dp)) }
                 }
             }
         }

@@ -62,7 +62,7 @@ fun SingleTile(
     phoneNumber: String? = null,
     onAvatarClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
-    isMenuOpen: Boolean = false,
+    useLongClick: Boolean = true,
     showAddToContact: Boolean = false,
     onSelectMode: (() -> Unit)? = null,
     onClick: () -> Unit
@@ -71,8 +71,6 @@ fun SingleTile(
     val haptic  = LocalHapticFeedback.current
     val prefs   = koinInject<PreferenceManager>()
     var showMenu              by remember { mutableStateOf(false) }
-    // Sync with external isMenuOpen
-    LaunchedEffect(isMenuOpen) { if (isMenuOpen) showMenu = true }
     var isPressed             by remember { mutableStateOf(false) }
     var horizontalDragDetected by remember { mutableStateOf(false) }
 
@@ -106,11 +104,13 @@ fun SingleTile(
                         }
                         onClick()
                     },
-                    onLongClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        if (onLongClick != null) onLongClick()
-                        else showMenu = true
-                    }
+                    onLongClick = if (useLongClick) {
+                        {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            if (onLongClick != null) onLongClick()
+                            else showMenu = true
+                        }
+                    } else null
                 )
                 .pointerInput(Unit) {
                     awaitEachGesture {

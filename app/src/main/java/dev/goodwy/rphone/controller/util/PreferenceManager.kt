@@ -251,11 +251,12 @@ class PreferenceManager(context: Context) {
         const val KEY_TAB_SHOW_CONTACTS        = "tab_show_contacts"
         const val KEY_TAB_SHOW_DIALPAD         = "tab_show_dialpad"
         const val KEY_TAB_SHOW_NOTES           = "tab_show_notes"
-        const val KEY_TAB_SHOW_SETTINGS        = "tab_show_setting"
+        const val KEY_TAB_SHOW_SETTINGS        = "tab_show_settings"
+        const val KEY_TAB_SHOW_SEARCH          = "tab_show_search"
         // Comma-separated list of tab keys (favorites, calls, contacts, notes)
         // describing the order tabs appear in the bottom navigation bar.
         const val KEY_TAB_ORDER                = "tab_order"
-        const val DEFAULT_TAB_ORDER            = "favorites,contacts,calls,dialpad,notes,settings"
+        const val DEFAULT_TAB_ORDER            = "favorites,contacts,calls,dialpad,notes,search,settings"
         // Biometrics
         const val KEY_BIOMETRICS_TYPE          = "biometrics_type"         // "system" | "pin" | "password" | ""
         const val KEY_BIOMETRICS_PIN           = "biometrics_pin"
@@ -264,6 +265,16 @@ class PreferenceManager(context: Context) {
         const val KEY_BIOMETRICS_CALL_LOCK     = "biometrics_call_lock"
         const val KEY_BIOMETRICS_CALL_LOCK_MODE    = "biometrics_call_lock_mode"    // "all" | "specified" | "skip_specified"
         const val KEY_BIOMETRICS_CALL_LOCK_NUMBERS = "biometrics_call_lock_numbers" // comma-separated phone numbers
+        // Search filter (Dialpad / Calls / Contacts / Favourites search bars) — the "Filter"
+        // button beside the search bar. All four default to true (checked) so search behaves
+        // as broadly as possible until the user deliberately narrows it down. Persisted here
+        // (rather than in-memory) so the chosen filter survives the app being closed and
+        // reopened.
+        const val KEY_SEARCH_FILTER_CONTACTS        = "search_filter_contacts"
+        const val KEY_SEARCH_FILTER_NON_CONTACTS    = "search_filter_non_contacts"
+        const val KEY_SEARCH_FILTER_RECORDINGS      = "search_filter_recordings"
+        const val KEY_SEARCH_FILTER_CONTACT_NOTES   = "search_filter_contact_notes"
+        const val KEY_SEARCH_FILTER_RECORDING_NOTES = "search_filter_recording_notes"
 
         // Goodwy
         const val KEY_DEFAULT_TAB              = "default_tab"

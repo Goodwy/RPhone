@@ -24,8 +24,6 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -57,6 +55,7 @@ import androidx.compose.material.icons.automirrored.filled.StickyNote2
 import androidx.compose.material.icons.automirrored.outlined.StickyNote2
 import androidx.compose.material.icons.filled.Assistant
 import androidx.compose.material.icons.filled.Dialpad
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Assistant
@@ -76,6 +75,7 @@ import dev.goodwy.rphone.liquidglass.highlight.Highlight
 import dev.goodwy.rphone.liquidglass.LocalLiquidGlassBackdrop
 import dev.goodwy.rphone.view.theme.MyColors.bottomBarColor
 import com.ramcosta.composedestinations.generated.destinations.DialPadScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.SearchScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.SettingsScreenDestination
 
 // Tab routes — only show the bar when one of these is active
@@ -85,9 +85,10 @@ private val TAB_ROUTES = setOf(
     RecentScreenDestination.route,
     NotesScreenDestination.route,
     DialPadScreenDestination.route,
-    SettingsScreenDestination.route,
+//    SettingsScreenDestination.route,
 //    SearchScreenDestination.route
 )
+
 
 /** Describes a single bottom-navigation tab, driving both the pill-style and standard nav bars. */
 data class TabSpec(
@@ -133,6 +134,7 @@ fun BottomBar(navController: NavController) {
     val showContactsTab     = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS,  true) }
     val showDialpadTab      = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD, true) }
     val showNotesTab        = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES,     false) }
+    val showSearchTab       = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SEARCH,     false) }
     val showSettingsTab     = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SETTINGS,     true) }
     val tabOrder            = remember(settingsState) { parseTabOrder(prefs.getString(PreferenceManager.KEY_TAB_ORDER, null)) }
     val labelStyle: TextStyle = MaterialTheme.typography.labelMedium
@@ -146,27 +148,30 @@ fun BottomBar(navController: NavController) {
     val isContactsSelected  = currentDestination?.hierarchy?.any { it.route == ContactScreenDestination.route } == true
     val isDialpadSelected   = currentDestination?.hierarchy?.any { it.route == DialPadScreenDestination.route } == true
     val isNotesSelected     = currentDestination?.hierarchy?.any { it.route == NotesScreenDestination.route } == true
+    val isSearchSelected    = currentDestination?.hierarchy?.any { it.route == SearchScreenDestination.route } == true
     val isSettingsSelected  = currentDestination?.hierarchy?.any { it.route == SettingsScreenDestination.route } == true //{ it.route?.contains("settings", ignoreCase = true) == true } == true
 
     // Build visible tab routes dynamically based on prefs
-    val visibleTabRoutes = remember(showFavoritesTab, showCallsTab, showContactsTab, showDialpadTab, showNotesTab, showSettingsTab) {
+    val visibleTabRoutes = remember(showFavoritesTab, showCallsTab, showContactsTab, showDialpadTab, showNotesTab, showSearchTab, showSettingsTab) {
         buildSet {
             if (showFavoritesTab) add(FavoritesScreenDestination.route)
-            if (showCallsTab)     add(RecentScreenDestination.route)
+            add(RecentScreenDestination.route)
             // Add contacts if ‘Favorites’ and ‘Contacts’ are hidden to make the ‘View contacts’ button work
-//            if (showContactsTab || !showFavoritesTab)  add(ContactScreenDestination.route)
             add(ContactScreenDestination.route)
             if (showDialpadTab)   add(DialPadScreenDestination.route)
             if (showNotesTab)     add(NotesScreenDestination.route)
-            if (showSettingsTab)     add(SettingsScreenDestination.route)
+            if (showSearchTab)    add(SearchScreenDestination.route)
+            if (showSettingsTab)  add(SettingsScreenDestination.route)
         }
     }
 
     // Only render pill when a visible tab screen is active, and not while a tab screen
     // (e.g. Recordings) is showing its own full-screen onboarding content.
     val isOnTabScreen = visibleTabRoutes.any { currentRoute.contains(it, ignoreCase = true) } &&
-            !NavBarVisibilityState.hideForOnboarding &&
-            !NavBarVisibilityState.hideForSelectionMode
+//            !NavBarVisibilityState.hideForOnboarding &&
+//            !NavBarVisibilityState.hideForSelectionMode &&
+//            !NavBarVisibilityState.hideForSettingsEntry &&
+            !NavBarVisibilityState.hideForSearchResult
 
     // If current tab is now hidden, redirect to first visible tab. This must only fire for
     // tabs the user actually disabled in Settings > Tab Sections — not for a visible tab that's
@@ -174,13 +179,16 @@ fun BottomBar(navController: NavController) {
     // disclaimer/permissions gate), otherwise tapping that tab would immediately get redirected
     // away again in a loop.
     val isOnHiddenTab = TAB_ROUTES.any { currentRoute.contains(it, ignoreCase = true) } &&
-            visibleTabRoutes.none { currentRoute.contains(it, ignoreCase = true) }
+            visibleTabRoutes.none { currentRoute.contains(it, ignoreCase = true) } &&
+//            !NavBarVisibilityState.hideForSettingsEntry &&
+            !NavBarVisibilityState.hideForSearchResult
     fun routeForTabKey(key: String): String? = when (key) {
         "favorites"  -> FavoritesScreenDestination.route
         "calls"      -> RecentScreenDestination.route
         "contacts"   -> ContactScreenDestination.route
         "dialpad"    -> DialPadScreenDestination.route
         "notes"      -> NotesScreenDestination.route
+        "search"     -> SearchScreenDestination.route
         "settings"   -> SettingsScreenDestination.route
         else         -> null
     }
@@ -250,9 +258,10 @@ fun BottomBar(navController: NavController) {
     val labelContacts = stringResource(R.string.contacts)
     val labelKeypad = stringResource(R.string.keypad)
     val labelNotes = stringResource(R.string.notes)
+    val labelSearch = stringResource(R.string.search)
     val labelSettings = stringResource(R.string.settings)
     val orderedTabs: List<TabSpec> = remember(
-        tabOrder, showFavoritesTab, showCallsTab, showContactsTab, showDialpadTab, showNotesTab, showSettingsTab,
+        tabOrder, showFavoritesTab, showCallsTab, showContactsTab, showDialpadTab, showNotesTab, showSearchTab, showSettingsTab,
         isFavoritesSelected, isRecentsSelected, isContactsSelected, isDialpadSelected, isNotesSelected, isSettingsSelected
     ) {
         tabOrder.mapNotNull { key ->
@@ -295,12 +304,21 @@ fun BottomBar(navController: NavController) {
                 ) else null
                 "notes" -> if (showNotesTab) TabSpec(
                     key            = key,
-                    route          = NotesScreenDestination.route,
+                    route          = NotesScreenDestination().route,
                     selected       = isNotesSelected,
                     selectedIcon   = Icons.AutoMirrored.Filled.StickyNote2,
                     unselectedIcon = Icons.AutoMirrored.Outlined.StickyNote2,
                     label          = labelNotes,
-                    onClick        = { doHaptic(); navigate(NotesScreenDestination.route) }
+                    onClick        = { doHaptic(); navigate(NotesScreenDestination().route) }
+                ) else null
+                "search" -> if (showSearchTab) TabSpec(
+                    key            = key,
+                    route          = SearchScreenDestination.route,
+                    selected       = isSearchSelected,
+                    selectedIcon   = Icons.Default.Search,
+                    unselectedIcon = Icons.Default.Search,
+                    label          = labelSearch,
+                    onClick        = { doHaptic(); navigate(SearchScreenDestination.route) }
                 ) else null
                 "settings" -> if (showSettingsTab) TabSpec(
                     key            = key,

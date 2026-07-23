@@ -208,16 +208,11 @@ fun DuplicateGroupCard(
 //                photoUri = contact.photoUri,
 //                onClick = { }
 //            )
-            Surface(
-                shape = RoundedCornerShape(cardCornerSmall),
-                color = Color.Transparent,
-            ) {
-                ContactListItem(
-                    contact = contact,
-                    navigator = navigator,
-                    displayOrder = displayOrder,
-                )
-            }
+            ContactListItem(
+                contact = contact,
+                navigator = navigator,
+                displayOrder = displayOrder,
+            )
         }
 
         Button(

@@ -73,7 +73,6 @@ import androidx.compose.material.icons.rounded.SearchOff
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -83,7 +82,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.core.net.toUri
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.bottomBarHeight
 import dev.goodwy.rphone.cardCornerBig
@@ -100,20 +98,13 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
 import com.ramcosta.composedestinations.generated.destinations.ContactEditScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.ContactScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.FavoritesScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.NotesScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.RecentScreenDestination
 import dev.goodwy.rphone.controller.UssdRepository
 import dev.goodwy.rphone.controller.util.SocialUtils
 import dev.goodwy.rphone.controller.util.SocialUtils.getInstalledMessenger
 import dev.goodwy.rphone.controller.util.SocialUtils.messengerPackages
-import dev.goodwy.rphone.controller.util.sendUssdCode
 import dev.goodwy.rphone.modal.data.getDisplayName
 import dev.goodwy.rphone.view.components.RillDialog
 import dev.goodwy.rphone.view.components.RillExpressiveButton
-import kotlinx.coroutines.launch
-import kotlin.math.abs
 
 /**
  * Keeps the in-progress dialed digits alive across the dialpad bottom sheet being dismissed
@@ -384,11 +375,10 @@ fun DialPadContent(
         val telecomManager =
             remember { context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager }
         var pendingSearchCallNumber by remember { mutableStateOf<String?>(null) }
-        var pendingUssdCode by remember { mutableStateOf<String?>(null) }
 
         // Helper: place a call respecting the default SIM preference
         fun placeCallWithSimPreference(num: String) {
-            val accounts = telecomManager.callCapablePhoneAccounts
+            val accounts = try { telecomManager.callCapablePhoneAccounts } catch (_: SecurityException) { emptyList() }
             if (accounts.size > 1) {
                 val simPref = prefs.getInt(PreferenceManager.KEY_DEFAULT_SIM, prefs.getDefaultSimIndexDefault())
                 when {
@@ -410,44 +400,6 @@ fun DialPadContent(
             } else {
                 replaceNumber("")
                 makeCall(context, num)
-            }
-        }
-
-        // Helper: send a USSD/MMI code via TelephonyManager.sendUssdRequest (the documented,
-        // reliable API), respecting the same default-SIM preference as regular calls. Falls
-        // back to dialing the code as a regular call (the old behavior) if sendUssdRequest
-        // isn't available/fails outright — e.g. pre-API 26 devices.
-        fun sendUssdWithSimPreference(code: String) {
-            fun dispatch(handle: android.telecom.PhoneAccountHandle?) {
-                sendUssdCode(
-                    context, code, handle,
-                    onResult = { req, resp -> UssdRepository.post(req, resp) },
-                    onFailure = { _, _ ->
-                        // Fall back to the legacy dial-based path so the code still runs even
-                        // if the documented API isn't available on this device.
-                        val encodedCode = code.replace("#", "%23")
-                        val telUri = "tel:$encodedCode".toUri()
-                        try {
-                            context.startActivity(
-                                Intent(Intent.ACTION_CALL, telUri).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK }
-                            )
-                        } catch (_: Exception) {}
-                    }
-                )
-            }
-            val accounts = telecomManager.callCapablePhoneAccounts
-            if (accounts.size > 1) {
-                val simPref = prefs.getInt(PreferenceManager.KEY_DEFAULT_SIM, prefs.getDefaultSimIndexDefault())
-                when {
-                    simPref == 1 && accounts.size >= 1 -> dispatch(accounts[0])
-                    simPref == 2 && accounts.size >= 2 -> dispatch(accounts[1])
-                    else -> {
-                        pendingUssdCode = code
-                        showSimPicker = true
-                    }
-                }
-            } else {
-                dispatch(null)
             }
         }
 
@@ -565,67 +517,108 @@ fun DialPadContent(
             val code = input.trim()
             if (code.length < 3) return false
 
+            // ── Pattern 0: *#06# (IMEI) / *#07# (SAR info)  ─────────────────────────────
+            // These look like MMI/USSD codes (they even used to be handled that way in this
+            // app), but they are NOT network requests at all — dialing them out via
+            // TelecomManager.placeCall() sends them to the SIM/carrier as if they were a real
+            // number, which is exactly what was causing the SIM-picker prompt / failed "call"
+            // instead of the expected system info screen. Stock dialers intercept these two
+            // locally, before ever touching Telecom, and this app now does the same.
+            //
+            // Note: reading the real IMEI via TelephonyManager.getImei() requires
+            // READ_PRIVILEGED_PHONE_STATE on Android 10+, which only privileged system apps
+            // can hold — being the default dialer does not grant it. So instead of showing a
+            // (permission-blocked) in-app dialog, we open Android's own "About phone → IMEI
+            // information" settings screen, which is what actually has that privilege and is
+            // guaranteed to exist on every device.
+            if (code == "*#06#") {
+                try {
+                    context.startActivity(
+                        Intent(android.provider.Settings.ACTION_DEVICE_INFO_SETTINGS)
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    )
+                } catch (_: Exception) {}
+                return true
+            }
+            if (code == "*#07#") {
+                // "SAR information" doesn't have one stable intent action across all OEMs/OS
+                // versions the way IMEI does, so try the couple of known ones first and fall
+                // back to the general device-info settings screen (still a real system menu,
+                // not a failed call) if none of them resolve on this device.
+                val sarActions = listOf(
+                    "android.settings.SAR_INFORMATION",
+                    "android.settings.RF_EXPOSURE_SETTINGS",
+                    android.provider.Settings.ACTION_DEVICE_INFO_SETTINGS
+                )
+                for (action in sarActions) {
+                    try {
+                        context.startActivity(Intent(action).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                        break
+                    } catch (_: Exception) { /* try next action */ }
+                }
+                return true
+            }
+
             // ── Pattern 1: *#*#DIGITS#*#*  (Android secret activity codes, e.g. testing menu) ──
             // These end with #*#* so a plain endsWith("#") check misses them entirely
             val secretMatch = Regex("^\\*#\\*#(\\d+)#\\*#\\*$").find(code)
             if (secretMatch != null) {
                 val digits = secretMatch.groupValues[1]
+                // Fire every known delivery mechanism unconditionally rather than only
+                // falling back to the classic broadcasts when sendDialerSpecialCode() throws.
+                // sendDialerSpecialCode() is a fire-and-forget AIDL call — it reports no
+                // success/failure back to us, so "didn't throw" is not proof the code was
+                // actually delivered anywhere. Different codes are ultimately owned by
+                // different apps (Settings' Testing menu for 4636, Calendar Storage for 225,
+                // Play Services for 426, an OEM diagnostics app for the hardware-test codes,
+                // etc.) and some only listen on one of these two channels, so sending both
+                // maximizes the chance whichever app owns this particular code receives it.
                 try {
-                    // The officially documented way for a default-dialer app to trigger these codes.
-                    // Manually broadcasting "android.provider.Telephony.SECRET_CODE" ourselves is
-                    // unreliable on Android 8+ — background-broadcast restrictions silently drop it
-                    // unless the app is privileged. sendDialerSpecialCode() is the real entry point
-                    // AOSP's own Dialer/Phone app calls internally, and it works correctly as long as
-                    // this app is set as the default dialer.
                     val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as? android.telephony.TelephonyManager
                     telephonyManager?.sendDialerSpecialCode(digits)
-                } catch (_: Exception) {
-                    // Fallback for devices/OEMs where sendDialerSpecialCode isn't wired up —
-                    // some ROMs still listen for the classic broadcasts directly.
-                    val uri = "android_secret_code://$digits".toUri()
-                    try {
-                        context.sendBroadcast(
-                            Intent("android.provider.Telephony.SECRET_CODE", uri).apply {
-                                addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
-                            }
-                        )
-                        context.sendBroadcast(
-                            Intent("android.telephony.action.SECRET_CODE", uri).apply {
-                                addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
-                            }
-                        )
-                    } catch (_: Exception) {}
-                }
+                } catch (_: Exception) {}
+                val uri = android.net.Uri.parse("android_secret_code://$digits")
+                try {
+                    context.sendBroadcast(
+                        Intent("android.provider.Telephony.SECRET_CODE", uri).apply {
+                            addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+                        }
+                    )
+                } catch (_: Exception) {}
+                try {
+                    context.sendBroadcast(
+                        Intent("android.telephony.action.SECRET_CODE", uri).apply {
+                            addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+                        }
+                    )
+                } catch (_: Exception) {}
                 return true
             }
 
             // ── Pattern 2: USSD / MMI codes  ──────────────────────────────────────────
-            // *124#  *123#  *199#  *#06#  ##002#  *21*N#  *#21#  *#62#
+            // *124#  *123#  *199#  ##002#  *21*N#  *#21#  *#62#
+            // (*#06# and *#07# are intercepted above and never reach this branch.)
             val decoded = try { android.net.Uri.decode(code) } catch (_: Exception) { code }
             if (!((decoded.startsWith("*") || decoded.startsWith("#")) &&
                         decoded.endsWith("#"))) return false
 
-            return if (ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE)
-                == PackageManager.PERMISSION_GRANTED) {
-                // Use the documented TelephonyManager.sendUssdRequest API (API 26+) instead of
-                // dialing the code as a regular call and trying to sniff the network's response
-                // out of undocumented Telecom connection-event extras — that approach was
-                // unreliable across OEMs/carriers and often silently never produced a response.
-                sendUssdWithSimPreference(decoded)
-                true
+            // Dial USSD/MMI codes exactly like a normal call via TelecomManager.placeCall()
+            // (same approach RivoPhoneApp uses). The carrier's telephony stack recognises the
+            // MMI/USSD prefix itself and drives the whole USSD session — including any
+            // interactive multi-step menu — through Android's own native USSD dialog, and
+            // placing a real call also lets CallService's connection-event listener (see
+            // isUssdNumber() below) pick up and surface the response inline when the
+            // carrier/OEM supplies one. This is far more reliable than
+            // TelephonyManager.sendUssdRequest(), which only supports a single
+            // non-interactive request/response and fails outright on many devices, carriers,
+            // and dual-SIM setups.
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
+                placeCallWithSimPreference(decoded)
             } else {
-                // No CALL_PHONE permission — open dialer pre-filled so user can dial manually
-                val encodedCode = decoded.replace("#", "%23")
-                val telUri = "tel:$encodedCode".toUri()
-                try {
-                    context.startActivity(
-                        Intent(Intent.ACTION_DIAL, telUri).apply {
-                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                        }
-                    )
-                    true
-                } catch (_: Exception) { false }
+                pendingSearchCallNumber = decoded
+                callPermissionLauncher.launch(arrayOf(Manifest.permission.CALL_PHONE, Manifest.permission.READ_PHONE_STATE))
             }
+            return true
         }
 
         fun initiateCall(num: String) {
@@ -657,26 +650,8 @@ fun DialPadContent(
                 onDismissRequest = { showSimPicker = false },
                 onSimSelected = { handle ->
                     replaceNumber("")
-                    val ussdCode = pendingUssdCode
-                    if (ussdCode != null) {
-                        sendUssdCode(
-                            context, ussdCode, handle,
-                            onResult = { req, resp -> UssdRepository.post(req, resp) },
-                            onFailure = { _, _ ->
-                                val encodedCode = ussdCode.replace("#", "%23")
-                                val telUri = "tel:$encodedCode".toUri()
-                                try {
-                                    context.startActivity(
-                                        Intent(Intent.ACTION_CALL, telUri).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK }
-                                    )
-                                } catch (_: Exception) {}
-                            }
-                        )
-                        pendingUssdCode = null
-                    } else {
-                        makeCall(context, pendingSearchCallNumber ?: number, handle)
-                        pendingSearchCallNumber = null
-                    }
+                    makeCall(context, pendingSearchCallNumber ?: number, handle)
+                    pendingSearchCallNumber = null
                     showSimPicker = false
                 }
             )
@@ -933,14 +908,8 @@ fun DialPadContent(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .fillMaxWidth()
                                 .weight(1.2f)
                                 .clip(RoundedCornerShape(16.dp))
-//                        .background(
-//                            if (number.isNotEmpty())
-//                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-//                            else Color.Transparent
-//                        )
                                 .animateContentSize(
                                     animationSpec = spring(
                                         stiffness = Spring.StiffnessLow,
@@ -986,7 +955,6 @@ fun DialPadContent(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .fillMaxWidth()
                                     .weight(1f),
                                 horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
@@ -1001,7 +969,6 @@ fun DialPadContent(
                                         compact = true,
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .fillMaxWidth()
                                             .weight(1f)
                                     )
                                 }
@@ -1011,24 +978,18 @@ fun DialPadContent(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .fillMaxWidth()
                                 .weight(1.2f)
                                 .padding(vertical = 2.dp),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceEvenly
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            FadeScaleBox(visible = number.isNotEmpty()) {
+                            FadeScaleBox(modifier = Modifier.weight(1f).fillMaxHeight(), visible = number.isNotEmpty()) {
                                 DialerActionExpressive(
                                     onClick = {
-                                        navigator?.navigate(
-                                            ContactEditScreenDestination(
-                                                initialPhone = number
-                                            )
-                                        )
-
+                                        navigator?.navigate(ContactEditScreenDestination(initialPhone = number))
                                     },
                                     icon = Icons.Default.PersonAdd,
-                                    contentDescription = stringResource(R.string.add_contact),
+                                    contentDescription = stringResource(R.string.create_contact),
                                     containerColor = Color.Transparent //MaterialTheme.colorScheme.surfaceContainerLow
                                 )
                             }
@@ -1051,12 +1012,10 @@ fun DialPadContent(
                                 contentDescription = stringResource(R.string.call),
                                 containerColor = color_call_button,
                                 contentColor = Color.White,
-                                modifier = Modifier
-                                    .width(96.dp)
-                                    .height(64.dp),
+                                modifier = Modifier.weight(1f).fillMaxHeight(),
                                 isLarge = true
                             )
-                            FadeScaleBox(visible = number.isNotEmpty()) {
+                            FadeScaleBox(modifier = Modifier.weight(1f).fillMaxHeight(), visible = number.isNotEmpty()) {
                                 DialerActionExpressive(
                                     onLongClick = {
                                         replaceNumber("")
@@ -1134,14 +1093,7 @@ fun DialPadContent(
                                     Surface(
                                         onClick = {
                                             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                            val intent = Intent(Intent.ACTION_INSERT).apply {
-                                                type = ContactsContract.RawContacts.CONTENT_TYPE
-                                                putExtra(
-                                                    ContactsContract.Intents.Insert.PHONE,
-                                                    number
-                                                )
-                                            }
-                                            context.startActivity(intent)
+                                            navigator?.navigate(ContactEditScreenDestination(initialPhone = number))
                                         },
                                         shape = RoundedCornerShape(50.dp),
                                         color = MaterialTheme.colorScheme.secondaryContainer,
@@ -1682,13 +1634,6 @@ fun DialPadContent(
                                                 .weight(1f)
 //                                            .defaultMinSize(minHeight = if (number.isEmpty()) 64.dp else 0.dp)
                                                 .clip(RoundedCornerShape(cardCornerMedium))
-//                                            .background(
-//                                                if (number.isNotEmpty())
-//                                                    MaterialTheme.colorScheme.primaryContainer.copy(
-//                                                        alpha = 0.3f
-//                                                    )
-//                                                else Color.Transparent
-//                                            )
                                                 .animateContentSize(
                                                     animationSpec = spring(
                                                         stiffness = Spring.StiffnessLow,
@@ -1802,25 +1747,13 @@ fun DialPadContent(
                                     ) {
                                         val lgBackdrop = LocalLiquidGlassBackdrop.current
                                         val lgDialpadEnabled = remember(settingsState) {
-                                            prefs.getBoolean(
-                                                PreferenceManager.KEY_LIQUID_GLASS,
-                                                false
-                                            ) &&
-                                                    prefs.getBoolean(
-                                                        PreferenceManager.KEY_LG_DIALPAD_CALL_BUTTON,
-                                                        false
-                                                    )
+                                            prefs.getBoolean(PreferenceManager.KEY_LIQUID_GLASS, false) &&
+                                            prefs.getBoolean(PreferenceManager.KEY_LG_DIALPAD_CALL_BUTTON, false)
                                         }
                                         val blurDialpadEnabled = remember(settingsState) {
-                                            prefs.getBoolean(
-                                                PreferenceManager.KEY_BLUR_EFFECTS,
-                                                false
-                                            ) &&
-                                                    prefs.getBoolean(
-                                                        PreferenceManager.KEY_BLUR_DIALPAD_CALL_BUTTON,
-                                                        false
-                                                    ) &&
-                                                    !lgDialpadEnabled
+                                            prefs.getBoolean(PreferenceManager.KEY_BLUR_EFFECTS, false) &&
+                                            prefs.getBoolean(PreferenceManager.KEY_BLUR_DIALPAD_CALL_BUTTON, false) &&
+                                            !lgDialpadEnabled
                                         }
                                         DialerActionExpressive(
                                             onClick = {
@@ -2416,8 +2349,8 @@ private fun playDtmf(context: Context, key: String, soundPool: SoundPool) {
 }
 
 @Composable
-private fun FadeScaleBox(visible: Boolean, content: @Composable () -> Unit) {
-    Box(modifier = Modifier.size(72.dp), contentAlignment = Alignment.Center) {
+private fun FadeScaleBox(modifier: Modifier, visible: Boolean, content: @Composable () -> Unit) {
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
         AnimatedVisibility(
             visible = visible,
             enter = fadeIn() + scaleIn(),

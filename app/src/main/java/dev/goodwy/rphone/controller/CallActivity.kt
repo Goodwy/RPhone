@@ -38,6 +38,11 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
     private val preferenceManager: PreferenceManager by inject()
     private var proximityWakeLock: PowerManager.WakeLock? = null
 
+    companion object {
+        /** FloatingCallService observes this to hide the bubble when CallActivity is visible. */
+        val isInForeground = kotlinx.coroutines.flow.MutableStateFlow(false)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         turnScreenOnAndShowWhileLocked()
         super.onCreate(savedInstanceState)
@@ -175,6 +180,16 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        isInForeground.value = true
+    }
+
+    override fun onPause() {
+        super.onPause()
+        isInForeground.value = false
     }
 
     private fun setupProximitySensor() {

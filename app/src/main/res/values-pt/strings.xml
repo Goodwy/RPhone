@@ -1,0 +1,489 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="widget_description">Chamadas recentes com marcação rápida</string>
+    <string name="copy" tools:ignore="PrivateResource">Copiar</string>
+    <string name="copy_path">Copiar caminho</string>
+    <string name="paste">Colar</string>
+    <string name="delete">Eliminar</string>
+    <string name="delete_contact">Eliminar contacto</string>
+    <string name="delete_contact_subtitle">Tem a certeza de que pretende eliminar este contacto? Esta ação não pode ser desfeita.</string>
+    <string name="delete_contacts">Eliminar contactos</string>
+    <string name="delete_contacts_subtitle">Tem a certeza de que pretende eliminar %s contactos selecionados? Esta ação não pode ser desfeita.</string>
+    <string name="selected_items">%s selecionados</string>
+    <string name="select">Selecionar</string>
+    <string name="select_all">Selecionar tudo</string>
+    <string name="deselect_all">Desselecionar tudo</string>
+    <string name="backspace">Eliminar</string>
+    <string name="back">Voltar</string>
+    <string name="edit">Editar</string>
+    <string name="done">Concluído</string>
+    <string name="ok">OK</string>
+    <string name="on">Ativado</string>
+    <string name="off">Desativado</string>
+    <string name="cancel">Cancelar</string>
+    <string name="open">Abrir</string>
+    <string name="save">Guardar</string>
+    <string name="confirm">Confirmar</string>
+    <string name="close">Fechar</string>
+    <string name="clear">Limpar</string>
+    <string name="share">Partilhar</string>
+    <string name="share_subtitle">Enviar dados de contacto para outros</string>
+    <string name="use">Utilizar</string>
+    <string name="connect_via_social">Conectar via redes sociais</string>
+    <string name="import_text">Importar</string>
+    <string name="export_text">Exportar</string>
+    <string name="call_is_ongoing">Chamada em curso — Toque para voltar</string>
+    <string name="filter_all">Todas</string>
+    <string name="filter_missed">Perdidas</string>
+    <string name="filter_incoming">Recebidas</string>
+    <string name="filter_outgoing">Efetuadas</string>
+    <string name="filter_rejected">Rejeitadas</string>
+
+    <!-- Search -->
+    <string name="search">Pesquisar</string>
+    <string name="search_contacts">Pesquisar contactos</string>
+    <string name="no_results">Sem resultados</string>
+    <string name="no_contacts_found">Não foram encontrados contactos</string>
+    <string name="call_query">Ligar para %s</string>
+    <string name="voice_input">Entrada de voz</string>
+    <string name="filter_results">Filtrar resultados</string>
+
+    <!-- Billing -->
+    <string name="no_connection">Sem ligação</string>
+    <string name="loading_price">A carregar…</string>
+
+    <!-- Project support -->
+    <string name="project_support">Apoio ao projeto</string>
+    <string name="project_support_summary">Adquira a aplicação paga para apoiar desenvolvimentos futuros e funcionalidades extra</string>
+    <string name="project_support_description">
+        <![CDATA[
+        Acreditamos que a privacidade deve ser gratuita. É por isso que todas as funcionalidades essenciais são completamente suas sem gastar um cêntimo.<br>
+        Se gosta do que estamos a construir, considere oferecer-nos um café. Em agradecimento, receberá:<br> <b>Todos os temas, cores personalizadas e tipos de letra personalizados.</b><br>
+        Isto não é um nível premium. É um gesto de agradecimento. O seu apoio mantém o Rill independente, privado e sem anúncios.
+        ]]>
+    </string>
+    <string name="support_project_to_unlock">Apoie o projeto para desbloquear</string>
+    <string name="restore_purchase">Restaurar compra</string>
+    <string name="continue_support">Continuar</string>
+    <string name="monthly">Mensal</string>
+    <string name="monthly_description">Flexibilidade para quem pretende fazer contribuições mensais</string>
+    <string name="yearly">Anual</string>
+    <string name="yearly_description">Apoio anual para a melhor aplicação de chamadas do mundo</string>
+    <string name="lifetime">Para sempre</string>
+    <string name="lifetime_description">Pague uma vez e desfrute da máxima conveniência em todas as suas chamadas para sempre</string>
+    <string name="most_flexible">Mais flexível</string>
+    <string name="bast_value">Melhor relação qualidade/preço</string>
+    <string name="pay_once">Pagar uma vez</string>
+    <string name="support_development">Apoiar o desenvolvimento</string>
+    <string name="support_all_options">Apoiar todas as opções</string>
+    <string name="support_development_description1">O Rill Phone tem orgulho em ser de código aberto e completamente gratuito. O seu apoio ajuda-nos a mantê-lo assim.</string>
+    <string name="support_development_description2">Ao fazer uma doação, não está apenas a desbloquear funcionalidades — está a investir na privacidade, transparência e no futuro do desenvolvimento verdadeiramente independente.</string>
+    <string name="support_development_description3">Cada contribuição, independentemente do tamanho, faz a diferença.</string>
+    <string name="unlock_all_features">Desbloquear todas as funcionalidades</string>
+    <string name="all_features_unlocked">✨ Todas as funcionalidades desbloqueadas! Obrigado pelo seu apoio!</string>
+    <string name="thank_you_for_your_support">Obrigado pelo seu apoio! ❤️</string>
+    <string name="features_locked">Funcionalidades bloqueadas</string>
+    <string name="your_donation_ensures">A sua doação garante:</string>
+    <string name="your_donation_ensures_1">✅ Atualizações regulares e correções de segurança</string>
+    <string name="your_donation_ensures_2">✅ Novas funcionalidades e melhorias</string>
+    <string name="your_donation_ensures_3">✅ Acesso gratuito para todos</string>
+    <string name="your_donation_ensures_4">✅ Desenvolvimento de código aberto</string>
+
+    <!-- About -->
+    <string name="about">Sobre</string>
+    <string name="rate_app">Classificar aplicação</string>
+    <string name="other_apps">As nossas outras aplicações</string>
+    <string name="source_code">Código-fonte</string>
+    <string name="privacy_policy">Política de privacidade</string>
+
+    <!-- Contributors -->
+    <string name="contributors">Colaboradores</string>
+    <string name="development_team">Equipa de desenvolvimento</string>
+    <string name="apps_that_inspired_us">Aplicações que nos inspiraram</string>
+
+    <!-- Settings -->
+    <string name="settings">Definições</string>
+    <string name="appearance">Aparência</string>
+    <string name="interface_settings">Interface</string>
+    <string name="interface_settings_subtitle">Temas, cores e disposição</string>
+    <string name="app_theme">Tema da aplicação</string>
+    <string name="theme_auto">Automático</string>
+    <string name="theme_light">Claro</string>
+    <string name="theme_dark">Escuro</string>
+    <string name="theme_auto_black_white">Auto P/B</string>
+    <string name="theme_white">Branco</string>
+    <string name="theme_black">Preto</string>
+    <string name="custom_color">Cores personalizadas</string>
+    <string name="custom_color_subtitle">Esquema de cores baseado numa cor personalizada</string>
+    <string name="hex_color">Cor hexadecimal</string>
+    <string name="hex_color_subtitle">Introduza um código hexadecimal válido de 6 dígitos</string>
+    <string name="custom_font">Tipo de letra personalizado</string>
+    <string name="custom_font_subtitle">Escolha um ficheiro .ttf para usar na aplicação</string>
+    <string name="visual_effects">Efeitos visuais</string>
+    <string name="not_supported_on_this_device">Não suportado neste dispositivo</string>
+    <string name="not_supported_on_this_device_subtitle">O desfoque e o Vidro Líquido requerem Android 12 ou superior</string>
+    <string name="material_liquid_you_glass">Vidro Líquido Material You</string>
+    <string name="material_liquid_you_glass_subtitle">Aplicar um efeito de vidro líquido à navegação</string>
+    <string name="material_blur_effects">Efeitos de desfoque Material</string>
+    <string name="material_blur_effects_subtitle">Aplicar um efeito de desfoque de fundo à navegação</string>
+    <string name="scroll_animation">Animação de deslocamento</string>
+    <string name="scroll_animation_device">Animação de aparecimento para itens de lista ao deslocar</string>
+    <string name="call_ui">Interface de chamada</string>
+    <string name="incoming_call_ui">Interface de chamada recebida</string>
+    <string name="incoming_call_ui_subtitle">Escolha como atender chamadas recebidas</string>
+    <string name="avatars_settings">Definições de avatares</string>
+    <string name="avatars_settings_subtitle">Personalizar cores, molduras e mais</string>
+    <string name="avatar_colors">Cores de avatar</string>
+    <string name="colorful">Coloridos</string>
+    <string name="primary_color">Cor primária</string>
+    <string name="secondary_color">Cor secundária</string>
+    <string name="google_contacts_color">Cor dos Contactos Google</string>
+    <string name="show_first_letter_in_avatar">Mostrar primeira letra no avatar</string>
+    <string name="show_first_letter_in_avatar_subtitle">Mostra a letra quando a imagem está em falta</string>
+    <string name="avatar_frame">Moldura do avatar</string>
+    <string name="avatar_frame_subtitle">Mostrar uma borda à volta do avatar</string>
+    <string name="show_picture_in_avatar">Mostrar imagem no avatar</string>
+    <string name="show_picture_in_avatar_subtitle">Mostra a foto do contacto se disponível</string>
+
+    <string name="сaller_ui">Interface de chamador</string>
+    <string name="сaller_ui_subtitle">Personalizar o ecrã de chamada e os controlos</string>
+    <string name="end_call_button">Botão de terminar chamada</string>
+    <string name="customize_width">Personalizar largura</string>
+    <string name="customize_width_subtitle">Ajustar a largura do botão de terminar chamada</string>
+
+    <string name="navigations">Navegação</string>
+    <string name="navigations_subtitle">Visibilidade dos separadores e estilo</string>
+    <string name="tab_sections">Secções de separadores</string>
+    <string name="tab_sections_subtitle">Escolha quais os separadores visíveis e arraste para os reordenar na barra de navegação</string>
+    <string name="navigation_style">Estilo de navegação</string>
+    <string name="pill_style_navigation">Navegação estilo pílula</string>
+    <string name="pill_style_navigation_subtitle">Mostrar uma barra de navegação flutuante estilo pílula em vez da barra inferior padrão</string>
+    <string name="icon_only_bottom_bar">Barra inferior apenas com ícones</string>
+    <string name="icon_only_bottom_bar_subtitle">Remove os rótulos de texto da navegação</string>
+
+    <string name="calls_and_system">Chamadas e sistema</string>
+    <string name="call_settings">Definições de chamadas</string>
+    <string name="call_settings_subtitle">Contas, sensor e modo de bolso</string>
+    <string name="default_sim">SIM predefinido</string>
+    <string name="ask_first">Perguntar primeiro</string>
+    <string name="calling_accounts">Contas de chamadas</string>
+    <string name="system_settings">Definições do sistema</string>
+    <string name="call_behavior">Comportamento de chamadas</string>
+    <string name="proximity_sensor">Sensor de proximidade em segundo plano</string>
+    <string name="proximity_sensor_subtitle">Desligar o ecrã quando o telefone está perto do ouvido durante uma chamada</string>
+    <string name="pocket_mode_prevention">Modo de bolso</string>
+    <string name="pocket_mode_prevention_subtitle">Evitar resposta/rejeição acidental quando o telefone está no bolso</string>
+    <string name="floating_ongoing_call">Chamada flutuante</string>
+    <string name="floating_ongoing_call_subtitle">Mostrar uma bolha flutuante durante chamadas. Requer permissão \"Mostrar sobre outras aplicações\"</string>
+    <string name="direct_call_on_tap">Chamada direta ao tocar</string>
+    <string name="direct_call_on_tap_subtitle">Toque numa entrada do registo de chamadas para ligar diretamente</string>
+    <string name="auto_speaker">Altifalante automático</string>
+    <string name="auto_speaker_subtitle">Mudar automaticamente para o altifalante quando o telefone está longe do ouvido, e de volta para o auscultador quando está perto</string>
+
+    <string name="sound_and_vibration">Som e vibração</string>
+    <string name="sound_and_vibration_subtitle">Toques, sons do teclado e háptica em toda a aplicação</string>
+    <string name="tap_haptics">Háptica de toque</string>
+    <string name="enable_tap_haptics">Ativar háptica de toque</string>
+    <string name="haptics_intensity">Intensidade</string>
+    <string name="haptics_soft">Suave</string>
+    <string name="haptics_strong">Forte</string>
+    <string name="haptics_custom">Personalizada</string>
+    <string name="preview_haptic">Pré-visualização háptica</string>
+    <string name="ringtone_settings">Definições de toque</string>
+    <string name="dialpad_tones">Sons do teclado</string>
+    <string name="dialpad_tones_subtitle">Som do teclado reproduzido ao premir teclas</string>
+    <string name="calls">Chamadas</string>
+    <string name="vibrate_on_answer">Vibrar ao atender</string>
+    <string name="vibrate_on_answer_subtitle">Vibrar quando a outra parte atende</string>
+    <string name="vibrate_on_hang_up">Vibrar ao desligar</string>
+    <string name="vibrate_on_hang_up_subtitle">Vibrar quando a chamada termina</string>
+    <string name="haptics_across_app">Háptica em toda a aplicação</string>
+    <string name="scroll_haptics">Háptica de deslocamento</string>
+    <string name="scroll_haptics_subtitle">Vibrar ao fazer gestos de deslocamento na aplicação</string>
+    <string name="haptic_interval">Intervalo háptico</string>
+    <string name="haptic_interval_value">1 por %.1f cm</string>
+    <string name="haptic_strength">Intensidade háptica</string>
+
+    <string name="manage_blocked">Gerir bloqueados</string>
+    <string name="manage_blocked_subtitle">Gerir chamadas bloqueadas e spam</string>
+    <string name="blocked_numbers">Números bloqueados</string>
+    <string name="block_notifications">Bloquear notificações</string>
+    <string name="block_notifications_subtitle">Mostrar um alerta de baixa prioridade para chamadas bloqueadas</string>
+    <string name="block_method">Método de bloqueio</string>
+    <string name="block_method_subtitle">Como as chamadas bloqueadas são tratadas</string>
+    <string name="decline_automatically">Rejeitar automaticamente</string>
+    <string name="ring_silently">Tocar silenciosamente</string>
+    <string name="log_visibility">Visibilidade no registo</string>
+    <string name="log_visibility_subtitle">Mostrar ou ocultar chamadas bloqueadas nos recentes</string>
+    <string name="hide_from_logs">Ocultar dos registos</string>
+    <string name="show_in_logs">Mostrar nos registos</string>
+    <string name="blocked_size">Bloqueadas: %s</string>
+
+    <string name="authentication">Autenticação</string>
+    <string name="authentication_method">Método de autenticação</string>
+    <string name="system_biometrics">Biometria do sistema</string>
+    <string name="system_biometrics_subtitle">Impressão digital, reconhecimento facial ou credenciais do dispositivo</string>
+    <string name="system_biometrics_not_available">Não disponível neste dispositivo</string>
+    <string name="custom_biometrics">Biometria personalizada</string>
+    <string name="custom_pin">PIN personalizado</string>
+    <string name="custom_password">Palavra-passe personalizada</string>
+    <string name="pin">PIN</string>
+    <string name="pin_subtitle">Definir um PIN numérico</string>
+    <string name="password">Palavra-passe</string>
+    <string name="password_subtitle">Definir uma palavra-passe alfanumérica personalizada</string>
+    <string name="remove_biometric">Remover bloqueio biométrico</string>
+    <string name="not_configured">Não configurado</string>
+    <string name="lock_app_on_open">Bloquear aplicação ao abrir</string>
+    <string name="lock_app_on_open_subtitle">Exigir autenticação ao abrir a aplicação</string>
+    <string name="lock_call_actions">Bloquear ações de chamada</string>
+    <string name="lock_call_actions_subtitle">Exigir autenticação para atender ou rejeitar chamadas recebidas</string>
+    <string name="lock_scope">Âmbito do bloqueio de chamadas</string>
+    <string name="all_calls">Todas as chamadas</string>
+    <string name="all_calls_subtitle">Biometria necessária para cada chamada recebida</string>
+    <string name="blacklist">Lista negra</string>
+    <string name="blacklist_count">Contactos para os quais a autenticação para atender está ativada: %s</string>
+    <string name="blacklist_subtitle">Escolha contactos que requerem biometria para atender</string>
+    <string name="whitelist">Lista branca</string>
+    <string name="whitelist_count">Contactos para os quais a autenticação para atender está desativada: %s</string>
+    <string name="whitelist_subtitle">Escolha contactos para ignorar o bloqueio biométrico</string>
+    <string name="select_contacts">Selecionar contactos</string>
+    <string name="set_pin">Definir PIN</string>
+    <string name="set_pin_subtitle">Introduza um PIN de 4 dígitos</string>
+    <string name="enter_pin">Introduzir PIN</string>
+    <string name="confirm_pin">Confirmar PIN</string>
+    <string name="confirm_pin_subtitle">Volte a introduzir o seu PIN para confirmar</string>
+    <string name="incorrect_pin">PIN incorreto. Por favor, tente novamente.</string>
+    <string name="pin_dont_match">Os PINs não coincidem. Por favor, comece de novo.</string>
+    <string name="set_password">Definir palavra-passe</string>
+    <string name="set_password_subtitle">Introduza qualquer palavra-passe. São permitidas letras, números e caracteres especiais.</string>
+    <string name="enter_password">Introduzir palavra-passe</string>
+    <string name="confirm_password">Confirmar palavra-passe</string>
+    <string name="incorrect_password">Palavra-passe incorreta</string>
+    <string name="incorrect_password_subtitle">A palavra-passe deve ter pelo menos 4 caracteres</string>
+    <string name="password_dont_match">As palavras-passe não coincidem</string>
+
+    <string name="manage_contacts">Gerir contactos</string>
+    <string name="manage_contacts_subtitle">Contactos privados, contas a mostrar e limpar a sua lista</string>
+    <string name="display">Ecrã</string>
+    <string name="sort_by">Ordenar por</string>
+    <string name="name_format">Formato do nome</string>
+    <string name="first_name_first">Nome primeiro</string>
+    <string name="last_name_first">Apelido primeiro</string>
+    <string name="merge_and_fix">Fundir e corrigir</string>
+    <string name="standardize">Padronizar</string>
+    <string name="standardize_phone_numbers">Padronizar números de telefone</string>
+    <string name="standardize_phone_numbers_subtitle">Remover espaços e caracteres especiais dos números de telefone</string>
+    <string name="total_contacts">Total de contactos</string>
+    <string name="contacts_with_changes">Contactos com alterações</string>
+    <string name="numbers_to_standardize">Números a padronizar</string>
+    <string name="all_numbers_are_already_standardized">✅ Todos os números já estão padronizados!</string>
+    <string name="examples_of_changes">Exemplos de alterações:</string>
+    <string name="and_more">E %s mais…</string>
+
+    <string name="merging_contacts">Fundir contactos</string>
+    <string name="merging_contacts_subtitle">Encontrar e fundir contactos duplicados</string>
+    <string name="merging_contacts_description">Os contactos fundidos são múltiplas entradas de diferentes contas ligadas numa só. Pode editar cada fonte separadamente ou desligá-las.</string>
+    <string name="no_duplicates_found">Não foram encontrados duplicados</string>
+    <string name="duplicates_in">Duplicados em: %s</string>
+    <string name="merge_duplicates">Fundir duplicados (%s)</string>
+
+    <string name="unmerging_contacts">Desligar contactos</string>
+    <string name="unmerging_contacts_subtitle">Encontrar e desligar contactos fundidos</string>
+    <string name="unmerging_contacts_description">A informação do contacto provém de múltiplas fontes. Selecione uma para editar, ou desligue todas para as ter como contactos separados.</string>
+    <string name="no_merged_contacts_found">Não foram encontrados contactos fundidos</string>
+    <string name="merged_from_sources">Fundido de %s fontes</string>
+    <string name="unlink">Desligar</string>
+    <string name="warning_cannot_be_undone">⚠️ Esta ação não pode ser desfeita.</string>
+
+    <string name="managing_contact_sources">Gerir fontes de contactos</string>
+    <string name="managing_contact_sources_subtitle">Escolha quais as contas a mostrar na sua lista</string>
+    <string name="managing_contact_sources_description">Selecione quais as contas que devem ser visíveis na sua lista de contactos. Desmarcar uma conta ocultará os seus contactos, mas não os eliminará.</string>
+    <string name="contact_sources">Fontes de contactos</string>
+    <string name="contacts_stored_on_app">Contactos armazenados na aplicação</string>
+    <string name="contacts_stored_on_device">Contactos armazenados no dispositivo</string>
+
+    <string name="private_contacts">Contactos privados</string>
+    <string name="private_contacts_subtitle">Gerir os seus contactos locais encriptados</string>
+
+    <!-- Call -->
+    <string name="call">Chamada</string>
+    <string name="incoming">Recebida</string>
+    <string name="outgoing">Efetuada</string>
+    <string name="missed">Perdida</string>
+    <string name="rejected">Rejeitada</string>
+    <string name="blocked">Bloqueada</string>
+    <string name="answer">Atender</string>
+    <string name="decline">Rejeitar</string>
+    <string name="answer_and_decline">Atender e terminar outra chamada</string>
+    <string name="end_call">Terminar chamada</string>
+    <string name="back_to_call">Voltar à chamada</string>
+    <string name="keypad">Teclado</string>
+    <string name="mute">Silenciar</string>
+    <string name="unmute">Ativar som</string>
+    <string name="speaker">Altifalante</string>
+    <string name="add_call">Adicionar chamada</string>
+    <string name="resume">Retomar</string>
+    <string name="swap">Trocar</string>
+    <string name="more">Mais</string>
+    <string name="hold">Em espera</string>
+    <string name="on_hold">Em espera</string>
+    <string name="call_ended">Chamada terminada</string>
+    <string name="calling">A chamar…</string>
+    <string name="incoming_call">Chamada recebida</string>
+    <string name="connecting">A ligar…</string>
+    <string name="slide_to_answer">Deslize para atender</string>
+    <string name="swipe_up_to_answer">Deslize para cima para atender</string>
+    <string name="swipe_down_to_reject">Deslize para baixo para rejeitar</string>
+
+    <!-- Recents -->
+    <string name="recents">Recentes</string>
+    <string name="home_tab">Início</string>
+    <string name="call_history">Histórico de chamadas</string>
+    <string name="history_with">Histórico com %s</string>
+    <string name="no_call_history_found">Não foi encontrado histórico de chamadas</string>
+    <string name="delete_call_logs">Eliminar registos de chamadas</string>
+    <string name="delete_call_logs_selected">Tem a certeza de que pretende eliminar %s registos de chamadas selecionados?</string>
+    <string name="deleted_from_call_log">Eliminado do registo de chamadas</string>
+    <string name="could_not_delete">Não foi possível eliminar</string>
+    <string name="clear_all_filtered_logs">Limpar todos os registos filtrados</string>
+    <string name="clear_all_filtered_logs_selected">Isto eliminará todo o histórico de chamadas apresentado. Esta ação não pode ser desfeita.</string>
+
+    <!-- Contacts -->
+    <string name="contacts">Contactos</string>
+    <string name="view_contact">Ver contacto</string>
+    <string name="view_contacts">Ver contactos</string>
+    <string name="contacts_settings">Definições de contactos</string>
+    <string name="create_contact">Criar contacto</string>
+    <string name="add_contact">Adicionar contacto</string>
+    <string name="add_to_contact">Adicionar ao contacto</string>
+    <string name="edit_contact">Editar contacto</string>
+    <string name="contact_info">Informação do contacto</string>
+    <string name="favorites">Favoritos</string>
+    <string name="message">Mensagem</string>
+    <string name="video">Vídeo</string>
+    <string name="email">E-mail</string>
+    <string name="default_number">Predefinido</string>
+    <string name="recent_number">Recente</string>
+    <string name="recent_activity">Atividade recente</string>
+    <string name="add_to_favorites">Adicionar aos favoritos</string>
+    <string name="remove_from_favorites">Remover dos favoritos</string>
+    <string name="no_favorites_yet">Ainda não há favoritos</string>
+    <string name="no_favorites_yet_subtitle">Marque um contacto com estrela para o adicionar aqui</string>
+    <string name="move_contact">Mover contacto</string>
+    <string name="move_to_another_account">Mover para outra conta</string>
+    <string name="move_to_device_storage">Mover para o armazenamento do dispositivo</string>
+    <string name="contact_moved_successfully">Contacto movido com sucesso</string>
+    <string name="save_to_account">Guardar na conta</string>
+    <string name="show_full_history">Mostrar histórico completo</string>
+    <string name="contact_qr">QR do contacto</string>
+    <string name="phone_number">Número de telefone</string>
+    <string name="name">Nome</string>
+    <string name="prefix">Prefixo</string>
+    <string name="prefix_description">Sr., Sra., Dr., etc.</string>
+    <string name="first_name">Primeiro nome</string>
+    <string name="middle_name">Segundo nome</string>
+    <string name="middle_name_description">Segundo nome ou inicial</string>
+    <string name="last_name">Apelido</string>
+    <string name="suffix">Sufixo</string>
+    <string name="suffix_description">Jr., Sr., III, etc.</string>
+    <string name="nickname">Alcunha</string>
+    <string name="nickname_description">Nome curto ou alias</string>
+    <string name="company">Empresa</string>
+    <string name="job_title">Cargo</string>
+    <string name="job_title_description">Cargo na empresa</string>
+    <string name="add_field">Adicionar campo</string>
+    <string name="add_phone">Adicionar telefone</string>
+    <string name="add_email">Adicionar e-mail</string>
+    <string name="add_event">Adicionar evento</string>
+    <string name="add_address">Adicionar morada</string>
+    <string name="add_note">Adicionar nota</string>
+    <string name="contact_ringtone">Toque do contacto</string>
+    <string name="unsaved_changes">Alterações não guardadas</string>
+    <string name="unsaved_changes_subtitle">Deseja guardar as suas alterações antes de sair?</string>
+    <plurals name="contacts_count">
+        <item quantity="one">%d contacto</item>
+        <item quantity="many">%d contactos</item>
+        <item quantity="other">%d contactos</item>
+    </plurals>
+    <plurals name="add_to_favorites_confirmation">
+        <item quantity="one">Adicionar %d contacto aos favoritos?</item>
+        <item quantity="many">Adicionar %d contactos aos favoritos?</item>
+        <item quantity="other">Adicionar %d contactos aos favoritos?</item>
+    </plurals>
+    <plurals name="remove_from_favorites_confirmation">
+        <item quantity="one">Remover %d contacto dos favoritos?</item>
+        <item quantity="many">Remover %d contactos dos favoritos?</item>
+        <item quantity="other">Remover %d contactos dos favoritos?</item>
+    </plurals>
+
+    <!-- Permission -->
+    <string name="allow">Permitir</string>
+    <string name="call_history_permission">O Rill Phone precisa de acesso aos seus registos de chamadas para mostrar a sua atividade recente e chamadas perdidas.</string>
+    <string name="contacts_permission">Permissão de contactos necessária</string>
+    <string name="contacts_permission_description">Para ver os seus contactos, permita o acesso aos contactos.</string>
+    <string name="search_contacts_permission_description">Para pesquisar os seus contactos e identificar chamadas recebidas, permita o acesso aos contactos.</string>
+
+    <!-- Default Dialer -->
+    <string name="default_phone_number_cleared">Número de telefone predefinido limpo</string>
+    <string name="set_as_default">Definir como predefinido</string>
+    <string name="clear_default">Limpar predefinição</string>
+    <string name="default_phone_set">%s definido como predefinido</string>
+    <string name="default_dialer_title">Definir Rill Phone como predefinido</string>
+    <string name="default_dialer_subtitle">O Rill Phone só pode iniciar e receber chamadas se for a sua aplicação telefónica predefinida</string>
+    <string name="default_dialer_warning">A aplicação não pode funcionar sem esta permissão. Por favor, tente novamente.</string>
+
+    <!-- Call notes -->
+    <string name="notes">Notas</string>
+    <string name="call_notes">Notas de chamadas</string>
+    <string name="about_call_notes">Sobre as notas de chamadas</string>
+    <string name="about_call_notes_subtitle">Notas rápidas que tira durante uma chamada. São armazenadas localmente nos ficheiros da aplicação, ligadas ao número de telefone (não são sincronizadas com os Contactos Google e outros). Cada número tem a sua própria nota privada, à qual só pode aceder a partir do registo de chamadas nos detalhes do contacto dentro da aplicação ou a partir do separador \"Notas de chamadas\".</string>
+    <string name="type_your_note">Escreva a sua nota…</string>
+    <string name="no_notes_yet">Ainda não há notas</string>
+    <string name="no_notes_yet_subtitle">As notas tiradas durante chamadas aparecem aqui</string>
+    <string name="delete_notes">Eliminar notas</string>
+    <string name="delete_notes_subtitle">Tem a certeza de que pretende eliminar %s notas selecionadas?</string>
+    <string name="delete_note">Eliminar nota</string>
+    <string name="delete_note_subtitle">Eliminar nota para %s?"</string>
+
+    <!-- Times -->
+    <string name="just_now">Agora mesmo</string>
+    <string name="yesterday">Ontem</string>
+    <string name="today">Hoje</string>
+    <string name="seconds_letter">%ds</string>
+    <string name="minutes_letter">%dm</string>
+    <string name="hours_letter">%dh</string>
+    <string name="days_letter">%dd</string>
+
+    <!-- Phone numbers -->
+    <string name="no_label">Sem etiqueta</string>
+    <string name="custom_label">Etiqueta personalizada</string>
+    <string name="change_label">Alterar etiqueta</string>
+    <string name="mobile">Telemóvel</string>
+    <string name="main_number">Principal</string>
+    <string name="home">Casa</string>
+    <string name="work">Trabalho</string>
+    <string name="work_fax">Fax do trabalho</string>
+    <string name="home_fax">Fax de casa</string>
+    <string name="pager">Pager</string>
+    <string name="other">Outro</string>
+    <string name="send_whatsapp">Enviar por WhatsApp</string>
+
+    <!-- Events -->
+    <string name="other_information">Outras informações</string>
+    <string name="birthday">Aniversário</string>
+    <string name="anniversary">Aniversário de casamento</string>
+
+    <!-- Dialpad -->
+    <string name="add_pause">Adicionar pausa de 2 seg.</string>
+    <string name="add_wait">Adicionar espera</string>
+
+    <!-- Onboarding -->
+    <string name="skip">Saltar</string>
+    <string name="page_title_one">Privado por conceção</string>
+    <string name="page_subtitle_one">Os seus contactos permanecem no seu dispositivo. Nunca carregamos, rastreamos ou partilhamos os seus dados com ninguém. Nunca.</string>
+    <string name="page_title_two">Código aberto e transparente</string>
+    <string name="page_subtitle_two">Zero telemetria. Zero anúncios. Zero rastreio. Controlo total sobre a sua comunicação.</string>
+    <string name="page_title_three">Rápida e fiável</string>
+    <string name="page_subtitle_three">Pesquisa T9 instantânea, animações suaves e chamadas ultrarrápidas. Apenas uma aplicação telefónica que funciona.</string>
+    <string name="page_title_warning">Em desenvolvimento</string>
+    <string name="page_subtitle_warning">Esta aplicação ainda está em desenvolvimento. Algumas funcionalidades podem não funcionar como esperado. Utilize com cuidado e relate quaisquer problemas que encontrar.</string>
+</resources>

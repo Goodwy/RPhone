@@ -1,0 +1,486 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="widget_description">त्वरित डायल के साथ हाल की कॉलें</string>
+    <string name="copy" tools:ignore="PrivateResource">कॉपी करें</string>
+    <string name="copy_path">पथ कॉपी करें</string>
+    <string name="paste">पेस्ट करें</string>
+    <string name="delete">हटाएँ</string>
+    <string name="delete_contact">संपर्क हटाएँ</string>
+    <string name="delete_contact_subtitle">क्या आप वाकई इस संपर्क को हटाना चाहते हैं? यह क्रिया पूर्ववत नहीं की जा सकती।</string>
+    <string name="delete_contacts">संपर्क हटाएँ</string>
+    <string name="delete_contacts_subtitle">क्या आप वाकई %s चयनित संपर्कों को हटाना चाहते हैं? यह क्रिया पूर्ववत नहीं की जा सकती।</string>
+    <string name="selected_items">%s चयनित</string>
+    <string name="select">चुनें</string>
+    <string name="select_all">सभी चुनें</string>
+    <string name="deselect_all">सभी अचयनित करें</string>
+    <string name="backspace">हटाएँ</string>
+    <string name="back">पीछे</string>
+    <string name="edit">संपादित करें</string>
+    <string name="done">हो गया</string>
+    <string name="ok">ठीक है</string>
+    <string name="on">चालू</string>
+    <string name="off">बंद</string>
+    <string name="cancel">रद्द करें</string>
+    <string name="open">खोलें</string>
+    <string name="save">सहेजें</string>
+    <string name="confirm">पुष्टि करें</string>
+    <string name="close">बंद करें</string>
+    <string name="clear">साफ़ करें</string>
+    <string name="share">साझा करें</string>
+    <string name="share_subtitle">संपर्क विवरण दूसरों को भेजें</string>
+    <string name="use">उपयोग करें</string>
+    <string name="connect_via_social">सोशल के माध्यम से कनेक्ट करें</string>
+    <string name="import_text">आयात करें</string>
+    <string name="export_text">निर्यात करें</string>
+    <string name="call_is_ongoing">कॉल जारी है — वापस जाने के लिए टैप करें</string>
+    <string name="filter_all">सभी</string>
+    <string name="filter_missed">छूटी हुई</string>
+    <string name="filter_incoming">आने वाली</string>
+    <string name="filter_outgoing">जाने वाली</string>
+    <string name="filter_rejected">अस्वीकृत</string>
+
+    <!-- Search -->
+    <string name="search">खोजें</string>
+    <string name="search_contacts">संपर्क खोजें</string>
+    <string name="no_results">कोई परिणाम नहीं</string>
+    <string name="no_contacts_found">कोई संपर्क नहीं मिला</string>
+    <string name="call_query">%s को कॉल करें</string>
+    <string name="voice_input">वॉइस इनपुट</string>
+    <string name="filter_results">परिणाम फ़िल्टर करें</string>
+
+    <!-- Billing -->
+    <string name="no_connection">कोई कनेक्शन नहीं</string>
+    <string name="loading_price">लोड हो रहा है…</string>
+
+    <!-- Project support -->
+    <string name="project_support">परियोजना समर्थन</string>
+    <string name="project_support_summary">भविष्य के विकास और अतिरिक्त सुविधाओं का समर्थन करने के लिए भुगतान ऐप प्राप्त करें</string>
+    <string name="project_support_description">
+        <![CDATA[
+        हमारा मानना है कि गोपनीयता मुफ्त होनी चाहिए। इसलिए सभी आवश्यक सुविधाएँ बिना एक पैसा खर्च किए पूरी तरह से आपकी हैं।<br>
+        अगर आपको हमारा काम पसंद है, तो हमें कॉफी खिलाने पर विचार करें। धन्यवाद के रूप में, आपको मिलेगा:<br> <b>सभी थीम, कस्टम रंग और कस्टम फोंट।</b><br>
+        यह कोई प्रीमियम स्तर नहीं है। यह एक धन्यवाद इशारा है। आपका समर्थन Rill को स्वतंत्र, निजी और विज्ञापन-मुक्त रखता है।
+        ]]>
+    </string>
+    <string name="support_project_to_unlock">अनलॉक करने के लिए परियोजना का समर्थन करें</string>
+    <string name="restore_purchase">खरीदारी पुनर्स्थापित करें</string>
+    <string name="continue_support">जारी रखें</string>
+    <string name="monthly">मासिक</string>
+    <string name="monthly_description">उन लोगों के लिए लचीलापन जो मासिक योगदान देना चाहते हैं</string>
+    <string name="yearly">वार्षिक</string>
+    <string name="yearly_description">दुनिया के सर्वश्रेष्ठ कॉलिंग ऐप के लिए वार्षिक समर्थन</string>
+    <string name="lifetime">आजीवन</string>
+    <string name="lifetime_description">एक बार भुगतान करें और जीवन भर अपनी सभी कॉलों पर अंतिम सुविधा का आनंद लें</string>
+    <string name="most_flexible">सबसे लचीला</string>
+    <string name="bast_value">सर्वोत्तम मूल्य</string>
+    <string name="pay_once">एक बार भुगतान करें</string>
+    <string name="support_development">विकास का समर्थन करें</string>
+    <string name="support_all_options">सभी विकल्पों का समर्थन करें</string>
+    <string name="support_development_description1">Rill Phone गर्व से ओपन-सोर्स और पूरी तरह से मुफ्त है। आपका समर्थन इसे ऐसे बनाए रखने में हमारी मदद करता है।</string>
+    <string name="support_development_description2">दान करके, आप न केवल सुविधाओं को अनलॉक कर रहे हैं — आप गोपनीयता, पारदर्शिता और वास्तव में स्वतंत्र विकास के भविष्य में निवेश कर रहे हैं।</string>
+    <string name="support_development_description3">आकार चाहे जो भी हो, हर योगदान मायने रखता है।</string>
+    <string name="unlock_all_features">सभी सुविधाएँ अनलॉक करें</string>
+    <string name="all_features_unlocked">✨ सभी सुविधाएँ अनलॉक! आपके समर्थन के लिए धन्यवाद!</string>
+    <string name="thank_you_for_your_support">आपके समर्थन के लिए धन्यवाद! ❤️</string>
+    <string name="features_locked">सुविधाएँ लॉक</string>
+    <string name="your_donation_ensures">आपका दान सुनिश्चित करता है:</string>
+    <string name="your_donation_ensures_1">✅ नियमित अपडेट और सुरक्षा पैच</string>
+    <string name="your_donation_ensures_2">✅ नई सुविधाएँ और सुधार</string>
+    <string name="your_donation_ensures_3">✅ सभी के लिए मुफ्त पहुँच</string>
+    <string name="your_donation_ensures_4">✅ ओपन-सोर्स विकास</string>
+
+    <!-- About -->
+    <string name="about">परिचय</string>
+    <string name="rate_app">ऐप रेट करें</string>
+    <string name="other_apps">हमारे अन्य ऐप</string>
+    <string name="source_code">सोर्स कोड</string>
+    <string name="privacy_policy">गोपनीयता नीति</string>
+
+    <!-- Contributors -->
+    <string name="contributors">योगदानकर्ता</string>
+    <string name="development_team">विकास टीम</string>
+    <string name="apps_that_inspired_us">ऐप्स जिन्होंने हमें प्रेरित किया</string>
+
+    <!-- Settings -->
+    <string name="settings">सेटिंग्स</string>
+    <string name="appearance">दिखावट</string>
+    <string name="interface_settings">इंटरफ़ेस</string>
+    <string name="interface_settings_subtitle">थीम, रंग और लेआउट</string>
+    <string name="app_theme">ऐप थीम</string>
+    <string name="theme_auto">ऑटो</string>
+    <string name="theme_light">हल्का</string>
+    <string name="theme_dark">गहरा</string>
+    <string name="theme_auto_black_white">ऑटो काला/सफ़ेद</string>
+    <string name="theme_white">सफ़ेद</string>
+    <string name="theme_black">काला</string>
+    <string name="custom_color">कस्टम रंग</string>
+    <string name="custom_color_subtitle">कस्टम रंग पर आधारित रंग योजना</string>
+    <string name="hex_color">हेक्स रंग</string>
+    <string name="hex_color_subtitle">एक वैध 6-अंकीय हेक्स कोड दर्ज करें</string>
+    <string name="custom_font">कस्टम फ़ॉन्ट</string>
+    <string name="custom_font_subtitle">ऐप में उपयोग के लिए .ttf फ़ाइल चुनें</string>
+    <string name="visual_effects">दृश्य प्रभाव</string>
+    <string name="not_supported_on_this_device">इस डिवाइस पर समर्थित नहीं</string>
+    <string name="not_supported_on_this_device_subtitle">ब्लर और लिक्विड ग्लास के लिए Android 12 या उच्चतर आवश्यक है</string>
+    <string name="material_liquid_you_glass">लिक्विड ग्लास Material You</string>
+    <string name="material_liquid_you_glass_subtitle">नेविगेशन पर तरल कांच का प्रभाव लागू करें</string>
+    <string name="material_blur_effects">Material ब्लर प्रभाव</string>
+    <string name="material_blur_effects_subtitle">नेविगेशन पर पृष्ठभूमि ब्लर प्रभाव लागू करें</string>
+    <string name="scroll_animation">स्क्रॉल एनीमेशन</string>
+    <string name="scroll_animation_device">स्क्रॉल करते समय सूची आइटम के लिए फ़ेड-इन एनीमेशन</string>
+    <string name="call_ui">कॉल UI</string>
+    <string name="incoming_call_ui">आने वाली कॉल UI</string>
+    <string name="incoming_call_ui_subtitle">चुनें कि आने वाली कॉल का कैसे उत्तर दें</string>
+    <string name="avatars_settings">अवतार सेटिंग्स</string>
+    <string name="avatars_settings_subtitle">रंग, फ्रेम और अधिक कस्टमाइज़ करना</string>
+    <string name="avatar_colors">अवतार रंग</string>
+    <string name="colorful">रंगीन</string>
+    <string name="primary_color">प्राथमिक रंग</string>
+    <string name="secondary_color">द्वितीयक रंग</string>
+    <string name="google_contacts_color">Google संपर्क रंग</string>
+    <string name="show_first_letter_in_avatar">अवतार में पहला अक्षर दिखाएँ</string>
+    <string name="show_first_letter_in_avatar_subtitle">जब चित्र न हो तो अक्षर दिखाता है</string>
+    <string name="avatar_frame">अवतार फ्रेम</string>
+    <string name="avatar_frame_subtitle">अवतार के चारों ओर एक बॉर्डर दिखाएँ</string>
+    <string name="show_picture_in_avatar">अवतार में चित्र दिखाएँ</string>
+    <string name="show_picture_in_avatar_subtitle">यदि उपलब्ध हो तो संपर्क फ़ोटो दिखाता है</string>
+
+    <string name="сaller_ui">कॉलर UI</string>
+    <string name="сaller_ui_subtitle">कॉल स्क्रीन और नियंत्रण कस्टमाइज़ करें</string>
+    <string name="end_call_button">कॉल समाप्त करें बटन</string>
+    <string name="customize_width">चौड़ाई कस्टमाइज़ करें</string>
+    <string name="customize_width_subtitle">कॉल समाप्त करें बटन की चौड़ाई समायोजित करें</string>
+
+    <string name="navigations">नेविगेशन</string>
+    <string name="navigations_subtitle">टैब दृश्यता और शैली</string>
+    <string name="tab_sections">टैब अनुभाग</string>
+    <string name="tab_sections_subtitle">चुनें कि कौन से टैब दिखाई देते हैं, और नेविगेशन बार में उन्हें पुनर्व्यवस्थित करने के लिए हैंडल को खींचें</string>
+    <string name="navigation_style">नेविगेशन शैली</string>
+    <string name="pill_style_navigation">पिल स्टाइल नेविगेशन</string>
+    <string name="pill_style_navigation_subtitle">मानक निचली बार के बजाय एक फ़्लोटिंग पिल-स्टाइल नेविगेशन बार दिखाएँ</string>
+    <string name="icon_only_bottom_bar">केवल आइकन निचली बार</string>
+    <string name="icon_only_bottom_bar_subtitle">नेविगेशन से टेक्स्ट लेबल हटाता है</string>
+
+    <string name="calls_and_system">कॉल और सिस्टम</string>
+    <string name="call_settings">कॉल सेटिंग्स</string>
+    <string name="call_settings_subtitle">खाते, सेंसर और पॉकेट मोड</string>
+    <string name="default_sim">डिफ़ॉल्ट SIM</string>
+    <string name="ask_first">पहले पूछें</string>
+    <string name="calling_accounts">कॉल खाते</string>
+    <string name="system_settings">सिस्टम सेटिंग्स</string>
+    <string name="call_behavior">कॉल व्यवहार</string>
+    <string name="proximity_sensor">पृष्ठभूमि में प्रॉक्सिमिटी सेंसर</string>
+    <string name="proximity_sensor_subtitle">कॉल के दौरान फोन कान के पास होने पर स्क्रीन बंद करें</string>
+    <string name="pocket_mode_prevention">पॉकेट मोड रोकथाम</string>
+    <string name="pocket_mode_prevention_subtitle">फोन जेब में होने पर आकस्मिक उत्तर/अस्वीकार को रोकें</string>
+    <string name="floating_ongoing_call">फ़्लोटिंग जारी कॉल</string>
+    <string name="floating_ongoing_call_subtitle">कॉल के दौरान एक खींचने योग्य फ़्लोटिंग बुलबुला दिखाएँ। \'अन्य ऐप्स के ऊपर दिखाएँ\' अनुमति की आवश्यकता है</string>
+    <string name="direct_call_on_tap">टैप पर सीधी कॉल</string>
+    <string name="direct_call_on_tap_subtitle">सीधे कॉल करने के लिए कॉल लॉग प्रविष्टि पर टैप करें</string>
+    <string name="auto_speaker">ऑटो स्पीकर</string>
+    <string name="auto_speaker_subtitle">जब फोन कान से दूर हो तो स्वचालित रूप से लाउडस्पीकर पर स्विच करें, और पास होने पर ईयरपीस पर वापस जाएँ</string>
+
+    <string name="sound_and_vibration">ध्वनि और कंपन</string>
+    <string name="sound_and_vibration_subtitle">रिंगटोन, डायलपैड टोन और ऐप भर में हैप्टिक्स</string>
+    <string name="tap_haptics">टैप हैप्टिक्स</string>
+    <string name="enable_tap_haptics">टैप हैप्टिक्स सक्षम करें</string>
+    <string name="haptics_intensity">तीव्रता</string>
+    <string name="haptics_soft">नरम</string>
+    <string name="haptics_strong">मजबूत</string>
+    <string name="haptics_custom">कस्टम</string>
+    <string name="preview_haptic">हैप्टिक पूर्वावलोकन</string>
+    <string name="ringtone_settings">रिंगटोन सेटिंग्स</string>
+    <string name="dialpad_tones">डायलपैड टोन</string>
+    <string name="dialpad_tones_subtitle">कीप्रेस के दौरान बजने वाली डायलपैड टोन</string>
+    <string name="calls">कॉल</string>
+    <string name="vibrate_on_answer">उत्तर देने पर कंपन</string>
+    <string name="vibrate_on_answer_subtitle">जब दूसरा पक्ष उत्तर देता है तो कंपन करें</string>
+    <string name="vibrate_on_hang_up">कॉल समाप्त होने पर कंपन</string>
+    <string name="vibrate_on_hang_up_subtitle">जब कॉल समाप्त होती है तो कंपन करें</string>
+    <string name="haptics_across_app">ऐप भर में हैप्टिक्स</string>
+    <string name="scroll_haptics">स्क्रॉल हैप्टिक्स</string>
+    <string name="scroll_haptics_subtitle">ऐप में स्क्रॉल जेस्चर पर कंपन करें</string>
+    <string name="haptic_interval">हैप्टिक अंतराल</string>
+    <string name="haptic_interval_value">%.1f सेमी पर 1</string>
+    <string name="haptic_strength">हैप्टिक ताकत</string>
+
+    <string name="manage_blocked">अवरुद्ध प्रबंधित करें</string>
+    <string name="manage_blocked_subtitle">अवरुद्ध कॉल और स्पैम प्रबंधित करें</string>
+    <string name="blocked_numbers">अवरुद्ध नंबर</string>
+    <string name="block_notifications">सूचनाएँ अवरुद्ध करें</string>
+    <string name="block_notifications_subtitle">अवरुद्ध कॉल के लिए कम प्राथमिकता वाला अलर्ट दिखाएँ</string>
+    <string name="block_method">अवरुद्ध विधि</string>
+    <string name="block_method_subtitle">अवरुद्ध कॉल कैसे संभाली जाती हैं</string>
+    <string name="decline_automatically">स्वचालित रूप से अस्वीकार करें</string>
+    <string name="ring_silently">चुपचाप बजाएँ</string>
+    <string name="log_visibility">लॉग दृश्यता</string>
+    <string name="log_visibility_subtitle">हाल ही में अवरुद्ध कॉल दिखाएँ या छिपाएँ</string>
+    <string name="hide_from_logs">लॉग से छिपाएँ</string>
+    <string name="show_in_logs">लॉग में दिखाएँ</string>
+    <string name="blocked_size">अवरुद्ध: %s</string>
+
+    <string name="authentication">प्रमाणीकरण</string>
+    <string name="authentication_method">प्रमाणीकरण विधि</string>
+    <string name="system_biometrics">सिस्टम बायोमेट्रिक्स</string>
+    <string name="system_biometrics_subtitle">फिंगरप्रिंट, चेहरा अनलॉक, या डिवाइस क्रेडेंशियल्स</string>
+    <string name="system_biometrics_not_available">इस डिवाइस पर उपलब्ध नहीं</string>
+    <string name="custom_biometrics">कस्टम बायोमेट्रिक्स</string>
+    <string name="custom_pin">कस्टम PIN</string>
+    <string name="custom_password">कस्टम पासवर्ड</string>
+    <string name="pin">PIN</string>
+    <string name="pin_subtitle">एक संख्यात्मक PIN सेट करें</string>
+    <string name="password">पासवर्ड</string>
+    <string name="password_subtitle">एक कस्टम अल्फान्यूमेरिक पासवर्ड सेट करें</string>
+    <string name="remove_biometric">बायोमेट्रिक लॉक हटाएँ</string>
+    <string name="not_configured">कॉन्फ़िगर नहीं</string>
+    <string name="lock_app_on_open">खोलने पर ऐप लॉक करें</string>
+    <string name="lock_app_on_open_subtitle">ऐप खोलते समय प्रमाणीकरण की आवश्यकता होती है</string>
+    <string name="lock_call_actions">कॉल क्रियाएँ लॉक करें</string>
+    <string name="lock_call_actions_subtitle">आने वाली कॉल का उत्तर देने या अस्वीकार करने के लिए प्रमाणीकरण की आवश्यकता होती है</string>
+    <string name="lock_scope">कॉल लॉक का दायरा</string>
+    <string name="all_calls">सभी कॉल</string>
+    <string name="all_calls_subtitle">प्रत्येक आने वाली कॉल के लिए बायोमेट्रिक्स आवश्यक</string>
+    <string name="blacklist">ब्लैकलिस्ट</string>
+    <string name="blacklist_count">जिन संपर्कों के लिए कॉल-उत्तर प्रमाणीकरण सक्षम है: %s</string>
+    <string name="blacklist_subtitle">ऐसे संपर्क चुनें जिन्हें उत्तर देने के लिए बायोमेट्रिक्स की आवश्यकता होती है</string>
+    <string name="whitelist">व्हाइटलिस्ट</string>
+    <string name="whitelist_count">जिन संपर्कों के लिए कॉल-उत्तर प्रमाणीकरण अक्षम है: %s</string>
+    <string name="whitelist_subtitle">बायोमेट्रिक लॉक को छोड़ने के लिए संपर्क चुनें</string>
+    <string name="select_contacts">संपर्क चुनें</string>
+    <string name="set_pin">PIN सेट करें</string>
+    <string name="set_pin_subtitle">4-अंकीय PIN दर्ज करें</string>
+    <string name="enter_pin">PIN दर्ज करें</string>
+    <string name="confirm_pin">PIN की पुष्टि करें</string>
+    <string name="confirm_pin_subtitle">पुष्टि करने के लिए अपना PIN पुनः दर्ज करें</string>
+    <string name="incorrect_pin">गलत PIN। कृपया पुनः प्रयास करें।</string>
+    <string name="pin_dont_match">PIN मेल नहीं खाते। कृपया फिर से शुरू करें।</string>
+    <string name="set_password">पासवर्ड सेट करें</string>
+    <string name="set_password_subtitle">कोई भी पासवर्ड दर्ज करें। अक्षर, संख्याएँ और विशेष वर्ण समर्थित हैं।</string>
+    <string name="enter_password">पासवर्ड दर्ज करें</string>
+    <string name="confirm_password">पासवर्ड की पुष्टि करें</string>
+    <string name="incorrect_password">गलत पासवर्ड</string>
+    <string name="incorrect_password_subtitle">पासवर्ड कम से कम 4 वर्णों का होना चाहिए</string>
+    <string name="password_dont_match">पासवर्ड मेल नहीं खाते</string>
+
+    <string name="manage_contacts">संपर्क प्रबंधित करें</string>
+    <string name="manage_contacts_subtitle">निजी संपर्क, दिखाने के लिए खाते, और अपनी सूची साफ़ करें</string>
+    <string name="display">प्रदर्शन</string>
+    <string name="sort_by">क्रमबद्ध करें</string>
+    <string name="name_format">नाम प्रारूप</string>
+    <string name="first_name_first">पहले नाम</string>
+    <string name="last_name_first">पहले उपनाम</string>
+    <string name="merge_and_fix">मर्ज करें और ठीक करें</string>
+    <string name="standardize">मानकीकृत करें</string>
+    <string name="standardize_phone_numbers">फ़ोन नंबर मानकीकृत करें</string>
+    <string name="standardize_phone_numbers_subtitle">फ़ोन नंबरों से रिक्त स्थान और विशेष वर्ण हटाएँ</string>
+    <string name="total_contacts">कुल संपर्क</string>
+    <string name="contacts_with_changes">परिवर्तन वाले संपर्क</string>
+    <string name="numbers_to_standardize">मानकीकृत करने के लिए नंबर</string>
+    <string name="all_numbers_are_already_standardized">✅ सभी नंबर पहले से ही मानकीकृत हैं!</string>
+    <string name="examples_of_changes">परिवर्तनों के उदाहरण:</string>
+    <string name="and_more">और %s और…</string>
+
+    <string name="merging_contacts">संपर्क मर्ज करना</string>
+    <string name="merging_contacts_subtitle">डुप्लिकेट संपर्क ढूँढना और मर्ज करना</string>
+    <string name="merging_contacts_description">मर्ज किए गए संपर्क विभिन्न खातों से कई प्रविष्टियाँ हैं जो एक में लिंक हैं। आप प्रत्येक स्रोत को अलग से संपादित कर सकते हैं या उन्हें अनलिंक कर सकते हैं।</string>
+    <string name="no_duplicates_found">कोई डुप्लिकेट नहीं मिला</string>
+    <string name="duplicates_in">इसमें डुप्लिकेट: %s</string>
+    <string name="merge_duplicates">डुप्लिकेट मर्ज करें (%s संपर्क)</string>
+
+    <string name="unmerging_contacts">संपर्क अनलिंक करें</string>
+    <string name="unmerging_contacts_subtitle">मर्ज किए गए संपर्क ढूँढना और अनलिंक करना</string>
+    <string name="unmerging_contacts_description">संपर्क जानकारी कई स्रोतों से है। संपादित करने के लिए एक चुनें, या सभी अनलिंक करें और उन्हें अलग संपर्क के रूप में रखें।</string>
+    <string name="no_merged_contacts_found">कोई मर्ज किया गया संपर्क नहीं मिला</string>
+    <string name="merged_from_sources">%s स्रोतों से मर्ज किया गया</string>
+    <string name="unlink">अनलिंक करें</string>
+    <string name="warning_cannot_be_undone">⚠️ यह क्रिया पूर्ववत नहीं की जा सकती।</string>
+
+    <string name="managing_contact_sources">संपर्क स्रोत प्रबंधित करना</string>
+    <string name="managing_contact_sources_subtitle">चुनें कि आपकी सूची में कौन से खाते दिखाएँ</string>
+    <string name="managing_contact_sources_description">चुनें कि आपकी संपर्क सूची में कौन से खाते दिखाई देने चाहिए। किसी खाते को अचयनित करने से उसके संपर्क छिप जाएंगे लेकिन हटेंगे नहीं।</string>
+    <string name="contact_sources">संपर्क स्रोत</string>
+    <string name="contacts_stored_on_app">ऐप में संग्रहीत संपर्क</string>
+    <string name="contacts_stored_on_device">डिवाइस पर संग्रहीत संपर्क</string>
+
+    <string name="private_contacts">निजी संपर्क</string>
+    <string name="private_contacts_subtitle">अपने एन्क्रिप्टेड स्थानीय संपर्क प्रबंधित करें</string>
+
+    <!-- Call -->
+    <string name="call">कॉल</string>
+    <string name="incoming">आने वाली</string>
+    <string name="outgoing">जाने वाली</string>
+    <string name="missed">छूटी हुई</string>
+    <string name="rejected">अस्वीकृत</string>
+    <string name="blocked">अवरुद्ध</string>
+    <string name="answer">उत्तर दें</string>
+    <string name="decline">अस्वीकार करें</string>
+    <string name="answer_and_decline">उत्तर दें और दूसरी कॉल समाप्त करें</string>
+    <string name="end_call">कॉल समाप्त करें</string>
+    <string name="back_to_call">कॉल पर वापस जाएँ</string>
+    <string name="keypad">कीपैड</string>
+    <string name="mute">म्यूट</string>
+    <string name="unmute">अनम्यूट</string>
+    <string name="speaker">स्पीकर</string>
+    <string name="add_call">कॉल जोड़ें</string>
+    <string name="resume">फिर से शुरू करें</string>
+    <string name="swap">बदलें</string>
+    <string name="more">अधिक</string>
+    <string name="hold">होल्ड करें</string>
+    <string name="on_hold">होल्ड पर</string>
+    <string name="call_ended">कॉल समाप्त</string>
+    <string name="calling">कॉल कर रहे हैं…</string>
+    <string name="incoming_call">आने वाली कॉल</string>
+    <string name="connecting">कनेक्ट हो रहा है…</string>
+    <string name="slide_to_answer">उत्तर देने के लिए स्लाइड करें</string>
+    <string name="swipe_up_to_answer">उत्तर देने के लिए ऊपर स्वाइप करें</string>
+    <string name="swipe_down_to_reject">अस्वीकार करने के लिए नीचे स्वाइप करें</string>
+
+    <!-- Recents -->
+    <string name="recents">हाल की</string>
+    <string name="home_tab">होम</string>
+    <string name="call_history">कॉल इतिहास</string>
+    <string name="history_with">%s के साथ इतिहास</string>
+    <string name="no_call_history_found">कोई कॉल इतिहास नहीं मिला</string>
+    <string name="delete_call_logs">कॉल लॉग हटाएँ</string>
+    <string name="delete_call_logs_selected">क्या आप वाकई %s चयनित कॉल लॉग हटाना चाहते हैं?</string>
+    <string name="deleted_from_call_log">कॉल लॉग से हटा दिया गया</string>
+    <string name="could_not_delete">हटाया नहीं जा सका</string>
+    <string name="clear_all_filtered_logs">सभी फ़िल्टर किए गए लॉग साफ़ करें</string>
+    <string name="clear_all_filtered_logs_selected">यह प्रदर्शित सभी कॉल इतिहास हटा देगा। यह क्रिया पूर्ववत नहीं की जा सकती।</string>
+
+    <!-- Contacts -->
+    <string name="contacts">संपर्क</string>
+    <string name="view_contact">संपर्क देखें</string>
+    <string name="view_contacts">संपर्क देखें</string>
+    <string name="contacts_settings">संपर्क सेटिंग्स</string>
+    <string name="create_contact">संपर्क बनाएँ</string>
+    <string name="add_contact">संपर्क जोड़ें</string>
+    <string name="add_to_contact">संपर्क में जोड़ें</string>
+    <string name="edit_contact">संपर्क संपादित करें</string>
+    <string name="contact_info">संपर्क जानकारी</string>
+    <string name="favorites">पसंदीदा</string>
+    <string name="message">संदेश</string>
+    <string name="video">वीडियो</string>
+    <string name="email">ईमेल</string>
+    <string name="default_number">डिफ़ॉल्ट</string>
+    <string name="recent_number">हाल का</string>
+    <string name="recent_activity">हाल की गतिविधि</string>
+    <string name="add_to_favorites">पसंदीदा में जोड़ें</string>
+    <string name="remove_from_favorites">पसंदीदा से हटाएँ</string>
+    <string name="no_favorites_yet">अभी कोई पसंदीदा नहीं</string>
+    <string name="no_favorites_yet_subtitle">इसे यहाँ जोड़ने के लिए किसी संपर्क को स्टार करें</string>
+    <string name="move_contact">संपर्क स्थानांतरित करें</string>
+    <string name="move_to_another_account">दूसरे खाते में स्थानांतरित करें</string>
+    <string name="move_to_device_storage">डिवाइस स्टोरेज में स्थानांतरित करें</string>
+    <string name="contact_moved_successfully">संपर्क सफलतापूर्वक स्थानांतरित किया गया</string>
+    <string name="save_to_account">खाते में सहेजें</string>
+    <string name="show_full_history">पूरा इतिहास दिखाएँ</string>
+    <string name="contact_qr">संपर्क QR</string>
+    <string name="phone_number">फ़ोन नंबर</string>
+    <string name="name">नाम</string>
+    <string name="prefix">उपसर्ग</string>
+    <string name="prefix_description">श्री, श्रीमती, डॉ, आदि।</string>
+    <string name="first_name">पहला नाम</string>
+    <string name="middle_name">मध्य नाम</string>
+    <string name="middle_name_description">मध्य नाम या आद्याक्षर</string>
+    <string name="last_name">उपनाम</string>
+    <string name="suffix">प्रत्यय</string>
+    <string name="suffix_description">जूनियर, सीनियर, III, आदि।</string>
+    <string name="nickname">उपनाम</string>
+    <string name="nickname_description">छोटा नाम या उपनाम</string>
+    <string name="company">कंपनी</string>
+    <string name="job_title">पद</string>
+    <string name="job_title_description">कंपनी में पद</string>
+    <string name="add_field">फ़ील्ड जोड़ें</string>
+    <string name="add_phone">फ़ोन जोड़ें</string>
+    <string name="add_email">ईमेल जोड़ें</string>
+    <string name="add_event">ईवेंट जोड़ें</string>
+    <string name="add_address">पता जोड़ें</string>
+    <string name="add_note">नोट जोड़ें</string>
+    <string name="contact_ringtone">संपर्क रिंगटोन</string>
+    <string name="unsaved_changes">असहेजे गए परिवर्तन</string>
+    <string name="unsaved_changes_subtitle">क्या आप बाहर निकलने से पहले अपने परिवर्तन सहेजना चाहते हैं?</string>
+    <plurals name="contacts_count">
+        <item quantity="one">%d संपर्क</item>
+        <item quantity="other">%d संपर्क</item>
+    </plurals>
+    <plurals name="add_to_favorites_confirmation">
+        <item quantity="one">%d संपर्क को पसंदीदा में जोड़ें?</item>
+        <item quantity="other">%d संपर्कों को पसंदीदा में जोड़ें?</item>
+    </plurals>
+    <plurals name="remove_from_favorites_confirmation">
+        <item quantity="one">%d संपर्क को पसंदीदा से हटाएँ?</item>
+        <item quantity="other">%d संपर्कों को पसंदीदा से हटाएँ?</item>
+    </plurals>
+
+    <!-- Permission -->
+    <string name="allow">अनुमति दें</string>
+    <string name="call_history_permission">Rill Phone को आपकी हाल की गतिविधि और छूटी हुई कॉल दिखाने के लिए आपके कॉल लॉग तक पहुँच की आवश्यकता है।</string>
+    <string name="contacts_permission">संपर्क अनुमति आवश्यक</string>
+    <string name="contacts_permission_description">अपने संपर्क देखने के लिए, संपर्क अनुमति की अनुमति दें।</string>
+    <string name="search_contacts_permission_description">अपने संपर्क खोजने और आने वाली कॉल की पहचान करने के लिए, संपर्क अनुमति की अनुमति दें।</string>
+
+    <!-- Default Dialer -->
+    <string name="default_phone_number_cleared">डिफ़ॉल्ट फ़ोन नंबर साफ़ किया गया</string>
+    <string name="set_as_default">डिफ़ॉल्ट के रूप में सेट करें</string>
+    <string name="clear_default">डिफ़ॉल्ट साफ़ करें</string>
+    <string name="default_phone_set">%s डिफ़ॉल्ट के रूप में सेट किया गया</string>
+    <string name="default_dialer_title">Rill Phone को डिफ़ॉल्ट के रूप में सेट करें</string>
+    <string name="default_dialer_subtitle">Rill Phone केवल तभी कॉल शुरू और प्राप्त कर सकता है जब यह आपका डिफ़ॉल्ट फ़ोन ऐप हो</string>
+    <string name="default_dialer_warning">इस अनुमति के बिना ऐप कार्य नहीं कर सकता। कृपया पुनः प्रयास करें।</string>
+
+    <!-- Call notes -->
+    <string name="notes">नोट्स</string>
+    <string name="call_notes">कॉल नोट्स</string>
+    <string name="about_call_notes">कॉल नोट्स के बारे में</string>
+    <string name="about_call_notes_subtitle">कॉल के दौरान आप जो त्वरित नोट्स लेते हैं। वे ऐप की फ़ाइलों में स्थानीय रूप से संग्रहीत होते हैं, फ़ोन नंबर से लिंक होते हैं (Google संपर्क और अन्य के साथ सिंक नहीं होते)। प्रत्येक नंबर का अपना निजी नोट होता है, जिसे केवल ऐप के भीतर संपर्क विवरण में कॉल लॉग से या \"कॉल नोट्स\" टैब से एक्सेस किया जा सकता है।</string>
+    <string name="type_your_note">अपना नोट टाइप करें…</string>
+    <string name="no_notes_yet">अभी कोई नोट नहीं</string>
+    <string name="no_notes_yet_subtitle">कॉल के दौरान लिए गए नोट यहाँ दिखाई देते हैं</string>
+    <string name="delete_notes">नोट्स हटाएँ</string>
+    <string name="delete_notes_subtitle">क्या आप वाकई %s चयनित नोट्स हटाना चाहते हैं?</string>
+    <string name="delete_note">नोट हटाएँ</string>
+    <string name="delete_note_subtitle">%s के लिए नोट हटाएँ?"</string>
+
+    <!-- Times -->
+    <string name="just_now">अभी</string>
+    <string name="yesterday">कल</string>
+    <string name="today">आज</string>
+    <string name="seconds_letter">%dसे</string>
+    <string name="minutes_letter">%dमि</string>
+    <string name="hours_letter">%dघं</string>
+    <string name="days_letter">%dदि</string>
+
+    <!-- Phone numbers -->
+    <string name="no_label">कोई लेबल नहीं</string>
+    <string name="custom_label">कस्टम लेबल</string>
+    <string name="change_label">लेबल बदलें</string>
+    <string name="mobile">मोबाइल</string>
+    <string name="main_number">मुख्य</string>
+    <string name="home">घर</string>
+    <string name="work">कार्य</string>
+    <string name="work_fax">कार्य फैक्स</string>
+    <string name="home_fax">घर फैक्स</string>
+    <string name="pager">पेजर</string>
+    <string name="other">अन्य</string>
+    <string name="send_whatsapp">WhatsApp पर भेजें</string>
+
+    <!-- Events -->
+    <string name="other_information">अन्य जानकारी</string>
+    <string name="birthday">जन्मदिन</string>
+    <string name="anniversary">सालगिरह</string>
+
+    <!-- Dialpad -->
+    <string name="add_pause">2-सेकंड विराम जोड़ें</string>
+    <string name="add_wait">प्रतीक्षा जोड़ें</string>
+
+    <!-- Onboarding -->
+    <string name="skip">छोड़ें</string>
+    <string name="page_title_one">डिज़ाइन द्वारा निजी</string>
+    <string name="page_subtitle_one">आपके संपर्क आपके डिवाइस पर रहते हैं। हम कभी भी आपका डेटा अपलोड, ट्रैक या किसी के साथ साझा नहीं करते। कभी नहीं।</string>
+    <string name="page_title_two">ओपन सोर्स और पारदर्शी</string>
+    <string name="page_subtitle_two">शून्य टेलीमेट्री। शून्य विज्ञापन। शून्य ट्रैकिंग। आपके संचार पर पूर्ण नियंत्रण।</string>
+    <string name="page_title_three">तेज़ और विश्वसनीय</string>
+    <string name="page_subtitle_three">तत्काल T9 खोज, सहज एनिमेशन और तेज़ कॉल। बस एक फ़ोन ऐप जो काम करता है।</string>
+    <string name="page_title_warning">विकासाधीन</string>
+    <string name="page_subtitle_warning">यह ऐप अभी भी विकासाधीन है। कुछ सुविधाएँ अपेक्षा के अनुसार काम नहीं कर सकती हैं। कृपया सावधानी से उपयोग करें और आपके सामने आने वाली किसी भी समस्या की रिपोर्ट करें।</string>
+</resources>

@@ -2,6 +2,7 @@
     <string name="app_name" translatable="false">Rill Phone</string>
     <string name="widget_description">Recent calls with quick dial</string>
     <string name="copy" tools:ignore="PrivateResource">Copy</string>
+    <string name="copy_path">Copy Path</string>
     <string name="paste">Paste</string>
     <string name="delete">Delete</string>
     <string name="delete_contact">Delete Contact</string>
@@ -39,11 +40,13 @@
     <string name="filter_rejected">Rejected</string>
 
     <!-- Search -->
+    <string name="search">Search</string>
     <string name="search_contacts">Search contacts</string>
     <string name="no_results">No results</string>
     <string name="no_contacts_found">No contacts found</string>
     <string name="call_query">Call %s</string>
     <string name="voice_input">Voice Input</string>
+    <string name="filter_results">Filter results</string>
 
     <!-- Billing -->
     <string name="no_connection">No connection</string>
@@ -436,7 +439,7 @@
     <string name="notes">Notes</string>
     <string name="call_notes">Call notes</string>
     <string name="about_call_notes">About call notes</string>
-    <string name="about_call_notes_subtitle">Quick notes you take during a call. They are stored locally within the app, linked to the phone number (not synced with Google Contacts and others). Each number has its own private note, which can only be accessed from the call log in the contact details within the app or from the “Call Notes” tab.</string>
+    <string name="about_call_notes_subtitle">Quick notes you take during a call. They are stored locally in the app\'s files, linked to the phone number (not synced with Google Contacts and others). Each number has its own private note, which can only be accessed from the call log in the contact details within the app or from the “Call Notes” tab.</string>
     <string name="type_your_note">Type your note…</string>
     <string name="no_notes_yet">No Notes Yet</string>
     <string name="no_notes_yet_subtitle">Notes taken during calls appear here</string>

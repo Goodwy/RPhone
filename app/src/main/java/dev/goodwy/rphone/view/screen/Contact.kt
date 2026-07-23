@@ -90,14 +90,11 @@ fun ContactScreen(navController: NavController, navigator: DestinationsNavigator
     val context = LocalContext.current
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
-    val showButton by remember {
-        derivedStateOf {
-            listState.firstVisibleItemIndex > 2
-        }
-    }
+    val showButton by remember { derivedStateOf { listState.firstVisibleItemIndex > 2 } }
 
     val prefs = koinInject<PreferenceManager>()
     val pillNav = remember { prefs.getBoolean(PreferenceManager.KEY_PILL_NAV, false) }
+    val searchEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SEARCH, false)
 //    val favoritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, true)
 //    val dialpadEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD, true)
 //    val notesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES, false)
@@ -177,8 +174,13 @@ fun ContactScreen(navController: NavController, navigator: DestinationsNavigator
             ) { isSelecting ->
                 if (!isSelecting) {
                     Column {
-                        TopBar(navController, navigator)
+                        if (!searchEnabled) TopBar(navController, navigator)
                         AccountFilterBar(
+                            modifier = Modifier
+                                .then(
+                                    if (searchEnabled) Modifier.windowInsetsPadding(WindowInsets.statusBars)
+                                    else Modifier
+                                ),
                             navigator = navigator,
                             viewModel = contactsVM,
                             onAddContact = {
@@ -368,6 +370,7 @@ fun ContactScreen(navController: NavController, navigator: DestinationsNavigator
 
 @Composable
 fun AccountFilterBar(
+    modifier: Modifier,
     navigator: DestinationsNavigator,
     viewModel: ContactsViewModel,
     onAddContact: () -> Unit,
@@ -430,7 +433,7 @@ fun AccountFilterBar(
     }
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = 12.dp)
             .alpha(chipAlpha)

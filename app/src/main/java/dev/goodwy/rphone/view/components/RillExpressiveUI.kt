@@ -1227,82 +1227,43 @@ fun RillDialog(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // Header Area
-                    if (isLandscape) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 16.dp, bottom = 16.dp),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            if (icon != null) {
-                                Surface(
-                                    modifier = Modifier.size(44.dp),
-                                    shape = RoundedCornerShape(12.dp),
-                                    color = iconBgContainerColor
-                                        ?: MaterialTheme.colorScheme.primaryContainer,
-                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Icon(
-                                            imageVector = icon,
-                                            contentDescription = null,
-                                            modifier = modifierIcon.size(24.dp),
-                                            tint = iconContainerColor ?: LocalContentColor.current
-                                        )
-                                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 24.dp, bottom = 16.dp)
+                            .padding(horizontal = 24.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (icon != null) {
+                            Surface(
+                                modifier = Modifier.size(44.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                color = iconBgContainerColor
+                                    ?: MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = icon,
+                                        contentDescription = null,
+                                        modifier = modifierIcon.size(24.dp),
+                                        tint = iconContainerColor ?: LocalContentColor.current
+                                    )
                                 }
-                                Spacer(modifier = Modifier.height(16.dp))
                             }
-
-                            if (title != null) {
-                                Text(
-                                    text = title,
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.padding(horizontal = 24.dp)
-                                )
-                            }
+                            Spacer(modifier = Modifier.height(16.dp))
                         }
-                    } else {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 32.dp, bottom = 16.dp, start = if (icon != null) 0.dp else 12.dp),
-                            horizontalAlignment = if (icon != null) Alignment.CenterHorizontally else Alignment.Start
-                        ) {
-                            if (icon != null) {
-                                Surface(
-                                    modifier = Modifier.size(64.dp),
-                                    shape = RoundedCornerShape(20.dp),
-                                    color = iconBgContainerColor
-                                        ?: MaterialTheme.colorScheme.primaryContainer,
-                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Icon(
-                                            imageVector = icon,
-                                            contentDescription = null,
-                                            modifier = modifierIcon.size(32.dp),
-                                            tint = iconContainerColor ?: LocalContentColor.current
-                                        )
-                                    }
-                                }
-                                Spacer(modifier = Modifier.height(16.dp))
-                            }
 
-                            if (title != null) {
-                                Text(
-                                    text = title,
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.padding(horizontal = 24.dp)
-                                )
-                            }
+                        if (title != null) {
+                            Text(
+                                text = title,
+                                style = MaterialTheme.typography.headlineSmall,
+                                lineHeight = MaterialTheme.typography.titleMedium.lineHeight,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                textAlign = TextAlign.Start,
+                                modifier = Modifier.weight(1f).padding(horizontal = 22.dp)
+                            )
                         }
                     }
 

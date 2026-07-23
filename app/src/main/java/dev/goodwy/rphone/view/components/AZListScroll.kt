@@ -305,7 +305,7 @@ fun ContactListItem(
     selectionMode: Boolean = false,
     isSelected: Boolean = false,
     displayOrder: Int,
-    onSelectToggle: () -> Unit = {}
+    onSelectToggle: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
@@ -322,7 +322,7 @@ fun ContactListItem(
         label = "contactItemScale"
     )
 
-    val headline = contact.displayName //getDisplayName(contact, displayOrder)
+    val headline =  getDisplayName(contact, displayOrder)
 
     // Delete confirmation dialog
     if (showDeleteConfirm) {
@@ -357,7 +357,7 @@ fun ContactListItem(
     }
 
     val onClick: () -> Unit = {
-        if (selectionMode) {
+        if (selectionMode && onSelectToggle != null) {
             onSelectToggle()
         } else {
             if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
@@ -373,6 +373,7 @@ fun ContactListItem(
     }
     Surface(
         color = if (isSelected) cardColorSelected else cardColor,
+        shape = RoundedCornerShape(cardCornerSmall),
         modifier = Modifier
             .fillMaxWidth()
             .scale(scale),
@@ -390,10 +391,10 @@ fun ContactListItem(
                         if (horizontalDragDetected) return@combinedClickable
                         onClick()
                     },
-                    onLongClick = {
+                    onLongClick = if (onSelectToggle != null) {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onSelectToggle()
-                    }
+                        onSelectToggle
+                    } else null
                 )
                 .pointerInput(Unit) {
                     awaitEachGesture {
@@ -438,7 +439,7 @@ fun ContactListItem(
                 )
             } else {
                 RillAvatar(
-                    name = headline,
+                    name = contact.displayName,
                     photoUri = contact.photoUri,
                     modifier = Modifier
                         .size(42.dp)
@@ -492,18 +493,20 @@ fun ContactListItem(
                 onDismissRequest = { showMenu = false },
                 offset = DpOffset(42.dp, 48.dp),
             ) {
-                DropdownMenuItem(
-                    contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
-                    text = { Text(stringResource(R.string.select)) },
-                    leadingIcon = { Icon(Icons.Default.CheckBox, null) },
-                    onClick = {
-                        showMenu = false
-                        onSelectToggle()
-                    }
-                )
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                )
+                if (onSelectToggle != null) {
+                    DropdownMenuItem(
+                        contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
+                        text = { Text(stringResource(R.string.select)) },
+                        leadingIcon = { Icon(Icons.Default.CheckBox, null) },
+                        onClick = {
+                            showMenu = false
+                            onSelectToggle()
+                        }
+                    )
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    )
+                }
                 DropdownMenuItem(
                     contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
                     text = { Text(stringResource(R.string.view_contact)) },

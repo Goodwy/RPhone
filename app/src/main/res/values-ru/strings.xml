@@ -1,6 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="widget_description">Последние звонки с быстрым набором</string>
     <string name="copy" tools:ignore="PrivateResource">Копировать</string>
+    <string name="copy_path">Скопировать путь</string>
     <string name="paste">Вставить</string>
     <string name="delete">Удалить</string>
     <string name="delete_contact">Удалить контакт</string>
@@ -38,11 +39,13 @@
     <string name="filter_rejected">Отклоненные</string>
 
     <!-- Search -->
+    <string name="search">Поиск</string>
     <string name="search_contacts">Поиск в контактах</string>
     <string name="no_results">Результатов нет</string>
     <string name="no_contacts_found">Контакты не найдены</string>
     <string name="call_query">Позвонить %s</string>
     <string name="voice_input">Голосовой ввод</string>
+    <string name="filter_results">Фильтр результата</string>
 
     <!-- Billing -->
     <string name="no_connection">Нет связи</string>
@@ -435,7 +438,7 @@
     <string name="notes">Заметки</string>
     <string name="call_notes">Заметки о звонках</string>
     <string name="about_call_notes">Информация о заметках</string>
-    <string name="about_call_notes_subtitle">Краткая информация, которую вы записываете во время звонка. Она хранится локально в приложении и привязана к номеру телефона (не синхронизируется с «Контактами Google» и другими). У каждого номера есть своя личная заметка, доступ к которой возможен только из журнала звонков в деталях контакта внутри приложения или из вкладки «Заметки о звонках».</string>
+    <string name="about_call_notes_subtitle">Краткая информация, которую вы записываете во время звонка. Она хранится локально в файлах приложения и привязана к номеру телефона (не синхронизируется с «Контактами Google» и другими). У каждого номера есть своя личная заметка, доступ к которой возможен только из журнала звонков в деталях контакта внутри приложения или из вкладки «Заметки о звонках».</string>
     <string name="type_your_note">Введите текст заметки…</string>
     <string name="no_notes_yet">Пока нет заметок</string>
     <string name="no_notes_yet_subtitle">Здесь отображаются заметки, сделанные во время звонков</string>

@@ -728,7 +728,7 @@ class CallService : InCallService() {
 
         // Start/stop floating bubble based on preference
         if (call.state != Call.STATE_DISCONNECTED && call.state != Call.STATE_DISCONNECTING) {
-            maybeStartFloatingCall(contactName, number)
+            maybeStartFloatingCall(contactName, number, contact?.photoUri)
         }
     }
 
@@ -743,10 +743,10 @@ class CallService : InCallService() {
         serviceScope.cancel()
     }
 
-    private fun maybeStartFloatingCall(contactName: String, number: String) {
+    private fun maybeStartFloatingCall(contactName: String, number: String, photoUri: String?) {
         if (!preferenceManager.getBoolean(PreferenceManager.KEY_FLOATING_CALL, false)) return
         if (!android.provider.Settings.canDrawOverlays(this)) return
-        FloatingCallService.start(this, contactName, number)
+        FloatingCallService.start(this, contactName, number, photoUri)
     }
 
     /** Returns true for any MMI / USSD code like *124# *#06# ##002# *21*N# */

@@ -138,6 +138,8 @@ class MainActivity : FragmentActivity() {
                 val favouritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, false)
                 val contactsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS, true)
                 val notesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES, false)
+                val searchEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SEARCH, false)
+                val settingsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SETTINGS, true)
 //                val dialpadEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD, true)
                 val defaultTab = prefs.getString(PreferenceManager.KEY_DEFAULT_TAB, "calls") ?: "calls"
 
@@ -178,14 +180,14 @@ class MainActivity : FragmentActivity() {
                                 when {
                                     lastOpenedTab.contains(FavoritesScreenDestination.route) && favouritesEnabled -> FavoritesScreenDestination
                                     lastOpenedTab.contains(ContactScreenDestination.route) && contactsEnabled -> ContactScreenDestination
-                                    lastOpenedTab.contains(NotesScreenDestination.route) && notesEnabled -> NotesScreenDestination
+                                    lastOpenedTab.contains(NotesScreenDestination.route) && notesEnabled -> NotesScreenDestination()
 //                                    lastOpenedTab.contains(DialPadScreenDestination.route) && dialpadEnabled -> DialPadScreenDestination
                                     else -> RecentScreenDestination
                                 }
                             }
                             defaultTab == "favorites" && favouritesEnabled -> FavoritesScreenDestination
                             defaultTab == "contacts" && contactsEnabled -> ContactScreenDestination
-                            defaultTab == "notes" && notesEnabled -> NotesScreenDestination
+                            defaultTab == "notes" && notesEnabled -> NotesScreenDestination()
                             else -> RecentScreenDestination
                         }
                     }
@@ -276,11 +278,11 @@ class MainActivity : FragmentActivity() {
                             val showNotesRail = prefs2.getBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES, false)
                             val tabOrder = parseTabOrder(prefs2.getString(PreferenceManager.KEY_TAB_ORDER, null))
 
-                            val isFavoritesSelected = currentDest?.hierarchy?.any { it.route == FavoritesScreenDestination.route } == true
-                            val isRecentsSelected   = currentDest?.hierarchy?.any { it.route == RecentScreenDestination.route } == true
-                            val isContactsSelected  = currentDest?.hierarchy?.any { it.route == ContactScreenDestination.route } == true
-                            val isDialpadSelected   = currentDest?.hierarchy?.any { it.route == DialPadScreenDestination.route } == true
-                            val isNotesSelected     = currentDest?.hierarchy?.any { it.route == NotesScreenDestination.route } == true
+                            val isFavoritesSelected = currentDest?.hierarchy?.any { it.route == FavoritesScreenDestination.route }  == true
+                            val isRecentsSelected   = currentDest?.hierarchy?.any { it.route == RecentScreenDestination.route }     == true
+                            val isContactsSelected  = currentDest?.hierarchy?.any { it.route == ContactScreenDestination.route }    == true
+                            val isDialpadSelected   = currentDest?.hierarchy?.any { it.route == DialPadScreenDestination.route }    == true
+                            val isNotesSelected     = currentDest?.hierarchy?.any { it.route == NotesScreenDestination.route }      == true
 
                             fun saveCurrentTab(route: String) {
                                 when {
@@ -408,12 +410,12 @@ class MainActivity : FragmentActivity() {
                                             ) else null
                                             "notes" -> if (showNotesRail) TabSpec(
                                                 key            = key,
-                                                route          = NotesScreenDestination.route,
+                                                route          = NotesScreenDestination().route,
                                                 selected       = isNotesSelected,
                                                 selectedIcon   = Icons.AutoMirrored.Filled.StickyNote2,
                                                 unselectedIcon = Icons.AutoMirrored.Outlined.StickyNote2,
                                                 label          = labelNotes,
-                                                onClick        = { doHaptic(); navTo(NotesScreenDestination.route) }
+                                                onClick        = { doHaptic(); navTo(NotesScreenDestination().route) }
                                             ) else null
                                             else -> null
                                         }
@@ -543,7 +545,7 @@ class MainActivity : FragmentActivity() {
                             } else {
                                 val liquidGlassBackdrop = rememberLayerBackdrop()
                                 val showBottomBar =
-                                    showFavoritesRail || showContactsRail || showDialpadRail || notesEnabled
+                                    showFavoritesRail || showContactsRail || showDialpadRail || notesEnabled || searchEnabled || settingsEnabled
                                 CompositionLocalProvider(LocalLiquidGlassBackdrop provides liquidGlassBackdrop) {
                                     Scaffold(
                                         bottomBar = { if (showBottomBar) BottomBar(navController) },

@@ -108,12 +108,34 @@ fun CallLogFullScreen(
     )
     LaunchedEffect(Unit) { screenVisible = true }
 
-    val filteredLogsByContact = remember(allLogs, contactId, phoneNumber) {
-        if (contactId == null && phoneNumber == null && numbersList == null) allLogs
-        else allLogs.filter { log ->
-            (contactId != null && contactId != "null" && log.contactId == contactId) ||
-            (phoneNumber != null && log.number.replace(" ", "").contains(phoneNumber.replace(" ", ""))) ||
-            (numbersList != null && numbersList.contains(log.number))
+//    val filteredLogsByContact = remember(allLogs, contactId, phoneNumber) {
+//        if (contactId == null && phoneNumber == null && numbersList == null) allLogs
+//        else allLogs.filter { log ->
+//            (contactId != null && contactId != "null" && log.contactId == contactId) ||
+//            (phoneNumber != null && log.number.replace(" ", "").contains(phoneNumber.replace(" ", ""))) ||
+//            (numbersList != null && numbersList.contains(log.number))
+//        }
+//    }
+    val filteredLogsByContact = remember(allLogs, contactId, phoneNumber, numbersList) {
+        if (contactId == null && phoneNumber == null && numbersList == null) {
+            allLogs
+        } else {
+            allLogs.filter { log ->
+                val logNumber = log.number.replace(" ", "")
+
+                // By contact ID
+                val matchesContactId = contactId != null && contactId != "null" && log.contactId == contactId
+
+                // By exact number match
+                val matchesPhoneNumber = phoneNumber != null && logNumber == phoneNumber.replace(" ", "")
+
+                // By list numbers (exact match)
+                val matchesNumbersList = numbersList != null && numbersList.any {
+                    logNumber == it.replace(" ", "")
+                }
+
+                matchesContactId || matchesPhoneNumber || matchesNumbersList
+            }
         }
     }
 
@@ -264,7 +286,7 @@ fun CallLogFullScreen(
                                     title = header,
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(horizontal = 20.dp, vertical = 4.dp))
+                                        .padding(horizontal = 20.dp, vertical = 8.dp))
                                 RillExpressiveCard {
                                     logsInGroup.forEachIndexed { index, lg ->
                                         CallLogTileSimple(

@@ -72,6 +72,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import dev.goodwy.rphone.R
@@ -79,6 +80,7 @@ import dev.goodwy.rphone.controller.ContactsViewModel
 import dev.goodwy.rphone.modal.data.CallLogEntry
 import dev.goodwy.rphone.modal.data.Contact
 import com.ramcosta.composedestinations.generated.destinations.CallLogFullScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.SettingsScreenDestination
 import dev.goodwy.rphone.controller.util.hasDualSim
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -104,6 +106,8 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
     val contactsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS, true)
     val dialpadEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD, true)
     val notesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES, false)
+    val searchEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SEARCH, false)
+    val settingsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SETTINGS, true)
 
     var showDialpad by remember { mutableStateOf(false) }
     var fabVisible by remember { mutableStateOf(false) }
@@ -181,7 +185,7 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
         }
     }
 
-    val showBottomBar = favoritesEnabled || contactsEnabled || dialpadEnabled ||notesEnabled
+    val showBottomBar = favoritesEnabled || contactsEnabled || dialpadEnabled ||notesEnabled || searchEnabled || settingsEnabled
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -278,17 +282,46 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
 
                     if (!isSelecting) {
                         Column {
-                            TopBar(navController, navigator)
-                            LazyRow(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                contentPadding = PaddingValues(horizontal = 16.dp),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            if (!searchEnabled) TopBar(navController, navigator)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth()
+                                    .then(
+                                        if (searchEnabled) Modifier.windowInsetsPadding(WindowInsets.statusBars)
+                                        else Modifier
+                                    )
                             ) {
-                                items(CallLogFilter.entries) { filter ->
-                                    RillFilterChip(stringResource(filter.stringRes), selectedFilter == filter, { _ ->
-                                        viewModel.setFilter(filter)
-                                    })
+                                LazyRow(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .fillMaxWidth(),
+                                    contentPadding = PaddingValues(horizontal = 16.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    items(CallLogFilter.entries) { filter ->
+                                        RillFilterChip(stringResource(filter.stringRes), selectedFilter == filter, { _ ->
+                                            viewModel.setFilter(filter)
+                                        })
+                                    }
+                                }
+                                if (searchEnabled && !settingsEnabled) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_settings),
+                                        contentDescription = stringResource(R.string.settings),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier
+                                            .padding(horizontal = 16.dp)
+                                            .combinedClickable(
+                                                onClick = {
+                                                    if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
+                                                        performAppHaptic(context, prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light", prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f))
+                                                    }
+                                                    navigator.navigate(SettingsScreenDestination)
+                                                },
+                                                interactionSource = null,
+                                                indication = ripple(bounded = false, radius = 22.dp)
+                                            ),
+                                    )
                                 }
                             }
                         }
@@ -710,44 +743,8 @@ fun CallLogFullContent(
                         contentPadding = PaddingValues(top = 8.dp, bottom = 168.dp),
                         verticalArrangement = Arrangement.spacedBy(0.dp)
                     ) {
-                        // In landscape, stat cards and filter pills scroll with the list
-//                        if (isLandscape) {
-//                            if (showToday || showMissed || showOutgoing || showCallTime) {
-//                                item(key = "stat_cards", contentType = "statCards") {
-//                                    LazyRow(
-//                                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-//                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-//                                    ) {
-//                                        if (showToday) item { AnimatedStatCard(0L, "Today", totalToday.toString(), Icons.AutoMirrored.Filled.CallReceived, ColorBlue, Modifier.width(110.dp)) { viewModel.setFilter(CallLogFilter.All) } }
-//                                        if (showMissed) item { AnimatedStatCard(60L, "Missed", missedToday.toString(), Icons.AutoMirrored.Filled.CallMissed, ColorRed, Modifier.width(110.dp),
-//                                            if (missedToday > 0) MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.6f) else MaterialTheme.colorScheme.surfaceContainerLow
-//                                        ) { viewModel.setFilter(CallLogFilter.Missed) } }
-//                                        if (showOutgoing) item { AnimatedStatCard(120L, "Outgoing", outgoingToday.toString(), Icons.AutoMirrored.Filled.CallMade, ColorGreen, Modifier.width(110.dp)) { viewModel.setFilter(CallLogFilter.Outgoing) } }
-//                                        if (showCallTime) {
-//                                            item { AnimatedStatCard(180L, "Call Time", if (totalDurationToday > 0) formatDuration(totalDurationToday) else "0s", Icons.Default.Timer, ColorOrange, Modifier.width(110.dp)) { viewModel.setFilter(CallLogFilter.Incoming) } }
-//                                        }
-//                                    }
-//                                }
-//                            }
-//                        }
                         if (!favouritesEnabled && favorites.isNotEmpty() && selectedFilter == CallLogFilter.All) {
                             item {
-//                                RivoSectionHeader(
-//                                    title = stringResource(R.string.favorites),
-//                                    trailingContent = {
-//                                        TextButton(
-//                                            onClick = { isEditingFavorites = !isEditingFavorites },
-//                                            modifier = Modifier.padding(end = 8.dp)
-//                                        ) {
-//                                            Text(
-//                                                text = if (isEditingFavorites) "Done" else "Edit",
-//                                                style = MaterialTheme.typography.labelLarge,
-//                                                fontWeight = FontWeight.Bold,
-//                                                color = MaterialTheme.colorScheme.primary
-//                                            )
-//                                        }
-//                                    }
-//                                )
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth().padding(end = 16.dp),
@@ -848,167 +845,6 @@ fun CallLogFullContent(
                                 )
                             }
                         }
-
-//                        if (showFavorite && currentFilter == CallLogFilter.All && favorites.isNotEmpty()) {
-//                            item(key = "favorites_pills", contentType = "favoritesPills") {
-//                                Column(
-//                                    modifier = Modifier
-//                                        .fillMaxSize()
-//                                        .padding(bottom = 2.dp)
-//                                ) {
-//                                    Row(
-//                                        modifier = Modifier
-//                                            .fillMaxWidth().padding(end = 16.dp),
-//                                        verticalAlignment = Alignment.CenterVertically,
-//                                        horizontalArrangement = Arrangement.SpaceBetween
-//                                    ) {
-//                                        Text(
-//                                            text = stringResource(R.string.favorites),
-//                                            style = MaterialTheme.typography.labelLarge,
-//                                            color = MaterialTheme.colorScheme.primary,
-//                                            fontWeight = FontWeight.Bold,
-//                                            modifier = Modifier.padding(horizontal = 36.dp, vertical = 4.dp)
-//                                        )
-//                                        Surface(
-//                                            modifier = Modifier.combinedClickable(
-//                                                onClick = {
-//                                                    navController.navigate(ContactScreenDestination.route) {
-//                                                        popUpTo(navController.graph.findStartDestination().id) {
-//                                                            saveState = true
-//                                                        }
-//                                                        launchSingleTop = true
-//                                                        restoreState = true
-//                                                    }
-//                                                },
-//                                                interactionSource = null,
-//                                                indication = null,
-//                                            ),
-//                                            shape = RoundedCornerShape(20.dp),
-//                                            color = MaterialTheme.colorScheme.surfaceContainerHigh
-//                                        ) {
-//                                            Text(
-//                                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp),
-//                                                text = stringResource(R.string.view_contacts),
-//                                                style = MaterialTheme.typography.labelMedium,
-//                                                fontWeight = FontWeight.SemiBold,
-//                                                color = MaterialTheme.colorScheme.onPrimaryContainer
-//                                            )
-//                                        }
-//                                    }
-//                                    LazyRow(
-//                                        state = lazyRowState,
-//                                        userScrollEnabled = draggedFavoriteId == null,
-//                                        modifier = Modifier
-//                                            .fillMaxWidth()
-//                                            .height(108.dp)
-//                                            .onGloballyPositioned { coords ->
-//                                                lazyRowLayoutCoords = coords
-//                                            },
-//                                        contentPadding = PaddingValues(
-//                                            horizontal = 24.dp,
-//                                            vertical = 12.dp
-//                                        ),
-//                                        horizontalArrangement = Arrangement.spacedBy(20.dp)
-//                                    ) {
-//                                        items(orderedFavorites, key = { it.id }) { contact ->
-//                                            RillScrollAnimatedItem(
-//                                                modifier = Modifier.zIndex(
-//                                                    if (currentDraggedFavoriteId == contact.id) 10f else 0f
-//                                                )
-//                                            ) {
-//                                                FavoriteContactCard(
-//                                                    modifier = Modifier
-//                                                        .width(60.dp)
-//                                                        .wrapContentHeight(),
-//                                                    contact = contact,
-//                                                    navigator = navigator,
-//                                                    context = context,
-//                                                    isDragging = currentDraggedFavoriteId == contact.id,
-//                                                    dragOffset = if (currentDraggedFavoriteId == contact.id) dragOffset else null,
-//                                                    onBoundsChanged = { bounds -> itemBoundsMap[contact.id] = bounds },
-//                                                    onDragStart = { _ ->
-//                                                        onDraggedFavoriteIdChange(contact.id)
-//                                                        dragOffset = Offset.Zero
-//                                                        val center = itemBoundsMap[contact.id]?.center ?: Offset.Zero
-//                                                        fingerAbsPos = center
-//                                                        expectedDraggedCenter = center
-//                                                        lastSwapTargetId = null
-//                                                    },
-//                                                    onDrag = { amt ->
-//                                                        if (currentDraggedFavoriteId == contact.id) {
-//                                                            fingerAbsPos += amt
-//                                                            // dragOffset = finger position minus expected card center
-//                                                            // expectedDraggedCenter is updated synchronously on swap,
-//                                                            // eliminating the 1-frame position jump that causes flicker
-//                                                            dragOffset = fingerAbsPos - expectedDraggedCenter
-//
-//                                                            val targetId = itemBoundsMap.entries
-//                                                                .filter { it.key != currentDraggedFavoriteId }
-//                                                                .firstOrNull { (_, b) -> b.contains(fingerAbsPos) }
-//                                                                ?.key
-//
-//                                                            if (targetId != null && targetId != lastSwapTargetId) {
-//                                                                // Update expectedDraggedCenter to target's current bounds BEFORE swap
-//                                                                // so dragOffset compensates immediately in this same frame
-//                                                                val targetCenter = itemBoundsMap[targetId]?.center
-//                                                                if (targetCenter != null) {
-//                                                                    expectedDraggedCenter = targetCenter
-//                                                                    dragOffset = fingerAbsPos - expectedDraggedCenter
-//                                                                }
-//                                                                lastSwapTargetId = targetId
-//                                                                val fromIdx = orderedFavorites.indexOfFirst { it.id == currentDraggedFavoriteId }
-//                                                                val toIdx   = orderedFavorites.indexOfFirst { it.id == targetId }
-//                                                                if (fromIdx != -1 && toIdx != -1) {
-//                                                                    orderedFavorites.add(toIdx, orderedFavorites.removeAt(fromIdx))
-//                                                                }
-//                                                            }
-//                                                        }
-//                                                    },
-//                                                    onDragEnd = {
-//                                                        onDraggedFavoriteIdChange(null)
-//                                                        dragOffset = Offset.Zero
-//                                                        fingerAbsPos = Offset.Zero
-//                                                        expectedDraggedCenter = Offset.Zero
-//                                                        lastSwapTargetId = null
-//                                                        saveFavoritesOrder()
-//                                                    },
-//                                                    onDragCancel = {
-//                                                        onDraggedFavoriteIdChange(null)
-//                                                        dragOffset = Offset.Zero
-//                                                        fingerAbsPos = Offset.Zero
-//                                                        expectedDraggedCenter = Offset.Zero
-//                                                        lastSwapTargetId = null
-//                                                    },
-//                                                    onClick = {
-//                                                        val phoneNumber =
-//                                                            contact.phoneNumbers.firstOrNull()
-//                                                        if (phoneNumber != null) {
-//                                                            placeCallWithSimPreference(
-//                                                                context,
-//                                                                phoneNumber,
-//                                                                simPref
-//                                                            ) {
-//                                                                pendingNumber =
-//                                                                    phoneNumber; showSimPicker = true
-//                                                            }
-//                                                        } else {
-//                                                            navigator.navigate(
-//                                                                ContactDetailsScreenDestination(
-//                                                                    contactId = contact.id
-//                                                                )
-//                                                            )
-//                                                        }
-//                                                    },
-//                                                    onToggleFavorite = {
-//                                                        contactsVM.toggleFavorite(contact)
-//                                                    }
-//                                                )
-//                                            }
-//                                        }
-//                                    }
-//                                }
-//                            }
-//                        }
 
                         val directCall = prefs.getBoolean(PreferenceManager.KEY_DIRECT_CALL_ON_TAP, false)
                         val showSimLabel = hasDualSim(context)

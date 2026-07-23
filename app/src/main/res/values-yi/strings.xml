@@ -1,0 +1,493 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" dir="rtl">
+    <string name="widget_description">לעצטע רופן מיט גיך-ווייל</string>
+    <string name="copy" tools:ignore="PrivateResource">קאָפּירן</string>
+    <string name="copy_path">קאָפּירן וועג</string>
+    <string name="paste">קלעפּן</string>
+    <string name="delete">אַוועקנעמען</string>
+    <string name="delete_contact">אַוועקנעמען קאָנטאַקט</string>
+    <string name="delete_contact_subtitle">ביסטו זיכער אז דו ווילסט אַוועקנעמען דעם קאָנטאַקט? דער אַקציע קען מען נישט צוריקקערן.</string>
+    <string name="delete_contacts">אַוועקנעמען קאָנטאַקטן</string>
+    <string name="delete_contacts_subtitle">ביסטו זיכער אז דו ווילסט אַוועקנעמען %s אויסגעוויילטע קאָנטאַקטן? דער אַקציע קען מען נישט צוריקקערן.</string>
+    <string name="selected_items">%s אויסגעוויילט</string>
+    <string name="select">אויסוויילן</string>
+    <string name="select_all">אויסוויילן אַלע</string>
+    <string name="deselect_all">אַנולירן אויסוויילן אַלע</string>
+    <string name="backspace">אַוועקנעמען</string>
+    <string name="back">צוריק</string>
+    <string name="edit">רעדאַקטירן</string>
+    <string name="done">געטאן</string>
+    <string name="ok">אויק</string>
+    <string name="on">אויף</string>
+    <string name="off">אויס</string>
+    <string name="cancel">אַנולירן</string>
+    <string name="open">עפֿענען</string>
+    <string name="save">אויפֿהיטן</string>
+    <string name="confirm">באַשטעטיקן</string>
+    <string name="close">שליסן</string>
+    <string name="clear">רייניקן</string>
+    <string name="share">טיילן</string>
+    <string name="share_subtitle">שיקן קאָנטאַקט אינפֿאָרמאַציע צו אַנדערע</string>
+    <string name="use">נוצן</string>
+    <string name="connect_via_social">פֿאַרבינדן דורך סאציאל</string>
+    <string name="import_text">אימפּאָרטירן</string>
+    <string name="export_text">עקספּאָרטירן</string>
+    <string name="call_is_ongoing">רוף גייט אָן — דריק צוריקצוקומען</string>
+    <string name="filter_all">אַלע</string>
+    <string name="filter_missed">פֿאַרפֿעלט</string>
+    <string name="filter_incoming">איינקומענדיק</string>
+    <string name="filter_outgoing">אויסגייענדיק</string>
+    <string name="filter_rejected">אָפּגעוואָרפֿן</string>
+
+    <!-- Search -->
+    <string name="search">זוכן</string>
+    <string name="search_contacts">זוכן קאָנטאַקטן</string>
+    <string name="no_results">קיין רעזולטאַטן</string>
+    <string name="no_contacts_found">קיין קאָנטאַקטן געפֿונען</string>
+    <string name="call_query">רופן %s</string>
+    <string name="voice_input">שטים איינגאַב</string>
+    <string name="filter_results">פֿילטער רעזולטאַטן</string>
+
+    <!-- Billing -->
+    <string name="no_connection">קיין פֿאַרבינדונג</string>
+    <string name="loading_price">לאָדן…</string>
+
+    <!-- Project support -->
+    <string name="project_support">פּראָיעקט שטיצע</string>
+    <string name="project_support_summary">באַקום די באַצאָלטע אַפּ צו שטיצן צוקונפֿטיקע אַנטוויקלונגען און עקסטרע פֿעאַטורעס</string>
+    <string name="project_support_description">
+        <![CDATA[
+        מיר גלויבן אז פּריוואַטקייט זאָל זײַן פֿרײַ. דערפאַר זענען אַלע וויכטיקע פֿעאַטורעס גאָר דײַנע אָן אַ פּנים.<br>
+        אויב די געפֿעלט וואָס מיר בויען, טראַכט אונדז אַ קאַווע צו קויפֿן. ווי אַ דאַנק וועסטו באַקומען:<br> <b>אַלע טעמעס, פּערזענלעכע פֿאַרבן און פּערזענלעכע שריפֿטן.</b><br>
+        דאָס איז נישט קיין פּרעמיום סטאַפֿע. דאָס איז אַ דאַנק געבערדע. דײַן שטיצע האַלט Rill אומאָפּהענגיק, פּריוואַט און אָן ווערבונגען.
+        ]]>
+    </string>
+    <string name="support_project_to_unlock">שטיץ דעם פּראָיעקט צו עפֿענען</string>
+    <string name="restore_purchase">ריקער אָפּקויף</string>
+    <string name="continue_support">פֿאָרזעצן</string>
+    <string name="monthly">כּדור</string>
+    <string name="monthly_description">פֿלעקסיביליטעט פֿאַר יענע וואָס ווילן כּדורדיקע בײַשטײַערונגען</string>
+    <string name="yearly">יערלעך</string>
+    <string name="yearly_description">יערלעכע שטיצע פֿאַר דער וועלט\'ס בעסטער רוף אַפּ</string>
+    <string name="lifetime">לעבן לאַנג</string>
+    <string name="lifetime_description">באַצאָל איין מאָל און געניס פֿון אולטימאַטיווער באַקוועמקייט אין אַלע דײַנע רופן לעבן לאַנג</string>
+    <string name="most_flexible">דאָס פֿלעקסיבלסטע</string>
+    <string name="bast_value">דער בעסטער ווערט</string>
+    <string name="pay_once">באַצאָל איין מאָל</string>
+    <string name="support_development">שטיץ אַנטוויקלונג</string>
+    <string name="support_all_options">שטיץ אַלע אָפּציעס</string>
+    <string name="support_development_description1">Rill Phone איז שטאָלץ אפענער קאָד און גאָר פֿרײַ. דײַן שטיצע הילפֿט אונדז עס אַזוי צו האַלטן.</string>
+    <string name="support_development_description2">מיט אַ תּרומה, עפֿענסטו נישט קיין פֿעאַטורעס — דו אינוועסטירסט אין פּריוואַטקייט, טראַנספּאַרענץ און דער צוקונפֿט פֿון טאַקע אומאָפּהענגיקער אַנטוויקלונג.</string>
+    <string name="support_development_description3">יעדע בײַשטײַערונג, אָן קיין חילוק ווי גרויס, מאכט אַ חילוק.</string>
+    <string name="unlock_all_features">עפֿענען אַלע פֿעאַטורעס</string>
+    <string name="all_features_unlocked">✨ אַלע פֿעאַטורעס געעפֿנט! אַ דאַנק פֿאַר דײַן שטיצע!</string>
+    <string name="thank_you_for_your_support">אַ דאַנק פֿאַר דײַן שטיצע! ❤️</string>
+    <string name="features_locked">פֿעאַטורעס פֿאַרשליסן</string>
+    <string name="your_donation_ensures">דײַן תּרומה פֿאַרזיכערט:</string>
+    <string name="your_donation_ensures_1">✅ רעגולערע דערהויכענונגען און זיכערהייט לאַטעס</string>
+    <string name="your_donation_ensures_2">✅ נייע פֿעאַטורעס און פֿאַרבעסערונגען</string>
+    <string name="your_donation_ensures_3">✅ פֿרײַע צוטריט פֿאַר אַלעמען</string>
+    <string name="your_donation_ensures_4">✅ אַנטוויקלונג מיט אפענעם קאָד</string>
+
+    <!-- About -->
+    <string name="about">וועגן</string>
+    <string name="rate_app">ראטעווען די אַפּ</string>
+    <string name="other_apps">אונדזערע אַנדערע אַפּס</string>
+    <string name="source_code">קאָד קוואַל</string>
+    <string name="privacy_policy">פּריוואַטקייט פּאָליטיק</string>
+
+    <!-- Contributors -->
+    <string name="contributors">בײַשטײַערער</string>
+    <string name="development_team">אַנטוויקלונג מאַנשאַפֿט</string>
+    <string name="apps_that_inspired_us">אַפּס וואָס האָבן אונדז אָנגעריגט</string>
+
+    <!-- Settings -->
+    <string name="settings">איינשטעלונגען</string>
+    <string name="appearance">אויסזען</string>
+    <string name="interface_settings">אינטערפֿאַץ</string>
+    <string name="interface_settings_subtitle">טעמעס, פֿאַרבן און אויפֿשטעל</string>
+    <string name="app_theme">אַפּ טעמע</string>
+    <string name="theme_auto">אויטאָ</string>
+    <string name="theme_light">ליכטיק</string>
+    <string name="theme_dark">פֿינצטער</string>
+    <string name="theme_auto_black_white">אויטאָ שוואַרץ/ווײַס</string>
+    <string name="theme_white">ווײַס</string>
+    <string name="theme_black">שוואַרץ</string>
+    <string name="custom_color">פּערזענלעכע פֿאַרבן</string>
+    <string name="custom_color_subtitle">פֿאַרבן סכעמע באַזירט אויף אַ פּערזענלעכער פֿאַרב</string>
+    <string name="hex_color">העקס פֿאַרב</string>
+    <string name="hex_color_subtitle">אַרײַן אַ גילטיקן 6-ציפֿעריקן העקס קאָד</string>
+    <string name="custom_font">פּערזענלעכער שריפֿט</string>
+    <string name="custom_font_subtitle">קלויב אַ .ttf טעקע פֿאַר נוץ אין דער אַפּ</string>
+    <string name="visual_effects">וויזועלע עפעקטן</string>
+    <string name="not_supported_on_this_device">נישט געשטיצט אויף דעם גערעט</string>
+    <string name="not_supported_on_this_device_subtitle">בלער און פֿליסיק גלאָז פֿאַרלאַנגען Android 12 אָדער העכער</string>
+    <string name="material_liquid_you_glass">פֿליסיק גלאָז Material You</string>
+    <string name="material_liquid_you_glass_subtitle">צולייגן אַ פֿליסיק גלאָז עפעקט צו נאַוויגאַציע</string>
+    <string name="material_blur_effects">Material בלער עפעקטן</string>
+    <string name="material_blur_effects_subtitle">צולייגן אַ הינטערגרונט בלער עפעקט צו נאַוויגאַציע</string>
+    <string name="scroll_animation">גליט אַנימאַציע</string>
+    <string name="scroll_animation_device">אַרײַנקומען אַנימאַציע פֿאַר ליסטע פּונקטן בשעת גליטן</string>
+    <string name="call_ui">רוף אינ"פ</string>
+    <string name="incoming_call_ui">איינקומענדיק רוף אינ"פ</string>
+    <string name="incoming_call_ui_subtitle">קלויב ווי צו ענטפֿערן איינקומענדיקע רופן</string>
+    <string name="avatars_settings">אַוואַטאַר איינשטעלונגען</string>
+    <string name="avatars_settings_subtitle">פּערזענליכטיק פֿאַרבן, ראַמען און מער</string>
+    <string name="avatar_colors">אַוואַטאַר פֿאַרבן</string>
+    <string name="colorful">פֿאַרביק</string>
+    <string name="primary_color">הויפּט פֿאַרב</string>
+    <string name="secondary_color">צווייטיק פֿאַרב</string>
+    <string name="google_contacts_color">Google קאָנטאַקטן פֿאַרב</string>
+    <string name="show_first_letter_in_avatar">ווײַזן ערשטן אות אין אַוואַטאַר</string>
+    <string name="show_first_letter_in_avatar_subtitle">ווײַזט אות ווען בילד פֿעלט</string>
+    <string name="avatar_frame">אַוואַטאַר ראַם</string>
+    <string name="avatar_frame_subtitle">ווײַזן אַ גרענעץ אַרום דעם אַוואַטאַר</string>
+    <string name="show_picture_in_avatar">ווײַזן בילד אין אַוואַטאַר</string>
+    <string name="show_picture_in_avatar_subtitle">ווײַזט קאָנטאַקט בילד אויב פֿאַראַן</string>
+
+    <string name="сaller_ui">רופֿער אינ"פ</string>
+    <string name="сaller_ui_subtitle">פּערזענליכטיק דעם רוף פאַרשטעל און קאָנטראָלן</string>
+    <string name="end_call_button">ענדיק רוף קנעפּל</string>
+    <string name="customize_width">פּערזענליכטיק ברייט</string>
+    <string name="customize_width_subtitle">אַדזשיסטירן די ברייט פֿון ענדיק רוף קנעפּל</string>
+
+    <string name="navigations">נאַוויגאַציע</string>
+    <string name="navigations_subtitle">טאַב זעבאַרקייט און סטיל</string>
+    <string name="tab_sections">טאַב סעקציעס</string>
+    <string name="tab_sections_subtitle">קלויב וועלכע טאַבס זענען זעבאַר, און שלעפּ די הענדל צו אָרדענען זיי אין נאַוויגאַציע באַר</string>
+    <string name="navigation_style">נאַוויגאַציע סטיל</string>
+    <string name="pill_style_navigation">פּיל סטיל נאַוויגאַציע</string>
+    <string name="pill_style_navigation_subtitle">ווײַזן אַ פֿלאָטענדיקן פּיל-סטיל נאַוויגאַציע באַר אַנשטאָט דעם סטאַנדאַרדן אונטערשטן באַר</string>
+    <string name="icon_only_bottom_bar">נאָר איקאָנען אונטערשטער באַר</string>
+    <string name="icon_only_bottom_bar_subtitle">אַראָפּנעמט טעקסט פֿון נאַוויגאַציע</string>
+
+    <string name="calls_and_system">רופן און סיסטעם</string>
+    <string name="call_settings">רוף איינשטעלונגען</string>
+    <string name="call_settings_subtitle">קאָנטען, סענסאָר און קעשענע מאָדע</string>
+    <string name="default_sim">סטאנדאַרד SIM</string>
+    <string name="ask_first">פֿרעג ערשט</string>
+    <string name="calling_accounts">רוף קאָנטען</string>
+    <string name="system_settings">סיסטעם איינשטעלונגען</string>
+    <string name="call_behavior">רוף פֿירן</string>
+    <string name="proximity_sensor">פֿאַרנענטערונג סענסאָר אין הינטערגרונט</string>
+    <string name="proximity_sensor_subtitle">אַרויסלעשן פאַרשטעל ווען טעלעפֿון איז נאָענט צום אויער בשעת אַ רוף</string>
+    <string name="pocket_mode_prevention">קעשענע מאָדע</string>
+    <string name="pocket_mode_prevention_subtitle">פֿאַרהיטן צופאַליק ענטפֿערן/אָפּוואַרפן ווען טעלעפֿון איז אין קעשענע</string>
+    <string name="floating_ongoing_call">פֿלאָטענדיקער לויפֿענדיקער רוף</string>
+    <string name="floating_ongoing_call_subtitle">ווײַזן אַ שלעפּבאַר פֿלאָטענדיקער בלאָז בעשאַס רופן. פֿאַרלאַנגט דערלויבעניש \'ווײַזן איבער אַנדערע אַפּס\'</string>
+    <string name="direct_call_on_tap">דירעקטער רוף בײַ דריק</string>
+    <string name="direct_call_on_tap_subtitle">דריק אויף אַ רוף לאָג אײַנטראָג צו רופן דירעקט</string>
+    <string name="auto_speaker">אויטאָ ספּיקער</string>
+    <string name="auto_speaker_subtitle">אויטאָמאַטיש אומשטעלן צו הויך-רעדער ווען טעלעפֿון איז ווײַט פֿון אויער, און צוריק צו אויער-רעדער ווען נאָענט</string>
+
+    <string name="sound_and_vibration">קלאַנג און וויבראַציע</string>
+    <string name="sound_and_vibration_subtitle">רינגטאן, ווייל טאָנען און האַפּטיק אין גאַנצער אַפּ</string>
+    <string name="tap_haptics">דריק האַפּטיק</string>
+    <string name="enable_tap_haptics">אַקטיוויזן דריק האַפּטיק</string>
+    <string name="haptics_intensity">אינטענסיטעט</string>
+    <string name="haptics_soft">ווייך</string>
+    <string name="haptics_strong">שטאַרק</string>
+    <string name="haptics_custom">פּערזענלעך</string>
+    <string name="preview_haptic">פֿאָרויסזען האַפּטיק</string>
+    <string name="ringtone_settings">רינגטאן איינשטעלונגען</string>
+    <string name="dialpad_tones">ווייל טאָנען</string>
+    <string name="dialpad_tones_subtitle">ווייל טאָן וואָס שפּילט זיך בײַ דריק אויף קלאַוויאַטור</string>
+    <string name="calls">רופן</string>
+    <string name="vibrate_on_answer">וויברירן בײַ ענטפֿערן</string>
+    <string name="vibrate_on_answer_subtitle">וויברירן ווען די צווייטע זײַט ענטפֿערט</string>
+    <string name="vibrate_on_hang_up">וויברירן בײַ אָפּהענגען</string>
+    <string name="vibrate_on_hang_up_subtitle">וויברירן ווען דער רוף ענדיקט זיך</string>
+    <string name="haptics_across_app">האַפּטיק אין גאַנצער אַפּ</string>
+    <string name="scroll_haptics">גליט האַפּטיק</string>
+    <string name="scroll_haptics_subtitle">וויברירן בײַ גליט געבערדן אין דער אַפּ</string>
+    <string name="haptic_interval">האַפּטיק אינטערוואַל</string>
+    <string name="haptic_interval_value">1 פּער %.1f סענטימעטער</string>
+    <string name="haptic_strength">האַפּטיק שטאַרקייט</string>
+
+    <string name="manage_blocked">פֿאַרוואַלטן געבלאָקירטע</string>
+    <string name="manage_blocked_subtitle">פֿאַרוואַלטן געבלאָקירטע רופן און ספּאַם</string>
+    <string name="blocked_numbers">געבלאָקירטע נומערן</string>
+    <string name="block_notifications">בלאָקירן נאָטיפיקאַציעס</string>
+    <string name="block_notifications_subtitle">ווײַזן אַ נידעריק-פּריאָריטעט אַלערט פֿאַר געבלאָקירטע רופן</string>
+    <string name="block_method">בלאָקירן מעטאָד</string>
+    <string name="block_method_subtitle">ווי געבלאָקירטע רופן ווערן באַהאַנדלט</string>
+    <string name="decline_automatically">אָפּוואַרפן אויטאָמאַטיש</string>
+    <string name="ring_silently">קלינגען שטיל</string>
+    <string name="log_visibility">לאָג זעבאַרקייט</string>
+    <string name="log_visibility_subtitle">ווײַזן אָדער באַהאַלטן געבלאָקירטע רופן אין לעצטע</string>
+    <string name="hide_from_logs">באַהאַלטן פֿון לאָגס</string>
+    <string name="show_in_logs">ווײַזן אין לאָגס</string>
+    <string name="blocked_size">געבלאָקירט: %s</string>
+
+    <string name="authentication">אָטענטיפֿיקאַציע</string>
+    <string name="authentication_method">אָטענטיפֿיקאַציע מעטאָד</string>
+    <string name="system_biometrics">סיסטעם ביאמעטריק</string>
+    <string name="system_biometrics_subtitle">פֿינגער דרוק, פּנים אַנשליס, אָדער גערעט איינשריבן</string>
+    <string name="system_biometrics_not_available">נישט פֿאַראַן אויף דעם גערעט</string>
+    <string name="custom_biometrics">פּערזענלעכע ביאמעטריק</string>
+    <string name="custom_pin">פּערזענלעכער PIN</string>
+    <string name="custom_password">פּערזענלעכער פאַרוואָרט</string>
+    <string name="pin">PIN</string>
+    <string name="pin_subtitle">אויפֿשטעלן אַ נומערישן PIN</string>
+    <string name="password">פאַרוואָרט</string>
+    <string name="password_subtitle">אויפֿשטעלן אַ פּערזענלעכן אַלפֿאַ-נומערישן פאַרוואָרט</string>
+    <string name="remove_biometric">אַראָפּנעמען ביאמעטריק שליסל</string>
+    <string name="not_configured">נישט קאָנפֿיגורירט</string>
+    <string name="lock_app_on_open">שליסן אַפּ בײַ עפֿענען</string>
+    <string name="lock_app_on_open_subtitle">פֿאַרלאַנגן אָטענטיפֿיקאַציע בײַ עפֿענען אַפּ</string>
+    <string name="lock_call_actions">שליסן רוף אַקציעס</string>
+    <string name="lock_call_actions_subtitle">פֿאַרלאַנגן אָטענטיפֿיקאַציע צו ענטפֿערן אָדער אָפּוואַרפן איינקומענדיקע רופן</string>
+    <string name="lock_scope">רוף שליסל סקאָפּ</string>
+    <string name="all_calls">אַלע רופן</string>
+    <string name="all_calls_subtitle">ביאמעטריק פֿאַרלאַנגט פֿאַר יעדן איינקומענדיקן רוף</string>
+    <string name="blacklist">שוואַרץ ליסטע</string>
+    <string name="blacklist_count">קאָנטאַקטן פֿאַר וועלכע ענטפֿערן אָטענטיפֿיקאַציע איז אַקטיוו: %s</string>
+    <string name="blacklist_subtitle">קלויב קאָנטאַקטן וואָס פֿאַרלאַנגען ביאמעטריק צו ענטפֿערן</string>
+    <string name="whitelist">ווײַס ליסטע</string>
+    <string name="whitelist_count">קאָנטאַקטן פֿאַר וועלכע ענטפֿערן אָטענטיפֿיקאַציע איז ניט-אַקטיוו: %s</string>
+    <string name="whitelist_subtitle">קלויב קאָנטאַקטן צו איבערשפּרינגן דעם ביאמעטריק שליסל</string>
+    <string name="select_contacts">קלויב קאָנטאַקטן</string>
+    <string name="set_pin">אויפֿשטעלן PIN</string>
+    <string name="set_pin_subtitle">אַרײַן אַ 4-ציפֿעריקן PIN</string>
+    <string name="enter_pin">אַרײַן PIN</string>
+    <string name="confirm_pin">באַשטעטיקן PIN</string>
+    <string name="confirm_pin_subtitle">אַרײַן דײַן PIN נאָכאַמאָל צו באַשטעטיקן</string>
+    <string name="incorrect_pin">פֿאַלשער PIN. ביטע פרובירן נאָכאַמאָל.</string>
+    <string name="pin_dont_match">PINס שטימען נישט. ביטע הויב אָן פֿון די נידער.</string>
+    <string name="set_password">אויפֿשטעלן פאַרוואָרט</string>
+    <string name="set_password_subtitle">אַרײַן אַ פאַרוואָרט. שטיצט אותיות, נומערן און ספּעציעלע כאַראַקטערן.</string>
+    <string name="enter_password">אַרײַן פאַרוואָרט</string>
+    <string name="confirm_password">באַשטעטיקן פאַרוואָרט</string>
+    <string name="incorrect_password">פֿאַלשער פאַרוואָרט</string>
+    <string name="incorrect_password_subtitle">פאַרוואָרט מוז זײַן לפּחות 4 כאַראַקטערן</string>
+    <string name="password_dont_match">פאַרווערטער שטימען נישט</string>
+
+    <string name="manage_contacts">פֿאַרוואַלטן קאָנטאַקטן</string>
+    <string name="manage_contacts_subtitle">פּריוואַטע קאָנטאַקטן, קאָנטען צו ווײַזן, און רייניקן דײַן ליסטע</string>
+    <string name="display">אַרויסווײַז</string>
+    <string name="sort_by">סאָרטירן לויט</string>
+    <string name="name_format">נאָמען פֿאָרמאַט</string>
+    <string name="first_name_first">פֿאָרנאָמען קודם</string>
+    <string name="last_name_first">פֿאַמיליע נאָמען קודם</string>
+    <string name="merge_and_fix">פֿאַראייניקן און פֿאַרריכטן</string>
+    <string name="standardize">סטאַנדאַרדיזירן</string>
+    <string name="standardize_phone_numbers">סטאַנדאַרדיזירן טעלעפֿאָן נומערן</string>
+    <string name="standardize_phone_numbers_subtitle">אַראָפּנעמען לייקנס און ספּעציעלע כאַראַקטערן פֿון טעלעפֿאָן נומערן</string>
+    <string name="total_contacts">גאַנץ קאָנטאַקטן</string>
+    <string name="contacts_with_changes">קאָנטאַקטן מיט ענדערונגען</string>
+    <string name="numbers_to_standardize">נומערן צו סטאַנדאַרדיזירן</string>
+    <string name="all_numbers_are_already_standardized">✅ אַלע נומערן זענען שוין סטאַנדאַרדיזירט!</string>
+    <string name="examples_of_changes">בייַשפּילן פֿון ענדערונגען:</string>
+    <string name="and_more">און נאָך %s…</string>
+
+    <string name="merging_contacts">פֿאַראייניקן קאָנטאַקטן</string>
+    <string name="merging_contacts_subtitle">געפֿינען און פֿאַראייניקן צווייענדיקע קאָנטאַקטן</string>
+    <string name="merging_contacts_description">פֿאַראייניקטע קאָנטאַקטן זענען מערערע אײַנטראָגן פֿון פֿאַרשיידענע קאָנטען פֿאַרבונדן אין איינס. מען קען יעדן מקור באַזונדער רעדאַקטירן אָדער זיי צעטיילן.</string>
+    <string name="no_duplicates_found">קיין צווייענדיקע געפֿונען</string>
+    <string name="duplicates_in">צווייענדיקע אין: %s</string>
+    <string name="merge_duplicates">פֿאַראייניקן צווייענדיקע (%s קאָנטאַקטן)</string>
+
+    <string name="unmerging_contacts">צעטיילן קאָנטאַקטן</string>
+    <string name="unmerging_contacts_subtitle">געפֿינען און צעטיילן פֿאַראייניקטע קאָנטאַקטן</string>
+    <string name="unmerging_contacts_description">קאָנטאַקט אינפֿאָרמאַציע איז פֿון מערערע מקורים. קלויב איינעם צו רעדאַקטירן, אָדער צעטייל אַלע צו האָבן זיי ווי באַזונדערע קאָנטאַקטן.</string>
+    <string name="no_merged_contacts_found">קיין פֿאַראייניקטע קאָנטאַקטן געפֿונען</string>
+    <string name="merged_from_sources">פֿאַראייניקט פֿון %s מקורים</string>
+    <string name="unlink">צעטיילן</string>
+    <string name="warning_cannot_be_undone">⚠️ דער אַקציע קען מען נישט צוריקקערן.</string>
+
+    <string name="managing_contact_sources">פֿאַרוואַלטן קאָנטאַקט קוואַלן</string>
+    <string name="managing_contact_sources_subtitle">קלויב וועלכע קאָנטען צו ווײַזן אין דײַן ליסטע</string>
+    <string name="managing_contact_sources_description">קלויב וועלכע קאָנטען זאָלן זײַן זעבאַר אין דײַן קאָנטאַקט ליסטע. אַראָפּנעמען אַ קאָנטע וועט באַהאַלטן זײַנע קאָנטאַקטן אָבער נישט אַוועקנעמען.</string>
+    <string name="contact_sources">קאָנטאַקט קוואַלן</string>
+    <string name="contacts_stored_on_app">קאָנטאַקטן געהיט אין דער אַפּ</string>
+    <string name="contacts_stored_on_device">קאָנטאַקטן געהיט אויף גערעט</string>
+
+    <string name="private_contacts">פּריוואַטע קאָנטאַקטן</string>
+    <string name="private_contacts_subtitle">פֿאַרוואַלטן דײַנע פֿאַרשלעסלטע לאָקאַלע קאָנטאַקטן</string>
+
+    <!-- Call -->
+    <string name="call">רוף</string>
+    <string name="incoming">איינקומענדיק</string>
+    <string name="outgoing">אויסגייענדיק</string>
+    <string name="missed">פֿאַרפֿעלט</string>
+    <string name="rejected">אָפּגעוואָרפֿן</string>
+    <string name="blocked">געבלאָקירט</string>
+    <string name="answer">ענטפֿער</string>
+    <string name="decline">אָפּוואַרפן</string>
+    <string name="answer_and_decline">ענטפֿער און ענדיק אנדערן רוף</string>
+    <string name="end_call">ענדיק רוף</string>
+    <string name="back_to_call">צוריק צום רוף</string>
+    <string name="keypad">קלאַוויאַטור</string>
+    <string name="mute">שטיל</string>
+    <string name="unmute">ניט-שטיל</string>
+    <string name="speaker">הויך-רעדער</string>
+    <string name="add_call">צולייגן רוף</string>
+    <string name="resume">אָנהײבן ווידער</string>
+    <string name="swap">איבערבויען</string>
+    <string name="more">נאָך</string>
+    <string name="hold">האַלטן</string>
+    <string name="on_hold">אויף האַלטן</string>
+    <string name="call_ended">רוף געענדיקט</string>
+    <string name="calling">רופט…</string>
+    <string name="incoming_call">איינקומענדיקער רוף</string>
+    <string name="connecting">פֿאַרבינדט…</string>
+    <string name="slide_to_answer">גליט צו ענטפֿערן</string>
+    <string name="swipe_up_to_answer">גליט אַרויף צו ענטפֿערן</string>
+    <string name="swipe_down_to_reject">גליט אַראָפּ צו אָפּוואַרפן</string>
+
+    <!-- Recents -->
+    <string name="recents">לעצטע</string>
+    <string name="home_tab">היים</string>
+    <string name="call_history">רוף היסטאָריע</string>
+    <string name="history_with">היסטאָריע מיט %s</string>
+    <string name="no_call_history_found">קיין רוף היסטאָריע געפֿונען</string>
+    <string name="delete_call_logs">אַוועקנעמען רוף לאָגס</string>
+    <string name="delete_call_logs_selected">ביסטו זיכער אז דו ווילסט אַוועקנעמען %s אויסגעוויילטע רוף לאָגס?</string>
+    <string name="deleted_from_call_log">אַוועקגענומען פֿון רוף לאָג</string>
+    <string name="could_not_delete">האָט נישט געקענט אַוועקנעמען</string>
+    <string name="clear_all_filtered_logs">רייניקן אַלע פֿילטערטע לאָגס</string>
+    <string name="clear_all_filtered_logs_selected">דאָס וועט אַוועקנעמען אַלע געוויזענע רוף היסטאָריע. דער אַקציע קען מען נישט צוריקקערן.</string>
+
+    <!-- Contacts -->
+    <string name="contacts">קאָנטאַקטן</string>
+    <string name="view_contact">ווײַזן קאָנטאַקט</string>
+    <string name="view_contacts">ווײַזן קאָנטאַקטן</string>
+    <string name="contacts_settings">קאָנטאַקט איינשטעלונגען</string>
+    <string name="create_contact">שאַפֿן קאָנטאַקט</string>
+    <string name="add_contact">צולייגן קאָנטאַקט</string>
+    <string name="add_to_contact">צולייגן צו קאָנטאַקט</string>
+    <string name="edit_contact">רעדאַקטירן קאָנטאַקט</string>
+    <string name="contact_info">קאָנטאַקט אינפֿאָרמאַציע</string>
+    <string name="favorites">פֿאַוואָריטן</string>
+    <string name="message">מעלדונג</string>
+    <string name="video">ווידעאָ</string>
+    <string name="email">בליצפּאָסט</string>
+    <string name="default_number">סטאנדאַרד</string>
+    <string name="recent_number">לעצט</string>
+    <string name="recent_activity">לעצטע אקטיוויטעט</string>
+    <string name="add_to_favorites">צולייגן צו פֿאַוואָריטן</string>
+    <string name="remove_from_favorites">אַראָפּנעמען פֿון פֿאַוואָריטן</string>
+    <string name="no_favorites_yet">נאָך נישט קיין פֿאַוואָריטן</string>
+    <string name="no_favorites_yet_subtitle">שטערן אַ קאָנטאַקט צו צולייגן עס דאָ</string>
+    <string name="move_contact">באַוועגן קאָנטאַקט</string>
+    <string name="move_to_another_account">באַוועגן צו אנדערן קאָנטע</string>
+    <string name="move_to_device_storage">באַוועגן צו גערעט אױפֿבאַהיטונג</string>
+    <string name="contact_moved_successfully">קאָנטאַקט באַוועגט געראָטן</string>
+    <string name="save_to_account">היטן אין קאָנטע</string>
+    <string name="show_full_history">ווײַזן גאַנצע היסטאָריע</string>
+    <string name="contact_qr">קאָנטאַקט QR</string>
+    <string name="phone_number">טעלעפֿאָן נומער</string>
+    <string name="name">נאָמען</string>
+    <string name="prefix">פּרעפֿיקס</string>
+    <string name="prefix_description">הר, פֿרו, ד"ר, אאַז"וו</string>
+    <string name="first_name">פֿאָרנאָמען</string>
+    <string name="middle_name">מיטלער נאָמען</string>
+    <string name="middle_name_description">מיטלער נאָמען אָדער ראשי תיבות</string>
+    <string name="last_name">פֿאַמיליע נאָמען</string>
+    <string name="suffix">סופֿיקס</string>
+    <string name="suffix_description">דער ייִנגערער, דער עלטערער, III, אאַז"וו</string>
+    <string name="nickname">צונאָמען</string>
+    <string name="nickname_description">קורצער נאָמען אָדער אַליאַס</string>
+    <string name="company">פֿירמע</string>
+    <string name="job_title">פּאָזיציע</string>
+    <string name="job_title_description">פּאָזיציע אין דער פֿירמע</string>
+    <string name="add_field">צולייגן פֿעלד</string>
+    <string name="add_phone">צולייגן טעלעפֿאָן</string>
+    <string name="add_email">צולייגן בליצפּאָסט</string>
+    <string name="add_event">צולייגן געשעעניש</string>
+    <string name="add_address">צולייגן אַדרעס</string>
+    <string name="add_note">צולייגן הערה</string>
+    <string name="contact_ringtone">קאָנטאַקט רינגטאן</string>
+    <string name="unsaved_changes">נישט געהיטע ענדערונגען</string>
+    <string name="unsaved_changes_subtitle">צי דו ווילסט היטן דײַנע ענדערונגען איידער אַרויסגיין?</string>
+    <plurals name="contacts_count">
+        <item quantity="one">%d קאָנטאַקט</item>
+        <item quantity="two">%d קאָנטאַקטן</item>
+        <item quantity="many">%d קאָנטאַקטן</item>
+        <item quantity="other">%d קאָנטאַקטן</item>
+    </plurals>
+    <plurals name="add_to_favorites_confirmation">
+        <item quantity="one">צולייגן %d קאָנטאַקט צו פֿאַוואָריטן?</item>
+        <item quantity="two">צולייגן %d קאָנטאַקטן צו פֿאַוואָריטן?</item>
+        <item quantity="many">צולייגן %d קאָנטאַקטן צו פֿאַוואָריטן?</item>
+        <item quantity="other">צולייגן %d קאָנטאַקטן צו פֿאַוואָריטן?</item>
+    </plurals>
+    <plurals name="remove_from_favorites_confirmation">
+        <item quantity="one">אַראָפּנעמען %d קאָנטאַקט פֿון פֿאַוואָריטן?</item>
+        <item quantity="two">אַראָפּנעמען %d קאָנטאַקטן פֿון פֿאַוואָריטן?</item>
+        <item quantity="many">אַראָפּנעמען %d קאָנטאַקטן פֿון פֿאַוואָריטן?</item>
+        <item quantity="other">אַראָפּנעמען %d קאָנטאַקטן פֿון פֿאַוואָריטן?</item>
+    </plurals>
+
+    <!-- Permission -->
+    <string name="allow">דערלויבן</string>
+    <string name="call_history_permission">Rill Phone דאַרף צוטריט צו דײַנע רוף לאָגס צו ווײַזן דײַן לעצטע אקטיוויטעט און פֿאַרפֿעלטע רופן.</string>
+    <string name="contacts_permission">קאָנטאַקט דערלויבעניש פֿאַרלאַנגט</string>
+    <string name="contacts_permission_description">צו ווײַזן דײַנע קאָנטאַקטן, דערלויב קאָנטאַקט דערלויבעניש.</string>
+    <string name="search_contacts_permission_description">צו זוכן דײַנע קאָנטאַקטן און ידענטיפֿיצירן איינקומענדיקע רופן, דערלויב קאָנטאַקט דערלויבעניש.</string>
+
+    <!-- Default Dialer -->
+    <string name="default_phone_number_cleared">סטאנדאַרד טעלעפֿאָן נומער גערייניקט</string>
+    <string name="set_as_default">אויפֿשטעלן ווי סטאנדאַרד</string>
+    <string name="clear_default">רייניקן סטאנדאַרד</string>
+    <string name="default_phone_set">%s אויפֿגעשטעלט ווי סטאנדאַרד</string>
+    <string name="default_dialer_title">אויפֿשטעלן Rill Phone ווי סטאנדאַרד</string>
+    <string name="default_dialer_subtitle">Rill Phone קען נאָר אָנהײבן און באַקומען רופן אויב עס איז דײַן סטאנדאַרד טעלעפֿאָן אַפּ</string>
+    <string name="default_dialer_warning">די אַפּ קען נישט אַרבעטן אָן דער דערלויבעניש. ביטע פרובירן נאָכאַמאָל.</string>
+
+    <!-- Call notes -->
+    <string name="notes">הערות</string>
+    <string name="call_notes">רוף הערות</string>
+    <string name="about_call_notes">וועגן רוף הערות</string>
+    <string name="about_call_notes_subtitle">גיך הערות וואָס דו שרײַבסט בעשאַס אַ רוף. זיי ווערן געהיט לאָקאַל אין דער אַפּ ס טעקעס, פֿאַרבונדן מיט דעם טעלעפֿאָן נומער (נישט סינגכראַניזירט מיט Google קאָנטאַקטן און אַנדערע). יעדער נומער האָט זײַן אייגענע פּריוואַטע הערה, וואָס מען קען נאָר צוקומען פֿון דעם רוף לאָג אין די קאָנטאַקט דעטאַלן אין דער אַפּ אָדער פֿון דעם \"רוף הערות\" טאַב.</string>
+    <string name="type_your_note">שרײַב דײַן הערה…</string>
+    <string name="no_notes_yet">נאָך נישט קיין הערות</string>
+    <string name="no_notes_yet_subtitle">הערות געשריבן בעשאַס רופן קומען פֿאָר דאָ</string>
+    <string name="delete_notes">אַוועקנעמען הערות</string>
+    <string name="delete_notes_subtitle">ביסטו זיכער אז דו ווילסט אַוועקנעמען %s אויסגעוויילטע הערות?</string>
+    <string name="delete_note">אַוועקנעמען הערה</string>
+    <string name="delete_note_subtitle">אַוועקנעמען הערה פֿאַר %s?"</string>
+
+    <!-- Times -->
+    <string name="just_now">איצט</string>
+    <string name="yesterday">נעכטן</string>
+    <string name="today">היינט</string>
+    <string name="seconds_letter">%dסעק</string>
+    <string name="minutes_letter">%dמינ</string>
+    <string name="hours_letter">%dשט</string>
+    <string name="days_letter">%dטעג</string>
+
+    <!-- Phone numbers -->
+    <string name="no_label">קיין פֿירקעס</string>
+    <string name="custom_label">פּערזענלעכער פֿירקעס</string>
+    <string name="change_label">ענדערן פֿירקעס</string>
+    <string name="mobile">מאָביל</string>
+    <string name="main_number">הויפּט</string>
+    <string name="home">היים</string>
+    <string name="work">אַרבעט</string>
+    <string name="work_fax">אַרבעט פאַקס</string>
+    <string name="home_fax">היים פאַקס</string>
+    <string name="pager">פּיידזשער</string>
+    <string name="other">אַנדער</string>
+    <string name="send_whatsapp">שיקן דורך WhatsApp</string>
+
+    <!-- Events -->
+    <string name="other_information">אנדערע אינפֿאָרמאַציע</string>
+    <string name="birthday">געבורטסטאָג</string>
+    <string name="anniversary">יאָרטאָג</string>
+
+    <!-- Dialpad -->
+    <string name="add_pause">צולייגן 2-סעקונדע פּויזע</string>
+    <string name="add_wait">צולייגן וואַרטן</string>
+
+    <!-- Onboarding -->
+    <string name="skip">איבערשפּרינגען</string>
+    <string name="page_title_one">פּריוואַט פֿון דיזיין</string>
+    <string name="page_subtitle_one">דײַנע קאָנטאַקטן בלייַבן אויף דײַן גערעט. מיר קיינמאָל נישט אַרויפֿלאָדן, טראַקן אָדער טיילן דײַנע דאַטן מיט קיינעם. קיינמאָל.</string>
+    <string name="page_title_two">אפענער קאָד און טראַנספּאַרענט</string>
+    <string name="page_subtitle_two">נול טעלעמעטריע. נול ווערבונגען. נול טראַקינג. גאַנץ קאָנטראָל איבער דײַן קאָמוניקאַציע.</string>
+    <string name="page_title_three">גיך און פאַרלאָזלעך</string>
+    <string name="page_subtitle_three">אוממידיק T9 זוכן, גלאַטע אַנימאַציעס, און בליץ-גיך רופן. נאָר אַ טעלעפֿאָן אַפּ וואָס אַרבעט.</string>
+    <string name="page_title_warning">אין אַנטוויקלונג</string>
+    <string name="page_subtitle_warning">די אַפּ איז נאָך אין אַנטוויקלונג. עטלעכע פֿעאַטורעס קענען נישט אַרבעטן ווי דערוואַרט. ביטע ניץ מיט אויפּמערקזאַמקייט און מעלדן קיין פּראָבלעמען וואָס דו טרעפֿסט.</string>
+</resources>

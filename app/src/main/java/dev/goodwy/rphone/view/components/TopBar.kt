@@ -38,6 +38,96 @@ import com.ramcosta.composedestinations.generated.destinations.SettingsScreenDes
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.compose.koinInject
 
+/** The pill-shaped, non-editable "Search in Ever Dialer" bar — tapping it opens the single
+ *  unified [SearchScreenDestination] (contacts, non-contacts, contact notes, recording notes).
+ *  Shown at the top of the main tabs (via [TopBar]) as well as Settings, Notes, and Recordings,
+ *  so every entry point into search looks and behaves identically. */
+@Composable
+fun SearchBarPill(navigator: DestinationsNavigator, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val prefs = koinInject<PreferenceManager>()
+    val searchSource = remember { MutableInteractionSource() }
+    val searchPressed by searchSource.collectIsPressedAsState()
+    val searchScale by animateFloatAsState(
+        targetValue = if (searchPressed) 0.96f else 1f,
+        animationSpec = spring(stiffness = Spring.StiffnessLow, dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "searchScale"
+    )
+    // Settings button press animation
+    val settingsSource = remember { MutableInteractionSource() }
+    val micSource = remember { MutableInteractionSource() }
+
+    Surface(
+        onClick = {
+            if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
+                performAppHaptic(
+                    context,
+                    prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light",
+                    prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f))
+            }
+            navigator.navigate(SearchScreenDestination())
+        },
+        modifier = modifier.height(52.dp).scale(searchScale),
+        shape = CircleShape,
+        color = cardColor, //MaterialTheme.colorScheme.surfaceContainerHigh,
+        interactionSource = searchSource
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = stringResource(R.string.search),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = stringResource(R.string.search),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f)
+            )
+
+            Icon(
+                imageVector = Icons.Rounded.MicNone,
+                contentDescription = stringResource(R.string.voice_input),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .combinedClickable(
+                        onClick = {
+                            if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
+                                performAppHaptic(context, prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light", prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f))
+                            }
+                            navigator.navigate(SearchScreenDestination(true))
+                        },
+                        interactionSource = micSource,
+                        indication = ripple(bounded = false, radius = 22.dp)
+                    ),
+            )
+            if (!prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SETTINGS, true)) {
+                Spacer(modifier = Modifier.size(0.dp))
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_settings),
+                    contentDescription = stringResource(R.string.settings),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .combinedClickable(
+                            onClick = {
+                                if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
+                                    performAppHaptic(context, prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light", prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f))
+                                }
+                                navigator.navigate(SettingsScreenDestination)
+                            },
+                            interactionSource = settingsSource,
+                            indication = ripple(bounded = false, radius = 22.dp)
+                        ),
+                )
+            }
+        }
+    }
+}
+
 @Composable
 fun TopBar(
     navController: NavController,
@@ -113,11 +203,11 @@ fun TopBar(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Search,
-                        contentDescription = stringResource(R.string.search_contacts),
+                        contentDescription = stringResource(R.string.search),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = stringResource(R.string.search_contacts),
+                        text = stringResource(R.string.search),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.weight(1f)

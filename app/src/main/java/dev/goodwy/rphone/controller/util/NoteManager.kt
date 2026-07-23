@@ -35,9 +35,6 @@ object NoteManager {
         }
     }
 
-//    fun getNoteFile(context: Context, contactName: String, phoneNumber: String): File =
-//        File(getNotesDir(context), getFileName(contactName, phoneNumber))
-
     // Get the file to save (with the current contact name)
     fun getNoteFile(context: Context, contactName: String, phoneNumber: String): File {
         // First, let's try to find an existing file by its number
@@ -70,17 +67,6 @@ object NoteManager {
         }
     }
 
-//    fun readNoteByPhone(context: Context, phoneNumber: String): String {
-//        val safeNumber = phoneNumber.filter { it.isDigit() || it == '+' }
-//        if (safeNumber.isEmpty()) return ""
-//        return try {
-//            getNotesDir(context).listFiles()
-//                ?.filter { it.extension == "txt" && it.nameWithoutExtension.contains("[$safeNumber]") }
-//                ?.maxByOrNull { it.lastModified() }
-//                ?.readText() ?: ""
-//        } catch (_: Exception) { "" }
-//    }
-
     // A simplified method for looking up items by number only
     fun readNoteByPhone(context: Context, phoneNumber: String): String {
         val file = findNoteFileByNumber(context, phoneNumber)
@@ -103,10 +89,6 @@ object NoteManager {
         } catch (_: Exception) {}
     }
 
-//    fun deleteNote(context: Context, contactName: String, phoneNumber: String) {
-//        try { getNoteFile(context, contactName, phoneNumber).delete() } catch (_: Exception) {}
-//    }
-
     fun deleteNote(context: Context, phoneNumber: String) {
         try {
             findNoteFileByNumber(context, phoneNumber)?.delete()
@@ -116,19 +98,6 @@ object NoteManager {
     fun deleteNoteFile(file: File) {
         try { file.delete() } catch (_: Exception) {}
     }
-
-//    fun getAllNotes(context: Context): List<NoteEntry> = try {
-//        getNotesDir(context).listFiles()
-//            ?.filter { it.extension == "txt" }
-//            ?.sortedByDescending { it.lastModified() }
-//            ?.map { file ->
-//                val base = file.nameWithoutExtension
-//                val idx = base.lastIndexOf(" - [")
-//                val contactName = if (idx >= 0) base.substring(0, idx) else base
-//                val phoneNumber = if (idx >= 0) base.substring(idx + 4).trimEnd(']') else ""
-//                NoteEntry(file, contactName, phoneNumber, file.readText(), file.lastModified())
-//            } ?: emptyList()
-//    } catch (_: Exception) { emptyList() }
 
     fun getAllNotes(context: Context): List<NoteEntry> = try {
         getNotesDir(context).listFiles()

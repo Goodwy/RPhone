@@ -1,0 +1,487 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" dir="rtl">
+    <string name="widget_description">تماس‌های اخیر با شماره‌گیری سریع</string>
+    <string name="copy" tools:ignore="PrivateResource">کپی</string>
+    <string name="copy_path">کپی مسیر</string>
+    <string name="paste">چسباندن</string>
+    <string name="delete">حذف</string>
+    <string name="delete_contact">حذف مخاطب</string>
+    <string name="delete_contact_subtitle">آیا مطمئن هستید که می‌خواهید این مخاطب را حذف کنید؟ این عمل قابل بازگشت نیست.</string>
+    <string name="delete_contacts">حذف مخاطبان</string>
+    <string name="delete_contacts_subtitle">آیا مطمئن هستید که می‌خواهید %s مخاطب انتخاب شده را حذف کنید؟ این عمل قابل بازگشت نیست.</string>
+    <string name="selected_items">%s انتخاب شده</string>
+    <string name="select">انتخاب</string>
+    <string name="select_all">انتخاب همه</string>
+    <string name="deselect_all">لغو انتخاب همه</string>
+    <string name="backspace">حذف</string>
+    <string name="back">بازگشت</string>
+    <string name="edit">ویرایش</string>
+    <string name="done">انجام شد</string>
+    <string name="ok">تأیید</string>
+    <string name="on">روشن</string>
+    <string name="off">خاموش</string>
+    <string name="cancel">لغو</string>
+    <string name="open">باز کردن</string>
+    <string name="save">ذخیره</string>
+    <string name="confirm">تأیید</string>
+    <string name="close">بستن</string>
+    <string name="clear">پاک کردن</string>
+    <string name="share">اشتراک‌گذاری</string>
+    <string name="share_subtitle">ارسال اطلاعات مخاطب به دیگران</string>
+    <string name="use">استفاده</string>
+    <string name="connect_via_social">اتصال از طریق شبکه‌های اجتماعی</string>
+    <string name="import_text">واردات</string>
+    <string name="export_text">صادرات</string>
+    <string name="call_is_ongoing">تماس در حال انجام است — برای بازگشت ضربه بزنید</string>
+    <string name="filter_all">همه</string>
+    <string name="filter_missed">از دست رفته</string>
+    <string name="filter_incoming">ورودی</string>
+    <string name="filter_outgoing">خروجی</string>
+    <string name="filter_rejected">رد شده</string>
+
+    <!-- Search -->
+    <string name="search">جستجو</string>
+    <string name="search_contacts">جستجوی مخاطبان</string>
+    <string name="no_results">نتیجه‌ای یافت نشد</string>
+    <string name="no_contacts_found">مخاطبی یافت نشد</string>
+    <string name="call_query">تماس با %s</string>
+    <string name="voice_input">ورودی صوتی</string>
+    <string name="filter_results">فیلتر نتایج</string>
+
+    <!-- Billing -->
+    <string name="no_connection">بدون اتصال</string>
+    <string name="loading_price">در حال بارگذاری…</string>
+
+    <!-- Project support -->
+    <string name="project_support">حمایت از پروژه</string>
+    <string name="project_support_summary">برای حمایت از توسعه‌های آینده و ویژگی‌های اضافی، برنامه پولی را دریافت کنید</string>
+    <string name="project_support_description">
+        <![CDATA[
+        ما معتقدیم که حریم خصوصی باید رایگان باشد. به همین دلیل تمام ویژگی‌های ضروری به طور کامل در اختیار شماست بدون اینکه یک ریال هزینه کنید.<br>
+        اگر از آنچه می‌سازیم لذت می‌برید، به ما یک قهوه تعارف کنید. به عنوان تشکر، دریافت می‌کنید:<br> <b>همه تم‌ها، رنگ‌های سفارشی و فونت‌های سفارشی.</b><br>
+        این یک سطح حق اشتراک نیست. این یک ژست تشکر است. حمایت شما Rill را مستقل، خصوصی و بدون تبلیغات نگه می‌دارد.
+        ]]>
+    </string>
+    <string name="support_project_to_unlock">برای باز کردن قفل از پروژه حمایت کنید</string>
+    <string name="restore_purchase">بازگرداندن خرید</string>
+    <string name="continue_support">ادامه</string>
+    <string name="monthly">ماهانه</string>
+    <string name="monthly_description">انعطاف‌پذیری برای کسانی که می‌خواهند کمک‌های ماهانه داشته باشند</string>
+    <string name="yearly">سالانه</string>
+    <string name="yearly_description">حمایت سالانه از بهترین برنامه تماس در جهان</string>
+    <string name="lifetime">مادام‌العمر</string>
+    <string name="lifetime_description">یک بار پرداخت کنید و از راحتی نهایی در تمام تماس‌های خود برای همیشه لذت ببرید</string>
+    <string name="most_flexible">انعطاف‌پذیرترین</string>
+    <string name="bast_value">بهترین ارزش</string>
+    <string name="pay_once">یک بار پرداخت</string>
+    <string name="support_development">حمایت از توسعه</string>
+    <string name="support_all_options">حمایت از همه گزینه‌ها</string>
+    <string name="support_development_description1">Rill Phone با افتخار منبع باز و کاملاً رایگان است. حمایت شما به ما کمک می‌کند که آن را به همین شکل نگه داریم.</string>
+    <string name="support_development_description2">با کمک مالی، شما فقط ویژگی‌ها را باز نمی‌کنید — در حریم خصوصی، شفافیت و آینده توسعه واقعاً مستقل سرمایه‌گذاری می‌کنید.</string>
+    <string name="support_development_description3">هر کمک، صرف نظر از اندازه، تفاوت ایجاد می‌کند.</string>
+    <string name="unlock_all_features">باز کردن همه ویژگی‌ها</string>
+    <string name="all_features_unlocked">✨ همه ویژگی‌ها باز شد! از حمایت شما متشکریم!</string>
+    <string name="thank_you_for_your_support">از حمایت شما متشکریم! ❤️</string>
+    <string name="features_locked">ویژگی‌ها قفل هستند</string>
+    <string name="your_donation_ensures">کمک مالی شما تضمین می‌کند:</string>
+    <string name="your_donation_ensures_1">✅ به‌روزرسانی‌های منظم و وصله‌های امنیتی</string>
+    <string name="your_donation_ensures_2">✅ ویژگی‌ها و بهبودهای جدید</string>
+    <string name="your_donation_ensures_3">✅ دسترسی رایگان برای همه</string>
+    <string name="your_donation_ensures_4">✅ توسعه منبع باز</string>
+
+    <!-- About -->
+    <string name="about">درباره</string>
+    <string name="rate_app">امتیاز دادن به برنامه</string>
+    <string name="other_apps">سایر برنامه‌های ما</string>
+    <string name="source_code">کد منبع</string>
+    <string name="privacy_policy">سیاست حریم خصوصی</string>
+
+    <!-- Contributors -->
+    <string name="contributors">همکاران</string>
+    <string name="development_team">تیم توسعه</string>
+    <string name="apps_that_inspired_us">برنامه‌هایی که الهام‌بخش ما بودند</string>
+
+    <!-- Settings -->
+    <string name="settings">تنظیمات</string>
+    <string name="appearance">ظاهر</string>
+    <string name="interface_settings">رابط کاربری</string>
+    <string name="interface_settings_subtitle">تم‌ها، رنگ‌ها و چیدمان</string>
+    <string name="app_theme">تم برنامه</string>
+    <string name="theme_auto">خودکار</string>
+    <string name="theme_light">روشن</string>
+    <string name="theme_dark">تاریک</string>
+    <string name="theme_auto_black_white">خودکار سیاه/سفید</string>
+    <string name="theme_white">سفید</string>
+    <string name="theme_black">سیاه</string>
+    <string name="custom_color">رنگ‌های سفارشی</string>
+    <string name="custom_color_subtitle">طرح رنگی بر اساس رنگ سفارشی</string>
+    <string name="hex_color">رنگ هگزادسیمال</string>
+    <string name="hex_color_subtitle">یک کد هگزادسیمال معتبر 6 رقمی وارد کنید</string>
+    <string name="custom_font">فونت سفارشی</string>
+    <string name="custom_font_subtitle">یک فایل .ttf برای استفاده در سراسر برنامه انتخاب کنید</string>
+    <string name="visual_effects">جلوه‌های بصری</string>
+    <string name="not_supported_on_this_device">در این دستگاه پشتیبانی نمی‌شود</string>
+    <string name="not_supported_on_this_device_subtitle">محو و شیشه مایع نیاز به Android 12 یا بالاتر دارد</string>
+    <string name="material_liquid_you_glass">شیشه مایع Material You</string>
+    <string name="material_liquid_you_glass_subtitle">اعمال جلوه شیشه مایع به ناوبری</string>
+    <string name="material_blur_effects">جلوه‌های محو Material</string>
+    <string name="material_blur_effects_subtitle">اعمال جلوه محو پس‌زمینه به ناوبری</string>
+    <string name="scroll_animation">انیمیشن اسکرول</string>
+    <string name="scroll_animation_device">انیمیشن ظاهر شدن برای آیتم‌های لیست هنگام اسکرول</string>
+    <string name="call_ui">رابط کاربری تماس</string>
+    <string name="incoming_call_ui">رابط کاربری تماس ورودی</string>
+    <string name="incoming_call_ui_subtitle">نحوه پاسخ دادن به تماس‌های ورودی را انتخاب کنید</string>
+    <string name="avatars_settings">تنظیمات آواتار</string>
+    <string name="avatars_settings_subtitle">سفارشی‌سازی رنگ‌ها، قاب‌ها و موارد بیشتر</string>
+    <string name="avatar_colors">رنگ‌های آواتار</string>
+    <string name="colorful">رنگی</string>
+    <string name="primary_color">رنگ اصلی</string>
+    <string name="secondary_color">رنگ فرعی</string>
+    <string name="google_contacts_color">رنگ مخاطبان Google</string>
+    <string name="show_first_letter_in_avatar">نمایش حرف اول در آواتار</string>
+    <string name="show_first_letter_in_avatar_subtitle">در صورت نداشتن تصویر، حرف را نمایش می‌دهد</string>
+    <string name="avatar_frame">قاب آواتار</string>
+    <string name="avatar_frame_subtitle">نمایش حاشیه در اطراف آواتار</string>
+    <string name="show_picture_in_avatar">نمایش تصویر در آواتار</string>
+    <string name="show_picture_in_avatar_subtitle">در صورت وجود، عکس مخاطب را نمایش می‌دهد</string>
+
+    <string name="сaller_ui">رابط کاربری تماس گیرنده</string>
+    <string name="сaller_ui_subtitle">سفارشی‌سازی صفحه تماس و کنترل‌ها</string>
+    <string name="end_call_button">دکمه پایان تماس</string>
+    <string name="customize_width">سفارشی‌سازی عرض</string>
+    <string name="customize_width_subtitle">تنظیم عرض دکمه پایان تماس</string>
+
+    <string name="navigations">ناوبری</string>
+    <string name="navigations_subtitle">قابلیت مشاهده و سبک برگه‌ها</string>
+    <string name="tab_sections">بخش‌های برگه</string>
+    <string name="tab_sections_subtitle">انتخاب کنید کدام برگه‌ها قابل مشاهده هستند، و دسته را بکشید تا آنها را در نوار ناوبری مرتب کنید</string>
+    <string name="navigation_style">سبک ناوبری</string>
+    <string name="pill_style_navigation">ناوبری به سبک قرص</string>
+    <string name="pill_style_navigation_subtitle">نمایش نوار ناوبری شناور به سبک قرص به جای نوار پایینی استاندارد</string>
+    <string name="icon_only_bottom_bar">نوار پایینی فقط با آیکون</string>
+    <string name="icon_only_bottom_bar_subtitle">برچسب‌های متنی را از ناوبری حذف می‌کند</string>
+
+    <string name="calls_and_system">تماس‌ها و سیستم</string>
+    <string name="call_settings">تنظیمات تماس</string>
+    <string name="call_settings_subtitle">حساب‌ها، سنسور و حالت جیب</string>
+    <string name="default_sim">سیم‌کارت پیش‌فرض</string>
+    <string name="ask_first">ابتدا بپرس</string>
+    <string name="calling_accounts">حساب‌های تماس</string>
+    <string name="system_settings">تنظیمات سیستم</string>
+    <string name="call_behavior">رفتار تماس</string>
+    <string name="proximity_sensor">سنسور مجاورت در پس‌زمینه</string>
+    <string name="proximity_sensor_subtitle">خاموش کردن صفحه هنگام نزدیک بودن گوشی به گوش در طول تماس</string>
+    <string name="pocket_mode_prevention">حالت جیب</string>
+    <string name="pocket_mode_prevention_subtitle">جلوگیری از پاسخ/رد تصادفی زمانی که گوشی در جیب است</string>
+    <string name="floating_ongoing_call">حباب تماس شناور</string>
+    <string name="floating_ongoing_call_subtitle">نمایش حباب شناور قابل کشیدن در طول تماس‌ها. نیاز به مجوز \'نمایش روی سایر برنامه‌ها\' دارد</string>
+    <string name="direct_call_on_tap">تماس مستقیم با ضربه</string>
+    <string name="direct_call_on_tap_subtitle">برای تماس مستقیم، روی یک ورودی لاگ تماس ضربه بزنید</string>
+    <string name="auto_speaker">بلندگوی خودکار</string>
+    <string name="auto_speaker_subtitle">به طور خودکار به بلندگو تغییر دهید زمانی که گوشی از گوش دور است، و زمانی که نزدیک است به گوشی برگردید</string>
+
+    <string name="sound_and_vibration">صدا و لرزش</string>
+    <string name="sound_and_vibration_subtitle">زنگ‌ها، صداهای صفحه کلید و بازخورد لمسی در سراسر برنامه</string>
+    <string name="tap_haptics">بازخورد لمسی ضربه</string>
+    <string name="enable_tap_haptics">فعال‌سازی بازخورد لمسی ضربه</string>
+    <string name="haptics_intensity">شدت</string>
+    <string name="haptics_soft">نرم</string>
+    <string name="haptics_strong">قوی</string>
+    <string name="haptics_custom">سفارشی</string>
+    <string name="preview_haptic">پیش‌نمایش بازخورد لمسی</string>
+    <string name="ringtone_settings">تنظیمات زنگ</string>
+    <string name="dialpad_tones">صداهای صفحه کلید</string>
+    <string name="dialpad_tones_subtitle">صدای صفحه کلید که هنگام فشار دادن کلیدها پخش می‌شود</string>
+    <string name="calls">تماس‌ها</string>
+    <string name="vibrate_on_answer">لرزش هنگام پاسخ</string>
+    <string name="vibrate_on_answer_subtitle">زمانی که طرف مقابل پاسخ می‌دهد لرزش داشته باشد</string>
+    <string name="vibrate_on_hang_up">لرزش هنگام پایان تماس</string>
+    <string name="vibrate_on_hang_up_subtitle">زمانی که تماس پایان می‌یابد لرزش داشته باشد</string>
+    <string name="haptics_across_app">بازخورد لمسی در سراسر برنامه</string>
+    <string name="scroll_haptics">بازخورد لمسی اسکرول</string>
+    <string name="scroll_haptics_subtitle">لرزش هنگام حرکات اسکرول در برنامه</string>
+    <string name="haptic_interval">فاصله بازخورد لمسی</string>
+    <string name="haptic_interval_value">1 در هر %.1f سانتی‌متر</string>
+    <string name="haptic_strength">قدرت بازخورد لمسی</string>
+
+    <string name="manage_blocked">مدیریت مسدود شده‌ها</string>
+    <string name="manage_blocked_subtitle">مدیریت تماس‌های مسدود شده و هرزنامه</string>
+    <string name="blocked_numbers">شماره‌های مسدود شده</string>
+    <string name="block_notifications">مسدود کردن اعلان‌ها</string>
+    <string name="block_notifications_subtitle">نمایش هشدار با اولویت پایین برای تماس‌های مسدود شده</string>
+    <string name="block_method">روش مسدود کردن</string>
+    <string name="block_method_subtitle">نحوه برخورد با تماس‌های مسدود شده</string>
+    <string name="decline_automatically">رد خودکار</string>
+    <string name="ring_silently">زنگ بی‌صدا</string>
+    <string name="log_visibility">قابلیت مشاهده در لاگ</string>
+    <string name="log_visibility_subtitle">نمایش یا پنهان کردن تماس‌های مسدود شده در اخیر</string>
+    <string name="hide_from_logs">پنهان از لاگ‌ها</string>
+    <string name="show_in_logs">نمایش در لاگ‌ها</string>
+    <string name="blocked_size">مسدود شده: %s</string>
+
+    <string name="authentication">احراز هویت</string>
+    <string name="authentication_method">روش احراز هویت</string>
+    <string name="system_biometrics">بیومتریک سیستم</string>
+    <string name="system_biometrics_subtitle">اثر انگشت، باز کردن قفل با چهره، یا اطلاعات ورود دستگاه</string>
+    <string name="system_biometrics_not_available">در این دستگاه در دسترس نیست</string>
+    <string name="custom_biometrics">بیومتریک سفارشی</string>
+    <string name="custom_pin">PIN سفارشی</string>
+    <string name="custom_password">رمز عبور سفارشی</string>
+    <string name="pin">PIN</string>
+    <string name="pin_subtitle">تنظیم PIN عددی</string>
+    <string name="password">رمز عبور</string>
+    <string name="password_subtitle">تنظیم رمز عبور الفبایی-عددی سفارشی</string>
+    <string name="remove_biometric">حذف قفل بیومتریک</string>
+    <string name="not_configured">پیکربندی نشده</string>
+    <string name="lock_app_on_open">قفل برنامه هنگام باز شدن</string>
+    <string name="lock_app_on_open_subtitle">هنگام باز کردن برنامه نیاز به احراز هویت دارد</string>
+    <string name="lock_call_actions">قفل اقدامات تماس</string>
+    <string name="lock_call_actions_subtitle">برای پاسخ یا رد تماس‌های ورودی نیاز به احراز هویت دارد</string>
+    <string name="lock_scope">دامنه قفل تماس</string>
+    <string name="all_calls">همه تماس‌ها</string>
+    <string name="all_calls_subtitle">بیومتریک برای هر تماس ورودی لازم است</string>
+    <string name="blacklist">لیست سیاه</string>
+    <string name="blacklist_count">مخاطبانی که احراز هویت پاسخ برای آنها فعال است: %s</string>
+    <string name="blacklist_subtitle">مخاطبانی را انتخاب کنید که برای پاسخ به بیومتریک نیاز دارند</string>
+    <string name="whitelist">لیست سفید</string>
+    <string name="whitelist_count">مخاطبانی که احراز هویت پاسخ برای آنها غیرفعال است: %s</string>
+    <string name="whitelist_subtitle">مخاطبانی را انتخاب کنید تا قفل بیومتریک را رد کنند</string>
+    <string name="select_contacts">انتخاب مخاطبان</string>
+    <string name="set_pin">تنظیم PIN</string>
+    <string name="set_pin_subtitle">یک PIN 4 رقمی وارد کنید</string>
+    <string name="enter_pin">وارد کردن PIN</string>
+    <string name="confirm_pin">تأیید PIN</string>
+    <string name="confirm_pin_subtitle">برای تأیید، PIN خود را دوباره وارد کنید</string>
+    <string name="incorrect_pin">PIN نادرست است. لطفاً دوباره تلاش کنید.</string>
+    <string name="pin_dont_match">PINها مطابقت ندارند. لطفاً دوباره شروع کنید.</string>
+    <string name="set_password">تنظیم رمز عبور</string>
+    <string name="set_password_subtitle">هر رمز عبوری را وارد کنید. از حروف، اعداد و کاراکترهای خاص پشتیبانی می‌کند.</string>
+    <string name="enter_password">وارد کردن رمز عبور</string>
+    <string name="confirm_password">تأیید رمز عبور</string>
+    <string name="incorrect_password">رمز عبور نادرست است</string>
+    <string name="incorrect_password_subtitle">رمز عبور باید حداقل 4 کاراکتر باشد</string>
+    <string name="password_dont_match">رمزهای عبور مطابقت ندارند</string>
+
+    <string name="manage_contacts">مدیریت مخاطبان</string>
+    <string name="manage_contacts_subtitle">مخاطبان خصوصی، حساب‌های نمایش داده شده، و پاک کردن لیست شما</string>
+    <string name="display">نمایش</string>
+    <string name="sort_by">مرتب‌سازی بر اساس</string>
+    <string name="name_format">قالب نام</string>
+    <string name="first_name_first">ابتدا نام</string>
+    <string name="last_name_first">ابتدا نام خانوادگی</string>
+    <string name="merge_and_fix">ادغام و رفع</string>
+    <string name="standardize">استانداردسازی</string>
+    <string name="standardize_phone_numbers">استانداردسازی شماره تلفن‌ها</string>
+    <string name="standardize_phone_numbers_subtitle">حذف فاصله‌ها و کاراکترهای خاص از شماره تلفن‌ها</string>
+    <string name="total_contacts">کل مخاطبان</string>
+    <string name="contacts_with_changes">مخاطبان با تغییرات</string>
+    <string name="numbers_to_standardize">شماره‌های قابل استانداردسازی</string>
+    <string name="all_numbers_are_already_standardized">✅ همه شماره‌ها قبلاً استاندارد شده‌اند!</string>
+    <string name="examples_of_changes">نمونه‌هایی از تغییرات:</string>
+    <string name="and_more">و %s بیشتر…</string>
+
+    <string name="merging_contacts">ادغام مخاطبان</string>
+    <string name="merging_contacts_subtitle">یافتن و ادغام مخاطبان تکراری</string>
+    <string name="merging_contacts_description">مخاطبان ادغام شده ورودی‌های متعددی از حساب‌های مختلف هستند که در یکی پیوند شده‌اند. می‌توانید هر منبع را جداگانه ویرایش کنید یا آنها را از هم جدا کنید.</string>
+    <string name="no_duplicates_found">تکراری یافت نشد</string>
+    <string name="duplicates_in">تکراری در: %s</string>
+    <string name="merge_duplicates">ادغام تکراری‌ها (%s مخاطب)</string>
+
+    <string name="unmerging_contacts">جدا کردن مخاطبان</string>
+    <string name="unmerging_contacts_subtitle">یافتن و جدا کردن مخاطبان ادغام شده</string>
+    <string name="unmerging_contacts_description">اطلاعات مخاطب از چندین منبع است. یکی را برای ویرایش انتخاب کنید، یا همه را جدا کنید تا به عنوان مخاطبان جداگانه داشته باشید.</string>
+    <string name="no_merged_contacts_found">مخاطب ادغام شده‌ای یافت نشد</string>
+    <string name="merged_from_sources">ادغام شده از %s منبع</string>
+    <string name="unlink">جدا کردن</string>
+    <string name="warning_cannot_be_undone">⚠️ این عمل قابل بازگشت نیست.</string>
+
+    <string name="managing_contact_sources">مدیریت منابع مخاطبان</string>
+    <string name="managing_contact_sources_subtitle">انتخاب کنید کدام حساب‌ها در لیست شما نمایش داده شوند</string>
+    <string name="managing_contact_sources_description">انتخاب کنید کدام حساب‌ها باید در لیست مخاطبان شما قابل مشاهده باشند. لغو انتخاب یک حساب، مخاطبان آن را پنهان می‌کند اما آنها را حذف نمی‌کند.</string>
+    <string name="contact_sources">منابع مخاطبان</string>
+    <string name="contacts_stored_on_app">مخاطبان ذخیره شده در برنامه</string>
+    <string name="contacts_stored_on_device">مخاطبان ذخیره شده در دستگاه</string>
+
+    <string name="private_contacts">مخاطبان خصوصی</string>
+    <string name="private_contacts_subtitle">مدیریت مخاطبان محلی رمزگذاری شده شما</string>
+
+    <!-- Call -->
+    <string name="call">تماس</string>
+    <string name="incoming">ورودی</string>
+    <string name="outgoing">خروجی</string>
+    <string name="missed">از دست رفته</string>
+    <string name="rejected">رد شده</string>
+    <string name="blocked">مسدود شده</string>
+    <string name="answer">پاسخ</string>
+    <string name="decline">رد</string>
+    <string name="answer_and_decline">پاسخ و پایان تماس دیگر</string>
+    <string name="end_call">پایان تماس</string>
+    <string name="back_to_call">بازگشت به تماس</string>
+    <string name="keypad">صفحه کلید</string>
+    <string name="mute">بی‌صدا</string>
+    <string name="unmute">رفع بی‌صدایی</string>
+    <string name="speaker">بلندگو</string>
+    <string name="add_call">افزودن تماس</string>
+    <string name="resume">ادامه</string>
+    <string name="swap">تعویض</string>
+    <string name="more">بیشتر</string>
+    <string name="hold">مکث</string>
+    <string name="on_hold">در حالت مکث</string>
+    <string name="call_ended">تماس پایان یافت</string>
+    <string name="calling">در حال برقراری تماس…</string>
+    <string name="incoming_call">تماس ورودی</string>
+    <string name="connecting">در حال اتصال…</string>
+    <string name="slide_to_answer">برای پاسخ بکشید</string>
+    <string name="swipe_up_to_answer">برای پاسخ به بالا بکشید</string>
+    <string name="swipe_down_to_reject">برای رد به پایین بکشید</string>
+
+    <!-- Recents -->
+    <string name="recents">اخیر</string>
+    <string name="home_tab">خانه</string>
+    <string name="call_history">تاریخچه تماس‌ها</string>
+    <string name="history_with">تاریخچه با %s</string>
+    <string name="no_call_history_found">تاریخچه تماسی یافت نشد</string>
+    <string name="delete_call_logs">حذف لاگ‌های تماس</string>
+    <string name="delete_call_logs_selected">آیا مطمئن هستید که می‌خواهید %s لاگ تماس انتخاب شده را حذف کنید؟</string>
+    <string name="deleted_from_call_log">از لاگ تماس حذف شد</string>
+    <string name="could_not_delete">قابل حذف نبود</string>
+    <string name="clear_all_filtered_logs">پاک کردن همه لاگ‌های فیلتر شده</string>
+    <string name="clear_all_filtered_logs_selected">این کار تمام تاریخچه تماس نمایش داده شده را حذف می‌کند. این عمل قابل بازگشت نیست.</string>
+
+    <!-- Contacts -->
+    <string name="contacts">مخاطبان</string>
+    <string name="view_contact">مشاهده مخاطب</string>
+    <string name="view_contacts">مشاهده مخاطبان</string>
+    <string name="contacts_settings">تنظیمات مخاطبان</string>
+    <string name="create_contact">ایجاد مخاطب</string>
+    <string name="add_contact">افزودن مخاطب</string>
+    <string name="add_to_contact">افزودن به مخاطب</string>
+    <string name="edit_contact">ویرایش مخاطب</string>
+    <string name="contact_info">اطلاعات مخاطب</string>
+    <string name="favorites">محبوب‌ها</string>
+    <string name="message">پیام</string>
+    <string name="video">ویدئو</string>
+    <string name="email">ایمیل</string>
+    <string name="default_number">پیش‌فرض</string>
+    <string name="recent_number">اخیر</string>
+    <string name="recent_activity">فعالیت اخیر</string>
+    <string name="add_to_favorites">افزودن به محبوب‌ها</string>
+    <string name="remove_from_favorites">حذف از محبوب‌ها</string>
+    <string name="no_favorites_yet">هنوز محبوبی وجود ندارد</string>
+    <string name="no_favorites_yet_subtitle">برای افزودن مخاطب به اینجا، آن را ستاره‌دار کنید</string>
+    <string name="move_contact">انتقال مخاطب</string>
+    <string name="move_to_another_account">انتقال به حساب دیگر</string>
+    <string name="move_to_device_storage">انتقال به حافظه دستگاه</string>
+    <string name="contact_moved_successfully">مخاطب با موفقیت انتقال یافت</string>
+    <string name="save_to_account">ذخیره در حساب</string>
+    <string name="show_full_history">نمایش تاریخچه کامل</string>
+    <string name="contact_qr">کیوآر مخاطب</string>
+    <string name="phone_number">شماره تلفن</string>
+    <string name="name">نام</string>
+    <string name="prefix">پیشوند</string>
+    <string name="prefix_description">آقا، خانم، دکتر، و غیره</string>
+    <string name="first_name">نام</string>
+    <string name="middle_name">نام وسط</string>
+    <string name="middle_name_description">نام وسط یا حرف اول</string>
+    <string name="last_name">نام خانوادگی</string>
+    <string name="suffix">پسوند</string>
+    <string name="suffix_description">جونیور، سینیور، III، و غیره</string>
+    <string name="nickname">لقب</string>
+    <string name="nickname_description">نام کوتاه یا نام مستعار</string>
+    <string name="company">شرکت</string>
+    <string name="job_title">عنوان شغلی</string>
+    <string name="job_title_description">موقعیت در شرکت</string>
+    <string name="add_field">افزودن فیلد</string>
+    <string name="add_phone">افزودن تلفن</string>
+    <string name="add_email">افزودن ایمیل</string>
+    <string name="add_event">افزودن رویداد</string>
+    <string name="add_address">افزودن آدرس</string>
+    <string name="add_note">افزودن یادداشت</string>
+    <string name="contact_ringtone">زنگ مخاطب</string>
+    <string name="unsaved_changes">تغییرات ذخیره نشده</string>
+    <string name="unsaved_changes_subtitle">آیا می‌خواهید قبل از خروج تغییرات خود را ذخیره کنید؟</string>
+    <plurals name="contacts_count">
+        <item quantity="one">%d مخاطب</item>
+        <item quantity="other">%d مخاطب</item>
+    </plurals>
+    <plurals name="add_to_favorites_confirmation">
+        <item quantity="one">افزودن %d مخاطب به محبوب‌ها؟</item>
+        <item quantity="other">افزودن %d مخاطب به محبوب‌ها؟</item>
+    </plurals>
+    <plurals name="remove_from_favorites_confirmation">
+        <item quantity="one">حذف %d مخاطب از محبوب‌ها؟</item>
+        <item quantity="other">حذف %d مخاطب از محبوب‌ها؟</item>
+    </plurals>
+
+    <!-- Permission -->
+    <string name="allow">اجازه</string>
+    <string name="call_history_permission">Rill Phone برای نمایش فعالیت اخیر و تماس‌های از دست رفته شما به لاگ‌های تماس شما نیاز دارد.</string>
+    <string name="contacts_permission">مجوز مخاطبان لازم است</string>
+    <string name="contacts_permission_description">برای مشاهده مخاطبان خود، به مخاطبان اجازه دسترسی دهید.</string>
+    <string name="search_contacts_permission_description">برای جستجوی مخاطبان و شناسایی تماس‌های ورودی، به مخاطبان اجازه دسترسی دهید.</string>
+
+    <!-- Default Dialer -->
+    <string name="default_phone_number_cleared">شماره تلفن پیش‌فرض پاک شد</string>
+    <string name="set_as_default">تنظیم به عنوان پیش‌فرض</string>
+    <string name="clear_default">پاک کردن پیش‌فرض</string>
+    <string name="default_phone_set">%s به عنوان پیش‌فرض تنظیم شد</string>
+    <string name="default_dialer_title">تنظیم Rill Phone به عنوان پیش‌فرض</string>
+    <string name="default_dialer_subtitle">Rill Phone فقط در صورتی می‌تواند تماس‌ها را شروع و دریافت کند که برنامه تلفن پیش‌فرض شما باشد</string>
+    <string name="default_dialer_warning">برنامه بدون این مجوز نمی‌تواند کار کند. لطفاً دوباره تلاش کنید.</string>
+
+    <!-- Call notes -->
+    <string name="notes">یادداشت‌ها</string>
+    <string name="call_notes">یادداشت‌های تماس</string>
+    <string name="about_call_notes">درباره یادداشت‌های تماس</string>
+    <string name="about_call_notes_subtitle">یادداشت‌های سریعی که در طول تماس می‌نویسید. آنها به صورت محلی در فایل‌های برنامه ذخیره می‌شوند و به شماره تلفن متصل می‌شوند (با مخاطبان Google و دیگران همگام‌سازی نمی‌شوند). هر شماره یادداشت خصوصی خود را دارد که فقط از لاگ تماس در جزئیات مخاطب در داخل برنامه یا از برگه \"یادداشت‌های تماس\" قابل دسترسی است.</string>
+    <string name="type_your_note">یادداشت خود را تایپ کنید…</string>
+    <string name="no_notes_yet">هنوز یادداشتی وجود ندارد</string>
+    <string name="no_notes_yet_subtitle">یادداشت‌های نوشته شده در طول تماس‌ها در اینجا ظاهر می‌شوند</string>
+    <string name="delete_notes">حذف یادداشت‌ها</string>
+    <string name="delete_notes_subtitle">آیا مطمئن هستید که می‌خواهید %s یادداشت انتخاب شده را حذف کنید؟</string>
+    <string name="delete_note">حذف یادداشت</string>
+    <string name="delete_note_subtitle">حذف یادداشت برای %s؟"</string>
+
+    <!-- Times -->
+    <string name="just_now">همین الان</string>
+    <string name="yesterday">دیروز</string>
+    <string name="today">امروز</string>
+    <string name="seconds_letter">%dث</string>
+    <string name="minutes_letter">%dد</string>
+    <string name="hours_letter">%dس</string>
+    <string name="days_letter">%dر</string>
+
+    <!-- Phone numbers -->
+    <string name="no_label">بدون برچسب</string>
+    <string name="custom_label">برچسب سفارشی</string>
+    <string name="change_label">تغییر برچسب</string>
+    <string name="mobile">همراه</string>
+    <string name="main_number">اصلی</string>
+    <string name="home">خانه</string>
+    <string name="work">کار</string>
+    <string name="work_fax">فکس کار</string>
+    <string name="home_fax">فکس خانه</string>
+    <string name="pager">پیجر</string>
+    <string name="other">سایر</string>
+    <string name="send_whatsapp">ارسال از طریق WhatsApp</string>
+
+    <!-- Events -->
+    <string name="other_information">اطلاعات دیگر</string>
+    <string name="birthday">تولد</string>
+    <string name="anniversary">سالگرد</string>
+
+    <!-- Dialpad -->
+    <string name="add_pause">افزودن مکث 2 ثانیه‌ای</string>
+    <string name="add_wait">افزودن انتظار</string>
+
+    <!-- Onboarding -->
+    <string name="skip">رد شدن</string>
+    <string name="page_title_one">خصوصی با طراحی</string>
+    <string name="page_subtitle_one">مخاطبان شما در دستگاه شما باقی می‌مانند. ما هرگز داده‌های شما را آپلود، ردیابی یا با کسی به اشتراک نمی‌گذاریم. هرگز.</string>
+    <string name="page_title_two">منبع باز و شفاف</string>
+    <string name="page_subtitle_two">بدون تلمتری. بدون تبلیغات. بدون ردیابی. کنترل کامل بر ارتباطات شما.</string>
+    <string name="page_title_three">سریع و قابل اعتماد</string>
+    <string name="page_subtitle_three">جستجوی فوری T9، انیمیشن‌های روان، و تماس‌های فوق‌العاده سریع. فقط یک برنامه تلفن که کار می‌کند.</string>
+    <string name="page_title_warning">در حال توسعه</string>
+    <string name="page_subtitle_warning">این برنامه هنوز در حال توسعه است. برخی از ویژگی‌ها ممکن است مطابق انتظار کار نکنند. لطفاً با احتیاط استفاده کنید و هر گونه مشکلی را گزارش دهید.</string>
+</resources>

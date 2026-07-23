@@ -1,0 +1,486 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="widget_description">Hızlı arama ile son aramalar</string>
+    <string name="copy" tools:ignore="PrivateResource">Kopyala</string>
+    <string name="copy_path">Yolu Kopyala</string>
+    <string name="paste">Yapıştır</string>
+    <string name="delete">Sil</string>
+    <string name="delete_contact">Kişiyi Sil</string>
+    <string name="delete_contact_subtitle">Bu kişiyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</string>
+    <string name="delete_contacts">Kişileri Sil</string>
+    <string name="delete_contacts_subtitle">Seçili %s kişiyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</string>
+    <string name="selected_items">%s seçili</string>
+    <string name="select">Seç</string>
+    <string name="select_all">Tümünü Seç</string>
+    <string name="deselect_all">Seçimi Kaldır</string>
+    <string name="backspace">Sil</string>
+    <string name="back">Geri</string>
+    <string name="edit">Düzenle</string>
+    <string name="done">Tamam</string>
+    <string name="ok">Tamam</string>
+    <string name="on">Açık</string>
+    <string name="off">Kapalı</string>
+    <string name="cancel">İptal</string>
+    <string name="open">Aç</string>
+    <string name="save">Kaydet</string>
+    <string name="confirm">Onayla</string>
+    <string name="close">Kapat</string>
+    <string name="clear">Temizle</string>
+    <string name="share">Paylaş</string>
+    <string name="share_subtitle">Kişi bilgilerini başkalarına gönder</string>
+    <string name="use">Kullan</string>
+    <string name="connect_via_social">Sosyal Ağ Üzerinden Bağlan</string>
+    <string name="import_text">İçe Aktar</string>
+    <string name="export_text">Dışa Aktar</string>
+    <string name="call_is_ongoing">Arama Devam Ediyor — Dönmek için Dokunun</string>
+    <string name="filter_all">Tümü</string>
+    <string name="filter_missed">Cevaplanmayan</string>
+    <string name="filter_incoming">Gelen</string>
+    <string name="filter_outgoing">Giden</string>
+    <string name="filter_rejected">Reddedilen</string>
+
+    <!-- Search -->
+    <string name="search">Ara</string>
+    <string name="search_contacts">Kişilerde Ara</string>
+    <string name="no_results">Sonuç yok</string>
+    <string name="no_contacts_found">Kişi bulunamadı</string>
+    <string name="call_query">%s\'i Ara</string>
+    <string name="voice_input">Sesli Giriş</string>
+    <string name="filter_results">Sonuçları Filtrele</string>
+
+    <!-- Billing -->
+    <string name="no_connection">Bağlantı yok</string>
+    <string name="loading_price">Yükleniyor…</string>
+
+    <!-- Project support -->
+    <string name="project_support">Proje Desteği</string>
+    <string name="project_support_summary">Gelecekteki gelişmeleri ve ek özellikleri desteklemek için ücretli uygulamayı edinin</string>
+    <string name="project_support_description">
+        <![CDATA[
+        Gizliliğin ücretsiz olması gerektiğine inanıyoruz. Bu nedenle tüm temel özellikler tek bir kuruş harcamadan tamamen sizin.<br>
+        Yaptıklarımızı beğeniyorsanız, bize bir kahve ısmarlamayı düşünün. Teşekkür olarak şunları alacaksınız:<br> <b>Tüm temalar, Özel renkler ve Özel yazı tipleri.</b><br>
+        Bu bir premium katman değil. Bir teşekkür jestidir. Desteğiniz Rill\'i bağımsız, özel ve reklamsız tutar.
+        ]]>
+    </string>
+    <string name="support_project_to_unlock">Kilidi açmak için projeyi destekleyin</string>
+    <string name="restore_purchase">Satın Almayı Geri Yükle</string>
+    <string name="continue_support">Devam Et</string>
+    <string name="monthly">Aylık</string>
+    <string name="monthly_description">Aylık katkı yapmak isteyenler için esneklik</string>
+    <string name="yearly">Yıllık</string>
+    <string name="yearly_description">Dünyanın en iyi arama uygulaması için yıllık destek</string>
+    <string name="lifetime">Ömür Boyu</string>
+    <string name="lifetime_description">Bir kez ödeyin ve tüm aramalarınızda ömür boyu nihai konforun tadını çıkarın</string>
+    <string name="most_flexible">En Esnek</string>
+    <string name="bast_value">En İyi Değer</string>
+    <string name="pay_once">Tek Seferlik Öde</string>
+    <string name="support_development">Geliştirmeyi Destekle</string>
+    <string name="support_all_options">Tüm Seçenekleri Destekle</string>
+    <string name="support_development_description1">Rill Phone açık kaynaklıdır ve tamamen ücretsizdir. Desteğiniz bunu böyle tutmamıza yardımcı olur.</string>
+    <string name="support_development_description2">Bağış yaparak yalnızca özelliklerin kilidini açmıyorsunuz — gizliliğe, şeffaflığa ve gerçekten bağımsız geliştirmenin geleceğine yatırım yapıyorsunuz.</string>
+    <string name="support_development_description3">Boyutu ne olursa olsun her katkı fark yaratır.</string>
+    <string name="unlock_all_features">Tüm Özelliklerin Kilidini Aç</string>
+    <string name="all_features_unlocked">✨ Tüm özelliklerin kilidi açıldı! Desteğiniz için teşekkürler!</string>
+    <string name="thank_you_for_your_support">Desteğiniz için teşekkürler! ❤️</string>
+    <string name="features_locked">Özellikler kilitli</string>
+    <string name="your_donation_ensures">Bağışınız şunları sağlar:</string>
+    <string name="your_donation_ensures_1">✅ Düzenli güncellemeler ve güvenlik yamaları</string>
+    <string name="your_donation_ensures_2">✅ Yeni özellikler ve iyileştirmeler</string>
+    <string name="your_donation_ensures_3">✅ Herkes için ücretsiz erişim</string>
+    <string name="your_donation_ensures_4">✅ Açık kaynak geliştirme</string>
+
+    <!-- About -->
+    <string name="about">Hakkında</string>
+    <string name="rate_app">Uygulamayı Değerlendir</string>
+    <string name="other_apps">Diğer Uygulamalarımız</string>
+    <string name="source_code">Kaynak Kodu</string>
+    <string name="privacy_policy">Gizlilik Politikası</string>
+
+    <!-- Contributors -->
+    <string name="contributors">Katkıda Bulunanlar</string>
+    <string name="development_team">Geliştirme Ekibi</string>
+    <string name="apps_that_inspired_us">Bize İlham Veren Uygulamalar</string>
+
+    <!-- Settings -->
+    <string name="settings">Ayarlar</string>
+    <string name="appearance">Görünüm</string>
+    <string name="interface_settings">Arayüz</string>
+    <string name="interface_settings_subtitle">Temalar, renkler ve düzen</string>
+    <string name="app_theme">Uygulama Teması</string>
+    <string name="theme_auto">Otomatik</string>
+    <string name="theme_light">Açık</string>
+    <string name="theme_dark">Koyu</string>
+    <string name="theme_auto_black_white">Otomatik S/B</string>
+    <string name="theme_white">Beyaz</string>
+    <string name="theme_black">Siyah</string>
+    <string name="custom_color">Özel Renkler</string>
+    <string name="custom_color_subtitle">Özel bir renge dayalı renk şeması</string>
+    <string name="hex_color">Hex Rengi</string>
+    <string name="hex_color_subtitle">Geçerli bir 6 haneli hex kodu girin</string>
+    <string name="custom_font">Özel Yazı Tipi</string>
+    <string name="custom_font_subtitle">Uygulamada kullanmak için bir .ttf dosyası seçin</string>
+    <string name="visual_effects">Görsel Efektler</string>
+    <string name="not_supported_on_this_device">Bu cihazda desteklenmiyor</string>
+    <string name="not_supported_on_this_device_subtitle">Bulanıklık ve Sıvı Cam Android 12 veya üstü gerektirir</string>
+    <string name="material_liquid_you_glass">Sıvı Cam Material You</string>
+    <string name="material_liquid_you_glass_subtitle">Navigasyona sıvı cam efekti uygulayın</string>
+    <string name="material_blur_effects">Material Bulanıklık Efektleri</string>
+    <string name="material_blur_effects_subtitle">Navigasyona arka plan bulanıklığı efekti uygulayın</string>
+    <string name="scroll_animation">Kaydırma Animasyonu</string>
+    <string name="scroll_animation_device">Kaydırırken liste öğeleri için belirme animasyonu</string>
+    <string name="call_ui">Arama Arayüzü</string>
+    <string name="incoming_call_ui">Gelen Arama Arayüzü</string>
+    <string name="incoming_call_ui_subtitle">Gelen aramaları nasıl yanıtlayacağınızı seçin</string>
+    <string name="avatars_settings">Avatar Ayarları</string>
+    <string name="avatars_settings_subtitle">Renkleri, çerçeveleri ve daha fazlasını özelleştirme</string>
+    <string name="avatar_colors">Avatar Renkleri</string>
+    <string name="colorful">Renkli</string>
+    <string name="primary_color">Ana Renk</string>
+    <string name="secondary_color">İkincil Renk</string>
+    <string name="google_contacts_color">Google Kişiler Rengi</string>
+    <string name="show_first_letter_in_avatar">Avatarda İlk Harfi Göster</string>
+    <string name="show_first_letter_in_avatar_subtitle">Resim eksik olduğunda harfi gösterir</string>
+    <string name="avatar_frame">Avatar Çerçevesi</string>
+    <string name="avatar_frame_subtitle">Avatarın etrafında bir kenarlık göster</string>
+    <string name="show_picture_in_avatar">Avatarda Resmi Göster</string>
+    <string name="show_picture_in_avatar_subtitle">Mevcutsa kişi fotoğrafını gösterir</string>
+
+    <string name="сaller_ui">Arayan Arayüzü</string>
+    <string name="сaller_ui_subtitle">Arama ekranını ve kontrolleri özelleştirin</string>
+    <string name="end_call_button">Aramayı Sonlandır Düğmesi</string>
+    <string name="customize_width">Genişliği Özelleştir</string>
+    <string name="customize_width_subtitle">Aramayı sonlandır düğmesinin genişliğini ayarlayın</string>
+
+    <string name="navigations">Navigasyon</string>
+    <string name="navigations_subtitle">Sekme görünürlüğü ve stil</string>
+    <string name="tab_sections">Sekme Bölümleri</string>
+    <string name="tab_sections_subtitle">Hangi sekmelerin görünür olacağını seçin ve navigasyon çubuğunda yeniden sıralamak için tutamacı sürükleyin</string>
+    <string name="navigation_style">Navigasyon Stili</string>
+    <string name="pill_style_navigation">Hap Stili Navigasyon</string>
+    <string name="pill_style_navigation_subtitle">Standart alt çubuk yerine yüzen bir hap stili navigasyon çubuğu göster</string>
+    <string name="icon_only_bottom_bar">Yalnızca Simge Alt Çubuk</string>
+    <string name="icon_only_bottom_bar_subtitle">Navigasyondan metin etiketlerini kaldırır</string>
+
+    <string name="calls_and_system">Aramalar ve Sistem</string>
+    <string name="call_settings">Arama Ayarları</string>
+    <string name="call_settings_subtitle">Hesaplar, sensör ve cep modu</string>
+    <string name="default_sim">Varsayılan SIM</string>
+    <string name="ask_first">Önce Sor</string>
+    <string name="calling_accounts">Arama Hesapları</string>
+    <string name="system_settings">Sistem Ayarları</string>
+    <string name="call_behavior">Arama Davranışı</string>
+    <string name="proximity_sensor">Arka Planda Yakınlık Sensörü</string>
+    <string name="proximity_sensor_subtitle">Arama sırasında telefon kulak yakınındayken ekranı kapat</string>
+    <string name="pocket_mode_prevention">Cep Modu Önleme</string>
+    <string name="pocket_mode_prevention_subtitle">Telefon cepteyken yanlışlıkla cevaplamayı/reddetmeyi engelle</string>
+    <string name="floating_ongoing_call">Devam Eden Arama Baloncuğu</string>
+    <string name="floating_ongoing_call_subtitle">Aramalar sırasında sürüklenebilir bir baloncuk göster. \'Diğer uygulamaların üzerinde göster\' izni gerektirir</string>
+    <string name="direct_call_on_tap">Dokunarak Doğrudan Arama</string>
+    <string name="direct_call_on_tap_subtitle">Doğrudan aramak için bir arama kaydına dokunun</string>
+    <string name="auto_speaker">Otomatik Hoparlör</string>
+    <string name="auto_speaker_subtitle">Telefon kulaktan uzakta olduğunda otomatik olarak hoparlöre geçin ve yakın olduğunda ahizeye geri dönün</string>
+
+    <string name="sound_and_vibration">Ses ve Titreşim</string>
+    <string name="sound_and_vibration_subtitle">Zil sesleri, tuş sesleri ve uygulama genelinde dokunsal geri bildirim</string>
+    <string name="tap_haptics">Dokunma Haptiği</string>
+    <string name="enable_tap_haptics">Dokunma Haptiğini Etkinleştir</string>
+    <string name="haptics_intensity">Yoğunluk</string>
+    <string name="haptics_soft">Yumuşak</string>
+    <string name="haptics_strong">Güçlü</string>
+    <string name="haptics_custom">Özel</string>
+    <string name="preview_haptic">Haptiği Önizle</string>
+    <string name="ringtone_settings">Zil Sesi Ayarları</string>
+    <string name="dialpad_tones">Tuş Sesleri</string>
+    <string name="dialpad_tones_subtitle">Tuşa basıldığında çalan tuş sesi</string>
+    <string name="calls">Aramalar</string>
+    <string name="vibrate_on_answer">Cevaplarken Titreşim</string>
+    <string name="vibrate_on_answer_subtitle">Karşı taraf cevapladığında titreşim</string>
+    <string name="vibrate_on_hang_up">Kapatırken Titreşim</string>
+    <string name="vibrate_on_hang_up_subtitle">Arama sona erdiğinde titreşim</string>
+    <string name="haptics_across_app">Uygulama Genelinde Haptik</string>
+    <string name="scroll_haptics">Kaydırma Haptiği</string>
+    <string name="scroll_haptics_subtitle">Uygulamada kaydırma hareketlerinde titreşim</string>
+    <string name="haptic_interval">Haptik Aralığı</string>
+    <string name="haptic_interval_value">%.1f cm\'de 1</string>
+    <string name="haptic_strength">Haptik Gücü</string>
+
+    <string name="manage_blocked">Engellenenleri Yönet</string>
+    <string name="manage_blocked_subtitle">Engellenen aramaları ve spam\'ı yönetin</string>
+    <string name="blocked_numbers">Engellenen Numaralar</string>
+    <string name="block_notifications">Bildirimleri Engelle</string>
+    <string name="block_notifications_subtitle">Engellenen aramalar için düşük öncelikli bir uyarı göster</string>
+    <string name="block_method">Engelleme Yöntemi</string>
+    <string name="block_method_subtitle">Engellenen aramalar nasıl işlenir</string>
+    <string name="decline_automatically">Otomatik Reddet</string>
+    <string name="ring_silently">Sessizce Çal</string>
+    <string name="log_visibility">Kayıt Görünürlüğü</string>
+    <string name="log_visibility_subtitle">Son aramalarda engellenen aramaları göster veya gizle</string>
+    <string name="hide_from_logs">Kayıtlardan Gizle</string>
+    <string name="show_in_logs">Kayıtlarda Göster</string>
+    <string name="blocked_size">Engellenen: %s</string>
+
+    <string name="authentication">Kimlik Doğrulama</string>
+    <string name="authentication_method">Kimlik Doğrulama Yöntemi</string>
+    <string name="system_biometrics">Sistem Biyometrisi</string>
+    <string name="system_biometrics_subtitle">Parmak izi, yüz tanıma veya cihaz kimlik bilgileri</string>
+    <string name="system_biometrics_not_available">Bu cihazda mevcut değil</string>
+    <string name="custom_biometrics">Özel Biyometri</string>
+    <string name="custom_pin">Özel PIN</string>
+    <string name="custom_password">Özel Parola</string>
+    <string name="pin">PIN</string>
+    <string name="pin_subtitle">Sayısal bir PIN belirleyin</string>
+    <string name="password">Parola</string>
+    <string name="password_subtitle">Özel bir alfasayısal parola belirleyin</string>
+    <string name="remove_biometric">Biyometrik Kilidi Kaldır</string>
+    <string name="not_configured">Yapılandırılmadı</string>
+    <string name="lock_app_on_open">Açarken Uygulamayı Kilitle</string>
+    <string name="lock_app_on_open_subtitle">Uygulama açılırken kimlik doğrulama gerektir</string>
+    <string name="lock_call_actions">Arama İşlemlerini Kilitle</string>
+    <string name="lock_call_actions_subtitle">Gelen aramaları yanıtlamak veya reddetmek için kimlik doğrulama gerektir</string>
+    <string name="lock_scope">Arama Kilidi Kapsamı</string>
+    <string name="all_calls">Tüm Aramalar</string>
+    <string name="all_calls_subtitle">Her gelen arama için biyometri gerekir</string>
+    <string name="blacklist">Kara Liste</string>
+    <string name="blacklist_count">Yanıtlama kimlik doğrulaması etkin olan kişiler: %s</string>
+    <string name="blacklist_subtitle">Yanıtlamak için biyometri gerektiren kişileri seçin</string>
+    <string name="whitelist">Beyaz Liste</string>
+    <string name="whitelist_count">Yanıtlama kimlik doğrulaması devre dışı olan kişiler: %s</string>
+    <string name="whitelist_subtitle">Biyometrik kilidi atlamak için kişileri seçin</string>
+    <string name="select_contacts">Kişileri Seç</string>
+    <string name="set_pin">PIN Belirle</string>
+    <string name="set_pin_subtitle">4 haneli bir PIN girin</string>
+    <string name="enter_pin">PIN Girin</string>
+    <string name="confirm_pin">PIN\'i Onayla</string>
+    <string name="confirm_pin_subtitle">Onaylamak için PIN\'inizi yeniden girin</string>
+    <string name="incorrect_pin">Geçersiz PIN. Lütfen tekrar deneyin.</string>
+    <string name="pin_dont_match">PIN\'ler eşleşmiyor. Lütfen baştan başlayın.</string>
+    <string name="set_password">Parola Belirle</string>
+    <string name="set_password_subtitle">Herhangi bir parola girin. Harfler, sayılar ve özel karakterler desteklenir.</string>
+    <string name="enter_password">Parola Girin</string>
+    <string name="confirm_password">Parolayı Onayla</string>
+    <string name="incorrect_password">Geçersiz parola</string>
+    <string name="incorrect_password_subtitle">Parola en az 4 karakter olmalıdır</string>
+    <string name="password_dont_match">Parolalar eşleşmiyor</string>
+
+    <string name="manage_contacts">Kişileri Yönet</string>
+    <string name="manage_contacts_subtitle">Özel kişiler, gösterilecek hesaplar ve listenizi temizleyin</string>
+    <string name="display">Görüntü</string>
+    <string name="sort_by">Sıralama Ölçütü</string>
+    <string name="name_format">İsim Biçimi</string>
+    <string name="first_name_first">Önce Ad</string>
+    <string name="last_name_first">Önce Soyad</string>
+    <string name="merge_and_fix">Birleştir ve Düzelt</string>
+    <string name="standardize">Standartlaştır</string>
+    <string name="standardize_phone_numbers">Telefon numaralarını standartlaştır</string>
+    <string name="standardize_phone_numbers_subtitle">Telefon numaralarından boşlukları ve özel karakterleri kaldır</string>
+    <string name="total_contacts">Toplam Kişi</string>
+    <string name="contacts_with_changes">Değişiklik olan kişiler</string>
+    <string name="numbers_to_standardize">Standartlaştırılacak numaralar</string>
+    <string name="all_numbers_are_already_standardized">✅ Tüm numaralar zaten standartlaştırılmış!</string>
+    <string name="examples_of_changes">Değişiklik örnekleri:</string>
+    <string name="and_more">Ve %s daha…</string>
+
+    <string name="merging_contacts">Kişileri Birleştirme</string>
+    <string name="merging_contacts_subtitle">Yinelenen kişileri bulma ve birleştirme</string>
+    <string name="merging_contacts_description">Birleştirilmiş kişiler, farklı hesaplardan tek bir kişide bağlanmış birden fazla giriştir. Her kaynağı ayrı ayrı düzenleyebilir veya bağlantılarını kaldırabilirsiniz.</string>
+    <string name="no_duplicates_found">Yinelenen bulunamadı</string>
+    <string name="duplicates_in">Şunlarda yinelenenler: %s</string>
+    <string name="merge_duplicates">Yinelenenleri birleştir (%s kişi)</string>
+
+    <string name="unmerging_contacts">Kişi Bağlantılarını Kaldır</string>
+    <string name="unmerging_contacts_subtitle">Birleştirilmiş kişileri bul ve bağlantılarını kaldır</string>
+    <string name="unmerging_contacts_description">Kişi bilgileri birden fazla kaynaktan gelmektedir. Düzenlemek için birini seçin veya tüm bağlantıları kaldırarak ayrı kişiler olarak alın.</string>
+    <string name="no_merged_contacts_found">Birleştirilmiş kişi bulunamadı</string>
+    <string name="merged_from_sources">%s kaynaktan birleştirilmiş</string>
+    <string name="unlink">Bağlantıyı Kaldır</string>
+    <string name="warning_cannot_be_undone">⚠️ Bu işlem geri alınamaz.</string>
+
+    <string name="managing_contact_sources">Kişi Kaynaklarını Yönetme</string>
+    <string name="managing_contact_sources_subtitle">Listenizde hangi hesapların gösterileceğini seçin</string>
+    <string name="managing_contact_sources_description">Kişi listenizde hangi hesapların görünür olacağını seçin. Bir hesabın işaretini kaldırmak, kişilerini gizler ancak silmez.</string>
+    <string name="contact_sources">Kişi Kaynakları</string>
+    <string name="contacts_stored_on_app">Uygulamada depolanan kişiler</string>
+    <string name="contacts_stored_on_device">Cihazda depolanan kişiler</string>
+
+    <string name="private_contacts">Özel Kişiler</string>
+    <string name="private_contacts_subtitle">Şifrelenmiş yerel kişilerinizi yönetin</string>
+
+    <!-- Call -->
+    <string name="call">Ara</string>
+    <string name="incoming">Gelen</string>
+    <string name="outgoing">Giden</string>
+    <string name="missed">Cevaplanmayan</string>
+    <string name="rejected">Reddedilen</string>
+    <string name="blocked">Engellenen</string>
+    <string name="answer">Cevapla</string>
+    <string name="decline">Reddet</string>
+    <string name="answer_and_decline">Cevapla ve diğer aramayı sonlandır</string>
+    <string name="end_call">Aramayı Sonlandır</string>
+    <string name="back_to_call">Aramaya Dön</string>
+    <string name="keypad">Tuş Takımı</string>
+    <string name="mute">Sessiz</string>
+    <string name="unmute">Sesi Aç</string>
+    <string name="speaker">Hoparlör</string>
+    <string name="add_call">Arama Ekle</string>
+    <string name="resume">Devam Et</string>
+    <string name="swap">Değiştir</string>
+    <string name="more">Daha Fazla</string>
+    <string name="hold">Beklet</string>
+    <string name="on_hold">Beklemede</string>
+    <string name="call_ended">Arama Sona Erdi</string>
+    <string name="calling">Aranıyor…</string>
+    <string name="incoming_call">Gelen Arama</string>
+    <string name="connecting">Bağlanıyor…</string>
+    <string name="slide_to_answer">Cevaplamak için kaydırın</string>
+    <string name="swipe_up_to_answer">Cevaplamak için yukarı kaydırın</string>
+    <string name="swipe_down_to_reject">Reddetmek için aşağı kaydırın</string>
+
+    <!-- Recents -->
+    <string name="recents">Son Aramalar</string>
+    <string name="home_tab">Ana Sayfa</string>
+    <string name="call_history">Arama Geçmişi</string>
+    <string name="history_with">%s ile geçmiş</string>
+    <string name="no_call_history_found">Arama geçmişi bulunamadı</string>
+    <string name="delete_call_logs">Arama kayıtlarını sil</string>
+    <string name="delete_call_logs_selected">Seçili %s arama kaydını silmek istediğinizden emin misiniz?</string>
+    <string name="deleted_from_call_log">Arama kaydından silindi</string>
+    <string name="could_not_delete">Silinemedi</string>
+    <string name="clear_all_filtered_logs">Tüm filtrelenmiş kayıtları temizle</string>
+    <string name="clear_all_filtered_logs_selected">Bu, görüntülenen tüm arama geçmişini silecektir. Bu işlem geri alınamaz.</string>
+
+    <!-- Contacts -->
+    <string name="contacts">Kişiler</string>
+    <string name="view_contact">Kişiyi Görüntüle</string>
+    <string name="view_contacts">Kişileri Görüntüle</string>
+    <string name="contacts_settings">Kişi Ayarları</string>
+    <string name="create_contact">Kişi Oluştur</string>
+    <string name="add_contact">Kişi Ekle</string>
+    <string name="add_to_contact">Kişiye Ekle</string>
+    <string name="edit_contact">Kişiyi Düzenle</string>
+    <string name="contact_info">Kişi Bilgileri</string>
+    <string name="favorites">Favoriler</string>
+    <string name="message">Mesaj</string>
+    <string name="video">Video</string>
+    <string name="email">E-posta</string>
+    <string name="default_number">Varsayılan</string>
+    <string name="recent_number">Son Kullanılan</string>
+    <string name="recent_activity">Son Etkinlik</string>
+    <string name="add_to_favorites">Favorilere Ekle</string>
+    <string name="remove_from_favorites">Favorilerden Kaldır</string>
+    <string name="no_favorites_yet">Henüz Favori Yok</string>
+    <string name="no_favorites_yet_subtitle">Buraya eklemek için bir kişiyi yıldızlayın</string>
+    <string name="move_contact">Kişiyi Taşı</string>
+    <string name="move_to_another_account">Başka bir hesaba taşı</string>
+    <string name="move_to_device_storage">Cihaz Depolamasına Taşı</string>
+    <string name="contact_moved_successfully">Kişi başarıyla taşındı</string>
+    <string name="save_to_account">Hesaba Kaydet</string>
+    <string name="show_full_history">Tüm geçmişi göster</string>
+    <string name="contact_qr">Kişi QR\'ı</string>
+    <string name="phone_number">Telefon Numarası</string>
+    <string name="name">Ad</string>
+    <string name="prefix">Önek</string>
+    <string name="prefix_description">Bay, Bayan, Dr, vb.</string>
+    <string name="first_name">Ad</string>
+    <string name="middle_name">İkinci Ad</string>
+    <string name="middle_name_description">İkinci ad veya baş harf</string>
+    <string name="last_name">Soyad</string>
+    <string name="suffix">Sonek</string>
+    <string name="suffix_description">Jr., Sr., III, vb.</string>
+    <string name="nickname">Takma Ad</string>
+    <string name="nickname_description">Kısa ad veya rumuz</string>
+    <string name="company">Şirket</string>
+    <string name="job_title">Ünvan</string>
+    <string name="job_title_description">Şirketteki pozisyon</string>
+    <string name="add_field">Alan Ekle</string>
+    <string name="add_phone">Telefon Ekle</string>
+    <string name="add_email">E-posta Ekle</string>
+    <string name="add_event">Etkinlik Ekle</string>
+    <string name="add_address">Adres Ekle</string>
+    <string name="add_note">Not Ekle</string>
+    <string name="contact_ringtone">Kişi Zil Sesi</string>
+    <string name="unsaved_changes">Kaydedilmemiş Değişiklikler</string>
+    <string name="unsaved_changes_subtitle">Çıkmadan önce değişikliklerinizi kaydetmek ister misiniz?</string>
+    <plurals name="contacts_count">
+        <item quantity="one">%d kişi</item>
+        <item quantity="other">%d kişi</item>
+    </plurals>
+    <plurals name="add_to_favorites_confirmation">
+        <item quantity="one">%d kişi favorilere eklensin mi?</item>
+        <item quantity="other">%d kişi favorilere eklensin mi?</item>
+    </plurals>
+    <plurals name="remove_from_favorites_confirmation">
+        <item quantity="one">%d kişi favorilerden kaldırılsın mı?</item>
+        <item quantity="other">%d kişi favorilerden kaldırılsın mı?</item>
+    </plurals>
+
+    <!-- Permission -->
+    <string name="allow">İzin Ver</string>
+    <string name="call_history_permission">Rill Phone, son etkinliğinizi ve cevaplanmayan aramalarınızı göstermek için arama kayıtlarınıza erişime ihtiyaç duyar.</string>
+    <string name="contacts_permission">Kişi İzni Gerekli</string>
+    <string name="contacts_permission_description">Kişilerinizi görüntülemek için kişi iznine izin verin.</string>
+    <string name="search_contacts_permission_description">Kişilerinizde arama yapmak ve gelen aramaları tanımlamak için kişi iznine izin verin.</string>
+
+    <!-- Default Dialer -->
+    <string name="default_phone_number_cleared">Varsayılan telefon numarası temizlendi</string>
+    <string name="set_as_default">Varsayılan olarak ayarla</string>
+    <string name="clear_default">Varsayılanı temizle</string>
+    <string name="default_phone_set">%s varsayılan olarak ayarlandı</string>
+    <string name="default_dialer_title">Rill Phone\'u varsayılan olarak ayarla</string>
+    <string name="default_dialer_subtitle">Rill Phone yalnızca varsayılan telefon uygulamanızsa arama başlatabilir ve alabilir</string>
+    <string name="default_dialer_warning">Uygulama bu izin olmadan çalışamaz. Lütfen tekrar deneyin.</string>
+
+    <!-- Call notes -->
+    <string name="notes">Notlar</string>
+    <string name="call_notes">Arama Notları</string>
+    <string name="about_call_notes">Arama Notları Hakkında</string>
+    <string name="about_call_notes_subtitle">Arama sırasında aldığınız hızlı notlar. Uygulamanın dosyalarında yerel olarak depolanır, telefon numarasına bağlanır (Google Kişiler ve diğerleriyle senkronize edilmez). Her numaranın, uygulama içindeki kişi ayrıntılarındaki arama kaydından veya \"Arama Notları\" sekmesinden erişilebilen kendi özel notu vardır.</string>
+    <string name="type_your_note">Notunuzu yazın…</string>
+    <string name="no_notes_yet">Henüz Not Yok</string>
+    <string name="no_notes_yet_subtitle">Aramalar sırasında alınan notlar burada görünür</string>
+    <string name="delete_notes">Notları Sil</string>
+    <string name="delete_notes_subtitle">Seçili %s notu silmek istediğinizden emin misiniz?</string>
+    <string name="delete_note">Notu Sil</string>
+    <string name="delete_note_subtitle">%s için not silinsin mi?"</string>
+
+    <!-- Times -->
+    <string name="just_now">Şimdi</string>
+    <string name="yesterday">Dün</string>
+    <string name="today">Bugün</string>
+    <string name="seconds_letter">%ds</string>
+    <string name="minutes_letter">%ddk</string>
+    <string name="hours_letter">%dsa</string>
+    <string name="days_letter">%dg</string>
+
+    <!-- Phone numbers -->
+    <string name="no_label">Etiketsiz</string>
+    <string name="custom_label">Özel etiket</string>
+    <string name="change_label">Etiketi değiştir</string>
+    <string name="mobile">Cep</string>
+    <string name="main_number">Ana</string>
+    <string name="home">Ev</string>
+    <string name="work">İş</string>
+    <string name="work_fax">İş Faksı</string>
+    <string name="home_fax">Ev Faksı</string>
+    <string name="pager">Çağrı Cihazı</string>
+    <string name="other">Diğer</string>
+    <string name="send_whatsapp">WhatsApp\'tan Gönder</string>
+
+    <!-- Events -->
+    <string name="other_information">Diğer Bilgiler</string>
+    <string name="birthday">Doğum Günü</string>
+    <string name="anniversary">Yıl Dönümü</string>
+
+    <!-- Dialpad -->
+    <string name="add_pause">2 saniye duraklama ekle</string>
+    <string name="add_wait">Bekleme ekle</string>
+
+    <!-- Onboarding -->
+    <string name="skip">Atla</string>
+    <string name="page_title_one">Tasarsan Gizli</string>
+    <string name="page_subtitle_one">Kişileriniz cihazınızda kalır. Verilerinizi asla yüklemez, izlemez veya kimseyle paylaşmayız. Asla.</string>
+    <string name="page_title_two">Açık Kaynak ve Şeffaf</string>
+    <string name="page_subtitle_two">Sıfır telemetri. Sıfır reklam. Sıfır izleme. İletişiminiz üzerinde tam kontrol.</string>
+    <string name="page_title_three">Hızlı ve Güvenilir</string>
+    <string name="page_subtitle_three">Anında T9 araması, akıcı animasyonlar ve şimşek hızında aramalar. Sadece çalışan bir telefon uygulaması.</string>
+    <string name="page_title_warning">Geliştirme Aşamasında</string>
+    <string name="page_subtitle_warning">Bu uygulama hala geliştirme aşamasındadır. Bazı özellikler beklendiği gibi çalışmayabilir. Lütfen dikkatli kullanın ve karşılaştığınız sorunları bildirin.</string>
+</resources>

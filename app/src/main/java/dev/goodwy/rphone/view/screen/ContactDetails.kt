@@ -64,9 +64,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.automirrored.rounded.CallSplit
 import androidx.compose.material.icons.automirrored.rounded.DriveFileMove
-import androidx.compose.material.icons.filled.BugReport
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.automirrored.rounded.Help
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarOutline
 import androidx.compose.material.icons.outlined.Directions
@@ -79,9 +77,7 @@ import androidx.compose.material.icons.rounded.PersonAdd
 import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material.icons.rounded.QrCode2
 import androidx.compose.material.icons.rounded.Share
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment.Companion
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -178,10 +174,15 @@ fun ContactDetailsScreen(
         } else null
 
         if (contact == null && contactId != null && contactId != "null") {
-            context.toast(noContactsFound)
-            isFullLoading = false
-            navigateBack()
-            return@LaunchedEffect
+            if (phoneNumber != null) {
+                isFullLoading = false
+                return@LaunchedEffect
+            } else {
+                context.toast(noContactsFound)
+                isFullLoading = false
+                navigateBack()
+                return@LaunchedEffect
+            }
         }
         isFullLoading = false
     }
@@ -256,8 +257,16 @@ fun ContactDetailsScreen(
 
     val contactLogs = remember(contact, phoneNumber, allLogs) {
         allLogs.filter { log ->
-            (contact != null && (log.contactId == contact!!.id || contact!!.phoneNumbers.any { n -> log.number.replace(" ", "").contains(n.replace(" ", "")) })) ||
-            (phoneNumber != null && log.number.replace(" ", "").contains(phoneNumber.replace(" ", "")))
+//            (contact != null && (log.contactId == contact!!.id ||
+//                contact!!.phoneNumbers.any { n -> log.number.replace(" ", "").contains(n.replace(" ", "")) }))
+//                    || (phoneNumber != null && log.number.replace(" ", "").contains(phoneNumber.replace(" ", "")))
+
+            val normalizedLogNumber = log.number.replace(" ", "")
+            val normalizedPhoneNumber = phoneNumber?.replace(" ", "")
+
+            (contact != null && (log.contactId == contact!!.id ||
+                contact!!.phoneNumbers.any { n -> normalizedLogNumber == n.replace(" ", "") }))
+                    || (phoneNumber != null && normalizedLogNumber == normalizedPhoneNumber)
         }
     }
 
@@ -888,11 +897,34 @@ fun ContactDetailsScreen(
 
                                 var showAboutNotesDialog by remember { mutableStateOf(false) }
                                 if (showAboutNotesDialog) {
-                                    InfoDialog(
+                                    RillDialog(
+                                        onDismissRequest = { showAboutNotesDialog = false },
                                         title = stringResource(R.string.about_call_notes),
-                                        subtitle = stringResource(R.string.about_call_notes_subtitle),
-                                        onDismiss = { showAboutNotesDialog = false }
-                                    )
+                                        icon = Icons.AutoMirrored.Rounded.Help,
+                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+                                        confirmButton = {
+                                            TextButton(onClick = {
+                                                showAboutNotesDialog = false
+                                            }) {
+                                                Text(
+                                                    stringResource(R.string.close),
+                                                    textAlign = TextAlign.End,
+                                                )
+                                            }
+                                        },
+                                        dismissButton = {
+                                            val notesDir = NoteManager.getNotesDir(context).absolutePath
+                                            TextButton(onClick = {
+                                                showAboutNotesDialog = false
+                                                context.copyToClipboard(notesDir)
+                                            }) {
+                                                Text(stringResource(R.string.copy_path))
+                                            }
+                                        }
+                                    ) {
+                                        Text(stringResource(R.string.about_call_notes_subtitle))
+                                    }
                                 }
                                 RillExpressiveCard(
                                     title = stringResource(R.string.call_notes),
@@ -1630,11 +1662,34 @@ fun ContactDetailsScreen(
 
                             var showAboutNotesDialog by remember { mutableStateOf(false) }
                             if (showAboutNotesDialog) {
-                                InfoDialog(
+                                RillDialog(
+                                    onDismissRequest = { showAboutNotesDialog = false },
                                     title = stringResource(R.string.about_call_notes),
-                                    subtitle = stringResource(R.string.about_call_notes_subtitle),
-                                    onDismiss = { showAboutNotesDialog = false }
-                                )
+                                    icon = Icons.AutoMirrored.Rounded.Help,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+                                    confirmButton = {
+                                        TextButton(onClick = {
+                                            showAboutNotesDialog = false
+                                        }) {
+                                            Text(
+                                                stringResource(R.string.close),
+                                                textAlign = TextAlign.End,
+                                            )
+                                        }
+                                    },
+                                    dismissButton = {
+                                        val notesDir = NoteManager.getNotesDir(context).absolutePath
+                                        TextButton(onClick = {
+                                            showAboutNotesDialog = false
+                                            context.copyToClipboard(notesDir)
+                                        }) {
+                                            Text(stringResource(R.string.copy_path))
+                                        }
+                                    }
+                                ) {
+                                    Text(stringResource(R.string.about_call_notes_subtitle))
+                                }
                             }
                             RillExpressiveCard(
                                 title = stringResource(R.string.call_notes),
@@ -2156,7 +2211,9 @@ fun SourcesDialog(
                     stringResource(R.string.unmerging_contacts_description),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 16.dp)
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = 16.dp)
                 )
 
                 RillExpressiveCard(shape = RoundedCornerShape(cardCornerMedium)) {
@@ -2210,7 +2267,9 @@ fun SourcesDialog(
 
                                 if (contactData != null) {
                                     Column(
-                                        modifier = Modifier.weight(1f).padding(start = 14.dp),
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .padding(start = 14.dp),
                                         verticalArrangement = Arrangement.spacedBy(2.dp)
                                     ) {
                                         if (contactData.displayName.isNotBlank()) {

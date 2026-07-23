@@ -19,4 +19,22 @@ object NavBarVisibilityState {
      * bottom nav pill can smoothly slide away instead of overlapping it.
      */
     var hideForSelectionMode by mutableStateOf(false)
+
+    /**
+     * True while the recordings list is showing as a screen pushed from Settings → Call
+     * Recording, rather than as the "Recordings" bottom-nav tab itself. Both routes render the
+     * exact same single screen, but the bottom pill/nav bar should stay hidden in the
+     * Settings-pushed case since the user isn't switching tabs there — they're drilling into a
+     * detail screen and expect a normal "back" flow.
+     */
+    var hideForSettingsEntry by mutableStateOf(false)
+
+    /**
+     * True while a tab screen is showing a single highlighted result it was opened into from
+     * unified Search (e.g. Notes opened from a "Notes" search hit) rather than as the normal
+     * bottom-nav tab. The bottom pill/nav bar and that screen's own search bar pill both stay
+     * hidden for the lifetime of this highlighted view, matching the Settings-entry behaviour
+     * above, since the user is viewing one specific search match rather than browsing the tab.
+     */
+    var hideForSearchResult by mutableStateOf(false)
 }

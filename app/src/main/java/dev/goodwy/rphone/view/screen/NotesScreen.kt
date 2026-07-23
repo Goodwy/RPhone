@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Help
 import androidx.compose.material.icons.automirrored.outlined.StickyNote2
+import androidx.compose.material.icons.automirrored.rounded.Help
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.*
@@ -32,10 +33,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.pointerInput
-import kotlin.math.abs
-import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -43,16 +40,15 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.ContactsViewModel
 import dev.goodwy.rphone.controller.util.NoteEntry
 import dev.goodwy.rphone.controller.util.NoteManager
 import dev.goodwy.rphone.controller.util.PreferenceManager
-import dev.goodwy.rphone.view.components.InfoDialog
 import dev.goodwy.rphone.view.components.PlaceholderView
 import dev.goodwy.rphone.view.components.RillAvatar
 import dev.goodwy.rphone.view.components.RillDialog
@@ -63,14 +59,14 @@ import dev.goodwy.rphone.view.theme.MyColors.cardColorSelected
 import dev.goodwy.rphone.view.theme.customColors
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.generated.destinations.ContactScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.DialPadScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.FavoritesScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.RecentScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import dev.goodwy.rphone.controller.util.copyToClipboard
+import dev.goodwy.rphone.view.components.NavBarVisibilityState
+import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillIconButton
 import dev.goodwy.rphone.view.components.RillTextButton
 import dev.goodwy.rphone.view.components.Title
+import dev.goodwy.rphone.view.components.TopBar
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinActivityViewModel
 import java.text.SimpleDateFormat
@@ -79,7 +75,7 @@ import java.util.*
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Destination<RootGraph>(style = TabTransitionStyle::class)
 @Composable
-fun NotesScreen(navController: NavController, navigator: DestinationsNavigator) {
+fun NotesScreen(navController: NavController, navigator: DestinationsNavigator, highlightQuery: String? = null) {
     val context = LocalContext.current
     val prefs = koinInject<PreferenceManager>()
     val haptic = LocalHapticFeedback.current
@@ -97,27 +93,66 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator) 
         }
     }
 
-    var notes by remember { mutableStateOf(NoteManager.getAllNotes(context)) }
+    var allNotes by remember { mutableStateOf<List<NoteEntry>>(emptyList()) }
+    fun refreshNotes() {
+        allNotes = NoteManager.getAllNotes(context)
+    }
+    // Load notes on first launch
+    LaunchedEffect(Unit) {
+        refreshNotes()
+    }
+
+    val notes = remember(allNotes, highlightQuery) {
+        if (highlightQuery.isNullOrBlank()) {
+            allNotes
+        } else {
+            allNotes.filter { note ->
+                note.contactName.contains(highlightQuery, ignoreCase = true) ||
+                        note.phoneNumber.contains(highlightQuery.filter { c -> c.isDigit() || c == '+' }.ifEmpty { highlightQuery }, ignoreCase = true) ||
+                        note.content.contains(highlightQuery, ignoreCase = true)
+            }
+        }
+    }
+    // Find all notes containing matches for highlighting
+    val matchedNotes = remember(notes, highlightQuery) {
+        if (highlightQuery.isNullOrBlank()) {
+            emptySet()
+        } else {
+            notes.filter { note ->
+                note.contactName.contains(highlightQuery, ignoreCase = true) ||
+                        note.phoneNumber.contains(highlightQuery.filter { c -> c.isDigit() || c == '+' }.ifEmpty { highlightQuery }, ignoreCase = true) ||
+                        note.content.contains(highlightQuery, ignoreCase = true)
+            }.map { it.file.absolutePath }.toSet()
+        }
+    }
+    // Keep the bottom pill hidden (and the in-screen search bar hidden below) for the whole
+    // lifetime of this screen when it was opened to show one highlighted match from unified
+    // Search, rather than as the normal "Notes" bottom-nav tab.
+    val isSearchResultView = !highlightQuery.isNullOrBlank()
+    DisposableEffect(isSearchResultView) {
+        NavBarVisibilityState.hideForSearchResult = isSearchResultView
+        onDispose { NavBarVisibilityState.hideForSearchResult = false }
+    }
+
     var showOverflow by remember { mutableStateOf(false) }
 
     var selectedNotes by remember { mutableStateOf<Set<String>>(emptySet()) }
-
     BackHandler(enabled = selectedNotes.isNotEmpty()) {
         selectedNotes = emptySet()
     }
     var selectedNote by remember { mutableStateOf<NoteEntry?>(null) }
     var showEditor by remember { mutableStateOf(false) }
     var editorNote by remember { mutableStateOf<NoteEntry?>(null) }
+    var editorHighlightQuery by remember { mutableStateOf<String?>(null) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
     var noteToDelete by remember { mutableStateOf<NoteEntry?>(null) }
-
-    fun refreshNotes() { notes = NoteManager.getAllNotes(context) }
 
     if (showEditor && editorNote != null) {
         NoteEditorDialog(
             contactName = editorNote!!.contactName,
             phoneNumber = editorNote!!.phoneNumber,
-            onDismiss = { showEditor = false; editorNote = null; refreshNotes() }
+            highlightQuery = editorHighlightQuery,
+            onDismiss = { showEditor = false; editorNote = null; editorHighlightQuery = null; refreshNotes() }
         )
     }
 
@@ -159,6 +194,7 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator) 
 //    val favouritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, false)
 //    val contactsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS, true)
 //    val dialpadEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD, true)
+    val searchEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SEARCH, false)
 
     Scaffold(
         modifier = Modifier
@@ -221,52 +257,98 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator) 
                 label = "TopBarTransition"
             ) { isSelecting ->
                 if (!isSelecting) {
-                    TopAppBar(
-                        windowInsets = WindowInsets.systemBars.only(
-                            WindowInsetsSides.Top + WindowInsetsSides.Horizontal
-                        ),
-                        modifier = Modifier.padding(start = 8.dp, end = 4.dp),
-                        title = { Title(stringResource(R.string.call_notes)) },
-                        actions = {
-                            var showAboutNotesDialog by remember { mutableStateOf(false) }
-                            if (showAboutNotesDialog) {
-                                InfoDialog(
-                                    title = stringResource(R.string.about_call_notes),
-                                    subtitle = stringResource(R.string.about_call_notes_subtitle),
-                                    onDismiss = { showAboutNotesDialog = false }
-                                )
-                            }
-                            Box {
-                                IconButton(onClick = { showOverflow = true }) {
-                                    Icon(Icons.Default.MoreVert, "More")
-                                }
-                            }
-
-                            AnimatedVisibility(
-                                visible = showOverflow,
-                                enter = slideInVertically(initialOffsetY = { -it }, animationSpec = tween(320, easing = FastOutSlowInEasing)) + fadeIn(tween(280)),
-                                exit  = slideOutVertically(targetOffsetY = { -it }, animationSpec = tween(420, easing = FastOutLinearInEasing)) + fadeOut(tween(380))
-                            ) {
-                                DropdownMenu(
-                                    shape = RoundedCornerShape(16.dp),
-                                    expanded = showOverflow,
-                                    onDismissRequest = { showOverflow = false },
-                                        offset = DpOffset(0.dp, 24.dp),
-                                ) {
-                                    DropdownMenuItem(
-                                        contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
-                                        text = { Text(stringResource(R.string.about_call_notes)) },
-                                        leadingIcon = { Icon(Icons.AutoMirrored.Outlined.Help, null) },
-                                        onClick = {
-                                            showOverflow = false
-                                            showAboutNotesDialog = true
+                    if (searchEnabled || NavBarVisibilityState.hideForSearchResult) {
+                        TopAppBar(
+                            windowInsets = WindowInsets.systemBars.only(
+                                WindowInsetsSides.Top + WindowInsetsSides.Horizontal
+                            ),
+                            modifier = Modifier.padding(start = 8.dp, end = 4.dp),
+                            title = { Title(stringResource(R.string.call_notes)) },
+                            navigationIcon = {
+                                if (NavBarVisibilityState.hideForSearchResult) NavigationIcon(onClick = { navigator.navigateUp() })
+                            },
+                            actions = {
+                                var showAboutNotesDialog by remember { mutableStateOf(false) }
+                                if (showAboutNotesDialog) {
+                                    RillDialog(
+                                        onDismissRequest = { showAboutNotesDialog = false },
+                                        title = stringResource(R.string.about_call_notes),
+                                        icon = Icons.AutoMirrored.Rounded.Help,
+                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+                                        confirmButton = {
+                                            TextButton(onClick = {
+                                                showAboutNotesDialog = false
+                                            }) {
+                                                Text(
+                                                    stringResource(R.string.close),
+                                                    textAlign = TextAlign.End,
+                                                )
+                                            }
+                                        },
+                                        dismissButton = {
+                                            val notesDir = NoteManager.getNotesDir(context).absolutePath
+                                            TextButton(onClick = {
+                                                showAboutNotesDialog = false
+                                                context.copyToClipboard(notesDir)
+                                            }) {
+                                                Text(stringResource(R.string.copy_path))
+                                            }
                                         }
-                                    )
+                                    ) {
+                                        Text(stringResource(R.string.about_call_notes_subtitle))
+                                    }
                                 }
-                            }
-                        },
-                        colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
-                    )
+
+                                Box {
+                                    IconButton(onClick = { showOverflow = true }) {
+                                        Icon(Icons.Default.MoreVert, stringResource(R.string.more))
+                                    }
+                                }
+
+                                AnimatedVisibility(
+                                    visible = showOverflow,
+                                    enter = slideInVertically(
+                                        initialOffsetY = { -it },
+                                        animationSpec = tween(320, easing = FastOutSlowInEasing)
+                                    ) + fadeIn(tween(280)),
+                                    exit = slideOutVertically(
+                                        targetOffsetY = { -it },
+                                        animationSpec = tween(420, easing = FastOutLinearInEasing)
+                                    ) + fadeOut(tween(380))
+                                ) {
+                                    DropdownMenu(
+                                        shape = RoundedCornerShape(16.dp),
+                                        expanded = showOverflow,
+                                        onDismissRequest = { showOverflow = false },
+                                        offset = DpOffset(0.dp, 24.dp),
+                                    ) {
+                                        DropdownMenuItem(
+                                            contentPadding = PaddingValues(
+                                                start = 20.dp,
+                                                end = 26.dp
+                                            ),
+                                            text = { Text(stringResource(R.string.about_call_notes)) },
+                                            leadingIcon = {
+                                                Icon(
+                                                    Icons.AutoMirrored.Outlined.Help,
+                                                    null
+                                                )
+                                            },
+                                            onClick = {
+                                                showOverflow = false
+                                                showAboutNotesDialog = true
+                                            }
+                                        )
+                                    }
+                                }
+                            },
+                            colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
+                        )
+                    }
+                    else {
+                        TopBar(navController, navigator)
+                    }
                 } else {
                     val shareText = stringResource(R.string.share)
                     BatchNotesActionBar(
@@ -275,7 +357,7 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator) 
                         onDelete = {
                             notes.filter { selectedNotes.contains(it.file.absolutePath) }.forEach { it.file.delete() }
                             selectedNotes = emptySet()
-                            notes = NoteManager.getAllNotes(context)
+                            refreshNotes()
                         },
                         onShare = {
                             val text = notes.filter { selectedNotes.contains(it.file.absolutePath) }.joinToString("\n\n") { "${it.contactName}: ${it.content}" }
@@ -296,7 +378,9 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator) 
         containerColor = MaterialTheme.colorScheme.surface,
         contentWindowInsets = WindowInsets(0)
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
+        Box(modifier = Modifier
+            .padding(innerPadding)
+            .fillMaxSize()) {
             Column(modifier = Modifier.fillMaxSize()) {
                 if (notes.isEmpty()) {
                     PlaceholderView(
@@ -317,17 +401,20 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator) 
                         items(notes, key = { it.file.absolutePath }) { note ->
                             val safePhone = note.phoneNumber.filter { it.isDigit() || it == '+' }
                             val photoUri = phoneToPhotoUri[safePhone]
+                            val isHighlighted = matchedNotes.contains(note.file.absolutePath)
                             RillScrollAnimatedItem {
                                 NoteCard(
                                     note = note,
                                     photoUri = photoUri,
                                     isSelected = selectedNotes.contains(note.file.absolutePath),
+                                    highlightQuery = if (isHighlighted) highlightQuery else null,
                                     onClick = {
                                         if (selectionMode) {
                                             val key = note.file.absolutePath
                                             selectedNotes = if (selectedNotes.contains(key)) selectedNotes - key else selectedNotes + key
                                         } else {
                                             editorNote = note
+                                            editorHighlightQuery = if (isHighlighted) highlightQuery else null
                                             showEditor = true
                                         }
                                     },
@@ -411,12 +498,80 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator) 
     }
 }
 
+/** Highlights every case-insensitive occurrence of [query] with a tinted background span inside
+ *  the note editor's text field, so the word that matched a search is visible while editing —
+ *  not just on the note card in the list. Character offsets are unchanged, so identity mapping
+ *  is used. */
+private class NoteHighlightTransformation(
+    private val query: String,
+    private val highlightColor: androidx.compose.ui.graphics.Color
+) : androidx.compose.ui.text.input.VisualTransformation {
+    override fun filter(text: androidx.compose.ui.text.AnnotatedString): androidx.compose.ui.text.input.TransformedText {
+        val annotated = androidx.compose.ui.text.buildAnnotatedString {
+            append(text.text)
+            if (query.isNotBlank()) {
+                val lowerText = text.text.lowercase()
+                val lowerQuery = query.lowercase()
+                var startIndex = 0
+                while (startIndex <= text.text.length) {
+                    val matchIndex = lowerText.indexOf(lowerQuery, startIndex)
+                    if (matchIndex < 0) break
+                    addStyle(
+                        androidx.compose.ui.text.SpanStyle(
+                            background = highlightColor.copy(alpha = 0.35f),
+                            fontWeight = FontWeight.Bold
+                        ),
+                        matchIndex,
+                        matchIndex + query.length
+                    )
+                    startIndex = matchIndex + query.length
+                }
+            }
+        }
+        return androidx.compose.ui.text.input.TransformedText(
+            annotated,
+            androidx.compose.ui.text.input.OffsetMapping.Identity
+        )
+    }
+}
+
+/** Wraps every case-insensitive occurrence of [query] in [text] with a highlighted span — used
+ *  to show at a glance which word matched when a note was opened from search results. */
+@Composable
+private fun highlightedText(text: String, query: String?): androidx.compose.ui.text.AnnotatedString {
+    if (query.isNullOrBlank()) return androidx.compose.ui.text.AnnotatedString(text)
+    return androidx.compose.ui.text.buildAnnotatedString {
+        var startIndex = 0
+        val lowerText = text.lowercase()
+        val lowerQuery = query.lowercase()
+        while (startIndex <= text.length) {
+            val matchIndex = lowerText.indexOf(lowerQuery, startIndex)
+            if (matchIndex < 0) {
+                append(text.substring(startIndex))
+                break
+            }
+            append(text.substring(startIndex, matchIndex))
+            withStyle(
+                androidx.compose.ui.text.SpanStyle(
+                    background = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.35f),
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            ) {
+                append(text.substring(matchIndex, matchIndex + query.length))
+            }
+            startIndex = matchIndex + query.length
+        }
+    }
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun NoteCard(
     note: NoteEntry,
     photoUri: String? = null,
     isSelected: Boolean = false,
+    highlightQuery: String? = null,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     onAvatarLongClick: (() -> Unit)? = null,
@@ -433,8 +588,15 @@ fun NoteCard(
         label = "ButtonShapeAnimation"
     )
 
+    // Briefly (and then persistently, while this note is the search-result match) tints the
+    // card so it's obvious at a glance which note matched, in addition to the inline word
+    // highlight below.
     val cardBgColor by animateColorAsState(
-        targetValue = if (isSelected) cardColorSelected else cardColor,
+        targetValue = when {
+            isSelected -> cardColorSelected
+//            highlightQuery != null -> MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.35f)
+            else -> cardColor
+        },
         animationSpec = tween(200), label = "noteBg"
     )
     Box(modifier = Modifier.fillMaxWidth()) {
@@ -470,7 +632,8 @@ fun NoteCard(
                     )
                     RillAvatar(
                         name = "",
-                        modifier = Modifier.size(44.dp)
+                        modifier = Modifier
+                            .size(44.dp)
                             .scale(iconScale)
                             .alpha(iconAlpha),
                         icon = Icons.Rounded.Check,
@@ -480,7 +643,8 @@ fun NoteCard(
                     RillAvatar(
                         name = note.contactName,
                         photoUri = photoUri,
-                        modifier = Modifier.size(44.dp)
+                        modifier = Modifier
+                            .size(44.dp)
                             .then(
                                 if (onAvatarLongClick != null)
                                     Modifier.combinedClickable(
@@ -527,7 +691,7 @@ fun NoteCard(
                     }
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = note.content,
+                        text = highlightedText(note.content, highlightQuery),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 3,
@@ -544,16 +708,25 @@ fun NoteCard(
 fun NoteEditorDialog(
     contactName: String,
     phoneNumber: String,
+    highlightQuery: String? = null,
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
-    var text by remember {
-        mutableStateOf(NoteManager.readNote(context, contactName, phoneNumber))
+    val initialText = remember(contactName, phoneNumber) {
+        NoteManager.readNote(context, contactName, phoneNumber)
+    }
+    var text by remember(initialText) {
+        mutableStateOf(initialText)
+    }
+    val hasChanges = remember(text, initialText) {
+        text != initialText
     }
 
     ModalBottomSheet(
         onDismissRequest = {
-            NoteManager.writeNote(context, contactName, phoneNumber, text)
+            if (hasChanges) {
+                NoteManager.writeNote(context, contactName, phoneNumber, text)
+            }
             onDismiss()
         },
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
@@ -580,7 +753,9 @@ fun NoteEditorDialog(
                 ) {}
             }
             Row(
-                modifier = Modifier.fillMaxWidth().padding(start = 12.dp, end = 4.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 12.dp, end = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -636,7 +811,10 @@ fun NoteEditorDialog(
                     focusedContainerColor = cardColor,
                     unfocusedContainerColor = cardColor
                 ),
-                minLines = 8
+                minLines = 8,
+                visualTransformation = if (!highlightQuery.isNullOrBlank()) {
+                    NoteHighlightTransformation(highlightQuery, MaterialTheme.colorScheme.tertiary)
+                } else androidx.compose.ui.text.input.VisualTransformation.None
             )
         }
     }
@@ -661,7 +839,8 @@ fun BatchNotesActionBar(
         shadowElevation = 4.dp
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .statusBarsPadding()
                 .padding(horizontal = 8.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically
