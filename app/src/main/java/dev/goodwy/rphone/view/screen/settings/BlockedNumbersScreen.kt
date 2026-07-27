@@ -5,16 +5,14 @@ import android.telecom.TelecomManager
 import android.view.Surface
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Help
 import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.rounded.CallEnd
 import androidx.compose.material.icons.rounded.DisabledVisible
-import androidx.compose.material.icons.rounded.Gavel
-import androidx.compose.material.icons.rounded.MusicOff
-import androidx.compose.material.icons.rounded.NotificationsPaused
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -23,7 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -36,11 +34,11 @@ import dev.goodwy.rphone.view.components.RillAnimatedSection
 import dev.goodwy.rphone.view.components.RillExpressiveCard
 import dev.goodwy.rphone.view.components.RillListItem
 import dev.goodwy.rphone.view.components.RillSelectListItem
-import dev.goodwy.rphone.view.components.RillSwitchListItem
 import dev.goodwy.rphone.view.theme.customColors
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import dev.goodwy.rphone.view.components.RillDialog
 import dev.goodwy.rphone.view.components.Title
 import org.koin.compose.koinInject
 
@@ -113,43 +111,108 @@ fun BlockedNumbersScreen(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             item {
-                RillAnimatedSection(delayMs = 0L) {
-                    RillExpressiveCard {
-                        RillSwitchListItem(
-                            headline = stringResource(R.string.block_notifications),
-                            supporting = stringResource(R.string.block_notifications_subtitle),
-                            leadingIcon = Icons.Rounded.NotificationsPaused,
-                            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
-                            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
-                            checked = blockNotification,
-                            onCheckedChange = {
-                                blockNotification = it
-                                prefs.setBoolean(PreferenceManager.KEY_BLOCK_NOTIFICATION, it)
+                RillAnimatedSection(delayMs = 60L) {
+                    var showAboutNotesDialog by remember { mutableStateOf(false) }
+                    Column {
+                        SettingsSectionLabel(stringResource(R.string.system_settings))
+                        RillExpressiveCard {
+                            RillListItem(
+                                headline = stringResource(R.string.blocked_numbers),
+                                supporting = stringResource(R.string.blocked_size, blockedNumbersSize),
+                                leadingIcon = Icons.AutoMirrored.Rounded.List,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
+                                preTrailingIcon = Icons.AutoMirrored.Rounded.Help,
+                                modifierPreTrailingIcon = Modifier
+                                    .padding(end = 8.dp)
+                                    .size(24.dp)
+                                    .combinedClickable(
+                                        interactionSource = null,
+                                        indication = ripple(
+                                            bounded = false,
+                                            radius = 24.dp
+                                        ),
+                                        onClick = { showAboutNotesDialog = true }),
+                                trailingIcon = Icons.Default.ChevronRight,
+                                onClick = {
+                                    val telecomManager =
+                                        context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
+                                    try {
+                                        val intent =
+                                            telecomManager.createManageBlockedNumbersIntent()
+                                        context.startActivity(intent)
+                                    } catch (_: Exception) {
+                                        // Fallback if the intent is not supported on some older/custom versions
+                                    }
+                                }
+                            )
+                        }
+
+                        if (showAboutNotesDialog) {
+                            RillDialog(
+                                onDismissRequest = { showAboutNotesDialog = false },
+                                title = stringResource(R.string.blocked_numbers),
+                                icon = Icons.AutoMirrored.Rounded.Help,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+                                confirmButton = {
+                                    TextButton(onClick = {
+                                        showAboutNotesDialog = false
+                                    }) {
+                                        Text(
+                                            stringResource(R.string.close),
+                                            textAlign = TextAlign.End,
+                                        )
+                                    }
+                                },
+                            ) {
+                                Text(stringResource(R.string.blocked_numbers_system_info))
                             }
-                        )
+                        }
                     }
                 }
             }
 
+            // Our app's rules do not apply to blocked numbers on the system list; such calls are blocked by the system beforehand.
+//            item {
+//                RillAnimatedSection(delayMs = 60L) {
+//                    RillExpressiveCard {
+//                        RillSwitchListItem(
+//                            headline = stringResource(R.string.blocking_notifications),
+//                            supporting = stringResource(R.string.blocking_notifications_subtitle),
+//                            leadingIcon = Icons.Rounded.NotificationsPaused,
+//                            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+//                            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+//                            checked = blockNotification,
+//                            onCheckedChange = {
+//                                blockNotification = it
+//                                prefs.setBoolean(PreferenceManager.KEY_BLOCK_NOTIFICATION, it)
+//                            }
+//                        )
+//                    }
+//                }
+//            }
+
             item {
-                RillAnimatedSection(delayMs = 80L) {
+                RillAnimatedSection(delayMs = 120L) {
                     RillExpressiveCard {
-                        RillSelectListItem(
-                            headline = stringResource(R.string.block_method),
-                            supporting = stringResource(R.string.block_method_subtitle),
-                            leadingIcon = if (blockMethod == 0) Icons.Rounded.CallEnd else Icons.Rounded.MusicOff,
-                            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
-                            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
-                            options = listOf(
-                                stringResource(R.string.decline_automatically) to 0,
-                                stringResource(R.string.ring_silently) to 1
-                            ),
-                            selectedValue = blockMethod,
-                            onValueChange = {
-                                blockMethod = it
-                                prefs.setInt(PreferenceManager.KEY_BLOCK_METHOD, it)
-                            }
-                        )
+                        // Our app's rules do not apply to blocked numbers on the system list; such calls are blocked by the system beforehand.
+//                        RillSelectListItem(
+//                            headline = stringResource(R.string.block_method),
+//                            supporting = stringResource(R.string.block_method_subtitle),
+//                            leadingIcon = if (blockMethod == 0) Icons.Rounded.CallEnd else Icons.Rounded.MusicOff,
+//                            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+//                            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
+//                            options = listOf(
+//                                stringResource(R.string.decline_automatically) to 0,
+//                                stringResource(R.string.ring_silently) to 1
+//                            ),
+//                            selectedValue = blockMethod,
+//                            onValueChange = {
+//                                blockMethod = it
+//                                prefs.setInt(PreferenceManager.KEY_BLOCK_METHOD, it)
+//                            }
+//                        )
                         RillSelectListItem(
                             headline = stringResource(R.string.log_visibility),
                             supporting = stringResource(R.string.log_visibility_subtitle),
@@ -164,31 +227,6 @@ fun BlockedNumbersScreen(
                             onValueChange = {
                                 logVisibility = it
                                 prefs.setInt(PreferenceManager.KEY_BLOCK_LOG_VISIBILITY, it)
-                            }
-                        )
-                    }
-                }
-            }
-            
-            item {
-                RillAnimatedSection(delayMs = 160L) {
-                    RillExpressiveCard {
-                        RillListItem(
-                            headline = stringResource(R.string.blocked_numbers),
-                            supporting = stringResource(R.string.blocked_size, blockedNumbersSize),
-                            leadingIcon = Icons.AutoMirrored.Rounded.List,
-                            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
-                            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
-                            trailingIcon = Icons.Default.ChevronRight,
-                            onClick = {
-                                val telecomManager =
-                                    context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
-                                try {
-                                    val intent = telecomManager.createManageBlockedNumbersIntent()
-                                    context.startActivity(intent)
-                                } catch (_: Exception) {
-                                    // Fallback if the intent is not supported on some older/custom versions
-                                }
                             }
                         )
                     }

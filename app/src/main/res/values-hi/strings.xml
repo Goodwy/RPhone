@@ -130,6 +130,12 @@
     <string name="call_ui">कॉल UI</string>
     <string name="incoming_call_ui">आने वाली कॉल UI</string>
     <string name="incoming_call_ui_subtitle">चुनें कि आने वाली कॉल का कैसे उत्तर दें</string>
+    <string name="incoming_call_ui_default_swipe">डिफ़ॉल्ट स्वाइप</string>
+    <string name="incoming_call_ui_horizontal_swipe">क्षैतिज स्वाइप</string>
+    <string name="incoming_call_ui_buttons">बटन</string>
+    <string name="incoming_call_ui_slide_to_answer">उत्तर देने के लिए स्वाइप करें (iOS)</string>
+    <string name="incoming_call_ui_vertical_swipe">ऊर्ध्वाधर स्वाइप</string>
+
     <string name="avatars_settings">अवतार सेटिंग्स</string>
     <string name="avatars_settings_subtitle">रंग, फ्रेम और अधिक कस्टमाइज़ करना</string>
     <string name="avatar_colors">अवतार रंग</string>
@@ -178,6 +184,8 @@
     <string name="direct_call_on_tap_subtitle">सीधे कॉल करने के लिए कॉल लॉग प्रविष्टि पर टैप करें</string>
     <string name="auto_speaker">ऑटो स्पीकर</string>
     <string name="auto_speaker_subtitle">जब फोन कान से दूर हो तो स्वचालित रूप से लाउडस्पीकर पर स्विच करें, और पास होने पर ईयरपीस पर वापस जाएँ</string>
+    <string name="fullscreen_calls">फुल-स्क्रीन कॉल</string>
+    <string name="fullscreen_calls_subtitle">आने वाली कॉल हमेशा फुल-स्क्रीन मोड में दिखाई जाती हैं</string>
 
     <string name="sound_and_vibration">ध्वनि और कंपन</string>
     <string name="sound_and_vibration_subtitle">रिंगटोन, डायलपैड टोन और ऐप भर में हैप्टिक्स</string>
@@ -206,8 +214,9 @@
     <string name="manage_blocked">अवरुद्ध प्रबंधित करें</string>
     <string name="manage_blocked_subtitle">अवरुद्ध कॉल और स्पैम प्रबंधित करें</string>
     <string name="blocked_numbers">अवरुद्ध नंबर</string>
-    <string name="block_notifications">सूचनाएँ अवरुद्ध करें</string>
-    <string name="block_notifications_subtitle">अवरुद्ध कॉल के लिए कम प्राथमिकता वाला अलर्ट दिखाएँ</string>
+    <string name="blocked_numbers_system_info">सिस्टम ब्लॉक सूची में मौजूद नंबरों से कॉल हमारे ऐप तक पहुंचने से पहले Android द्वारा फ़िल्टर की जाती हैं। हमारा इस व्यवहार पर कोई नियंत्रण नहीं है।</string>
+    <string name="blocking_notifications">ब्लॉकिंग सूचनाएं</string>
+    <string name="blocking_notifications_subtitle">अवरुद्ध कॉल के लिए कम प्राथमिकता वाला अलर्ट दिखाएँ</string>
     <string name="block_method">अवरुद्ध विधि</string>
     <string name="block_method_subtitle">अवरुद्ध कॉल कैसे संभाली जाती हैं</string>
     <string name="decline_automatically">स्वचालित रूप से अस्वीकार करें</string>

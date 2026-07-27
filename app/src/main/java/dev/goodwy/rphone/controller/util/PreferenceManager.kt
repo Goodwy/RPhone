@@ -286,5 +286,6 @@ class PreferenceManager(context: Context) {
         const val KEY_IS_PRO_FOSS              = "is_pro_foss"
         const val KEY_AVATAR_FRAME             = "avatar_frame"
         const val KEY_HIGH_SCORE               = "horse_game_high_score"
+        const val KEY_ALWAYS_FULLSCREEN_CALLS  = "always_fullscreen_calls"
     }
 }

@@ -23,8 +23,8 @@ android {
         applicationId = "dev.goodwy.rphone"
         minSdk = 29
         targetSdk = 35
-        versionCode = 21
-        versionName = "0.2.1"
+        versionCode = 22
+        versionName = "0.2.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -64,6 +64,7 @@ android {
     productFlavors {
         create("gplay") { dimension = "distribution" }
         create("foss") { dimension = "distribution" }
+        create("rustore") { dimension = "distribution" }
     }
 
     compileOptions {
@@ -144,4 +145,6 @@ dependencies {
 
     // Goodwy
     "gplayImplementation" 'com.android.billingclient:billing:8.0.0'
+    "rustoreImplementation" 'ru.rustore.sdk:bom:2026.04.01'
+    "rustoreImplementation" 'ru.rustore.sdk:pay:10.3.1'
 }

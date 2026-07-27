@@ -131,6 +131,12 @@
     <string name="call_ui">ממשק שיחה</string>
     <string name="incoming_call_ui">ממשק שיחה נכנסת</string>
     <string name="incoming_call_ui_subtitle">בחר כיצד לענות לשיחות נכנסות</string>
+    <string name="incoming_call_ui_default_swipe">החלקה ברירת מחדל</string>
+    <string name="incoming_call_ui_horizontal_swipe">החלקה אופקית</string>
+    <string name="incoming_call_ui_buttons">כפתורים</string>
+    <string name="incoming_call_ui_slide_to_answer">גלול כדי לענות (iOS)</string>
+    <string name="incoming_call_ui_vertical_swipe">החלקה אנכית</string>
+
     <string name="avatars_settings">הגדרות אווטאר</string>
     <string name="avatars_settings_subtitle">התאמה אישית של צבעים, מסגרות ועוד</string>
     <string name="avatar_colors">צבעי אווטאר</string>
@@ -179,6 +185,8 @@
     <string name="direct_call_on_tap_subtitle">הקש על רשומה ביומן השיחות כדי להתקשר ישירות</string>
     <string name="auto_speaker">רמקול אוטומטי</string>
     <string name="auto_speaker_subtitle">עבור אוטומטית לרמקול כאשר הטלפון רחוק מהאוזן, ובחזרה לאפרכסת כאשר הוא קרוב</string>
+    <string name="fullscreen_calls">שיחות במסך מלא</string>
+    <string name="fullscreen_calls_subtitle">שיחות נכנסות מוצגות תמיד במצב מסך מלא</string>
 
     <string name="sound_and_vibration">צליל ורעידות</string>
     <string name="sound_and_vibration_subtitle">צלילי רינגטון, צלילי חיוג ומשוב הפטי בכל האפליקציה</string>
@@ -207,8 +215,9 @@
     <string name="manage_blocked">ניהול חסומים</string>
     <string name="manage_blocked_subtitle">ניהול שיחות חסומות וספאם</string>
     <string name="blocked_numbers">מספרים חסומים</string>
-    <string name="block_notifications">חסום התראות</string>
-    <string name="block_notifications_subtitle">הצג התראה בעדיפות נמוכה לשיחות חסומות</string>
+    <string name="blocked_numbers_system_info">שיחות ממספרים ברשימת החסימה של המערכת מסוננות על ידי Android לפני שהן מגיעות לאפליקציה שלנו. אין לנו שליטה על התנהגות זו.</string>
+    <string name="blocking_notifications">התראות חסימה</string>
+    <string name="blocking_notifications_subtitle">הצג התראה בעדיפות נמוכה לשיחות חסומות</string>
     <string name="block_method">שיטת חסימה</string>
     <string name="block_method_subtitle">כיצד מטפלים בשיחות חסומות</string>
     <string name="decline_automatically">דחה אוטומטית</string>

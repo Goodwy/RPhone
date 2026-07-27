@@ -130,6 +130,12 @@
     <string name="call_ui">Interface d\'appel</string>
     <string name="incoming_call_ui">Interface d\'appel entrant</string>
     <string name="incoming_call_ui_subtitle">Choisissez comment répondre aux appels entrants</string>
+    <string name="incoming_call_ui_default_swipe">Glissement par défaut</string>
+    <string name="incoming_call_ui_horizontal_swipe">Glissement horizontal</string>
+    <string name="incoming_call_ui_buttons">Boutons</string>
+    <string name="incoming_call_ui_slide_to_answer">Glisser pour répondre (iOS)</string>
+    <string name="incoming_call_ui_vertical_swipe">Glissement vertical</string>
+
     <string name="avatars_settings">Paramètres des avatars</string>
     <string name="avatars_settings_subtitle">Personnaliser les couleurs, les cadres et plus</string>
     <string name="avatar_colors">Couleurs des avatars</string>
@@ -178,6 +184,8 @@
     <string name="direct_call_on_tap_subtitle">Appuyez sur une entrée du journal d\'appels pour appeler directement</string>
     <string name="auto_speaker">Haut-parleur automatique</string>
     <string name="auto_speaker_subtitle">Passer automatiquement au haut-parleur lorsque le téléphone est éloigné de l\'oreille, et revenir à l\'écouteur lorsqu\'il est proche</string>
+    <string name="fullscreen_calls">Appels en plein écran</string>
+    <string name="fullscreen_calls_subtitle">Les appels entrants sont toujours affichés en mode plein écran</string>
 
     <string name="sound_and_vibration">Son &amp; Vibration</string>
     <string name="sound_and_vibration_subtitle">Sonneries, touches et retour haptique dans l\'application</string>
@@ -206,8 +214,9 @@
     <string name="manage_blocked">Gérer les bloqués</string>
     <string name="manage_blocked_subtitle">Gérer les appels bloqués et les spams</string>
     <string name="blocked_numbers">Numéros bloqués</string>
-    <string name="block_notifications">Bloquer les notifications</string>
-    <string name="block_notifications_subtitle">Afficher une alerte de faible priorité pour les appels bloqués</string>
+    <string name="blocked_numbers_system_info">Les appels provenant de numéros figurant sur la liste de blocage du système sont filtrés par Android avant d\'atteindre notre application. Nous n\'avons aucun contrôle sur ce comportement.</string>
+    <string name="blocking_notifications">Notifications de blocage</string>
+    <string name="blocking_notifications_subtitle">Afficher une alerte de faible priorité pour les appels bloqués</string>
     <string name="block_method">Méthode de blocage</string>
     <string name="block_method_subtitle">Comment les appels bloqués sont traités</string>
     <string name="decline_automatically">Refuser automatiquement</string>

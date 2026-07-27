@@ -130,6 +130,12 @@
     <string name="call_ui">Samtalsgränssnitt</string>
     <string name="incoming_call_ui">Gränssnitt för inkommande samtal</string>
     <string name="incoming_call_ui_subtitle">Välj hur du vill svara på inkommande samtal</string>
+    <string name="incoming_call_ui_default_swipe">Standard-svep</string>
+    <string name="incoming_call_ui_horizontal_swipe">Horisontellt svep</string>
+    <string name="incoming_call_ui_buttons">Knappar</string>
+    <string name="incoming_call_ui_slide_to_answer">Dra för att svara (iOS)</string>
+    <string name="incoming_call_ui_vertical_swipe">Vertikalt svep</string>
+
     <string name="avatars_settings">Avatar-inställningar</string>
     <string name="avatars_settings_subtitle">Anpassa färger, ramar och mer</string>
     <string name="avatar_colors">Avatar-färger</string>
@@ -178,6 +184,8 @@
     <string name="direct_call_on_tap_subtitle">Tryck på en post i samtalsloggen för att ringa direkt</string>
     <string name="auto_speaker">Automatisk högtalare</string>
     <string name="auto_speaker_subtitle">Växla automatiskt till högtalare när telefonen är borta från örat, och tillbaka till hörluren när den är nära</string>
+    <string name="fullscreen_calls">Helskärmssamtal</string>
+    <string name="fullscreen_calls_subtitle">Inkommande samtal visas alltid i helskärmsläge</string>
 
     <string name="sound_and_vibration">Ljud och vibration</string>
     <string name="sound_and_vibration_subtitle">Signaltoner, knappljud och haptik i hela appen</string>
@@ -206,8 +214,9 @@
     <string name="manage_blocked">Hantera blockerade</string>
     <string name="manage_blocked_subtitle">Hantera blockerade samtal och skräppost</string>
     <string name="blocked_numbers">Blockerade nummer</string>
-    <string name="block_notifications">Blockera aviseringar</string>
-    <string name="block_notifications_subtitle">Visa en avisering med låg prioritet för blockerade samtal</string>
+    <string name="blocked_numbers_system_info">Samtal från nummer på systemets blockeringslista filtreras av Android innan de når vår app. Vi har ingen kontroll över detta beteende.</string>
+    <string name="blocking_notifications">Aviseringar om blockering</string>
+    <string name="blocking_notifications_subtitle">Visa en avisering med låg prioritet för blockerade samtal</string>
     <string name="block_method">Blockeringmetod</string>
     <string name="block_method_subtitle">Hur blockerade samtal hanteras</string>
     <string name="decline_automatically">Avvisa automatiskt</string>

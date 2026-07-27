@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.rounded.Backpack
+import androidx.compose.material.icons.rounded.CropFree
 import androidx.compose.material.icons.rounded.PictureInPicture
 import androidx.compose.material.icons.rounded.SettingsPhone
 import androidx.compose.material.icons.rounded.SimCard
@@ -56,6 +57,7 @@ fun CallSettingsScreen(navigator: DestinationsNavigator) {
     var directCallOnTap by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_DIRECT_CALL_ON_TAP, false)) }
     var autoSpeaker by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_AUTO_SPEAKER, false)) }
     var defaultSim by remember { mutableStateOf(prefs.getInt(PreferenceManager.KEY_DEFAULT_SIM, prefs.getDefaultSimIndexDefault())) }
+    var fullscreenCalls by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_ALWAYS_FULLSCREEN_CALLS, false)) }
 
     var visible by remember { mutableStateOf(false) }
     val screenAlpha by animateFloatAsState(
@@ -201,6 +203,18 @@ fun CallSettingsScreen(navigator: DestinationsNavigator) {
                                         floatingCall = newValue
                                         prefs.setBoolean(PreferenceManager.KEY_FLOATING_CALL, newValue)
                                     }
+                                }
+                            )
+                            RillSwitchListItem(
+                                headline   = stringResource(R.string.fullscreen_calls),
+                                supporting = stringResource(R.string.fullscreen_calls_subtitle),
+                                leadingIcon = Icons.Rounded.CropFree,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
+                                checked = fullscreenCalls,
+                                onCheckedChange = {
+                                    fullscreenCalls = it
+                                    prefs.setBoolean(PreferenceManager.KEY_ALWAYS_FULLSCREEN_CALLS, it)
                                 }
                             )
                             RillSwitchListItem(

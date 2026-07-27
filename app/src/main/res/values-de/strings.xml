@@ -130,6 +130,12 @@
     <string name="call_ui">Anruf-UI</string>
     <string name="incoming_call_ui">UI für eingehende Anrufe</string>
     <string name="incoming_call_ui_subtitle">Wählen Sie, wie eingehende Anrufe angenommen werden sollen</string>
+    <string name="incoming_call_ui_default_swipe">Standard-Wischen</string>
+    <string name="incoming_call_ui_horizontal_swipe">Horizontales Wischen</string>
+    <string name="incoming_call_ui_buttons">Schaltflächen</string>
+    <string name="incoming_call_ui_slide_to_answer">Zum Annehmen schieben (iOS)</string>
+    <string name="incoming_call_ui_vertical_swipe">Vertikales Wischen</string>
+
     <string name="avatars_settings">Avatar-Einstellungen</string>
     <string name="avatars_settings_subtitle">Farben, Rahmen und mehr anpassen</string>
     <string name="avatar_colors">Avatar-Farben</string>
@@ -178,6 +184,8 @@
     <string name="direct_call_on_tap_subtitle">Tippen Sie auf einen Anrufprotokolleintrag, um direkt anzurufen</string>
     <string name="auto_speaker">Automatischer Lautsprecher</string>
     <string name="auto_speaker_subtitle">Automatisch auf Lautsprecher umschalten, wenn das Telefon vom Ohr entfernt ist, und zurück zum Hörer, wenn es nah ist</string>
+    <string name="fullscreen_calls">Vollbild-Anrufe</string>
+    <string name="fullscreen_calls_subtitle">Eingehende Anrufe werden immer im Vollbildmodus angezeigt</string>
 
     <string name="sound_and_vibration">Sound &amp; Vibration</string>
     <string name="sound_and_vibration_subtitle">Klingeltöne, Wähltöne und Haptik in der App</string>
@@ -206,8 +214,9 @@
     <string name="manage_blocked">Gesperrte verwalten</string>
     <string name="manage_blocked_subtitle">Gesperrte Anrufe und Spam verwalten</string>
     <string name="blocked_numbers">Gesperrte Nummern</string>
-    <string name="block_notifications">Benachrichtigungen blockieren</string>
-    <string name="block_notifications_subtitle">Eine Benachrichtigung mit niedriger Priorität für blockierte Anrufe anzeigen</string>
+    <string name="blocked_numbers_system_info">Anrufe von Nummern auf der System-Sperrliste werden von Android gefiltert, bevor sie unsere App erreichen. Wir haben keinen Einfluss auf dieses Verhalten.</string>
+    <string name="blocking_notifications">Blockierungsbenachrichtigungen</string>
+    <string name="blocking_notifications_subtitle">Eine Benachrichtigung mit niedriger Priorität für blockierte Anrufe anzeigen</string>
     <string name="block_method">Blockierungsmethode</string>
     <string name="block_method_subtitle">Wie blockierte Anrufe behandelt werden</string>
     <string name="decline_automatically">Automatisch ablehnen</string>

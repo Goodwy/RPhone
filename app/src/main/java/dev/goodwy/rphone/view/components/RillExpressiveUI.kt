@@ -896,7 +896,7 @@ fun RillListItem(
                     },
                     onLongClick = onLongClick
                 )
-                .padding(horizontal = 12.dp, vertical = 14.dp),
+                .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (avatarName != null || photoUri != null) {
@@ -1015,7 +1015,7 @@ fun RillSwitchListItem(
     ) {
         Row(
             modifier = Modifier
-                .padding(horizontal = 12.dp, vertical = 10.dp)
+                .padding(horizontal = 16.dp, vertical = 10.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -1110,7 +1110,7 @@ fun RillSelectListItem(
     ) {
         Row(
             modifier = Modifier
-                .padding(horizontal = 12.dp, vertical = 10.dp)
+                .padding(horizontal = 16.dp, vertical = 10.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -1805,7 +1805,7 @@ fun SupportProjectItem(
                         onClick()
                     },
                 )
-                .padding(horizontal = 12.dp, vertical = 14.dp),
+                .padding(horizontal = 16.dp, vertical = 15.dp),
             verticalAlignment = Alignment.Top
         ) {
             var appeared by remember { mutableStateOf(false) }

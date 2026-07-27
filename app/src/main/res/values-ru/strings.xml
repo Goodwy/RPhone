@@ -66,7 +66,7 @@
     <string name="continue_support">Продолжить</string>
     <string name="monthly">Ежемесячная поддержка</string>
     <string name="monthly_description">Гибкие условия для тех, кто хочет поддерживать проект ежемесячно</string>
-    <string name="yearly">Ежегодная пожжержка</string>
+    <string name="yearly">Ежегодная поддержка</string>
     <string name="yearly_description">Ежегодная поддержка лучшего в мире приложения для звонков</string>
     <string name="lifetime">Разовая поддержка</string>
     <string name="lifetime_description">Оплатите один раз и наслаждайтесь максимальным удобством при звонках на всю жизнь</string>
@@ -130,6 +130,12 @@
     <string name="call_ui">Интерфейс вызова</string>
     <string name="incoming_call_ui">Интерфейс входящего вызова</string>
     <string name="incoming_call_ui_subtitle">Выберите способ ответа на входящие звонки</string>
+    <string name="incoming_call_ui_default_swipe">Стандартный свайп</string>
+    <string name="incoming_call_ui_horizontal_swipe">Горизонтальный свайп</string>
+    <string name="incoming_call_ui_buttons">Кнопки</string>
+    <string name="incoming_call_ui_slide_to_answer">Горизонтальный свайп (iOS)</string>
+    <string name="incoming_call_ui_vertical_swipe">Вертикальный свайп</string>
+
     <string name="avatars_settings">Настройки аватаров</string>
     <string name="avatars_settings_subtitle">Настройка цветов, рамок и других параметров</string>
     <string name="avatar_colors">Цвета аватаров</string>
@@ -178,6 +184,8 @@
     <string name="direct_call_on_tap_subtitle">Нажмите на запись в журнале вызовов, чтобы сразу позвонить</string>
     <string name="auto_speaker">Автоматически включать динамик</string>
     <string name="auto_speaker_subtitle">Автоматически переключаться на громкую связь, когда телефон находится вдали от уха, и обратно на наушник, когда он находится рядом</string>
+    <string name="fullscreen_calls">Полноэкранные звонки</string>
+    <string name="fullscreen_calls_subtitle">Входящие звонки всегда отображаются в полноэкранном режиме</string>
 
     <string name="sound_and_vibration">Звуки и вибрация</string>
     <string name="sound_and_vibration_subtitle">Мелодии звонка, звуки клавиатуры и тактильная обратная связь в приложении</string>
@@ -206,8 +214,9 @@
     <string name="manage_blocked">Управление блокировками</string>
     <string name="manage_blocked_subtitle">Управление заблокированными звонками и спамом</string>
     <string name="blocked_numbers">Заблокированные номера</string>
-    <string name="block_notifications">Блокировать уведомления</string>
-    <string name="block_notifications_subtitle">Отображать уведомление низкого приоритета о заблокированных звонках</string>
+    <string name="blocked_numbers_system_info">Звонки с номеров, включенных в системный список заблокированных, фильтруются системой Android до того, как они поступают в наше приложение. Мы не можем влиять на это поведение.</string>
+    <string name="blocking_notifications">Уведомления о блокировке</string>
+    <string name="blocking_notifications_subtitle">Отображать уведомление низкого приоритета о заблокированных звонках</string>
     <string name="block_method">Метод блокировки</string>
     <string name="block_method_subtitle">Как обрабатывать заблокированные звонки</string>
     <string name="decline_automatically">Автоматически отклонять</string>
@@ -238,7 +247,7 @@
     <string name="lock_call_actions_subtitle">Требовать аутентификацию для приема или отклонения входящих вызовов</string>
     <string name="lock_scope">Область действия аутентификации вызовов</string>
     <string name="all_calls">Все звонки</string>
-    <string name="all_calls_subtitle">Biometric required for every incoming call</string>
+    <string name="all_calls_subtitle">Аутентификация требуется при каждом входящем звонке</string>
     <string name="blacklist">Черный список</string>
     <string name="blacklist_count">Контакты для которых включена аутентификация для ответа: %s</string>
     <string name="blacklist_subtitle">Выберите контакты, для ответа которым требуется аутентификация</string>

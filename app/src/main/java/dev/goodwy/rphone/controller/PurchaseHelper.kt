@@ -28,4 +28,9 @@ interface PurchaseHelper {
     fun purchaseSubscription(product: String, activity: Activity, planId: String? = null)
     fun restorePurchases()
     fun refreshAllData()
+
+    fun loadProducts(productIds: List<String>) {
+        // Empty default implementation for Google Play
+        // RuStoreViewModel will override this method
+    }
 }

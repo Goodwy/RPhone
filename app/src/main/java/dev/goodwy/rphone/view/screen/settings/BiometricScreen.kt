@@ -610,13 +610,16 @@ private fun ContactPickerDialog(
                             )
                         },
                         trailingIcon = {
-                            AnimatedVisibility(visible = searchQuery.isNotEmpty()) {
+                            AnimatedVisibility(
+                                visible = searchQuery.isNotEmpty(),
+                                enter = fadeIn() + scaleIn(),
+                                exit = fadeOut() + scaleOut()
+                            ) {
                                 IconButton(onClick = { searchQuery = "" },
                                     modifier = Modifier
                                         .padding(end = 4.dp)
                                 ) {
-                                    Icon(Icons.Default.Close, contentDescription = stringResource(R.string.clear),
-                                        modifier = Modifier.size(18.dp))
+                                    Icon(Icons.Default.Close, contentDescription = stringResource(R.string.clear))
                                 }
                             }
                         },

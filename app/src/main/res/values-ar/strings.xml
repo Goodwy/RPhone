@@ -131,6 +131,12 @@
     <string name="call_ui">واجهة المكالمة</string>
     <string name="incoming_call_ui">واجهة المكالمة الواردة</string>
     <string name="incoming_call_ui_subtitle">اختر كيفية الرد على المكالمات الواردة</string>
+    <string name="incoming_call_ui_default_swipe">السحب الافتراضي</string>
+    <string name="incoming_call_ui_horizontal_swipe">السحب الأفقي</string>
+    <string name="incoming_call_ui_buttons">أزرار</string>
+    <string name="incoming_call_ui_slide_to_answer">اسحب للرد (iOS)</string>
+    <string name="incoming_call_ui_vertical_swipe">السحب العمودي</string>
+
     <string name="avatars_settings">إعدادات الصور الرمزية</string>
     <string name="avatars_settings_subtitle">تخصيص الألوان والإطارات والمزيد</string>
     <string name="avatar_colors">ألوان الصورة الرمزية</string>
@@ -179,6 +185,8 @@
     <string name="direct_call_on_tap_subtitle">انقر على إدخال سجل المكالمات للاتصال مباشرة</string>
     <string name="auto_speaker">مكبر صوت تلقائي</string>
     <string name="auto_speaker_subtitle">التبديل تلقائيًا إلى مكبر الصوت عندما يكون الهاتف بعيدًا عن الأذن، والعودة إلى سماعة الأذن عندما يكون قريبًا</string>
+    <string name="fullscreen_calls">مكالمات ملء الشاشة</string>
+    <string name="fullscreen_calls_subtitle">يتم دائمًا عرض المكالمات الواردة في وضع ملء الشاشة</string>
 
     <string name="sound_and_vibration">الصوت والاهتزاز</string>
     <string name="sound_and_vibration_subtitle">نغمات الرنين، ونغمات لوحة المفاتيح، والاهتزازات اللمسية في جميع أنحاء التطبيق</string>
@@ -207,8 +215,9 @@
     <string name="manage_blocked">إدارة المحظورين</string>
     <string name="manage_blocked_subtitle">إدارة المكالمات المحظورة والبريد العشوائي</string>
     <string name="blocked_numbers">الأرقام المحظورة</string>
-    <string name="block_notifications">حظر الإشعارات</string>
-    <string name="block_notifications_subtitle">إظهار تنبيه منخفض الأولوية للمكالمات المحظورة</string>
+    <string name="blocked_numbers_system_info">يتم تصفية المكالمات من الأرقام الموجودة في قائمة حظر النظام بواسطة Android قبل وصولها إلى تطبيقنا. ليس لدينا أي سيطرة على هذا السلوك.</string>
+    <string name="blocking_notifications">إشعارات الحظر</string>
+    <string name="blocking_notifications_subtitle">إظهار تنبيه منخفض الأولوية للمكالمات المحظورة</string>
     <string name="block_method">طريقة الحظر</string>
     <string name="block_method_subtitle">كيفية معالجة المكالمات المحظورة</string>
     <string name="decline_automatically">رفض تلقائيًا</string>

@@ -131,6 +131,12 @@
     <string name="call_ui">رابط کاربری تماس</string>
     <string name="incoming_call_ui">رابط کاربری تماس ورودی</string>
     <string name="incoming_call_ui_subtitle">نحوه پاسخ دادن به تماس‌های ورودی را انتخاب کنید</string>
+    <string name="incoming_call_ui_default_swipe">کشیدن پیش‌فرض</string>
+    <string name="incoming_call_ui_horizontal_swipe">کشیدن افقی</string>
+    <string name="incoming_call_ui_buttons">دکمه‌ها</string>
+    <string name="incoming_call_ui_slide_to_answer">برای پاسخ بکشید (iOS)</string>
+    <string name="incoming_call_ui_vertical_swipe">کشیدن عمودی</string>
+
     <string name="avatars_settings">تنظیمات آواتار</string>
     <string name="avatars_settings_subtitle">سفارشی‌سازی رنگ‌ها، قاب‌ها و موارد بیشتر</string>
     <string name="avatar_colors">رنگ‌های آواتار</string>
@@ -179,6 +185,8 @@
     <string name="direct_call_on_tap_subtitle">برای تماس مستقیم، روی یک ورودی لاگ تماس ضربه بزنید</string>
     <string name="auto_speaker">بلندگوی خودکار</string>
     <string name="auto_speaker_subtitle">به طور خودکار به بلندگو تغییر دهید زمانی که گوشی از گوش دور است، و زمانی که نزدیک است به گوشی برگردید</string>
+    <string name="fullscreen_calls">تماس‌های تمام صفحه</string>
+    <string name="fullscreen_calls_subtitle">تماس‌های ورودی همیشه در حالت تمام صفحه نمایش داده می‌شوند</string>
 
     <string name="sound_and_vibration">صدا و لرزش</string>
     <string name="sound_and_vibration_subtitle">زنگ‌ها، صداهای صفحه کلید و بازخورد لمسی در سراسر برنامه</string>
@@ -207,8 +215,9 @@
     <string name="manage_blocked">مدیریت مسدود شده‌ها</string>
     <string name="manage_blocked_subtitle">مدیریت تماس‌های مسدود شده و هرزنامه</string>
     <string name="blocked_numbers">شماره‌های مسدود شده</string>
-    <string name="block_notifications">مسدود کردن اعلان‌ها</string>
-    <string name="block_notifications_subtitle">نمایش هشدار با اولویت پایین برای تماس‌های مسدود شده</string>
+    <string name="blocked_numbers_system_info">تماس‌های شماره‌های موجود در لیست مسدودسازی سیستم توسط Android قبل از رسیدن به برنامه ما فیلتر می‌شوند. ما هیچ کنترلی بر این رفتار نداریم.</string>
+    <string name="blocking_notifications">اعلان‌های مسدودسازی</string>
+    <string name="blocking_notifications_subtitle">نمایش هشدار با اولویت پایین برای تماس‌های مسدود شده</string>
     <string name="block_method">روش مسدود کردن</string>
     <string name="block_method_subtitle">نحوه برخورد با تماس‌های مسدود شده</string>
     <string name="decline_automatically">رد خودکار</string>

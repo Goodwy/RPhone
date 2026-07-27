@@ -131,6 +131,12 @@
     <string name="call_ui">רוף אינ"פ</string>
     <string name="incoming_call_ui">איינקומענדיק רוף אינ"פ</string>
     <string name="incoming_call_ui_subtitle">קלויב ווי צו ענטפֿערן איינקומענדיקע רופן</string>
+    <string name="incoming_call_ui_default_swipe">סטאנדאַרד גליט</string>
+    <string name="incoming_call_ui_horizontal_swipe">האָריזאָנטאַל גליט</string>
+    <string name="incoming_call_ui_buttons">קנעפּלעך</string>
+    <string name="incoming_call_ui_slide_to_answer">גליט צו ענטפֿערן (iOS)</string>
+    <string name="incoming_call_ui_vertical_swipe">ווערטיקאַל גליט</string>
+
     <string name="avatars_settings">אַוואַטאַר איינשטעלונגען</string>
     <string name="avatars_settings_subtitle">פּערזענליכטיק פֿאַרבן, ראַמען און מער</string>
     <string name="avatar_colors">אַוואַטאַר פֿאַרבן</string>
@@ -179,6 +185,8 @@
     <string name="direct_call_on_tap_subtitle">דריק אויף אַ רוף לאָג אײַנטראָג צו רופן דירעקט</string>
     <string name="auto_speaker">אויטאָ ספּיקער</string>
     <string name="auto_speaker_subtitle">אויטאָמאַטיש אומשטעלן צו הויך-רעדער ווען טעלעפֿון איז ווײַט פֿון אויער, און צוריק צו אויער-רעדער ווען נאָענט</string>
+    <string name="fullscreen_calls">פֿול-סקרין רופן</string>
+    <string name="fullscreen_calls_subtitle">איינקומענדיקע רופן ווערן שטענדיק געוויזן אין פֿול-סקרין מאָדע</string>
 
     <string name="sound_and_vibration">קלאַנג און וויבראַציע</string>
     <string name="sound_and_vibration_subtitle">רינגטאן, ווייל טאָנען און האַפּטיק אין גאַנצער אַפּ</string>
@@ -207,8 +215,9 @@
     <string name="manage_blocked">פֿאַרוואַלטן געבלאָקירטע</string>
     <string name="manage_blocked_subtitle">פֿאַרוואַלטן געבלאָקירטע רופן און ספּאַם</string>
     <string name="blocked_numbers">געבלאָקירטע נומערן</string>
-    <string name="block_notifications">בלאָקירן נאָטיפיקאַציעס</string>
-    <string name="block_notifications_subtitle">ווײַזן אַ נידעריק-פּריאָריטעט אַלערט פֿאַר געבלאָקירטע רופן</string>
+    <string name="blocked_numbers_system_info">רופן פֿון נומערן אויף דער סיסטעם בלאָקירן ליסטע ווערן פֿילטערט דורך Android איידער זיי קומען צו אונדזער אַפּ. מיר האָבן קיין קאָנטראָל איבער דעם פֿירן.</string>
+    <string name="blocking_notifications">בלאָקירן נאָטיפיקאַציעס</string>
+    <string name="blocking_notifications_subtitle">ווײַזן אַ נידעריק-פּריאָריטעט אַלערט פֿאַר געבלאָקירטע רופן</string>
     <string name="block_method">בלאָקירן מעטאָד</string>
     <string name="block_method_subtitle">ווי געבלאָקירטע רופן ווערן באַהאַנדלט</string>
     <string name="decline_automatically">אָפּוואַרפן אויטאָמאַטיש</string>

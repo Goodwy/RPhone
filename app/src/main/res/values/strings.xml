@@ -131,6 +131,18 @@
     <string name="call_ui">Call UI</string>
     <string name="incoming_call_ui">Incoming Call UI</string>
     <string name="incoming_call_ui_subtitle">Choose how to answer incoming calls</string>
+    <string name="incoming_call_ui_default_swipe">Default Swipe</string>
+    <string name="incoming_call_ui_horizontal_swipe">Horizontal Swipe</string>
+    <string name="incoming_call_ui_buttons">Buttons</string>
+    <string name="incoming_call_ui_slide_to_answer">Slide to Answer (iOS)</string>
+    <string name="incoming_call_ui_vertical_swipe">Vertical Swipe</string>
+
+    <string name="сaller_ui">Caller UI</string>
+    <string name="сaller_ui_subtitle">Customize the in-call screen layout and controls</string>
+    <string name="end_call_button">End Call Button</string>
+    <string name="customize_width">Customize Width</string>
+    <string name="customize_width_subtitle">Adjust the width of the end call button</string>
+
     <string name="avatars_settings">Avatars Settings</string>
     <string name="avatars_settings_subtitle">Customizing colors, frames, and more</string>
     <string name="avatar_colors">Avatar Colors</string>
@@ -144,12 +156,6 @@
     <string name="avatar_frame_subtitle">Show a border around the avatar</string>
     <string name="show_picture_in_avatar">Show Picture in Avatar</string>
     <string name="show_picture_in_avatar_subtitle">Shows the contact picture if available</string>
-
-    <string name="сaller_ui">Caller UI</string>
-    <string name="сaller_ui_subtitle">Customize the in-call screen layout and controls</string>
-    <string name="end_call_button">End Call Button</string>
-    <string name="customize_width">Customize Width</string>
-    <string name="customize_width_subtitle">Adjust the width of the end call button</string>
 
     <string name="navigations">Navigations</string>
     <string name="navigations_subtitle">Tab visibility and tab style</string>
@@ -179,6 +185,8 @@
     <string name="direct_call_on_tap_subtitle">Tap a call log entry to call directly instead</string>
     <string name="auto_speaker">Auto Speaker</string>
     <string name="auto_speaker_subtitle">Automatically switch to loudspeaker when phone is away from ear, and back to earpiece when near</string>
+    <string name="fullscreen_calls">Full-screen calls</string>
+    <string name="fullscreen_calls_subtitle">Incoming calls are always displayed in full-screen mode</string>
 
     <string name="sound_and_vibration">Sound &amp; Vibration</string>
     <string name="sound_and_vibration_subtitle">Ringtones, dialpad tones, and haptics across app</string>
@@ -207,8 +215,9 @@
     <string name="manage_blocked">Manage blocked</string>
     <string name="manage_blocked_subtitle">Manage blocked calls and spam</string>
     <string name="blocked_numbers">Blocked numbers</string>
-    <string name="block_notifications">Block notifications</string>
-    <string name="block_notifications_subtitle">Show a low-priority alert for blocked calls</string>
+    <string name="blocked_numbers_system_info">Calls from numbers on the system block list are filtered by Android before our app receives them. We have no control over this behavior.</string>
+    <string name="blocking_notifications">Blocking Notifications</string>
+    <string name="blocking_notifications_subtitle">Show a low-priority alert for blocked calls</string>
     <string name="block_method">Block method</string>
     <string name="block_method_subtitle">How blocked calls are handled</string>
     <string name="decline_automatically">Decline automatically</string>

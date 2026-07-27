@@ -33,7 +33,6 @@ import android.view.Surface
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
@@ -76,6 +75,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import androidx.core.graphics.toColorInt
 import com.ramcosta.composedestinations.generated.destinations.AvatarsPreferenceScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.CallerUIScreenDestination
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.cardCornerMedium
 import dev.goodwy.rphone.controller.util.darken
@@ -810,7 +810,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                     iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
                                     iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
                                     trailingIcon = Icons.Default.ChevronRight,
-                                    onClick = { navigator.navigate(com.ramcosta.composedestinations.generated.destinations.CallerUIScreenDestination) }
+                                    onClick = { navigator.navigate(CallerUIScreenDestination) }
                                 )
 //                                RillListItem(
 //                                    headline = "Calls Section Elements",
@@ -832,42 +832,6 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                         Column {
                             SettingsSectionLabel("Avatars")
                             RillExpressiveCard {
-//                                RillSwitchListItem(
-//                                    headline = "Show First Letter in Avatar",
-//                                    supporting = "Displays letter when picture is missing",
-//                                    leadingIcon = if (showFirstLetter) Icons.Rounded.Title else Icons.Rounded.AccountCircle,
-//                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOliva,
-//                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOliva,
-//                                    checked = showFirstLetter,
-//                                    onCheckedChange = { showFirstLetter = it; prefs.setBoolean(PreferenceManager.KEY_SHOW_FIRST_LETTER, it) }
-//                                )
-//                                RillSwitchListItem(
-//                                    headline = "Use Colorful Avatars",
-//                                    supporting = "Random colors based on contact name",
-//                                    leadingIcon = Icons.Rounded.Palette,
-//                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOliva,
-//                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOliva,
-//                                    checked = colorfulAvatars,
-//                                    onCheckedChange = { colorfulAvatars = it; prefs.setBoolean(PreferenceManager.KEY_COLORFUL_AVATARS, it) }
-//                                )
-//                                RillSwitchListItem(
-//                                    headline = "Avatar Frame",
-//                                    supporting = "Show a border around the avatar",
-//                                    leadingIcon = if (avatarFrame) ImageVector.vectorResource(id = R.drawable.ic_person_border) else ImageVector.vectorResource(id = R.drawable.ic_person_no_border),
-//                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOliva,
-//                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOliva,
-//                                    checked = avatarFrame,
-//                                    onCheckedChange = { avatarFrame = it; prefs.setBoolean(PreferenceManager.KEY_AVATAR_FRAME, it) }
-//                                )
-//                                RillSwitchListItem(
-//                                    headline = "Show Picture in Avatar",
-//                                    supporting = "Shows the contact picture if available",
-//                                    leadingIcon = if (showPicture) Icons.Rounded.Portrait else Icons.Rounded.TextFields,
-//                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOliva,
-//                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOliva,
-//                                    checked = showPicture,
-//                                    onCheckedChange = { showPicture = it; prefs.setBoolean(PreferenceManager.KEY_SHOW_PICTURE, it) }
-//                                )
                                 RillListItem(
                                     headline = stringResource(R.string.avatars_settings),
                                     supporting = stringResource(R.string.avatars_settings_subtitle),

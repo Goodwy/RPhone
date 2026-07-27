@@ -130,6 +130,12 @@
     <string name="call_ui">Διεπαφή κλήσης</string>
     <string name="incoming_call_ui">Διεπαφή εισερχόμενης κλήσης</string>
     <string name="incoming_call_ui_subtitle">Επιλέξτε πώς θα απαντάτε σε εισερχόμενες κλήσεις</string>
+    <string name="incoming_call_ui_default_swipe">Προεπιλεγμένο σβήσιμο</string>
+    <string name="incoming_call_ui_horizontal_swipe">Οριζόντιο σβήσιμο</string>
+    <string name="incoming_call_ui_buttons">Κουμπιά</string>
+    <string name="incoming_call_ui_slide_to_answer">Σύρετε για απάντηση (iOS)</string>
+    <string name="incoming_call_ui_vertical_swipe">Κατακόρυφο σβήσιμο</string>
+
     <string name="avatars_settings">Ρυθμίσεις avatar</string>
     <string name="avatars_settings_subtitle">Προσαρμογή χρωμάτων, πλαισίων και άλλων</string>
     <string name="avatar_colors">Χρώματα avatar</string>
@@ -178,6 +184,8 @@
     <string name="direct_call_on_tap_subtitle">Πατήστε μια καταχώρηση αρχείου κλήσεων για άμεση κλήση</string>
     <string name="auto_speaker">Αυτόματο ηχείο</string>
     <string name="auto_speaker_subtitle">Αυτόματη εναλλαγή σε μεγάφωνο όταν το τηλέφωνο είναι μακριά από το αυτί και πίσω στο ακουστικό όταν είναι κοντά</string>
+    <string name="fullscreen_calls">Κλήσεις πλήρους οθόνης</string>
+    <string name="fullscreen_calls_subtitle">Οι εισερχόμενες κλήσεις εμφανίζονται πάντα σε λειτουργία πλήρους οθόνης</string>
 
     <string name="sound_and_vibration">Ήχος &amp; Δόνηση</string>
     <string name="sound_and_vibration_subtitle">Ήχοι κλήσης, ήχοι πληκτρολογίου και απτική ανάδραση σε όλη την εφαρμογή</string>
@@ -206,8 +214,9 @@
     <string name="manage_blocked">Διαχείριση αποκλεισμένων</string>
     <string name="manage_blocked_subtitle">Διαχείριση αποκλεισμένων κλήσεων και ανεπιθύμητων</string>
     <string name="blocked_numbers">Αποκλεισμένοι αριθμοί</string>
-    <string name="block_notifications">Αποκλεισμός ειδοποιήσεων</string>
-    <string name="block_notifications_subtitle">Εμφάνιση ειδοποίησης χαμηλής προτεραιότητας για αποκλεισμένες κλήσεις</string>
+    <string name="blocked_numbers_system_info">Οι κλήσεις από αριθμούς που βρίσκονται στη λίστα αποκλεισμού του συστήματος φιλτράρονται από το Android πριν φτάσουν στην εφαρμογή μας. Δεν έχουμε κανέναν έλεγχο σε αυτήν τη συμπεριφορά.</string>
+    <string name="blocking_notifications">Ειδοποιήσεις αποκλεισμού</string>
+    <string name="blocking_notifications_subtitle">Εμφάνιση ειδοποίησης χαμηλής προτεραιότητας για αποκλεισμένες κλήσεις</string>
     <string name="block_method">Μέθοδος αποκλεισμού</string>
     <string name="block_method_subtitle">Πώς αντιμετωπίζονται οι αποκλεισμένες κλήσεις</string>
     <string name="decline_automatically">Αυτόματη απόρριψη</string>

@@ -130,6 +130,12 @@
     <string name="call_ui">Interfejs połączenia</string>
     <string name="incoming_call_ui">Interfejs połączenia przychodzącego</string>
     <string name="incoming_call_ui_subtitle">Wybierz sposób odbierania połączeń przychodzących</string>
+    <string name="incoming_call_ui_default_swipe">Domyślne przesunięcie</string>
+    <string name="incoming_call_ui_horizontal_swipe">Przesunięcie poziome</string>
+    <string name="incoming_call_ui_buttons">Przyciski</string>
+    <string name="incoming_call_ui_slide_to_answer">Przesuń, aby odebrać (iOS)</string>
+    <string name="incoming_call_ui_vertical_swipe">Przesunięcie pionowe</string>
+
     <string name="avatars_settings">Ustawienia awatarów</string>
     <string name="avatars_settings_subtitle">Dostosowywanie kolorów, ramek i innych</string>
     <string name="avatar_colors">Kolory awatarów</string>
@@ -178,6 +184,8 @@
     <string name="direct_call_on_tap_subtitle">Dotknij wpisu w dzienniku połączeń, aby bezpośrednio zadzwonić</string>
     <string name="auto_speaker">Automatyczny głośnik</string>
     <string name="auto_speaker_subtitle">Automatycznie przełączaj na głośnomówiący, gdy telefon jest oddalony od ucha, i z powrotem na słuchawkę, gdy jest blisko</string>
+    <string name="fullscreen_calls">Połączenia na pełnym ekranie</string>
+    <string name="fullscreen_calls_subtitle">Połączenia przychodzące są zawsze wyświetlane w trybie pełnoekranowym</string>
 
     <string name="sound_and_vibration">Dźwięk i wibracje</string>
     <string name="sound_and_vibration_subtitle">Dzwonki, dźwięki klawiszy i haptyka w aplikacji</string>
@@ -206,8 +214,9 @@
     <string name="manage_blocked">Zarządzaj zablokowanymi</string>
     <string name="manage_blocked_subtitle">Zarządzaj zablokowanymi połączeniami i spamem</string>
     <string name="blocked_numbers">Zablokowane numery</string>
-    <string name="block_notifications">Blokuj powiadomienia</string>
-    <string name="block_notifications_subtitle">Pokaż alert o niskim priorytecie dla zablokowanych połączeń</string>
+    <string name="blocked_numbers_system_info">Połączenia z numerów znajdujących się na systemowej liście blokowanych są filtrowane przez Androida, zanim dotrą do naszej aplikacji. Nie mamy wpływu na to zachowanie.</string>
+    <string name="blocking_notifications">Powiadomienia o blokowaniu</string>
+    <string name="blocking_notifications_subtitle">Pokaż alert o niskim priorytecie dla zablokowanych połączeń</string>
     <string name="block_method">Metoda blokowania</string>
     <string name="block_method_subtitle">Jak obsługiwane są zablokowane połączenia</string>
     <string name="decline_automatically">Odrzucaj automatycznie</string>

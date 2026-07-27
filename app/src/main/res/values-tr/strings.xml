@@ -130,6 +130,12 @@
     <string name="call_ui">Arama Arayüzü</string>
     <string name="incoming_call_ui">Gelen Arama Arayüzü</string>
     <string name="incoming_call_ui_subtitle">Gelen aramaları nasıl yanıtlayacağınızı seçin</string>
+    <string name="incoming_call_ui_default_swipe">Varsayılan Kaydırma</string>
+    <string name="incoming_call_ui_horizontal_swipe">Yatay Kaydırma</string>
+    <string name="incoming_call_ui_buttons">Düğmeler</string>
+    <string name="incoming_call_ui_slide_to_answer">Cevaplamak için Kaydır (iOS)</string>
+    <string name="incoming_call_ui_vertical_swipe">Dikey Kaydırma</string>
+
     <string name="avatars_settings">Avatar Ayarları</string>
     <string name="avatars_settings_subtitle">Renkleri, çerçeveleri ve daha fazlasını özelleştirme</string>
     <string name="avatar_colors">Avatar Renkleri</string>
@@ -178,6 +184,8 @@
     <string name="direct_call_on_tap_subtitle">Doğrudan aramak için bir arama kaydına dokunun</string>
     <string name="auto_speaker">Otomatik Hoparlör</string>
     <string name="auto_speaker_subtitle">Telefon kulaktan uzakta olduğunda otomatik olarak hoparlöre geçin ve yakın olduğunda ahizeye geri dönün</string>
+    <string name="fullscreen_calls">Tam ekran aramalar</string>
+    <string name="fullscreen_calls_subtitle">Gelen aramalar her zaman tam ekran modunda gösterilir</string>
 
     <string name="sound_and_vibration">Ses ve Titreşim</string>
     <string name="sound_and_vibration_subtitle">Zil sesleri, tuş sesleri ve uygulama genelinde dokunsal geri bildirim</string>
@@ -206,8 +214,9 @@
     <string name="manage_blocked">Engellenenleri Yönet</string>
     <string name="manage_blocked_subtitle">Engellenen aramaları ve spam\'ı yönetin</string>
     <string name="blocked_numbers">Engellenen Numaralar</string>
-    <string name="block_notifications">Bildirimleri Engelle</string>
-    <string name="block_notifications_subtitle">Engellenen aramalar için düşük öncelikli bir uyarı göster</string>
+    <string name="blocked_numbers_system_info">Sistem engelleme listesindeki numaralardan gelen aramalar, uygulamamıza ulaşmadan önce Android tarafından filtrelenir. Bu davranış üzerinde hiçbir kontrolümüz yoktur.</string>
+    <string name="blocking_notifications">Engelleme Bildirimleri</string>
+    <string name="blocking_notifications_subtitle">Engellenen aramalar için düşük öncelikli bir uyarı göster</string>
     <string name="block_method">Engelleme Yöntemi</string>
     <string name="block_method_subtitle">Engellenen aramalar nasıl işlenir</string>
     <string name="decline_automatically">Otomatik Reddet</string>
