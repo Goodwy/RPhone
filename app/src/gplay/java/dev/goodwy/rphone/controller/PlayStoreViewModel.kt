@@ -113,21 +113,15 @@ class PlayStoreViewModel (
     private fun handlePurchase(purchase: Purchase) {
         if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
             if (!purchase.isAcknowledged) {
+                if (purchase.products.any { _iapSkuDetails.value.any { p -> p.productId == it } }) {
+                    handlePurchaseIAP(purchase)
+                } else {
+                    handlePurchaseSub(purchase)
+                }
+
+                _purchaseSuccess.value = true
                 viewModelScope.launch {
-                    purchase.products.forEach { sku ->
-                        // Check whether this is an IAP or a subscription
-                        if (_iapPurchased.value.contains(sku) || _subPurchased.value.contains(sku)) {
-                            // If this is an IAP
-                            if (_iapPurchased.value.contains(sku)) {
-                                handlePurchaseIAP(purchase)
-                            } else {
-                                handlePurchaseSub(purchase)
-                            }
-                            // Updating shopping lists
-                            _purchaseSuccess.value = true
-                            refreshPurchases()
-                        }
-                    }
+                    refreshPurchases()
                 }
             }
         }
@@ -141,10 +135,11 @@ class PlayStoreViewModel (
                 }
             }
             BillingClient.BillingResponseCode.USER_CANCELED -> {
-                // The user canceled the purchase—we don't do anything
+                _isLoading.value = false // The user has closed the window – let’s remove the spinner
             }
             else -> {
                 _errorMessage.value = "Purchase failed: ${billingResult.responseCode}"
+                _isLoading.value = false // Error – remove the spinner
             }
         }
     }
@@ -368,6 +363,7 @@ class PlayStoreViewModel (
 
     override fun purchaseDonation(product: String, activity: Activity) {
         viewModelScope.launch {
+            _isLoading.value = true // Let’s turn on the spinner
             try {
                 val iapSku = _iapSkuDetails.value.firstOrNull { it.productId == product }
                 if (iapSku != null) {
@@ -383,9 +379,11 @@ class PlayStoreViewModel (
                     billingClient.launchBillingFlow(activity, flowParams)
                 } else {
                     _errorMessage.value = "Product not found"
+                    _isLoading.value = false
                 }
             } catch (e: Exception) {
                 _errorMessage.value = e.message
+                _isLoading.value = false
             }
         }
     }
@@ -512,40 +510,32 @@ class PlayStoreViewModel (
         preferenceManager.setBoolean(PreferenceManager.KEY_DYNAMIC_COLORS, true)
     }
 
-    // Full Pro Status Check with Purchase History Download
     override fun checkProStatus() {
+        // 1. We immediately return the status from the cache (to avoid any delay with the banner)
+        val savedIsProIap = preferenceManager.getBoolean(PreferenceManager.KEY_IS_PRO_IAP, false)
+        val savedIsProSub = preferenceManager.getBoolean(PreferenceManager.KEY_IS_PRO_SUB, false)
+        if (savedIsProIap || savedIsProSub) {
+            _isPro.value = true
+        }
+        _proCheckDone.value = true
+
+        // 2. Background check without enabling _isLoading, to prevent the spinner from flashing on the screen
         viewModelScope.launch {
-            // If billing has not been initialized, let's initialize it
             if (!::billingClient.isInitialized) {
                 initBillingClient()
             }
 
-            // If billing isn't ready, we'll set it up
             if (!_isBillingReady.value) {
-                _isLoading.value = true
                 billingClient.startConnection(object : BillingClientStateListener {
-                    override fun onBillingServiceDisconnected() {
-                        viewModelScope.launch {
-                            _isLoading.value = false
-                            _errorMessage.value = "Billing service disconnected"
-                        }
-                    }
-
+                    override fun onBillingServiceDisconnected() { _isBillingReady.value = false }
                     override fun onBillingSetupFinished(billingResult: BillingResult) {
-                        viewModelScope.launch {
-                            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                                _isBillingReady.value = true
-                                // Loading purchases
-                                loadPurchasesOnly()
-                            } else {
-                                _isLoading.value = false
-                                _errorMessage.value = "Failed to setup billing"
-                            }
+                        if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                            _isBillingReady.value = true
+                            viewModelScope.launch { loadPurchasesOnly() }
                         }
                     }
                 })
             } else {
-                // If the billing is already ready, just upload the purchases
                 loadPurchasesOnly()
             }
         }
