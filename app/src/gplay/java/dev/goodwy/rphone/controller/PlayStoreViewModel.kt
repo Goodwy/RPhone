@@ -479,22 +479,37 @@ class PlayStoreViewModel (
     }
 
     private suspend fun checkAndUpdateProStatus() {
-        // Checking IAP Purchases
         val iapProPurchased = _iapPurchased.value.any {
             it == BuildConfig.PRODUCT_ID_X1
         }
 
-        // Checking Subscriptions
         val subProPurchased = _subPurchased.value.any {
             it == BuildConfig.SUBSCRIPTION_ID_X1 ||
                     it == BuildConfig.SUBSCRIPTION_YEAR_ID_X1
         }
 
-        // Updating the status
-        _isPro.value = iapProPurchased || subProPurchased
+        val isPro = iapProPurchased || subProPurchased
+
+        // If the status has changed from Pro to standard (meaning a refund or the end of the subscription)
+        if (_isPro.value && !isPro) {
+            clearProPrefsIfNeeded()
+        }
+
+        _isPro.value = isPro
         preferenceManager.setBoolean(PreferenceManager.KEY_IS_PRO_IAP, iapProPurchased)
         preferenceManager.setBoolean(PreferenceManager.KEY_IS_PRO_SUB, subProPurchased)
         _proCheckDone.value = true
+    }
+
+    override fun clearProPrefsIfNeeded() {
+        preferenceManager.setBoolean(PreferenceManager.KEY_IS_PRO_IAP, false)
+        preferenceManager.setBoolean(PreferenceManager.KEY_IS_PRO_SUB, false)
+
+        val themeMode = preferenceManager.getString(PreferenceManager.KEY_THEME_MODE, "auto") ?: "auto"
+        if (themeMode == "auto_bw" || themeMode == "white" || themeMode == "black" ) {
+            preferenceManager.setString(PreferenceManager.KEY_THEME_MODE, "auto")
+        }
+        preferenceManager.setBoolean(PreferenceManager.KEY_DYNAMIC_COLORS, true)
     }
 
     // Full Pro Status Check with Purchase History Download

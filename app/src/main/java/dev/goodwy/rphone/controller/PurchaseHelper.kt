@@ -1,6 +1,8 @@
 package dev.goodwy.rphone.controller
 
 import android.app.Activity
+import android.content.Intent
+import androidx.activity.ComponentActivity
 import kotlinx.coroutines.flow.StateFlow
 
 interface PurchaseHelper {
@@ -28,9 +30,10 @@ interface PurchaseHelper {
     fun purchaseSubscription(product: String, activity: Activity, planId: String? = null)
     fun restorePurchases()
     fun refreshAllData()
+    fun clearProPrefsIfNeeded()
 
-    fun loadProducts(productIds: List<String>) {
-        // Empty default implementation for Google Play
-        // RuStoreViewModel will override this method
-    }
+    // Empty default implementation for Google Play
+    // RuStoreViewModel will override this method
+    fun loadProducts(productIds: List<String>) {}
+    fun handleNewIntent(intent: Intent?, activity: ComponentActivity) {}
 }

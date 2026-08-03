@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application android:icon="@mipmap/ic_launcher">
+
+        <meta-data
+            android:name="console_app_id_value"
+            android:value="2063736635" />
+
+        <meta-data
+            android:name="sdk_pay_scheme_value"
+            android:value="dev.goodwy.rphone.scheme" />
+
+    </application>
+</manifest>

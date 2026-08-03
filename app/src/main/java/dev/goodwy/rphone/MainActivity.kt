@@ -101,20 +101,13 @@ import com.ramcosta.composedestinations.generated.destinations.PrivateContactsSc
 import com.ramcosta.composedestinations.generated.destinations.RecentScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.SoundVibrationScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.SpamScreenDestination
+import dev.goodwy.rphone.controller.PurchaseHelper
 import dev.goodwy.rphone.view.components.TabSpec
 import dev.goodwy.rphone.view.components.parseTabOrder
 import dev.goodwy.rphone.view.components.performAppHaptic
 import org.koin.core.context.GlobalContext
 
 class MainActivity : FragmentActivity() {
-
-    //    private val requestRoleLauncher = registerForActivityResult(
-//        ActivityResultContracts.StartActivityForResult()
-//    ) { _ -> }
-//
-//    private val requestPermissionsLauncher = registerForActivityResult(
-//        ActivityResultContracts.RequestMultiplePermissions()
-//    ) { _ -> /* permissions result; dialer popup now shown after welcome */ }
     private var intentState by mutableStateOf<Intent?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -638,6 +631,12 @@ class MainActivity : FragmentActivity() {
                         handleIntent(intent, navController)
                     }
                 }
+
+                // Will check and automatically reset the settings upon return
+//                LaunchedEffect(Unit) {
+//                    val purchaseHelper: PurchaseHelper = GlobalContext.get().get()
+//                    purchaseHelper.checkProStatus()
+//                }
             }
         }
     }
@@ -646,6 +645,9 @@ class MainActivity : FragmentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         intentState = intent
+
+        val purchaseHelper: PurchaseHelper = GlobalContext.get().get()
+        purchaseHelper.handleNewIntent(intent, this)
     }
 
     private fun handleIntent(intent: Intent?, navController: androidx.navigation.NavController) {

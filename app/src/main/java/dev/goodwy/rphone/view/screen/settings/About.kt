@@ -83,6 +83,7 @@ fun AboutAppScreen(navigator: DestinationsNavigator) {
     val appInfo = getAppVersion(context)
     val storeName = when (BuildConfig.FLAVOR) {
         "gplay" -> "GPlay"
+        "rustore" -> "RuStore"
         else -> "FOSS"
     }
 
