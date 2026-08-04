@@ -23,7 +23,8 @@ import androidx.core.graphics.drawable.IconCompat
 import androidx.core.net.toUri
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.PreferenceManager
-import dev.goodwy.rphone.modal.`interface`.IContactsRepository
+import dev.goodwy.rphone.data.manager.CallStateManager
+
 import dev.goodwy.rphone.view.screen.BiometricCallActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -44,8 +45,8 @@ data class CallSession(
 
 class CallService : InCallService() {
 
-    private val contactsRepository: IContactsRepository by inject()
     private val preferenceManager: PreferenceManager by inject()
+    private val callStateManager: CallStateManager by inject()
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var redialCount = 0
 
@@ -208,6 +209,17 @@ class CallService : InCallService() {
             } else {
                 updateNotification(call)
             }
+        }
+
+        override fun onDetailsChanged(call: Call, details: Call.Details) {
+            super.onDetailsChanged(call, details)
+            val number = details.handle?.schemeSpecificPart?.let { android.net.Uri.decode(it) } ?: ""
+            val cnam = if (details.callerDisplayNamePresentation == TelecomManager.PRESENTATION_ALLOWED) {
+                details.callerDisplayName
+            } else null
+            callStateManager.onNewCallReceived(number, cnam)
+            updateCallState()
+            updateNotification(call)
         }
     }
 
@@ -392,6 +404,11 @@ class CallService : InCallService() {
         call.registerCallback(callCallback)
 
         val number = call.details.handle?.schemeSpecificPart ?.let { android.net.Uri.decode(it) } ?: ""
+        val cnam = if (call.details.callerDisplayNamePresentation == TelecomManager.PRESENTATION_ALLOWED) {
+            call.details.callerDisplayName
+        } else null
+
+        callStateManager.onNewCallReceived(number, cnam)
 
         // ── USSD / MMI outgoing calls ────────────────────────────────────────
         // Do NOT launch CallActivity for codes like *124# *#06# ##002# *21*N#.
@@ -425,7 +442,10 @@ class CallService : InCallService() {
         super.onCallRemoved(call)
         call.unregisterCallback(callCallback)
         updateCallState()
-        val calls = calls ?: emptyList()
+        if (allCalls.value.isEmpty()) {
+            callStateManager.onCallEnded()
+        }
+        val calls = allCalls.value
         if (calls.isEmpty()) {
             removeForeground()
             cancelNotification()
@@ -514,20 +534,16 @@ class CallService : InCallService() {
 
         val handle = call.details.handle
         val number = handle?.schemeSpecificPart ?: ""
+        val metadata = callStateManager.callerMetadata.value
 
-        val contact = if (number.isNotEmpty()) {
-            try {
-                contactsRepository.getContactByNumber(number)
-            } catch (_: Exception) { null }
-        } else null
-
-        val contactName = when {
-            contact != null -> contact.displayName
-            number.isNotEmpty() -> number
-            else -> "Unknown Number"
+        val contactName = if (metadata != null && metadata.number == number) {
+            metadata.name
+        } else {
+            // Fallback if metadata isn't ready or matches another call (rare)
+            number.ifEmpty { "Unknown Number" }
         }
 
-        val contactPhoto = getContactBitmap(contact?.photoUri)
+        val contactPhoto = getContactBitmap(metadata?.photoUri)
 
         val telecomManager = getSystemService(TELECOM_SERVICE) as TelecomManager
         val accountHandle = call.details.accountHandle
@@ -743,7 +759,7 @@ class CallService : InCallService() {
 
         // Start/stop floating bubble based on preference
         if (call.state != Call.STATE_DISCONNECTED && call.state != Call.STATE_DISCONNECTING) {
-            maybeStartFloatingCall(contactName, number, contact?.photoUri)
+            maybeStartFloatingCall(contactName, number, metadata?.photoUri)
         }
     }
 
