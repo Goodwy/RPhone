@@ -26,7 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.fragment.app.FragmentActivity
 import dev.goodwy.rphone.controller.util.PreferenceManager
-import dev.goodwy.rphone.modal.`interface`.IContactsRepository
+
 import dev.goodwy.rphone.view.screen.ExpressiveCallScreen
 import dev.goodwy.rphone.view.theme.Rill4Theme
 import kotlinx.coroutines.delay
@@ -34,8 +34,8 @@ import org.koin.android.ext.android.inject
 
 class CallActivity : FragmentActivity() { //ComponentActivity()
 
-    private val contactsRepo: IContactsRepository by inject()
     private val preferenceManager: PreferenceManager by inject()
+    private val callViewModel: CallViewModel by inject()
     private var proximityWakeLock: PowerManager.WakeLock? = null
 
     companion object {
@@ -59,6 +59,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
                 val session by CallService.currentCallSession.collectAsState()
                 val audioState by CallService.audioState.collectAsState()
                 val settingsState by preferenceManager.settingsChanged.collectAsState()
+                val callerMetadata by callViewModel.callerMetadata.collectAsState()
 
                 val call = session?.call
                 val callState = session?.state
@@ -135,24 +136,6 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
                     val details = call.details
                     val number = details?.handle?.schemeSpecificPart ?: ""
 
-                    var contactName by remember(number) { mutableStateOf(number.ifEmpty { "Unknown" }) }
-                    var photoUri by remember(number) { mutableStateOf<String?>(null) }
-
-                    LaunchedEffect(number) {
-                        if (number.isNotEmpty()) {
-                            val contact = try {
-                                contactsRepo.getContactByNumber(number)
-                            } catch (e: Exception) {
-                                null
-                            }
-
-                            if (contact != null) {
-                                contactName = contact.name
-                                photoUri = contact.photoUri
-                            }
-                        }
-                    }
-
                     AnimatedContent(
                         targetState = call,
                         transitionSpec = {
@@ -162,12 +145,23 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
                         label = "CallSwitch"
                     ) { targetCall ->
                         val answeredFromNotification = intent?.getBooleanExtra("ANSWERED_FROM_NOTIFICATION", false) ?: false
+                        
+                        val currentCnam = if (targetCall.details.callerDisplayNamePresentation == android.telecom.TelecomManager.PRESENTATION_ALLOWED) {
+                            targetCall.details.callerDisplayName
+                        } else null
+
+                        val displayName = if (targetCall == call) {
+                            callerMetadata?.name ?: currentCnam ?: number.ifEmpty { "Unknown" }
+                        } else {
+                            currentCnam ?: (targetCall.details.handle?.schemeSpecificPart ?: "Unknown")
+                        }
+
                         ExpressiveCallScreen(
                             call = targetCall,
                             callState = if (targetCall == call) session?.state ?: Call.STATE_ACTIVE else targetCall.state,
-                            contactName = if (targetCall == call) contactName else (targetCall.details.handle?.schemeSpecificPart ?: "Unknown"),
+                            contactName = displayName,
                             phoneNumber = targetCall.details.handle?.schemeSpecificPart ?: "",
-                            photoUri = if (targetCall == call) photoUri else null,
+                            photoUri = if (targetCall == call) callerMetadata?.photoUri else null,
                             audioState = audioState,
                             skipIncomingScreen = answeredFromNotification
                         )

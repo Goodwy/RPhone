@@ -9,6 +9,11 @@ import dev.goodwy.rphone.modal.`interface`.ICallLogRepository
 import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 import dev.goodwy.rphone.modal.repository.CallLogRepository
 import dev.goodwy.rphone.modal.repository.ContactsRepository
+import dev.goodwy.rphone.domain.repository.ICallerRepository
+import dev.goodwy.rphone.domain.usecase.GetCallerNameUseCase
+import dev.goodwy.rphone.data.repository.CallerRepositoryImpl
+import dev.goodwy.rphone.data.manager.CallStateManager
+import dev.goodwy.rphone.controller.CallViewModel
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.modal.db.RillDatabase
 import org.koin.android.ext.koin.androidApplication
@@ -35,8 +40,14 @@ val appModule = module {
     single {
         PreferenceManager(androidContext())
     }
+    // Clean Architecture Wires
+    single<ICallerRepository> { CallerRepositoryImpl(get()) }
+    single { GetCallerNameUseCase(get()) }
+    single { CallStateManager(get()) }
+
     viewModel { ContactsViewModel(androidApplication(), get(), get()) }
     viewModel { CallLogViewModel(androidApplication(), get(), androidContext().contentResolver) }
+    viewModel { CallViewModel(get()) }
     single<PurchaseHelper> {
         RuStoreViewModel(androidApplication(), get())
     }

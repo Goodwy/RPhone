@@ -210,6 +210,8 @@
             </intent-filter>
         </service>
 
+
+
         <activity-alias
             android:name=".MainActivityDefaultIcon"
             android:targetActivity=".MainActivity"
