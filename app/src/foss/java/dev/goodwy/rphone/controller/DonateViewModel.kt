@@ -93,7 +93,5 @@ class DonateViewModel (
         // Stub
     }
 
-    override fun clearProPrefsIfNeeded() {
-        preferenceManager.setBoolean(PreferenceManager.KEY_IS_PRO_FOSS, false)
-    }
+    override fun clearProPrefsIfNeeded() {}
 }
