@@ -92,4 +92,6 @@ class DonateViewModel (
     override fun refreshAllData() {
         // Stub
     }
+
+    override fun clearProPrefsIfNeeded() {}
 }

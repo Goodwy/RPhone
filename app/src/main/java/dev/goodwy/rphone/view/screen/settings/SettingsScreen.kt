@@ -69,7 +69,7 @@ import dev.goodwy.rphone.view.theme.customColors
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.*
-import com.ramcosta.composedestinations.generated.destinations.CallSettingsScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.CallSettingScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.goodwy.rphone.BuildConfig
 import dev.goodwy.rphone.GITHUB_URL
@@ -452,7 +452,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.fullscreen_calls_subtitle),
             )
         ) {
-            navigator.navigate(CallSettingsScreenDestination)
+            navigator.navigate(CallSettingScreenDestination)
         },
         SettingsSearchEntry(
             headline = stringResource(R.string.sound_and_vibration),
@@ -844,7 +844,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                                     iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
                                     iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
                                     trailingIcon = Icons.Default.ChevronRight,
-                                    onClick = { navigator.navigate(CallSettingsScreenDestination) }
+                                    onClick = { navigator.navigate(CallSettingScreenDestination) }
                                 )
                                 RillListItem(
                                     headline = stringResource(R.string.sound_and_vibration),
@@ -979,7 +979,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 }
 
                 item { Spacer(modifier = Modifier
-                    .height(80.dp)
+                    .height(120.dp)
                     .navigationBarsPadding()) }
             }
         }

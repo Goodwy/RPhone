@@ -1,6 +1,5 @@
 package dev.goodwy.rphone.view.screen.settings
 
-import android.accounts.Account
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
@@ -11,7 +10,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.rounded.Backpack
 import androidx.compose.material.icons.rounded.CropFree
@@ -28,7 +26,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.goodwy.rphone.R
-import dev.goodwy.rphone.controller.util.ContactUtils
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillAnimatedSection
@@ -47,7 +44,7 @@ import dev.goodwy.rphone.view.components.Title
 @OptIn(ExperimentalMaterial3Api::class)
 @Destination<RootGraph>
 @Composable
-fun CallSettingsScreen(navigator: DestinationsNavigator) {
+fun CallSettingScreen(navigator: DestinationsNavigator) {
     val prefs = koinInject<PreferenceManager>()
     val context = LocalContext.current
 

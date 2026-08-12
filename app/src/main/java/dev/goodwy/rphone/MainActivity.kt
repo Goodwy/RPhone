@@ -82,7 +82,7 @@ import com.ramcosta.composedestinations.generated.destinations.BiometricScreenDe
 import com.ramcosta.composedestinations.generated.destinations.BlockedNumbersScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.BlurEffectsElementsScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.CallAccountsScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.CallSettingsScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.CallSettingScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.CallerUIScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactManagementScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactMergeDuplicatesScreenDestination
@@ -99,9 +99,11 @@ import com.ramcosta.composedestinations.generated.destinations.NavigationScreenD
 import com.ramcosta.composedestinations.generated.destinations.NotesScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.PrivateContactsScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.RecentScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.SettingsScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.SoundVibrationScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.SpamScreenDestination
 import dev.goodwy.rphone.controller.PurchaseHelper
+import dev.goodwy.rphone.controller.util.makeCall
 import dev.goodwy.rphone.view.components.TabSpec
 import dev.goodwy.rphone.view.components.parseTabOrder
 import dev.goodwy.rphone.view.components.performAppHaptic
@@ -487,11 +489,12 @@ class MainActivity : FragmentActivity() {
                                                     )
                                                     RailItem(
                                                         selected = currentDest?.hierarchy?.any {
-                                                            it.route?.contains("settings", ignoreCase = true) == true || it.route == DonateScreenDestination.route ||
+//                                                            it.route?.contains("settings", ignoreCase = true) == true ||
+                                                                    it.route == SettingsScreenDestination.route || it.route == DonateScreenDestination.route ||
                                                                     it.route == AboutAppScreenDestination.route || it.route == AppIconScreenDestination.route ||
                                                                     it.route == BiometricScreenDestination.route || it.route == BlockedNumbersScreenDestination.route ||
                                                                     it.route == BlurEffectsElementsScreenDestination.route || it.route == CallAccountsScreenDestination.route ||
-                                                                    it.route == CallerUIScreenDestination.route || it.route == CallSettingsScreenDestination.route ||
+                                                                    it.route == CallerUIScreenDestination.route || it.route == CallSettingScreenDestination.route ||
                                                                     it.route == ContributorsScreenDestination.route || it.route == InterfaceScreenDestination.route ||
                                                                     it.route == LiquidGlassElementsScreenDestination.route || it.route == NavigationScreenDestination.route ||
                                                                     it.route == SoundVibrationScreenDestination.route || it.route == SpamScreenDestination.route ||
@@ -506,7 +509,7 @@ class MainActivity : FragmentActivity() {
                                                                 modifier = Modifier.size(24.dp)
                                                             )
                                                         },
-                                                        onClick = { navTo(com.ramcosta.composedestinations.generated.destinations.SettingsScreenDestination.route) }
+                                                        onClick = { navTo(SettingsScreenDestination.route) }
                                                     )
                                                 }
                                             }
@@ -687,6 +690,16 @@ class MainActivity : FragmentActivity() {
                 if (data?.scheme == "tel") {
                     val number = data.schemeSpecificPart
                     navController.navigate(DialPadScreenDestination(initialNumber = number).route)
+                }
+            }
+            Intent.ACTION_CALL -> {
+                if (data?.scheme == "tel") {
+                    val number = data.schemeSpecificPart
+                    if (isAlreadyDefaultDialer(this)) {
+                        makeCall(this, number = number)
+                    } else {
+                        navController.navigate(DialPadScreenDestination(initialNumber = number).route)
+                    }
                 }
             }
             Intent.ACTION_INSERT -> {

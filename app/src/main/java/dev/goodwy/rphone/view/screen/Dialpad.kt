@@ -1648,16 +1648,17 @@ fun DialPadContent(
                                                 number = number,
                                                 fontSize = (
                                                         (when {
-                                                            numberLength > 45 -> 6
-                                                            numberLength > 39 -> 8
-                                                            numberLength > 35 -> 10
-                                                            numberLength > 31 -> 12
-                                                            numberLength > 27 -> 14
-                                                            numberLength > 23 -> 16
-                                                            numberLength > 20 -> 18
-                                                            numberLength > 16 -> 20
-                                                            numberLength > 14 -> 24
-                                                            numberLength > 11 -> 28
+                                                            numberLength > 46 -> 5
+                                                            numberLength > 42 -> 6
+                                                            numberLength > 35 -> 8
+                                                            numberLength > 31 -> 10
+                                                            numberLength > 26 -> 12
+                                                            numberLength > 23 -> 14
+                                                            numberLength > 21 -> 16
+                                                            numberLength > 18 -> 18
+                                                            numberLength > 15 -> 20
+                                                            numberLength > 13 -> 24
+                                                            numberLength > 10 -> 28
                                                             else -> 36
                                                         }) * scaleFactor).coerceIn(8f, 40f).toInt(),
                                                 cursorPosition = cursorPosition,
