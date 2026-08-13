@@ -116,10 +116,11 @@ fun ContactEditScreen(
     val showButton by remember { derivedStateOf { listState.firstVisibleItemIndex > 2 } }
 
     // Retrieving data for a specific RawContact
-    val rawContactData = remember(rawContactId) {
+    var rawContactData by remember { mutableStateOf<Contact?>(null) }
+    LaunchedEffect(rawContactId) {
         if (isEditingSource && rawContactId != null) {
-            contactsVM.getRawContactData(rawContactId)
-        } else null
+            rawContactData = contactsVM.getRawContactData(rawContactId)
+        }
     }
 
     val contactIdData = remember(contactId, allContacts) {

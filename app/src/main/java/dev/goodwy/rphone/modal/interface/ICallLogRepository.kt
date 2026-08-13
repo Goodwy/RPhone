@@ -3,9 +3,9 @@ package dev.goodwy.rphone.modal.`interface`
 import dev.goodwy.rphone.modal.data.CallLogEntry
 
 interface ICallLogRepository {
-    fun getCallLogs(): List<CallLogEntry>
-    fun saveCallLog(entry: CallLogEntry)
-    fun deleteCallLog(number: String)
-    fun deleteCallLogsByIds(ids: List<Long>)
-    fun clearCallLogs()
+    suspend fun getCallLogs(): List<CallLogEntry>
+    suspend fun saveCallLog(entry: CallLogEntry)
+    suspend fun deleteCallLog(number: String)
+    suspend fun deleteCallLogsByIds(ids: List<Long>)
+    suspend fun clearCallLogs()
 }

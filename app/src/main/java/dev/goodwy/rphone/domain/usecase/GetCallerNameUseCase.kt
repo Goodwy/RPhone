@@ -4,7 +4,7 @@ import dev.goodwy.rphone.domain.model.CallerMetadata
 import dev.goodwy.rphone.domain.repository.ICallerRepository
 
 class GetCallerNameUseCase(private val repository: ICallerRepository) {
-    operator fun invoke(incomingNumber: String, cnamName: String?): CallerMetadata {
+    suspend operator fun invoke(incomingNumber: String, cnamName: String?): CallerMetadata {
         val localContact = repository.getContactByNumber(incomingNumber)
         
         val hasLocalName = localContact != null && (

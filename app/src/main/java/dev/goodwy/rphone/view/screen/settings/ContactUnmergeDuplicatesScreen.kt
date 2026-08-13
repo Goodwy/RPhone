@@ -76,14 +76,17 @@ fun ContactUnmergeDuplicatesScreen(
     val settingsState by prefs.settingsChanged.collectAsState()
     val displayOrder = remember(settingsState) { prefs.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0) }
     val viewModel: ContactsViewModel = koinActivityViewModel()
+    val scope = rememberCoroutineScope()
 
     var mergedContacts by remember { mutableStateOf<List<MergedContactDisplay>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
 
     fun loadMergedContacts() {
-        val allContacts = viewModel.allContacts.value
-        mergedContacts = findMergedContactsWithData(allContacts, viewModel)
-        isLoading = false
+        scope.launch {
+            val allContacts = viewModel.allContacts.value
+            mergedContacts = findMergedContactsWithData(allContacts, viewModel)
+            isLoading = false
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -97,7 +100,6 @@ fun ContactUnmergeDuplicatesScreen(
     }
 
     val listState = rememberLazyListState()
-    val scope = rememberCoroutineScope()
     var visible by remember { mutableStateOf(false) }
     var isClosing by remember { mutableStateOf(false) }
 
@@ -428,7 +430,7 @@ fun MergedContactCard(
     }
 }
 
-private fun findMergedContactsWithData(
+private suspend fun findMergedContactsWithData(
     contacts: List<Contact>,
     viewModel: ContactsViewModel
 ): List<MergedContactDisplay> {

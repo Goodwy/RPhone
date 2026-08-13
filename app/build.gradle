@@ -107,6 +107,7 @@ dependencies {
     // Navigation & Serialization
     implementation 'androidx.navigation:navigation-compose:2.8.5'
     implementation 'androidx.preference:preference-ktx:1.2.1'
+    implementation 'androidx.datastore:datastore-preferences:1.2.1'
 
     // Biometrics
     implementation 'androidx.biometric:biometric:1.2.0-alpha05'

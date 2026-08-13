@@ -28,6 +28,9 @@ import dev.goodwy.rphone.controller.util.deduplicateNumbers
 import dev.goodwy.rphone.device_only
 import dev.goodwy.rphone.modal.db.PrivateContactEntity
 import dev.goodwy.rphone.private_only
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.delay
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -39,7 +42,7 @@ class ContactsRepository(
     private val contentResolver: ContentResolver = context.contentResolver
 //    private val preferenceManager = PreferenceManager(context)
 
-    override fun getContacts(includePrivate: Boolean): List<Contact> {
+    override suspend fun getContacts(includePrivate: Boolean): List<Contact> = withContext(Dispatchers.IO) {
         val contactsMap = mutableMapOf<String, Contact>()
         val rawContactsMap = mutableMapOf<String, MutableList<String>>()
 
@@ -226,15 +229,15 @@ class ContactsRepository(
             e.printStackTrace()
         }
 
-        return contactsMap.values.toList()
+        return@withContext contactsMap.values.toList()
 //            .filter { it.phoneNumbers.isNotEmpty() || it.emails.isNotEmpty() }
             .sortedBy { it.displayName.lowercase() }
     }
 
-    override fun getContactById(contactId: String): Contact? {
+    override suspend fun getContactById(contactId: String): Contact? = withContext(Dispatchers.IO) {
         if (contactId.startsWith("p")) {
-            val id = contactId.substring(1).toLongOrNull() ?: return null
-            return privateContactDao.getById(id)?.toContact()
+            val id = contactId.substring(1).toLongOrNull() ?: return@withContext null
+            return@withContext privateContactDao.getById(id)?.toContact()
         }
         val projection = arrayOf(
             ContactsContract.Data.CONTACT_ID,
@@ -379,16 +382,16 @@ class ContactsRepository(
         } catch (e: SecurityException) {
             e.printStackTrace()
         }
-        return contact
+        return@withContext contact
     }
 
-    override fun toggleFavorite(contactId: String, isFavorite: Boolean) {
+    override suspend fun toggleFavorite(contactId: String, isFavorite: Boolean) = withContext(Dispatchers.IO) {
         if (contactId.startsWith("p")) {
-            val id = contactId.substring(1).toLongOrNull() ?: return
+            val id = contactId.substring(1).toLongOrNull() ?: return@withContext
             privateContactDao.getById(id)?.let {
                 privateContactDao.update(it.copy(isFavorite = isFavorite))
             }
-            return
+            return@withContext
         }
         val contentValue = ContentValues().apply {
             put(ContactsContract.Contacts.STARRED, if (isFavorite) 1 else 0)
@@ -397,10 +400,11 @@ class ContactsRepository(
             .appendPath(contactId)
             .build()
         contentResolver.update(updateUri, contentValue, null, null)
+        Unit
     }
 
-    override fun setDefaultPhoneNumber(contactId: String, phoneNumber: String, isPrimary: Boolean) {
-        val rawContactId = getRawContactId(contactId) ?: return
+    override suspend fun setDefaultPhoneNumber(contactId: String, phoneNumber: String, isPrimary: Boolean) = withContext(Dispatchers.IO) {
+        val rawContactId = getRawContactId(contactId) ?: return@withContext
 
         val ops = ArrayList<ContentProviderOperation>()
 
@@ -496,7 +500,7 @@ class ContactsRepository(
         return getRawContactIds(contactId).firstOrNull()
     }
 
-    override fun saveContact(contact: Contact) {
+    override suspend fun saveContact(contact: Contact) = withContext(Dispatchers.IO) {
 //        if (contact.isPrivate) {
 //            val entity = PrivateContactEntity.fromContact(contact)
 //            if (entity.localId == 0L) {
@@ -524,7 +528,7 @@ class ContactsRepository(
                 // Update by ID
                 privateContactDao.update(entity)
             }
-            return
+            return@withContext
         }
 
         val ops = ArrayList<ContentProviderOperation>()
@@ -686,7 +690,7 @@ class ContactsRepository(
         } else {
             // Update existing contact
             val rawContactIds = getRawContactIds(contact.id)
-            if (rawContactIds.isEmpty()) return
+            if (rawContactIds.isEmpty()) return@withContext
 
             rawContactIds.forEach { rawContactId ->
                 // Update Account (Move contact)
@@ -853,11 +857,11 @@ class ContactsRepository(
         }
     }
 
-    override fun deleteContact(contactId: String) {
+    override suspend fun deleteContact(contactId: String) = withContext(Dispatchers.IO) {
         if (contactId.startsWith("p")) {
-            val id = contactId.substring(1).toLongOrNull() ?: return
+            val id = contactId.substring(1).toLongOrNull() ?: return@withContext
             privateContactDao.deleteById(id)
-            return
+            return@withContext
         }
 
         try {
@@ -873,7 +877,7 @@ class ContactsRepository(
         }
     }
 
-    override fun deleteContacts(contactIds: List<String>) {
+    override suspend fun deleteContacts(contactIds: List<String>) = withContext(Dispatchers.IO) {
         val ops = ArrayList<ContentProviderOperation>()
         contactIds.forEach { id ->
             if (id.startsWith("p")) {
@@ -889,9 +893,10 @@ class ContactsRepository(
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        Unit
     }
 
-    override fun moveContacts(contactIds: List<String>, accountName: String?, accountType: String?) {
+    override suspend fun moveContacts(contactIds: List<String>, accountName: String?, accountType: String?) = withContext(Dispatchers.IO) {
 //        val ops = ArrayList<ContentProviderOperation>()
 //        contactIds.forEach { id ->
 //            val rawContactId = getRawContactId(id)
@@ -911,7 +916,7 @@ class ContactsRepository(
 //            e.printStackTrace()
 //        }
 
-        if (contactIds.isEmpty()) return
+        if (contactIds.isEmpty()) return@withContext
 
         // We separate private and public contacts
         val privateIds = contactIds.filter { it.startsWith("p") }
@@ -962,7 +967,7 @@ class ContactsRepository(
         }
     }
 
-    override fun getAvailableAccountsForMoving(): List<Account> {
+    override suspend fun getAvailableAccountsForMoving(): List<Account> = withContext(Dispatchers.IO) {
         val sources = LinkedHashSet<Account>()
         // Accounts
         try {
@@ -992,10 +997,10 @@ class ContactsRepository(
             sources.add(Account("sim_1", "SIM"))
         }
 
-        return sources.toList()
+        sources.toList()
     }
 
-    override fun getAvailableAccounts(): List<Account> {
+    override suspend fun getAvailableAccounts(): List<Account> = withContext(Dispatchers.IO) {
         val sources = LinkedHashSet<Account>()
         try {
             // We retrieve all raw contacts along with account information
@@ -1050,15 +1055,15 @@ class ContactsRepository(
             sources.add(Account("sim_1", "SIM"))
         }
 
-        return sources.toList()
+        sources.toList()
     }
 
-    override fun getContactByNumber(number: String): Contact? {
+    override suspend fun getContactByNumber(number: String): Contact? = withContext(Dispatchers.IO) {
         // Check private contacts first
         privateContactDao.getAll().forEach {
             val contact = it.toContact()
             if (contact.phoneNumbers.any { num -> areNumbersEqual(num, number) }) {
-                return contact
+                return@withContext contact
             }
         }
 
@@ -1078,13 +1083,13 @@ class ContactsRepository(
             e.printStackTrace()
         }
 
-        if (contactId == null) return null
+        if (contactId == null) return@withContext null
 
         // We retrieve the full contact information, including all fields
-        val fullContact = getContactById(contactId)
+        val fullContact = getContactById(contactId!!)
 
         // Add the number you were looking for if it's not on the list
-        return fullContact?.let {
+        fullContact?.let {
             if (it.phoneNumbers.contains(number)) {
                 it
             } else {
@@ -1101,7 +1106,7 @@ class ContactsRepository(
         }
     }
 
-    override fun findDuplicates(): List<List<Contact>> {
+    override suspend fun findDuplicates(): List<List<Contact>> = withContext(Dispatchers.IO) {
         val allContacts = getContacts()
         val availableAccounts = getAvailableAccountsForMoving()
         val validAccounts = availableAccounts.map { it.name to it.type }.toSet()
@@ -1146,7 +1151,7 @@ class ContactsRepository(
             }
         }
 
-        return duplicates
+        duplicates
     }
 
 //    override fun mergeContacts(targetContactId: String, sourceContactIds: List<String>) {
@@ -1179,13 +1184,13 @@ class ContactsRepository(
 //        }
 //    }
 
-    override fun setCustomRingtone(contactId: String, ringtoneUri: String?) {
+    override suspend fun setCustomRingtone(contactId: String, ringtoneUri: String?) = withContext(Dispatchers.IO) {
         if (contactId.startsWith("p")) {
-            val id = contactId.substring(1).toLongOrNull() ?: return
+            val id = contactId.substring(1).toLongOrNull() ?: return@withContext
             privateContactDao.getById(id)?.let {
                 privateContactDao.update(it.copy(customRingtone = ringtoneUri))
             }
-            return
+            return@withContext
         }
         val contentValue = ContentValues().apply {
             put(ContactsContract.Contacts.CUSTOM_RINGTONE, ringtoneUri)
@@ -1194,9 +1199,10 @@ class ContactsRepository(
             .appendPath(contactId)
             .build()
         contentResolver.update(updateUri, contentValue, null, null)
+        Unit
     }
 
-    override fun formatAllPhoneNumbers(onProgress: ((current: Int, total: Int) -> Unit)?) {
+    override suspend fun formatAllPhoneNumbers(onProgress: ((current: Int, total: Int) -> Unit)?) = withContext(Dispatchers.IO) {
         val allContacts = getContacts(true)
         val ops = ArrayList<ContentProviderOperation>()
         val total = allContacts.size
@@ -1296,9 +1302,9 @@ class ContactsRepository(
         }
     }
 
-    override fun makeContactPrivate(contactId: String) {
-        val contact = getContactById(contactId) ?: return
-        if (contact.isPrivate) return
+    override suspend fun makeContactPrivate(contactId: String) = withContext(Dispatchers.IO) {
+        val contact = getContactById(contactId) ?: return@withContext
+        if (contact.isPrivate) return@withContext
 
         // 1. Save to local DB
         val privateContact = contact.copy(isPrivate = true)
@@ -1308,9 +1314,9 @@ class ContactsRepository(
         deleteContact(contactId)
     }
 
-    override fun makeContactPublic(contactId: String) {
-        val contact = getContactById(contactId) ?: return
-        if (!contact.isPrivate) return
+    override suspend fun makeContactPublic(contactId: String) = withContext(Dispatchers.IO) {
+        val contact = getContactById(contactId) ?: return@withContext
+        if (!contact.isPrivate) return@withContext
 
         // 1. Save to system contacts
         saveContact(contact.copy(id = "", isPrivate = false))
@@ -1319,7 +1325,7 @@ class ContactsRepository(
         deleteContact(contactId)
     }
 
-    override fun exportPrivateContacts(uri: Uri) {
+    override suspend fun exportPrivateContacts(uri: Uri) = withContext(Dispatchers.IO) {
         val privateContacts = privateContactDao.getAll().map { it.toContact() }
         val vcfContent = buildString {
             privateContacts.forEach { contact ->
@@ -1450,11 +1456,12 @@ class ContactsRepository(
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        Unit
     }
 
-    override fun importPrivateContacts(uri: Uri) {
+    override suspend fun importPrivateContacts(uri: Uri) = withContext(Dispatchers.IO) {
         try {
-            val content = context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() } ?: return
+            val content = context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() } ?: return@withContext
             val vCards = content.split("BEGIN:VCARD")
             vCards.forEach { vCard ->
                 if (vCard.isBlank()) return@forEach
@@ -1789,7 +1796,7 @@ class ContactsRepository(
         val contactId: String
     )
 
-    override fun getRawContactsForContact(contactId: String): List<RawContactInfo> {
+    override suspend fun getRawContactsForContact(contactId: String): List<RawContactInfo> = withContext(Dispatchers.IO) {
         val rawContacts = mutableListOf<RawContactInfo>()
 
         val projection = arrayOf(
@@ -1836,15 +1843,15 @@ class ContactsRepository(
             e.printStackTrace()
         }
 
-        return rawContacts
+        rawContacts
     }
 
     // We use Android's aggregation mechanism to avoid data loss.
-    override fun mergeContacts(targetContactId: String, sourceContactIds: List<String>) {
-        if (targetContactId.startsWith("p")) return
+    override suspend fun mergeContacts(targetContactId: String, sourceContactIds: List<String>) = withContext(Dispatchers.IO) {
+        if (targetContactId.startsWith("p")) return@withContext
 
         val targetRawIds = getRawContactIds(targetContactId)
-        if (targetRawIds.isEmpty()) return
+        if (targetRawIds.isEmpty()) return@withContext
 
         val ops = ArrayList<ContentProviderOperation>()
 
@@ -1909,11 +1916,11 @@ class ContactsRepository(
 //        }
 //    }
 
-    override fun unmergeAllSources(contactId: String) {
-        if (contactId.startsWith("p")) return
+    override suspend fun unmergeAllSources(contactId: String) = withContext(Dispatchers.IO) {
+        if (contactId.startsWith("p")) return@withContext
 
         val rawIds = getRawContactIds(contactId).map { it.toLong() }
-        if (rawIds.size < 2) return
+        if (rawIds.size < 2) return@withContext
 
         val ops = ArrayList<ContentProviderOperation>()
 
@@ -1941,7 +1948,7 @@ class ContactsRepository(
         }
     }
 
-    override fun getRawContactData(rawContactId: String): Contact? {
+    override suspend fun getRawContactData(rawContactId: String): Contact? = withContext(Dispatchers.IO) {
         val projection = arrayOf(
             ContactsContract.Data.CONTACT_ID,
             ContactsContract.Data.DISPLAY_NAME_PRIMARY,
@@ -2090,7 +2097,7 @@ class ContactsRepository(
             e.printStackTrace()
         }
 
-        return contact?.copy(photoUri = getPhotoUriForRawContact(rawContactId) ?: photoUri)
+        return@withContext contact?.copy(photoUri = getPhotoUriForRawContact(rawContactId) ?: photoUri)
     }
 
     // A method for retrieving a photo associated with a specific RawContact
@@ -2123,7 +2130,7 @@ class ContactsRepository(
         return photoUri
     }
 
-    override fun updateRawContact(rawContactId: String, contact: Contact) {
+    override suspend fun updateRawContact(rawContactId: String, contact: Contact) = withContext(Dispatchers.IO) {
         val ops = ArrayList<ContentProviderOperation>()
 
         // 1. StructuredName
@@ -2343,24 +2350,22 @@ class ContactsRepository(
         try {
             contentResolver.applyBatch(ContactsContract.AUTHORITY, ops)
 
-            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                val afterRawIds = if (contact.id.isNotEmpty() && !contact.id.startsWith("p")) {
-                    getRawContactIds(contact.id).map { it.toLong() }
-                } else {
-                    emptyList()
-                }
+            delay(300)
+            val afterRawIds = if (contact.id.isNotEmpty() && !contact.id.startsWith("p")) {
+                getRawContactIds(contact.id).map { it.toLong() }
+            } else {
+                emptyList()
+            }
 
-                if (afterRawIds.size > 1) {
-                    // Contact is still merged!
-                } else {
-                    // We're trying to restore aggregation
-                    findAndMergeByPhoneNumber(contact.id)
-                }
-            }, 300)
+            if (afterRawIds.size <= 1) {
+                // We're trying to restore aggregation
+                findAndMergeByPhoneNumber(contact.id)
+            }
 
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        Unit
     }
 
     // A helper method for updating or inserting data
@@ -2431,7 +2436,7 @@ class ContactsRepository(
         return exists
     }
 
-    private fun findAndMergeByPhoneNumber(contactId: String) {
+    private suspend fun findAndMergeByPhoneNumber(contactId: String) {
         if (contactId.startsWith("p")) return
 
         val contact = getContactById(contactId) ?: return
@@ -2508,7 +2513,7 @@ class ContactsRepository(
         }
     }
 
-    override fun dumpContact(contactId: String): String {
-        return ContactDumpUtils.dumpFullContact(contentResolver, contactId)
+    override suspend fun dumpContact(contactId: String): String = withContext(Dispatchers.IO) {
+        ContactDumpUtils.dumpFullContact(contentResolver, contactId)
     }
 }
