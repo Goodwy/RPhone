@@ -30,8 +30,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -56,7 +54,9 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import android.os.Build
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import dev.goodwy.rphone.bottomBarHeight
 import dev.goodwy.rphone.cardCornerBig
 import dev.goodwy.rphone.cardCornerSmall
@@ -67,20 +67,22 @@ import dev.goodwy.rphone.liquidglass.effects.colorControls
 import dev.goodwy.rphone.liquidglass.highlight.Highlight
 import dev.goodwy.rphone.liquidglass.LocalLiquidGlassBackdrop
 import org.koin.compose.viewmodel.koinActivityViewModel
-import java.util.Calendar
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.ContactsViewModel
 import dev.goodwy.rphone.modal.data.CallLogEntry
 import dev.goodwy.rphone.modal.data.Contact
 import com.ramcosta.composedestinations.generated.destinations.CallLogFullScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.SettingsScreenDestination
+import dev.goodwy.rphone.controller.util.BlockedNumbersManager
 import dev.goodwy.rphone.controller.util.hasDualSim
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -355,6 +357,12 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
                                 viewModel.deleteCallLogsByIds(filteredIdsToDelete)
                                 selectedEntries = emptySet()
                             },
+                            onBlock = {
+                                selectedEntries.forEach { entry ->
+                                    BlockedNumbersManager.block(context, entry.number)
+                                }
+                                selectedEntries = emptySet()
+                            },
                             onShare = {
                                 val text = selectedEntries.map { it.number }
                                     .joinToString("\n") { it.split("|").firstOrNull() ?: it }
@@ -582,9 +590,11 @@ fun CallLogFullContent(
             }.thenBy { it.displayName })
         }
         var isEditingFavorites by remember { mutableStateOf(false) }
-
         LaunchedEffect(selectedFilter) {
             isEditingFavorites = false
+        }
+        var isFavoritesCollapsed by remember(settingsState) {
+            mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_RECENTS_FAVORITES_COLLAPSED, false))
         }
 
         var lazyRowLayoutCoords by remember { mutableStateOf<LayoutCoordinates?>(null) }
@@ -751,17 +761,52 @@ fun CallLogFullContent(
                                     verticalAlignment = Alignment.CenterVertically,
 //                                    horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Text(
-                                        text = stringResource(R.string.favorites),
-                                        style = MaterialTheme.typography.labelLarge,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        fontWeight = FontWeight.Bold,
-                                        modifier = Modifier.padding(horizontal = 36.dp, vertical = 4.dp)
-                                    )
+                                    Surface(
+                                        modifier = Modifier
+                                            .padding(horizontal = 20.dp)
+                                            .clip(RoundedCornerShape(20.dp))
+                                            .combinedClickable(
+                                                onClick = {
+                                                    val newCollapsed = !isFavoritesCollapsed
+                                                    isFavoritesCollapsed = newCollapsed
+                                                    prefs.setBoolean(
+                                                        PreferenceManager.KEY_RECENTS_FAVORITES_COLLAPSED,
+                                                        newCollapsed
+                                                    )
+                                                },
+                                                interactionSource = null,
+                                                indication = ripple(bounded = true),
+                                            ),
+                                        shape = RoundedCornerShape(20.dp),
+                                        color = Color.Transparent
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.favorites),
+                                                style = MaterialTheme.typography.labelLarge,
+                                                color = MaterialTheme.colorScheme.primary,
+                                                fontWeight = FontWeight.Bold,
+                                            )
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            Icon(
+                                                imageVector =
+                                                    if (isFavoritesCollapsed) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowUp,
+                                                contentDescription = stringResource(R.string.favorites),
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                    }
+
                                     Spacer(Modifier.weight(1f))
                                     if (!contactsEnabled) {
                                         Surface(
-                                            modifier = Modifier.combinedClickable(
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(20.dp))
+                                                .combinedClickable(
                                                 onClick = {
                                                     navController.navigate(ContactScreenDestination.route) {
                                                         popUpTo(navController.graph.findStartDestination().id) {
@@ -772,30 +817,42 @@ fun CallLogFullContent(
                                                     }
                                                 },
                                                 interactionSource = null,
-                                                indication = null,
+                                                indication = ripple(bounded = true),
                                             ),
                                             shape = RoundedCornerShape(20.dp),
                                             color = MaterialTheme.colorScheme.surfaceContainerHigh
                                         ) {
                                             Text(
-                                                modifier = Modifier.padding(
-                                                    horizontal = 16.dp,
-                                                    vertical = 5.dp
-                                                ),
+                                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp),
                                                 text = stringResource(R.string.view_contacts),
                                                 style = MaterialTheme.typography.labelMedium,
                                                 fontWeight = FontWeight.SemiBold,
-                                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis,
+                                                color = MaterialTheme.colorScheme.onSurface
                                             )
                                         }
                                         Spacer(Modifier.width(12.dp))
                                     }
+
                                     Surface(
-                                        modifier = Modifier.combinedClickable(
-                                            onClick = { isEditingFavorites = !isEditingFavorites },
-                                            interactionSource = null,
-                                            indication = null,
-                                        ),
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(20.dp))
+                                            .combinedClickable(
+                                                onClick = {
+                                                    isEditingFavorites = !isEditingFavorites
+
+                                                    if (isFavoritesCollapsed) {
+                                                        isFavoritesCollapsed = false
+                                                        prefs.setBoolean(
+                                                            PreferenceManager.KEY_RECENTS_FAVORITES_COLLAPSED,
+                                                            false
+                                                        )
+                                                    }
+                                                },
+                                                interactionSource = null,
+                                                indication = ripple(bounded = true),
+                                            ),
                                         shape = RoundedCornerShape(20.dp),
                                         color = MaterialTheme.colorScheme.surfaceContainerHigh
                                     ) {
@@ -805,44 +862,48 @@ fun CallLogFullContent(
                                                     else stringResource(R.string.edit),
                                             style = MaterialTheme.typography.labelMedium,
                                             fontWeight = FontWeight.SemiBold,
-                                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                            color = MaterialTheme.colorScheme.onSurface
                                         )
                                     }
                                 }
-                                IPhoneFavoritesRow(
-                                    favorites = favorites,
-                                    isEditing = isEditingFavorites,
-                                    onUnfavorite = { contact ->
-                                        contactsVM.toggleFavorite(contact)
-                                    },
-                                    onSaveOrder = { newOrder ->
-                                        prefs.setFavoritesOrder(newOrder)
-                                    },
-                                    onClick = { contact ->
+                                AnimatedVisibility(visible = !isFavoritesCollapsed) {
+                                    IPhoneFavoritesRow(
+                                        favorites = favorites,
+                                        isEditing = isEditingFavorites,
+                                        onUnfavorite = { contact ->
+                                            contactsVM.toggleFavorite(contact)
+                                        },
+                                        onSaveOrder = { newOrder ->
+                                            prefs.setFavoritesOrder(newOrder)
+                                        },
+                                        onClick = { contact ->
 //                                        callLauncher.dial(contact.phoneNumbers.firstOrNull() ?: "", contact)
-                                        val phoneNumber =
-                                            contact.phoneNumbers.firstOrNull()
-                                        if (phoneNumber != null) {
-                                            placeCallWithSimPreference(
-                                                context,
-                                                phoneNumber,
-                                                simPref
-                                            ) {
-                                                pendingNumber =
-                                                    phoneNumber; showSimPicker = true
-                                            }
-                                        } else {
-                                            navigator.navigate(
-                                                ContactDetailsScreenDestination(
-                                                    contactId = contact.id
+                                            val phoneNumber =
+                                                contact.phoneNumbers.firstOrNull()
+                                            if (phoneNumber != null) {
+                                                placeCallWithSimPreference(
+                                                    context,
+                                                    phoneNumber,
+                                                    simPref
+                                                ) {
+                                                    pendingNumber =
+                                                        phoneNumber; showSimPicker = true
+                                                }
+                                            } else {
+                                                navigator.navigate(
+                                                    ContactDetailsScreenDestination(
+                                                        contactId = contact.id
+                                                    )
                                                 )
-                                            )
-                                        }
-                                    },
-                                    isDragging = isDraggingFavorite,
-                                    onDraggingChange = onDraggingFavoriteChange,
-                                    displayOrder = displayOrder
-                                )
+                                            }
+                                        },
+                                        isDragging = isDraggingFavorite,
+                                        onDraggingChange = onDraggingFavoriteChange,
+                                        displayOrder = displayOrder
+                                    )
+                                }
                             }
                         }
 

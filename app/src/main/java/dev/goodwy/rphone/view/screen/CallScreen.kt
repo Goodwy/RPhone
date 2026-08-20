@@ -2,6 +2,7 @@ package dev.goodwy.rphone.view.screen
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.media.AudioManager
 import android.media.ToneGenerator
 import android.os.Build
@@ -69,8 +70,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -81,6 +84,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
@@ -92,9 +96,11 @@ import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 import dev.goodwy.rphone.cardCornerSmall
 import dev.goodwy.rphone.controller.util.NoteManager
+import dev.goodwy.rphone.modal.data.Contact
 import dev.goodwy.rphone.modal.data.getDisplayName
 import dev.goodwy.rphone.view.components.RillExpressiveCard
 import dev.goodwy.rphone.view.components.RillIconBox
+import dev.goodwy.rphone.view.components.RillSelectionDialog
 import dev.goodwy.rphone.view.screen.onboarding.wavyCircleShape
 import dev.goodwy.rphone.view.screen.settings.PasswordSetupDialog
 import dev.goodwy.rphone.view.screen.settings.PinSetupDialog
@@ -109,7 +115,17 @@ import org.koin.compose.koinInject
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.roundToInt
-import kotlin.time.Duration.Companion.seconds
+
+@Composable
+private fun audioRouteLabel(audioRoute: Int, audioState: CallAudioState?): String {
+    val bluetoothShortLabel = stringResource(R.string.audio_route_bluetooth_short)
+    return when (audioRoute) {
+        CallAudioState.ROUTE_SPEAKER -> stringResource(R.string.audio_route_speaker)
+        CallAudioState.ROUTE_BLUETOOTH -> try { audioState?.activeBluetoothDevice?.name ?: bluetoothShortLabel } catch (e: Exception) { bluetoothShortLabel }
+        CallAudioState.ROUTE_WIRED_HEADSET -> stringResource(R.string.audio_route_headset)
+        else -> stringResource(R.string.audio_route_handset)
+    }
+}
 
 @Composable
 fun ExpressiveCallScreen(
@@ -119,6 +135,8 @@ fun ExpressiveCallScreen(
     phoneNumber: String,
     photoUri: String?,
     audioState: CallAudioState?,
+    initialConnectTime: Long = 0L,
+    backgroundUri: String? = null,
     skipIncomingScreen: Boolean = false
 ) {
     val view = LocalView.current
@@ -133,11 +151,12 @@ fun ExpressiveCallScreen(
         allCalls.find { it != call && it.state != Call.STATE_DISCONNECTED }
     }
 
-    val simLabel = remember(call.details.accountHandle) {
-        val handle = call.details.accountHandle
-        if (handle != null) {
+    val accountHandle = call.details.accountHandle
+    val simLabelFallback = accountHandle?.let { stringResource(R.string.call_screen_sim_label, it.id) }
+    val simLabel = remember(accountHandle, simLabelFallback) {
+        if (accountHandle != null) {
             val account = try {
-                telecomManager.getPhoneAccount(handle)
+                telecomManager.getPhoneAccount(accountHandle)
             } catch (_: Exception) {
                 null
             }
@@ -146,7 +165,7 @@ fun ExpressiveCallScreen(
             if (!label.isNullOrEmpty()) {
                 label
             } else {
-                "SIM ${handle.id}"
+                simLabelFallback
             }
         } else {
             null
@@ -154,10 +173,21 @@ fun ExpressiveCallScreen(
     }
     val isMuted = audioState?.isMuted ?: false
 
-    var callDuration by remember { mutableLongStateOf(0L) }
+    var callDuration by remember(initialConnectTime) {
+        mutableLongStateOf(
+            if (initialConnectTime > 0) (System.currentTimeMillis() - initialConnectTime) / 1000 else 0L
+        )
+    }
     var showKeypad by remember { mutableStateOf(false) }
-    var showMore by remember { mutableStateOf(false) }
+    var showAudioPicker by remember { mutableStateOf(false) }
     var typedDigits by remember { mutableStateOf("") }
+    var showMore by remember { mutableStateOf(false) }
+    var isEnding by remember { mutableStateOf(false) }
+
+    fun callDisconnect(isIncoming: Boolean = false) {
+        if (isIncoming) isEnding = true
+        try { call.disconnect() } catch (_: Exception) { }
+    }
 
     val settingsState by preferenceManager.settingsChanged.collectAsState()
     val showCallScreenAvatar = remember(settingsState) {
@@ -165,9 +195,16 @@ fun ExpressiveCallScreen(
     }
 
     val connectTime = remember(call) { call.details.connectTimeMillis }
-//    LaunchedEffect(callState, call.details.connectTimeMillis) {
+
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+//    LaunchedEffect(callState, call.details.connectTimeMillis, initialConnectTime) {
 //        if (callState == Call.STATE_ACTIVE) {
-//            val connectTime = if (call.details.connectTimeMillis > 0) call.details.connectTimeMillis else System.currentTimeMillis()
+//            val connectTime = when {
+//                initialConnectTime > 0 -> initialConnectTime
+//                call.details.connectTimeMillis > 0 -> call.details.connectTimeMillis
+//                else -> System.currentTimeMillis()
+//            }
 //            while (true) {
 //                callDuration = (System.currentTimeMillis() - connectTime) / 1000
 //                delay(1.seconds)
@@ -192,6 +229,50 @@ fun ExpressiveCallScreen(
 
     BackHandler(showKeypad) {
         showKeypad = false
+    }
+
+    if (showAudioPicker) {
+        val supported = audioState?.supportedRouteMask ?: 0
+        val handsetLabel = stringResource(R.string.audio_route_handset)
+        val speakerLabel = stringResource(R.string.audio_route_speaker)
+        val headsetLabel = stringResource(R.string.audio_route_headset)
+        val bluetoothLabel = stringResource(R.string.audio_route_bluetooth)
+        val options = remember(supported, handsetLabel, speakerLabel, headsetLabel, bluetoothLabel) {
+            mutableListOf<Pair<String, Int>>().apply {
+                if ((supported and CallAudioState.ROUTE_EARPIECE) != 0) add(handsetLabel to CallAudioState.ROUTE_EARPIECE)
+                if ((supported and CallAudioState.ROUTE_SPEAKER) != 0) add(speakerLabel to CallAudioState.ROUTE_SPEAKER)
+                if ((supported and CallAudioState.ROUTE_WIRED_HEADSET) != 0) add(headsetLabel to CallAudioState.ROUTE_WIRED_HEADSET)
+                if ((supported and CallAudioState.ROUTE_BLUETOOTH) != 0) {
+                    val deviceName = try {
+                        audioState?.activeBluetoothDevice?.name
+                    } catch (e: SecurityException) {
+                        null
+                    }
+                    add((deviceName ?: bluetoothLabel) to CallAudioState.ROUTE_BLUETOOTH)
+                }
+            }
+        }
+
+        RillSelectionDialog<Pair<String, Int>>(
+            onDismissRequest = { showAudioPicker = false },
+            title = stringResource(R.string.audio_output_title),
+            items = options,
+            itemLabel = { option -> option.first },
+            onItemSelected = { option ->
+                view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                CallService.setAudioRoute(option.second)
+            },
+            isSelected = { option -> option.second == audioState?.route },
+            icon = Icons.AutoMirrored.Rounded.VolumeUp,
+            itemIcon = { option ->
+                when (option.second) {
+                    CallAudioState.ROUTE_SPEAKER -> Icons.AutoMirrored.Rounded.VolumeUp
+                    CallAudioState.ROUTE_BLUETOOTH -> Icons.Rounded.Bluetooth
+                    CallAudioState.ROUTE_WIRED_HEADSET -> Icons.Rounded.Headset
+                    else -> Icons.AutoMirrored.Rounded.VolumeDown
+                }
+            }
+        )
     }
 
     // Call notes --->
@@ -249,8 +330,7 @@ fun ExpressiveCallScreen(
         .fillMaxSize()
         .background(MaterialTheme.colorScheme.surface)
     ) {
-        if (!photoUri.isNullOrEmpty()) ExpressiveBackground(photoUri)
-        FloatingParticles()
+        ExpressiveBackground(photoUri, backgroundUri)
 
         Column(
             modifier = Modifier
@@ -322,7 +402,7 @@ fun ExpressiveCallScreen(
                                         overflow = TextOverflow.Ellipsis
                                     )
                                     Text(
-                                        text = stringResource(R.string.on_hold),
+                                        text = stringResource(R.string.call_status_on_hold),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.primary
                                     )
@@ -352,12 +432,12 @@ fun ExpressiveCallScreen(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         val statusText = when (callState) {
-                            Call.STATE_DISCONNECTED -> stringResource(R.string.call_ended)
-                            Call.STATE_HOLDING -> stringResource(R.string.on_hold)
+                            Call.STATE_DISCONNECTED -> stringResource(R.string.call_status_ended)
+                            Call.STATE_HOLDING -> stringResource(R.string.call_status_on_hold)
                             Call.STATE_ACTIVE -> formatDuration(callDuration)
-                            Call.STATE_DIALING -> stringResource(R.string.calling)
-                            Call.STATE_RINGING -> stringResource(R.string.incoming_call)
-                            else -> stringResource(R.string.connecting)
+                            Call.STATE_DIALING -> stringResource(R.string.call_status_calling)
+                            Call.STATE_RINGING -> stringResource(R.string.call_status_incoming)
+                            else -> stringResource(R.string.call_status_connecting)
                         }
 
                         Text(
@@ -430,7 +510,7 @@ fun ExpressiveCallScreen(
             }
 
             // --- UI CONTROLS ---
-            if (callState != Call.STATE_RINGING) {
+            if (callState != Call.STATE_RINGING && !isEnding) {
                 val isDark = isSystemInDarkTheme()
                 val controlBtnColor = dialpadKeyColor
                 val controlBtnActiveColor = if (isDark) Color.White else Color.Black
@@ -587,11 +667,13 @@ fun ExpressiveCallScreen(
 
                                     // --- KEYPAD ---
                                     if (showKeypad) {
-                                        InCallKeypad(
-                                            call = call,
-                                            typedDigits = typedDigits,
-                                            onDigitClick = { digit -> typedDigits += digit }
-                                        )
+                                        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                                            InCallKeypad(
+                                                call = call,
+                                                typedDigits = typedDigits,
+                                                onDigitClick = { digit -> typedDigits += digit }
+                                            )
+                                        }
                                     }
                                     Spacer(modifier = Modifier.height(24.dp))
                                 }
@@ -643,7 +725,7 @@ fun ExpressiveCallScreen(
                             }
 
                             val audioLabel = when (audioRoute) {
-                                CallAudioState.ROUTE_SPEAKER -> stringResource(R.string.speaker)
+                                CallAudioState.ROUTE_SPEAKER -> stringResource(R.string.audio_route_speaker)
                                 CallAudioState.ROUTE_BLUETOOTH -> {
                                     try {
                                         audioState?.activeBluetoothDevice?.name ?: "Bluetooth"
@@ -773,10 +855,7 @@ fun ExpressiveCallScreen(
                                             noteText
                                         )
                                     }
-                                    try {
-                                        call.disconnect()
-                                    } catch (_: Exception) {
-                                    }
+                                    callDisconnect()
                                 },
                                 modifier = if (isCircleHangup) Modifier
                                     .size(76.dp)
@@ -837,7 +916,7 @@ fun ExpressiveCallScreen(
                         Surface(
                             onClick = {
                                 view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                                try { call.disconnect() } catch (_: Exception) {}
+                                callDisconnect(true)
                                 val intent = Intent(Intent.ACTION_SENDTO).apply {
                                     data = "smsto:$phoneNumber".toUri()
                                 }
@@ -864,7 +943,7 @@ fun ExpressiveCallScreen(
                     when {
                         useCustomUI == 1 || otherCall != null -> IncomingCallButtons(
                             onAnswer = { try { call.answer(VideoProfile.STATE_AUDIO_ONLY) } catch (_: Exception) {} },
-                            onDecline = { try { call.disconnect() } catch (_: Exception) {} },
+                            onDecline = { callDisconnect(true) },
                             onAnswerAndDecline = if (otherCall != null) {
                                 {
                                     try {
@@ -876,10 +955,10 @@ fun ExpressiveCallScreen(
                         )
                         useCustomUI == 2 -> IPhoneSwipeToAnswer(
                             onAnswer = { try { call.answer(VideoProfile.STATE_AUDIO_ONLY) } catch (_: Exception) {} },
-                            onDecline = { try { call.disconnect() } catch (_: Exception) {} },
+                            onDecline = { callDisconnect(true) },
                             onMessage = {
                                 view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                                try { call.disconnect() } catch (_: Exception) {}
+                                callDisconnect(true)
                                 val intent = Intent(Intent.ACTION_SENDTO).apply {
                                     data = "smsto:$phoneNumber".toUri()
                                 }
@@ -897,9 +976,9 @@ fun ExpressiveCallScreen(
                             },
                             onDecline = {
                                 if (callBiometricUnlocked) {
-                                    try { call.disconnect() } catch (_: Exception) {}
+                                    callDisconnect(true)
                                 } else {
-                                    pendingAction = { try { call.disconnect() } catch (_: Exception) {} }
+                                    pendingAction = { callDisconnect(true) }
                                     showCallBiometricUnlock = true
                                 }
                             }
@@ -915,9 +994,9 @@ fun ExpressiveCallScreen(
                             },
                             onDecline = {
                                 if (callBiometricUnlocked) {
-                                    try { call.disconnect() } catch (_: Exception) {}
+                                    callDisconnect(true)
                                 } else {
-                                    pendingAction = { try { call.disconnect() } catch (_: Exception) {} }
+                                    pendingAction = { callDisconnect(true) }
                                     showCallBiometricUnlock = true
                                 }
                             }
@@ -933,15 +1012,15 @@ fun ExpressiveCallScreen(
                             },
                             onDecline = {
                                 if (callBiometricUnlocked) {
-                                    try { call.disconnect() } catch (_: Exception) {}
+                                    callDisconnect(true)
                                 } else {
-                                    pendingAction = { try { call.disconnect() } catch (_: Exception) {} }
+                                    pendingAction = { callDisconnect(true) }
                                     showCallBiometricUnlock = true
                                 }
                             },
                             onMessage = {
                                 view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                                try { call.disconnect() } catch (_: Exception) {}
+                                callDisconnect(true)
                                 val intent = Intent(Intent.ACTION_SENDTO).apply {
                                     data = "smsto:$phoneNumber".toUri()
                                 }
@@ -983,9 +1062,9 @@ fun ExpressiveCallScreen(
                     )
                     prompt.authenticate(
                         androidx.biometric.BiometricPrompt.PromptInfo.Builder()
-                            .setTitle("Ever Dialer")
+                            .setTitle(activity.getString(R.string.enter_pin))
                             .setSubtitle("Verify your identity to access this call")
-                            .setNegativeButtonText("Cancel")
+                            .setNegativeButtonText(activity.getString(R.string.cancel))
                             .setAllowedAuthenticators(androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK)
                             .build()
                     )
@@ -1169,63 +1248,6 @@ fun KeypadButton(
 }
 
 @Composable
-fun ExpressiveBackground(photoUri: String?) {
-    val infiniteTransition = rememberInfiniteTransition(label = "bg")
-    val driftX by infiniteTransition.animateFloat(
-        initialValue = -30f, targetValue = 30f,
-        animationSpec = infiniteRepeatable(tween(20000, easing = LinearEasing), RepeatMode.Reverse), label = "x"
-    )
-    val driftY by infiniteTransition.animateFloat(
-        initialValue = -20f, targetValue = 20f,
-        animationSpec = infiniteRepeatable(tween(25000, easing = LinearEasing), RepeatMode.Reverse), label = "y"
-    )
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        if (!photoUri.isNullOrEmpty()) {
-            AsyncImage(
-                model = photoUri,
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .graphicsLayer {
-                        translationX = driftX
-                        translationY = driftY
-                        scaleX = 1.4f
-                        scaleY = 1.4f
-                    }
-                    .blur(80.dp)
-                    .alpha(0.35f),
-                contentScale = ContentScale.Crop
-            )
-        } else {
-            val color1 = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
-            val color2 = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f)
-            val color3 = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.2f)
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Brush.linearGradient(listOf(color1, color2, color3)))
-                    .blur(40.dp)
-            )
-        }
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        listOf(
-                            Color.Transparent,
-                            MaterialTheme.colorScheme.surface.copy(alpha = 0.2f),
-                            MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
-                        )
-                    )
-                )
-        )
-    }
-}
-
-@Composable
 fun PulsingAvatar(photoUri: String?) {
     val prefs = koinInject<PreferenceManager>()
     val settingsState by prefs.settingsChanged.collectAsState()
@@ -1279,57 +1301,6 @@ fun PulsingAvatar(photoUri: String?) {
         )
 
         HeroAvatar(photoUri, avatarSize = 200.dp, wavy = true)
-    }
-}
-
-@Composable
-fun FloatingParticles() {
-    val infiniteTransition = rememberInfiniteTransition(label = "particles")
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        repeat(10) { index ->
-            val startX = (index * 100f) % 1000f
-            val startY = (index * 150f) % 1500f
-
-            val animX by infiniteTransition.animateFloat(
-                initialValue = 0f,
-                targetValue = 100f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(durationMillis = 10000 + index * 1000, easing = LinearEasing),
-                    repeatMode = RepeatMode.Reverse
-                ),
-                label = "x_$index"
-            )
-
-            val animY by infiniteTransition.animateFloat(
-                initialValue = 0f,
-                targetValue = -150f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(durationMillis = 12000 + index * 1200, easing = LinearEasing),
-                    repeatMode = RepeatMode.Reverse
-                ),
-                label = "y_$index"
-            )
-
-            val alpha by infiniteTransition.animateFloat(
-                initialValue = 0.1f,
-                targetValue = 0.4f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(durationMillis = 5000 + index * 500, easing = LinearEasing),
-                    repeatMode = RepeatMode.Reverse
-                ),
-                label = "alpha_$index"
-            )
-
-            Box(
-                modifier = Modifier
-                    .offset(x = (startX + animX).dp, y = (startY + animY).dp)
-                    .size((10 + index % 20).dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = alpha))
-                    .blur(2.dp)
-            )
-        }
     }
 }
 

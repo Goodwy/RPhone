@@ -38,6 +38,9 @@
     <string name="filter_incoming">איינקומענדיק</string>
     <string name="filter_outgoing">אויסגייענדיק</string>
     <string name="filter_rejected">אָפּגעוואָרפֿן</string>
+    <string name="sim_picker_title">קלויב SIM קאַרטע</string>
+    <string name="label_unknown_number">אומבאַקאַנט נומער</string>
+    <string name="reset">צוריקשטעלן</string>
 
     <!-- Search -->
     <string name="search">זוכן</string>
@@ -136,6 +139,10 @@
     <string name="incoming_call_ui_buttons">קנעפּלעך</string>
     <string name="incoming_call_ui_slide_to_answer">גליט צו ענטפֿערן (iOS)</string>
     <string name="incoming_call_ui_vertical_swipe">ווערטיקאַל גליט</string>
+    <string name="dialpad_animations">ווייל אַנימאַציעס</string>
+    <string name="dialpad_animations_subtitle">ווײַזן אַנימאַציעס בײַ אַרײַנטיפּן ציפֿערן</string>
+    <string name="hide_voice_search">באַהאַלטן שטים זוכן</string>
+    <string name="hide_voice_search_subtitle">באַהאַלטן דעם שטים זוכן קנעפּל</string>
 
     <string name="avatars_settings">אַוואַטאַר איינשטעלונגען</string>
     <string name="avatars_settings_subtitle">פּערזענליכטיק פֿאַרבן, ראַמען און מער</string>
@@ -270,6 +277,8 @@
     <string name="incorrect_password">פֿאַלשער פאַרוואָרט</string>
     <string name="incorrect_password_subtitle">פאַרוואָרט מוז זײַן לפּחות 4 כאַראַקטערן</string>
     <string name="password_dont_match">פאַרווערטער שטימען נישט</string>
+    <string name="lock_on_minimize">שליסן בײַ פֿאַרקלענערן</string>
+    <string name="lock_on_minimize_subtitle">אויב דאָס איז אויסגעשטעלט, וועט די אַפּ נאָר ענדיקן ווען זי ווערט גאָר אַראָפּגעלאָדן פֿון דעם זכּרון</string>
 
     <string name="manage_contacts">פֿאַרוואַלטן קאָנטאַקטן</string>
     <string name="manage_contacts_subtitle">פּריוואַטע קאָנטאַקטן, קאָנטען צו ווײַזן, און רייניקן דײַן ליסטע</string>
@@ -329,17 +338,22 @@
     <string name="keypad">קלאַוויאַטור</string>
     <string name="mute">שטיל</string>
     <string name="unmute">ניט-שטיל</string>
-    <string name="speaker">הויך-רעדער</string>
+    <string name="audio_route_speaker">הויך-רעדער</string>
+    <string name="audio_route_handset">טעלעפֿאָן</string>
+    <string name="audio_route_headset">העאַדסעט</string>
+    <string name="audio_route_bluetooth">בלוטוט</string>
+    <string name="audio_route_bluetooth_short">BT</string>
+    <string name="audio_output_title">אַודיאָ אויסגאַנג</string>
     <string name="add_call">צולייגן רוף</string>
     <string name="resume">אָנהײבן ווידער</string>
     <string name="swap">איבערבויען</string>
     <string name="more">נאָך</string>
     <string name="hold">האַלטן</string>
-    <string name="on_hold">אויף האַלטן</string>
-    <string name="call_ended">רוף געענדיקט</string>
-    <string name="calling">רופט…</string>
-    <string name="incoming_call">איינקומענדיקער רוף</string>
-    <string name="connecting">פֿאַרבינדט…</string>
+    <string name="call_status_on_hold">אויף האַלטן</string>
+    <string name="call_status_ended">רוף געענדיקט</string>
+    <string name="call_status_calling">רופט…</string>
+    <string name="call_status_incoming">איינקומענדיקער רוף</string>
+    <string name="call_status_connecting">פֿאַרבינדט…</string>
     <string name="slide_to_answer">גליט צו ענטפֿערן</string>
     <string name="swipe_up_to_answer">גליט אַרויף צו ענטפֿערן</string>
     <string name="swipe_down_to_reject">גליט אַראָפּ צו אָפּוואַרפן</string>
@@ -356,6 +370,31 @@
     <string name="could_not_delete">האָט נישט געקענט אַוועקנעמען</string>
     <string name="clear_all_filtered_logs">רייניקן אַלע פֿילטערטע לאָגס</string>
     <string name="clear_all_filtered_logs_selected">דאָס וועט אַוועקנעמען אַלע געוויזענע רוף היסטאָריע. דער אַקציע קען מען נישט צוריקקערן.</string>
+
+    <string name="action_block">בלאָקירן</string>
+    <string name="action_unblock">אַנולירן בלאָק</string>
+    <string name="action_block_number">בלאָקירן אַ נומער</string>
+    <string name="action_unblock_number">אַנולירן בלאָק פֿון אַ נומער</string>
+    <string name="contact_block">בלאָקירן קאָנטאַקט</string>
+    <string name="contact_block_supporting">בלאָקירן איינקומענדיקע רופן און מעלדונגען פֿון דעם קאָנטאַקט</string>
+    <string name="contact_unblock">אַנולירן בלאָק פֿון קאָנטאַקט</string>
+    <string name="contact_unblock_supporting">דערלויבן ווידער רופן און מעלדונגען פֿון דעם קאָנטאַקט</string>
+    <string name="call_log_block_title">בלאָקירן נומערן?</string>
+    <string name="call_log_block_message">רופן פֿון די %1$d אויסגעוויילטע אײַנטראָגן וועלן בלאָקירט ווערן.</string>
+
+    <string name="contact_call_background">רוף פאַרשטעל הינטערגרונט</string>
+    <string name="contact_call_background_set">פּערזענלעכע בילד אויסגעוויילט</string>
+    <string name="contact_call_background_none">נוץ דעם סטאנדאַרד הינטערגרונט</string>
+    <string name="contact_call_background_choose">קלויב אַ בילד</string>
+    <string name="contact_call_background_change">ענדער בילד</string>
+    <string name="contact_call_background_remove">אַראָפּנעם הינטערגרונט</string>
+    <string name="contact_call_background_saving">היט בילד…</string>
+    <string name="contact_call_background_error">האָט נישט געקענט היטן דאָס בילד</string>
+    <string name="contact_call_background_no_target">היט ערשט דעם נומער ווי אַ קאָנטאַקט</string>
+    <string name="contact_call_background_preview">פֿאָרויסזען רוף פאַרשטעל הינטערגרונט</string>
+    <string name="settings_call_default_background">סטאנדאַרד רוף הינטערגרונט</string>
+    <string name="settings_call_default_background_set">אַ פּערזענלעך בילד ווערט געוויזן אויף יעדן רוף</string>
+    <string name="settings_call_default_background_none">נישט איינגעשטעלט — רופן ניצן די אַפּ טעמע</string>
 
     <!-- Contacts -->
     <string name="contacts">קאָנטאַקטן</string>
@@ -406,9 +445,11 @@
     <string name="add_event">צולייגן געשעעניש</string>
     <string name="add_address">צולייגן אַדרעס</string>
     <string name="add_note">צולייגן הערה</string>
+    <string name="add_photo">צולייגן אַ פֿאָטאָ</string>
     <string name="contact_ringtone">קאָנטאַקט רינגטאן</string>
     <string name="unsaved_changes">נישט געהיטע ענדערונגען</string>
     <string name="unsaved_changes_subtitle">צי דו ווילסט היטן דײַנע ענדערונגען איידער אַרויסגיין?</string>
+    <string name="ringtone_custom">פּערזענלעך</string>
     <plurals name="contacts_count">
         <item quantity="one">%d קאָנטאַקט</item>
         <item quantity="two">%d קאָנטאַקטן</item>
@@ -446,6 +487,7 @@
 
     <!-- Call notes -->
     <string name="notes">הערות</string>
+    <string name="notes_contact">אנמערקונגען</string>
     <string name="call_notes">רוף הערות</string>
     <string name="about_call_notes">וועגן רוף הערות</string>
     <string name="about_call_notes_subtitle">גיך הערות וואָס דו שרײַבסט בעשאַס אַ רוף. זיי ווערן געהיט לאָקאַל אין דער אַפּ ס טעקעס, פֿאַרבונדן מיט דעם טעלעפֿאָן נומער (נישט סינגכראַניזירט מיט Google קאָנטאַקטן און אַנדערע). יעדער נומער האָט זײַן אייגענע פּריוואַטע הערה, וואָס מען קען נאָר צוקומען פֿון דעם רוף לאָג אין די קאָנטאַקט דעטאַלן אין דער אַפּ אָדער פֿון דעם \"רוף הערות\" טאַב.</string>
@@ -499,4 +541,16 @@
     <string name="page_subtitle_three">אוממידיק T9 זוכן, גלאַטע אַנימאַציעס, און בליץ-גיך רופן. נאָר אַ טעלעפֿאָן אַפּ וואָס אַרבעט.</string>
     <string name="page_title_warning">אין אַנטוויקלונג</string>
     <string name="page_subtitle_warning">די אַפּ איז נאָך אין אַנטוויקלונג. עטלעכע פֿעאַטורעס קענען נישט אַרבעטן ווי דערוואַרט. ביטע ניץ מיט אויפּמערקזאַמקייט און מעלדן קיין פּראָבלעמען וואָס דו טרעפֿסט.</string>
+
+    <!-- Call notifications (CallService) -->
+    <string name="notif_channel_outgoing_calls">אויסגייענדיקע רופן</string>
+    <string name="notif_channel_incoming_calls">איינקומענדיקע רופן</string>
+    <string name="notif_channel_fullscreen_incoming_calls">איינקומענדיקע רופן (פֿול-סקרין)</string>
+    <string name="notif_channel_missed_calls">פֿאַרפֿעלטע רופן</string>
+    <string name="notif_blocked_call_title">בלאָקירטער רוף</string>
+    <string name="notif_blocked_call_text">בלאָקירטער רוף פֿון %1$s</string>
+    <string name="notif_missed_call_title">פֿאַרפֿעלטער רוף</string>
+    <string name="notif_missed_call_text">פֿאַרפֿעלטער רוף פֿון %1$s אין %2$s</string>
+    <string name="notif_via_sim">דורך %1$s</string>
+    <string name="notif_active_call">אַקטיווער רוף</string>
 </resources>

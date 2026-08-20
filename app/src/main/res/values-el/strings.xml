@@ -37,6 +37,9 @@
     <string name="filter_incoming">Εισερχόμενες</string>
     <string name="filter_outgoing">Εξερχόμενες</string>
     <string name="filter_rejected">Απορριφθείσες</string>
+    <string name="sim_picker_title">Επιλογή κάρτας SIM</string>
+    <string name="label_unknown_number">Άγνωστος αριθμός</string>
+    <string name="reset">Επαναφορά</string>
 
     <!-- Search -->
     <string name="search">Αναζήτηση</string>
@@ -135,6 +138,10 @@
     <string name="incoming_call_ui_buttons">Κουμπιά</string>
     <string name="incoming_call_ui_slide_to_answer">Σύρετε για απάντηση (iOS)</string>
     <string name="incoming_call_ui_vertical_swipe">Κατακόρυφο σβήσιμο</string>
+    <string name="dialpad_animations">Κινήσεις πληκτρολογίου</string>
+    <string name="dialpad_animations_subtitle">Εμφάνιση κινήσεων κατά την πληκτρολόγηση ψηφίων</string>
+    <string name="hide_voice_search">Απόκρυψη φωνητικής αναζήτησης</string>
+    <string name="hide_voice_search_subtitle">Αποκρύπτει το κουμπί φωνητικής αναζήτησης</string>
 
     <string name="avatars_settings">Ρυθμίσεις avatar</string>
     <string name="avatars_settings_subtitle">Προσαρμογή χρωμάτων, πλαισίων και άλλων</string>
@@ -269,6 +276,8 @@
     <string name="incorrect_password">Λανθασμένος κωδικός</string>
     <string name="incorrect_password_subtitle">Ο κωδικός πρέπει να έχει τουλάχιστον 4 χαρακτήρες</string>
     <string name="password_dont_match">Οι κωδικοί δεν ταιριάζουν</string>
+    <string name="lock_on_minimize">Κλείδωμα κατά την ελαχιστοποίηση</string>
+    <string name="lock_on_minimize_subtitle">Εάν αυτό είναι απενεργοποιημένο, η εφαρμογή θα τερματιστεί μόνο όταν εκφορτωθεί πλήρως από τη μνήμη</string>
 
     <string name="manage_contacts">Διαχείριση επαφών</string>
     <string name="manage_contacts_subtitle">Ιδιωτικές επαφές, λογαριασμοί προς εμφάνιση και καθαρισμός λίστας</string>
@@ -328,17 +337,22 @@
     <string name="keypad">Πληκτρολόγιο</string>
     <string name="mute">Σίγαση</string>
     <string name="unmute">Κατάργηση σίγασης</string>
-    <string name="speaker">Ηχείο</string>
+    <string name="audio_route_speaker">Ηχείο</string>
+    <string name="audio_route_handset">Ακουστικό</string>
+    <string name="audio_route_headset">Ακουστικά</string>
+    <string name="audio_route_bluetooth">Bluetooth</string>
+    <string name="audio_route_bluetooth_short">BT</string>
+    <string name="audio_output_title">Έξοδος ήχου</string>
     <string name="add_call">Προσθήκη κλήσης</string>
     <string name="resume">Συνέχιση</string>
     <string name="swap">Εναλλαγή</string>
     <string name="more">Περισσότερα</string>
     <string name="hold">Αναμονή</string>
-    <string name="on_hold">Σε αναμονή</string>
-    <string name="call_ended">Η κλήση έληξε</string>
-    <string name="calling">Κλήση…</string>
-    <string name="incoming_call">Εισερχόμενη κλήση</string>
-    <string name="connecting">Σύνδεση…</string>
+    <string name="call_status_on_hold">Σε αναμονή</string>
+    <string name="call_status_ended">Η κλήση έληξε</string>
+    <string name="call_status_calling">Κλήση…</string>
+    <string name="call_status_incoming">Εισερχόμενη κλήση</string>
+    <string name="call_status_connecting">Σύνδεση…</string>
     <string name="slide_to_answer">Σύρετε για απάντηση</string>
     <string name="swipe_up_to_answer">Σύρετε προς τα πάνω για απάντηση</string>
     <string name="swipe_down_to_reject">Σύρετε προς τα κάτω για απόρριψη</string>
@@ -355,6 +369,31 @@
     <string name="could_not_delete">Δεν ήταν δυνατή η διαγραφή</string>
     <string name="clear_all_filtered_logs">Εκκαθάριση όλων των φιλτραρισμένων αρχείων</string>
     <string name="clear_all_filtered_logs_selected">Αυτό θα διαγράψει ολόκληρο το εμφανιζόμενο ιστορικό κλήσεων. Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.</string>
+
+    <string name="action_block">Αποκλεισμός</string>
+    <string name="action_unblock">Άρση αποκλεισμού</string>
+    <string name="action_block_number">Αποκλεισμός αριθμού</string>
+    <string name="action_unblock_number">Άρση αποκλεισμού αριθμού</string>
+    <string name="contact_block">Αποκλεισμός επαφής</string>
+    <string name="contact_block_supporting">Αποκλεισμός εισερχόμενων κλήσεων και μηνυμάτων από αυτήν την επαφή</string>
+    <string name="contact_unblock">Άρση αποκλεισμού επαφής</string>
+    <string name="contact_unblock_supporting">Επαναφορά κλήσεων και μηνυμάτων από αυτήν την επαφή</string>
+    <string name="call_log_block_title">Αποκλεισμός αριθμών;</string>
+    <string name="call_log_block_message">Οι κλήσεις από τις %1$d επιλεγμένες εγγραφές θα αποκλειστούν.</string>
+
+    <string name="contact_call_background">Φόντο οθόνης κλήσης</string>
+    <string name="contact_call_background_set">Επιλέχθηκε προσαρμοσμένη εικόνα</string>
+    <string name="contact_call_background_none">Χρήση προεπιλεγμένου φόντου</string>
+    <string name="contact_call_background_choose">Επιλογή εικόνας</string>
+    <string name="contact_call_background_change">Αλλαγή εικόνας</string>
+    <string name="contact_call_background_remove">Αφαίρεση φόντου</string>
+    <string name="contact_call_background_saving">Αποθήκευση εικόνας…</string>
+    <string name="contact_call_background_error">Δεν ήταν δυνατή η αποθήκευση αυτής της εικόνας</string>
+    <string name="contact_call_background_no_target">Αποθηκεύστε πρώτα τον αριθμό ως επαφή</string>
+    <string name="contact_call_background_preview">Προεπισκόπηση φόντου οθόνης κλήσης</string>
+    <string name="settings_call_default_background">Προεπιλεγμένο φόντο κλήσης</string>
+    <string name="settings_call_default_background_set">Εμφανίζεται προσαρμοσμένη εικόνα σε κάθε κλήση</string>
+    <string name="settings_call_default_background_none">Δεν έχει οριστεί — οι κλήσεις χρησιμοποιούν το θέμα της εφαρμογής</string>
 
     <!-- Contacts -->
     <string name="contacts">Επαφές</string>
@@ -405,9 +444,11 @@
     <string name="add_event">Προσθήκη εκδήλωσης</string>
     <string name="add_address">Προσθήκη διεύθυνσης</string>
     <string name="add_note">Προσθήκη σημείωσης</string>
+    <string name="add_photo">Προσθήκη φωτογραφίας</string>
     <string name="contact_ringtone">Ήχος κλήσης επαφής</string>
     <string name="unsaved_changes">Μη αποθηκευμένες αλλαγές</string>
     <string name="unsaved_changes_subtitle">Θέλετε να αποθηκεύσετε τις αλλαγές σας πριν φύγετε;</string>
+    <string name="ringtone_custom">Προσαρμοσμένο</string>
     <plurals name="contacts_count">
         <item quantity="one">%d επαφή</item>
         <item quantity="other">%d επαφές</item>
@@ -439,6 +480,7 @@
 
     <!-- Call notes -->
     <string name="notes">Σημειώσεις</string>
+    <string name="notes_contact">Παρατηρήσεις</string>
     <string name="call_notes">Σημειώσεις κλήσεων</string>
     <string name="about_call_notes">Σχετικά με τις σημειώσεις κλήσεων</string>
     <string name="about_call_notes_subtitle">Γρήγορες σημειώσεις που κρατάτε κατά τη διάρκεια μιας κλήσης. Αποθηκεύονται τοπικά στα αρχεία της εφαρμογής, συνδεδεμένες με τον αριθμό τηλεφώνου (δεν συγχρονίζονται με τις Επαφές Google και άλλες). Κάθε αριθμός έχει τη δική του ιδιωτική σημείωση, στην οποία μπορείτε να έχετε πρόσβαση μόνο από το αρχείο κλήσεων στις λεπτομέρειες της επαφής εντός της εφαρμογής ή από την καρτέλα \"Σημειώσεις κλήσεων\".</string>
@@ -492,4 +534,16 @@
     <string name="page_subtitle_three">Άμεση αναζήτηση T9, ομαλές κινήσεις και εξαιρετικά γρήγορες κλήσεις. Απλώς μια εφαρμογή τηλεφώνου που λειτουργεί.</string>
     <string name="page_title_warning">Υπό ανάπτυξη</string>
     <string name="page_subtitle_warning">Αυτή η εφαρμογή είναι ακόμη υπό ανάπτυξη. Ορισμένες λειτουργίες ενδέχεται να μην λειτουργούν όπως αναμένεται. Παρακαλώ χρησιμοποιήστε την με προσοχή και αναφέρετε τυχόν προβλήματα που αντιμετωπίζετε.</string>
+
+    <!-- Call notifications (CallService) -->
+    <string name="notif_channel_outgoing_calls">Εξερχόμενες κλήσεις</string>
+    <string name="notif_channel_incoming_calls">Εισερχόμενες κλήσεις</string>
+    <string name="notif_channel_fullscreen_incoming_calls">Εισερχόμενες κλήσεις (πλήρης οθόνη)</string>
+    <string name="notif_channel_missed_calls">Αναπάντητες κλήσεις</string>
+    <string name="notif_blocked_call_title">Μπλοκαρισμένη κλήση</string>
+    <string name="notif_blocked_call_text">Μπλοκαρισμένη κλήση από %1$s</string>
+    <string name="notif_missed_call_title">Αναπάντητη κλήση</string>
+    <string name="notif_missed_call_text">Αναπάντητη κλήση από %1$s στις %2$s</string>
+    <string name="notif_via_sim">μέσω %1$s</string>
+    <string name="notif_active_call">Ενεργή κλήση</string>
 </resources>

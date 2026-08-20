@@ -38,6 +38,9 @@
     <string name="filter_incoming">נכנסות</string>
     <string name="filter_outgoing">יוצאות</string>
     <string name="filter_rejected">נדחו</string>
+    <string name="sim_picker_title">בחר כרטיס SIM</string>
+    <string name="label_unknown_number">מספר לא ידוע</string>
+    <string name="reset">איפוס</string>
 
     <!-- Search -->
     <string name="search">חיפוש</string>
@@ -136,6 +139,10 @@
     <string name="incoming_call_ui_buttons">כפתורים</string>
     <string name="incoming_call_ui_slide_to_answer">גלול כדי לענות (iOS)</string>
     <string name="incoming_call_ui_vertical_swipe">החלקה אנכית</string>
+    <string name="dialpad_animations">אנימציות לוח חיוג</string>
+    <string name="dialpad_animations_subtitle">הצג אנימציות בעת הקלדת ספרות</string>
+    <string name="hide_voice_search">הסתר חיפוש קולי</string>
+    <string name="hide_voice_search_subtitle">מסתיר את כפתור החיפוש הקולי</string>
 
     <string name="avatars_settings">הגדרות אווטאר</string>
     <string name="avatars_settings_subtitle">התאמה אישית של צבעים, מסגרות ועוד</string>
@@ -270,6 +277,8 @@
     <string name="incorrect_password">סיסמה שגויה</string>
     <string name="incorrect_password_subtitle">על הסיסמה להכיל לפחות 4 תווים</string>
     <string name="password_dont_match">הסיסמאות אינן תואמות</string>
+    <string name="lock_on_minimize">נעל בעת מזעור</string>
+    <string name="lock_on_minimize_subtitle">אם זה כבוי, האפליקציה תסתיים רק כאשר היא תורד לחלוטין מהזיכרון</string>
 
     <string name="manage_contacts">ניהול אנשי קשר</string>
     <string name="manage_contacts_subtitle">אנשי קשר פרטיים, חשבונות להצגה, וניקוי הרשימה</string>
@@ -329,17 +338,22 @@
     <string name="keypad">לוח מקשים</string>
     <string name="mute">השתק</string>
     <string name="unmute">בטל השתקה</string>
-    <string name="speaker">רמקול</string>
+    <string name="audio_route_speaker">רמקול</string>
+    <string name="audio_route_handset">שפופרת</string>
+    <string name="audio_route_headset">אוזניות</string>
+    <string name="audio_route_bluetooth">Bluetooth</string>
+    <string name="audio_route_bluetooth_short">BT</string>
+    <string name="audio_output_title">פלט שמע</string>
     <string name="add_call">הוסף שיחה</string>
     <string name="resume">המשך</string>
     <string name="swap">החלף</string>
     <string name="more">עוד</string>
     <string name="hold">העמדת המתנה</string>
-    <string name="on_hold">בהמתנה</string>
-    <string name="call_ended">השיחה הסתיימה</string>
-    <string name="calling">מתקשר…</string>
-    <string name="incoming_call">שיחה נכנסת</string>
-    <string name="connecting">מתחבר…</string>
+    <string name="call_status_on_hold">בהמתנה</string>
+    <string name="call_status_ended">השיחה הסתיימה</string>
+    <string name="call_status_calling">מתקשר…</string>
+    <string name="call_status_incoming">שיחה נכנסת</string>
+    <string name="call_status_connecting">מתחבר…</string>
     <string name="slide_to_answer">גלול כדי לענות</string>
     <string name="swipe_up_to_answer">החלק למעלה כדי לענות</string>
     <string name="swipe_down_to_reject">החלק למטה כדי לדחות</string>
@@ -356,6 +370,31 @@
     <string name="could_not_delete">לא ניתן למחוק</string>
     <string name="clear_all_filtered_logs">נקה את כל היומנים המסוננים</string>
     <string name="clear_all_filtered_logs_selected">פעולה זו תמחק את כל היסטוריית השיחות המוצגת. לא ניתן לבטל פעולה זו.</string>
+
+    <string name="action_block">חסום</string>
+    <string name="action_unblock">בטל חסימה</string>
+    <string name="action_block_number">חסום מספר</string>
+    <string name="action_unblock_number">בטל חסימת מספר</string>
+    <string name="contact_block">חסום איש קשר</string>
+    <string name="contact_block_supporting">חסום שיחות נכנסות והודעות מאיש קשר זה</string>
+    <string name="contact_unblock">בטל חסימת איש קשר</string>
+    <string name="contact_unblock_supporting">אפשר שוב שיחות והודעות מאיש קשר זה</string>
+    <string name="call_log_block_title">לחסום מספרים?</string>
+    <string name="call_log_block_message">שיחות מ-%1$d רשומות שנבחרו ייחסמו.</string>
+
+    <string name="contact_call_background">רקע מסך שיחה</string>
+    <string name="contact_call_background_set">תמונה מותאמת אישית נבחרה</string>
+    <string name="contact_call_background_none">השתמש ברקע ברירת המחדל</string>
+    <string name="contact_call_background_choose">בחר תמונה</string>
+    <string name="contact_call_background_change">שנה תמונה</string>
+    <string name="contact_call_background_remove">הסר רקע</string>
+    <string name="contact_call_background_saving">שומר תמונה…</string>
+    <string name="contact_call_background_error">לא ניתן היה לשמור תמונה זו</string>
+    <string name="contact_call_background_no_target">שמור קודם את המספר כאיש קשר</string>
+    <string name="contact_call_background_preview">תצוגה מקדימה של רקע מסך שיחה</string>
+    <string name="settings_call_default_background">רקע שיחה ברירת מחדל</string>
+    <string name="settings_call_default_background_set">תמונה מותאמת אישית מוצגת בכל שיחה</string>
+    <string name="settings_call_default_background_none">לא הוגדר — שיחות משתמשות בערכת הנושא של האפליקציה</string>
 
     <!-- Contacts -->
     <string name="contacts">אנשי קשר</string>
@@ -406,9 +445,11 @@
     <string name="add_event">הוסף אירוע</string>
     <string name="add_address">הוסף כתובת</string>
     <string name="add_note">הוסף הערה</string>
+    <string name="add_photo">הוסף תמונה</string>
     <string name="contact_ringtone">רינגטון איש קשר</string>
     <string name="unsaved_changes">שינויים לא שמורים</string>
     <string name="unsaved_changes_subtitle">האם ברצונך לשמור את השינויים שלך לפני היציאה?</string>
+    <string name="ringtone_custom">מותאם אישית</string>
     <plurals name="contacts_count">
         <item quantity="one">איש קשר אחד</item>
         <item quantity="two">שני אנשי קשר</item>
@@ -443,6 +484,7 @@
 
     <!-- Call notes -->
     <string name="notes">הערות</string>
+    <string name="notes_contact">הערות</string>
     <string name="call_notes">הערות שיחה</string>
     <string name="about_call_notes">אודות הערות שיחה</string>
     <string name="about_call_notes_subtitle">הערות מהירות שאתה רושם במהלך שיחה. הן מאוחסנות באופן מקומי בקבצי האפליקציה, המקושרים למספר הטלפון (לא מסונכרנות עם אנשי קשר של Google ואחרים). לכל מספר יש הערה פרטית משלו, שניתן לגשת אליה רק מיומן השיחות בפרטי איש הקשר בתוך האפליקציה או מהלשונית "הערות שיחה".</string>
@@ -496,4 +538,16 @@
     <string name="page_subtitle_three">חיפוש T9 מיידי, אנימציות חלקות ושיחות מהירות ברק. רק אפליקציית טלפון שעובדת.</string>
     <string name="page_title_warning">בפיתוח</string>
     <string name="page_subtitle_warning">אפליקציה זו עדיין בפיתוח. ייתכן שחלק מהתכונות לא יפעלו כמצופה. אנא השתמש בזהירות ודווח על בעיות שאתה נתקל בהן.</string>
+
+    <!-- Call notifications (CallService) -->
+    <string name="notif_channel_outgoing_calls">שיחות יוצאות</string>
+    <string name="notif_channel_incoming_calls">שיחות נכנסות</string>
+    <string name="notif_channel_fullscreen_incoming_calls">שיחות נכנסות (מסך מלא)</string>
+    <string name="notif_channel_missed_calls">שיחות שהוחמצו</string>
+    <string name="notif_blocked_call_title">שיחה חסומה</string>
+    <string name="notif_blocked_call_text">שיחה חסומה מ-%1$s</string>
+    <string name="notif_missed_call_title">שיחה שהוחמצה</string>
+    <string name="notif_missed_call_text">שיחה שהוחמצה מ-%1$s בשעה %2$s</string>
+    <string name="notif_via_sim">דרך %1$s</string>
+    <string name="notif_active_call">שיחה פעילה</string>
 </resources>

@@ -24,7 +24,7 @@ import androidx.core.net.toUri
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.data.manager.CallStateManager
-
+import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 import dev.goodwy.rphone.view.screen.BiometricCallActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -35,6 +35,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
+import kotlin.getValue
 
 data class CallSession(
     val call: Call,
@@ -45,10 +46,12 @@ data class CallSession(
 
 class CallService : InCallService() {
 
+    private val contactsRepository: IContactsRepository by inject()
     private val preferenceManager: PreferenceManager by inject()
     private val callStateManager: CallStateManager by inject()
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var redialCount = 0
+    private val callStartTimes = mutableMapOf<Call, Long>()
 
     private fun getContactBitmap(photoUri: String?): Bitmap? {
         if (photoUri == null) return null
@@ -95,6 +98,10 @@ class CallService : InCallService() {
         fun toggleMute() {
             val currentMute = _audioState.value?.isMuted ?: false
             mute(!currentMute)
+        }
+
+        fun setAudioRoute(route: Int) {
+            instance?.setAudioRoute(route)
         }
 
         fun cycleAudioRoute() {
@@ -149,19 +156,40 @@ class CallService : InCallService() {
             _currentCallSession.value?.call?.answer(VideoProfile.STATE_AUDIO_ONLY)
         }
 
+        fun answerRingingCall(endActive: Boolean) {
+            val calls = instance?.getCalls() ?: return
+            val ringing = calls.find { it.state == Call.STATE_RINGING } ?: return
+            val others = calls.filter { it != ringing && it.state != Call.STATE_DISCONNECTED }
+
+            others.forEach { other ->
+                try {
+                    if (endActive) other.disconnect() else if (other.state == Call.STATE_ACTIVE) other.hold()
+                } catch (e: Exception) {
+                }
+            }
+
+            try {
+                ringing.answer(VideoProfile.STATE_AUDIO_ONLY)
+            } catch (e: Exception) {
+            }
+        }
+
         fun declineCall() {
-//            _currentCallSession.value?.call?.disconnect()
             // If the call hasn't been answered yet, we try to reject it so that it's recorded correctly in the call history
-            val isRinging = _currentCallSession.value?.call?.state == Call.STATE_RINGING
-            if (isRinging && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                _currentCallSession.value?.call?.reject(Call.REJECT_REASON_DECLINED)
-            } else {
-                _currentCallSession.value?.call?.disconnect()
+            val call = _currentCallSession.value?.call ?: return
+            val isRinging = call.state == Call.STATE_RINGING
+            try {
+                if (isRinging && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    call.reject(Call.REJECT_REASON_DECLINED)
+                } else {
+                    call.disconnect()
+                }
+            } catch (_: Exception) {
+                try { call.disconnect() } catch (_: Exception) {}
             }
         }
 
         fun setMuted(muted: Boolean) { instance?.setMuted(muted) }
-        fun setAudioRoute(route: Int) { instance?.setAudioRoute(route) }
     }
 
     override fun onCreate() {
@@ -202,7 +230,8 @@ class CallService : InCallService() {
                 val cause = call.details.disconnectCause
                 handleDisconnect(call, cause)
 
-                if ((instance?.calls?.size ?: 0) == 0) {
+                val remaining = getCalls()?.filter { it.state != Call.STATE_DISCONNECTED } ?: emptyList()
+                if (remaining.isEmpty()) {
                     removeForeground()
                     cancelNotification()
                 }
@@ -245,7 +274,6 @@ class CallService : InCallService() {
             }
         }
 
-        // Missed Call Notification
         // Need to create a Receiver (android.telecom.action.SHOW_MISSED_CALLS_NOTIFICATION) to prevent the system notification from being duplicated
 //        val wasNeverConnected = call.details.connectTimeMillis == 0L
 //        val isIncoming = call.details.callDirection == Call.Details.DIRECTION_INCOMING
@@ -287,8 +315,8 @@ class CallService : InCallService() {
 
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_menu_close_clear_cancel)
-            .setContentTitle("Blocked Call")
-            .setContentText("Blocked call from $number")
+            .setContentTitle(getString(R.string.notif_blocked_call_title))
+            .setContentText(getString(R.string.notif_blocked_call_text, number))
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setAutoCancel(true)
 
@@ -296,9 +324,13 @@ class CallService : InCallService() {
     }
 
 //    private fun showMissedCallNotification(call: Call) {
-//        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+//        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 //
-//        val channel = NotificationChannel(MISSED_CHANNEL_ID, "Missed Calls", NotificationManager.IMPORTANCE_DEFAULT).apply {
+//        val channel = NotificationChannel(
+//            MISSED_CHANNEL_ID,
+//            getString(R.string.notif_channel_missed_calls),
+//            NotificationManager.IMPORTANCE_DEFAULT
+//        ).apply {
 //            lockscreenVisibility = Notification.VISIBILITY_PUBLIC
 //            enableVibration(true)
 //            setShowBadge(true)
@@ -314,26 +346,36 @@ class CallService : InCallService() {
 //            } catch (e: Exception) { null }
 //        } else null
 //
-//        val contactName = contact?.displayName ?: number.ifEmpty { "Unknown Number" }
+//        val contactName = contact?.name ?: number.ifEmpty { getString(R.string.label_unknown_number) }
 //        val contactPhoto = getContactBitmap(contact?.photoUri)
 //
-//        val telecomManager = getSystemService(TELECOM_SERVICE) as TelecomManager
+//        val telecomManager = getSystemService(Context.TELECOM_SERVICE) as TelecomManager
 //        val simLabel = call.details.accountHandle?.let {
 //            try { telecomManager.getPhoneAccount(it)?.label?.toString() } catch (e: SecurityException) { null }
 //        }
 //
-//        val intent = Intent(this, dev.goodwy.rphone.MainActivity::class.java).apply {
-//            action = "dev.goodwy.rphone.ACTION_VIEW_RECENTS"
+//        val intent = Intent(this, MainActivity::class.java).apply {
+//            action = "com.grinch.rivo4.ACTION_VIEW_RECENTS"
 //            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
 //        }
 //        val pendingIntent = PendingIntent.getActivity(this, 10, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 //
 //        val timeString = android.text.format.DateFormat.getTimeFormat(this).format(java.util.Date())
 //
-//        val builder = NotificationCompat.Builder(this, MISSED_CHANNEL_ID)
-//            .setSmallIcon(R.drawable.ic_phone)
-//            .setContentTitle("Missed Call")
-//            .setContentText("Missed call from $contactName at $timeString${if (simLabel != null) " via $simLabel" else ""}")
+//        val missedCallText = buildString {
+//            append(getString(R.string.notif_missed_call_text, contactName, timeString))
+//            if (simLabel != null) {
+//                append(" ")
+//                append(getString(R.string.notif_via_sim, simLabel))
+//            }
+//        }
+//
+//        val builder = NotificationCompat.Builder(this,
+//            MISSED_CHANNEL_ID
+//        )
+//            .setSmallIcon(android.R.drawable.sym_call_missed)
+//            .setContentTitle(getString(R.string.notif_missed_call_title))
+//            .setContentText(missedCallText)
 //            .setLargeIcon(contactPhoto)
 //            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 //            .setCategory(NotificationCompat.CATEGORY_MESSAGE)
@@ -348,13 +390,23 @@ class CallService : InCallService() {
         val calls = calls ?: emptyList()
         _allCalls.value = ArrayList(calls)
 
+        calls.forEach { c ->
+            if (c.state == Call.STATE_ACTIVE) {
+                val detailsTime = c.details.connectTimeMillis
+                if (detailsTime > 0) {
+                    callStartTimes[c] = detailsTime
+                } else if (!callStartTimes.containsKey(c)) {
+                    callStartTimes[c] = System.currentTimeMillis()
+                }
+            }
+        }
+        callStartTimes.keys.retainAll(calls.toSet())
+
         val preferred = _preferredCall.value
-        // Clear preferred if it's gone or disconnected
         if (preferred != null && (preferred !in calls || preferred.state == Call.STATE_DISCONNECTED)) {
             _preferredCall.value = null
         }
 
-        // Priority: Ringing > Preferred > Dialing/Connecting > Active > Holding > Others
         val activePreferred = if (preferred != null && preferred.state != Call.STATE_DISCONNECTED && preferred.state != Call.STATE_HOLDING) preferred else null
 
         val priorityCall = calls.find { it.state == Call.STATE_RINGING }
@@ -362,18 +414,12 @@ class CallService : InCallService() {
             ?: calls.find { it.state == Call.STATE_RINGING }
             ?: calls.find { it.state == Call.STATE_DIALING || it.state == Call.STATE_CONNECTING }
             ?: calls.find { it.state == Call.STATE_ACTIVE }
-            ?: calls.find { it == preferred } // Even if held, if it's preferred and nothing else is active
+            ?: calls.find { it == preferred }
             ?: calls.find { it.state == Call.STATE_HOLDING }
             ?: calls.firstOrNull { it.state != Call.STATE_DISCONNECTED }
 
         if (priorityCall != null) {
-            val connectTime = if (priorityCall.state == Call.STATE_ACTIVE) {
-                if (priorityCall.details.connectTimeMillis > 0) {
-                    priorityCall.details.connectTimeMillis
-                } else {
-                    System.currentTimeMillis()
-                }
-            } else 0L
+            val connectTime = callStartTimes[priorityCall] ?: 0L
             _currentCallSession.value = CallSession(priorityCall, priorityCall.state, connectTimeMillis = connectTime)
         } else {
             _currentCallSession.value = null
@@ -506,7 +552,7 @@ class CallService : InCallService() {
             if (fullscreenCalls) {
                 NotificationChannel(
                     FULLSCREEN_INCOMING_CHANNEL_ID,
-                    "Fullscreen Incoming Calls",
+                    getString(R.string.notif_channel_fullscreen_incoming_calls),
                     NotificationManager.IMPORTANCE_LOW
                 ).apply {
                     lockscreenVisibility = Notification.VISIBILITY_PUBLIC
@@ -516,7 +562,7 @@ class CallService : InCallService() {
             } else {
                 NotificationChannel(
                     INCOMING_CHANNEL_ID,
-                    "Incoming Calls",
+                    getString(R.string.notif_channel_incoming_calls),
                     NotificationManager.IMPORTANCE_HIGH
                 ).apply {
                     lockscreenVisibility = Notification.VISIBILITY_PUBLIC
@@ -525,7 +571,11 @@ class CallService : InCallService() {
                 }
             }
         } else {
-            NotificationChannel(CHANNEL_ID, "Ongoing Calls", NotificationManager.IMPORTANCE_LOW).apply {
+            NotificationChannel(
+                CHANNEL_ID,
+                getString(R.string.notif_channel_outgoing_calls),
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
                 lockscreenVisibility = Notification.VISIBILITY_PUBLIC
                 enableVibration(false)
             }
@@ -540,7 +590,7 @@ class CallService : InCallService() {
             metadata.name
         } else {
             // Fallback if metadata isn't ready or matches another call (rare)
-            number.ifEmpty { "Unknown Number" }
+            number.ifEmpty { getString(R.string.label_unknown_number) }
         }
 
         val contactPhoto = getContactBitmap(metadata?.photoUri)
@@ -579,21 +629,24 @@ class CallService : InCallService() {
         val audioState = _audioState.value
         val audioRoute = audioState?.route ?: CallAudioState.ROUTE_EARPIECE
         val audioLabel = when (audioRoute) {
-            CallAudioState.ROUTE_SPEAKER -> this.getString(R.string.speaker)
+            CallAudioState.ROUTE_SPEAKER -> this.getString(R.string.audio_route_speaker)
             CallAudioState.ROUTE_BLUETOOTH -> {
                 try {
-                    audioState?.activeBluetoothDevice?.name ?: "Bluetooth"
+                    audioState?.activeBluetoothDevice?.name ?: getString(R.string.audio_route_bluetooth)
                 } catch (_: SecurityException) {
-                    "Bluetooth"
+                    getString(R.string.audio_route_bluetooth)
                 }
             }
-            CallAudioState.ROUTE_WIRED_HEADSET -> "Earpiece"
-            else -> "Handset"
+            CallAudioState.ROUTE_WIRED_HEADSET -> getString(R.string.audio_route_headset)
+            else -> getString(R.string.audio_route_handset)
         }
 
         val contentText = buildString {
-            if (isRinging) append("Incoming call") else append("Active call")
-            if (!simLabel.isNullOrEmpty()) append(" via $simLabel")
+            if (call.state == Call.STATE_RINGING) append(getString(R.string.call_status_incoming)) else append(getString(R.string.notif_active_call))
+            if (!simLabel.isNullOrEmpty()) {
+                append(" ")
+                append(getString(R.string.notif_via_sim, simLabel))
+            }
         }
         val channelId = if (isRinging) {
             if (fullscreenCalls) FULLSCREEN_INCOMING_CHANNEL_ID else INCOMING_CHANNEL_ID
@@ -614,7 +667,6 @@ class CallService : InCallService() {
                 .setContentTitle(contactName)
                 .setContentText(contentText)
                 .setCategory(Notification.CATEGORY_CALL)
-                .setFullScreenIntent(fullScreenPendingIntent, true)
                 .setContentIntent(fullScreenPendingIntent)
                 .setOngoing(true)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
@@ -631,7 +683,11 @@ class CallService : InCallService() {
                 .setColor(notificationColor)
                 .addPerson(person)
 
-            if (call.state == Call.STATE_ACTIVE) {
+            if (call.state == Call.STATE_RINGING) {
+                builder.setFullScreenIntent(fullScreenPendingIntent, true)
+                builder.setUsesChronometer(false)
+                builder.setShowWhen(false)
+            } else {
                 val connectTime = call.details.connectTimeMillis
                 if (connectTime > 0) {
                     builder.setWhen(connectTime)
@@ -641,9 +697,6 @@ class CallService : InCallService() {
                     builder.setUsesChronometer(false)
                     builder.setShowWhen(false)
                 }
-            } else {
-                builder.setUsesChronometer(false)
-                builder.setShowWhen(false)
             }
 
             // Add extra action buttons for ongoing calls

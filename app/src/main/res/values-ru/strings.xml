@@ -37,6 +37,9 @@
     <string name="filter_incoming">Входящие</string>
     <string name="filter_outgoing">Исходящие</string>
     <string name="filter_rejected">Отклоненные</string>
+    <string name="sim_picker_title">Выбрать SIM-карту</string>
+    <string name="label_unknown_number">Неизвестный номер</string>
+    <string name="reset">Сбросить</string>
 
     <!-- Search -->
     <string name="search">Поиск</string>
@@ -57,7 +60,7 @@
     <string name="project_support_description">
         <![CDATA[
         Мы считаем, что конфиденциальность должна быть бесплатной. Именно поэтому все основные функции полностью в вашем распоряжении — и это не стоит ни копейки.<br>
-        Если вам нравится то, что мы создаём, подумайте о том, чтобы угостить нас кофе. В знак благодарности вы получите:<br> <b>все темы, пользовательские цвета и пользовательские шрифты.</b><br>
+        Если вам нравится то, что мы создаём, подумайте о том, чтобы угостить нас кофе. В знак благодарности вы получите:<br> <b>все темы, пользовательские цвета, шрифты и настройку фона экрана звонка.</b><br>
         Это не премиум-уровень. Это просто знак благодарности. Благодаря вашей поддержке Rill остается независимым и свободным от рекламы.
         ]]>
     </string>
@@ -135,6 +138,10 @@
     <string name="incoming_call_ui_buttons">Кнопки</string>
     <string name="incoming_call_ui_slide_to_answer">Горизонтальный свайп (iOS)</string>
     <string name="incoming_call_ui_vertical_swipe">Вертикальный свайп</string>
+    <string name="dialpad_animations">Анимации набора</string>
+    <string name="dialpad_animations_subtitle">Показывать анимацию появления цифр при наборе номера</string>
+    <string name="hide_voice_search">Скрыть голосовой поиск</string>
+    <string name="hide_voice_search_subtitle">Скрывает кнопку голосового поиска</string>
 
     <string name="avatars_settings">Настройки аватаров</string>
     <string name="avatars_settings_subtitle">Настройка цветов, рамок и других параметров</string>
@@ -269,6 +276,8 @@
     <string name="incorrect_password">Неверный пароль</string>
     <string name="incorrect_password_subtitle">Пароль должен состоять как минимум из 4 символов</string>
     <string name="password_dont_match">Пароли не совпадают</string>
+    <string name="lock_on_minimize">Блокировать при сворачивании</string>
+    <string name="lock_on_minimize_subtitle">Если выключено, приложение будет блокироваться только при полной выгрузке из памяти</string>
 
     <string name="manage_contacts">Управление контактами</string>
     <string name="manage_contacts_subtitle">Приватные контакты, отображение учетных записей и очистка контактов</string>
@@ -328,17 +337,22 @@
     <string name="keypad">Клавиатура</string>
     <string name="mute">Без звука</string>
     <string name="unmute">Вкл. звук</string>
-    <string name="speaker">Динамик</string>
+    <string name="audio_route_speaker">Динамик</string>
+    <string name="audio_route_handset">Телефон</string>
+    <string name="audio_route_headset">Гарнитура</string>
+    <string name="audio_route_bluetooth">Bluetooth</string>
+    <string name="audio_route_bluetooth_short">BT</string>
+    <string name="audio_output_title">Аудиовыход</string>
     <string name="add_call">Добавить вызов</string>
     <string name="resume">Возобновить</string>
     <string name="swap">Переключить</string>
     <string name="more">Ещё</string>
     <string name="hold">Удерживать</string>
-    <string name="on_hold">Звонок на удержании</string>
-    <string name="call_ended">Звонок завершен</string>
-    <string name="calling">Вызов…</string>
-    <string name="incoming_call">Входящий звонок</string>
-    <string name="connecting">Соединение…</string>
+    <string name="call_status_on_hold">Звонок на удержании</string>
+    <string name="call_status_ended">Звонок завершен</string>
+    <string name="call_status_calling">Вызов…</string>
+    <string name="call_status_incoming">Входящий звонок</string>
+    <string name="call_status_connecting">Соединение…</string>
     <string name="slide_to_answer">Ответьте</string>
     <string name="swipe_up_to_answer">Что бы ответить, проведите вверх</string>
     <string name="swipe_down_to_reject">Что бы отклонить, проведите вниз</string>
@@ -355,6 +369,33 @@
     <string name="could_not_delete">Не удалось удалить</string>
     <string name="clear_all_filtered_logs">Очистить все отфильтрованные записи</string>
     <string name="clear_all_filtered_logs_selected">Это приведет к удалению всей отображаемой истории звонков. Это действие нельзя отменить.</string>
+
+    <!-- Blocking -->
+    <string name="action_block">Заблокировать</string>
+    <string name="action_unblock">Разблокировать</string>
+    <string name="action_block_number">Заблокировать номер</string>
+    <string name="action_unblock_number">Разблокировать номер</string>
+    <string name="contact_block">Заблокировать контакт</string>
+    <string name="contact_block_supporting">Заблокировать входящие звонки и сообщения от этого контакта</string>
+    <string name="contact_unblock">Разблокировать контакт</string>
+    <string name="contact_unblock_supporting">Разрешить звонки и сообщения от этого контакта</string>
+    <string name="call_log_block_title">Заблокировать номера?</string>
+    <string name="call_log_block_message">Звонки с %1$d выбранных номеров будут заблокированы.</string>
+
+    <!-- Contact call screen background -->
+    <string name="contact_call_background">Фон экрана вызова</string>
+    <string name="contact_call_background_set">Выбрано пользовательское изображение</string>
+    <string name="contact_call_background_none">Использовать фон по умолчанию</string>
+    <string name="contact_call_background_choose">Выберите изображение</string>
+    <string name="contact_call_background_change">Изменить изображение</string>
+    <string name="contact_call_background_remove">Удалить фон</string>
+    <string name="contact_call_background_saving">Сохранение изображения…</string>
+    <string name="contact_call_background_error">Не удалось сохранить это изображение</string>
+    <string name="contact_call_background_no_target">Сначала сохраните номер в списке контактов</string>
+    <string name="contact_call_background_preview">Предварительный просмотр фона экрана вызова</string>
+    <string name="settings_call_default_background">Фон вызова по умолчанию</string>
+    <string name="settings_call_default_background_set">При каждом звонке отображается индивидуальное изображение</string>
+    <string name="settings_call_default_background_none">Не задано — при звонках используется тема приложения</string>
 
     <!-- Contacts -->
     <string name="contacts">Контакты</string>
@@ -405,9 +446,11 @@
     <string name="add_event">Добавить событие</string>
     <string name="add_address">Добавить адрес</string>
     <string name="add_note">Добавить заметку</string>
+    <string name="add_photo">Добавить фотографию</string>
     <string name="contact_ringtone">Рингтон для контакта</string>
     <string name="unsaved_changes">Несохраненные изменения</string>
     <string name="unsaved_changes_subtitle">Хотите сохранить изменения перед выходом?</string>
+    <string name="ringtone_custom">Пользовательский</string>
     <plurals name="contacts_count">
         <item quantity="one">%d контакт</item>
         <item quantity="few">%d контакта</item>
@@ -445,6 +488,7 @@
 
     <!-- Call notes -->
     <string name="notes">Заметки</string>
+    <string name="notes_contact">Примечания</string>
     <string name="call_notes">Заметки о звонках</string>
     <string name="about_call_notes">Информация о заметках</string>
     <string name="about_call_notes_subtitle">Краткая информация, которую вы записываете во время звонка. Она хранится локально в файлах приложения и привязана к номеру телефона (не синхронизируется с «Контактами Google» и другими). У каждого номера есть своя личная заметка, доступ к которой возможен только из журнала звонков в деталях контакта внутри приложения или из вкладки «Заметки о звонках».</string>
@@ -498,4 +542,16 @@
     <string name="page_subtitle_three">Мгновенный T9 поиск, плавная анимация и молниеносные звонки. Просто телефонное приложение, которое работает.</string>
     <string name="page_title_warning">В стадии разработки</string>
     <string name="page_subtitle_warning">Это приложение пока находится в стадии разработки. Некоторые функции могут работать не так, как ожидается. Пожалуйста, пользуйтесь им с осторожностью и сообщайте о любых возникших проблемах.</string>
+
+    <!-- Call notifications (CallService) -->
+    <string name="notif_channel_outgoing_calls">Исходящие вызовы</string>
+    <string name="notif_channel_incoming_calls">Входящие вызовы</string>
+    <string name="notif_channel_fullscreen_incoming_calls">Входящие вызовы (полноэкранный режим)</string>
+    <string name="notif_channel_missed_calls">Пропущенные вызовы</string>
+    <string name="notif_blocked_call_title">Вызов заблокирован</string>
+    <string name="notif_blocked_call_text">Заблокированный вызов от %1$s</string>
+    <string name="notif_missed_call_title">Пропущенный вызов</string>
+    <string name="notif_missed_call_text">Пропущенный вызов от %1$s в %2$s</string>
+    <string name="notif_via_sim">через %1$s</string>
+    <string name="notif_active_call">Активный вызов</string>
 </resources>

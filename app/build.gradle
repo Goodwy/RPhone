@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     id 'com.android.application' version '9.1.1'
     id 'org.jetbrains.kotlin.plugin.compose' version '2.3.21'
@@ -23,8 +25,8 @@ android {
         applicationId = "dev.goodwy.rphone"
         minSdk = 29
         targetSdk = 35
-        versionCode = 25
-        versionName = "0.2.5"
+        versionCode = 30
+        versionName = "0.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -62,9 +64,9 @@ android {
 
     flavorDimensions += "distribution"
     productFlavors {
-        create("gplay") { dimension = "distribution" }
-        create("foss") { dimension = "distribution" }
-        create("rustore") { dimension = "distribution" }
+        register("gplay") { dimension = "distribution" }
+        register("foss") { dimension = "distribution" }
+        register("rustore") { dimension = "distribution" }
     }
 
     compileOptions {
@@ -74,7 +76,7 @@ android {
 
     kotlin {
         compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+            jvmTarget.set(JvmTarget.JVM_17)
 
             freeCompilerArgs.addAll(
                 "-opt-in=androidx.compose.material3.ExperimentalMaterial3ExpressiveApi",
@@ -87,13 +89,19 @@ android {
         compose = true
         buildConfig true
     }
+
+    androidResources {
+        generateLocaleConfig = true
+    }
 }
 
 dependencies {
     // UI Stack managed by BOM
     implementation platform('androidx.compose:compose-bom:2025.12.01')
     implementation 'androidx.compose.ui:ui'
-    implementation 'androidx.compose.material3:material3'
+    implementation 'androidx.compose.material3:material3:1.5.0-alpha18'
+    implementation 'androidx.exifinterface:exifinterface:1.3.6'
+    implementation 'androidx.graphics:graphics-shapes:1.0.1'
     implementation 'androidx.activity:activity-compose'
     implementation 'androidx.compose.foundation:foundation'
     implementation 'androidx.compose.ui:ui-graphics'

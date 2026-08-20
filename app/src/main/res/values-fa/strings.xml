@@ -38,6 +38,9 @@
     <string name="filter_incoming">ورودی</string>
     <string name="filter_outgoing">خروجی</string>
     <string name="filter_rejected">رد شده</string>
+    <string name="sim_picker_title">انتخاب سیم‌کارت</string>
+    <string name="label_unknown_number">شماره ناشناس</string>
+    <string name="reset">بازنشانی</string>
 
     <!-- Search -->
     <string name="search">جستجو</string>
@@ -136,6 +139,10 @@
     <string name="incoming_call_ui_buttons">دکمه‌ها</string>
     <string name="incoming_call_ui_slide_to_answer">برای پاسخ بکشید (iOS)</string>
     <string name="incoming_call_ui_vertical_swipe">کشیدن عمودی</string>
+    <string name="dialpad_animations">انیمیشن‌های صفحه کلید</string>
+    <string name="dialpad_animations_subtitle">نمایش انیمیشن‌ها هنگام تایپ اعداد</string>
+    <string name="hide_voice_search">پنهان کردن جستجوی صوتی</string>
+    <string name="hide_voice_search_subtitle">دکمه جستجوی صوتی را پنهان می‌کند</string>
 
     <string name="avatars_settings">تنظیمات آواتار</string>
     <string name="avatars_settings_subtitle">سفارشی‌سازی رنگ‌ها، قاب‌ها و موارد بیشتر</string>
@@ -270,6 +277,8 @@
     <string name="incorrect_password">رمز عبور نادرست است</string>
     <string name="incorrect_password_subtitle">رمز عبور باید حداقل 4 کاراکتر باشد</string>
     <string name="password_dont_match">رمزهای عبور مطابقت ندارند</string>
+    <string name="lock_on_minimize">قفل هنگام کوچک‌سازی</string>
+    <string name="lock_on_minimize_subtitle">اگر این گزینه خاموش باشد، برنامه فقط زمانی پایان می‌یابد که به طور کامل از حافظه تخلیه شود</string>
 
     <string name="manage_contacts">مدیریت مخاطبان</string>
     <string name="manage_contacts_subtitle">مخاطبان خصوصی، حساب‌های نمایش داده شده، و پاک کردن لیست شما</string>
@@ -329,17 +338,22 @@
     <string name="keypad">صفحه کلید</string>
     <string name="mute">بی‌صدا</string>
     <string name="unmute">رفع بی‌صدایی</string>
-    <string name="speaker">بلندگو</string>
+    <string name="audio_route_speaker">بلندگو</string>
+    <string name="audio_route_handset">گوشی</string>
+    <string name="audio_route_headset">هدفون</string>
+    <string name="audio_route_bluetooth">بلوتوث</string>
+    <string name="audio_route_bluetooth_short">BT</string>
+    <string name="audio_output_title">خروجی صدا</string>
     <string name="add_call">افزودن تماس</string>
     <string name="resume">ادامه</string>
     <string name="swap">تعویض</string>
     <string name="more">بیشتر</string>
     <string name="hold">مکث</string>
-    <string name="on_hold">در حالت مکث</string>
-    <string name="call_ended">تماس پایان یافت</string>
-    <string name="calling">در حال برقراری تماس…</string>
-    <string name="incoming_call">تماس ورودی</string>
-    <string name="connecting">در حال اتصال…</string>
+    <string name="call_status_on_hold">در حالت مکث</string>
+    <string name="call_status_ended">تماس پایان یافت</string>
+    <string name="call_status_calling">در حال برقراری تماس…</string>
+    <string name="call_status_incoming">تماس ورودی</string>
+    <string name="call_status_connecting">در حال اتصال…</string>
     <string name="slide_to_answer">برای پاسخ بکشید</string>
     <string name="swipe_up_to_answer">برای پاسخ به بالا بکشید</string>
     <string name="swipe_down_to_reject">برای رد به پایین بکشید</string>
@@ -356,6 +370,31 @@
     <string name="could_not_delete">قابل حذف نبود</string>
     <string name="clear_all_filtered_logs">پاک کردن همه لاگ‌های فیلتر شده</string>
     <string name="clear_all_filtered_logs_selected">این کار تمام تاریخچه تماس نمایش داده شده را حذف می‌کند. این عمل قابل بازگشت نیست.</string>
+
+    <string name="action_block">مسدود کردن</string>
+    <string name="action_unblock">رفع مسدودیت</string>
+    <string name="action_block_number">مسدود کردن شماره</string>
+    <string name="action_unblock_number">رفع مسدودیت شماره</string>
+    <string name="contact_block">مسدود کردن مخاطب</string>
+    <string name="contact_block_supporting">مسدود کردن تماس‌های ورودی و پیام‌های این مخاطب</string>
+    <string name="contact_unblock">رفع مسدودیت مخاطب</string>
+    <string name="contact_unblock_supporting">اجازه مجدد تماس‌ها و پیام‌های این مخاطب</string>
+    <string name="call_log_block_title">مسدود کردن شماره‌ها؟</string>
+    <string name="call_log_block_message">تماس‌های %1$d ورودی انتخاب شده مسدود خواهند شد.</string>
+
+    <string name="contact_call_background">پس‌زمینه صفحه تماس</string>
+    <string name="contact_call_background_set">تصویر سفارشی انتخاب شد</string>
+    <string name="contact_call_background_none">استفاده از پس‌زمینه پیش‌فرض</string>
+    <string name="contact_call_background_choose">انتخاب تصویر</string>
+    <string name="contact_call_background_change">تغییر تصویر</string>
+    <string name="contact_call_background_remove">حذف پس‌زمینه</string>
+    <string name="contact_call_background_saving">در حال ذخیره تصویر…</string>
+    <string name="contact_call_background_error">این تصویر ذخیره نشد</string>
+    <string name="contact_call_background_no_target">ابتدا شماره را به عنوان مخاطب ذخیره کنید</string>
+    <string name="contact_call_background_preview">پیش‌نمایش پس‌زمینه صفحه تماس</string>
+    <string name="settings_call_default_background">پس‌زمینه پیش‌فرض تماس</string>
+    <string name="settings_call_default_background_set">یک تصویر سفارشی در هر تماس نمایش داده می‌شود</string>
+    <string name="settings_call_default_background_none">تنظیم نشده — تماس‌ها از تم برنامه استفاده می‌کنند</string>
 
     <!-- Contacts -->
     <string name="contacts">مخاطبان</string>
@@ -406,9 +445,11 @@
     <string name="add_event">افزودن رویداد</string>
     <string name="add_address">افزودن آدرس</string>
     <string name="add_note">افزودن یادداشت</string>
+    <string name="add_photo">افزودن عکس</string>
     <string name="contact_ringtone">زنگ مخاطب</string>
     <string name="unsaved_changes">تغییرات ذخیره نشده</string>
     <string name="unsaved_changes_subtitle">آیا می‌خواهید قبل از خروج تغییرات خود را ذخیره کنید؟</string>
+    <string name="ringtone_custom">سفارشی</string>
     <plurals name="contacts_count">
         <item quantity="one">%d مخاطب</item>
         <item quantity="other">%d مخاطب</item>
@@ -440,6 +481,7 @@
 
     <!-- Call notes -->
     <string name="notes">یادداشت‌ها</string>
+    <string name="notes_contact">توضیحات</string>
     <string name="call_notes">یادداشت‌های تماس</string>
     <string name="about_call_notes">درباره یادداشت‌های تماس</string>
     <string name="about_call_notes_subtitle">یادداشت‌های سریعی که در طول تماس می‌نویسید. آنها به صورت محلی در فایل‌های برنامه ذخیره می‌شوند و به شماره تلفن متصل می‌شوند (با مخاطبان Google و دیگران همگام‌سازی نمی‌شوند). هر شماره یادداشت خصوصی خود را دارد که فقط از لاگ تماس در جزئیات مخاطب در داخل برنامه یا از برگه \"یادداشت‌های تماس\" قابل دسترسی است.</string>
@@ -493,4 +535,16 @@
     <string name="page_subtitle_three">جستجوی فوری T9، انیمیشن‌های روان، و تماس‌های فوق‌العاده سریع. فقط یک برنامه تلفن که کار می‌کند.</string>
     <string name="page_title_warning">در حال توسعه</string>
     <string name="page_subtitle_warning">این برنامه هنوز در حال توسعه است. برخی از ویژگی‌ها ممکن است مطابق انتظار کار نکنند. لطفاً با احتیاط استفاده کنید و هر گونه مشکلی را گزارش دهید.</string>
+
+    <!-- Call notifications (CallService) -->
+    <string name="notif_channel_outgoing_calls">تماس‌های خروجی</string>
+    <string name="notif_channel_incoming_calls">تماس‌های ورودی</string>
+    <string name="notif_channel_fullscreen_incoming_calls">تماس‌های ورودی (تمام صفحه)</string>
+    <string name="notif_channel_missed_calls">تماس‌های از دست رفته</string>
+    <string name="notif_blocked_call_title">تماس مسدود شده</string>
+    <string name="notif_blocked_call_text">تماس مسدود شده از %1$s</string>
+    <string name="notif_missed_call_title">تماس از دست رفته</string>
+    <string name="notif_missed_call_text">تماس از دست رفته از %1$s در %2$s</string>
+    <string name="notif_via_sim">از طریق %1$s</string>
+    <string name="notif_active_call">تماس فعال</string>
 </resources>

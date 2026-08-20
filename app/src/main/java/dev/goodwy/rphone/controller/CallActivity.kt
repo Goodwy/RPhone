@@ -2,21 +2,26 @@ package dev.goodwy.rphone.controller
 
 import android.app.KeyguardManager
 import android.content.Intent
+import android.content.res.Configuration
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.telecom.Call
 import android.view.HapticFeedbackConstants
 import android.view.WindowManager
-import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -24,19 +29,42 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.FragmentActivity
+import dev.goodwy.rphone.R
+import dev.goodwy.rphone.controller.util.CallBackgroundStore
 import dev.goodwy.rphone.controller.util.PreferenceManager
-
+import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 import dev.goodwy.rphone.view.screen.ExpressiveCallScreen
 import dev.goodwy.rphone.view.theme.Rill4Theme
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
+import kotlin.getValue
+
+private data class CallIdentity(
+    val number: String,
+    val name: String,
+    val photoUri: String?,
+    val backgroundUri: String?
+)
+
+private data class CachedCallIdentity(
+    val identity: CallIdentity,
+    val version: Int
+)
 
 class CallActivity : FragmentActivity() { //ComponentActivity()
 
+    private val contactsRepo: IContactsRepository by inject()
     private val preferenceManager: PreferenceManager by inject()
     private val callViewModel: CallViewModel by inject()
     private var proximityWakeLock: PowerManager.WakeLock? = null
+    private var isFinishingCall = false
+    private var keyguardDismissRequested = false
+    private val identityCache = mutableMapOf<String, CachedCallIdentity>()
 
     companion object {
         /** FloatingCallService observes this to hide the bubble when CallActivity is visible. */
@@ -47,12 +75,25 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
         turnScreenOnAndShowWhileLocked()
         super.onCreate(savedInstanceState)
 
+        CallBackgroundStore.attach(preferenceManager)
+
+        if (CallService.allCalls.value.none { it.state != Call.STATE_DISCONNECTED } &&
+            CallService.currentCallSession.value == null
+        ) {
+            finish()
+            return
+        }
+
         if (preferenceManager.getBoolean(PreferenceManager.KEY_KEEP_SCREEN_ON, true)) {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
 
         setupProximitySensor()
-        enableEdgeToEdge()
+        val themeMode = preferenceManager.getString(PreferenceManager.KEY_THEME_MODE, "auto") ?: "auto"
+        applySystemBarStyle(
+            themeMode == "dark" || themeMode == "black" ||
+                    (themeMode == "auto" && isNightMode()) || (themeMode == "auto_bw" && isNightMode())
+        )
 
         setContent {
             Rill4Theme {
@@ -61,8 +102,32 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
                 val settingsState by preferenceManager.settingsChanged.collectAsState()
                 val callerMetadata by callViewModel.callerMetadata.collectAsState()
 
-                val call = session?.call
+                var retainedSession by remember { mutableStateOf<CallSession?>(null) }
+                LaunchedEffect(session) {
+                    session?.let { retainedSession = it }
+                }
+
+                val displaySession = session ?: retainedSession
+                val displayCall = displaySession?.call
                 val callState = session?.state
+
+                val identity = if (displayCall != null) {
+                    rememberCallIdentity(displayCall, settingsState)
+                } else {
+                    null
+                }
+
+                val darkSystemTheme = isSystemInDarkTheme()
+                val darkTheme = themeMode == "dark" || themeMode == "black" ||
+                        (themeMode == "auto" && darkSystemTheme) || (themeMode == "auto_bw" && darkSystemTheme)
+                val lightSystemBarIcons = darkTheme ||
+                        identity?.backgroundUri != null ||
+                        identity?.photoUri != null
+
+                DisposableEffect(lightSystemBarIcons) {
+                    applySystemBarStyle(lightSystemBarIcons)
+                    onDispose { }
+                }
 
                 LaunchedEffect(callState, settingsState) {
                     val keepScreenOn =
@@ -80,7 +145,11 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
                                 )
                             ) {
                                 this@CallActivity.window?.decorView?.performHapticFeedback(
-                                    HapticFeedbackConstants.VIRTUAL_KEY
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                        HapticFeedbackConstants.CONFIRM
+                                    } else {
+                                        HapticFeedbackConstants.VIRTUAL_KEY
+                                    }
                                 )
                             }
                             if (preferenceManager.getBoolean(
@@ -113,31 +182,36 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
                                 )
                             ) {
                                 this@CallActivity.window?.decorView?.performHapticFeedback(
-                                    HapticFeedbackConstants.LONG_PRESS
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                        HapticFeedbackConstants.REJECT
+                                    } else {
+                                        HapticFeedbackConstants.LONG_PRESS
+                                    }
                                 )
                             }
                             releaseProximityLock()
-                            delay(1200) // Brief delay to show "Call Ended" state
-                            finish()
+                            delay(400)
+                            dismissCallScreen()
                         }
 
                         else -> releaseProximityLock()
                     }
 
                     if (session == null) {
-                        delay(1200)
-                        if (CallService.allCalls.value.isEmpty()) {
-                            finish()
+                        delay(400)
+                        if (CallService.allCalls.value.none { it.state != Call.STATE_DISCONNECTED }) {
+                            dismissCallScreen()
                         }
                     }
                 }
 
-                if (call != null && session != null) {
-                    val details = call.details
-                    val number = details?.handle?.schemeSpecificPart ?: ""
-
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surface)
+                ) {
                     AnimatedContent(
-                        targetState = call,
+                        targetState = displayCall,
                         transitionSpec = {
                             (fadeIn(animationSpec = tween(400)) + scaleIn(initialScale = 0.92f, animationSpec = tween(400)))
                                 .togetherWith(fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.95f, animationSpec = tween(300)))
@@ -145,35 +219,138 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
                         label = "CallSwitch"
                     ) { targetCall ->
                         val answeredFromNotification = intent?.getBooleanExtra("ANSWERED_FROM_NOTIFICATION", false) ?: false
-                        
-                        val currentCnam = if (targetCall.details.callerDisplayNamePresentation == android.telecom.TelecomManager.PRESENTATION_ALLOWED) {
-                            targetCall.details.callerDisplayName
-                        } else null
 
-                        val displayName = if (targetCall == call) {
-                            callerMetadata?.name ?: currentCnam ?: number.ifEmpty { "Unknown" }
+                        if (targetCall == null) {
+                            Box(modifier = Modifier.fillMaxSize())
                         } else {
-                            currentCnam ?: (targetCall.details.handle?.schemeSpecificPart ?: "Unknown")
-                        }
+                            val isDisplayed = targetCall === displayCall
+                            val targetIdentity =
+                                if (isDisplayed && identity != null) {
+                                    identity
+                                } else {
+                                    rememberCallIdentity(targetCall, settingsState)
+                                }
+                            val targetState = if (isDisplayed) {
+                                session?.state ?: targetCall.state
+                            } else {
+                                targetCall.state
+                            }
+                            val connectTime = if (isDisplayed) {
+                                displaySession?.connectTimeMillis ?: 0L
+                            } else {
+                                targetCall.details?.connectTimeMillis ?: 0L
+                            }
 
-                        ExpressiveCallScreen(
-                            call = targetCall,
-                            callState = if (targetCall == call) session?.state ?: Call.STATE_ACTIVE else targetCall.state,
-                            contactName = displayName,
-                            phoneNumber = targetCall.details.handle?.schemeSpecificPart ?: "",
-                            photoUri = if (targetCall == call) callerMetadata?.photoUri else null,
-                            audioState = audioState,
-                            skipIncomingScreen = answeredFromNotification
-                        )
+                            ExpressiveCallScreen(
+                                call = targetCall,
+                                callState = targetState,
+                                contactName = targetIdentity.name,
+                                phoneNumber = targetIdentity.number,
+                                photoUri = targetIdentity.photoUri,
+                                audioState = audioState,
+                                initialConnectTime = connectTime,
+                                backgroundUri = targetIdentity.backgroundUri,
+                                skipIncomingScreen = answeredFromNotification
+                            )
+                        }
                     }
-                } else {
-                    Box(
-                        modifier = Modifier.fillMaxSize()
-                            .background(MaterialTheme.colorScheme.background)
-                    )
                 }
             }
         }
+    }
+
+    @Composable
+    private fun rememberCallIdentity(call: Call, settingsState: Int): CallIdentity {
+        val context = LocalContext.current
+        val unknownLabel = stringResource(R.string.label_unknown)
+        val number = remember(call) { call.details?.handle?.schemeSpecificPart.orEmpty() }
+
+        var identity by remember(number, unknownLabel) {
+            val base = cachedIdentity(number, settingsState)
+                ?: CallIdentity(number, number.ifEmpty { unknownLabel }, null, null)
+            mutableStateOf(
+                if (base.backgroundUri == null) {
+                    base.copy(backgroundUri = CallBackgroundStore.defaultModel(context))
+                } else {
+                    base
+                }
+            )
+        }
+
+        LaunchedEffect(number, settingsState) {
+            val handle = number.ifEmpty { null }
+
+            val handleResult = CallBackgroundStore.resolveResult(context, handle, null)
+            val handleBackground = handleResult.uri
+            if (handleBackground != null && handleBackground != identity.backgroundUri) {
+                identity = identity.copy(backgroundUri = handleBackground)
+            }
+
+            val lookup = if (handle == null) {
+                null
+            } else {
+                withContext(Dispatchers.IO) {
+                    runCatching { contactsRepo.getContactByNumber(number) }
+                }
+            }
+            val contact = lookup?.getOrNull()
+            val contactFailed = lookup?.isFailure == true
+
+            val contactId = contact?.id?.takeIf { it.isNotBlank() }
+            val idResult = if (handleBackground == null && contactId != null) {
+                CallBackgroundStore.resolveResult(context, handle, contactId)
+            } else {
+                null
+            }
+
+            val resolvedBackground = handleBackground ?: idResult?.uri
+            val resolveFailed =
+                handleResult.failed || idResult?.failed == true || contactFailed
+            val defaultBackground = CallBackgroundStore.defaultModelAsync(context)
+            val background = resolvedBackground
+                ?: identity.backgroundUri.takeIf { resolveFailed }
+                ?: defaultBackground
+
+            val resolved = CallIdentity(
+                number = number,
+                name = contact?.name?.takeIf { it.isNotBlank() }
+                    ?: identity.name.takeIf { contactFailed && it.isNotBlank() }
+                    ?: number.ifEmpty { unknownLabel },
+                photoUri = contact?.photoUri ?: identity.photoUri.takeIf { contactFailed },
+                backgroundUri = background
+            )
+            cacheIdentity(number, resolved, settingsState)
+            identity = resolved
+        }
+
+        return identity
+    }
+
+    private fun cachedIdentity(number: String, version: Int): CallIdentity? {
+        if (number.isEmpty()) return null
+        val cached = identityCache[number] ?: return null
+        if (cached.version != version) return null
+        return cached.identity
+    }
+
+    private fun cacheIdentity(number: String, identity: CallIdentity, version: Int) {
+        identityCache.entries.removeAll { it.value.version != version }
+        if (number.isEmpty()) return
+        identityCache[number] = CachedCallIdentity(identity, version)
+    }
+
+    private fun isNightMode(): Boolean {
+        return (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
+                Configuration.UI_MODE_NIGHT_YES
+    }
+
+    private fun applySystemBarStyle(lightIcons: Boolean) {
+        val style = if (lightIcons) {
+            SystemBarStyle.dark(Color.TRANSPARENT)
+        } else {
+            SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
+        }
+        enableEdgeToEdge(statusBarStyle = style, navigationBarStyle = style)
     }
 
     override fun onResume() {
@@ -204,22 +381,33 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-//        turnScreenOnAndShowWhileLocked()
+        if (!isFinishingCall && CallService.allCalls.value.any { it.state != Call.STATE_DISCONNECTED }) {
+            turnScreenOnAndShowWhileLocked()
+        }
+    }
+
+    private fun dismissCallScreen() {
+        if (isFinishingCall) return
+        isFinishingCall = true
+
+        if (CallService.allCalls.value.any { it.state != Call.STATE_DISCONNECTED }) {
+            isFinishingCall = false
+            return
+        }
+
+        setShowWhenLocked(false)
+        setTurnScreenOn(false)
+        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        finishAndRemoveTask()
     }
 
     private fun turnScreenOnAndShowWhileLocked() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-            setShowWhenLocked(true)
-            setTurnScreenOn(true)
+        setShowWhenLocked(true)
+        setTurnScreenOn(true)
+        if (!keyguardDismissRequested) {
+            keyguardDismissRequested = true
             val keyguardManager = getSystemService(KEYGUARD_SERVICE) as KeyguardManager
             keyguardManager.requestDismissKeyguard(this, null)
-        } else {
-            @Suppress("DEPRECATION")
-            window.addFlags(
-                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                        WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
-                        WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
-            )
         }
         window.addFlags(WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON)
     }

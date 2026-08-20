@@ -2,6 +2,7 @@ package dev.goodwy.rphone.view.screen.settings
 
 import android.app.Activity
 import android.content.Context
+import android.view.Surface
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
@@ -25,11 +26,13 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.goodwy.rphone.BuildConfig
 import dev.goodwy.rphone.R
@@ -178,7 +181,8 @@ fun DonateScreen(navigator: DestinationsNavigator) {
 
     val rotation = (context.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager)
         .defaultDisplay.rotation
-    val isRotation90 = rotation == android.view.Surface.ROTATION_90
+    val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
+    val isRotation90 = rotation == if (isLtr) Surface.ROTATION_90 else Surface.ROTATION_270
 
     Scaffold(
         topBar = {

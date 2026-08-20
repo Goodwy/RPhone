@@ -1,4 +1,4 @@
-package dev.goodwy.rphone.view.components.tiles
+package dev.goodwy.rphone.view.components
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -45,6 +45,7 @@ import dev.goodwy.rphone.view.components.performAppHaptic
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import org.koin.compose.koinInject
 import androidx.core.net.toUri
+import kotlin.math.abs
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -121,8 +122,8 @@ fun SingleTile(
                         do {
                             val event   = awaitPointerEvent()
                             val current = event.changes.firstOrNull() ?: break
-                            val dx = kotlin.math.abs(current.position.x - downPos.x)
-                            val dy = kotlin.math.abs(current.position.y - downPos.y)
+                            val dx = abs(current.position.x - downPos.x)
+                            val dy = abs(current.position.y - downPos.y)
                             if (dx > 28.dp.toPx() && dx > dy * 1.3f) horizontalDragDetected = true
                             if (!current.pressed) break
                         } while (true)

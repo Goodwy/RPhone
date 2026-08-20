@@ -38,10 +38,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.zIndex
@@ -179,7 +181,7 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
                                         contentDescription = null,
                                         modifier = Modifier.size(20.dp),
                                         tint = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
-                                        else MaterialTheme.colorScheme.onSurfaceVariant
+                                                else MaterialTheme.colorScheme.onSurface
                                     )
                                     Spacer(Modifier.width(12.dp))
                                     Text(
@@ -187,7 +189,7 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
                                         style = MaterialTheme.typography.bodyLarge,
                                         modifier = Modifier.weight(1f),
                                         color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
-                                        else MaterialTheme.colorScheme.onSurface
+                                                else MaterialTheme.colorScheme.onSurface
                                     )
                                     RadioButton(
                                         selected = isSelected,
@@ -298,14 +300,16 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
                                         imageVector = option.icon,
                                         contentDescription = null,
                                         modifier = Modifier.size(20.dp),
-                                        tint = if (option.enabled) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSecondaryContainer
+                                        tint = if (option.enabled) MaterialTheme.colorScheme.onPrimaryContainer
+                                                else MaterialTheme.colorScheme.onSurface
                                     )
                                     Spacer(Modifier.width(10.dp))
                                     Text(
                                         option.label,
                                         style = if (option.enabled) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyLarge,
                                         fontWeight = if (option.enabled) FontWeight.Bold else FontWeight.SemiBold,
-                                        color = if (option.enabled) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSecondaryContainer,
+                                        color = if (option.enabled) MaterialTheme.colorScheme.onPrimaryContainer
+                                                else MaterialTheme.colorScheme.onSurface,
                                         modifier = Modifier.weight(1f)
                                     )
                                     Checkbox(
@@ -375,7 +379,8 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
 
     val rotation =
         (context.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager).defaultDisplay.rotation
-    val isRotation90 = rotation == Surface.ROTATION_90
+    val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
+    val isRotation90 = rotation == if (isLtr) Surface.ROTATION_90 else Surface.ROTATION_270
     Scaffold(
         topBar = {
             TopAppBar(
@@ -489,7 +494,7 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
 //                }
 //            }
 
-            item { Spacer(modifier = Modifier.height(20.dp).navigationBarsPadding()) }
+            item { SettingsBottomPadding() }
         }
     }
 }

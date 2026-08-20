@@ -56,6 +56,7 @@ fun SearchBarPill(navigator: DestinationsNavigator, modifier: Modifier = Modifie
     // Settings button press animation
     val settingsSource = remember { MutableInteractionSource() }
     val micSource = remember { MutableInteractionSource() }
+    val hideVoiceSearch = remember { prefs.getBoolean(PreferenceManager.KEY_HIDE_VOICE_SEARCH, false) }
 
     Surface(
         onClick = {
@@ -89,22 +90,25 @@ fun SearchBarPill(navigator: DestinationsNavigator, modifier: Modifier = Modifie
                 modifier = Modifier.weight(1f)
             )
 
-            Icon(
-                imageVector = Icons.Rounded.MicNone,
-                contentDescription = stringResource(R.string.voice_input),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier
-                    .combinedClickable(
-                        onClick = {
-                            if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                                performAppHaptic(context, prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light", prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f))
-                            }
-                            navigator.navigate(SearchScreenDestination(true))
-                        },
-                        interactionSource = micSource,
-                        indication = ripple(bounded = false, radius = 22.dp)
-                    ),
-            )
+            if (!hideVoiceSearch) {
+                Icon(
+                    imageVector = Icons.Rounded.MicNone,
+                    contentDescription = stringResource(R.string.voice_input),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .combinedClickable(
+                            onClick = {
+                                if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
+                                    performAppHaptic(context, prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light", prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f))
+                                }
+                                navigator.navigate(SearchScreenDestination(true))
+                            },
+                            interactionSource = micSource,
+                            indication = ripple(bounded = false, radius = 22.dp)
+                        ),
+                )
+            }
+
             if (!prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SETTINGS, true)) {
                 Spacer(modifier = Modifier.size(0.dp))
                 Icon(
@@ -167,6 +171,7 @@ fun TopBar(
         animationSpec = spring(stiffness = Spring.StiffnessLow, dampingRatio = Spring.DampingRatioMediumBouncy),
         label = "searchScale"
     )
+    val hideVoiceSearch = remember { prefs.getBoolean(PreferenceManager.KEY_HIDE_VOICE_SEARCH, false) }
 
     Surface(
         modifier = Modifier
@@ -213,22 +218,25 @@ fun TopBar(
                         modifier = Modifier.weight(1f)
                     )
 
-                    Icon(
-                        imageVector = Icons.Rounded.MicNone,
-                        contentDescription = stringResource(R.string.voice_input),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier
-                            .combinedClickable(
-                                onClick = {
-                                    if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                                        performAppHaptic(context, prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light", prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f))
-                                    }
-                                    navigator.navigate(SearchScreenDestination(true))
-                                },
-                                interactionSource = micSource,
-                                indication = ripple(bounded = false, radius = 22.dp)
-                            ),
-                    )
+                    if (!hideVoiceSearch) {
+                        Icon(
+                            imageVector = Icons.Rounded.MicNone,
+                            contentDescription = stringResource(R.string.voice_input),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier
+                                .combinedClickable(
+                                    onClick = {
+                                        if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
+                                            performAppHaptic(context, prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light", prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f))
+                                        }
+                                        navigator.navigate(SearchScreenDestination(true))
+                                    },
+                                    interactionSource = micSource,
+                                    indication = ripple(bounded = false, radius = 22.dp)
+                                ),
+                        )
+                    }
+
                     if (!prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SETTINGS, true)) {
                         Spacer(modifier = Modifier.size(0.dp))
                         Icon(

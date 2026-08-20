@@ -17,12 +17,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import dev.goodwy.rphone.cardCornerSmall
+import dev.goodwy.rphone.R
 
 @Composable
 fun SimPickerDialog(
@@ -80,7 +82,7 @@ fun SimPickerDialog(
                             end = 24.dp)
                 ) {
                     Text(
-                        text = "Select SIM Card",
+                        text = stringResource(R.string.sim_picker_title),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(bottom = 20.dp, start = 4.dp)
@@ -150,7 +152,7 @@ fun SimPickerDialog(
                         onClick = onDismissRequest,
                         modifier = Modifier.align(Alignment.End)
                     ) {
-                        Text("Cancel")
+                        Text(stringResource(R.string.cancel))
                     }
                 }
             }

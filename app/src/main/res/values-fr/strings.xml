@@ -37,6 +37,9 @@
     <string name="filter_incoming">Entrants</string>
     <string name="filter_outgoing">Sortants</string>
     <string name="filter_rejected">Rejetés</string>
+    <string name="sim_picker_title">Sélectionner la carte SIM</string>
+    <string name="label_unknown_number">Numéro inconnu</string>
+    <string name="reset">Réinitialiser</string>
 
     <!-- Search -->
     <string name="search">Rechercher</string>
@@ -135,6 +138,10 @@
     <string name="incoming_call_ui_buttons">Boutons</string>
     <string name="incoming_call_ui_slide_to_answer">Glisser pour répondre (iOS)</string>
     <string name="incoming_call_ui_vertical_swipe">Glissement vertical</string>
+    <string name="dialpad_animations">Animations du clavier</string>
+    <string name="dialpad_animations_subtitle">Afficher les animations lors de la saisie des chiffres</string>
+    <string name="hide_voice_search">Masquer la recherche vocale</string>
+    <string name="hide_voice_search_subtitle">Masque le bouton de recherche vocale</string>
 
     <string name="avatars_settings">Paramètres des avatars</string>
     <string name="avatars_settings_subtitle">Personnaliser les couleurs, les cadres et plus</string>
@@ -269,6 +276,8 @@
     <string name="incorrect_password">Mot de passe incorrect</string>
     <string name="incorrect_password_subtitle">Le mot de passe doit comporter au moins 4 caractères</string>
     <string name="password_dont_match">Les mots de passe ne correspondent pas</string>
+    <string name="lock_on_minimize">Verrouiller lors de la réduction</string>
+    <string name="lock_on_minimize_subtitle">Si cette option est désactivée, l\'application ne sera terminée que lorsqu\'elle sera complètement déchargée de la mémoire</string>
 
     <string name="manage_contacts">Gérer les contacts</string>
     <string name="manage_contacts_subtitle">Contacts privés, comptes à afficher et nettoyer votre liste</string>
@@ -328,17 +337,22 @@
     <string name="keypad">Clavier</string>
     <string name="mute">Muet</string>
     <string name="unmute">Rétablir le son</string>
-    <string name="speaker">Haut-parleur</string>
+    <string name="audio_route_speaker">Haut-parleur</string>
+    <string name="audio_route_handset">Combiné</string>
+    <string name="audio_route_headset">Casque</string>
+    <string name="audio_route_bluetooth">Bluetooth</string>
+    <string name="audio_route_bluetooth_short">BT</string>
+    <string name="audio_output_title">Sortie audio</string>
     <string name="add_call">Ajouter un appel</string>
     <string name="resume">Reprendre</string>
     <string name="swap">Basculer</string>
     <string name="more">Plus</string>
     <string name="hold">Mettre en attente</string>
-    <string name="on_hold">En attente</string>
-    <string name="call_ended">Appel terminé</string>
-    <string name="calling">Appel en cours…</string>
-    <string name="incoming_call">Appel entrant</string>
-    <string name="connecting">Connexion…</string>
+    <string name="call_status_on_hold">En attente</string>
+    <string name="call_status_ended">Appel terminé</string>
+    <string name="call_status_calling">Appel en cours…</string>
+    <string name="call_status_incoming">Appel entrant</string>
+    <string name="call_status_connecting">Connexion…</string>
     <string name="slide_to_answer">Glisser pour répondre</string>
     <string name="swipe_up_to_answer">Balayer vers le haut pour répondre</string>
     <string name="swipe_down_to_reject">Balayer vers le bas pour refuser</string>
@@ -355,6 +369,31 @@
     <string name="could_not_delete">Impossible de supprimer</string>
     <string name="clear_all_filtered_logs">Effacer tous les journaux filtrés</string>
     <string name="clear_all_filtered_logs_selected">Ceci supprimera tout l\'historique d\'appels affiché. Cette action est irréversible.</string>
+
+    <string name="action_block">Bloquer</string>
+    <string name="action_unblock">Débloquer</string>
+    <string name="action_block_number">Bloquer un numéro</string>
+    <string name="action_unblock_number">Débloquer un numéro</string>
+    <string name="contact_block">Bloquer le contact</string>
+    <string name="contact_block_supporting">Bloquer les appels entrants et les messages de ce contact</string>
+    <string name="contact_unblock">Débloquer le contact</string>
+    <string name="contact_unblock_supporting">Autoriser à nouveau les appels et messages de ce contact</string>
+    <string name="call_log_block_title">Bloquer les numéros ?</string>
+    <string name="call_log_block_message">Les appels des %1$d entrées sélectionnées seront bloqués.</string>
+
+    <string name="contact_call_background">Arrière-plan d\'appel</string>
+    <string name="contact_call_background_set">Image personnalisée sélectionnée</string>
+    <string name="contact_call_background_none">Utiliser l\'arrière-plan par défaut</string>
+    <string name="contact_call_background_choose">Choisir une image</string>
+    <string name="contact_call_background_change">Changer l\'image</string>
+    <string name="contact_call_background_remove">Supprimer l\'arrière-plan</string>
+    <string name="contact_call_background_saving">Enregistrement de l\'image…</string>
+    <string name="contact_call_background_error">Impossible d\'enregistrer cette image</string>
+    <string name="contact_call_background_no_target">Enregistrez d\'abord le numéro comme contact</string>
+    <string name="contact_call_background_preview">Aperçu de l\'arrière-plan d\'appel</string>
+    <string name="settings_call_default_background">Arrière-plan d\'appel par défaut</string>
+    <string name="settings_call_default_background_set">Une image personnalisée est affichée pour chaque appel</string>
+    <string name="settings_call_default_background_none">Non défini — les appels utilisent le thème de l\'application</string>
 
     <!-- Contacts -->
     <string name="contacts">Contacts</string>
@@ -405,9 +444,11 @@
     <string name="add_event">Ajouter un événement</string>
     <string name="add_address">Ajouter une adresse</string>
     <string name="add_note">Ajouter une note</string>
+    <string name="add_photo">Ajouter une photo</string>
     <string name="contact_ringtone">Sonnerie du contact</string>
     <string name="unsaved_changes">Modifications non enregistrées</string>
     <string name="unsaved_changes_subtitle">Voulez-vous enregistrer vos modifications avant de quitter ?</string>
+    <string name="ringtone_custom">Personnalisé</string>
     <plurals name="contacts_count">
         <item quantity="one">%d contact</item>
         <item quantity="other">%d contacts</item>
@@ -439,6 +480,7 @@
 
     <!-- Call notes -->
     <string name="notes">Notes</string>
+    <string name="notes_contact">Remarques</string>
     <string name="call_notes">Notes d\'appel</string>
     <string name="about_call_notes">À propos des notes d\'appel</string>
     <string name="about_call_notes_subtitle">Notes rapides que vous prenez pendant un appel. Elles sont stockées localement dans les fichiers de l\'application, liées au numéro de téléphone (non synchronisées avec Google Contacts et autres). Chaque numéro a sa propre note privée, accessible uniquement à partir du journal d\'appels dans les détails du contact au sein de l\'application ou depuis l\'onglet \"Notes d\'appel\".</string>
@@ -492,4 +534,16 @@
     <string name="page_subtitle_three">Recherche T9 instantanée, animations fluides et appels ultra-rapides. Une simple application téléphonique qui fonctionne.</string>
     <string name="page_title_warning">En développement</string>
     <string name="page_subtitle_warning">Cette application est encore en développement. Certaines fonctionnalités peuvent ne pas fonctionner comme prévu. Veuillez l\'utiliser avec prudence et signaler tout problème rencontré.</string>
+
+    <!-- Call notifications (CallService) -->
+    <string name="notif_channel_outgoing_calls">Appels sortants</string>
+    <string name="notif_channel_incoming_calls">Appels entrants</string>
+    <string name="notif_channel_fullscreen_incoming_calls">Appels entrants (plein écran)</string>
+    <string name="notif_channel_missed_calls">Appels manqués</string>
+    <string name="notif_blocked_call_title">Appel bloqué</string>
+    <string name="notif_blocked_call_text">Appel bloqué de %1$s</string>
+    <string name="notif_missed_call_title">Appel manqué</string>
+    <string name="notif_missed_call_text">Appel manqué de %1$s à %2$s</string>
+    <string name="notif_via_sim">via %1$s</string>
+    <string name="notif_active_call">Appel actif</string>
 </resources>

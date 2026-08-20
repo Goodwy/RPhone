@@ -1,6 +1,7 @@
 package dev.goodwy.rphone.controller.util
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.role.RoleManager
 import android.content.ClipData
@@ -27,6 +28,7 @@ import android.text.format.DateUtils
 import android.view.Gravity
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresPermission
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -329,6 +331,332 @@ fun getDefaultDialerIntent(context: Context): Intent {
             putExtra(TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME, context.packageName)
         }
     }
+}
+
+data class DeviceImeiInfo(
+    val imei1: String? = null,
+    val imei2: String? = null,
+    val meid: String? = null,
+    val serial: String? = null
+)
+
+@SuppressLint("HardwareIds")
+@RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE")
+fun getDeviceImeiInfo(context: Context): DeviceImeiInfo {
+    val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+    var imei1: String? = null
+    var imei2: String? = null
+    var meid: String? = null
+    var serial: String? = null
+
+    if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                imei1 = try { tm.getImei(0) } catch (e: Exception) { null }
+                imei2 = try { tm.getImei(1) } catch (e: Exception) { null }
+                meid = try { tm.getMeid() } catch (e: Exception) { null }
+            }
+            if (imei1.isNullOrEmpty()) {
+                @Suppress("DEPRECATION")
+                imei1 = try { tm.deviceId } catch (e: Exception) { null }
+            }
+            @Suppress("DEPRECATION")
+            serial = try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                    Build.getSerial()
+                } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                    Build.SERIAL
+                } else null
+            } catch (e: Exception) { null }
+        } catch (e: SecurityException) {
+            e.printStackTrace()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+    return DeviceImeiInfo(imei1 = imei1, imei2 = imei2, meid = meid, serial = serial)
+}
+
+fun processSecretCode(context: Context, fullCode: String): Boolean {
+    val cleanNumber = fullCode.replace(" ", "")
+    var code: String? = null
+
+    if (cleanNumber.startsWith("*#*#") && cleanNumber.endsWith("#*#*") && cleanNumber.length > 8) {
+        code = cleanNumber.substring(4, cleanNumber.length - 4)
+    } else if (cleanNumber.startsWith("##") && cleanNumber.endsWith("#") && cleanNumber.length >= 4) {
+        code = cleanNumber.replace("#", "")
+    } else if (cleanNumber.startsWith("*#") && cleanNumber.endsWith("#") && cleanNumber.length >= 3) {
+        code = cleanNumber.substring(2, cleanNumber.length - 1)
+    }
+
+    if (code.isNullOrEmpty()) return false
+
+    var handled = false
+
+    // 1. Send system special code event via TelephonyManager (Android 8.0+ API for default dialers)
+    try {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+            tm.sendDialerSpecialCode(code)
+            handled = true
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+
+    // 2. Broadcast TelephonyManager.ACTION_SECRET_CODE (android.telephony.action.SECRET_CODE / android.provider.Telephony.SECRET_CODE)
+    try {
+        val actionSecretCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            TelephonyManager.ACTION_SECRET_CODE
+        } else {
+            "android.telephony.action.SECRET_CODE"
+        }
+        val intent1 = Intent(actionSecretCode).apply {
+            data = Uri.parse("android_secret_code://$code")
+        }
+        context.sendBroadcast(intent1)
+        handled = true
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+
+    // 3. Broadcast legacy android.provider.Telephony.SECRET_CODE for older Android receivers
+    try {
+        val intent2 = Intent("android.provider.Telephony.SECRET_CODE").apply {
+            data = Uri.parse("android_secret_code://$code")
+        }
+        context.sendBroadcast(intent2)
+        handled = true
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+
+    // 4. Comprehensive Activity Fallbacks for major OEM secret codes
+    when (code) {
+        "4636" -> { // Testing Menu / RadioInfo
+            val targets = listOf(
+                Intent(Intent.ACTION_MAIN).setClassName("com.android.settings", "com.android.settings.Settings\$TestingSettingsActivity"),
+                Intent(Intent.ACTION_MAIN).setClassName("com.android.settings", "com.android.settings.RadioInfo"),
+                Intent("android.intent.action.MAIN").setClassName("com.android.settings", "com.android.settings.TestingSettings")
+            )
+            for (target in targets) {
+                try {
+                    target.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    context.startActivity(target)
+                    handled = true
+                    break
+                } catch (e: Exception) {}
+            }
+        }
+        "07" -> { // Regulatory Information & SAR levels
+            val targets = listOf(
+                Intent("android.settings.REGULATORY_INFO"),
+                Intent(Intent.ACTION_MAIN).setClassName("com.android.settings", "com.android.settings.Settings\$RegulatoryInfoActivity")
+            )
+            for (target in targets) {
+                try {
+                    target.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    context.startActivity(target)
+                    handled = true
+                    break
+                } catch (e: Exception) {}
+            }
+        }
+        "0", "0*" -> { // Samsung Hardware Module / Factory Test Mode (*#0*#)
+            val targets = listOf(
+                Intent(Intent.ACTION_MAIN).setClassName("com.sec.android.app.hwmoduletest", "com.sec.android.app.hwmoduletest.HwModuleTest"),
+                Intent(Intent.ACTION_MAIN).setClassName("com.sec.factory", "com.sec.factory.main"),
+                Intent(Intent.ACTION_MAIN).setClassName("com.sec.android.app.servicemodeapp", "com.sec.android.app.servicemodeapp.ServiceModeApp")
+            )
+            for (target in targets) {
+                try {
+                    target.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    context.startActivity(target)
+                    handled = true
+                    break
+                } catch (e: Exception) {}
+            }
+        }
+        "0228" -> { // Samsung Battery Status & Calibration (*#0228#)
+            val targets = listOf(
+                Intent(Intent.ACTION_MAIN).setClassName("com.sec.android.app.servicemodeapp", "com.sec.android.app.servicemodeapp.BatteryStatus"),
+                Intent(Intent.ACTION_MAIN).setClassName("com.sec.android.app.servicemodeapp", "com.sec.android.app.servicemodeapp.ServiceModeApp")
+            )
+            for (target in targets) {
+                try {
+                    target.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    context.startActivity(target)
+                    handled = true
+                    break
+                } catch (e: Exception) {}
+            }
+        }
+        "9900" -> { // Samsung SysDump (*#9900#)
+            val targets = listOf(
+                Intent(Intent.ACTION_MAIN).setClassName("com.sec.android.SysDump", "com.sec.android.SysDump.SysDump")
+            )
+            for (target in targets) {
+                try {
+                    target.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    context.startActivity(target)
+                    handled = true
+                    break
+                } catch (e: Exception) {}
+            }
+        }
+        "1234" -> { // Samsung Firmware Version (*#1234#)
+            val targets = listOf(
+                Intent(Intent.ACTION_MAIN).setClassName("com.sec.android.app.servicemodeapp", "com.sec.android.app.servicemodeapp.VersionInfo")
+            )
+            for (target in targets) {
+                try {
+                    target.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    context.startActivity(target)
+                    handled = true
+                    break
+                } catch (e: Exception) {}
+            }
+        }
+        "0808" -> { // Samsung USB Settings (*#0808#)
+            val targets = listOf(
+                Intent(Intent.ACTION_MAIN).setClassName("com.sec.android.app.parser", "com.sec.android.app.parser.UsbSettings"),
+                Intent(Intent.ACTION_MAIN).setClassName("com.sec.android.app.servicemodeapp", "com.sec.android.app.servicemodeapp.UsbSettings")
+            )
+            for (target in targets) {
+                try {
+                    target.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    context.startActivity(target)
+                    handled = true
+                    break
+                } catch (e: Exception) {}
+            }
+        }
+        "800", "808", "888", "899", "6776" -> { // OnePlus / Oppo / Realme Engineer Mode & LogKit (*#800#, *#888#, etc.)
+            val targets = listOf(
+                Intent(Intent.ACTION_MAIN).setClassName("com.oplus.logkit", "com.oplus.logkit.LogKitMainActivity"),
+                Intent(Intent.ACTION_MAIN).setClassName("com.oplus.engineermode", "com.oplus.engineermode.Engineermode"),
+                Intent(Intent.ACTION_MAIN).setClassName("com.oneplus.factorymode", "com.oneplus.factorymode.FactoryModeMain")
+            )
+            for (target in targets) {
+                try {
+                    target.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    context.startActivity(target)
+                    handled = true
+                    break
+                } catch (e: Exception) {}
+            }
+        }
+        "2846579", "0000" -> { // Huawei / Honor Project Menu (*#*#2846579#*#*)
+            val targets = listOf(
+                Intent(Intent.ACTION_MAIN).setClassName("com.huawei.projectmenu", "com.huawei.projectmenu.ProjectMenu"),
+                Intent(Intent.ACTION_MAIN).setClassName("com.huawei.settings.projectmenu", "com.huawei.settings.projectmenu.ProjectMenu")
+            )
+            for (target in targets) {
+                try {
+                    target.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    context.startActivity(target)
+                    handled = true
+                    break
+                } catch (e: Exception) {}
+            }
+        }
+        "2486" -> { // Motorola CQATest (*#*#2486#*#*)
+            val targets = listOf(
+                Intent(Intent.ACTION_MAIN).setClassName("com.motorola.cqatest", "com.motorola.cqatest.CQATest")
+            )
+            for (target in targets) {
+                try {
+                    target.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    context.startActivity(target)
+                    handled = true
+                    break
+                } catch (e: Exception) {}
+            }
+        }
+        "7378423" -> { // Sony Service Menu (*#*#7378423#*#*)
+            val targets = listOf(
+                Intent(Intent.ACTION_MAIN).setClassName("com.sonyericsson.android.servicemenu", "com.sonyericsson.android.servicemenu.ServiceMenu")
+            )
+            for (target in targets) {
+                try {
+                    target.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    context.startActivity(target)
+                    handled = true
+                    break
+                } catch (e: Exception) {}
+            }
+        }
+        "3646633" -> { // MediaTek Engineer Mode (*#*#3646633#*#*)
+            val targets = listOf(
+                Intent(Intent.ACTION_MAIN).setClassName("com.mediatek.engineermode", "com.mediatek.engineermode.EngineerMode")
+            )
+            for (target in targets) {
+                try {
+                    target.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    context.startActivity(target)
+                    handled = true
+                    break
+                } catch (e: Exception) {}
+            }
+        }
+        "6484", "64663" -> { // Xiaomi CIT Hardware Diagnostic Test Menu (*#*#6484#*#*)
+            val targets = listOf(
+                Intent(Intent.ACTION_MAIN).setClassName("com.miui.cit", "com.miui.cit.CitLauncherActivity"),
+                Intent(Intent.ACTION_MAIN).setClassName("com.miui.cit", "com.miui.cit.CitTestActivity")
+            )
+            for (target in targets) {
+                try {
+                    target.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    context.startActivity(target)
+                    handled = true
+                    break
+                } catch (e: Exception) {}
+            }
+        }
+        "225" -> { // Calendar Storage Info
+            val targets = listOf(
+                Intent(Intent.ACTION_MAIN).setClassName("com.android.providers.calendar", "com.android.providers.calendar.CalendarDebugActivity")
+            )
+            for (target in targets) {
+                try {
+                    target.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    context.startActivity(target)
+                    handled = true
+                    break
+                } catch (e: Exception) {}
+            }
+        }
+        "426" -> { // FCM Diagnostics
+            val targets = listOf(
+                Intent(Intent.ACTION_MAIN).setClassName("com.google.android.gms", "com.google.android.gms.gcm.GcmDiagnostics"),
+                Intent(Intent.ACTION_MAIN).setClassName("com.google.android.gms", "com.google.android.gms.cloudmessaging.CloudMessagingDiagnostics")
+            )
+            for (target in targets) {
+                try {
+                    target.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    context.startActivity(target)
+                    handled = true
+                    break
+                } catch (e: Exception) {}
+            }
+        }
+        "759" -> { // RLZ Debug UI
+            val targets = listOf(
+                Intent(Intent.ACTION_MAIN).setClassName("com.google.android.apps.rlz", "com.google.android.apps.rlz.DebugActivity"),
+                Intent(Intent.ACTION_MAIN).setClassName("com.google.android.partnersetup", "com.google.android.partnersetup.RlzDebugActivity")
+            )
+            for (target in targets) {
+                try {
+                    target.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    context.startActivity(target)
+                    handled = true
+                    break
+                } catch (e: Exception) {}
+            }
+        }
+    }
+
+    return handled
 }
 
 // Goodwy
@@ -646,3 +974,5 @@ fun HtmlTextView(
         }
     )
 }
+
+fun String.forceLtr(): String = "\u200E$this"

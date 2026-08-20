@@ -1,6 +1,7 @@
 package dev.goodwy.rphone.controller.util
 
 import android.content.Context
+
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.SharedPreferencesMigration
 import androidx.datastore.preferences.core.*
@@ -85,16 +86,16 @@ class PreferenceManager(context: Context) {
     fun getDefaultSimIndexDefault(): Int = if (getActiveSimCount() == 1) 1 else 0
 
     // Synchronous-style API for backward compatibility
-    fun getBoolean(key: String, defaultValue: Boolean): Boolean = 
+    fun getBoolean(key: String, defaultValue: Boolean): Boolean =
         _prefsCache.value[booleanPreferencesKey(key)] ?: defaultValue
-    
+
     fun setBoolean(key: String, value: Boolean) {
         scope.launch { dataStore.edit { it[booleanPreferencesKey(key)] = value } }
     }
 
-    fun getString(key: String, defaultValue: String?): String? = 
+    fun getString(key: String, defaultValue: String?): String? =
         _prefsCache.value[stringPreferencesKey(key)] ?: defaultValue
-    
+
     fun setString(key: String, value: String?) {
         scope.launch {
             dataStore.edit {
@@ -104,16 +105,16 @@ class PreferenceManager(context: Context) {
         }
     }
 
-    fun getInt(key: String, defaultValue: Int): Int = 
+    fun getInt(key: String, defaultValue: Int): Int =
         _prefsCache.value[intPreferencesKey(key)] ?: defaultValue
-    
+
     fun setInt(key: String, value: Int) {
         scope.launch { dataStore.edit { it[intPreferencesKey(key)] = value } }
     }
 
-    fun getFloat(key: String, defaultValue: Float): Float = 
+    fun getFloat(key: String, defaultValue: Float): Float =
         _prefsCache.value[floatPreferencesKey(key)] ?: defaultValue
-    
+
     fun setFloat(key: String, value: Float) {
         scope.launch { dataStore.edit { it[floatPreferencesKey(key)] = value } }
     }
@@ -176,6 +177,93 @@ class PreferenceManager(context: Context) {
         setString(KEY_FAVORITES_ORDER, order.joinToString(","))
     }
 
+    fun contactBackgroundIdKey(contactId: String): String {
+        return CONTACT_BACKGROUND_PREFIX + contactId
+    }
+
+    fun contactBackgroundNumberKey(numberKey: String): String {
+        return CONTACT_BACKGROUND_NUMBER_PREFIX + numberKey
+    }
+
+    fun setContactBackground(contactId: String, uri: String?) {
+        setString(contactBackgroundIdKey(contactId), uri)
+    }
+
+    fun getContactBackground(contactId: String): String? {
+        return getString(contactBackgroundIdKey(contactId), null)
+    }
+
+    fun setContactBackgroundForNumber(numberKey: String, value: String?) {
+        setString(contactBackgroundNumberKey(numberKey), value)
+    }
+
+    fun getContactBackgroundForNumber(numberKey: String): String? {
+        return try {
+            getString(contactBackgroundNumberKey(numberKey), null)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    fun getContactBackgroundEntries(): Map<String, String> {
+        return try {
+            _prefsCache.value.asMap()
+                .filterKeys { it.name.startsWith(CONTACT_BACKGROUND_PREFIX) }
+                .mapNotNull { (key, value) ->
+                    val stringValue = value as? String
+                    if (stringValue.isNullOrBlank()) null else key.name to stringValue
+                }
+                .toMap()
+        } catch (e: Exception) {
+            emptyMap()
+        }
+    }
+
+    fun getContactBackgroundNumberEntries(): Map<String, String> {
+        return try {
+            _prefsCache.value.asMap()
+                .filterKeys { it.name.startsWith(CONTACT_BACKGROUND_NUMBER_PREFIX) }
+                .mapNotNull { (key, value) ->
+                    val stringValue = value as? String
+                    if (stringValue.isNullOrBlank()) null else {
+                        val numberKey = key.name.removePrefix(CONTACT_BACKGROUND_NUMBER_PREFIX)
+                        numberKey to stringValue
+                    }
+                }
+                .toMap()
+        } catch (e: Exception) {
+            emptyMap()
+        }
+    }
+
+    fun updateContactBackgroundEntries(updates: Map<String, String?>) {
+        if (updates.isEmpty()) return
+        scope.launch {
+            dataStore.edit { prefs ->
+                updates.forEach { (key, value) ->
+                    if (key.startsWith(CONTACT_BACKGROUND_PREFIX)) {
+                        val dataStoreKey = stringPreferencesKey(key)
+                        if (value == null) prefs.remove(dataStoreKey)
+                        else prefs[dataStoreKey] = value
+                    }
+                }
+            }
+        }
+    }
+
+    suspend fun updateContactBackgroundEntriesSuspend(updates: Map<String, String?>) {
+        if (updates.isEmpty()) return
+        dataStore.edit { prefs ->
+            updates.forEach { (key, value) ->
+                if (key.startsWith(CONTACT_BACKGROUND_PREFIX)) {
+                    val dataStoreKey = stringPreferencesKey(key)
+                    if (value == null) prefs.remove(dataStoreKey)
+                    else prefs[dataStoreKey] = value
+                }
+            }
+        }
+    }
+
     fun getVisibleAccounts(): Set<String>? {
         val str = getString(KEY_VISIBLE_ACCOUNTS, null) ?: return null
         return str.split(",").filter { it.isNotEmpty() }.toSet()
@@ -186,6 +274,9 @@ class PreferenceManager(context: Context) {
     }
 
     companion object {
+        const val CONTACT_BACKGROUND_PREFIX = "contact_background_"
+        const val CONTACT_BACKGROUND_NUMBER_PREFIX = "contact_background_num_"
+
         const val KEY_DEFAULT_SIM           = "default_sim"
         const val KEY_DYNAMIC_COLORS        = "dynamic_colors"
         const val KEY_AMOLED_MODE           = "amoled_mode"
@@ -249,7 +340,20 @@ class PreferenceManager(context: Context) {
         const val KEY_CONTACT_SORT_ORDER = "contact_sort_order"
         const val KEY_CONTACT_DISPLAY_ORDER = "contact_display_order"
         const val KEY_PATREON_PROMPT_SHOWN = "patreon_prompt_shown"
+        const val KEY_CALL_RECORDING = "call_recording"
+        const val KEY_CALL_RECORDING_AUTO = "call_recording_auto"
+        const val KEY_BOTTOM_NAV_ORDER = "bottom_nav_order"
+        const val KEY_BOTTOM_NAV_HIDDEN = "bottom_nav_hidden"
+        const val KEY_MERGE_FAVORITES_RECENTS = "merge_favorites_recents"
+        const val KEY_RECENTS_FAVORITES_COLLAPSED = "recents_favorites_collapsed"
 
+        const val TAB_RECENTS = 0
+        const val TAB_FAVORITES = 1
+        const val TAB_CONTACTS = 2
+
+        val DEFAULT_BOTTOM_NAV_ORDER = listOf(TAB_RECENTS, TAB_CONTACTS, TAB_FAVORITES)
+
+        // Ever
         const val KEY_BLOCK_UNKNOWN         = "block_unknown_callers"
         const val KEY_BLOCK_HIDDEN          = "block_hidden_callers"
         const val KEY_OPEN_DIALPAD_DEFAULT  = "open_dialpad_default"
@@ -263,6 +367,7 @@ class PreferenceManager(context: Context) {
         const val KEY_BLOCKED_CONTACTS      = "blocked_contacts"
         const val KEY_SHOW_INCOMING_CALL_UI = "show_incoming_call_ui"
         const val KEY_SHOW_CALLER_UI        = "show_caller_ui"
+//        const val KEY_SILENCE_UNKNOWN       = "silence_unknown_callers"
         const val KEY_PROXIMITY_BG          = "proximity_sensor_bg"
         const val KEY_SCROLL_HAPTICS        = "scroll_haptics_enabled"
         const val KEY_SCROLL_CM_PER_HAPTIC  = "scroll_cm_per_haptic"   // cm scrolled before each haptic tick
@@ -276,7 +381,9 @@ class PreferenceManager(context: Context) {
         const val KEY_AUTO_UPDATE_CHECK     = "auto_update_check"
         const val KEY_PILL_NAV              = "pill_style_nav"
         const val KEY_FIRST_LAUNCH_DONE     = "first_launch_done"
+        // Hangup button width fraction (0.4f .. 1.0f)
         const val KEY_HANGUP_WIDTH          = "hangup_button_width"
+        // Dialer role popup shown after welcome
         const val KEY_DIALER_POPUP_SHOWN    = "dialer_popup_shown"
         const val KEY_TELEGRAM_SHOWN        = "telegram_shown"
         const val KEY_SCROLL_ANIMATION      = "scroll_animation_enabled"
@@ -290,6 +397,7 @@ class PreferenceManager(context: Context) {
         const val KEY_LG_CONTACTS_FAB          = "lg_contacts_fab"
         const val KEY_LG_RECENTS_FAB           = "lg_recents_fab"
         const val KEY_BLUR_EFFECTS            = "blur_effects_ui"
+        // Material Blur effect elements
         const val KEY_BLUR_BOTTOM_NAV          = "blur_bottom_nav"
         const val KEY_BLUR_DROPDOWN_MENU       = "blur_dropdown_menu"
         const val KEY_BLUR_DIALPAD_CALL_BUTTON = "blur_dialpad_call_button"
@@ -297,6 +405,7 @@ class PreferenceManager(context: Context) {
         const val KEY_BLUR_RECENTS_FAB         = "blur_recents_fab"
         const val KEY_AUTO_SPEAKER             = "auto_speaker"
         const val KEY_FLOATING_CALL            = "floating_ongoing_call"
+        // Tab Sections visibility
         const val KEY_TAB_SHOW_FAVORITES       = "tab_show_favorites"
         const val KEY_TAB_SHOW_CALLS           = "tab_show_calls"
         const val KEY_TAB_SHOW_CONTACTS        = "tab_show_contacts"
@@ -304,21 +413,31 @@ class PreferenceManager(context: Context) {
         const val KEY_TAB_SHOW_NOTES           = "tab_show_notes"
         const val KEY_TAB_SHOW_SETTINGS        = "tab_show_settings"
         const val KEY_TAB_SHOW_SEARCH          = "tab_show_search"
+        // Comma-separated list of tab keys (favorites, calls, contacts, notes)
+        // describing the order tabs appear in the bottom navigation bar.
         const val KEY_TAB_ORDER                = "tab_order"
         const val DEFAULT_TAB_ORDER            = "favorites,contacts,calls,dialpad,notes,search,settings"
-        const val KEY_BIOMETRICS_TYPE          = "biometrics_type"
+        // Biometrics
+        const val KEY_BIOMETRICS_TYPE          = "biometrics_type"         // "system" | "pin" | "password" | ""
         const val KEY_BIOMETRICS_PIN           = "biometrics_pin"
         const val KEY_BIOMETRICS_PASSWORD      = "biometrics_password"
         const val KEY_BIOMETRICS_APP_LOCK      = "biometrics_app_lock"
+        const val KEY_BIOMETRICS_APP_LOCK_ON_MINIMIZE      = "biometrics_app_lock_on_minimize"
         const val KEY_BIOMETRICS_CALL_LOCK     = "biometrics_call_lock"
-        const val KEY_BIOMETRICS_CALL_LOCK_MODE    = "biometrics_call_lock_mode"
-        const val KEY_BIOMETRICS_CALL_LOCK_NUMBERS = "biometrics_call_lock_numbers"
+        const val KEY_BIOMETRICS_CALL_LOCK_MODE    = "biometrics_call_lock_mode"    // "all" | "specified" | "skip_specified"
+        const val KEY_BIOMETRICS_CALL_LOCK_NUMBERS = "biometrics_call_lock_numbers" // comma-separated phone numbers
+        // Search filter (Dialpad / Calls / Contacts / Favourites search bars) — the "Filter"
+        // button beside the search bar. All four default to true (checked) so search behaves
+        // as broadly as possible until the user deliberately narrows it down. Persisted here
+        // (rather than in-memory) so the chosen filter survives the app being closed and
+        // reopened.
         const val KEY_SEARCH_FILTER_CONTACTS        = "search_filter_contacts"
         const val KEY_SEARCH_FILTER_NON_CONTACTS    = "search_filter_non_contacts"
         const val KEY_SEARCH_FILTER_RECORDINGS      = "search_filter_recordings"
         const val KEY_SEARCH_FILTER_CONTACT_NOTES   = "search_filter_contact_notes"
         const val KEY_SEARCH_FILTER_RECORDING_NOTES = "search_filter_recording_notes"
 
+        // Goodwy
         const val KEY_DEFAULT_TAB              = "default_tab"
         const val KEY_CONTACTS_DEFAULT_ACCOUNT = "contacts_default_accounts"
         const val KEY_LAST_OPENED_TAB          = "last_opened_tab"
@@ -329,5 +448,7 @@ class PreferenceManager(context: Context) {
         const val KEY_AVATAR_FRAME             = "avatar_frame"
         const val KEY_HIGH_SCORE               = "horse_game_high_score"
         const val KEY_ALWAYS_FULLSCREEN_CALLS  = "always_fullscreen_calls"
+        const val KEY_DIALPAD_ANIMATION        = "dialpad_animation_enabled"
+        const val KEY_HIDE_VOICE_SEARCH        = "hide_voice_search"
     }
 }

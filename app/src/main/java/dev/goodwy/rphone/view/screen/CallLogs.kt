@@ -54,6 +54,8 @@ import dev.goodwy.rphone.view.theme.color_call_button
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import dev.goodwy.rphone.controller.util.BlockedNumbersManager
+import dev.goodwy.rphone.controller.util.forceLtr
 import dev.goodwy.rphone.controller.util.hasDualSim
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinActivityViewModel
@@ -140,8 +142,7 @@ fun CallLogFullScreen(
     }
 
     val contactName = remember(filteredLogsByContact) {
-        filteredLogsByContact.firstOrNull { it.name != null && it.name != it.number }?.name ?: phoneNumber
-        filteredLogsByContact.firstOrNull { it.name != null && it.name != it.number }?.name ?: (if (phoneNumber != null) formatPhoneNumber(phoneNumber) else null)
+        filteredLogsByContact.firstOrNull { it.name != null && it.name != it.number }?.name ?: (phoneNumber?.forceLtr())
     }
 
     if (showSimPicker && pendingNumber != null) {
@@ -168,7 +169,7 @@ fun CallLogFullScreen(
                         TopAppBar(
                             title = {
                                 val name =
-                                    if ((contactId == null || contactId == "null") && numbersList != null) numbersList.joinToString()
+                                    if ((contactId == null || contactId == "null") && numbersList != null) numbersList.joinToString().forceLtr()
                                     else contactName
                                 Text(
                                     text = if (name != null) stringResource(R.string.history_with, name)
@@ -223,6 +224,12 @@ fun CallLogFullScreen(
                         onClearAll = {
                             val filteredIdsToDelete = finalLogs.flatMap { it.ids }
                             viewModel.deleteCallLogsByIds(filteredIdsToDelete)
+                            selectedEntries = emptySet()
+                        },
+                        onBlock = {
+                            selectedEntries.forEach { entry ->
+                                BlockedNumbersManager.block(context, entry.number)
+                            }
                             selectedEntries = emptySet()
                         },
                         onDeselect = {

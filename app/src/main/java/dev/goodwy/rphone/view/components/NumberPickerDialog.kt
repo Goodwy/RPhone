@@ -10,10 +10,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import dev.goodwy.rphone.R
 import dev.goodwy.rphone.cardCornerBig
 import dev.goodwy.rphone.cardCornerMedium
 import dev.goodwy.rphone.cardCornerSmall
@@ -42,7 +44,7 @@ fun NumberPickerDialog(
                     .padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 8.dp)
             ) {
                 Text(
-                    text = "Select Number",
+                    text = stringResource(R.string.select),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 24.dp)
@@ -115,7 +117,7 @@ fun NumberPickerDialog(
                     onClick = onDismissRequest,
                     modifier = Modifier.align(Alignment.End)
                 ) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         }

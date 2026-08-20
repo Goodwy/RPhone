@@ -37,9 +37,11 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.cardCornerSmall
@@ -289,7 +291,8 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
 
     val rotation =
         (context.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager).defaultDisplay.rotation
-    val isRotation90 = rotation == Surface.ROTATION_90
+    val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
+    val isRotation90 = rotation == if (isLtr) Surface.ROTATION_90 else Surface.ROTATION_270
     Scaffold(
         topBar = {
             TopAppBar(
@@ -534,7 +537,7 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
                 }
             }
 
-            item { Spacer(modifier = Modifier.height(80.dp).navigationBarsPadding()) }
+            item { SettingsBottomPadding() }
         }
     }
 }

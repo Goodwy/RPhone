@@ -4,6 +4,7 @@ import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
+import android.net.Uri
 import android.provider.ContactsContract
 import android.provider.ContactsContract.CommonDataKinds.Email
 import android.provider.ContactsContract.CommonDataKinds.Event
@@ -25,10 +26,14 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -36,12 +41,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.OpenInNew
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.CrueltyFree
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material.icons.rounded.PostAdd
 import androidx.compose.material.icons.rounded.RemoveCircleOutline
 import androidx.compose.material.icons.rounded.SwitchAccount
+import androidx.compose.material.icons.rounded.Wallpaper
 import androidx.compose.material.icons.rounded.Work
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -50,15 +58,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.ContactsViewModel
 import dev.goodwy.rphone.controller.util.ContactUtils
@@ -82,6 +96,7 @@ import dev.goodwy.rphone.view.theme.customColors
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import dev.goodwy.rphone.controller.util.CallBackgroundStore
 import dev.goodwy.rphone.device_only
 import dev.goodwy.rphone.private_only
 import dev.goodwy.rphone.view.components.RillDialog
@@ -149,8 +164,16 @@ fun ContactEditScreen(
     var nickname by remember(existingContact) { mutableStateOf(existingContact?.nickname ?: "") }
     var company by remember(existingContact) { mutableStateOf(existingContact?.company ?: "") }
     var jobTitle by remember(existingContact) { mutableStateOf(existingContact?.jobTitle ?: "") }
+    var notes by remember(existingContact) { mutableStateOf(existingContact?.notes) }
     var photoUri by remember(existingContact) { mutableStateOf<String?>(existingContact?.photoUri) }
     var isFavorite by remember(existingContact) { mutableStateOf<Boolean>(existingContact?.isFavorite ?: false) }
+
+    var callBackground by remember { mutableStateOf<String?>(null) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    var selectedBackgroundUri by remember { mutableStateOf<Uri?>(null) }
+    var tempCallBackground by remember { mutableStateOf<String?>(null) }
+    var tempPhotoUri by remember { mutableStateOf<String?>(null) }
+    var tempBackgroundDeleted by remember { mutableStateOf(false) }
 
     var isPrivate by remember(existingContact) { mutableStateOf(existingContact?.isPrivate ?: false) }
     var selectedAccount by remember(existingContact, availableAccounts) {
@@ -240,8 +263,51 @@ fun ContactEditScreen(
 
     val scope = rememberCoroutineScope()
 
+    val knownNumbers = remember(existingContact, initialPhone) {
+        ((existingContact?.phoneNumbers ?: emptyList()) + listOfNotNull(initialPhone)).distinct()
+    }
+    val backgroundContactId = existingContact?.id?.takeIf { it.isNotBlank() }
+    val backgroundNumbers = knownNumbers
+    val backgroundKeys = remember(backgroundNumbers) {
+        CallBackgroundStore.numberKeys(backgroundNumbers)
+    }
+    val backgroundAvailable = backgroundContactId != null || backgroundKeys.isNotEmpty()
+    val backgroundErrorMessage = stringResource(R.string.contact_call_background_error)
+    val backgroundNoTargetMessage = stringResource(R.string.contact_call_background_no_target)
+
+    LaunchedEffect(backgroundContactId, backgroundNumbers) {
+        callBackground = CallBackgroundStore.peek(context, backgroundContactId, backgroundNumbers)
+    }
+
+    val backgroundPickerLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            runCatching {
+                context.contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            }
+            selectedBackgroundUri = uri
+            tempCallBackground = uri.toString()
+            tempBackgroundDeleted = false
+        }
+    }
+
+    val onBackgroundClick: () -> Unit = {
+        when {
+            !backgroundAvailable -> {
+                scope.launch { snackbarHostState.showSnackbar(backgroundNoTargetMessage) }
+            }
+            else -> {
+                backgroundPickerLauncher.launch(arrayOf("image/*"))
+            }
+        }
+    }
+
     val currentContactForPreview = remember(
-        namePrefix, givenName, middleName, familyName, nameSuffix, nickname, company, jobTitle
+        namePrefix, givenName, middleName, familyName, nameSuffix, nickname, company, jobTitle, notes
     ) {
         Contact(
             id = "",
@@ -253,13 +319,18 @@ fun ContactEditScreen(
             nickname = nickname,
             company = company,
             jobTitle = jobTitle,
+            notes = notes,
             phoneNumbers = phoneNumbers.filter { it.isNotBlank() }
         )
     }
 
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri -> if (uri != null) photoUri = uri.toString() }
+        onResult = { uri ->
+            if (uri != null) {
+                tempPhotoUri = uri.toString()
+            }
+        }
     )
     var showDeleteConfirm by remember { mutableStateOf(false) }
 
@@ -280,6 +351,7 @@ fun ContactEditScreen(
             emails = emails.filter { it.value.isNotBlank() },
             addresses = addresses.filter { it.formattedAddress.isNotBlank() },
             events = events.filter { it.date.isNotBlank() },
+            notes = notes,
             photoUri = photoUri,
             isFavorite = isFavorite,
 //            customRingtone=null,
@@ -305,14 +377,18 @@ fun ContactEditScreen(
             emails = emptyList(),
             addresses = emptyList(),
             events = emptyList(),
+            notes = null,
             photoUri = null,
             isFavorite = false,
             isPrivate = false
         )
 
-//        context.copyToClipboard(currentContact.toString() +"\n" + originalContact.toString())
+        // Checking the background changes
+        val hasBackgroundChange = selectedBackgroundUri != null ||
+                tempCallBackground != null ||
+                tempBackgroundDeleted
 
-        return currentContact != originalContact
+        return currentContact != originalContact || hasBackgroundChange
     }
 
     // Status for the exit confirmation dialog
@@ -322,6 +398,21 @@ fun ContactEditScreen(
     }
 
     fun exitWithoutSaving() {
+        // Reset temporary changes
+        tempPhotoUri = null
+        selectedBackgroundUri = null
+        tempCallBackground = null
+        tempBackgroundDeleted = false
+
+        // If the photo was temporarily modified, we'll restore the original
+        if (existingContact?.photoUri != null) {
+            photoUri = existingContact.photoUri
+        }
+
+        // Restore original background if it was deleted temporarily
+        if (existingContact != null) {
+            callBackground = CallBackgroundStore.peek(context, backgroundContactId, backgroundNumbers)
+        }
         navigator.navigateUp()
     }
 
@@ -341,6 +432,7 @@ fun ContactEditScreen(
             emails = emails.filter { it.value.isNotBlank() },
             addresses = addresses.filter { it.formattedAddress.isNotBlank() },
             events = events.filter { it.date.isNotBlank() },
+            notes = notes,
             photoUri = photoUri,
             isFavorite = isFavorite,
 //            customRingtone=null,
@@ -349,32 +441,50 @@ fun ContactEditScreen(
             isPrivate = isPrivate,
         )
         scope.launch {
-            // If a contact becomes private and previously had a public ID
-//            if (isPrivate && contactId != null && contactId != "0" && !contactId.startsWith("p")) {
-//                // First, save it as private
-//                contactsVM.saveContact(contactToSave)
-//                // Next, we delete the public version
-//                contactsVM.deleteContact(contactId)
-//            } else {
-//                contactsVM.saveContact(contactToSave)
-//            }
-//            navigator.navigateUp()
-
             if (isEditingSource && rawContactId != null) {
                 // Update only the specific RawContact
                 contactsVM.updateRawContact(rawContactId, contactToSave)
-                navigator.navigateUp()
             } else if (isPrivate && contactId != null && contactId != "0" && !contactId.startsWith("p")) {
                 // If a contact becomes private and previously had a public ID
                 // First, save it as private
                 contactsVM.saveContact(contactToSave)
                 // Next, we delete the public version
                 contactsVM.deleteContact(contactId)
-                navigator.navigateUp()
             } else {
                 contactsVM.saveContact(contactToSave)
-                navigator.navigateUp()
             }
+
+            // Editing the Background
+            if (selectedBackgroundUri != null) {
+                // If a new background has been selected, save it
+                val saved = CallBackgroundStore.save(
+                    context,
+                    backgroundContactId,
+                    backgroundNumbers,
+                    selectedBackgroundUri!!
+                )
+                if (saved) {
+                    callBackground = CallBackgroundStore.peek(context, backgroundContactId, backgroundNumbers)
+                    selectedBackgroundUri = null
+                    tempCallBackground = null
+                    tempBackgroundDeleted = false
+                } else {
+                    snackbarHostState.showSnackbar(backgroundErrorMessage)
+                }
+            } else if (tempBackgroundDeleted) {
+                // If the background was removed (and not replaced with a new one)
+                CallBackgroundStore.clear(context, backgroundContactId, backgroundNumbers)
+                callBackground = null
+                tempBackgroundDeleted = false
+            }
+
+            // Clear all temporary data
+            tempPhotoUri = null
+            selectedBackgroundUri = null
+            tempCallBackground = null
+            tempBackgroundDeleted = false
+
+            navigator.navigateUp()
         }
     }
 
@@ -546,8 +656,10 @@ fun ContactEditScreen(
 
     val rotation =
         (context.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager).defaultDisplay.rotation
-    val isRotation90 = rotation == Surface.ROTATION_90
+    val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
+    val isRotation90 = rotation == if (isLtr) Surface.ROTATION_90 else Surface.ROTATION_270
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 windowInsets = WindowInsets.systemBars.only(
@@ -660,6 +772,7 @@ fun ContactEditScreen(
                                 onDismissRequest = { showSelectionMenuOuter = false }
                             ) {
                                 DropdownMenuItem(
+                                    contentPadding = PaddingValues(start = 20.dp, end = 24.dp),
                                     text = { Text(stringResource(R.string.open)) },
                                     leadingIcon = { Icon(Icons.AutoMirrored.Rounded.OpenInNew, stringResource(R.string.open)) },
                                     onClick = {
@@ -671,6 +784,7 @@ fun ContactEditScreen(
                                     }
                                 )
                                 DropdownMenuItem(
+                                    contentPadding = PaddingValues(start = 20.dp, end = 24.dp),
                                     text = { Text(stringResource(R.string.delete)) },
                                     leadingIcon = {
                                         Icon(
@@ -719,48 +833,162 @@ fun ContactEditScreen(
                         .fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        RillAvatar(
-                            name = getDisplayName(currentContactForPreview),
-                            photoUri = photoUri,
-                            modifier = Modifier.size(180.dp),
-                            shape = CircleShape
-                        )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(start = 24.dp, top = 16.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.surfaceContainerLowest,
+                                shape = RoundedCornerShape(24.dp)
+                            )
+                            .padding(vertical = 24.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(contentAlignment = Alignment.BottomEnd) {
+                            RillAvatar(
+                                name = getDisplayName(currentContactForPreview),
+                                photoUri = photoUri,
+                                modifier = Modifier.size(120.dp),
+                                shape = CircleShape
+                            )
 
-                        if (photoUri != null) {
+                            if (photoUri != null) {
+                                SmallFloatingActionButton(
+                                    onClick = { photoUri = null },
+                                    containerColor = MaterialTheme.colorScheme.customColors.colorRed,
+                                    contentColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+                                    shape = CircleShape,
+                                    elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .align(Alignment.BottomStart)
+                                        .offset(x = (-8).dp, y = 0.dp)
+                                        .border(
+                                            border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
+                                            shape = CircleShape
+                                        )
+                                ) {
+                                    Icon(
+                                        ImageVector.vectorResource(id = R.drawable.ic_delete),
+                                        null,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+
                             SmallFloatingActionButton(
-                                onClick = { photoUri = null },
-                                containerColor = MaterialTheme.colorScheme.customColors.colorRed,
-                                contentColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+                                onClick = {
+                                    photoPickerLauncher.launch(
+                                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                    )
+                                },
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                                 shape = CircleShape,
+                                elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
                                 modifier = Modifier
                                     .size(40.dp)
-                                    .align(Alignment.BottomStart)
-                                    .offset(x = (-16).dp, y = (-16).dp)
+                                    .align(Alignment.BottomEnd)
+                                    .offset(x = 8.dp, y = 0.dp)
+                                    .border(
+                                        border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
+                                        shape = CircleShape
+                                    )
                             ) {
                                 Icon(
-                                    ImageVector.vectorResource(id = R.drawable.ic_delete),
-                                    null,
+                                    if (photoUri != null) Icons.Outlined.Edit else Icons.Rounded.Add,
+                                    if (photoUri != null) stringResource(R.string.edit) else stringResource(R.string.add_photo),
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
                         }
-
-                        SmallFloatingActionButton(
-                            onClick = {
-                                photoPickerLauncher.launch(
-                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        Spacer(Modifier.width(32.dp))
+                        Box(contentAlignment = Alignment.BottomEnd) {
+                            val displayBackground = tempCallBackground ?: callBackground
+                            if (displayBackground != null) {
+                                AsyncImage(
+                                    model = displayBackground,
+                                    contentDescription = stringResource(R.string.contact_call_background_preview),
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .size(width = 82.dp, height = 160.dp)
+                                        .clip(MaterialTheme.shapes.medium)
                                 )
-                            },
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            shape = CircleShape,
-                            modifier = Modifier
-                                .size(40.dp)
-                                .align(Alignment.BottomEnd)
-                                .offset(x = 16.dp, y = (-16).dp)
-                        ) {
-                            Icon(Icons.Default.AddAPhoto, null, modifier = Modifier.size(20.dp))
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .size(width = 82.dp, height = 160.dp)
+                                        .clip(MaterialTheme.shapes.medium)
+                                        .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Wallpaper,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(40.dp)
+                                    )
+                                }
+                            }
+
+                            if (displayBackground != null) {
+                                SmallFloatingActionButton(
+                                    onClick = {
+                                        // If this is a temporary background (not yet saved)
+                                        if (tempCallBackground != null) {
+                                            tempCallBackground = null
+                                            selectedBackgroundUri = null
+                                            tempBackgroundDeleted = true
+                                        } else if (callBackground != null) {
+                                            // If this is a saved background, mark it for deletion when saving
+                                            tempBackgroundDeleted = true
+                                            callBackground = null
+                                        }
+                                    },
+                                    containerColor = MaterialTheme.colorScheme.customColors.colorRed,
+                                    contentColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+                                    shape = CircleShape,
+                                    elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .align(Alignment.BottomStart)
+                                        .offset(x = (-16).dp, y = 12.dp)
+                                        .border(
+                                            border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
+                                            shape = CircleShape
+                                        )
+                                ) {
+                                    Icon(
+                                        ImageVector.vectorResource(id = R.drawable.ic_delete),
+                                        stringResource(R.string.contact_call_background_remove),
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+
+                            SmallFloatingActionButton(
+                                onClick = onBackgroundClick,
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                shape = CircleShape,
+                                elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .align(Alignment.BottomEnd)
+                                    .offset(x = 16.dp, y = 12.dp)
+                                    .border(
+                                        border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
+                                        shape = CircleShape
+                                    )
+                            ) {
+                                Icon(
+                                    if (displayBackground != null) Icons.Outlined.Edit else Icons.Rounded.Add,
+                                    if (displayBackground != null) stringResource(R.string.contact_call_background_change)
+                                    else stringResource(R.string.contact_call_background_set),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
                         }
                     }
                 }
@@ -1061,7 +1289,6 @@ fun ContactEditScreen(
                         }
                     }
 
-
                     item {
                         Column(
                             modifier = Modifier.animateContentSize(
@@ -1203,13 +1430,6 @@ fun ContactEditScreen(
                             ),verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             addresses.forEachIndexed { index, address ->
-//                        EditField(
-//                            value = address.formattedAddress,
-//                            onValueChange = { addresses[index] = ContactAddress(address.type, address.label, it) },
-//                            label = getAddressTypeText(context, address.type, address.label),
-//                            icon = Icons.Default.LocationOn,
-//                            onDelete = if (addresses.size > 1) { { addresses.removeAt(index) } } else null
-//                        )
                                 EditAddressField(
                                     value = address.formattedAddress,
                                     onValueChange = { addresses[index] = ContactAddress(address.type, address.label, it) },
@@ -1236,6 +1456,43 @@ fun ContactEditScreen(
                                 Text(stringResource(R.string.add_address))
                             }
                         }
+                    }
+
+                    // Notes
+                    item {
+                        var appeared by remember { mutableStateOf(false) }
+                        LaunchedEffect(Unit) { appeared = true }
+                        val rowScale by animateFloatAsState(
+                            targetValue = if (appeared) 1f else 0.5f,
+                            animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                            label = "rowScale"
+                        )
+                        val rowAlpha by animateFloatAsState(
+                            targetValue = if (appeared) 1f else 0f,
+                            animationSpec = tween(150),
+                            label = "rowAlpha"
+                        )
+                        OutlinedTextField(
+                            value = notes ?: "",
+                            onValueChange = { notes = it },
+                            label = { Text(stringResource(R.string.notes_contact)) },
+                            modifier = Modifier
+                                .animateContentSize(
+                                    animationSpec = spring(
+                                        stiffness = Spring.StiffnessMediumLow,
+                                        dampingRatio = Spring.DampingRatioMediumBouncy
+                                    )
+                                )
+                                .scale(rowScale)
+                                .alpha(rowAlpha)
+                                .fillMaxWidth()
+                                .padding(horizontal = paddingHorizontal),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                                focusedBorderColor = MaterialTheme.colorScheme.primary
+                            )
+                        )
                     }
 
                     item {
@@ -1323,11 +1580,17 @@ fun ContactEditScreen(
                 verticalArrangement = Arrangement.spacedBy(32.dp)
             ) {
                 item {
-                    Column(
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .padding(horizontal = paddingHorizontal)
+                            .background(
+                                color = MaterialTheme.colorScheme.surfaceContainerLowest,
+                                shape = RoundedCornerShape(24.dp)
+                            )
                             .padding(vertical = 24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(contentAlignment = Alignment.BottomEnd) {
                             RillAvatar(
@@ -1343,10 +1606,15 @@ fun ContactEditScreen(
                                     containerColor = MaterialTheme.colorScheme.customColors.colorRed,
                                     contentColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
                                     shape = CircleShape,
+                                    elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
                                     modifier = Modifier
                                         .size(40.dp)
                                         .align(Alignment.BottomStart)
-                                        .offset(x = (-16).dp, y = (-16).dp)
+                                        .offset(x = (-8).dp, y = 0.dp)
+                                        .border(
+                                            border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
+                                            shape = CircleShape
+                                        )
                                 ) {
                                     Icon(
                                         ImageVector.vectorResource(id = R.drawable.ic_delete),
@@ -1365,17 +1633,112 @@ fun ContactEditScreen(
                                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                                 shape = CircleShape,
+                                elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
                                 modifier = Modifier
                                     .size(40.dp)
                                     .align(Alignment.BottomEnd)
-                                    .offset(x = 16.dp, y = (-16).dp)
+                                    .offset(x = 8.dp, y = 0.dp)
+                                    .border(
+                                        border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
+                                        shape = CircleShape
+                                    )
                             ) {
-                                Icon(Icons.Default.AddAPhoto, null, modifier = Modifier.size(20.dp))
+                                Icon(
+                                    if (photoUri != null) Icons.Outlined.Edit else Icons.Rounded.Add,
+                                    if (photoUri != null) stringResource(R.string.edit) else stringResource(R.string.add_photo),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                        Spacer(Modifier.width(32.dp))
+                        Box(contentAlignment = Alignment.BottomEnd) {
+                            val displayBackground = tempCallBackground ?: callBackground
+                            if (displayBackground != null) {
+                                AsyncImage(
+                                    model = displayBackground,
+                                    contentDescription = stringResource(R.string.contact_call_background_preview),
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .size(width = 82.dp, height = 160.dp)
+                                        .clip(MaterialTheme.shapes.medium)
+                                )
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .size(width = 82.dp, height = 160.dp)
+                                        .clip(MaterialTheme.shapes.medium)
+                                        .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Wallpaper,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(40.dp)
+                                    )
+                                }
+                            }
+
+                            if (displayBackground != null) {
+                                SmallFloatingActionButton(
+                                    onClick = {
+                                        // If this is a temporary background (not yet saved)
+                                        if (tempCallBackground != null) {
+                                            tempCallBackground = null
+                                            selectedBackgroundUri = null
+                                            tempBackgroundDeleted = true
+                                        } else if (callBackground != null) {
+                                            // If this is a saved background, mark it for deletion when saving
+                                            tempBackgroundDeleted = true
+                                            callBackground = null
+                                        }
+                                    },
+                                    containerColor = MaterialTheme.colorScheme.customColors.colorRed,
+                                    contentColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+                                    shape = CircleShape,
+                                    elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .align(Alignment.BottomStart)
+                                        .offset(x = (-16).dp, y = 12.dp)
+                                        .border(
+                                            border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
+                                            shape = CircleShape
+                                        )
+                                ) {
+                                    Icon(
+                                        ImageVector.vectorResource(id = R.drawable.ic_delete),
+                                        stringResource(R.string.contact_call_background_remove),
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+
+                            SmallFloatingActionButton(
+                                onClick = onBackgroundClick,
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                shape = CircleShape,
+                                elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .align(Alignment.BottomEnd)
+                                    .offset(x = 16.dp, y = 12.dp)
+                                    .border(
+                                        border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
+                                        shape = CircleShape
+                                    )
+                            ) {
+                                Icon(
+                                    if (displayBackground != null) Icons.Outlined.Edit else Icons.Rounded.Add,
+                                    if (displayBackground != null) stringResource(R.string.contact_call_background_change)
+                                        else stringResource(R.string.contact_call_background_set),
+                                    modifier = Modifier.size(20.dp)
+                                )
                             }
                         }
                     }
                 }
-
 
                 item {
                     var appeared by remember { mutableStateOf(false) }
@@ -1840,6 +2203,43 @@ fun ContactEditScreen(
                             Text(stringResource(R.string.add_address))
                         }
                     }
+                }
+
+                // Notes
+                item {
+                    var appeared by remember { mutableStateOf(false) }
+                    LaunchedEffect(Unit) { appeared = true }
+                    val rowScale by animateFloatAsState(
+                        targetValue = if (appeared) 1f else 0.5f,
+                        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                        label = "rowScale"
+                    )
+                    val rowAlpha by animateFloatAsState(
+                        targetValue = if (appeared) 1f else 0f,
+                        animationSpec = tween(150),
+                        label = "rowAlpha"
+                    )
+                    OutlinedTextField(
+                        value = notes ?: "",
+                        onValueChange = { notes = it },
+                        label = { Text(stringResource(R.string.notes_contact)) },
+                        modifier = Modifier
+                            .animateContentSize(
+                                animationSpec = spring(
+                                    stiffness = Spring.StiffnessMediumLow,
+                                    dampingRatio = Spring.DampingRatioMediumBouncy
+                                )
+                            )
+                            .scale(rowScale)
+                            .alpha(rowAlpha)
+                            .fillMaxWidth()
+                            .padding(horizontal = paddingHorizontal),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary
+                        )
+                    )
                 }
 
                 item {
@@ -2519,22 +2919,22 @@ fun FieldOption(
             modifier = Modifier.size(24.dp),
             tint = MaterialTheme.colorScheme.primary
         )
-
         Spacer(modifier = Modifier.width(16.dp))
-
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium
             )
+            Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodySmall,
+                lineHeight = 14.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-
+        Spacer(modifier = Modifier.width(16.dp))
         Checkbox(
             checked = isSelected,
             onCheckedChange = { onToggle() },

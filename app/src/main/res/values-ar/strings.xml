@@ -38,6 +38,9 @@
     <string name="filter_incoming">واردة</string>
     <string name="filter_outgoing">صادرة</string>
     <string name="filter_rejected">مرفوضة</string>
+    <string name="sim_picker_title">اختيار بطاقة SIM</string>
+    <string name="label_unknown_number">رقم غير معروف</string>
+    <string name="reset">إعادة تعيين</string>
 
     <!-- Search -->
     <string name="search">بحث</string>
@@ -136,6 +139,10 @@
     <string name="incoming_call_ui_buttons">أزرار</string>
     <string name="incoming_call_ui_slide_to_answer">اسحب للرد (iOS)</string>
     <string name="incoming_call_ui_vertical_swipe">السحب العمودي</string>
+    <string name="dialpad_animations">رسوم متحركة للوحة المفاتيح</string>
+    <string name="dialpad_animations_subtitle">إظهار الرسوم المتحركة عند كتابة الأرقام</string>
+    <string name="hide_voice_search">إخفاء البحث الصوتي</string>
+    <string name="hide_voice_search_subtitle">يخفي زر البحث الصوتي</string>
 
     <string name="avatars_settings">إعدادات الصور الرمزية</string>
     <string name="avatars_settings_subtitle">تخصيص الألوان والإطارات والمزيد</string>
@@ -270,6 +277,8 @@
     <string name="incorrect_password">كلمة مرور غير صحيحة</string>
     <string name="incorrect_password_subtitle">يجب أن تتكون كلمة المرور من 4 أحرف على الأقل</string>
     <string name="password_dont_match">كلمات المرور غير متطابقة</string>
+    <string name="lock_on_minimize">القفل عند التصغير</string>
+    <string name="lock_on_minimize_subtitle">إذا تم إيقاف تشغيل هذا، سيتم إنهاء التطبيق فقط عند إلغاء تحميله بالكامل من الذاكرة</string>
 
     <string name="manage_contacts">إدارة جهات الاتصال</string>
     <string name="manage_contacts_subtitle">جهات الاتصال الخاصة، والحسابات المراد عرضها، وتنظيف قائمتك</string>
@@ -329,17 +338,22 @@
     <string name="keypad">لوحة المفاتيح</string>
     <string name="mute">كتم</string>
     <string name="unmute">إلغاء الكتم</string>
-    <string name="speaker">مكبر الصوت</string>
+    <string name="audio_route_speaker">مكبر الصوت</string>
+    <string name="audio_route_handset">السماعة</string>
+    <string name="audio_route_headset">سماعة الرأس</string>
+    <string name="audio_route_bluetooth">بلوتوث</string>
+    <string name="audio_route_bluetooth_short">BT</string>
+    <string name="audio_output_title">مخرجات الصوت</string>
     <string name="add_call">إضافة مكالمة</string>
     <string name="resume">استئناف</string>
     <string name="swap">تبديل</string>
     <string name="more">المزيد</string>
     <string name="hold">تعليق</string>
-    <string name="on_hold">معلقة</string>
-    <string name="call_ended">انتهت المكالمة</string>
-    <string name="calling">جاري الاتصال…</string>
-    <string name="incoming_call">مكالمة واردة</string>
-    <string name="connecting">جاري الاتصال…</string>
+    <string name="call_status_on_hold">معلقة</string>
+    <string name="call_status_ended">انتهت المكالمة</string>
+    <string name="call_status_calling">جاري الاتصال…</string>
+    <string name="call_status_incoming">مكالمة واردة</string>
+    <string name="call_status_connecting">جاري الاتصال…</string>
     <string name="slide_to_answer">اسحب للرد</string>
     <string name="swipe_up_to_answer">اسحب لأعلى للرد</string>
     <string name="swipe_down_to_reject">اسحب لأسفل للرفض</string>
@@ -356,6 +370,31 @@
     <string name="could_not_delete">تعذر الحذف</string>
     <string name="clear_all_filtered_logs">مسح جميع السجلات المصفاة</string>
     <string name="clear_all_filtered_logs_selected">سيؤدي هذا إلى حذف جميع سجل المكالمات المعروض. لا يمكن التراجع عن هذا الإجراء.</string>
+
+    <string name="action_block">حظر</string>
+    <string name="action_unblock">إلغاء الحظر</string>
+    <string name="action_block_number">حظر رقم</string>
+    <string name="action_unblock_number">إلغاء حظر رقم</string>
+    <string name="contact_block">حظر جهة الاتصال</string>
+    <string name="contact_block_supporting">حظر المكالمات الواردة والرسائل من جهة الاتصال هذه</string>
+    <string name="contact_unblock">إلغاء حظر جهة الاتصال</string>
+    <string name="contact_unblock_supporting">السماح مرة أخرى بالمكالمات والرسائل من جهة الاتصال هذه</string>
+    <string name="call_log_block_title">حظر الأرقام؟</string>
+    <string name="call_log_block_message">سيتم حظر المكالمات من %1$d إدخالاً محدداً.</string>
+
+    <string name="contact_call_background">خلفية شاشة المكالمة</string>
+    <string name="contact_call_background_set">تم اختيار صورة مخصصة</string>
+    <string name="contact_call_background_none">استخدام الخلفية الافتراضية</string>
+    <string name="contact_call_background_choose">اختر صورة</string>
+    <string name="contact_call_background_change">تغيير الصورة</string>
+    <string name="contact_call_background_remove">إزالة الخلفية</string>
+    <string name="contact_call_background_saving">جاري حفظ الصورة…</string>
+    <string name="contact_call_background_error">تعذر حفظ هذه الصورة</string>
+    <string name="contact_call_background_no_target">احفظ الرقم كجهة اتصال أولاً</string>
+    <string name="contact_call_background_preview">معاينة خلفية شاشة المكالمة</string>
+    <string name="settings_call_default_background">خلفية المكالمة الافتراضية</string>
+    <string name="settings_call_default_background_set">يتم عرض صورة مخصصة في كل مكالمة</string>
+    <string name="settings_call_default_background_none">غير محددة — تستخدم المكالمات سمة التطبيق</string>
 
     <!-- Contacts -->
     <string name="contacts">جهات الاتصال</string>
@@ -406,9 +445,11 @@
     <string name="add_event">إضافة حدث</string>
     <string name="add_address">إضافة عنوان</string>
     <string name="add_note">إضافة ملاحظة</string>
+    <string name="add_photo">إضافة صورة</string>
     <string name="contact_ringtone">نغمة رنين جهة الاتصال</string>
     <string name="unsaved_changes">تغييرات غير محفوظة</string>
     <string name="unsaved_changes_subtitle">هل تريد حفظ تغييراتك قبل المغادرة؟</string>
+    <string name="ringtone_custom">مخصص</string>
     <plurals name="contacts_count">
         <item quantity="zero">لا جهات اتصال</item>
         <item quantity="one">جهة اتصال واحدة</item>
@@ -452,6 +493,7 @@
 
     <!-- Call notes -->
     <string name="notes">ملاحظات</string>
+    <string name="notes_contact">تعليقات</string>
     <string name="call_notes">ملاحظات المكالمات</string>
     <string name="about_call_notes">حول ملاحظات المكالمات</string>
     <string name="about_call_notes_subtitle">ملاحظات سريعة تدونها أثناء المكالمة. يتم تخزينها محليًا في ملفات التطبيق، ومرتبطة برقم الهاتف (غير متزامنة مع جهات اتصال Google وغيرها). لكل رقم ملاحظته الخاصة، والتي لا يمكن الوصول إليها إلا من سجل المكالمات في تفاصيل جهة الاتصال داخل التطبيق أو من علامة التبويب \"ملاحظات المكالمات\".</string>
@@ -505,4 +547,16 @@
     <string name="page_subtitle_three">بحث T9 فوري، ورسوم متحركة سلسة، ومكالمات سريعة للغاية. مجرد تطبيق هاتف يعمل.</string>
     <string name="page_title_warning">قيد التطوير</string>
     <string name="page_subtitle_warning">هذا التطبيق لا يزال قيد التطوير. قد لا تعمل بعض الميزات كما هو متوقع. يرجى استخدامه بحذر والإبلاغ عن أي مشاكل تواجهها.</string>
+
+    <!-- Call notifications (CallService) -->
+    <string name="notif_channel_outgoing_calls">المكالمات الصادرة</string>
+    <string name="notif_channel_incoming_calls">المكالمات الواردة</string>
+    <string name="notif_channel_fullscreen_incoming_calls">المكالمات الواردة (ملء الشاشة)</string>
+    <string name="notif_channel_missed_calls">المكالمات الفائتة</string>
+    <string name="notif_blocked_call_title">مكالمة محظورة</string>
+    <string name="notif_blocked_call_text">مكالمة محظورة من %1$s</string>
+    <string name="notif_missed_call_title">مكالمة فائتة</string>
+    <string name="notif_missed_call_text">مكالمة فائتة من %1$s الساعة %2$s</string>
+    <string name="notif_via_sim">عبر %1$s</string>
+    <string name="notif_active_call">مكالمة نشطة</string>
 </resources>

@@ -27,7 +27,8 @@ val appModule = module {
             androidContext(),
             RillDatabase::class.java,
             "rill_database"
-        ).build()
+        ).fallbackToDestructiveMigration()
+            .build()
     }
     single { get<RillDatabase>().privateContactDao() }
 

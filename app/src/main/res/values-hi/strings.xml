@@ -37,6 +37,9 @@
     <string name="filter_incoming">आने वाली</string>
     <string name="filter_outgoing">जाने वाली</string>
     <string name="filter_rejected">अस्वीकृत</string>
+    <string name="sim_picker_title">SIM कार्ड चुनें</string>
+    <string name="label_unknown_number">अज्ञात नंबर</string>
+    <string name="reset">रीसेट करें</string>
 
     <!-- Search -->
     <string name="search">खोजें</string>
@@ -135,6 +138,10 @@
     <string name="incoming_call_ui_buttons">बटन</string>
     <string name="incoming_call_ui_slide_to_answer">उत्तर देने के लिए स्वाइप करें (iOS)</string>
     <string name="incoming_call_ui_vertical_swipe">ऊर्ध्वाधर स्वाइप</string>
+    <string name="dialpad_animations">डायलपैड एनिमेशन</string>
+    <string name="dialpad_animations_subtitle">अंक टाइप करते समय एनिमेशन दिखाएँ</string>
+    <string name="hide_voice_search">वॉइस खोज छुपाएं</string>
+    <string name="hide_voice_search_subtitle">वॉइस खोज बटन छुपाता है</string>
 
     <string name="avatars_settings">अवतार सेटिंग्स</string>
     <string name="avatars_settings_subtitle">रंग, फ्रेम और अधिक कस्टमाइज़ करना</string>
@@ -269,6 +276,8 @@
     <string name="incorrect_password">गलत पासवर्ड</string>
     <string name="incorrect_password_subtitle">पासवर्ड कम से कम 4 वर्णों का होना चाहिए</string>
     <string name="password_dont_match">पासवर्ड मेल नहीं खाते</string>
+    <string name="lock_on_minimize">छोटा करने पर लॉक करें</string>
+    <string name="lock_on_minimize_subtitle">यदि यह बंद है, तो ऐप केवल तभी समाप्त होगा जब इसे मेमोरी से पूरी तरह से हटा दिया जाएगा</string>
 
     <string name="manage_contacts">संपर्क प्रबंधित करें</string>
     <string name="manage_contacts_subtitle">निजी संपर्क, दिखाने के लिए खाते, और अपनी सूची साफ़ करें</string>
@@ -328,17 +337,22 @@
     <string name="keypad">कीपैड</string>
     <string name="mute">म्यूट</string>
     <string name="unmute">अनम्यूट</string>
-    <string name="speaker">स्पीकर</string>
+    <string name="audio_route_speaker">स्पीकर</string>
+    <string name="audio_route_handset">हैंडसेट</string>
+    <string name="audio_route_headset">हेडसेट</string>
+    <string name="audio_route_bluetooth">ब्लूटूथ</string>
+    <string name="audio_route_bluetooth_short">BT</string>
+    <string name="audio_output_title">ऑडियो आउटपुट</string>
     <string name="add_call">कॉल जोड़ें</string>
     <string name="resume">फिर से शुरू करें</string>
     <string name="swap">बदलें</string>
     <string name="more">अधिक</string>
     <string name="hold">होल्ड करें</string>
-    <string name="on_hold">होल्ड पर</string>
-    <string name="call_ended">कॉल समाप्त</string>
-    <string name="calling">कॉल कर रहे हैं…</string>
-    <string name="incoming_call">आने वाली कॉल</string>
-    <string name="connecting">कनेक्ट हो रहा है…</string>
+    <string name="call_status_on_hold">होल्ड पर</string>
+    <string name="call_status_ended">कॉल समाप्त</string>
+    <string name="call_status_calling">कॉल कर रहे हैं…</string>
+    <string name="call_status_incoming">आने वाली कॉल</string>
+    <string name="call_status_connecting">कनेक्ट हो रहा है…</string>
     <string name="slide_to_answer">उत्तर देने के लिए स्लाइड करें</string>
     <string name="swipe_up_to_answer">उत्तर देने के लिए ऊपर स्वाइप करें</string>
     <string name="swipe_down_to_reject">अस्वीकार करने के लिए नीचे स्वाइप करें</string>
@@ -355,6 +369,31 @@
     <string name="could_not_delete">हटाया नहीं जा सका</string>
     <string name="clear_all_filtered_logs">सभी फ़िल्टर किए गए लॉग साफ़ करें</string>
     <string name="clear_all_filtered_logs_selected">यह प्रदर्शित सभी कॉल इतिहास हटा देगा। यह क्रिया पूर्ववत नहीं की जा सकती।</string>
+
+    <string name="action_block">ब्लॉक करें</string>
+    <string name="action_unblock">अनब्लॉक करें</string>
+    <string name="action_block_number">नंबर ब्लॉक करें</string>
+    <string name="action_unblock_number">नंबर अनब्लॉक करें</string>
+    <string name="contact_block">संपर्क ब्लॉक करें</string>
+    <string name="contact_block_supporting">इस संपर्क से आने वाली कॉल और संदेश ब्लॉक करें</string>
+    <string name="contact_unblock">संपर्क अनब्लॉक करें</string>
+    <string name="contact_unblock_supporting">इस संपर्क से कॉल और संदेशों की फिर से अनुमति दें</string>
+    <string name="call_log_block_title">नंबर ब्लॉक करें?</string>
+    <string name="call_log_block_message">%1$d चयनित प्रविष्टियों से कॉल ब्लॉक कर दी जाएंगी।</string>
+
+    <string name="contact_call_background">कॉल स्क्रीन बैकग्राउंड</string>
+    <string name="contact_call_background_set">कस्टम इमेज चुनी गई</string>
+    <string name="contact_call_background_none">डिफ़ॉल्ट बैकग्राउंड का उपयोग करें</string>
+    <string name="contact_call_background_choose">एक इमेज चुनें</string>
+    <string name="contact_call_background_change">इमेज बदलें</string>
+    <string name="contact_call_background_remove">बैकग्राउंड हटाएं</string>
+    <string name="contact_call_background_saving">इमेज सेव हो रही है…</string>
+    <string name="contact_call_background_error">वह इमेज सेव नहीं की जा सकी</string>
+    <string name="contact_call_background_no_target">पहले नंबर को संपर्क के रूप में सेव करें</string>
+    <string name="contact_call_background_preview">कॉल स्क्रीन बैकग्राउंड पूर्वावलोकन</string>
+    <string name="settings_call_default_background">डिफ़ॉल्ट कॉल बैकग्राउंड</string>
+    <string name="settings_call_default_background_set">हर कॉल पर कस्टम इमेज दिखाई जाती है</string>
+    <string name="settings_call_default_background_none">सेट नहीं — कॉल ऐप थीम का उपयोग करती हैं</string>
 
     <!-- Contacts -->
     <string name="contacts">संपर्क</string>
@@ -405,9 +444,11 @@
     <string name="add_event">ईवेंट जोड़ें</string>
     <string name="add_address">पता जोड़ें</string>
     <string name="add_note">नोट जोड़ें</string>
+    <string name="add_photo">फ़ोटो जोड़ें</string>
     <string name="contact_ringtone">संपर्क रिंगटोन</string>
     <string name="unsaved_changes">असहेजे गए परिवर्तन</string>
     <string name="unsaved_changes_subtitle">क्या आप बाहर निकलने से पहले अपने परिवर्तन सहेजना चाहते हैं?</string>
+    <string name="ringtone_custom">कस्टम</string>
     <plurals name="contacts_count">
         <item quantity="one">%d संपर्क</item>
         <item quantity="other">%d संपर्क</item>
@@ -439,6 +480,7 @@
 
     <!-- Call notes -->
     <string name="notes">नोट्स</string>
+    <string name="notes_contact">टिप्पणियाँ</string>
     <string name="call_notes">कॉल नोट्स</string>
     <string name="about_call_notes">कॉल नोट्स के बारे में</string>
     <string name="about_call_notes_subtitle">कॉल के दौरान आप जो त्वरित नोट्स लेते हैं। वे ऐप की फ़ाइलों में स्थानीय रूप से संग्रहीत होते हैं, फ़ोन नंबर से लिंक होते हैं (Google संपर्क और अन्य के साथ सिंक नहीं होते)। प्रत्येक नंबर का अपना निजी नोट होता है, जिसे केवल ऐप के भीतर संपर्क विवरण में कॉल लॉग से या \"कॉल नोट्स\" टैब से एक्सेस किया जा सकता है।</string>
@@ -492,4 +534,16 @@
     <string name="page_subtitle_three">तत्काल T9 खोज, सहज एनिमेशन और तेज़ कॉल। बस एक फ़ोन ऐप जो काम करता है।</string>
     <string name="page_title_warning">विकासाधीन</string>
     <string name="page_subtitle_warning">यह ऐप अभी भी विकासाधीन है। कुछ सुविधाएँ अपेक्षा के अनुसार काम नहीं कर सकती हैं। कृपया सावधानी से उपयोग करें और आपके सामने आने वाली किसी भी समस्या की रिपोर्ट करें।</string>
+
+    <!-- Call notifications (CallService) -->
+    <string name="notif_channel_outgoing_calls">आउटगोइंग कॉल</string>
+    <string name="notif_channel_incoming_calls">इनकमिंग कॉल</string>
+    <string name="notif_channel_fullscreen_incoming_calls">इनकमिंग कॉल (फुल-स्क्रीन)</string>
+    <string name="notif_channel_missed_calls">छूटी हुई कॉल</string>
+    <string name="notif_blocked_call_title">कॉल ब्लॉक की गई</string>
+    <string name="notif_blocked_call_text">%1$s से ब्लॉक की गई कॉल</string>
+    <string name="notif_missed_call_title">छूटी हुई कॉल</string>
+    <string name="notif_missed_call_text">%2$s पर %1$s से छूटी हुई कॉल</string>
+    <string name="notif_via_sim">%1$s के माध्यम से</string>
+    <string name="notif_active_call">सक्रिय कॉल</string>
 </resources>

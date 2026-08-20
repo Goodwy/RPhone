@@ -37,6 +37,9 @@
     <string name="filter_incoming">Gelen</string>
     <string name="filter_outgoing">Giden</string>
     <string name="filter_rejected">Reddedilen</string>
+    <string name="sim_picker_title">SIM kart seç</string>
+    <string name="label_unknown_number">Bilinmeyen numara</string>
+    <string name="reset">Sıfırla</string>
 
     <!-- Search -->
     <string name="search">Ara</string>
@@ -135,6 +138,10 @@
     <string name="incoming_call_ui_buttons">Düğmeler</string>
     <string name="incoming_call_ui_slide_to_answer">Cevaplamak için Kaydır (iOS)</string>
     <string name="incoming_call_ui_vertical_swipe">Dikey Kaydırma</string>
+    <string name="dialpad_animations">Tuş takımı animasyonları</string>
+    <string name="dialpad_animations_subtitle">Rakam yazarken animasyonları göster</string>
+    <string name="hide_voice_search">Sesli aramayı gizle</string>
+    <string name="hide_voice_search_subtitle">Sesli arama düğmesini gizler</string>
 
     <string name="avatars_settings">Avatar Ayarları</string>
     <string name="avatars_settings_subtitle">Renkleri, çerçeveleri ve daha fazlasını özelleştirme</string>
@@ -269,6 +276,8 @@
     <string name="incorrect_password">Geçersiz parola</string>
     <string name="incorrect_password_subtitle">Parola en az 4 karakter olmalıdır</string>
     <string name="password_dont_match">Parolalar eşleşmiyor</string>
+    <string name="lock_on_minimize">Küçültüldüğünde Kilitle</string>
+    <string name="lock_on_minimize_subtitle">Bu kapatılırsa, uygulama yalnızca bellekten tamamen kaldırıldığında sonlandırılır</string>
 
     <string name="manage_contacts">Kişileri Yönet</string>
     <string name="manage_contacts_subtitle">Özel kişiler, gösterilecek hesaplar ve listenizi temizleyin</string>
@@ -328,17 +337,22 @@
     <string name="keypad">Tuş Takımı</string>
     <string name="mute">Sessiz</string>
     <string name="unmute">Sesi Aç</string>
-    <string name="speaker">Hoparlör</string>
+    <string name="audio_route_speaker">Hoparlör</string>
+    <string name="audio_route_handset">Ahize</string>
+    <string name="audio_route_headset">Kulaklık</string>
+    <string name="audio_route_bluetooth">Bluetooth</string>
+    <string name="audio_route_bluetooth_short">BT</string>
+    <string name="audio_output_title">Ses çıkışı</string>
     <string name="add_call">Arama Ekle</string>
     <string name="resume">Devam Et</string>
     <string name="swap">Değiştir</string>
     <string name="more">Daha Fazla</string>
     <string name="hold">Beklet</string>
-    <string name="on_hold">Beklemede</string>
-    <string name="call_ended">Arama Sona Erdi</string>
-    <string name="calling">Aranıyor…</string>
-    <string name="incoming_call">Gelen Arama</string>
-    <string name="connecting">Bağlanıyor…</string>
+    <string name="call_status_on_hold">Beklemede</string>
+    <string name="call_status_ended">Arama Sona Erdi</string>
+    <string name="call_status_calling">Aranıyor…</string>
+    <string name="call_status_incoming">Gelen Arama</string>
+    <string name="call_status_connecting">Bağlanıyor…</string>
     <string name="slide_to_answer">Cevaplamak için kaydırın</string>
     <string name="swipe_up_to_answer">Cevaplamak için yukarı kaydırın</string>
     <string name="swipe_down_to_reject">Reddetmek için aşağı kaydırın</string>
@@ -355,6 +369,31 @@
     <string name="could_not_delete">Silinemedi</string>
     <string name="clear_all_filtered_logs">Tüm filtrelenmiş kayıtları temizle</string>
     <string name="clear_all_filtered_logs_selected">Bu, görüntülenen tüm arama geçmişini silecektir. Bu işlem geri alınamaz.</string>
+
+    <string name="action_block">Engelle</string>
+    <string name="action_unblock">Engeli kaldır</string>
+    <string name="action_block_number">Numarayı engelle</string>
+    <string name="action_unblock_number">Numaranın engelini kaldır</string>
+    <string name="contact_block">Kişiyi engelle</string>
+    <string name="contact_block_supporting">Bu kişiden gelen aramaları ve mesajları engelle</string>
+    <string name="contact_unblock">Kişinin engelini kaldır</string>
+    <string name="contact_unblock_supporting">Bu kişiden gelen arama ve mesajlara yeniden izin ver</string>
+    <string name="call_log_block_title">Numaralar engellensin mi?</string>
+    <string name="call_log_block_message">Seçilen %1$d kayıttan gelen aramalar engellenecektir.</string>
+
+    <string name="contact_call_background">Arama ekranı arka planı</string>
+    <string name="contact_call_background_set">Özel resim seçildi</string>
+    <string name="contact_call_background_none">Varsayılan arka planı kullan</string>
+    <string name="contact_call_background_choose">Bir resim seç</string>
+    <string name="contact_call_background_change">Resmi değiştir</string>
+    <string name="contact_call_background_remove">Arka planı kaldır</string>
+    <string name="contact_call_background_saving">Resim kaydediliyor…</string>
+    <string name="contact_call_background_error">Bu resim kaydedilemedi</string>
+    <string name="contact_call_background_no_target">Önce numarayı kişi olarak kaydedin</string>
+    <string name="contact_call_background_preview">Arama ekranı arka planı önizlemesi</string>
+    <string name="settings_call_default_background">Varsayılan arama arka planı</string>
+    <string name="settings_call_default_background_set">Her aramada özel bir resim gösterilir</string>
+    <string name="settings_call_default_background_none">Ayarlanmadı — aramalar uygulama temasını kullanır</string>
 
     <!-- Contacts -->
     <string name="contacts">Kişiler</string>
@@ -405,9 +444,11 @@
     <string name="add_event">Etkinlik Ekle</string>
     <string name="add_address">Adres Ekle</string>
     <string name="add_note">Not Ekle</string>
+    <string name="add_photo">Fotoğraf ekle</string>
     <string name="contact_ringtone">Kişi Zil Sesi</string>
     <string name="unsaved_changes">Kaydedilmemiş Değişiklikler</string>
     <string name="unsaved_changes_subtitle">Çıkmadan önce değişikliklerinizi kaydetmek ister misiniz?</string>
+    <string name="ringtone_custom">Özel</string>
     <plurals name="contacts_count">
         <item quantity="one">%d kişi</item>
         <item quantity="other">%d kişi</item>
@@ -439,6 +480,7 @@
 
     <!-- Call notes -->
     <string name="notes">Notlar</string>
+    <string name="notes_contact">Açıklamalar</string>
     <string name="call_notes">Arama Notları</string>
     <string name="about_call_notes">Arama Notları Hakkında</string>
     <string name="about_call_notes_subtitle">Arama sırasında aldığınız hızlı notlar. Uygulamanın dosyalarında yerel olarak depolanır, telefon numarasına bağlanır (Google Kişiler ve diğerleriyle senkronize edilmez). Her numaranın, uygulama içindeki kişi ayrıntılarındaki arama kaydından veya \"Arama Notları\" sekmesinden erişilebilen kendi özel notu vardır.</string>
@@ -492,4 +534,16 @@
     <string name="page_subtitle_three">Anında T9 araması, akıcı animasyonlar ve şimşek hızında aramalar. Sadece çalışan bir telefon uygulaması.</string>
     <string name="page_title_warning">Geliştirme Aşamasında</string>
     <string name="page_subtitle_warning">Bu uygulama hala geliştirme aşamasındadır. Bazı özellikler beklendiği gibi çalışmayabilir. Lütfen dikkatli kullanın ve karşılaştığınız sorunları bildirin.</string>
+
+    <!-- Call notifications (CallService) -->
+    <string name="notif_channel_outgoing_calls">Giden aramalar</string>
+    <string name="notif_channel_incoming_calls">Gelen aramalar</string>
+    <string name="notif_channel_fullscreen_incoming_calls">Gelen aramalar (tam ekran)</string>
+    <string name="notif_channel_missed_calls">Cevaplanmayan aramalar</string>
+    <string name="notif_blocked_call_title">Arama engellendi</string>
+    <string name="notif_blocked_call_text">%1$s\'den engellenen arama</string>
+    <string name="notif_missed_call_title">Cevaplanmayan arama</string>
+    <string name="notif_missed_call_text">%1$s\'den %2$s\'de cevaplanmayan arama</string>
+    <string name="notif_via_sim">%1$s üzerinden</string>
+    <string name="notif_active_call">Aktif arama</string>
 </resources>

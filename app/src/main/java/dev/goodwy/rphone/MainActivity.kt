@@ -55,8 +55,6 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Assistant
 import androidx.compose.material.icons.filled.Dialpad
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.StarOutline
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Assistant
 import androidx.compose.material.icons.rounded.AccessTime
@@ -64,9 +62,11 @@ import androidx.compose.material.icons.rounded.AccessTimeFilled
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -107,10 +107,17 @@ import dev.goodwy.rphone.controller.util.makeCall
 import dev.goodwy.rphone.view.components.TabSpec
 import dev.goodwy.rphone.view.components.parseTabOrder
 import dev.goodwy.rphone.view.components.performAppHaptic
+import dev.goodwy.rphone.view.theme.isLandscapeMode
 import org.koin.core.context.GlobalContext
 
 class MainActivity : FragmentActivity() {
     private var intentState by mutableStateOf<Intent?>(null)
+    private var isInBackground by mutableStateOf(false)
+    private var _isUnlocked by mutableStateOf(true)
+    private var biometricType: String = ""
+    private var appLockEnabled: Boolean = false
+    private var lockOnMinimize: Boolean = false
+    private lateinit var prefs: PreferenceManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -120,15 +127,17 @@ class MainActivity : FragmentActivity() {
         // Edge-to-edge is set via theme XML instead (windowDrawsSystemBarBackgrounds etc).
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
+        prefs = GlobalContext.get().get<PreferenceManager>()
+        biometricType = prefs.getString(PreferenceManager.KEY_BIOMETRICS_TYPE, "") ?: ""
+        appLockEnabled = prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK, false)
+        lockOnMinimize = prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK_ON_MINIMIZE, false)
+        _isUnlocked = !(biometricType.isNotEmpty() && appLockEnabled)
+
         setContent {
             Rill4Theme {
                 val context = LocalContext.current
                 val appInfo = getAppVersion(context)
                 val navController = rememberNavController()
-
-                val prefs = remember {
-                    GlobalContext.get().get<PreferenceManager>()
-                }
 
                 val favouritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, false)
                 val contactsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS, true)
@@ -154,14 +163,16 @@ class MainActivity : FragmentActivity() {
                 } else {
                     // ── Biometric app-lock ──────────────────────────────────────
                     val settingsVer by prefs.settingsChanged.collectAsState()
-                    val biometricType = remember(settingsVer) {
-                        prefs.getString(PreferenceManager.KEY_BIOMETRICS_TYPE, "") ?: ""
+                    LaunchedEffect(settingsVer) {
+                        biometricType = prefs.getString(PreferenceManager.KEY_BIOMETRICS_TYPE, "") ?: ""
+                        appLockEnabled = prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK, false)
+                        lockOnMinimize = prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK_ON_MINIMIZE, false)
                     }
-                    val appLockEnabled = remember(settingsVer) {
-                        prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK, false)
-                    }
-                    var isUnlocked by remember {
-                        mutableStateOf(!(biometricType.isNotEmpty() && appLockEnabled))
+//                    var isUnlocked by remember {
+//                        mutableStateOf(!(biometricType.isNotEmpty() && appLockEnabled))
+//                    }
+                    val isUnlocked by remember {
+                        derivedStateOf { _isUnlocked && !isInBackground }
                     }
 
                     val lastOpenedTab = remember {
@@ -262,7 +273,7 @@ class MainActivity : FragmentActivity() {
                             val configuration = LocalConfiguration.current
                             val isLandscape =
                                 configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-                            dev.goodwy.rphone.view.theme.isLandscapeMode = isLandscape
+                            isLandscapeMode = isLandscape
                             val navBackStack by navController.currentBackStackEntryAsState()
                             val currentDest = navBackStack?.destination
                             val prefs2 = remember { GlobalContext.get().get<PreferenceManager>() }
@@ -343,11 +354,12 @@ class MainActivity : FragmentActivity() {
                             if (isLandscape && isAlreadyDefaultDialer(this@MainActivity)) {
                                 val ctx = LocalContext.current
 
+                                val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
                                 @Suppress("DEPRECATION")
                                 val rotation =
                                     (ctx.getSystemService(WINDOW_SERVICE) as android.view.WindowManager).defaultDisplay.rotation
-                                val isRotation90 = rotation == Surface.ROTATION_90
-                                val isRotation270 = rotation == Surface.ROTATION_270
+                                val isRotation90 = rotation == if (isLtr) Surface.ROTATION_90 else Surface.ROTATION_270
+                                val isRotation270 = rotation == if (isLtr) Surface.ROTATION_270 else Surface.ROTATION_90
 //                        val railPaddingStart = if (isRotation270) 10.dp else 0.dp
 //                        val railPaddingEnd   = if (isRotation90)  10.dp else 0.dp
 
@@ -592,14 +604,15 @@ class MainActivity : FragmentActivity() {
                         val activity = this@MainActivity
                         LaunchedEffect(biometricType) {
                             if (biometricType.isEmpty() || !appLockEnabled) {
-                                isUnlocked = true; return@LaunchedEffect
+                                _isUnlocked = true
+                                return@LaunchedEffect
                             }
                             if (biometricType == "system") {
                                 val executor = androidx.core.content.ContextCompat.getMainExecutor(activity)
                                 val prompt = androidx.biometric.BiometricPrompt(
                                     activity, executor,
                                     object : androidx.biometric.BiometricPrompt.AuthenticationCallback() {
-                                        override fun onAuthenticationSucceeded(r: androidx.biometric.BiometricPrompt.AuthenticationResult) { isUnlocked = true }
+                                        override fun onAuthenticationSucceeded(r: androidx.biometric.BiometricPrompt.AuthenticationResult) { _isUnlocked = true }
                                         override fun onAuthenticationError(code: Int, msg: CharSequence) { finish() }
                                         override fun onAuthenticationFailed() { finish() }
                                     }
@@ -618,14 +631,14 @@ class MainActivity : FragmentActivity() {
                             dev.goodwy.rphone.view.screen.settings.PinSetupDialog(
                                 title = stringResource(R.string.enter_pin), isVerify = true,
                                 expectedPin = prefs.getString(PreferenceManager.KEY_BIOMETRICS_PIN, "") ?: "",
-                                onConfirm = { isUnlocked = true }, onDismiss = { finish() }
+                                onConfirm = { _isUnlocked = true }, onDismiss = { finish() }
                             )
                         } else if (biometricType == "password") {
 
                             dev.goodwy.rphone.view.screen.settings.PasswordSetupDialog(
                                 title = stringResource(R.string.enter_password), isVerify = true,
                                 expectedPassword = prefs.getString(PreferenceManager.KEY_BIOMETRICS_PASSWORD, "") ?: "",
-                                onConfirm = { isUnlocked = true }, onDismiss = { finish() }
+                                onConfirm = { _isUnlocked = true }, onDismiss = { finish() }
                             )
                         }
                     } // end outer Box
@@ -642,6 +655,40 @@ class MainActivity : FragmentActivity() {
 //                }
             }
         }
+    }
+
+//    override fun onUserLeaveHint() {
+//        super.onUserLeaveHint()
+//        // Lock when the Home button is pressed or when switching between tasks
+//        if (appLockEnabled && lockOnMinimize) {
+//            isInBackground = true
+//            _isUnlocked = false
+//        }
+//    }
+
+    override fun onStop() {
+        super.onStop()
+        // When the app is minimized, we block it
+        if (appLockEnabled && lockOnMinimize) {
+            isInBackground = true
+            _isUnlocked = false
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        isInBackground = false
+        // If the lock is off, let’s unlock it straight away
+        if (biometricType.isEmpty() || !appLockEnabled) {
+            _isUnlocked = true
+        } else if (lockOnMinimize) {
+            // We request that the item be unlocked upon return
+            _isUnlocked = false
+        }
+        // If lockOnMinimize = false:
+        // - the application does NOT LOCK when minimised
+        // - it will only be locked if it has been completely unloaded from memory
+        // - in this case, _isUnlocked remains in its current state
     }
 
     override fun onNewIntent(intent: Intent) {
