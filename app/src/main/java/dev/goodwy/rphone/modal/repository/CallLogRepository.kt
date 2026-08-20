@@ -19,6 +19,8 @@ import dev.goodwy.rphone.modal.data.Contact
 import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 import androidx.core.net.toUri
 import dev.goodwy.rphone.modal.data.getDisplayName
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class CallLogRepository(
     private val context: Context,
@@ -29,7 +31,7 @@ class CallLogRepository(
     private val preferenceManager = PreferenceManager(context)
     private val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as? TelecomManager
 
-    override fun getCallLogs(): List<CallLogEntry> {
+    override suspend fun getCallLogs(): List<CallLogEntry> = withContext(Dispatchers.IO) {
         val callLogs = mutableListOf<CallLogEntry>()
 
         // Optimization: Fetch all contacts once for quick lookup
@@ -92,10 +94,10 @@ class CallLogRepository(
             }
         }
 
-        return callLogs
+        callLogs
     }
 
-    override fun saveCallLog(entry: CallLogEntry) {
+    override suspend fun saveCallLog(entry: CallLogEntry) = withContext(Dispatchers.IO) {
         val values = ContentValues().apply {
             put(CallLog.Calls.NUMBER, entry.number)
             put(CallLog.Calls.TYPE, entry.type)
@@ -108,6 +110,7 @@ class CallLogRepository(
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        Unit
     }
 
     private fun parseCursor(cursor: Cursor, callLogs: MutableList<CallLogEntry>, contactMap: Map<String, Contact>) {
@@ -219,7 +222,7 @@ class CallLogRepository(
         callLogs.addAll(tempLogs)
     }
 
-    override fun deleteCallLog(number: String) {
+    override suspend fun deleteCallLog(number: String) = withContext(Dispatchers.IO) {
         try {
             contentResolver.delete(
                 CallLog.Calls.CONTENT_URI,
@@ -229,10 +232,11 @@ class CallLogRepository(
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        Unit
     }
 
-    override fun deleteCallLogsByIds(ids: List<Long>) {
-        if (ids.isEmpty()) return
+    override suspend fun deleteCallLogsByIds(ids: List<Long>) = withContext(Dispatchers.IO) {
+        if (ids.isEmpty()) return@withContext
         try {
             val selection = "${CallLog.Calls._ID} IN (${ids.joinToString(",")})"
             contentResolver.delete(CallLog.Calls.CONTENT_URI, selection, null)
@@ -241,11 +245,12 @@ class CallLogRepository(
         }
     }
 
-    override fun clearCallLogs() {
+    override suspend fun clearCallLogs() = withContext(Dispatchers.IO) {
         try {
             contentResolver.delete(CallLog.Calls.CONTENT_URI, null, null)
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        Unit
     }
 }

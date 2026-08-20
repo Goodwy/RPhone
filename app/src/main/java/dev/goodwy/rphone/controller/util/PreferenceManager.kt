@@ -1,18 +1,58 @@
 package dev.goodwy.rphone.controller.util
 
 import android.content.Context
-import android.content.SharedPreferences
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import androidx.core.content.edit
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.SharedPreferencesMigration
+import androidx.datastore.preferences.core.*
+import androidx.datastore.preferences.preferencesDataStoreFile
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
+
+private val dataStoreScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+private var _sharedDataStore: DataStore<Preferences>? = null
+private val dataStoreLock = Any()
+
+private fun getSharedDataStore(context: Context): DataStore<Preferences> {
+    return _sharedDataStore ?: synchronized(dataStoreLock) {
+        _sharedDataStore ?: run {
+            val appContext = context.applicationContext
+            val deviceContext = appContext.createDeviceProtectedStorageContext()
+            try {
+                deviceContext.moveSharedPreferencesFrom(appContext, "rill_prefs")
+            } catch (_: Exception) {}
+
+            PreferenceDataStoreFactory.create(
+                migrations = listOf(
+                    SharedPreferencesMigration(
+                        context = deviceContext,
+                        sharedPreferencesName = "rill_prefs"
+                    )
+                ),
+                produceFile = { deviceContext.preferencesDataStoreFile("rill_prefs") },
+                scope = dataStoreScope
+            )
+        }.also { _sharedDataStore = it }
+    }
+}
 
 class PreferenceManager(context: Context) {
     private val appContext = context.applicationContext
-    private val prefs: SharedPreferences = run {
-        val deviceContext = context.createDeviceProtectedStorageContext()
-        deviceContext.moveSharedPreferencesFrom(context, "rill_prefs")
-        deviceContext.getSharedPreferences("rill_prefs", Context.MODE_PRIVATE)
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val dataStore = getSharedDataStore(appContext)
+
+    // Internal cache for synchronous access
+    private val _prefsCache = MutableStateFlow<Preferences>(runBlocking { dataStore.data.first() })
+
+    private val _settingsChanged = MutableStateFlow(0)
+    val settingsChanged: StateFlow<Int> = _settingsChanged.asStateFlow()
+
+    init {
+        scope.launch {
+            dataStore.data.collect { newPrefs ->
+                _prefsCache.value = newPrefs
+                _settingsChanged.value += 1
+            }
+        }
     }
 
     /** Number of currently active SIM subscriptions (0, 1, 2+). Never throws. */
@@ -44,23 +84,39 @@ class PreferenceManager(context: Context) {
      *  one SIM instead of nagging with an "Ask every time" dialog on every call. */
     fun getDefaultSimIndexDefault(): Int = if (getActiveSimCount() == 1) 1 else 0
 
-    private val _settingsChanged = MutableStateFlow(0)
-    val settingsChanged: StateFlow<Int> = _settingsChanged.asStateFlow()
-
-    private val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, _ ->
-        _settingsChanged.value += 1
+    // Synchronous-style API for backward compatibility
+    fun getBoolean(key: String, defaultValue: Boolean): Boolean = 
+        _prefsCache.value[booleanPreferencesKey(key)] ?: defaultValue
+    
+    fun setBoolean(key: String, value: Boolean) {
+        scope.launch { dataStore.edit { it[booleanPreferencesKey(key)] = value } }
     }
 
-    init { prefs.registerOnSharedPreferenceChangeListener(listener) }
+    fun getString(key: String, defaultValue: String?): String? = 
+        _prefsCache.value[stringPreferencesKey(key)] ?: defaultValue
+    
+    fun setString(key: String, value: String?) {
+        scope.launch {
+            dataStore.edit {
+                if (value == null) it.remove(stringPreferencesKey(key))
+                else it[stringPreferencesKey(key)] = value
+            }
+        }
+    }
 
-    fun getBoolean(key: String, defaultValue: Boolean) = prefs.getBoolean(key, defaultValue)
-    fun setBoolean(key: String, value: Boolean)        { prefs.edit { putBoolean(key, value) }; _settingsChanged.value += 1 }
-    fun getString(key: String, defaultValue: String?)  = prefs.getString(key, defaultValue)
-    fun setString(key: String, value: String?)         { prefs.edit { putString(key, value) }; _settingsChanged.value += 1 }
-    fun getInt(key: String, defaultValue: Int)         = prefs.getInt(key, defaultValue)
-    fun setInt(key: String, value: Int)                { prefs.edit { putInt(key, value) }; _settingsChanged.value += 1 }
-    fun getFloat(key: String, defaultValue: Float)     = prefs.getFloat(key, defaultValue)
-    fun setFloat(key: String, value: Float)            { prefs.edit { putFloat(key, value) }; _settingsChanged.value += 1 }
+    fun getInt(key: String, defaultValue: Int): Int = 
+        _prefsCache.value[intPreferencesKey(key)] ?: defaultValue
+    
+    fun setInt(key: String, value: Int) {
+        scope.launch { dataStore.edit { it[intPreferencesKey(key)] = value } }
+    }
+
+    fun getFloat(key: String, defaultValue: Float): Float = 
+        _prefsCache.value[floatPreferencesKey(key)] ?: defaultValue
+    
+    fun setFloat(key: String, value: Float) {
+        scope.launch { dataStore.edit { it[floatPreferencesKey(key)] = value } }
+    }
 
     /** Returns true if an incoming call from [phoneNumber] should be gated behind biometric. */
     fun shouldGateCallWithBiometric(phoneNumber: String?): Boolean {
@@ -80,35 +136,35 @@ class PreferenceManager(context: Context) {
     }
 
     fun setLastUsedNumber(contactId: String, number: String) {
-        prefs.edit { putString("last_used_number_$contactId", number) }
+        setString("last_used_number_$contactId", number)
     }
 
     fun getLastUsedNumber(contactId: String): String? {
-        return prefs.getString("last_used_number_$contactId", null)
+        return getString("last_used_number_$contactId", null)
     }
 
     fun setFavoriteNumber(contactId: String, number: String?) {
-        prefs.edit { putString("favorite_number_$contactId", number) }
+        setString("favorite_number_$contactId", number)
     }
 
     fun getFavoriteNumber(contactId: String): String? {
-        return prefs.getString("favorite_number_$contactId", null)
+        return getString("favorite_number_$contactId", null)
     }
 
     fun setFavoriteSim(contactId: String, simHandle: String?) {
-        prefs.edit { putString("favorite_sim_$contactId", simHandle) }
+        setString("favorite_sim_$contactId", simHandle)
     }
 
     fun getFavoriteSim(contactId: String): String? {
-        return prefs.getString("favorite_sim_$contactId", null)
+        return getString("favorite_sim_$contactId", null)
     }
 
     fun setFavoriteEmail(contactId: String, email: String?) {
-        prefs.edit { putString("favorite_email_$contactId", email) }
+        setString("favorite_email_$contactId", email)
     }
 
     fun getFavoriteEmail(contactId: String): String? {
-        return prefs.getString("favorite_email_$contactId", null)
+        return getString("favorite_email_$contactId", null)
     }
 
     fun getFavoritesOrder(): List<String> {
@@ -207,7 +263,6 @@ class PreferenceManager(context: Context) {
         const val KEY_BLOCKED_CONTACTS      = "blocked_contacts"
         const val KEY_SHOW_INCOMING_CALL_UI = "show_incoming_call_ui"
         const val KEY_SHOW_CALLER_UI        = "show_caller_ui"
-//        const val KEY_SILENCE_UNKNOWN       = "silence_unknown_callers"
         const val KEY_PROXIMITY_BG          = "proximity_sensor_bg"
         const val KEY_SCROLL_HAPTICS        = "scroll_haptics_enabled"
         const val KEY_SCROLL_CM_PER_HAPTIC  = "scroll_cm_per_haptic"   // cm scrolled before each haptic tick
@@ -221,9 +276,7 @@ class PreferenceManager(context: Context) {
         const val KEY_AUTO_UPDATE_CHECK     = "auto_update_check"
         const val KEY_PILL_NAV              = "pill_style_nav"
         const val KEY_FIRST_LAUNCH_DONE     = "first_launch_done"
-        // Hangup button width fraction (0.4f .. 1.0f)
         const val KEY_HANGUP_WIDTH          = "hangup_button_width"
-        // Dialer role popup shown after welcome
         const val KEY_DIALER_POPUP_SHOWN    = "dialer_popup_shown"
         const val KEY_TELEGRAM_SHOWN        = "telegram_shown"
         const val KEY_SCROLL_ANIMATION      = "scroll_animation_enabled"
@@ -237,7 +290,6 @@ class PreferenceManager(context: Context) {
         const val KEY_LG_CONTACTS_FAB          = "lg_contacts_fab"
         const val KEY_LG_RECENTS_FAB           = "lg_recents_fab"
         const val KEY_BLUR_EFFECTS            = "blur_effects_ui"
-        // Material Blur effect elements
         const val KEY_BLUR_BOTTOM_NAV          = "blur_bottom_nav"
         const val KEY_BLUR_DROPDOWN_MENU       = "blur_dropdown_menu"
         const val KEY_BLUR_DIALPAD_CALL_BUTTON = "blur_dialpad_call_button"
@@ -245,7 +297,6 @@ class PreferenceManager(context: Context) {
         const val KEY_BLUR_RECENTS_FAB         = "blur_recents_fab"
         const val KEY_AUTO_SPEAKER             = "auto_speaker"
         const val KEY_FLOATING_CALL            = "floating_ongoing_call"
-        // Tab Sections visibility
         const val KEY_TAB_SHOW_FAVORITES       = "tab_show_favorites"
         const val KEY_TAB_SHOW_CALLS           = "tab_show_calls"
         const val KEY_TAB_SHOW_CONTACTS        = "tab_show_contacts"
@@ -253,30 +304,21 @@ class PreferenceManager(context: Context) {
         const val KEY_TAB_SHOW_NOTES           = "tab_show_notes"
         const val KEY_TAB_SHOW_SETTINGS        = "tab_show_settings"
         const val KEY_TAB_SHOW_SEARCH          = "tab_show_search"
-        // Comma-separated list of tab keys (favorites, calls, contacts, notes)
-        // describing the order tabs appear in the bottom navigation bar.
         const val KEY_TAB_ORDER                = "tab_order"
         const val DEFAULT_TAB_ORDER            = "favorites,contacts,calls,dialpad,notes,search,settings"
-        // Biometrics
-        const val KEY_BIOMETRICS_TYPE          = "biometrics_type"         // "system" | "pin" | "password" | ""
+        const val KEY_BIOMETRICS_TYPE          = "biometrics_type"
         const val KEY_BIOMETRICS_PIN           = "biometrics_pin"
         const val KEY_BIOMETRICS_PASSWORD      = "biometrics_password"
         const val KEY_BIOMETRICS_APP_LOCK      = "biometrics_app_lock"
         const val KEY_BIOMETRICS_CALL_LOCK     = "biometrics_call_lock"
-        const val KEY_BIOMETRICS_CALL_LOCK_MODE    = "biometrics_call_lock_mode"    // "all" | "specified" | "skip_specified"
-        const val KEY_BIOMETRICS_CALL_LOCK_NUMBERS = "biometrics_call_lock_numbers" // comma-separated phone numbers
-        // Search filter (Dialpad / Calls / Contacts / Favourites search bars) — the "Filter"
-        // button beside the search bar. All four default to true (checked) so search behaves
-        // as broadly as possible until the user deliberately narrows it down. Persisted here
-        // (rather than in-memory) so the chosen filter survives the app being closed and
-        // reopened.
+        const val KEY_BIOMETRICS_CALL_LOCK_MODE    = "biometrics_call_lock_mode"
+        const val KEY_BIOMETRICS_CALL_LOCK_NUMBERS = "biometrics_call_lock_numbers"
         const val KEY_SEARCH_FILTER_CONTACTS        = "search_filter_contacts"
         const val KEY_SEARCH_FILTER_NON_CONTACTS    = "search_filter_non_contacts"
         const val KEY_SEARCH_FILTER_RECORDINGS      = "search_filter_recordings"
         const val KEY_SEARCH_FILTER_CONTACT_NOTES   = "search_filter_contact_notes"
         const val KEY_SEARCH_FILTER_RECORDING_NOTES = "search_filter_recording_notes"
 
-        // Goodwy
         const val KEY_DEFAULT_TAB              = "default_tab"
         const val KEY_CONTACTS_DEFAULT_ACCOUNT = "contacts_default_accounts"
         const val KEY_LAST_OPENED_TAB          = "last_opened_tab"

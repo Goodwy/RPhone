@@ -480,7 +480,7 @@ class ContactsViewModel(
             return map
         }
 
-    fun getContactSources(contactId: String): List<ContactsRepository.ContactSource> {
+    suspend fun getContactSources(contactId: String): List<ContactsRepository.ContactSource> {
         return contactsRepo.getRawContactsForContact(contactId)
             .map { raw ->
                 ContactsRepository.ContactSource(
@@ -495,7 +495,7 @@ class ContactsViewModel(
             }
     }
 
-    fun getRawContactData(rawContactId: String): Contact? {
+    suspend fun getRawContactData(rawContactId: String): Contact? {
         return contactsRepo.getRawContactData(rawContactId)
     }
 
@@ -513,7 +513,7 @@ class ContactsViewModel(
         }
     }
 
-    fun dumpContact(contactId: String): String {
+    suspend fun dumpContact(contactId: String): String {
         return contactsRepo.dumpContact(contactId)
     }
 }
