@@ -8,6 +8,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 /**
@@ -16,18 +17,32 @@ import kotlinx.coroutines.launch
  */
 class CallStateManager(private val getCallerNameUseCase: GetCallerNameUseCase) {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var lookupJob: Job? = null
     
     private val _callerMetadata = MutableStateFlow<CallerMetadata?>(null)
     val callerMetadata: StateFlow<CallerMetadata?> = _callerMetadata.asStateFlow()
 
     fun onNewCallReceived(number: String, cnam: String?) {
-        scope.launch {
+        // Immediately emit a fallback so UI/Notification isn't empty/Unknown if we have CNAM or just the number.
+        // Doing this before launching the lookup coroutine ensures synchronous updates for the current frame.
+        val current = _callerMetadata.value
+        if (current == null || current.number != number || (current.name == current.number && !cnam.isNullOrBlank())) {
+            _callerMetadata.value = CallerMetadata(
+                number = number,
+                name = cnam ?: number.ifBlank { "Unknown" },
+                isLocalContact = false
+            )
+        }
+
+        lookupJob?.cancel()
+        lookupJob = scope.launch {
             val metadata = getCallerNameUseCase(number, cnam)
             _callerMetadata.value = metadata
         }
     }
     
     fun onCallEnded() {
+        lookupJob?.cancel()
         _callerMetadata.value = null
     }
 }

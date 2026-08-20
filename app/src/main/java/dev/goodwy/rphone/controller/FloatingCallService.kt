@@ -58,6 +58,7 @@ import dev.goodwy.rphone.view.theme.Rill4Theme
 import dev.goodwy.rphone.view.theme.color_call_button
 import dev.goodwy.rphone.view.theme.color_call_end
 import kotlinx.coroutines.*
+import kotlin.math.roundToInt
 
 class FloatingCallService : Service() {
 
@@ -155,7 +156,13 @@ class FloatingCallService : Service() {
             setContent { Rill4Theme { BubbleUI(contactNameState.value, photoUriState.value) { if (menuView == null) showMenu() else dismissMenu() } } }
         }
         bubbleView = cv
-        try { wm.addView(cv, bubbleParams) } catch (_: Exception) { stopSelf() }
+        try {
+            wm.addView(cv, bubbleParams)
+        } catch (_: WindowManager.BadTokenException) {
+            stopSelf()
+        } catch (_: Exception) {
+            stopSelf()
+        }
     }
 
     @Composable
@@ -211,9 +218,11 @@ class FloatingCallService : Service() {
                                 dragged = true
                             if (dragged) {
                                 change.consume()
-                                bubbleParams.x = (bubbleParams.x + delta.x.toInt()).coerceAtLeast(0)
-                                bubbleParams.y = (bubbleParams.y + delta.y.toInt()).coerceAtLeast(0)
-                                try { wm.updateViewLayout(bubbleView, bubbleParams) } catch (_: Exception) {}
+                                bubbleParams.x = (bubbleParams.x + delta.x.roundToInt()).coerceAtLeast(0)
+                                bubbleParams.y = (bubbleParams.y + delta.y.roundToInt()).coerceAtLeast(0)
+                                try {
+                                    bubbleView?.let { wm.updateViewLayout(it, bubbleParams) }
+                                } catch (_: Exception) {}
                             }
                             if (!change.pressed) { if (!dragged) onTap(); break }
                         } while (true)
@@ -296,7 +305,15 @@ class FloatingCallService : Service() {
             }
         }
         menuView = cv
-        try { wm.addView(cv, menuParams) } catch (_: Exception) { dismissMenu(); return }
+        try {
+            wm.addView(cv, menuParams)
+        } catch (_: WindowManager.BadTokenException) {
+            dismissMenu()
+            return
+        } catch (_: Exception) {
+            dismissMenu()
+            return
+        }
         scope.launch { delay(40); menuVisibleState.value = true }
     }
 

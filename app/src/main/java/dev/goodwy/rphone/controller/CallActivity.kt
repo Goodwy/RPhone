@@ -64,7 +64,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
                 val call = session?.call
                 val callState = session?.state
 
-                LaunchedEffect(callState, settingsState) {
+                LaunchedEffect(callState, settingsState, session) {
                     val keepScreenOn =
                         preferenceManager.getBoolean(PreferenceManager.KEY_KEEP_SCREEN_ON, true)
                     if (keepScreenOn) {
@@ -72,6 +72,29 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
                     } else {
                         window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                     }
+
+                    if (session == null || callState == Call.STATE_DISCONNECTED) {
+                        if (callState == Call.STATE_DISCONNECTED) {
+                            if (preferenceManager.getBoolean(
+                                    PreferenceManager.KEY_VIBRATE_ON_HANGUP,
+                                    false
+                                )
+                            ) {
+                                this@CallActivity.window?.decorView?.performHapticFeedback(
+                                    HapticFeedbackConstants.LONG_PRESS
+                                )
+                            }
+                            releaseProximityLock()
+                        }
+                        
+                        delay(1200) // Brief delay to show "Call Ended" state
+                        if (CallService.currentCallSession.value == null || 
+                            CallService.currentCallSession.value?.state == Call.STATE_DISCONNECTED) {
+                            finish()
+                        }
+                        return@LaunchedEffect
+                    }
+
                     when (callState) {
                         Call.STATE_ACTIVE -> {
                             if (preferenceManager.getBoolean(
@@ -106,29 +129,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
                             }
                         }
 
-                        Call.STATE_DISCONNECTED -> {
-                            if (preferenceManager.getBoolean(
-                                    PreferenceManager.KEY_VIBRATE_ON_HANGUP,
-                                    false
-                                )
-                            ) {
-                                this@CallActivity.window?.decorView?.performHapticFeedback(
-                                    HapticFeedbackConstants.LONG_PRESS
-                                )
-                            }
-                            releaseProximityLock()
-                            delay(1200) // Brief delay to show "Call Ended" state
-                            finish()
-                        }
-
                         else -> releaseProximityLock()
-                    }
-
-                    if (session == null) {
-                        delay(1200)
-                        if (CallService.allCalls.value.isEmpty()) {
-                            finish()
-                        }
                     }
                 }
 

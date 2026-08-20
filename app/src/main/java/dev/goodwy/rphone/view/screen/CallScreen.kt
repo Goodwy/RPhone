@@ -103,8 +103,10 @@ import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import dev.goodwy.rphone.view.theme.MyColors.dialpadKeyColor
 import dev.goodwy.rphone.view.theme.color_call_button
 import dev.goodwy.rphone.view.theme.color_call_end
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
 import java.util.*
 import kotlin.math.abs
@@ -154,7 +156,7 @@ fun ExpressiveCallScreen(
     }
     val isMuted = audioState?.isMuted ?: false
 
-    var callDuration by remember { mutableLongStateOf(0L) }
+    var callDuration by remember(call) { mutableLongStateOf(0L) }
     var showKeypad by remember { mutableStateOf(false) }
     var showMore by remember { mutableStateOf(false) }
     var typedDigits by remember { mutableStateOf("") }
@@ -165,28 +167,16 @@ fun ExpressiveCallScreen(
     }
 
     val connectTime = remember(call) { call.details.connectTimeMillis }
-//    LaunchedEffect(callState, call.details.connectTimeMillis) {
-//        if (callState == Call.STATE_ACTIVE) {
-//            val connectTime = if (call.details.connectTimeMillis > 0) call.details.connectTimeMillis else System.currentTimeMillis()
-//            while (true) {
-//                callDuration = (System.currentTimeMillis() - connectTime) / 1000
-//                delay(1.seconds)
-//            }
-//        }
-//    }
-    LaunchedEffect(callState, connectTime) {
-        if (callState == Call.STATE_ACTIVE && connectTime > 0) {
+    LaunchedEffect(call, callState, connectTime) {
+        if (callState == Call.STATE_ACTIVE) {
+            val start = if (connectTime > 0) connectTime else System.currentTimeMillis()
             while (true) {
-                callDuration = (System.currentTimeMillis() - connectTime) / 1000
-                delay(1000)
+                callDuration = (System.currentTimeMillis() - start) / 1000
+                val nextTick = 1000 - (System.currentTimeMillis() % 1000)
+                delay(nextTick)
             }
-        } else if (callState == Call.STATE_ACTIVE && connectTime == 0L) {
-            // If connectTime == 0, use the current time
-            val startTime = System.currentTimeMillis()
-            while (true) {
-                callDuration = (System.currentTimeMillis() - startTime) / 1000
-                delay(1000)
-            }
+        } else if (callState != Call.STATE_HOLDING) {
+            callDuration = 0L
         }
     }
 
@@ -220,27 +210,35 @@ fun ExpressiveCallScreen(
 
     LaunchedEffect(phoneNumber) {
         if (phoneNumber.isNotEmpty() && noteText.isBlank()) {
-            val existing = NoteManager.readNoteByPhone(context, phoneNumber)
+            val existing = withContext(Dispatchers.IO) {
+                NoteManager.readNoteByPhone(context, phoneNumber)
+            }
             if (existing.isNotBlank()) noteText = existing
         }
     }
 
     LaunchedEffect(contactName) {
         if (phoneNumber.isNotEmpty() && noteText.isBlank()) {
-            val existing = NoteManager.readNote(context, contactName, phoneNumber)
+            val existing = withContext(Dispatchers.IO) {
+                NoteManager.readNote(context, contactName, phoneNumber)
+            }
             if (existing.isNotBlank()) noteText = existing
         }
     }
 
     LaunchedEffect(noteText) {
         if (phoneNumber.isNotEmpty() && noteText.isNotBlank()) {
-            NoteManager.writeNote(context, contactName, phoneNumber, noteText)
+            withContext(Dispatchers.IO) {
+                NoteManager.writeNote(context, contactName, phoneNumber, noteText)
+            }
         }
     }
 
     LaunchedEffect(callState) {
         if ((callState == Call.STATE_DISCONNECTED || callState == Call.STATE_DISCONNECTING) && noteText.isNotBlank() && phoneNumber.isNotEmpty()) {
-            NoteManager.writeNote(context, contactName, phoneNumber, noteText)
+            withContext(Dispatchers.IO) {
+                NoteManager.writeNote(context, contactName, phoneNumber, noteText)
+            }
         }
     }
     // <--- Call notes

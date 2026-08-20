@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
 
 data class CallSession(
@@ -50,12 +51,13 @@ class CallService : InCallService() {
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var redialCount = 0
 
-    private fun getContactBitmap(photoUri: String?): Bitmap? {
-        if (photoUri == null) return null
-        return try {
+    private suspend fun getContactBitmap(photoUri: String?): Bitmap? = withContext(Dispatchers.IO) {
+        if (photoUri == null) return@withContext null
+        try {
             val uri = photoUri.toUri()
-            val inputStream = contentResolver.openInputStream(uri)
-            BitmapFactory.decodeStream(inputStream)
+            contentResolver.openInputStream(uri)?.use { inputStream ->
+                BitmapFactory.decodeStream(inputStream)
+            }
         } catch (_: Exception) {
             null
         }
@@ -207,7 +209,9 @@ class CallService : InCallService() {
                     cancelNotification()
                 }
             } else {
-                updateNotification(call)
+                serviceScope.launch {
+                    updateNotification(call)
+                }
             }
         }
 
@@ -219,7 +223,9 @@ class CallService : InCallService() {
             } else null
             callStateManager.onNewCallReceived(number, cnam)
             updateCallState()
-            updateNotification(call)
+            serviceScope.launch {
+                updateNotification(call)
+            }
         }
     }
 
@@ -257,10 +263,10 @@ class CallService : InCallService() {
 //        }
     }
 
-    private fun isNumberBlocked(number: String): Boolean {
-        if (number.isEmpty()) return false
-        return try {
-            BlockedNumberContract.isBlocked(this, number)
+    private suspend fun isNumberBlocked(number: String): Boolean = withContext(Dispatchers.IO) {
+        if (number.isEmpty()) return@withContext false
+        try {
+            BlockedNumberContract.isBlocked(this@CallService, number)
         } catch (_: Exception) {
             false
         }
@@ -354,17 +360,17 @@ class CallService : InCallService() {
             _preferredCall.value = null
         }
 
-        // Priority: Ringing > Preferred > Dialing/Connecting > Active > Holding > Others
+        // Priority: Ringing > Preferred > Dialing/Connecting > Active > Holding > Disconnected > Others
         val activePreferred = if (preferred != null && preferred.state != Call.STATE_DISCONNECTED && preferred.state != Call.STATE_HOLDING) preferred else null
 
         val priorityCall = calls.find { it.state == Call.STATE_RINGING }
             ?: activePreferred
-            ?: calls.find { it.state == Call.STATE_RINGING }
             ?: calls.find { it.state == Call.STATE_DIALING || it.state == Call.STATE_CONNECTING }
             ?: calls.find { it.state == Call.STATE_ACTIVE }
-            ?: calls.find { it == preferred } // Even if held, if it's preferred and nothing else is active
+            ?: calls.find { it == preferred }
             ?: calls.find { it.state == Call.STATE_HOLDING }
-            ?: calls.firstOrNull { it.state != Call.STATE_DISCONNECTED }
+            ?: calls.find { it.state == Call.STATE_DISCONNECTED || it.state == Call.STATE_DISCONNECTING }
+            ?: calls.firstOrNull()
 
         if (priorityCall != null) {
             val connectTime = if (priorityCall.state == Call.STATE_ACTIVE) {
@@ -418,22 +424,24 @@ class CallService : InCallService() {
         if (isUssd) return
         // ────────────────────────────────────────────────────────────────────
 
-        if (isNumberBlocked(number)) {
-            handleBlockedCall(call, number)
-            return
-        }
-
-        updateCallState()
-        updateNotification(call)
-
-        val fullscreenCalls = preferenceManager.getBoolean(PreferenceManager.KEY_ALWAYS_FULLSCREEN_CALLS, false)
-        if (call.state != Call.STATE_RINGING || fullscreenCalls) {
-            val intent = Intent(this, CallActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        serviceScope.launch {
+            if (isNumberBlocked(number)) {
+                handleBlockedCall(call, number)
+                return@launch
             }
-            try {
-                startActivity(intent)
-            } catch (_: Exception) {
+
+            updateCallState()
+            updateNotification(call)
+
+            val fullscreenCalls = preferenceManager.getBoolean(PreferenceManager.KEY_ALWAYS_FULLSCREEN_CALLS, false)
+            if (call.state != Call.STATE_RINGING || fullscreenCalls) {
+                val intent = Intent(this@CallService, CallActivity::class.java).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                }
+                try {
+                    startActivity(intent)
+                } catch (_: Exception) {
+                }
             }
         }
     }
@@ -450,7 +458,9 @@ class CallService : InCallService() {
             removeForeground()
             cancelNotification()
         } else {
-            _currentCallSession.value?.call?.let { updateNotification(it) }
+            serviceScope.launch {
+                _currentCallSession.value?.call?.let { updateNotification(it) }
+            }
         }
     }
 
@@ -458,7 +468,9 @@ class CallService : InCallService() {
     override fun onCallAudioStateChanged(audioState: CallAudioState?) {
         super.onCallAudioStateChanged(audioState)
         _audioState.value = audioState
-        _currentCallSession.value?.call?.let { updateNotification(it) }
+        serviceScope.launch {
+            _currentCallSession.value?.call?.let { updateNotification(it) }
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -497,7 +509,7 @@ class CallService : InCallService() {
         return super.onStartCommand(intent, flags, startId)
     }
 
-    private fun updateNotification(call: Call) {
+    private suspend fun updateNotification(call: Call) {
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         val fullscreenCalls = preferenceManager.getBoolean(PreferenceManager.KEY_ALWAYS_FULLSCREEN_CALLS, false)
 
@@ -771,6 +783,11 @@ class CallService : InCallService() {
     override fun onDestroy() {
         super.onDestroy()
         if (instance == this) instance = null
+        // Clear static references to framework objects to prevent memory leaks
+        _currentCallSession.value = null
+        _allCalls.value = emptyList()
+        _preferredCall.value = null
+        _audioState.value = null
         serviceScope.cancel()
     }
 
