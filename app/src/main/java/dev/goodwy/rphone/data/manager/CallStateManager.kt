@@ -23,16 +23,22 @@ class CallStateManager(private val getCallerNameUseCase: GetCallerNameUseCase) {
     val callerMetadata: StateFlow<CallerMetadata?> = _callerMetadata.asStateFlow()
 
     fun onNewCallReceived(number: String, cnam: String?) {
+        val current = _callerMetadata.value
+        // Avoid redundant lookups if we already have the correct metadata or are already looking it up.
+        // We only proceed if it's a new number, or if we have a number-only metadata and a CNAM just arrived.
+        if (current != null && current.number == number) {
+            val isJustNumber = current.name == current.number
+            val hasNewCnam = !cnam.isNullOrBlank() && isJustNumber
+            if (!hasNewCnam) return 
+        }
+
         // Immediately emit a fallback so UI/Notification isn't empty/Unknown if we have CNAM or just the number.
         // Doing this before launching the lookup coroutine ensures synchronous updates for the current frame.
-        val current = _callerMetadata.value
-        if (current == null || current.number != number || (current.name == current.number && !cnam.isNullOrBlank())) {
-            _callerMetadata.value = CallerMetadata(
-                number = number,
-                name = cnam ?: number.ifBlank { "Unknown" },
-                isLocalContact = false
-            )
-        }
+        _callerMetadata.value = CallerMetadata(
+            number = number,
+            name = cnam ?: number.ifBlank { "Unknown" },
+            isLocalContact = false
+        )
 
         lookupJob?.cancel()
         lookupJob = scope.launch {

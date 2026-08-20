@@ -217,11 +217,6 @@ class CallService : InCallService() {
 
         override fun onDetailsChanged(call: Call, details: Call.Details) {
             super.onDetailsChanged(call, details)
-            val number = details.handle?.schemeSpecificPart?.let { android.net.Uri.decode(it) } ?: ""
-            val cnam = if (details.callerDisplayNamePresentation == TelecomManager.PRESENTATION_ALLOWED) {
-                details.callerDisplayName
-            } else null
-            callStateManager.onNewCallReceived(number, cnam)
             updateCallState()
             serviceScope.launch {
                 updateNotification(call)
@@ -380,7 +375,15 @@ class CallService : InCallService() {
                     System.currentTimeMillis()
                 }
             } else 0L
+            
             _currentCallSession.value = CallSession(priorityCall, priorityCall.state, connectTimeMillis = connectTime)
+
+            // Update metadata for the current priority call (handles swaps and initial loads)
+            val number = priorityCall.details.handle?.schemeSpecificPart?.let { android.net.Uri.decode(it) } ?: ""
+            val cnam = if (priorityCall.details.callerDisplayNamePresentation == TelecomManager.PRESENTATION_ALLOWED) {
+                priorityCall.details.callerDisplayName
+            } else null
+            callStateManager.onNewCallReceived(number, cnam)
         } else {
             _currentCallSession.value = null
         }
@@ -409,17 +412,8 @@ class CallService : InCallService() {
         redialCount = 0
         call.registerCallback(callCallback)
 
-        val number = call.details.handle?.schemeSpecificPart ?.let { android.net.Uri.decode(it) } ?: ""
-        val cnam = if (call.details.callerDisplayNamePresentation == TelecomManager.PRESENTATION_ALLOWED) {
-            call.details.callerDisplayName
-        } else null
-
-        callStateManager.onNewCallReceived(number, cnam)
-
         // ── USSD / MMI outgoing calls ────────────────────────────────────────
-        // Do NOT launch CallActivity for codes like *124# *#06# ##002# *21*N#.
-        // com.android.phone owns MMI/USSD processing at the RIL level and shows
-        // its own system dialog — just return and let it handle everything.
+        val number = call.details.handle?.schemeSpecificPart ?.let { android.net.Uri.decode(it) } ?: ""
         val isUssd = call.state != Call.STATE_RINGING && isUssdNumber(number)
         if (isUssd) return
         // ────────────────────────────────────────────────────────────────────
