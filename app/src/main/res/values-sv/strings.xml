@@ -37,6 +37,9 @@
     <string name="filter_incoming">Inkommande</string>
     <string name="filter_outgoing">Utgående</string>
     <string name="filter_rejected">Avvisade</string>
+    <string name="sim_picker_title">Välj SIM-kort</string>
+    <string name="label_unknown_number">Okänt nummer</string>
+    <string name="reset">Återställ</string>
 
     <!-- Search -->
     <string name="search">Sök</string>
@@ -135,6 +138,10 @@
     <string name="incoming_call_ui_buttons">Knappar</string>
     <string name="incoming_call_ui_slide_to_answer">Dra för att svara (iOS)</string>
     <string name="incoming_call_ui_vertical_swipe">Vertikalt svep</string>
+    <string name="dialpad_animations">Knappsatsanimationer</string>
+    <string name="dialpad_animations_subtitle">Visa animationer vid inmatning av siffror</string>
+    <string name="hide_voice_search">Dölj röstsökning</string>
+    <string name="hide_voice_search_subtitle">Döljer knappen för röstsökning</string>
 
     <string name="avatars_settings">Avatar-inställningar</string>
     <string name="avatars_settings_subtitle">Anpassa färger, ramar och mer</string>
@@ -269,6 +276,8 @@
     <string name="incorrect_password">Felaktigt lösenord</string>
     <string name="incorrect_password_subtitle">Lösenordet måste innehålla minst 4 tecken</string>
     <string name="password_dont_match">Lösenorden matchar inte</string>
+    <string name="lock_on_minimize">Lås vid minimering</string>
+    <string name="lock_on_minimize_subtitle">Om detta är avstängt kommer appen endast att avslutas när den är helt avlastad från minnet</string>
 
     <string name="manage_contacts">Hantera kontakter</string>
     <string name="manage_contacts_subtitle">Privata kontakter, konton att visa och rensa din lista</string>
@@ -328,17 +337,22 @@
     <string name="keypad">Knappsats</string>
     <string name="mute">Tyst</string>
     <string name="unmute">Ljud på</string>
-    <string name="speaker">Högtalare</string>
+    <string name="audio_route_speaker">Högtalare</string>
+    <string name="audio_route_handset">Lur</string>
+    <string name="audio_route_headset">Headset</string>
+    <string name="audio_route_bluetooth">Bluetooth</string>
+    <string name="audio_route_bluetooth_short">BT</string>
+    <string name="audio_output_title">Ljudutgång</string>
     <string name="add_call">Lägg till samtal</string>
     <string name="resume">Återuppta</string>
     <string name="swap">Växla</string>
     <string name="more">Mer</string>
     <string name="hold">Vänta</string>
-    <string name="on_hold">I vänteläge</string>
-    <string name="call_ended">Samtalet avslutat</string>
-    <string name="calling">Ringer…</string>
-    <string name="incoming_call">Inkommande samtal</string>
-    <string name="connecting">Ansluter…</string>
+    <string name="call_status_on_hold">I vänteläge</string>
+    <string name="call_status_ended">Samtalet avslutat</string>
+    <string name="call_status_calling">Ringer…</string>
+    <string name="call_status_incoming">Inkommande samtal</string>
+    <string name="call_status_connecting">Ansluter…</string>
     <string name="slide_to_answer">Dra för att svara</string>
     <string name="swipe_up_to_answer">Svep uppåt för att svara</string>
     <string name="swipe_down_to_reject">Svep nedåt för att avvisa</string>
@@ -355,6 +369,31 @@
     <string name="could_not_delete">Kunde inte ta bort</string>
     <string name="clear_all_filtered_logs">Rensa alla filtrerade loggar</string>
     <string name="clear_all_filtered_logs_selected">Detta kommer att ta bort all visad samtalshistorik. Den här åtgärden kan inte ångras.</string>
+
+    <string name="action_block">Blockera</string>
+    <string name="action_unblock">Avblockera</string>
+    <string name="action_block_number">Blockera ett nummer</string>
+    <string name="action_unblock_number">Avblockera ett nummer</string>
+    <string name="contact_block">Blockera kontakt</string>
+    <string name="contact_block_supporting">Blockera inkommande samtal och meddelanden från denna kontakt</string>
+    <string name="contact_unblock">Avblockera kontakt</string>
+    <string name="contact_unblock_supporting">Tillåt samtal och meddelanden från denna kontakt igen</string>
+    <string name="call_log_block_title">Blockera nummer?</string>
+    <string name="call_log_block_message">Samtal från de %1$d valda posterna kommer att blockeras.</string>
+
+    <string name="contact_call_background">Samtalsbakgrund</string>
+    <string name="contact_call_background_set">Anpassad bild vald</string>
+    <string name="contact_call_background_none">Använd standardbakgrunden</string>
+    <string name="contact_call_background_choose">Välj en bild</string>
+    <string name="contact_call_background_change">Ändra bild</string>
+    <string name="contact_call_background_remove">Ta bort bakgrund</string>
+    <string name="contact_call_background_saving">Sparar bild…</string>
+    <string name="contact_call_background_error">Kunde inte spara den bilden</string>
+    <string name="contact_call_background_no_target">Spara numret som en kontakt först</string>
+    <string name="contact_call_background_preview">Förhandsgranskning av samtalsbakgrund</string>
+    <string name="settings_call_default_background">Standard samtalsbakgrund</string>
+    <string name="settings_call_default_background_set">En anpassad bild visas vid varje samtal</string>
+    <string name="settings_call_default_background_none">Inte inställd — samtal använder apptemat</string>
 
     <!-- Contacts -->
     <string name="contacts">Kontakter</string>
@@ -405,9 +444,11 @@
     <string name="add_event">Lägg till händelse</string>
     <string name="add_address">Lägg till adress</string>
     <string name="add_note">Lägg till anteckning</string>
+    <string name="add_photo">Lägg till ett foto</string>
     <string name="contact_ringtone">Kontaktens signalton</string>
     <string name="unsaved_changes">Ej sparade ändringar</string>
     <string name="unsaved_changes_subtitle">Vill du spara dina ändringar innan du lämnar?</string>
+    <string name="ringtone_custom">Anpassad</string>
     <plurals name="contacts_count">
         <item quantity="one">%d kontakt</item>
         <item quantity="other">%d kontakter</item>
@@ -439,6 +480,7 @@
 
     <!-- Call notes -->
     <string name="notes">Anteckningar</string>
+    <string name="notes_contact">Anmärkningar</string>
     <string name="call_notes">Samtalsanteckningar</string>
     <string name="about_call_notes">Om samtalsanteckningar</string>
     <string name="about_call_notes_subtitle">Korta anteckningar som du gör under ett samtal. De lagras lokalt i appens filer, kopplade till telefonnumret (synkroniseras inte med Google Kontakter och andra). Varje nummer har sin egen privata anteckning, som endast kan nås från samtalsloggen i kontaktinformationen i appen eller från fliken \"Samtalsanteckningar\".</string>
@@ -492,4 +534,16 @@
     <string name="page_subtitle_three">Omedelbar T9-sökning, mjuka animationer och blixtsnabba samtal. Bara en telefonapp som fungerar.</string>
     <string name="page_title_warning">Under utveckling</string>
     <string name="page_subtitle_warning">Den här appen är fortfarande under utveckling. Vissa funktioner kanske inte fungerar som förväntat. Använd med försiktighet och rapportera eventuella problem du stöter på.</string>
+
+    <!-- Call notifications (CallService) -->
+    <string name="notif_channel_outgoing_calls">Utgående samtal</string>
+    <string name="notif_channel_incoming_calls">Inkommande samtal</string>
+    <string name="notif_channel_fullscreen_incoming_calls">Inkommande samtal (helskärm)</string>
+    <string name="notif_channel_missed_calls">Missade samtal</string>
+    <string name="notif_blocked_call_title">Blockerat samtal</string>
+    <string name="notif_blocked_call_text">Blockerat samtal från %1$s</string>
+    <string name="notif_missed_call_title">Missat samtal</string>
+    <string name="notif_missed_call_text">Missat samtal från %1$s kl. %2$s</string>
+    <string name="notif_via_sim">via %1$s</string>
+    <string name="notif_active_call">Aktivt samtal</string>
 </resources>

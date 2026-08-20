@@ -21,6 +21,7 @@ import androidx.compose.material.icons.automirrored.filled.CallMissed
 import androidx.compose.material.icons.automirrored.filled.CallReceived
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.rounded.AccessTime
+import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -35,6 +36,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import dev.goodwy.rphone.R
+import dev.goodwy.rphone.controller.util.forceLtr
 import dev.goodwy.rphone.controller.util.formatDate
 import dev.goodwy.rphone.controller.util.formatSecondsToShortTimeString
 import dev.goodwy.rphone.controller.util.getPhoneTypeText
@@ -69,7 +71,7 @@ fun CallLogTileSimple(
         CallLog.Calls.BLOCKED_TYPE  -> stringResource(R.string.blocked)
         else                        -> stringResource(R.string.call)
     }
-    val headlineText = if (showNumber) log.number + "  •  " + typeText else typeText
+    val headlineText = if (showNumber) log.number.forceLtr() + "  •  " + typeText else typeText
     val simLabel = if (showSimLabel && log.simLabel != null) " • " + log.simLabel else ""
     CallLogListItemSimple(
         headline = headlineText,
@@ -105,7 +107,7 @@ fun CallLogTile(
         val simLabel = if (showSimLabel && log.simLabel != null) " • " + log.simLabel else ""
         CallLogListItem(
             headline = buildString {
-                append(log.name ?: log.number)
+                append(if (log.name == log.number) log.number.forceLtr() else log.name?.ifEmpty { log.number } ?: log.number.ifEmpty { "Unknown" })
                 if (log.count > 1) append(" (${log.count})")
             },
             supporting = buildString {
@@ -173,7 +175,7 @@ fun CallLogTile(
                     onClick = { showMenu = false; onCallClick(log) }
                 )
                 if (log.number.isNotBlank()) {
-                    val phoneNumber = log.number
+                    val phoneNumber = log.number.forceLtr()
                     DropdownMenuItem(
                         contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
                         text = { Text(stringResource(R.string.message)) },
@@ -251,6 +253,7 @@ fun BatchCallLogActionBar(
     onClearSelection: () -> Unit,
     onDelete: () -> Unit,
     onClearAll: (() -> Unit)? = null,
+    onBlock: (() -> Unit)? = null,
     onShare: (() -> Unit)? = null,
     onCallLogs: (() -> Unit)? = null,
     onDeselect: () -> Unit,
@@ -260,6 +263,7 @@ fun BatchCallLogActionBar(
 //    var showSelectionMenuOuter by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
     var showClearAllConfirm by remember { mutableStateOf(false) }
+    var showBlockConfirm by remember { mutableStateOf(false) }
 
     Surface(
         color = MaterialTheme.colorScheme.primaryContainer,
@@ -290,6 +294,13 @@ fun BatchCallLogActionBar(
                     contentDescription = stringResource(R.string.show_full_history)
                 )
             }
+            if (onBlock != null) {
+                RillIconButton(
+                    onClick = { showBlockConfirm = true },
+                    imageVector = Icons.Rounded.Block,
+                    contentDescription = stringResource(R.string.action_block_number)
+                )
+            }
             if (onClearAll != null) {
                 RillIconButton(
                     onClick = { showClearAllConfirm = true },
@@ -309,42 +320,6 @@ fun BatchCallLogActionBar(
                     contentDescription = stringResource(R.string.share)
                 )
             }
-
-//            Box {
-//                RillIconButton(
-//                    onClick = { showSelectionMenuOuter = true },
-//                    imageVector = Icons.Default.MoreVert,
-//                    contentDescription = stringResource(R.string.more)
-//                )
-//                DropdownMenu(shape = RoundedCornerShape(16.dp), expanded = showSelectionMenuOuter, onDismissRequest = { showSelectionMenuOuter = false }) {
-//                    DropdownMenuItem(
-//                        text = { Text(stringResource(R.string.share)) },
-//                        leadingIcon = { Icon(Icons.Default.Share, null) },
-//                        onClick = {
-//                            showSelectionMenuOuter = false
-//                            onShare()
-//                        }
-//                    )
-////                    DropdownMenuItem(
-////                        text = { Text("Deselect All") },
-////                        leadingIcon = { Icon(Icons.Rounded.Deselect, "Deselect All") },
-////                        onClick = {
-////                            showSelectionMenuOuter = false
-////                            onDeselect()
-////                        }
-////                    )
-//                    if (!isAllSelected) {
-//                        DropdownMenuItem(
-//                            text = { Text("Select All") },
-//                            leadingIcon = { Icon(Icons.Rounded.SelectAll, "Select All") },
-//                            onClick = {
-//                                showSelectionMenuOuter = false
-//                                onSelectAll()
-//                            }
-//                        )
-//                    }
-//                }
-//            }
         }
     }
 
@@ -371,6 +346,37 @@ fun BatchCallLogActionBar(
         ) {
             Text(
                 stringResource(R.string.delete_call_logs_selected, selectedCount),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+
+    if (showBlockConfirm) {
+        RillDialog(
+            onDismissRequest = { showBlockConfirm = false },
+            title = stringResource(R.string.call_log_block_title),
+            icon = Icons.Rounded.Block,
+            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
+            confirmButton = {
+                TextButton(onClick = {
+                    onBlock?.invoke()
+                    showBlockConfirm = false
+                }) {
+                    Text(stringResource(R.string.action_block), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showBlockConfirm = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        ) {
+            Text(
+                stringResource(R.string.call_log_block_message, selectedCount),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,

@@ -59,7 +59,7 @@ import dev.goodwy.rphone.controller.util.NoteManager
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.util.normalizeNumberDigits
 import dev.goodwy.rphone.modal.data.CallLogEntry
-import dev.goodwy.rphone.view.components.tiles.SingleTile
+import dev.goodwy.rphone.view.components.SingleTile
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -134,6 +134,7 @@ fun ContactSearchContent(
     val settingsVer by prefs.settingsChanged.collectAsState()
     val filterState = remember(settingsVer) { prefs.getSearchFilterState() }
     val displayOrder = remember(settingsVer) { prefs.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0) }
+    val hideVoiceSearch = remember(settingsVer) { prefs.getBoolean(PreferenceManager.KEY_HIDE_VOICE_SEARCH, false) }
 
     var queryFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(""))
@@ -278,7 +279,7 @@ fun ContactSearchContent(
                         }
 
                         AnimatedVisibility(
-                            visible = micPermissionState.status == PermissionStatus.Granted,
+                            visible = micPermissionState.status == PermissionStatus.Granted && !hideVoiceSearch,
                             enter = fadeIn() + scaleIn(),
                             exit = fadeOut() + scaleOut()
                         ) {

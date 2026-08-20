@@ -1,5 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name" translatable="false">Rill Phone</string>
+    <string name="call_screen_sim_label" translatable="false">SIM %1$s</string>
+    <string name="label_unknown" translatable="false">Unknown</string>
+
     <string name="widget_description">Recent calls with quick dial</string>
     <string name="copy" tools:ignore="PrivateResource">Copy</string>
     <string name="copy_path">Copy Path</string>
@@ -38,6 +41,9 @@
     <string name="filter_incoming">Incoming</string>
     <string name="filter_outgoing">Outgoing</string>
     <string name="filter_rejected">Rejected</string>
+    <string name="sim_picker_title">Select SIM Card</string>
+    <string name="label_unknown_number">Unknown Number</string>
+    <string name="reset">Reset</string>
 
     <!-- Search -->
     <string name="search">Search</string>
@@ -58,7 +64,7 @@
     <string name="project_support_description">
         <![CDATA[
         We believe privacy should be free. That\'s why all essential features are completely yours without spending a dime.<br>
-        If you love what we\'re building, consider buying us a coffee. As a thank you, you\'ll get:<br> <b>All themes, Custom color, and Custom fonts.</b><br>
+        If you love what we\'re building, consider buying us a coffee. As a thank you, you\'ll get:<br> <b>all themes, custom color, fonts, and call screen background settings.</b><br>
         This isn\'t a premium tier. It\'s a thank-you gesture. Your support keeps Rill independent, private, and ad-free.
         ]]>
     </string>
@@ -136,6 +142,10 @@
     <string name="incoming_call_ui_buttons">Buttons</string>
     <string name="incoming_call_ui_slide_to_answer">Slide to Answer (iOS)</string>
     <string name="incoming_call_ui_vertical_swipe">Vertical Swipe</string>
+    <string name="dialpad_animations">Dialpad animations</string>
+    <string name="dialpad_animations_subtitle">Show animations when typing digits</string>
+    <string name="hide_voice_search">Hide voice search</string>
+    <string name="hide_voice_search_subtitle">Hides the voice search button</string>
 
     <string name="сaller_ui">Caller UI</string>
     <string name="сaller_ui_subtitle">Customize the in-call screen layout and controls</string>
@@ -270,6 +280,8 @@
     <string name="incorrect_password">Incorrect password</string>
     <string name="incorrect_password_subtitle">Password must be at least 4 characters</string>
     <string name="password_dont_match">Passwords don\'t match</string>
+    <string name="lock_on_minimize">Lock when minimised</string>
+    <string name="lock_on_minimize_subtitle">If this is turned off, the app will only be terminated when it is completely unloaded from memory</string>
 
     <string name="manage_contacts">Manage Contacts</string>
     <string name="manage_contacts_subtitle">Private contacts, Accounts to show, and clean up your list</string>
@@ -329,17 +341,22 @@
     <string name="keypad">Keypad</string>
     <string name="mute">Mute</string>
     <string name="unmute">Unmute</string>
-    <string name="speaker">Speaker</string>
+    <string name="audio_route_speaker">Speaker</string>
+    <string name="audio_route_handset">Handset</string>
+    <string name="audio_route_headset">Headset</string>
+    <string name="audio_route_bluetooth">Bluetooth</string>
+    <string name="audio_route_bluetooth_short">BT</string>
+    <string name="audio_output_title">Audio Output</string>
     <string name="add_call">Add call</string>
     <string name="resume">Resume</string>
     <string name="swap">Swap</string>
     <string name="more">More</string>
     <string name="hold">Hold</string>
-    <string name="on_hold">On hold</string>
-    <string name="call_ended">Call Ended</string>
-    <string name="calling">Calling…</string>
-    <string name="incoming_call">Incoming call</string>
-    <string name="connecting">Connecting…</string>
+    <string name="call_status_on_hold">On hold</string>
+    <string name="call_status_ended">Call Ended</string>
+    <string name="call_status_calling">Calling…</string>
+    <string name="call_status_incoming">Incoming call</string>
+    <string name="call_status_connecting">Connecting…</string>
     <string name="slide_to_answer">slide to answer</string>
     <string name="swipe_up_to_answer">Swipe up to answer</string>
     <string name="swipe_down_to_reject">Swipe down to reject</string>
@@ -356,6 +373,33 @@
     <string name="could_not_delete">Could not delete</string>
     <string name="clear_all_filtered_logs">Clear all filtered logs</string>
     <string name="clear_all_filtered_logs_selected">This will delete all displayed call history. This action cannot be undone.</string>
+
+    <!-- Blocking -->
+    <string name="action_block">Block</string>
+    <string name="action_unblock">Unblock</string>
+    <string name="action_block_number">Block a number</string>
+    <string name="action_unblock_number">Unblock a number</string>
+    <string name="contact_block">Block contact</string>
+    <string name="contact_block_supporting">Block incoming calls and messages from this contact</string>
+    <string name="contact_unblock">Unblock contact</string>
+    <string name="contact_unblock_supporting">Allow calls and messages from this contact again</string>
+    <string name="call_log_block_title">Block numbers?</string>
+    <string name="call_log_block_message">Calls from the %1$d selected entries will be blocked.</string>
+
+    <!-- Contact call screen background -->
+    <string name="contact_call_background">Call screen background</string>
+    <string name="contact_call_background_set">Custom image selected</string>
+    <string name="contact_call_background_none">Use the default background</string>
+    <string name="contact_call_background_choose">Choose an image</string>
+    <string name="contact_call_background_change">Change image</string>
+    <string name="contact_call_background_remove">Remove background</string>
+    <string name="contact_call_background_saving">Saving image…</string>
+    <string name="contact_call_background_error">Could not save that image</string>
+    <string name="contact_call_background_no_target">Save the number as a contact first</string>
+    <string name="contact_call_background_preview">Call screen background preview</string>
+    <string name="settings_call_default_background">Default call background</string>
+    <string name="settings_call_default_background_set">A custom image is shown on every call</string>
+    <string name="settings_call_default_background_none">Not set — calls use the app theme</string>
 
     <!-- Contacts -->
     <string name="contacts">Contacts</string>
@@ -406,9 +450,11 @@
     <string name="add_event">Add Event</string>
     <string name="add_address">Add Address</string>
     <string name="add_note">Add note</string>
+    <string name="add_photo">Add a photo</string>
     <string name="contact_ringtone">Contact ringtone</string>
     <string name="unsaved_changes">Unsaved Changes</string>
     <string name="unsaved_changes_subtitle">Do you want to save your changes before leaving?</string>
+    <string name="ringtone_custom">Custom</string>
     <plurals name="contacts_count">
         <item quantity="one">%d contact</item>
         <item quantity="few">%d contacts</item>
@@ -446,6 +492,7 @@
 
     <!-- Call notes -->
     <string name="notes">Notes</string>
+    <string name="notes_contact">Notes</string>
     <string name="call_notes">Call notes</string>
     <string name="about_call_notes">About call notes</string>
     <string name="about_call_notes_subtitle">Quick notes you take during a call. They are stored locally in the app\'s files, linked to the phone number (not synced with Google Contacts and others). Each number has its own private note, which can only be accessed from the call log in the contact details within the app or from the “Call Notes” tab.</string>
@@ -499,4 +546,16 @@
     <string name="page_subtitle_three">Instant T9 search, smooth animations, and blazing-fast calling. Just a phone app that works.</string>
     <string name="page_title_warning">Under Development</string>
     <string name="page_subtitle_warning">This app is still in development. Some features may not work as expected. Please use with caution and report any issues you encounter.</string>
+
+    <!-- Call notifications (CallService) -->
+    <string name="notif_channel_outgoing_calls">Outgoing Calls</string>
+    <string name="notif_channel_incoming_calls">Incoming Calls</string>
+    <string name="notif_channel_fullscreen_incoming_calls">Fullscreen Incoming Calls</string>
+    <string name="notif_channel_missed_calls">Missed Calls</string>
+    <string name="notif_blocked_call_title">Blocked Call</string>
+    <string name="notif_blocked_call_text">Blocked call from %1$s</string>
+    <string name="notif_missed_call_title">Missed Call</string>
+    <string name="notif_missed_call_text">Missed call from %1$s at %2$s</string>
+    <string name="notif_via_sim">via %1$s</string>
+    <string name="notif_active_call">Active call</string>
 </resources>

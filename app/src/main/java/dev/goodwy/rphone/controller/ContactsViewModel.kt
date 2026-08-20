@@ -484,8 +484,8 @@ class ContactsViewModel(
         return contactsRepo.getRawContactsForContact(contactId)
             .map { raw ->
                 ContactsRepository.ContactSource(
-                    accountName = raw.accountName,
-                    accountType = raw.accountType,
+                    accountName = raw.accountName?.takeIf { it.isNotBlank() } ?: "Unknown",
+                    accountType = raw.accountType?.takeIf { it.isNotBlank() } ?: "Unknown",
                     isPrimary = false, // Will be updated later
                     rawContactId = raw.rawContactId
                 )

@@ -5,6 +5,10 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import dev.goodwy.rphone.modal.data.Contact
+import dev.goodwy.rphone.modal.data.ContactAddress
+import dev.goodwy.rphone.modal.data.ContactEmail
+import dev.goodwy.rphone.modal.data.ContactEvent
+import dev.goodwy.rphone.modal.data.ContactPhoneDetail
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -27,6 +31,7 @@ data class PrivateContactEntity(
     val emailsJson: String,
     val addressesJson: String,
     val eventsJson: String,
+    val notes: String? = null,
     val photoUri: String? = null,
     val isFavorite: Boolean = false,
     val customRingtone: String? = null,
@@ -44,11 +49,12 @@ data class PrivateContactEntity(
             nickname = nickname,
             company = company,
             jobTitle = jobTitle,
-            phoneNumbers = Json.decodeFromString(phoneNumbersJson),
-            phoneDetails = Json.decodeFromString(phoneDetailsJson),
-            emails = Json.decodeFromString(emailsJson),
-            addresses = Json.decodeFromString(addressesJson),
-            events = Json.decodeFromString(eventsJson),
+            phoneNumbers = runCatching { Json.decodeFromString<List<String>>(phoneNumbersJson) }.getOrDefault(emptyList()),
+            phoneDetails = runCatching { Json.decodeFromString<List<ContactPhoneDetail>>(phoneDetailsJson) }.getOrDefault(emptyList()),
+            emails = runCatching { Json.decodeFromString<List<ContactEmail>>(emailsJson) }.getOrDefault(emptyList()),
+            addresses = runCatching { Json.decodeFromString<List<ContactAddress>>(addressesJson) }.getOrDefault(emptyList()),
+            events = runCatching { Json.decodeFromString<List<ContactEvent>>(eventsJson) }.getOrDefault(emptyList()),
+            notes = notes,
             photoUri = photoUri,
             isFavorite = isFavorite,
             customRingtone = customRingtone,
@@ -59,7 +65,7 @@ data class PrivateContactEntity(
     companion object {
         fun fromContact(contact: Contact): PrivateContactEntity {
             val entity = PrivateContactEntity(
-                localId = if (contact.id.startsWith("p")) contact.id.substring(1).toLong() else 0,
+                localId = if (contact.id.startsWith("p")) contact.id.substring(1).toLongOrNull() ?: 0L else 0L,
                 namePrefix = contact.namePrefix,
                 givenName = contact.givenName,
                 middleName = contact.middleName,
@@ -73,6 +79,7 @@ data class PrivateContactEntity(
                 emailsJson = Json.encodeToString(contact.emails),
                 addressesJson = Json.encodeToString(contact.addresses),
                 eventsJson = Json.encodeToString(contact.events),
+                notes = contact.notes,
                 photoUri = contact.photoUri,
                 isFavorite = contact.isFavorite,
                 customRingtone = contact.customRingtone,

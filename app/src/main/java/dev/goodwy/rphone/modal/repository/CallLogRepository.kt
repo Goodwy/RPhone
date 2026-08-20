@@ -5,10 +5,7 @@ import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
-import android.net.Uri
-import android.os.Build
 import android.provider.CallLog
-import android.provider.ContactsContract
 import android.telecom.PhoneAccountHandle
 import android.telecom.TelecomManager
 import dev.goodwy.rphone.controller.util.PreferenceManager
@@ -18,6 +15,7 @@ import dev.goodwy.rphone.modal.data.CallLogEntry
 import dev.goodwy.rphone.modal.data.Contact
 import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 import androidx.core.net.toUri
+import dev.goodwy.rphone.R
 import dev.goodwy.rphone.modal.data.getDisplayName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -57,7 +55,6 @@ class CallLogRepository(
             CallLog.Calls.DURATION
         )
 
-        // Try adding all possible SIM info columns
         baseProjection.add("phone_account_label")
         baseProjection.add(CallLog.Calls.PHONE_ACCOUNT_ID)
         baseProjection.add(CallLog.Calls.PHONE_ACCOUNT_COMPONENT_NAME)
@@ -113,6 +110,15 @@ class CallLogRepository(
         Unit
     }
 
+    private fun contactIdFromLookupUri(lookupUri: String): String? {
+        return try {
+            val segments = lookupUri.toUri().pathSegments
+            segments.lastOrNull { it.toLongOrNull() != null } ?: segments.lastOrNull()
+        } catch (_: Exception) {
+            null
+        }
+    }
+
     private fun parseCursor(cursor: Cursor, callLogs: MutableList<CallLogEntry>, contactMap: Map<String, Contact>) {
         val idIdx = cursor.getColumnIndex(CallLog.Calls._ID)
         val numberIdx = cursor.getColumnIndex(CallLog.Calls.NUMBER)
@@ -129,20 +135,20 @@ class CallLogRepository(
 
         val tempLogs = mutableListOf<CallLogEntry>()
         val simCache = mutableMapOf<String, String>()
+        val unknownLabel = context.getString(R.string.label_unknown)
 
         val displayOrder = preferenceManager.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0)
 
         while (cursor.moveToNext()) {
             val callId = cursor.getLong(idIdx)
-            val number = cursor.getString(numberIdx) ?: "Unknown"
+            val number = cursor.getString(numberIdx) ?: unknownLabel
             val type = cursor.getInt(typeIdx)
             val date = cursor.getLong(dateIdx)
             val duration = cursor.getLong(durationIdx)
 
             var simLabel = if (labelIdx != -1) cursor.getString(labelIdx) else null
 
-            val isBlocked =
-                type == CallLog.Calls.BLOCKED_TYPE// || type == CallLog.Calls.REJECTED_TYPE
+            val isBlocked = type == CallLog.Calls.BLOCKED_TYPE// || type == CallLog.Calls.REJECTED_TYPE
 
             // If label is missing, try to resolve it from account ID
             if (simLabel.isNullOrEmpty() && accountIdIdx != -1 && componentNameIdx != -1) {
@@ -172,9 +178,7 @@ class CallLogRepository(
 //            val displayName = matchedContact?.displayName ?: cursor.getString(cachedNameIdx)
             val photoUri = matchedContact?.photoUri ?: cursor.getString(cachedPhotoIdx)
             val contactId = matchedContact?.id ?: cursor.getString(cachedLookupIdx)?.let {
-                try {
-                    it.toUri().lastPathSegment
-                } catch (_: Exception) { null }
+                contactIdFromLookupUri(it)
             }
 
             val contactName = if (matchedContact != null) getDisplayName(matchedContact, displayOrder) else null //matchedContact?.displayName

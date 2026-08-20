@@ -1,5 +1,6 @@
 package dev.goodwy.rphone.modal.data
 
+import dev.goodwy.rphone.controller.util.forceLtr
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -18,6 +19,7 @@ data class Contact(
     val emails: List<ContactEmail> = emptyList(),
     val addresses: List<ContactAddress> = emptyList(),
     val events: List<ContactEvent> = emptyList(),
+    val notes: String? = null,
     val photoUri: String? = null,
     val isFavorite: Boolean = false,
     val customRingtone: String? = null,
@@ -138,7 +140,7 @@ fun getDisplayName(contact: Contact, order: Int = 0): String {
             append(contact.jobTitle)
         }
         if (isEmpty() && contact.phoneNumbers.isNotEmpty()) {
-            append(contact.phoneNumbers.first())
+            append(contact.phoneNumbers.first().forceLtr())
         }
         if (isEmpty()) {
             append("")

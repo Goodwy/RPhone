@@ -72,6 +72,7 @@ import dev.goodwy.rphone.view.theme.customColors
 import com.ramcosta.composedestinations.generated.destinations.ContactDetailsScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactEditScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import dev.goodwy.rphone.controller.util.forceLtr
 import dev.goodwy.rphone.modal.data.getDisplayName
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -380,7 +381,7 @@ fun ContactListItem(
         shadowElevation = 0.dp
     ) {
 //        val defaultOrFirstPhone = contact.phoneDetails.firstOrNull { it.isPrimary }?.number ?: contact.phoneNumbers.firstOrNull()
-        val contactInfo = if (contact.phoneNumbers.isNotEmpty()) contact.phoneNumbers.joinToString(", ")
+        val contactInfo = if (contact.phoneNumbers.isNotEmpty()) contact.phoneNumbers.joinToString(", ").forceLtr()
                                 else if (contact.emails.isNotEmpty()) contact.emails.joinToString(", ") { it.value }
                                 else null
         Row(

@@ -522,7 +522,7 @@ class FloatingCallService : Service() {
 
                             SheetAction(2,
                                 if (isSpeaker) Icons.AutoMirrored.Rounded.VolumeUp else Icons.AutoMirrored.Rounded.VolumeDown,
-                                stringResource(R.string.speaker),
+                                stringResource(R.string.audio_route_speaker),
                                 if (isSpeaker) controlBtnActiveFg else controlBtnFg,
                                 if (isSpeaker) controlBtnActiveColor else controlBtnColor,
                                 isActive = isSpeaker,

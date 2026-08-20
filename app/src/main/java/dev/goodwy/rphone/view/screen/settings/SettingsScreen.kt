@@ -47,9 +47,12 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import dev.goodwy.rphone.R
@@ -361,6 +364,8 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.material_blur_effects_subtitle),
                 stringResource(R.string.scroll_animation),
                 stringResource(R.string.scroll_animation_device),
+                stringResource(R.string.dialpad_animations),
+                stringResource(R.string.dialpad_animations_subtitle),
                 stringResource(R.string.call_ui),
                 stringResource(R.string.incoming_call_ui),
                 stringResource(R.string.incoming_call_ui_subtitle),
@@ -369,6 +374,8 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.incoming_call_ui_buttons),
                 stringResource(R.string.incoming_call_ui_slide_to_answer),
                 stringResource(R.string.incoming_call_ui_vertical_swipe),
+                stringResource(R.string.hide_voice_search),
+                stringResource(R.string.hide_voice_search_subtitle),
             )
         ) {
             navigator.navigate(InterfaceScreenDestination)
@@ -380,6 +387,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
             iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
             options = listOf(
+                stringResource(R.string.settings_call_default_background),
                 stringResource(R.string.end_call_button),
                 stringResource(R.string.customize_width),
                 stringResource(R.string.customize_width_subtitle),
@@ -674,7 +682,8 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
     // ── Screen ────────────────────────────────────────────────────────────────
     val rotation =
         (context.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager).defaultDisplay.rotation
-    val isRotation90 = rotation == Surface.ROTATION_90
+    val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
+    val isRotation90 = rotation == if (isLtr) Surface.ROTATION_90 else Surface.ROTATION_270
     Scaffold(
         topBar = {
             TopAppBar(
@@ -978,9 +987,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                     }
                 }
 
-                item { Spacer(modifier = Modifier
-                    .height(120.dp)
-                    .navigationBarsPadding()) }
+                item { SettingsBottomPadding(120.dp) }
             }
         }
     }
@@ -1022,4 +1029,9 @@ fun SettingsSectionLabel(text: String) {
         modifier = Modifier.padding(start = 20.dp, bottom = 8.dp),
         color = MaterialTheme.colorScheme.primary
     )
+}
+
+@Composable
+fun SettingsBottomPadding(padding: Dp = 36.dp) {
+    Spacer(modifier = Modifier.height(padding).navigationBarsPadding())
 }

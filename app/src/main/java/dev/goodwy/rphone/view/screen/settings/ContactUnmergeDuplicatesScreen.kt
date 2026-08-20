@@ -21,10 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.CallSplit
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.rounded.Merge
 import androidx.compose.material3.*
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -32,19 +29,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.goodwy.rphone.controller.ContactsViewModel
 import dev.goodwy.rphone.modal.data.Contact
 import dev.goodwy.rphone.view.components.RillExpressiveCard
-import dev.goodwy.rphone.view.components.RillListItem
 import dev.goodwy.rphone.view.components.RillLoadingIndicatorView
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.ContactDetailsScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.ContactDetailsScreenDestination.invoke
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.cardCornerBig
@@ -52,14 +49,12 @@ import dev.goodwy.rphone.cardCornerSmall
 import dev.goodwy.rphone.controller.util.ContactUtils
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.modal.data.getDisplayName
-import dev.goodwy.rphone.modal.repository.ContactsRepository
 import dev.goodwy.rphone.modal.repository.ContactsRepository.ContactSource
 import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillAvatar
 import dev.goodwy.rphone.view.components.ScrollHapticsEffect
 import dev.goodwy.rphone.view.components.Title
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
-import dev.goodwy.rphone.view.theme.MyColors.cardColorSelected
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -126,7 +121,8 @@ fun ContactUnmergeDuplicatesScreen(
 
     val rotation =
         (context.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay.rotation
-    val isRotation90 = rotation == Surface.ROTATION_90
+    val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
+    val isRotation90 = rotation == if (isLtr) Surface.ROTATION_90 else Surface.ROTATION_270
 
     Scaffold(
         topBar = {
@@ -203,7 +199,7 @@ fun ContactUnmergeDuplicatesScreen(
                     }
                 }
 
-                item { Spacer(modifier = Modifier.height(20.dp).navigationBarsPadding()) }
+                item { SettingsBottomPadding() }
             }
         }
     }

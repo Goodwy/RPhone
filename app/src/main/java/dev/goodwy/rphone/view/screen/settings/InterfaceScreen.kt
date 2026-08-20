@@ -52,15 +52,19 @@ import androidx.compose.material.icons.rounded.BlurOff
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.FontDownload
 import androidx.compose.material.icons.rounded.FormatSize
+import androidx.compose.material.icons.rounded.MicNone
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.PhoneInTalk
+import androidx.compose.material.icons.rounded._123
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import dev.goodwy.rphone.cardCornerSmall
 import dev.goodwy.rphone.view.components.RillAnimatedSection
 import dev.goodwy.rphone.view.components.RillExpressiveCard
@@ -130,6 +134,8 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
     var customPrimaryColor  by remember(settingsState) { mutableStateOf(prefs.getInt("custom_primary_color", color_default_primary.toArgb())) }
     var incomingCallUI      by remember(settingsState) { mutableStateOf(prefs.getInt(PreferenceManager.KEY_INCOMING_CALL_UI_MODE, 10)) }
     var scrollAnimation     by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SCROLL_ANIMATION, false)) }
+    var dialpadAnimation    by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_DIALPAD_ANIMATION, true)) }
+    var hideVoiceSearch    by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_HIDE_VOICE_SEARCH, false)) }
     var liquidGlass         by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_LIQUID_GLASS, false)) }
     var blurEffects         by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_BLUR_EFFECTS, false)) }
 
@@ -290,7 +296,8 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
 
     val rotation =
         (context.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager).defaultDisplay.rotation
-    val isRotation90 = rotation == Surface.ROTATION_90
+    val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
+    val isRotation90 = rotation == if (isLtr) Surface.ROTATION_90 else Surface.ROTATION_270
     Scaffold(
         topBar = {
             TopAppBar(
@@ -771,6 +778,18 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                         prefs.setBoolean(PreferenceManager.KEY_SCROLL_ANIMATION, it)
                                     }
                                 )
+                                RillSwitchListItem(
+                                    headline = stringResource(R.string.dialpad_animations),
+                                    supporting = stringResource(R.string.dialpad_animations_subtitle),
+                                    leadingIcon = Icons.Rounded._123,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+                                    checked = dialpadAnimation,
+                                    onCheckedChange = {
+                                        dialpadAnimation = it
+                                        prefs.setBoolean(PreferenceManager.KEY_DIALPAD_ANIMATION, it)
+                                    }
+                                )
                             }
                         }
                     }
@@ -830,7 +849,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                 item {
                     RillAnimatedSection(delayMs = 160L) {
                         Column {
-                            SettingsSectionLabel("Avatars")
+                            SettingsSectionLabel(stringResource(R.string.other))
                             RillExpressiveCard {
                                 RillListItem(
                                     headline = stringResource(R.string.avatars_settings),
@@ -840,6 +859,18 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                     iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
                                     trailingIcon = Icons.Default.ChevronRight,
                                     onClick = { navigator.navigate(AvatarsPreferenceScreenDestination) }
+                                )
+                                RillSwitchListItem(
+                                    headline = stringResource(R.string.hide_voice_search),
+                                    supporting = stringResource(R.string.hide_voice_search_subtitle),
+                                    leadingIcon = Icons.Rounded.MicNone,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+                                    checked = hideVoiceSearch,
+                                    onCheckedChange = {
+                                        hideVoiceSearch = it
+                                        prefs.setBoolean(PreferenceManager.KEY_HIDE_VOICE_SEARCH, it)
+                                    }
                                 )
                             }
                         }
@@ -865,7 +896,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
 //                    }
 //                }
 
-                item { Spacer(modifier = Modifier.height(20.dp).navigationBarsPadding()) }
+                item { SettingsBottomPadding() }
             }
 
             AnimatedVisibility(

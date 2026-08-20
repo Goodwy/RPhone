@@ -47,10 +47,10 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SearchOff
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Deselect
-import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Fingerprint
 import androidx.compose.material.icons.rounded.Key
 import androidx.compose.material.icons.rounded.Lock
@@ -60,16 +60,20 @@ import androidx.compose.material.icons.rounded.PersonOff
 import androidx.compose.material.icons.rounded.PhonePaused
 import androidx.compose.material.icons.rounded.Pin
 import androidx.compose.material.icons.rounded.SelectAll
+import androidx.compose.material.icons.rounded.UnfoldLess
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.window.DialogProperties
+import androidx.fragment.app.FragmentActivity
 import dev.goodwy.rphone.cardCornerMedium
 import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillExpressiveCard
@@ -102,6 +106,7 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
 
     var biometricsType by remember { mutableStateOf(prefs.getString(PreferenceManager.KEY_BIOMETRICS_TYPE, "") ?: "") }
     var appLockEnabled by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK, false)) }
+    var appLockOnMinimizeEnabled by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK_ON_MINIMIZE, false)) }
     var callLockEnabled by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_CALL_LOCK, false)) }
     var callLockMode by remember { mutableStateOf(prefs.getString(PreferenceManager.KEY_BIOMETRICS_CALL_LOCK_MODE, "all") ?: "all") }
     var callLockNumbers by remember { mutableStateOf(prefs.getString(PreferenceManager.KEY_BIOMETRICS_CALL_LOCK_NUMBERS, "") ?: "") }
@@ -126,6 +131,7 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
     var showTypeSheet by remember { mutableStateOf(false) }
     var showPinSetup by remember { mutableStateOf(false) }
     var showPasswordSetup by remember { mutableStateOf(false) }
+    var showDisableVerification by remember { mutableStateOf(false) }
     var isClosing by remember { mutableStateOf(false) }
     var visible by remember { mutableStateOf(false) }
 
@@ -161,7 +167,8 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
 
     val rotation =
         (context.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager).defaultDisplay.rotation
-    val isRotation90 = rotation == Surface.ROTATION_90
+    val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
+    val isRotation90 = rotation == if (isLtr) Surface.ROTATION_90 else Surface.ROTATION_270
     Scaffold(
         topBar = {
             TopAppBar(
@@ -216,7 +223,7 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
                     exit = fadeOut(tween(200)) + shrinkVertically(tween(200))
                 ) {
                     Column {
-                        SettingsSectionLabel(stringResource(R.string.authentication))
+//                        SettingsSectionLabel(stringResource(R.string.authentication))
                         RillExpressiveCard {
                             RillSwitchListItem(
                                 headline = stringResource(R.string.lock_app_on_open),
@@ -230,6 +237,20 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
                                     prefs.setBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK, it)
                                 }
                             )
+                            if (appLockEnabled) {
+                                RillSwitchListItem(
+                                    headline = stringResource(R.string.lock_on_minimize),
+                                    supporting = stringResource(R.string.lock_on_minimize_subtitle),
+                                    leadingIcon = Icons.Rounded.UnfoldLess,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
+                                    checked = appLockOnMinimizeEnabled,
+                                    onCheckedChange = {
+                                        appLockOnMinimizeEnabled = it
+                                        prefs.setBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK_ON_MINIMIZE, it)
+                                    }
+                                )
+                            }
                             RillSwitchListItem(
                                 headline = stringResource(R.string.lock_call_actions),
                                 supporting = stringResource(R.string.lock_call_actions_subtitle),
@@ -402,7 +423,7 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
                                     if (mode != "all") {
                                         Spacer(modifier = Modifier.width(16.dp))
                                         Icon(
-                                            Icons.Rounded.Edit, null,
+                                            Icons.Outlined.Edit, null,
                                             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                                             modifier = Modifier.size(20.dp),
                                         )
@@ -414,7 +435,7 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
                 }
             }
 
-            item { Spacer(modifier = Modifier.height(80.dp).navigationBarsPadding()) }
+            item { SettingsBottomPadding() }
         }
     }
 
@@ -434,19 +455,26 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
                     "pin"      -> showPinSetup = true
                     "password" -> showPasswordSetup = true
                     ""         -> {
-                        biometricsType = ""
-                        prefs.setString(PreferenceManager.KEY_BIOMETRICS_TYPE, "")
-                        prefs.setString(PreferenceManager.KEY_BIOMETRICS_PIN, "")
-                        prefs.setString(PreferenceManager.KEY_BIOMETRICS_PASSWORD, "")
-                        prefs.setBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK, false)
-                        prefs.setBoolean(PreferenceManager.KEY_BIOMETRICS_CALL_LOCK, false)
-                        appLockEnabled = false; callLockEnabled = false
-                        
+                        showDisableVerification = true
+                        showTypeSheet = false
                     }
                 }
             },
             onDismiss = { showTypeSheet = false }
         )
+    }
+
+    fun disableBiometric() {
+        biometricsType = ""
+        prefs.setString(PreferenceManager.KEY_BIOMETRICS_TYPE, "")
+        prefs.setString(PreferenceManager.KEY_BIOMETRICS_PIN, "")
+        prefs.setString(PreferenceManager.KEY_BIOMETRICS_PASSWORD, "")
+        prefs.setBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK, false)
+        prefs.setBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK_ON_MINIMIZE, false)
+        prefs.setBoolean(PreferenceManager.KEY_BIOMETRICS_CALL_LOCK, false)
+        appLockEnabled = false
+        appLockOnMinimizeEnabled = false
+        callLockEnabled = false
     }
 
     if (showPinSetup) {
@@ -488,6 +516,58 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
             },
             onDismiss = { showContactPicker = false }
         )
+    }
+
+    if (showDisableVerification) {
+        when (biometricsType) {
+            "system" -> {
+                BiometricPromptHelper.authenticate(
+                    context = context,
+                    title = stringResource(R.string.confirm),
+                    onSuccess = {
+                        showDisableVerification = false
+                        disableBiometric()
+                    },
+                    onError = {
+                        showDisableVerification = false
+                    }
+                )
+            }
+            "pin" -> {
+                PinSetupDialog(
+                    title = stringResource(R.string.enter_pin),
+                    isVerify = true,
+                    expectedPin = prefs.getString(PreferenceManager.KEY_BIOMETRICS_PIN, "") ?: "",
+                    showCloseButton = true,
+                    onConfirm = {
+                        showDisableVerification = false
+                        disableBiometric()
+                    },
+                    onDismiss = {
+                        showDisableVerification = false
+                    }
+                )
+            }
+            "password" -> {
+                PasswordSetupDialog(
+                    title = stringResource(R.string.enter_password),
+                    isVerify = true,
+                    expectedPassword = prefs.getString(PreferenceManager.KEY_BIOMETRICS_PASSWORD, "") ?: "",
+                    showCloseButton = true,
+                    onConfirm = {
+                        showDisableVerification = false
+                        disableBiometric()
+                    },
+                    onDismiss = {
+                        showDisableVerification = false
+                    }
+                )
+            }
+            else -> {
+                // If the method is not configured, disable it without confirmation
+                disableBiometric()
+            }
+        }
     }
 }
 
@@ -1575,6 +1655,40 @@ fun PasswordSetupDialog(
                 showCloseButton = showCloseButton
             )
         }
+    }
+}
+
+object BiometricPromptHelper {
+    fun authenticate(
+        context: Context,
+        title: String,
+        subtitle: String? = null,
+        onSuccess: () -> Unit,
+        onError: () -> Unit
+    ) {
+        val executor = androidx.core.content.ContextCompat.getMainExecutor(context)
+        val prompt = androidx.biometric.BiometricPrompt(
+            context as FragmentActivity,
+            executor,
+            object : androidx.biometric.BiometricPrompt.AuthenticationCallback() {
+                override fun onAuthenticationSucceeded(result: androidx.biometric.BiometricPrompt.AuthenticationResult) {
+                    onSuccess()
+                }
+                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                    onError()
+                }
+                override fun onAuthenticationFailed() {
+                    // keep prompt open
+                }
+            }
+        )
+        val promptInfo = androidx.biometric.BiometricPrompt.PromptInfo.Builder()
+            .setTitle(title)
+            .setSubtitle(subtitle ?: "")
+            .setNegativeButtonText(context.getString(R.string.cancel))
+            .setAllowedAuthenticators(androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK)
+            .build()
+        prompt.authenticate(promptInfo)
     }
 }
 

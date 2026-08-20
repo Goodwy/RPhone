@@ -170,7 +170,7 @@
             android:turnScreenOn="true"
             android:taskAffinity=""
             android:directBootAware="true"
-            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden|uiMode|density|fontScale"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.RillPhone" />
 

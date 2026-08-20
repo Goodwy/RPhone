@@ -12,8 +12,9 @@ import androidx.compose.ui.res.vectorResource
 import dev.goodwy.rphone.R
 
 object ContactUtils {
-    fun getAccountName(account: Account): String {
+    fun getAccountName(account: Account?): String {
         return when {
+            account == null -> "Local (Device Only)"
             account.type.contains("telegram", ignoreCase = true) -> "Telegram (${account.name})"
             account.type.contains("xiaomi", ignoreCase = true) -> "Mi Account (${account.name})"
             else -> account.name
