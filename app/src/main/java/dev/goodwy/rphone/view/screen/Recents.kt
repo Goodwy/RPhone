@@ -328,20 +328,7 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
                             }
                         }
                     } else {
-                        val logs by viewModel.allCallLogs.collectAsState()
-                        val blockLogVisibility = prefs.getInt(PreferenceManager.KEY_BLOCK_LOG_VISIBILITY, 0)
-                        val filteredLogs = remember(logs, selectedFilter, blockLogVisibility) {
-                            val baseLogs = if (blockLogVisibility == 0) logs.filter { !it.isBlocked } else logs
-
-                            when (selectedFilter) {
-                                CallLogFilter.All -> baseLogs
-                                CallLogFilter.Missed -> baseLogs.filter { it.type == CallLog.Calls.MISSED_TYPE }
-                                CallLogFilter.Incoming -> baseLogs.filter { it.type == CallLog.Calls.INCOMING_TYPE }
-                                CallLogFilter.Outgoing -> baseLogs.filter { it.type == CallLog.Calls.OUTGOING_TYPE }
-                                CallLogFilter.Rejected -> baseLogs.filter { it.type == CallLog.Calls.REJECTED_TYPE }
-                                CallLogFilter.Contacts -> baseLogs.filter { it.contactId != null }
-                            }
-                        }
+                        val filteredLogs by viewModel.filteredLogs.collectAsState()
                         BatchCallLogActionBar(
                             selectedCount = selectedEntries.size,
                             onClearSelection = { selectedEntries = emptySet() },
@@ -566,6 +553,7 @@ fun CallLogFullContent(
     if (isGranted) {
         val viewModel: CallLogViewModel = koinActivityViewModel()
         val logs by viewModel.allCallLogs.collectAsState()
+        val filteredLogs by viewModel.filteredLogs.collectAsState()
         val selectedFilter by viewModel.selectedFilter.collectAsState()
         val context = LocalContext.current
         val telecomManager = remember { context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager }
@@ -621,20 +609,6 @@ fun CallLogFullContent(
         // Track previous filter index for slide direction
         val filterEntries = CallLogFilter.entries
 //        var previousFilterIndex by remember { mutableIntStateOf(filterEntries.indexOf(selectedFilter)) }
-        val blockLogVisibility = prefs.getInt(PreferenceManager.KEY_BLOCK_LOG_VISIBILITY, 0)
-
-        val filteredLogs = remember(logs, selectedFilter, blockLogVisibility) {
-            val baseLogs = if (blockLogVisibility == 0) logs.filter { !it.isBlocked } else logs
-
-            when (selectedFilter) {
-                CallLogFilter.All -> baseLogs
-                CallLogFilter.Missed -> baseLogs.filter { it.type == CallLog.Calls.MISSED_TYPE }
-                CallLogFilter.Incoming -> baseLogs.filter { it.type == CallLog.Calls.INCOMING_TYPE }
-                CallLogFilter.Outgoing -> baseLogs.filter { it.type == CallLog.Calls.OUTGOING_TYPE }
-                CallLogFilter.Rejected -> baseLogs.filter { it.type == CallLog.Calls.REJECTED_TYPE }
-                CallLogFilter.Contacts -> baseLogs.filter { it.contactId != null }
-            }
-        }
         val groupedLogs = remember(filteredLogs) { filteredLogs.groupBy { context.formatDateHeader(it.date) } }
 
         if (showSimPicker && pendingNumber != null) {

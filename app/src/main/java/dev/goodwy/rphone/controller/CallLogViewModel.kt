@@ -9,6 +9,7 @@ import android.provider.CallLog
 import dev.goodwy.rphone.modal.`interface`.ICallLogRepository
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.modal.data.CallLogEntry
 import dev.goodwy.rphone.modal.data.CallLogFilter
 import kotlinx.coroutines.Dispatchers
@@ -17,6 +18,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
@@ -26,7 +28,8 @@ import java.io.File
 class CallLogViewModel(
     application: Application,
     private val callLogRepo: ICallLogRepository,
-    private val contentResolver: ContentResolver
+    private val contentResolver: ContentResolver,
+    private val preferenceManager: PreferenceManager
 ) : AndroidViewModel(application) {
 
     private val _allCallLogs = MutableStateFlow<List<CallLogEntry>>(emptyList())
@@ -37,6 +40,10 @@ class CallLogViewModel(
 
     private val _selectedFilter = MutableStateFlow(CallLogFilter.All)
     val selectedFilter = _selectedFilter.asStateFlow()
+
+    private val _filteredLogs = MutableStateFlow<List<CallLogEntry>>(emptyList())
+    val filteredLogs: StateFlow<List<CallLogEntry>> = _filteredLogs.asStateFlow()
+    private var filterJob: Job? = null
 
     // In-memory cache
     @Volatile private var cachedLogs: List<CallLogEntry> = emptyList()
@@ -76,14 +83,38 @@ class CallLogViewModel(
             // Step 2: refresh from provider in background
             fetchLogsInternal()
         }
+
+        viewModelScope.launch {
+            combine(
+                _allCallLogs,
+                _selectedFilter,
+                MutableStateFlow(preferenceManager.getInt(PreferenceManager.KEY_BLOCK_LOG_VISIBILITY, 0))
+            ) { logs, filter, blockVisibility ->
+                Triple(logs, filter, blockVisibility)
+            }.collect { (logs, filter, blockVisibility) ->
+                filterLogs(logs, filter, blockVisibility)
+            }
+        }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        try {
-            contentResolver.unregisterContentObserver(callLogObserver)
-        } catch (e: Exception) {
-            e.printStackTrace()
+    private fun filterLogs(logs: List<CallLogEntry>, filter: CallLogFilter, blockVisibility: Int) {
+        filterJob?.cancel()
+        filterJob = viewModelScope.launch(Dispatchers.Default) {
+            val result = withContext(Dispatchers.IO) {
+                val baseLogs = if (blockVisibility == 0) logs.filter { !it.isBlocked } else logs
+
+                when (filter) {
+                    CallLogFilter.All -> baseLogs
+                    CallLogFilter.Missed -> baseLogs.filter { it.type == CallLog.Calls.MISSED_TYPE }
+                    CallLogFilter.Incoming -> baseLogs.filter { it.type == CallLog.Calls.INCOMING_TYPE }
+                    CallLogFilter.Outgoing -> baseLogs.filter { it.type == CallLog.Calls.OUTGOING_TYPE }
+                    CallLogFilter.Rejected -> baseLogs.filter { it.type == CallLog.Calls.REJECTED_TYPE }
+                    CallLogFilter.Contacts -> baseLogs.filter { it.contactId != null }
+                }
+            }
+            withContext(Dispatchers.Main) {
+                _filteredLogs.value = result
+            }
         }
     }
 
@@ -92,6 +123,15 @@ class CallLogViewModel(
             _selectedFilter.value = CallLogFilter.All
         } else {
             _selectedFilter.value = newFilter
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        try {
+            contentResolver.unregisterContentObserver(callLogObserver)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
