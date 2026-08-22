@@ -150,16 +150,23 @@ fun CallLogFullScreen(
         filteredLogsByContact.firstOrNull { it.name != null && it.name != it.number }?.name ?: (phoneNumber?.forceLtr())
     }
 
-    val finalFilteredLogs = remember(filteredLogsByContact, selectedFilter) {
-        when (selectedFilter) {
-            CallLogFilter.All -> filteredLogsByContact
-            CallLogFilter.Missed -> filteredLogsByContact.filter { it.type == CallLog.Calls.MISSED_TYPE }
-            CallLogFilter.Incoming -> filteredLogsByContact.filter { it.type == CallLog.Calls.INCOMING_TYPE }
-            CallLogFilter.Outgoing -> filteredLogsByContact.filter { it.type == CallLog.Calls.OUTGOING_TYPE }
-            CallLogFilter.Rejected -> filteredLogsByContact.filter { it.type == CallLog.Calls.REJECTED_TYPE }
-            CallLogFilter.Contacts -> filteredLogsByContact.filter { it.contactId != null }
+    val filteredByType = remember { MutableStateFlow<List<CallLogEntry>>(emptyList()) }
+
+    LaunchedEffect(filteredLogsByContact, selectedFilter) {
+        withContext(Dispatchers.Default) {
+            val result = when (selectedFilter) {
+                CallLogFilter.All -> filteredLogsByContact
+                CallLogFilter.Missed -> filteredLogsByContact.filter { it.type == CallLog.Calls.MISSED_TYPE }
+                CallLogFilter.Incoming -> filteredLogsByContact.filter { it.type == CallLog.Calls.INCOMING_TYPE }
+                CallLogFilter.Outgoing -> filteredLogsByContact.filter { it.type == CallLog.Calls.OUTGOING_TYPE }
+                CallLogFilter.Rejected -> filteredLogsByContact.filter { it.type == CallLog.Calls.REJECTED_TYPE }
+                CallLogFilter.Contacts -> filteredLogsByContact.filter { it.contactId != null }
+            }
+            filteredByType.value = result
         }
     }
+
+    val finalFilteredLogs by filteredByType.collectAsState()
 
     if (showSimPicker && pendingNumber != null) {
         SimPickerDialog(

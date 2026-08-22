@@ -1,6 +1,7 @@
 package dev.goodwy.rphone.view.screen
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.res.Configuration
 import dev.goodwy.rphone.view.theme.TabTransitionStyle
 import android.content.Context
@@ -534,6 +535,7 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
 //    return cal.timeInMillis
 //}
 
+@SuppressLint("UnusedContentLambdaTargetStateParameter")
 @Composable
 fun CallLogFullContent(
     navController: NavController,
@@ -681,17 +683,24 @@ fun CallLogFullContent(
                 // list appears gracefully instead of jumping. Once the user starts
                 // changing filters the normal slide transition takes over.
                 var hasLoadedOnce by remember { mutableStateOf(false) }
+                // IMPORTANT: Scroll the list OUTSIDE AnimatedContent.
+                // This prevents the exit animation from conflicting with the scrolling.
+                LaunchedEffect(selectedFilter) {
+                    // Scroll to the top whenever the filter changes
+                    listState.scrollToItem(0)
+                }
+                // Remove `groupedLogs` from `AnimatedContent`’s `targetState`!
+                // The animation now depends ONLY on the selected filter.
                 AnimatedContent(
-                    targetState = Pair(selectedFilter, groupedLogs),
+                    targetState = selectedFilter,
                     transitionSpec = {
-                        val filterChanged = initialState.first != targetState.first
-                        if (!hasLoadedOnce || !filterChanged) {
-                            // Startup / data-only refresh: slow gentle fade, no slide
+                        if (!hasLoadedOnce) {
+                            // Startup: slow gentle fade, no slide
                             fadeIn(animationSpec = tween(600, easing = LinearOutSlowInEasing)) togetherWith
-                                fadeOut(animationSpec = tween(0))
+                                    fadeOut(animationSpec = tween(0))
                         } else {
-                            val currentIdx = filterEntries.indexOf(targetState.first)
-                            val prevIdx = filterEntries.indexOf(initialState.first)
+                            val currentIdx = filterEntries.indexOf(targetState)
+                            val prevIdx = filterEntries.indexOf(initialState)
                             val goingRight = currentIdx > prevIdx
                             if (goingRight) {
                                 slideInHorizontally(
@@ -714,12 +723,8 @@ fun CallLogFullContent(
                     },
                     modifier = Modifier.fillMaxSize(),
                     label = "filterSlide"
-                ) { (currentFilter, currentGroupedLogs) ->
-                    LaunchedEffect(Unit) { hasLoadedOnce = true }
-                    LaunchedEffect(selectedFilter) {
-                        // Scroll to the top whenever the filter changes
-                        listState.scrollToItem(0)
-                    }
+                ) { currentFilter ->
+                    SideEffect { hasLoadedOnce = true }
                     ScrollHapticsEffect(listState = listState)
                     LazyColumn(
                         state = listState,
@@ -781,18 +786,18 @@ fun CallLogFullContent(
                                             modifier = Modifier
                                                 .clip(RoundedCornerShape(20.dp))
                                                 .combinedClickable(
-                                                onClick = {
-                                                    navController.navigate(ContactScreenDestination.route) {
-                                                        popUpTo(navController.graph.findStartDestination().id) {
-                                                            saveState = true
+                                                    onClick = {
+                                                        navController.navigate(ContactScreenDestination.route) {
+                                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                                saveState = true
+                                                            }
+                                                            launchSingleTop = true
+                                                            restoreState = true
                                                         }
-                                                        launchSingleTop = true
-                                                        restoreState = true
-                                                    }
-                                                },
-                                                interactionSource = null,
-                                                indication = ripple(bounded = true),
-                                            ),
+                                                    },
+                                                    interactionSource = null,
+                                                    indication = ripple(bounded = true),
+                                                ),
                                             shape = RoundedCornerShape(20.dp),
                                             color = MaterialTheme.colorScheme.surfaceContainerHigh
                                         ) {
@@ -833,7 +838,7 @@ fun CallLogFullContent(
                                         Text(
                                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp),
                                             text = if (isEditingFavorites) stringResource(R.string.done)
-                                                    else stringResource(R.string.edit),
+                                            else stringResource(R.string.edit),
                                             style = MaterialTheme.typography.labelMedium,
                                             fontWeight = FontWeight.SemiBold,
                                             maxLines = 1,
@@ -883,7 +888,11 @@ fun CallLogFullContent(
 
                         val directCall = prefs.getBoolean(PreferenceManager.KEY_DIRECT_CALL_ON_TAP, false)
                         val showSimLabel = hasDualSim(context)
-                        currentGroupedLogs.forEach { (header, logsInGroup) ->
+
+                        // IMPORTANT: We retrieve the current `groupedLogs` directly from the closure of the Composable function.
+                        // They will update automatically as soon as the ViewModel returns a new list,
+                        // WITHOUT restarting the slide animation!
+                        groupedLogs.forEach { (header, logsInGroup) ->
                             // Section header as its own item
                             item(key = "header_$header", contentType = "sectionHeader") {
                                 RillScrollAnimatedItem {

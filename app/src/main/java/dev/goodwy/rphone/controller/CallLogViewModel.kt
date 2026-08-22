@@ -119,10 +119,10 @@ class CallLogViewModel(
     }
 
     fun setFilter(newFilter: CallLogFilter) {
-        if (newFilter == _selectedFilter.value) {
-            _selectedFilter.value = CallLogFilter.All
+        _selectedFilter.value = if (newFilter == _selectedFilter.value) {
+            CallLogFilter.All
         } else {
-            _selectedFilter.value = newFilter
+            newFilter
         }
     }
 
@@ -160,9 +160,9 @@ class CallLogViewModel(
             // and the freshly-fetched data are identical (the common case on
             // every app open after the first one).
             val changed = result.size != cachedLogs.size ||
-                result.zip(cachedLogs).any { (a, b) ->
-                    a.number != b.number || a.date != b.date || a.type != b.type
-                }
+                    result.zip(cachedLogs).any { (a, b) ->
+                        a.number != b.number || a.date != b.date || a.type != b.type
+                    }
             cachedLogs = result
             saveToDisk(result)
             if (changed) {
