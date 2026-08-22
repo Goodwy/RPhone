@@ -87,6 +87,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.core.net.toUri
 import androidx.fragment.app.FragmentActivity
 import coil.compose.AsyncImage
@@ -145,7 +146,7 @@ fun ExpressiveCallScreen(
     val contactsRepo = koinInject<IContactsRepository>()
     val telecomManager = remember { context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager }
     
-    val allCalls by CallService.allCalls.collectAsState()
+    val allCalls by CallService.allCalls.collectAsStateWithLifecycle()
     val otherCall = remember(allCalls, call) {
         @Suppress("DEPRECATION")
         allCalls.find { it != call && it.state != Call.STATE_DISCONNECTED }
@@ -189,7 +190,7 @@ fun ExpressiveCallScreen(
         try { call.disconnect() } catch (_: Exception) { }
     }
 
-    val settingsState by preferenceManager.settingsChanged.collectAsState()
+    val settingsState by preferenceManager.settingsChanged.collectAsStateWithLifecycle()
     val showCallScreenAvatar = remember(settingsState) {
         preferenceManager.getBoolean(PreferenceManager.KEY_SHOW_CALL_SCREEN_AVATAR, true)
     }
@@ -1107,7 +1108,7 @@ fun InCallKeypad(
     onDigitClick: (Char) -> Unit
 ) {
     val prefs = koinInject<PreferenceManager>()
-    val settingsState by prefs.settingsChanged.collectAsState()
+    val settingsState by prefs.settingsChanged.collectAsStateWithLifecycle()
     val toneGenerator = remember { ToneGenerator(AudioManager.STREAM_DTMF, 80) }
     val dialpadStyle by remember(settingsState) {
         mutableIntStateOf(prefs.getInt(PreferenceManager.KEY_DIALPAD_STYLE, 3))
@@ -1250,7 +1251,7 @@ fun KeypadButton(
 @Composable
 fun PulsingAvatar(photoUri: String?) {
     val prefs = koinInject<PreferenceManager>()
-    val settingsState by prefs.settingsChanged.collectAsState()
+    val settingsState by prefs.settingsChanged.collectAsStateWithLifecycle()
     val avatarShape = remember(settingsState) {
         val shapeVal = prefs.getInt(PreferenceManager.KEY_AVATAR_SHAPE, 1)
         when (shapeVal) {
@@ -1307,7 +1308,7 @@ fun PulsingAvatar(photoUri: String?) {
 @Composable
 fun HeroAvatar(photoUri: String?, avatarSize: Dp = 160.dp, wavy: Boolean = false) {
     val prefs = koinInject<PreferenceManager>()
-    val settingsState by prefs.settingsChanged.collectAsState()
+    val settingsState by prefs.settingsChanged.collectAsStateWithLifecycle()
     val avatarShape = remember(settingsState) {
         if (wavy) wavyCircleShape(waveAmplitude = 0.024f)
         else {

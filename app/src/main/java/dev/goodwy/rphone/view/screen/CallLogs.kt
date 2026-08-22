@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -75,8 +76,8 @@ fun CallLogFullScreen(
     numbersList: Array<String>? = null
 ) {
     val viewModel: CallLogViewModel = koinActivityViewModel()
-    val allLogs by viewModel.allCallLogs.collectAsState()
-    val selectedFilter by viewModel.selectedFilter.collectAsState()
+    val allLogs by viewModel.allCallLogs.collectAsStateWithLifecycle()
+    val selectedFilter by viewModel.selectedFilter.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
@@ -144,7 +145,7 @@ fun CallLogFullScreen(
         }
     }
 
-    val filteredLogsByContact by filteredByContact.collectAsState()
+    val filteredLogsByContact by filteredByContact.collectAsStateWithLifecycle()
 
     val contactName = remember(filteredLogsByContact) {
         filteredLogsByContact.firstOrNull { it.name != null && it.name != it.number }?.name ?: (phoneNumber?.forceLtr())

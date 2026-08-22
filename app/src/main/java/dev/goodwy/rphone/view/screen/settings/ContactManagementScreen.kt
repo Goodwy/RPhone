@@ -38,6 +38,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.controller.ContactsViewModel
 import dev.goodwy.rphone.modal.data.Contact
 import dev.goodwy.rphone.view.components.RillDialog
@@ -88,7 +89,7 @@ fun ContactManagementScreen(
     val viewModel: ContactsViewModel = koinActivityViewModel()
     var duplicateGroups by remember { mutableStateOf<List<List<Contact>>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
-    val standardizeProgress by viewModel.standardizeProgress.collectAsState()
+    val standardizeProgress by viewModel.standardizeProgress.collectAsStateWithLifecycle()
 
     if (standardizeProgress != null) {
         RillDialog(
@@ -226,8 +227,8 @@ fun ContactManagementScreen(
                 }
 
                 item {
-                    val sortOrder by viewModel.sortOrder.collectAsState()
-                    val displayOrder by viewModel.displayOrder.collectAsState()
+                    val sortOrder by viewModel.sortOrder.collectAsStateWithLifecycle()
+                    val displayOrder by viewModel.displayOrder.collectAsStateWithLifecycle()
                     RillAnimatedSection(delayMs = 60L) {
                         Column {
                             SettingsSectionLabel(stringResource(R.string.display))

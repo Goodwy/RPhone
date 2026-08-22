@@ -65,6 +65,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.cardCornerSmall
 import dev.goodwy.rphone.view.components.RillAnimatedSection
 import dev.goodwy.rphone.view.components.RillExpressiveCard
@@ -128,7 +129,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
     val snackbarHostState = remember { SnackbarHostState() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    val settingsState by prefs.settingsChanged.collectAsState()
+    val settingsState by prefs.settingsChanged.collectAsStateWithLifecycle()
     var themeMode           by remember(settingsState) { mutableStateOf(prefs.getString(PreferenceManager.KEY_THEME_MODE, "auto") ?: "auto") }
     var dynamicColors       by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_DYNAMIC_COLORS, true)) }
     var customPrimaryColor  by remember(settingsState) { mutableStateOf(prefs.getInt("custom_primary_color", color_default_primary.toArgb())) }
@@ -150,8 +151,8 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
     var hexError by remember(settingsState) { mutableStateOf(false) }
 
     val purchaseHelper: PurchaseHelper = koinInject()
-    val isPro by purchaseHelper.isPro.collectAsState()
-    val proCheckDone by purchaseHelper.proCheckDone.collectAsState()
+    val isPro by purchaseHelper.isPro.collectAsStateWithLifecycle()
+    val proCheckDone by purchaseHelper.proCheckDone.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
         val savedIsProIap = prefs.getBoolean(PreferenceManager.KEY_IS_PRO_IAP, false)
         val savedIsProSub = prefs.getBoolean(PreferenceManager.KEY_IS_PRO_SUB, false)

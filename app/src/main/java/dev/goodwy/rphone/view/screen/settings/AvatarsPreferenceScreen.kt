@@ -13,6 +13,7 @@ import androidx.compose.material.icons.rounded.TextFields
 import androidx.compose.material.icons.rounded.Title
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -43,7 +44,7 @@ import org.koin.compose.koinInject
 @Composable
 fun AvatarsPreferenceScreen(navigator: DestinationsNavigator) {
     val prefs = koinInject<PreferenceManager>()
-    val settingsState by prefs.settingsChanged.collectAsState()
+    val settingsState by prefs.settingsChanged.collectAsStateWithLifecycle()
 
     var showFirstLetter           by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SHOW_FIRST_LETTER, true)) }
     var colorfulAvatars           by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_COLORFUL_AVATARS, true)) }

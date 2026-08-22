@@ -146,7 +146,7 @@ class ContactsViewModel(
     }
 
     fun fetchContacts() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             if (_allContacts.value.isEmpty()) {
                 _isLoading.value = true
             }
@@ -157,19 +157,15 @@ class ContactsViewModel(
     }
 
     suspend fun getFullContactById(contactId: String): Contact? {
-        return withContext(Dispatchers.IO) {
-            contactsRepo.getContactById(contactId)
-        }
+        return contactsRepo.getContactById(contactId)
     }
 
     suspend fun getFullContactByNumber(number: String): Contact? {
-        return withContext(Dispatchers.IO) {
-            contactsRepo.getContactByNumber(number)
-        }
+        return contactsRepo.getContactByNumber(number)
     }
 
     fun fetchAccounts() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             _availableAccounts.value = contactsRepo.getAvailableAccounts()
             _availableAccountsForMoving.value = contactsRepo.getAvailableAccountsForMoving()
         }
@@ -218,7 +214,7 @@ class ContactsViewModel(
     }
 
     fun toggleFavorite(contact: Contact, add: Boolean = false) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             val newFavStatus = !contact.isFavorite
             contactsRepo.toggleFavorite(contact.id, if (add) true else newFavStatus)
 
@@ -240,27 +236,25 @@ class ContactsViewModel(
     }
 
     fun setFavorite(contact: Contact, isFavorite: Boolean) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             contactsRepo.toggleFavorite(contact.id, isFavorite)
             fetchContacts()
         }
     }
 
     suspend fun saveContact(contact: Contact) {
-        withContext(Dispatchers.IO) {
-            contactsRepo.saveContact(contact)
+        contactsRepo.saveContact(contact)
 
-            if (contact.isPrivate) {
-                preferenceManager.setString(PreferenceManager.KEY_LAST_USED_ACCOUNT_NAME, contact.accountName ?: private_only)
-                preferenceManager.setString(PreferenceManager.KEY_LAST_USED_ACCOUNT_TYPE, contact.accountType ?: private_only)
-            } else {
-                preferenceManager.setString(PreferenceManager.KEY_LAST_USED_ACCOUNT_NAME, contact.accountName ?: device_only)
-                preferenceManager.setString(PreferenceManager.KEY_LAST_USED_ACCOUNT_TYPE, contact.accountType ?: device_only)
-            }
-
-
-            fetchContacts()
+        if (contact.isPrivate) {
+            preferenceManager.setString(PreferenceManager.KEY_LAST_USED_ACCOUNT_NAME, contact.accountName ?: private_only)
+            preferenceManager.setString(PreferenceManager.KEY_LAST_USED_ACCOUNT_TYPE, contact.accountType ?: private_only)
+        } else {
+            preferenceManager.setString(PreferenceManager.KEY_LAST_USED_ACCOUNT_NAME, contact.accountName ?: device_only)
+            preferenceManager.setString(PreferenceManager.KEY_LAST_USED_ACCOUNT_TYPE, contact.accountType ?: device_only)
         }
+
+
+        fetchContacts()
     }
 
     fun getLastUsedAccount(): Account? {
@@ -310,7 +304,7 @@ class ContactsViewModel(
     }
 
     fun deleteContact(contactId: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             contactsRepo.deleteContact(contactId)
 
             val currentOrder = preferenceManager.getFavoritesOrder().toMutableList()
@@ -324,7 +318,7 @@ class ContactsViewModel(
     }
 
     fun deleteContacts(contactIds: List<String>) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             contactsRepo.deleteContacts(contactIds)
 
             val currentOrder = preferenceManager.getFavoritesOrder().toMutableList()
@@ -344,36 +338,34 @@ class ContactsViewModel(
     }
 
     fun moveContacts(contactIds: List<String>, account: Account?) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             contactsRepo.moveContacts(contactIds, account?.name, account?.type)
             fetchContacts()
         }
     }
 
     fun findDuplicates(onResult: (List<List<Contact>>) -> Unit) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             val duplicates = contactsRepo.findDuplicates()
-            withContext(Dispatchers.Main) {
-                onResult(duplicates)
-            }
+            onResult(duplicates)
         }
     }
 
     fun mergeContacts(targetId: String, sourceIds: List<String>) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             contactsRepo.mergeContacts(targetId, sourceIds)
             fetchContacts()
         }
     }
 
     fun setCustomRingtone(contactId: String, ringtoneUri: String?) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             contactsRepo.setCustomRingtone(contactId, ringtoneUri)
         }
     }
 
     fun formatAllPhoneNumbers() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             _standardizeProgress.value = 0f
             contactsRepo.formatAllPhoneNumbers { current, total ->
                 _standardizeProgress.value = if (total > 0) current.toFloat() / total else 1f
@@ -384,7 +376,7 @@ class ContactsViewModel(
     }
 
     fun previewStandardize(onResult: (StandardizeStats) -> Unit) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.Default) {
             val allContacts = contactsRepo.getContacts()
             var contactsWithChanges = 0
             var totalNumbersChanged = 0
@@ -427,27 +419,27 @@ class ContactsViewModel(
     }
 
     fun makeContactPrivate(contactId: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             contactsRepo.makeContactPrivate(contactId)
             fetchContacts()
         }
     }
 
     fun makeContactPublic(contactId: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             contactsRepo.makeContactPublic(contactId)
             fetchContacts()
         }
     }
 
     fun exportPrivateContacts(uri: Uri) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             contactsRepo.exportPrivateContacts(uri)
         }
     }
 
     fun importPrivateContacts(uri: Uri) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             contactsRepo.importPrivateContacts(uri)
             fetchContacts()
         }
@@ -455,14 +447,14 @@ class ContactsViewModel(
 
     // Goodwy
     fun setDefaultPhoneNumber(contactId: String, phoneNumber: String, isPrimary: Boolean) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             contactsRepo.setDefaultPhoneNumber(contactId, phoneNumber, isPrimary)
             refreshContacts()
         }
     }
 
     private fun refreshContacts() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             val freshContacts = contactsRepo.getContacts()
             _allContacts.value = freshContacts
         }
@@ -507,7 +499,7 @@ class ContactsViewModel(
     }
 
     fun unmergeAll(contactId: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             contactsRepo.unmergeAllSources(contactId)
             fetchContacts()
         }

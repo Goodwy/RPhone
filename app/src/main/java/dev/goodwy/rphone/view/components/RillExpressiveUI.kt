@@ -7,6 +7,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import android.os.VibratorManager
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
@@ -160,7 +161,7 @@ fun ScrollHapticsEffect(listState: LazyListState) {
     val context = LocalContext.current
     val density = LocalDensity.current
     val prefs = koinInject<PreferenceManager>()
-    val settingsVersion by prefs.settingsChanged.collectAsState()
+    val settingsVersion by prefs.settingsChanged.collectAsStateWithLifecycle()
 
     val scrollHapticsEnabled = remember(settingsVersion) { prefs.getBoolean(PreferenceManager.KEY_SCROLL_HAPTICS, false) }
     val cmPerHaptic = remember(settingsVersion) { prefs.getFloat(PreferenceManager.KEY_SCROLL_CM_PER_HAPTIC, 1.5f) }
@@ -214,7 +215,7 @@ fun ScrollHapticsGridEffect(gridState: androidx.compose.foundation.lazy.grid.Laz
     val context = LocalContext.current
     val density = LocalDensity.current
     val prefs = koinInject<PreferenceManager>()
-    val settingsVersion by prefs.settingsChanged.collectAsState()
+    val settingsVersion by prefs.settingsChanged.collectAsStateWithLifecycle()
 
     val scrollHapticsEnabled = remember(settingsVersion) { prefs.getBoolean(PreferenceManager.KEY_SCROLL_HAPTICS, false) }
     val cmPerHaptic = remember(settingsVersion) { prefs.getFloat(PreferenceManager.KEY_SCROLL_CM_PER_HAPTIC, 1.5f) }
@@ -1241,7 +1242,7 @@ fun RillScrollAnimatedItem(
     // that was already placed in the lazy list keeps its first-read value forever and
     // flipping the setting in InterfaceScreen has no visible effect until the process
     // restarts or the item happens to leave/re-enter composition.
-    val settingsVersion by prefs.settingsChanged.collectAsState()
+    val settingsVersion by prefs.settingsChanged.collectAsStateWithLifecycle()
     val scrollAnimEnabled = remember(settingsVersion) { prefs.getBoolean(PreferenceManager.KEY_SCROLL_ANIMATION, false) }
 
     if (scrollAnimEnabled) {

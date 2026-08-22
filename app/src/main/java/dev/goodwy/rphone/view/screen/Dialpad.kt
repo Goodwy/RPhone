@@ -44,6 +44,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import android.view.WindowManager
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.platform.LocalView
@@ -297,7 +298,7 @@ fun DialPadContent(
         val contactsVM: ContactsViewModel = koinActivityViewModel()
         val logsViewModel: CallLogViewModel = koinActivityViewModel()
         val prefs = koinInject<PreferenceManager>()
-        val settingsState by prefs.settingsChanged.collectAsState()
+        val settingsState by prefs.settingsChanged.collectAsStateWithLifecycle()
         val displayOrder by remember(settingsState) {
             mutableIntStateOf(prefs.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0))
         }
@@ -305,8 +306,8 @@ fun DialPadContent(
             mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_DIALPAD_ANIMATION, true))
         }
 
-        val allContacts by contactsVM.allContacts.collectAsState()
-        val logs by logsViewModel.allCallLogs.collectAsState()
+        val allContacts by contactsVM.allContacts.collectAsStateWithLifecycle()
+        val logs by logsViewModel.allCallLogs.collectAsStateWithLifecycle()
         var number by remember { mutableStateOf(initialNumber?.ifBlank { DialpadDraftHolder.pendingNumber } ?: DialpadDraftHolder.pendingNumber) }
         // Where new digits get inserted / backspace deletes from. Defaults to the end of the number
         // (normal typing behaviour), but the user can tap anywhere in the number to move it, so they
@@ -337,7 +338,7 @@ fun DialPadContent(
         LaunchedEffect(number) { DialpadDraftHolder.pendingNumber = number }
 
         // Collect USSD / MMI responses from CallService and show inline dialog
-        val ussdResult by UssdRepository.response.collectAsState()
+        val ussdResult by UssdRepository.response.collectAsStateWithLifecycle()
         DisposableEffect(Unit) { onDispose { UssdRepository.clear() } }
 
         ussdResult?.let { (request, response) ->

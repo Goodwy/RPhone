@@ -53,8 +53,7 @@ import androidx.compose.material.icons.rounded.Wallpaper
 import androidx.compose.material.icons.rounded.Work
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -123,9 +122,9 @@ fun ContactEditScreen(
 ) {
     val context = LocalContext.current
     val contactsVM: ContactsViewModel = koinActivityViewModel()
-    val allContacts by contactsVM.allContacts.collectAsState()
-    val availableAccounts by contactsVM.availableAccounts.collectAsState()
-    val availableAccountsForMoving by contactsVM.availableAccountsForMoving.collectAsState()
+    val allContacts by contactsVM.allContacts.collectAsStateWithLifecycle()
+    val availableAccounts by contactsVM.availableAccounts.collectAsStateWithLifecycle()
+    val availableAccountsForMoving by contactsVM.availableAccountsForMoving.collectAsStateWithLifecycle()
 
     val listState = rememberLazyListState()
     val showButton by remember { derivedStateOf { listState.firstVisibleItemIndex > 2 } }

@@ -68,6 +68,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -162,7 +163,7 @@ class MainActivity : FragmentActivity() {
                     )
                 } else {
                     // ── Biometric app-lock ──────────────────────────────────────
-                    val settingsVer by prefs.settingsChanged.collectAsState()
+                    val settingsVer by prefs.settingsChanged.collectAsStateWithLifecycle()
                     LaunchedEffect(settingsVer) {
                         biometricType = prefs.getString(PreferenceManager.KEY_BIOMETRICS_TYPE, "") ?: ""
                         appLockEnabled = prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK, false)
@@ -206,7 +207,7 @@ class MainActivity : FragmentActivity() {
                     )
 
                     // ── Ongoing Call Banner + Main nav host ───────────────────────
-                    val callSession by CallService.currentCallSession.collectAsState()
+                    val callSession by CallService.currentCallSession.collectAsStateWithLifecycle()
                     val hasOngoingCall =
                         callSession != null && callSession?.state != android.telecom.Call.STATE_RINGING
 

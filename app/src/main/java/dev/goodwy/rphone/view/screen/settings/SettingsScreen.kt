@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.BackupManager
 import dev.goodwy.rphone.controller.util.PreferenceManager
@@ -111,8 +112,8 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
 
     var proximityBg by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_PROXIMITY_BG, true)) }
     val purchaseHelper: PurchaseHelper = koinInject()
-    val isPro by purchaseHelper.isPro.collectAsState()
-    val proCheckDone by purchaseHelper.proCheckDone.collectAsState()
+    val isPro by purchaseHelper.isPro.collectAsStateWithLifecycle()
+    val proCheckDone by purchaseHelper.proCheckDone.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
         val savedIsProIap = prefs.getBoolean(PreferenceManager.KEY_IS_PRO_IAP, false)
         val savedIsProSub = prefs.getBoolean(PreferenceManager.KEY_IS_PRO_SUB, false)
@@ -874,7 +875,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                                     onClick = { navigator.navigate(BlockedNumbersScreenDestination) }
                                 )
                                 val biometricsType =
-                                    remember(prefs.settingsChanged.collectAsState().value) {
+                                    remember(prefs.settingsChanged.collectAsStateWithLifecycle().value) {
                                         prefs.getString(PreferenceManager.KEY_BIOMETRICS_TYPE, "")
                                             ?: ""
                                     }

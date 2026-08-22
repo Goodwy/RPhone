@@ -66,9 +66,9 @@ class CallService : InCallService() {
 
     companion object {
         private const val CHANNEL_ID = "call_channel"
-        private const val INCOMING_CHANNEL_ID = "incoming_call_channel"
-        private const val FULLSCREEN_INCOMING_CHANNEL_ID = "fullscreen_incoming_call_channel"
-        private const val MISSED_CHANNEL_ID = "missed_call_channel"
+        private const val INCOMING_CHANNEL_ID = "incoming_call_channel_v3"
+        private const val FULLSCREEN_INCOMING_CHANNEL_ID = "fullscreen_incoming_call_channel_v3"
+        private const val MISSED_CHANNEL_ID = "missed_call_channel_v3"
         private const val NOTIFICATION_ID = 101
 
         private val _currentCallSession = MutableStateFlow<CallSession?>(null)
@@ -197,6 +197,13 @@ class CallService : InCallService() {
         instance = this
         serviceScope.launch {
             isActivityVisible.collect {
+                _currentCallSession.value?.call?.let { currentCall ->
+                    updateNotification(currentCall)
+                }
+            }
+        }
+        serviceScope.launch {
+            callStateManager.callerMetadata.collect {
                 _currentCallSession.value?.call?.let { currentCall ->
                     updateNotification(currentCall)
                 }
@@ -549,26 +556,14 @@ class CallService : InCallService() {
 
         val isRinging = call.state == Call.STATE_RINGING
         val channel = if (isRinging) {
-            if (fullscreenCalls) {
-                NotificationChannel(
-                    FULLSCREEN_INCOMING_CHANNEL_ID,
-                    getString(R.string.notif_channel_fullscreen_incoming_calls),
-                    NotificationManager.IMPORTANCE_LOW
-                ).apply {
-                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                    enableVibration(true)
-                    setBypassDnd(true)
-                }
-            } else {
-                NotificationChannel(
-                    INCOMING_CHANNEL_ID,
-                    getString(R.string.notif_channel_incoming_calls),
-                    NotificationManager.IMPORTANCE_HIGH
-                ).apply {
-                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                    enableVibration(true)
-                    setBypassDnd(true)
-                }
+            NotificationChannel(
+                if (fullscreenCalls) FULLSCREEN_INCOMING_CHANNEL_ID else INCOMING_CHANNEL_ID,
+                if (fullscreenCalls) getString(R.string.notif_channel_fullscreen_incoming_calls) else getString(R.string.notif_channel_incoming_calls),
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                enableVibration(true)
+                setBypassDnd(true)
             }
         } else {
             NotificationChannel(

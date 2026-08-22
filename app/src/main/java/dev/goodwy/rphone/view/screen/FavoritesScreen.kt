@@ -82,6 +82,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinActivityViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.core.net.toUri
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactScreenDestination
@@ -95,11 +96,11 @@ import kotlinx.coroutines.delay
 @Composable
 fun FavoritesScreen(navController: NavController, navigator: DestinationsNavigator) {
     val contactsVM: ContactsViewModel = koinActivityViewModel()
-    val allContacts by contactsVM.allContacts.collectAsState()
+    val allContacts by contactsVM.allContacts.collectAsStateWithLifecycle()
     val favorites = remember(allContacts) { allContacts.filter { it.isFavorite } }
     val scope = rememberCoroutineScope()
     val prefs = koinInject<PreferenceManager>()
-    val settingsVersion by prefs.settingsChanged.collectAsState()
+    val settingsVersion by prefs.settingsChanged.collectAsStateWithLifecycle()
     val searchEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SEARCH, false)
 
     LaunchedEffect(settingsVersion) {
@@ -255,7 +256,7 @@ fun FavoritesScreen(navController: NavController, navigator: DestinationsNavigat
                             favorites.filter { selectedIds.contains(it.id) }.forEach { contactsVM.toggleFavorite(it) }
                             selectedIds = emptySet()
                         },
-                        availableAccounts = contactsVM.availableAccountsForMoving.collectAsState().value,
+                        availableAccounts = contactsVM.availableAccountsForMoving.collectAsStateWithLifecycle().value,
                         onShare = {
                             val text = favorites.filter { selectedIds.contains(it.id) }.joinToString("\n") { "${it.name}: ${it.phoneNumbers.firstOrNull() ?: ""}" }
                             val intent = Intent(Intent.ACTION_SEND).apply { type = "text/plain"; putExtra(Intent.EXTRA_TEXT, text) }

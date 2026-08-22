@@ -13,7 +13,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -181,7 +181,7 @@ fun Rill4Theme(
     prefs: PreferenceManager = koinInject(),
     content: @Composable () -> Unit
 ) {
-    val settingsState by prefs.settingsChanged.collectAsState()
+    val settingsState by prefs.settingsChanged.collectAsStateWithLifecycle()
 
     val themeMode      = prefs.getString(PreferenceManager.KEY_THEME_MODE, "auto") ?: "auto"
     val dynamicColor   = prefs.getBoolean(PreferenceManager.KEY_DYNAMIC_COLORS, true)

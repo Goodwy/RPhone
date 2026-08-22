@@ -72,13 +72,11 @@ class CallLogViewModel(
             callLogObserver
         )
         // Step 1: serve disk cache immediately so UI is instant
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             val diskCache = loadFromDisk()
             if (diskCache.isNotEmpty()) {
                 cachedLogs = diskCache
-                withContext(Dispatchers.Main) {
-                    _allCallLogs.value = diskCache
-                }
+                _allCallLogs.value = diskCache
             }
             // Step 2: refresh from provider in background
             fetchLogsInternal()
@@ -100,21 +98,17 @@ class CallLogViewModel(
     private fun filterLogs(logs: List<CallLogEntry>, filter: CallLogFilter, blockVisibility: Int) {
         filterJob?.cancel()
         filterJob = viewModelScope.launch(Dispatchers.Default) {
-            val result = withContext(Dispatchers.IO) {
-                val baseLogs = if (blockVisibility == 0) logs.filter { !it.isBlocked } else logs
+            val baseLogs = if (blockVisibility == 0) logs.filter { !it.isBlocked } else logs
 
-                when (filter) {
-                    CallLogFilter.All -> baseLogs
-                    CallLogFilter.Missed -> baseLogs.filter { it.type == CallLog.Calls.MISSED_TYPE }
-                    CallLogFilter.Incoming -> baseLogs.filter { it.type == CallLog.Calls.INCOMING_TYPE }
-                    CallLogFilter.Outgoing -> baseLogs.filter { it.type == CallLog.Calls.OUTGOING_TYPE }
-                    CallLogFilter.Rejected -> baseLogs.filter { it.type == CallLog.Calls.REJECTED_TYPE }
-                    CallLogFilter.Contacts -> baseLogs.filter { it.contactId != null }
-                }
+            val result = when (filter) {
+                CallLogFilter.All -> baseLogs
+                CallLogFilter.Missed -> baseLogs.filter { it.type == CallLog.Calls.MISSED_TYPE }
+                CallLogFilter.Incoming -> baseLogs.filter { it.type == CallLog.Calls.INCOMING_TYPE }
+                CallLogFilter.Outgoing -> baseLogs.filter { it.type == CallLog.Calls.OUTGOING_TYPE }
+                CallLogFilter.Rejected -> baseLogs.filter { it.type == CallLog.Calls.REJECTED_TYPE }
+                CallLogFilter.Contacts -> baseLogs.filter { it.contactId != null }
             }
-            withContext(Dispatchers.Main) {
-                _filteredLogs.value = result
-            }
+            _filteredLogs.value = result
         }
     }
 
@@ -145,7 +139,7 @@ class CallLogViewModel(
             return
         }
         if (isFetching) return
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             fetchLogsInternal()
         }
     }
@@ -166,9 +160,7 @@ class CallLogViewModel(
             cachedLogs = result
             saveToDisk(result)
             if (changed) {
-                withContext(Dispatchers.Main) {
-                    _allCallLogs.value = result
-                }
+                _allCallLogs.value = result
             }
         } finally {
             isFetching = false
@@ -177,7 +169,7 @@ class CallLogViewModel(
 
     // ── Disk cache helpers ────────────────────────────────────────────────────
 
-    private fun saveToDisk(logs: List<CallLogEntry>) {
+    private suspend fun saveToDisk(logs: List<CallLogEntry>) = withContext(Dispatchers.IO) {
         try {
             val arr = JSONArray()
             logs.forEach { e ->
@@ -207,9 +199,9 @@ class CallLogViewModel(
         } catch (_: Exception) {}
     }
 
-    private fun loadFromDisk(): List<CallLogEntry> {
-        return try {
-            if (!cacheFile.exists()) return emptyList()
+    private suspend fun loadFromDisk(): List<CallLogEntry> = withContext(Dispatchers.IO) {
+        try {
+            if (!cacheFile.exists()) return@withContext emptyList()
             val arr = JSONArray(cacheFile.readText())
             val list = mutableListOf<CallLogEntry>()
             for (i in 0 until arr.length()) {
@@ -251,21 +243,21 @@ class CallLogViewModel(
     }
 
     fun deleteCallLog(number: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             callLogRepo.deleteCallLog(number)
             fetchLogs()
         }
     }
 
     fun deleteCallLogsByIds(ids: List<Long>) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             callLogRepo.deleteCallLogsByIds(ids)
             fetchLogs()
         }
     }
 
     fun clearCallLogs() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             callLogRepo.clearCallLogs()
             fetchLogs()
         }

@@ -23,6 +23,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.controller.ContactsViewModel
 import dev.goodwy.rphone.controller.util.ContactUtils
 import dev.goodwy.rphone.view.components.RillExpressiveCard
@@ -47,8 +48,8 @@ fun ContactVisibilityScreen(
 ) {
     val context = LocalContext.current
     val viewModel: ContactsViewModel = koinActivityViewModel()
-    val accounts by viewModel.availableAccounts.collectAsState()
-    val visibleAccounts by viewModel.visibleAccountsFlow.collectAsState()
+    val accounts by viewModel.availableAccounts.collectAsStateWithLifecycle()
+    val visibleAccounts by viewModel.visibleAccountsFlow.collectAsStateWithLifecycle()
 
     val currentVisible = remember(visibleAccounts, accounts) {
         visibleAccounts ?: (accounts.map { "${it.type}|${it.name}" } + "local|local" + "private|private").toSet()
