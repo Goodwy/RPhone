@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
@@ -189,7 +190,7 @@ fun ContactScreen(navController: NavController, navigator: DestinationsNavigator
                         )
                     }
                 } else {
-                    val filteredContacts by contactsVM.filteredContacts.collectAsState()
+                    val filteredContacts by contactsVM.filteredContacts.collectAsStateWithLifecycle()
 
                     // Set the currentAccountKey for the selected contacts
                     val selectedContacts = filteredContacts.filter { selectedIds.contains(it.id) }
@@ -238,7 +239,7 @@ fun ContactScreen(navController: NavController, navigator: DestinationsNavigator
                         onRemoveFromFav = {
                             filteredContacts.filter { selectedIds.contains(it.id) }.forEach { contactsVM.toggleFavorite(it, false) }
                         },
-                        availableAccounts = contactsVM.availableAccountsForMoving.collectAsState().value,
+                        availableAccounts = contactsVM.availableAccountsForMoving.collectAsStateWithLifecycle().value,
                         currentAccountKey = currentAccountKey,
                         onShare = {
                             val text = filteredContacts.filter { selectedIds.contains(it.id) }.joinToString("\n") { "${it.displayName}: ${it.phoneNumbers.joinToString(", ")}" }
@@ -375,11 +376,11 @@ fun AccountFilterBar(
     viewModel: ContactsViewModel,
     onAddContact: () -> Unit,
 ) {
-    val accounts by viewModel.filteredAvailableAccounts.collectAsState()
-    val selectedAccount by viewModel.selectedAccount.collectAsState()
-    val showLocalOnly by viewModel.showLocalOnly.collectAsState()
-    val showPrivateOnly by viewModel.showPrivateOnly.collectAsState()
-    val visibleAccounts by viewModel.visibleAccountsFlow.collectAsState()
+    val accounts by viewModel.filteredAvailableAccounts.collectAsStateWithLifecycle()
+    val selectedAccount by viewModel.selectedAccount.collectAsStateWithLifecycle()
+    val showLocalOnly by viewModel.showLocalOnly.collectAsStateWithLifecycle()
+    val showPrivateOnly by viewModel.showPrivateOnly.collectAsStateWithLifecycle()
+    val visibleAccounts by viewModel.visibleAccountsFlow.collectAsStateWithLifecycle()
     val showLocalOnlyAccount = visibleAccounts?.contains("local|local") ?: true
     val showPrivateOnlyAccount = visibleAccounts?.contains("private|private") ?: true
     LaunchedEffect(Unit) { viewModel.fetchAccounts() }
@@ -396,8 +397,8 @@ fun AccountFilterBar(
         animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
         label = "chipScale"
     )
-    val allContacts by viewModel.allContacts.collectAsState()
-    val filteredContacts by viewModel.filteredContacts.collectAsState()
+    val allContacts by viewModel.allContacts.collectAsStateWithLifecycle()
+    val filteredContacts by viewModel.filteredContacts.collectAsStateWithLifecycle()
     LaunchedEffect(filteredContacts.size) { chipVisible = true }
 
     var showAccountSheet by remember { mutableStateOf(false) }
@@ -839,12 +840,12 @@ fun ContactContent(
     ) {
         if (isGranted) {
             val contactsVM: ContactsViewModel = koinActivityViewModel()
-            val isLoading by contactsVM.isLoading.collectAsState()
-            val contacts by contactsVM.filteredContacts.collectAsState()
-            val groupedContacts by contactsVM.groupedContacts.collectAsState()
+            val isLoading by contactsVM.isLoading.collectAsStateWithLifecycle()
+            val contacts by contactsVM.filteredContacts.collectAsStateWithLifecycle()
+            val groupedContacts by contactsVM.groupedContacts.collectAsStateWithLifecycle()
 
             val prefs = koinInject<PreferenceManager>()
-            val settingsVersion by prefs.settingsChanged.collectAsState()
+            val settingsVersion by prefs.settingsChanged.collectAsStateWithLifecycle()
 
             LaunchedEffect(settingsVersion) {
                 contactsVM.fetchContacts()

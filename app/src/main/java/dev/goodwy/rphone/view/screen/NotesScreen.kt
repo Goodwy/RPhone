@@ -43,6 +43,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.ContactsViewModel
@@ -80,7 +81,7 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator, 
     val prefs = koinInject<PreferenceManager>()
     val haptic = LocalHapticFeedback.current
     val contactsVM: ContactsViewModel = koinActivityViewModel()
-    val allContacts by contactsVM.allContacts.collectAsState()
+    val allContacts by contactsVM.allContacts.collectAsStateWithLifecycle()
 
     // Build phone→photoUri lookup map
     val phoneToPhotoUri = remember(allContacts) {

@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -121,7 +122,7 @@ fun BottomBar(navController: NavController) {
     val prefs         = koinInject<PreferenceManager>()
     val context       = LocalContext.current
     @Suppress("UNUSED_VARIABLE")
-    val settingsState by prefs.settingsChanged.collectAsState()
+    val settingsState by prefs.settingsChanged.collectAsStateWithLifecycle()
 
     val pillNav             = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_PILL_NAV, false) }
     val iconOnly            = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_ICON_ONLY_NAV, false) }

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -73,7 +74,7 @@ class BiometricCallActivity : FragmentActivity() {
         setContent {
             Rill4Theme {
                 val activity = this
-                val call = CallService.currentCallSession.collectAsState().value?.call
+                val call = CallService.currentCallSession.collectAsStateWithLifecycle().value?.call
                 if (call != null) BiometricFloatingUi(
                     biometricType  = biometricType,
                     activity       = activity,

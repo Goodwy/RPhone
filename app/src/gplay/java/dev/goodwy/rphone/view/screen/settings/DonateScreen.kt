@@ -45,6 +45,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.util.toast
@@ -106,13 +107,13 @@ fun DonateScreen(navigator: DestinationsNavigator) {
 
     val purchaseHelper: PurchaseHelper = koinInject()
 
-    val purchaseSuccess by purchaseHelper.purchaseSuccess.collectAsState()
-    val isLoading by purchaseHelper.isLoading.collectAsState()
-    val errorMessage by purchaseHelper.errorMessage.collectAsState()
-    val isBillingReady by purchaseHelper.isBillingReady.collectAsState()
-    val iapSkuDetailsInitialized by purchaseHelper.iapSkuDetailsInitialized.collectAsState()
-    val subSkuDetailsInitialized by purchaseHelper.subSkuDetailsInitialized.collectAsState()
-//    val isPro by playStoreViewModel.isPro.collectAsState()
+    val purchaseSuccess by purchaseHelper.purchaseSuccess.collectAsStateWithLifecycle()
+    val isLoading by purchaseHelper.isLoading.collectAsStateWithLifecycle()
+    val errorMessage by purchaseHelper.errorMessage.collectAsStateWithLifecycle()
+    val isBillingReady by purchaseHelper.isBillingReady.collectAsStateWithLifecycle()
+    val iapSkuDetailsInitialized by purchaseHelper.iapSkuDetailsInitialized.collectAsStateWithLifecycle()
+    val subSkuDetailsInitialized by purchaseHelper.subSkuDetailsInitialized.collectAsStateWithLifecycle()
+//    val isPro by playStoreViewModel.isPro.collectAsStateWithLifecycle()
 
     // Initialization
     LaunchedEffect(Unit) {

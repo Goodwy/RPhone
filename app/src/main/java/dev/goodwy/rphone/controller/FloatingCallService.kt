@@ -35,6 +35,7 @@ import androidx.compose.material.icons.rounded.Mic
 import androidx.compose.material.icons.rounded.MicOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -359,7 +360,7 @@ class FloatingCallService : Service() {
         onAction: (MenuAction) -> Unit
     ) {
         val context    = LocalContext.current
-        val audioState by CallService.audioState.collectAsState()
+        val audioState by CallService.audioState.collectAsStateWithLifecycle()
         val isMuted    = audioState?.isMuted ?: false
         val isSpeaker  = audioState?.route == CallAudioState.ROUTE_SPEAKER
 

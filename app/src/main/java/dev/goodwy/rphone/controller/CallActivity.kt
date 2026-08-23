@@ -23,7 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -97,10 +97,10 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
 
         setContent {
             Rill4Theme {
-                val session by CallService.currentCallSession.collectAsState()
-                val audioState by CallService.audioState.collectAsState()
-                val settingsState by preferenceManager.settingsChanged.collectAsState()
-                val callerMetadata by callViewModel.callerMetadata.collectAsState()
+                val session by CallService.currentCallSession.collectAsStateWithLifecycle()
+                val audioState by CallService.audioState.collectAsStateWithLifecycle()
+                val settingsState by preferenceManager.settingsChanged.collectAsStateWithLifecycle()
+                val callerMetadata by callViewModel.callerMetadata.collectAsStateWithLifecycle()
 
                 var retainedSession by remember { mutableStateOf<CallSession?>(null) }
                 LaunchedEffect(session) {

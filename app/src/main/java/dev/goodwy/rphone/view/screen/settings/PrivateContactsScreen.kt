@@ -34,6 +34,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.ContactsViewModel
 import dev.goodwy.rphone.modal.data.Contact
@@ -61,9 +62,9 @@ fun PrivateContactsScreen(
 ) {
     val context = LocalContext.current
     val viewModel: ContactsViewModel = koinActivityViewModel()
-    val allContacts by viewModel.allContacts.collectAsState()
+    val allContacts by viewModel.allContacts.collectAsStateWithLifecycle()
     val privateContacts = remember(allContacts) { allContacts.filter { it.isPrivate } }
-    val isLoading by viewModel.isLoading.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
 
     val exportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("text/vcard"),

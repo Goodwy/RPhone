@@ -23,6 +23,7 @@ import androidx.compose.material.icons.automirrored.rounded.CallSplit
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,7 +69,7 @@ fun ContactUnmergeDuplicatesScreen(
 ) {
     val context = LocalContext.current
     val prefs = koinInject<PreferenceManager>()
-    val settingsState by prefs.settingsChanged.collectAsState()
+    val settingsState by prefs.settingsChanged.collectAsStateWithLifecycle()
     val displayOrder = remember(settingsState) { prefs.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0) }
     val viewModel: ContactsViewModel = koinActivityViewModel()
     val scope = rememberCoroutineScope()

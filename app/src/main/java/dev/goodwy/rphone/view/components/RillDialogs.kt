@@ -43,7 +43,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -93,7 +93,7 @@ fun RillDialog(
     val showState = remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { showState.value = true }
     val prefs = koinInject<PreferenceManager>()
-    val settingsState by prefs.settingsChanged.collectAsState()
+    val settingsState by prefs.settingsChanged.collectAsStateWithLifecycle()
     val roundness = remember(settingsState) { prefs.getInt(PreferenceManager.KEY_CARD_ROUNDNESS, 28) }
 
     val scale by animateFloatAsState(
@@ -329,7 +329,7 @@ fun RillDropdownMenu(
     content: @Composable ColumnScope.() -> Unit
 ) {
     val prefs = koinInject<PreferenceManager>()
-    val settingsVer by prefs.settingsChanged.collectAsState()
+    val settingsVer by prefs.settingsChanged.collectAsStateWithLifecycle()
     val liquidGlass = remember(settingsVer) { prefs.getBoolean(PreferenceManager.KEY_LIQUID_GLASS, false) }
     val lgDropdownMenu = remember(settingsVer) { prefs.getBoolean(PreferenceManager.KEY_LG_DROPDOWN_MENU, true) }
     val blurEffects = remember(settingsVer) { prefs.getBoolean(PreferenceManager.KEY_BLUR_EFFECTS, false) }
@@ -477,7 +477,7 @@ fun RillDropdownMenuItem(
     isDestructive: Boolean = false
 ) {
     val prefs2 = koinInject<PreferenceManager>()
-    val settingsVer2 by prefs2.settingsChanged.collectAsState()
+    val settingsVer2 by prefs2.settingsChanged.collectAsStateWithLifecycle()
     val liquidGlass2 = remember(settingsVer2) { prefs2.getBoolean(PreferenceManager.KEY_LIQUID_GLASS, false) }
     val lgDropdown   = remember(settingsVer2) { prefs2.getBoolean(PreferenceManager.KEY_LG_DROPDOWN_MENU, true) }
 

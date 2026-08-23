@@ -73,6 +73,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.platform.LocalDensity
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -281,7 +282,7 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
             ) { isSelecting ->
                 if (isGranted) {
                     val viewModel: CallLogViewModel = koinActivityViewModel()
-                    val selectedFilter by viewModel.selectedFilter.collectAsState()
+                    val selectedFilter by viewModel.selectedFilter.collectAsStateWithLifecycle()
 
                     if (!isSelecting) {
                         Column {
@@ -329,7 +330,7 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
                             }
                         }
                     } else {
-                        val filteredLogs by viewModel.filteredLogs.collectAsState()
+                        val filteredLogs by viewModel.filteredLogs.collectAsStateWithLifecycle()
                         BatchCallLogActionBar(
                             selectedCount = selectedEntries.size,
                             onClearSelection = { selectedEntries = emptySet() },
@@ -384,7 +385,7 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
         floatingActionButton = {
             if (!dialpadEnabled) {
                 val globalBackdrop = LocalLiquidGlassBackdrop.current
-                val settingsVer by prefs.settingsChanged.collectAsState()
+                val settingsVer by prefs.settingsChanged.collectAsStateWithLifecycle()
                 val liquidGlass = remember(settingsVer) {
                     prefs.getBoolean(
                         PreferenceManager.KEY_LIQUID_GLASS,
@@ -554,14 +555,14 @@ fun CallLogFullContent(
 
     if (isGranted) {
         val viewModel: CallLogViewModel = koinActivityViewModel()
-        val logs by viewModel.allCallLogs.collectAsState()
-        val filteredLogs by viewModel.filteredLogs.collectAsState()
-        val selectedFilter by viewModel.selectedFilter.collectAsState()
+        val logs by viewModel.allCallLogs.collectAsStateWithLifecycle()
+        val filteredLogs by viewModel.filteredLogs.collectAsStateWithLifecycle()
+        val selectedFilter by viewModel.selectedFilter.collectAsStateWithLifecycle()
         val context = LocalContext.current
         val telecomManager = remember { context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager }
 
         val contactsVM: ContactsViewModel = koinActivityViewModel()
-        val settingsState by prefs.settingsChanged.collectAsState()
+        val settingsState by prefs.settingsChanged.collectAsStateWithLifecycle()
         val displayOrder by remember(settingsState) {
             mutableIntStateOf(prefs.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0))
         }
@@ -569,7 +570,7 @@ fun CallLogFullContent(
             contactsVM.fetchContacts()
         }
 
-        val allContacts by contactsVM.allContacts.collectAsState()
+        val allContacts by contactsVM.allContacts.collectAsStateWithLifecycle()
 //        val favorites = remember(allContacts) { allContacts.filter { it.isFavorite } }
         val favorites = remember(allContacts, settingsState) {
             val favContacts = allContacts.filter { it.isFavorite }

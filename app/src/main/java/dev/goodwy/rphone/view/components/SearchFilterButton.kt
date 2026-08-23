@@ -22,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -69,7 +70,7 @@ fun PreferenceManager.getSearchFilterState(): SearchFilterState = SearchFilterSt
 fun SearchFilterButton(modifier: Modifier = Modifier, size: Dp = 52.dp) {
     val prefs = koinInject<PreferenceManager>()
     var expanded by remember { mutableStateOf(false) }
-    val settingsVer by prefs.settingsChanged.collectAsState()
+    val settingsVer by prefs.settingsChanged.collectAsStateWithLifecycle()
     val state = remember(settingsVer) { prefs.getSearchFilterState() }
 
     Box(modifier = modifier) {

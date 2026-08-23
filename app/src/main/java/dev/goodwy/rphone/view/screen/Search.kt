@@ -38,6 +38,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.cardCornerBig
@@ -128,10 +129,10 @@ fun ContactSearchContent(
     val contactsVM: ContactsViewModel = koinActivityViewModel()
     val callLogVM: CallLogViewModel = koinActivityViewModel()
 
-    val contacts by contactsVM.allContacts.collectAsState()
-    val callLogs by callLogVM.allCallLogs.collectAsState()
+    val contacts by contactsVM.allContacts.collectAsStateWithLifecycle()
+    val callLogs by callLogVM.allCallLogs.collectAsStateWithLifecycle()
 
-    val settingsVer by prefs.settingsChanged.collectAsState()
+    val settingsVer by prefs.settingsChanged.collectAsStateWithLifecycle()
     val filterState = remember(settingsVer) { prefs.getSearchFilterState() }
     val displayOrder = remember(settingsVer) { prefs.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0) }
     val hideVoiceSearch = remember(settingsVer) { prefs.getBoolean(PreferenceManager.KEY_HIDE_VOICE_SEARCH, false) }

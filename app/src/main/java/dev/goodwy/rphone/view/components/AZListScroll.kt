@@ -58,6 +58,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.bottomBarHeight
 import dev.goodwy.rphone.cardCornerBig
@@ -113,7 +114,7 @@ fun AZListContent(
     grouped: Map<Char, List<Contact>>? = null,
 ) {
     val prefs = koinInject<PreferenceManager>()
-    val settingsState by prefs.settingsChanged.collectAsState()
+    val settingsState by prefs.settingsChanged.collectAsStateWithLifecycle()
     val showFavorites = false //!prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, true)
 
     val haptic = LocalHapticFeedback.current

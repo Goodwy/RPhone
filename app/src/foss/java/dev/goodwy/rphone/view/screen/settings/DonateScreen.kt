@@ -41,6 +41,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.view.components.NavigationIcon
@@ -89,7 +90,7 @@ fun DonateScreen(navigator: DestinationsNavigator) {
     )
 
     val prefs = koinInject<PreferenceManager>()
-    val settingsState by prefs.settingsChanged.collectAsState()
+    val settingsState by prefs.settingsChanged.collectAsStateWithLifecycle()
     var isPro by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_IS_PRO_FOSS, false)) }
     val themeMode      = prefs.getString(PreferenceManager.KEY_THEME_MODE, "auto") ?: "auto"
     val systemDark = isSystemInDarkTheme()

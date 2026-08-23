@@ -41,6 +41,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.window.Dialog
 import dev.goodwy.rphone.controller.CallLogViewModel
 import dev.goodwy.rphone.controller.ContactsViewModel
@@ -192,10 +193,10 @@ fun ContactDetailsScreen(
     val contactsViewModel: ContactsViewModel = koinActivityViewModel()
     val callLogViewModel: CallLogViewModel = koinActivityViewModel()
 
-//    val contacts by contactsViewModel.allContacts.collectAsState()
-    val allLogs by callLogViewModel.allCallLogs.collectAsState()
-    val availableAccounts = contactsViewModel.availableAccounts.collectAsState().value
-    val availableAccountsForMoving = contactsViewModel.availableAccountsForMoving.collectAsState().value
+//    val contacts by contactsViewModel.allContacts.collectAsStateWithLifecycle()
+    val allLogs by callLogViewModel.allCallLogs.collectAsStateWithLifecycle()
+    val availableAccounts = contactsViewModel.availableAccounts.collectAsStateWithLifecycle().value
+    val availableAccountsForMoving = contactsViewModel.availableAccountsForMoving.collectAsStateWithLifecycle().value
 
 //    val contact = remember(contactId, phoneNumber, contacts) {
 //        if (contactId != null && contactId != "null") contacts.find { it.id == contactId }

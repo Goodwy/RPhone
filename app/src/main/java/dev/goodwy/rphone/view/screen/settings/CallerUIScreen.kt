@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.PreferenceManager
@@ -71,12 +72,12 @@ fun CallerUIScreen(navigator: DestinationsNavigator) {
     val context = LocalContext.current
     val prefs = koinInject<PreferenceManager>()
     val scope = rememberCoroutineScope()
-    val settingsState by prefs.settingsChanged.collectAsState()
+    val settingsState by prefs.settingsChanged.collectAsStateWithLifecycle()
 
 
     val purchaseHelper: PurchaseHelper = koinInject()
-    val isPro by purchaseHelper.isPro.collectAsState()
-    val proCheckDone by purchaseHelper.proCheckDone.collectAsState()
+    val isPro by purchaseHelper.isPro.collectAsStateWithLifecycle()
+    val proCheckDone by purchaseHelper.proCheckDone.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
         val savedIsProIap = prefs.getBoolean(PreferenceManager.KEY_IS_PRO_IAP, false)
         val savedIsProSub = prefs.getBoolean(PreferenceManager.KEY_IS_PRO_SUB, false)
