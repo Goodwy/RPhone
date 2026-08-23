@@ -2,7 +2,6 @@ package dev.goodwy.rphone.view.screen.settings
 
 import android.app.Activity
 import android.app.DownloadManager
-
 import android.content.Context
 import android.net.Uri
 import android.view.Surface
@@ -90,7 +89,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import java.io.File
-import kotlin.collections.find
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)

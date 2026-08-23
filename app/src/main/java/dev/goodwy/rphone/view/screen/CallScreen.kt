@@ -55,7 +55,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.scale
@@ -87,9 +86,9 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.core.net.toUri
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.CallService
@@ -97,7 +96,6 @@ import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 import dev.goodwy.rphone.cardCornerSmall
 import dev.goodwy.rphone.controller.util.NoteManager
-import dev.goodwy.rphone.modal.data.Contact
 import dev.goodwy.rphone.modal.data.getDisplayName
 import dev.goodwy.rphone.view.components.RillExpressiveCard
 import dev.goodwy.rphone.view.components.RillIconBox

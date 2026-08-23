@@ -55,11 +55,9 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.goodwy.rphone.cardCornerMedium
 import dev.goodwy.rphone.controller.PurchaseHelper
 import dev.goodwy.rphone.controller.util.CallBackgroundStore
-import dev.goodwy.rphone.view.components.RillListItem
 import dev.goodwy.rphone.view.components.SupportProjectItem
 import dev.goodwy.rphone.view.components.Title
 import dev.goodwy.rphone.view.components.shake
-import dev.goodwy.rphone.view.theme.color_default_primary
 import dev.goodwy.rphone.view.theme.customColors
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

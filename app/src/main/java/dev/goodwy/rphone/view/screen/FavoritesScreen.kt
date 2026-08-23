@@ -82,8 +82,8 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinActivityViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.core.net.toUri
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactScreenDestination
 import dev.goodwy.rphone.R

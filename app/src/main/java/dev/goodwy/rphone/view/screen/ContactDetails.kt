@@ -41,7 +41,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.window.Dialog
 import dev.goodwy.rphone.controller.CallLogViewModel
 import dev.goodwy.rphone.controller.ContactsViewModel
@@ -105,6 +104,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinActivityViewModel
 import org.koin.compose.koinInject
 import androidx.core.net.toUri
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import dev.goodwy.rphone.cardCornerBig
 import dev.goodwy.rphone.cardCornerSmall

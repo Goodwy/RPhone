@@ -44,7 +44,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import android.view.WindowManager
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.platform.LocalView
@@ -85,6 +84,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.core.net.toUri
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.bottomBarHeight
 import dev.goodwy.rphone.cardCornerBig
@@ -105,9 +105,13 @@ import dev.goodwy.rphone.controller.UssdRepository
 import dev.goodwy.rphone.controller.util.SocialUtils
 import dev.goodwy.rphone.controller.util.SocialUtils.getInstalledMessenger
 import dev.goodwy.rphone.controller.util.SocialUtils.messengerPackages
+import dev.goodwy.rphone.modal.data.CallLogEntry
+import dev.goodwy.rphone.modal.data.Contact
 import dev.goodwy.rphone.modal.data.getDisplayName
 import dev.goodwy.rphone.view.components.RillDialog
 import dev.goodwy.rphone.view.components.RillExpressiveButton
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 /**
  * Keeps the in-progress dialed digits alive across the dialpad bottom sheet being dismissed
@@ -151,53 +155,6 @@ fun DialPadScreen(
     // and reopening it restores whatever digits were typed, instead of clearing them.
     LaunchedEffect(number) { DialpadDraftHolder.pendingNumber = number }
 
-//    val configuration = LocalConfiguration.current
-//    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-//    ModalBottomSheet(
-//        onDismissRequest = { navigator.navigateUp() },
-//        sheetState = sheetState,
-//        shape = RoundedCornerShape(topStart = 38.dp, topEnd = 38.dp),
-//        containerColor = MaterialTheme.colorScheme.surfaceContainerLow, //MaterialTheme.colorScheme.surfaceContainerHigh,
-//        tonalElevation = 4.dp,
-//        scrimColor = Color.Transparent,
-//        contentWindowInsets = {
-//            if (isLandscape) {
-//                WindowInsets.systemBars.only(
-//                    WindowInsetsSides.Top + WindowInsetsSides.Horizontal
-//                )
-//            } else BottomSheetDefaults.windowInsets
-//        },
-//        dragHandle = {
-//            if (isLandscape) null
-//            else {
-//                Box(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(top = 12.dp, bottom = 12.dp),
-//                    contentAlignment = Alignment.Center
-//                ) {
-//                    Surface(
-//                        shape = RoundedCornerShape(3.dp),
-//                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
-//                        modifier = Modifier.size(width = 36.dp, height = 4.dp)
-//                    ) {}
-//                }
-//            }
-//        },
-//        modifier = Modifier.statusBarsPadding()
-//    ) {
-//        DialPadContent(
-//            initialNumber = initialNumber,
-//            navigator = navigator,
-//            onDismiss = { navigator.navigateUp() },
-//            isBottomSheet = true
-//        )
-//    }
-
-//    val scope = rememberCoroutineScope()
-//    val favouritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, true)
-//    val contactsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS, true)
-//    val notesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_NOTES, false)
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
@@ -308,7 +265,7 @@ fun DialPadContent(
 
         val allContacts by contactsVM.allContacts.collectAsStateWithLifecycle()
         val logs by logsViewModel.allCallLogs.collectAsStateWithLifecycle()
-        var number by remember { mutableStateOf(initialNumber?.ifBlank { DialpadDraftHolder.pendingNumber } ?: DialpadDraftHolder.pendingNumber) }
+        var number by remember { mutableStateOf(initialNumber ?: DialpadDraftHolder.pendingNumber) }
         // Where new digits get inserted / backspace deletes from. Defaults to the end of the number
         // (normal typing behaviour), but the user can tap anywhere in the number to move it, so they
         // can fill in a missing digit in the middle without having to delete and retype everything.
@@ -412,7 +369,14 @@ fun DialPadContent(
         val clipText = remember {
             clipboard.getText()?.text?.filter { it.isDigit() || it == '+' } ?: ""
         }
-        var showClipboardBanner by remember { mutableStateOf(clipText.length in 7..15) }
+        var showClipboardBanner by remember { mutableStateOf(false) }
+        LaunchedEffect(Unit) {
+            val clipText = clipboard.getText()?.text?.filter { it.isDigit() || it == '+' } ?: ""
+            if (clipText.length in 7..15) {
+                showClipboardBanner = true
+            }
+        }
+
         var showOverflowMenu by remember { mutableStateOf(false) }
 
         var openDialpadDefault by remember {
@@ -421,52 +385,58 @@ fun DialPadContent(
 
         val take = 30
         // Search contacts results
-        val searchResults by remember(number, allContacts, t9Enabled) {
-            derivedStateOf {
-                if (number.isEmpty()) emptyList()
-                else {
-                    val cleanQuery = number.replace(" ", "").replace("-", "")
-                    allContacts.asSequence()
-                        .filter { contact ->
-                            val matchesNumber = contact.phoneNumbers.any {
-                                it.replace(" ", "").replace("-", "").contains(cleanQuery)
-                            }
-                            val matchesName =
-                                t9Enabled && T9Matcher.isMatch(contact.displayName, cleanQuery)
-                            val matchesNickname = t9Enabled && contact.nickname.let { T9Matcher.isMatch(it, cleanQuery) } ?: false
-                            matchesNumber || matchesName || matchesNickname
-                        }
-                        .take(take)
-                        .toList()
-                }
+        val searchResults by produceState(initialValue = emptyList<Contact>(), number, allContacts, t9Enabled) {
+            snapshotFlow {
+                Triple(number, allContacts, t9Enabled)
             }
+                .debounce(150) // We wait 150 ms after the last press
+                .distinctUntilChanged()
+                .collect { (num, contacts, t9) ->
+                    val cleanQuery = num.replace(" ", "").replace("-", "")
+                    value = if (cleanQuery.isEmpty()) {
+                        emptyList()
+                    } else {
+                        contacts.asSequence()
+                            .filter { contact ->
+                                val matchesNumber = contact.phoneNumbers.any {
+                                    it.replace(" ", "").replace("-", "").contains(cleanQuery)
+                                }
+                                val matchesName = t9 && T9Matcher.isMatch(contact.displayName, cleanQuery)
+                                val matchesNickname = t9 && contact.nickname.let { T9Matcher.isMatch(it, cleanQuery) } ?: false
+                                matchesNumber || matchesName || matchesNickname
+                            }
+                            .take(30)
+                            .toList()
+                    }
+                }
         }
 
         // Search logs results with unique numbers (latest call per number)
-        val searchLogsResults by remember(number, logs, t9Enabled) {
-            derivedStateOf {
-                if (number.isEmpty()) emptyList()
-                else {
-                    val cleanQuery = number.replace(" ", "").replace("-", "")
-                    val filtered = logs.asSequence()
-                        .filter { log ->
-                            val matchesNumber = log.number.replace(" ", "").replace("-", "").contains(cleanQuery)
-                            val matchesName =
-                                t9Enabled && T9Matcher.isMatch(log.name ?: "", cleanQuery)
-                            matchesNumber || matchesName
-                        }
-                        .take(take)
-                        .toList()
-                    // Then, keep only unique numbers (latest call per number)
-                    filtered
-                        .groupBy { it.number.replace(" ", "").replace("-", "") } // Group by normalized number
-                        .map { (_, logsGroup) ->
-                            logsGroup.maxByOrNull { it.date } // Take the latest call
-                        }
-                        .filterNotNull()
-                        .sortedByDescending { it.date } // Sort by date descending
-                }
+        val searchLogsResults by produceState(initialValue = emptyList<CallLogEntry>(), number, logs, t9Enabled) {
+            snapshotFlow {
+                Triple(number, logs, t9Enabled)
             }
+                .debounce(150)
+                .distinctUntilChanged()
+                .collect { (num, logsList, t9) ->
+                    val cleanQuery = num.replace(" ", "").replace("-", "")
+                    value = if (cleanQuery.isEmpty()) {
+                        emptyList()
+                    } else {
+                        logsList.asSequence()
+                            .filter { log ->
+                                val matchesNumber = log.number.replace(" ", "").replace("-", "").contains(cleanQuery)
+                                val matchesName = t9 && T9Matcher.isMatch(log.name ?: "", cleanQuery)
+                                matchesNumber || matchesName
+                            }
+                            .take(30)
+                            .toList()
+                            .groupBy { it.number.replace(" ", "").replace("-", "") }
+                            .map { (_, logsGroup) -> logsGroup.maxByOrNull { it.date } }
+                            .filterNotNull()
+                            .sortedByDescending { it.date }
+                    }
+                }
         }
 
         // Create a set of all phone numbers and names from contacts for quick searching
@@ -923,23 +893,16 @@ fun DialPadContent(
                                             dampingRatio = Spring.DampingRatioMediumBouncy
                                         )
                                     )
-                                    .padding(vertical = 8.dp, horizontal = 12.dp),
+                                    .padding(vertical = 8.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 val numberLength = number.length
+                                // Smooth mathematical scaling formula:
+                                // Start with 30sp. The more characters there are, the more the font size decreases.
+                                val dynamicFontSize = (30f - (numberLength * 0.45f)).coerceIn(10f, 30f).toInt()
                                 DialpadNumberDisplay(
                                     number = number,
-                                    fontSize = when {
-                                        numberLength > 42 -> 8
-                                        numberLength > 36 -> 10
-                                        numberLength > 32 -> 12
-                                        numberLength > 28 -> 14
-                                        numberLength > 25 -> 16
-                                        numberLength > 22 -> 18
-                                        numberLength > 16 -> 20
-                                        numberLength > 11 -> 24
-                                        else -> 30
-                                    },
+                                    fontSize = dynamicFontSize,
                                     cursorPosition = cursorPosition,
                                     onCursorPositionChange = { cursorPosition = it },
                                     onLongPress = {
@@ -1663,6 +1626,7 @@ fun DialPadContent(
                                                 }
                                             }
 
+                                            // Number display
                                             Box(
                                                 modifier = Modifier
                                                     .weight(1f)
@@ -1674,28 +1638,16 @@ fun DialPadContent(
                                                             dampingRatio = Spring.DampingRatioMediumBouncy
                                                         )
                                                     )
-                                                    .padding(vertical = 8.dp, horizontal = 12.dp),
+                                                    .padding(vertical = 8.dp),
                                                 contentAlignment = Alignment.Center
                                             ) {
                                                 val numberLength = number.length
+                                                // Smooth mathematical scaling formula:
+                                                // Start with 30sp. The more characters there are, the more the font size decreases.
+                                                val dynamicFontSize = (30f - (numberLength * 0.5f)).coerceIn(10f, 30f).toInt()
                                                 DialpadNumberDisplay(
                                                     number = number,
-                                                    fontSize = (
-                                                            (when {
-                                                                numberLength > 46 -> 5
-                                                                numberLength > 42 -> 6
-                                                                numberLength > 35 -> 8
-                                                                numberLength > 31 -> 10
-                                                                numberLength > 26 -> 12
-                                                                numberLength > 23 -> 14
-                                                                numberLength > 21 -> 16
-                                                                numberLength > 18 -> 18
-                                                                numberLength > 15 -> 20
-                                                                numberLength > 13 -> 24
-                                                                numberLength > 10 -> 28
-                                                                else -> 36
-                                                            }) * scaleFactor).coerceIn(8f, 40f)
-                                                        .toInt(),
+                                                    fontSize = dynamicFontSize,
                                                     cursorPosition = cursorPosition,
                                                     onCursorPositionChange = {
                                                         cursorPosition = it

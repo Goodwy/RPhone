@@ -26,7 +26,6 @@ import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -39,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.CallLogViewModel
 import dev.goodwy.rphone.controller.util.formatDateHeader
@@ -118,56 +118,63 @@ fun CallLogFullScreen(
 
     // Подписываемся на изменения allLogs и фильтруем в фоне
     LaunchedEffect(allLogs, contactId, phoneNumber, numbersList) {
-        withContext(Dispatchers.Default) {
-            val result = withContext(Dispatchers.IO) {
-                if (contactId == null && phoneNumber == null && numbersList == null) {
-                    allLogs
-                } else {
-                    allLogs.filter { log ->
-                        val logNumber = log.number.replace(" ", "")
+        val result = withContext(Dispatchers.IO) {
+            if (contactId == null && phoneNumber == null && numbersList == null) {
+                allLogs
+            } else {
+                allLogs.filter { log ->
+                    val logNumber = log.number.replace(" ", "")
 
-                        // By contact ID
-                        val matchesContactId = contactId != null && contactId != "null" && log.contactId == contactId
+                    // By contact ID
+                    val matchesContactId = contactId != null && contactId != "null" && log.contactId == contactId
 
-                        // By exact number match
-                        val matchesPhoneNumber = phoneNumber != null && logNumber == phoneNumber.replace(" ", "")
+                    // By exact number match
+                    val matchesPhoneNumber = phoneNumber != null && logNumber == phoneNumber.replace(" ", "")
 
-                        // By list numbers (exact match)
-                        val matchesNumbersList = numbersList != null && numbersList.any {
-                            logNumber == it.replace(" ", "")
-                        }
-
-                        matchesContactId || matchesPhoneNumber || matchesNumbersList
+                    // By list numbers (exact match)
+                    val matchesNumbersList = numbersList != null && numbersList.any {
+                        logNumber == it.replace(" ", "")
                     }
+
+                    matchesContactId || matchesPhoneNumber || matchesNumbersList
                 }
             }
-            filteredByContact.value = result
         }
+        filteredByContact.value = result
     }
 
-    val filteredLogsByContact by filteredByContact.collectAsStateWithLifecycle()
+    val filteredLogsByContact = remember(allLogs, contactId, phoneNumber, numbersList) {
+        if (contactId == null && phoneNumber == null && numbersList == null) {
+            allLogs
+        } else {
+            allLogs.filter { log ->
+                val logNumber = log.number.replace(" ", "")
+
+                val matchesContactId = contactId != null && contactId != "null" && log.contactId == contactId
+                val matchesPhoneNumber = phoneNumber != null && logNumber == phoneNumber.replace(" ", "")
+                val matchesNumbersList = numbersList != null && numbersList.any {
+                    logNumber == it.replace(" ", "")
+                }
+
+                matchesContactId || matchesPhoneNumber || matchesNumbersList
+            }
+        }
+    }
 
     val contactName = remember(filteredLogsByContact) {
         filteredLogsByContact.firstOrNull { it.name != null && it.name != it.number }?.name ?: (phoneNumber?.forceLtr())
     }
 
-    val filteredByType = remember { MutableStateFlow<List<CallLogEntry>>(emptyList()) }
-
-    LaunchedEffect(filteredLogsByContact, selectedFilter) {
-        withContext(Dispatchers.Default) {
-            val result = when (selectedFilter) {
-                CallLogFilter.All -> filteredLogsByContact
-                CallLogFilter.Missed -> filteredLogsByContact.filter { it.type == CallLog.Calls.MISSED_TYPE }
-                CallLogFilter.Incoming -> filteredLogsByContact.filter { it.type == CallLog.Calls.INCOMING_TYPE }
-                CallLogFilter.Outgoing -> filteredLogsByContact.filter { it.type == CallLog.Calls.OUTGOING_TYPE }
-                CallLogFilter.Rejected -> filteredLogsByContact.filter { it.type == CallLog.Calls.REJECTED_TYPE }
-                CallLogFilter.Contacts -> filteredLogsByContact.filter { it.contactId != null }
-            }
-            filteredByType.value = result
+    val finalFilteredLogs = remember(filteredLogsByContact, selectedFilter) {
+        when (selectedFilter) {
+            CallLogFilter.All -> filteredLogsByContact
+            CallLogFilter.Missed -> filteredLogsByContact.filter { it.type == CallLog.Calls.MISSED_TYPE }
+            CallLogFilter.Incoming -> filteredLogsByContact.filter { it.type == CallLog.Calls.INCOMING_TYPE }
+            CallLogFilter.Outgoing -> filteredLogsByContact.filter { it.type == CallLog.Calls.OUTGOING_TYPE }
+            CallLogFilter.Rejected -> filteredLogsByContact.filter { it.type == CallLog.Calls.REJECTED_TYPE }
+            CallLogFilter.Contacts -> filteredLogsByContact.filter { it.contactId != null }
         }
     }
-
-    val finalFilteredLogs by filteredByType.collectAsState()
 
     if (showSimPicker && pendingNumber != null) {
         SimPickerDialog(

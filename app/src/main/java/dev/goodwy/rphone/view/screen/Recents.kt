@@ -68,16 +68,15 @@ import dev.goodwy.rphone.liquidglass.effects.colorControls
 import dev.goodwy.rphone.liquidglass.highlight.Highlight
 import dev.goodwy.rphone.liquidglass.LocalLiquidGlassBackdrop
 import org.koin.compose.viewmodel.koinActivityViewModel
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.platform.LocalDensity
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.ContactsViewModel
 import dev.goodwy.rphone.modal.data.CallLogEntry

@@ -253,7 +253,6 @@ class ContactsViewModel(
             preferenceManager.setString(PreferenceManager.KEY_LAST_USED_ACCOUNT_TYPE, contact.accountType ?: device_only)
         }
 
-
         fetchContacts()
     }
 

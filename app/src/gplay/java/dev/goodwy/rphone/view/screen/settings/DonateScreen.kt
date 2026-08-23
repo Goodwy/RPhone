@@ -2,10 +2,7 @@ package dev.goodwy.rphone.view.screen.settings
 
 import android.app.Activity
 import android.content.Context
-import android.text.Html
-import android.view.Gravity
 import android.view.Surface
-import android.widget.TextView
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
@@ -34,7 +31,6 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
@@ -44,7 +40,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.PreferenceManager
@@ -60,10 +55,8 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.goodwy.rphone.BuildConfig
 import dev.goodwy.rphone.controller.PlayStoreViewModel
 import dev.goodwy.rphone.controller.PurchaseHelper
-import dev.goodwy.rphone.controller.Tipping
 import dev.goodwy.rphone.controller.util.HtmlTextView
 import org.koin.compose.koinInject
-import org.koin.compose.viewmodel.koinActivityViewModel
 import kotlin.math.cos
 import kotlin.math.sin
 

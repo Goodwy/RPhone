@@ -169,7 +169,7 @@ class CallLogViewModel(
 
     // ── Disk cache helpers ────────────────────────────────────────────────────
 
-    private suspend fun saveToDisk(logs: List<CallLogEntry>) = withContext(Dispatchers.IO) {
+    private suspend fun saveToDisk(logs: List<CallLogEntry>) {
         try {
             val arr = JSONArray()
             logs.forEach { e ->

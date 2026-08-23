@@ -46,7 +46,7 @@ data class CallSession(
 
 class CallService : InCallService() {
 
-    private val contactsRepository: IContactsRepository by inject()
+//    private val contactsRepository: IContactsRepository by inject()
     private val preferenceManager: PreferenceManager by inject()
     private val callStateManager: CallStateManager by inject()
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())

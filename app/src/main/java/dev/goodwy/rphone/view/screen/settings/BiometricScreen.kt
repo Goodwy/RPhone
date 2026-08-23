@@ -131,9 +131,10 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
     var showTypeSheet by remember { mutableStateOf(false) }
     var showPinSetup by remember { mutableStateOf(false) }
     var showPasswordSetup by remember { mutableStateOf(false) }
-    var showDisableVerification by remember { mutableStateOf(false) }
     var isClosing by remember { mutableStateOf(false) }
     var visible by remember { mutableStateOf(false) }
+    var isVerified by remember { mutableStateOf(false) }
+    var showVerification by remember { mutableStateOf(false) }
 
     val alpha by animateFloatAsState(
         targetValue = if (visible && !isClosing) 1f else 0f,
@@ -146,6 +147,14 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
         label = "offsetY"
     )
     LaunchedEffect(Unit) { visible = true }
+
+    LaunchedEffect(Unit) {
+        if (biometricsType.isNotEmpty()) {
+            showVerification = true
+        } else {
+            isVerified = true
+        }
+    }
 
     fun navigateBack() {
         isClosing = true
@@ -169,274 +178,317 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
         (context.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager).defaultDisplay.rotation
     val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
     val isRotation90 = rotation == if (isLtr) Surface.ROTATION_90 else Surface.ROTATION_270
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                windowInsets = WindowInsets.systemBars.only(
-                    if (isRotation90) WindowInsetsSides.Top + WindowInsetsSides.Horizontal
-                    else WindowInsetsSides.Top
-                ),
-                title = { Title(stringResource(R.string.authentication)) },
-                navigationIcon = {
-                    NavigationIcon(onClick = { navigateBack() })
-                }
-            )
-        },
-        containerColor = MaterialTheme.colorScheme.surface
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-//                .padding(padding)
-                .padding(
-                    top = innerPadding.calculateTopPadding(),
-                    start = 0.dp,
-                    end = 0.dp,
-                    bottom = 0.dp
+    if (isVerified) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    windowInsets = WindowInsets.systemBars.only(
+                        if (isRotation90) WindowInsetsSides.Top + WindowInsetsSides.Horizontal
+                        else WindowInsetsSides.Top
+                    ),
+                    title = { Title(stringResource(R.string.authentication)) },
+                    navigationIcon = {
+                        NavigationIcon(onClick = { navigateBack() })
+                    }
                 )
-                .alpha(alpha)
-                .offset(y = offsetY),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // ── Authentication Method card ─────────────────────────────────
-            item {
-//                SettingsSectionLabel("Authentication Method")
-                RillExpressiveCard {
-                    RillListItem(
-                        headline = stringResource(R.string.authentication_method),
-                        supporting = typeLabel,
-                        leadingIcon = Icons.Rounded.Fingerprint,
-                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
-                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
-                        trailingIcon = Icons.Default.ChevronRight,
-                        onClick = { showTypeSheet = true }
+            },
+            containerColor = MaterialTheme.colorScheme.surface
+        ) { innerPadding ->
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+//                .padding(padding)
+                    .padding(
+                        top = innerPadding.calculateTopPadding(),
+                        start = 0.dp,
+                        end = 0.dp,
+                        bottom = 0.dp
                     )
+                    .alpha(alpha)
+                    .offset(y = offsetY),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // ── Authentication Method card ─────────────────────────────────
+                item {
+//                SettingsSectionLabel("Authentication Method")
+                    RillExpressiveCard {
+                        RillListItem(
+                            headline = stringResource(R.string.authentication_method),
+                            supporting = typeLabel,
+                            leadingIcon = Icons.Rounded.Fingerprint,
+                            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+                            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
+                            trailingIcon = Icons.Default.ChevronRight,
+                            onClick = { showTypeSheet = true }
+                        )
+                    }
                 }
-            }
 
-            // ── Toggles — only visible when a method is configured ─────────
-            item {
-                AnimatedVisibility(
-                    visible = biometricsType.isNotEmpty(),
-                    enter = fadeIn(tween(300)) + expandVertically(tween(300)),
-                    exit = fadeOut(tween(200)) + shrinkVertically(tween(200))
-                ) {
-                    Column {
+                // ── Toggles — only visible when a method is configured ─────────
+                item {
+                    AnimatedVisibility(
+                        visible = biometricsType.isNotEmpty(),
+                        enter = fadeIn(tween(300)) + expandVertically(tween(300)),
+                        exit = fadeOut(tween(200)) + shrinkVertically(tween(200))
+                    ) {
+                        Column {
 //                        SettingsSectionLabel(stringResource(R.string.authentication))
-                        RillExpressiveCard {
-                            RillSwitchListItem(
-                                headline = stringResource(R.string.lock_app_on_open),
-                                supporting = stringResource(R.string.lock_app_on_open_subtitle),
-                                leadingIcon = Icons.Rounded.LockOpen,
-                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
-                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
-                                checked = appLockEnabled,
-                                onCheckedChange = {
-                                    appLockEnabled = it
-                                    prefs.setBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK, it)
-                                }
-                            )
-                            if (appLockEnabled) {
+                            RillExpressiveCard {
                                 RillSwitchListItem(
-                                    headline = stringResource(R.string.lock_on_minimize),
-                                    supporting = stringResource(R.string.lock_on_minimize_subtitle),
-                                    leadingIcon = Icons.Rounded.UnfoldLess,
+                                    headline = stringResource(R.string.lock_app_on_open),
+                                    supporting = stringResource(R.string.lock_app_on_open_subtitle),
+                                    leadingIcon = Icons.Rounded.LockOpen,
                                     iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
                                     iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
-                                    checked = appLockOnMinimizeEnabled,
+                                    checked = appLockEnabled,
                                     onCheckedChange = {
-                                        appLockOnMinimizeEnabled = it
-                                        prefs.setBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK_ON_MINIMIZE, it)
+                                        appLockEnabled = it
+                                        prefs.setBoolean(
+                                            PreferenceManager.KEY_BIOMETRICS_APP_LOCK,
+                                            it
+                                        )
+                                    }
+                                )
+                                if (appLockEnabled) {
+                                    RillSwitchListItem(
+                                        headline = stringResource(R.string.lock_on_minimize),
+                                        supporting = stringResource(R.string.lock_on_minimize_subtitle),
+                                        leadingIcon = Icons.Rounded.UnfoldLess,
+                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
+                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
+                                        checked = appLockOnMinimizeEnabled,
+                                        onCheckedChange = {
+                                            appLockOnMinimizeEnabled = it
+                                            prefs.setBoolean(
+                                                PreferenceManager.KEY_BIOMETRICS_APP_LOCK_ON_MINIMIZE,
+                                                it
+                                            )
+                                        }
+                                    )
+                                }
+                                RillSwitchListItem(
+                                    headline = stringResource(R.string.lock_call_actions),
+                                    supporting = stringResource(R.string.lock_call_actions_subtitle),
+                                    leadingIcon = Icons.Rounded.PhonePaused,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
+                                    checked = callLockEnabled,
+                                    onCheckedChange = {
+                                        callLockEnabled = it
+                                        prefs.setBoolean(
+                                            PreferenceManager.KEY_BIOMETRICS_CALL_LOCK,
+                                            it
+                                        )
+
                                     }
                                 )
                             }
-                            RillSwitchListItem(
-                                headline = stringResource(R.string.lock_call_actions),
-                                supporting = stringResource(R.string.lock_call_actions_subtitle),
-                                leadingIcon = Icons.Rounded.PhonePaused,
-                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
-                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
-                                checked = callLockEnabled,
-                                onCheckedChange = {
-                                    callLockEnabled = it
-                                    prefs.setBoolean(PreferenceManager.KEY_BIOMETRICS_CALL_LOCK, it)
-
-                                }
-                            )
                         }
                     }
                 }
-            }
 
-            item {
-                AnimatedVisibility(
-                    visible = biometricsType.isNotEmpty() && callLockEnabled,
-                    enter = fadeIn(tween(250)) + expandVertically(tween(250)),
-                    exit  = fadeOut(tween(200)) + shrinkVertically(tween(200))
-                ) {
-                    Column {
-                        SettingsSectionLabel(stringResource(R.string.lock_scope))
-                        RillExpressiveCard {
-                            data class CallLockMode(val key: String, val label: String)
-                            val callLockModes = listOf(
-                                CallLockMode("all",            stringResource(R.string.all_calls)),
-                                CallLockMode("specified",      stringResource(R.string.blacklist)),
-                                CallLockMode("skip_specified", stringResource(R.string.whitelist))
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .background(
-                                        color = cardColor,
-                                        shape = RoundedCornerShape(cardCornerSmall)
+                item {
+                    AnimatedVisibility(
+                        visible = biometricsType.isNotEmpty() && callLockEnabled,
+                        enter = fadeIn(tween(250)) + expandVertically(tween(250)),
+                        exit = fadeOut(tween(200)) + shrinkVertically(tween(200))
+                    ) {
+                        Column {
+                            SettingsSectionLabel(stringResource(R.string.lock_scope))
+                            RillExpressiveCard {
+                                data class CallLockMode(val key: String, val label: String)
+
+                                val callLockModes = listOf(
+                                    CallLockMode("all", stringResource(R.string.all_calls)),
+                                    CallLockMode("specified", stringResource(R.string.blacklist)),
+                                    CallLockMode(
+                                        "skip_specified",
+                                        stringResource(R.string.whitelist)
                                     )
-                                    .padding(12.dp)
-                            ) {
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(2.dp),
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    callLockModes.forEachIndexed { index, mode ->
-                                        val selected = callLockMode == mode.key
-                                        val interactionSource =
-                                            remember { MutableInteractionSource() }
-                                        val isPressed by interactionSource.collectIsPressedAsState()
-                                        val cornerRadius by animateDpAsState(
-                                            targetValue = if (isPressed || selected) 20.dp else 8.dp,
-                                            animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-                                            label = "ButtonShape"
-                                        )
-                                        val outsideCornerRadius by animateDpAsState(
-                                            targetValue = if (isPressed || selected) 20.dp else 16.dp,
-                                            animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-                                            label = "ButtonShape"
-                                        )
-                                        val shape = remember(cornerRadius, index) {
-                                            when (index) {
-                                                0 -> RoundedCornerShape(
-                                                    topStart = outsideCornerRadius,
-                                                    topEnd = cornerRadius,
-                                                    bottomEnd = cornerRadius,
-                                                    bottomStart = outsideCornerRadius
-                                                )
-
-                                                2 -> RoundedCornerShape(
-                                                    topStart = cornerRadius,
-                                                    topEnd = outsideCornerRadius,
-                                                    bottomEnd = outsideCornerRadius,
-                                                    bottomStart = cornerRadius
-                                                )
-
-                                                else -> RoundedCornerShape(cornerRadius)
-                                            }
-                                        }
-
-                                        Surface(
-                                            onClick = {
-                                                callLockMode = mode.key
-                                                prefs.setString(PreferenceManager.KEY_BIOMETRICS_CALL_LOCK_MODE, mode.key)
-                                                if (mode.key != "all") showContactPicker = true
-                                            },
-                                            shape = shape,
-                                            color = if (selected) MaterialTheme.colorScheme.primary
-                                                    else MaterialTheme.colorScheme.surfaceContainerHigh,
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .height(38.dp),
-                                            interactionSource = interactionSource,
-                                        ) {
-                                            Box(contentAlignment = Alignment.Center) {
-                                                Text(
-                                                    mode.label,
-                                                    style = MaterialTheme.typography.labelMedium,
-                                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                                                    color = if (selected) MaterialTheme.colorScheme.onPrimary
-                                                        else MaterialTheme.colorScheme.onSurfaceVariant,
-                                                    maxLines = 1,
-                                                    overflow = TextOverflow.Ellipsis,
-                                                    modifier = Modifier.padding(horizontal = 8.dp)
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            // Description card
-                            AnimatedContent(targetState = callLockMode, label = "lockModeDesc") { mode ->
-                                Row(
+                                )
+                                Box(
                                     modifier = Modifier
-                                        .combinedClickable(
-                                            enabled = callLockMode != "all",
-                                            onClick = { showContactPicker = true },
-                                        )
                                         .background(
                                             color = cardColor,
                                             shape = RoundedCornerShape(cardCornerSmall)
                                         )
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 16.dp, vertical = 14.dp),
-//                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                    verticalAlignment = Alignment.CenterVertically
+                                        .padding(12.dp)
                                 ) {
-                                    Surface(
-                                        shape = RoundedCornerShape(10.dp),
-                                        color = when (mode) {
-                                            "all" -> MaterialTheme.colorScheme.customColors.colorRed
-                                            "specified" -> MaterialTheme.colorScheme.customColors.colorOrange
-                                            else -> MaterialTheme.colorScheme.customColors.colorGreen
-                                        },
-                                        modifier = Modifier.size(36.dp)
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(2.dp),
+                                        modifier = Modifier.fillMaxWidth()
                                     ) {
-                                        Box(contentAlignment = Alignment.Center) {
-                                            Icon(
-                                                imageVector = when (mode) {
-                                                    "all" -> Icons.Rounded.Lock
-                                                    "specified" -> Icons.Rounded.Person
-                                                    else -> Icons.Rounded.PersonOff
-                                                },
-                                                contentDescription = null,
-                                                tint = when (mode) {
-                                                    "all" -> MaterialTheme.colorScheme.customColors.colorDarkRed
-                                                    "specified" -> MaterialTheme.colorScheme.customColors.colorDarkOrange
-                                                    else -> MaterialTheme.colorScheme.customColors.colorDarkGreen
-                                                },
-                                                modifier = Modifier.size(18.dp)
+                                        callLockModes.forEachIndexed { index, mode ->
+                                            val selected = callLockMode == mode.key
+                                            val interactionSource =
+                                                remember { MutableInteractionSource() }
+                                            val isPressed by interactionSource.collectIsPressedAsState()
+                                            val cornerRadius by animateDpAsState(
+                                                targetValue = if (isPressed || selected) 20.dp else 8.dp,
+                                                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                                                label = "ButtonShape"
                                             )
+                                            val outsideCornerRadius by animateDpAsState(
+                                                targetValue = if (isPressed || selected) 20.dp else 16.dp,
+                                                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                                                label = "ButtonShape"
+                                            )
+                                            val shape = remember(cornerRadius, index) {
+                                                when (index) {
+                                                    0 -> RoundedCornerShape(
+                                                        topStart = outsideCornerRadius,
+                                                        topEnd = cornerRadius,
+                                                        bottomEnd = cornerRadius,
+                                                        bottomStart = outsideCornerRadius
+                                                    )
+
+                                                    2 -> RoundedCornerShape(
+                                                        topStart = cornerRadius,
+                                                        topEnd = outsideCornerRadius,
+                                                        bottomEnd = outsideCornerRadius,
+                                                        bottomStart = cornerRadius
+                                                    )
+
+                                                    else -> RoundedCornerShape(cornerRadius)
+                                                }
+                                            }
+
+                                            Surface(
+                                                onClick = {
+                                                    callLockMode = mode.key
+                                                    prefs.setString(
+                                                        PreferenceManager.KEY_BIOMETRICS_CALL_LOCK_MODE,
+                                                        mode.key
+                                                    )
+                                                    if (mode.key != "all") showContactPicker = true
+                                                },
+                                                shape = shape,
+                                                color = if (selected) MaterialTheme.colorScheme.primary
+                                                else MaterialTheme.colorScheme.surfaceContainerHigh,
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .height(38.dp),
+                                                interactionSource = interactionSource,
+                                            ) {
+                                                Box(contentAlignment = Alignment.Center) {
+                                                    Text(
+                                                        mode.label,
+                                                        style = MaterialTheme.typography.labelMedium,
+                                                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                                                        color = if (selected) MaterialTheme.colorScheme.onPrimary
+                                                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                                                        maxLines = 1,
+                                                        overflow = TextOverflow.Ellipsis,
+                                                        modifier = Modifier.padding(horizontal = 8.dp)
+                                                    )
+                                                }
+                                            }
                                         }
                                     }
-                                    Spacer(modifier = Modifier.width(16.dp))
-                                    Text(
-                                        modifier = Modifier.weight(1f),
-                                        text = when (mode) {
-                                            "all" -> stringResource(R.string.all_calls_subtitle)
-                                            "specified" -> if (selectedContactCount > 0)
-                                                stringResource(R.string.blacklist_count, selectedContactCount)
-                                            else stringResource(R.string.blacklist_subtitle)
-                                            else -> if (selectedContactCount > 0)
-                                                stringResource(R.string.whitelist_count, selectedContactCount)
-                                            else stringResource(R.string.whitelist_subtitle)
-                                        },
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    if (mode != "all") {
+                                }
+
+                                // Description card
+                                AnimatedContent(
+                                    targetState = callLockMode,
+                                    label = "lockModeDesc"
+                                ) { mode ->
+                                    Row(
+                                        modifier = Modifier
+                                            .combinedClickable(
+                                                enabled = callLockMode != "all",
+                                                onClick = { showContactPicker = true },
+                                            )
+                                            .background(
+                                                color = cardColor,
+                                                shape = RoundedCornerShape(cardCornerSmall)
+                                            )
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp, vertical = 14.dp),
+//                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Surface(
+                                            shape = RoundedCornerShape(10.dp),
+                                            color = when (mode) {
+                                                "all" -> MaterialTheme.colorScheme.customColors.colorRed
+                                                "specified" -> MaterialTheme.colorScheme.customColors.colorOrange
+                                                else -> MaterialTheme.colorScheme.customColors.colorGreen
+                                            },
+                                            modifier = Modifier.size(36.dp)
+                                        ) {
+                                            Box(contentAlignment = Alignment.Center) {
+                                                Icon(
+                                                    imageVector = when (mode) {
+                                                        "all" -> Icons.Rounded.Lock
+                                                        "specified" -> Icons.Rounded.Person
+                                                        else -> Icons.Rounded.PersonOff
+                                                    },
+                                                    contentDescription = null,
+                                                    tint = when (mode) {
+                                                        "all" -> MaterialTheme.colorScheme.customColors.colorDarkRed
+                                                        "specified" -> MaterialTheme.colorScheme.customColors.colorDarkOrange
+                                                        else -> MaterialTheme.colorScheme.customColors.colorDarkGreen
+                                                    },
+                                                    modifier = Modifier.size(18.dp)
+                                                )
+                                            }
+                                        }
                                         Spacer(modifier = Modifier.width(16.dp))
-                                        Icon(
-                                            Icons.Outlined.Edit, null,
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                            modifier = Modifier.size(20.dp),
+                                        Text(
+                                            modifier = Modifier.weight(1f),
+                                            text = when (mode) {
+                                                "all" -> stringResource(R.string.all_calls_subtitle)
+                                                "specified" -> if (selectedContactCount > 0)
+                                                    stringResource(
+                                                        R.string.blacklist_count,
+                                                        selectedContactCount
+                                                    )
+                                                else stringResource(R.string.blacklist_subtitle)
+
+                                                else -> if (selectedContactCount > 0)
+                                                    stringResource(
+                                                        R.string.whitelist_count,
+                                                        selectedContactCount
+                                                    )
+                                                else stringResource(R.string.whitelist_subtitle)
+                                            },
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
+                                        if (mode != "all") {
+                                            Spacer(modifier = Modifier.width(16.dp))
+                                            Icon(
+                                                Icons.Outlined.Edit, null,
+                                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                                    alpha = 0.7f
+                                                ),
+                                                modifier = Modifier.size(20.dp),
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
-            }
 
-            item { SettingsBottomPadding() }
+                item { SettingsBottomPadding() }
+            }
         }
+    }
+
+    fun disableBiometric() {
+        biometricsType = ""
+        prefs.setString(PreferenceManager.KEY_BIOMETRICS_TYPE, "")
+        prefs.setString(PreferenceManager.KEY_BIOMETRICS_PIN, "")
+        prefs.setString(PreferenceManager.KEY_BIOMETRICS_PASSWORD, "")
+        prefs.setBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK, false)
+        prefs.setBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK_ON_MINIMIZE, false)
+        prefs.setBoolean(PreferenceManager.KEY_BIOMETRICS_CALL_LOCK, false)
+        appLockEnabled = false
+        appLockOnMinimizeEnabled = false
+        callLockEnabled = false
     }
 
     // ── Type Chooser Bottom Sheet ──────────────────────────────────────────
@@ -455,26 +507,13 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
                     "pin"      -> showPinSetup = true
                     "password" -> showPasswordSetup = true
                     ""         -> {
-                        showDisableVerification = true
                         showTypeSheet = false
+                        disableBiometric()
                     }
                 }
             },
             onDismiss = { showTypeSheet = false }
         )
-    }
-
-    fun disableBiometric() {
-        biometricsType = ""
-        prefs.setString(PreferenceManager.KEY_BIOMETRICS_TYPE, "")
-        prefs.setString(PreferenceManager.KEY_BIOMETRICS_PIN, "")
-        prefs.setString(PreferenceManager.KEY_BIOMETRICS_PASSWORD, "")
-        prefs.setBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK, false)
-        prefs.setBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK_ON_MINIMIZE, false)
-        prefs.setBoolean(PreferenceManager.KEY_BIOMETRICS_CALL_LOCK, false)
-        appLockEnabled = false
-        appLockOnMinimizeEnabled = false
-        callLockEnabled = false
     }
 
     if (showPinSetup) {
@@ -518,18 +557,19 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
         )
     }
 
-    if (showDisableVerification) {
+    if (showVerification) {
         when (biometricsType) {
             "system" -> {
                 BiometricPromptHelper.authenticate(
                     context = context,
                     title = stringResource(R.string.confirm),
                     onSuccess = {
-                        showDisableVerification = false
-                        disableBiometric()
+                        showVerification = false
+                        isVerified = true
                     },
                     onError = {
-                        showDisableVerification = false
+                        showVerification = false
+                        navigateBack()
                     }
                 )
             }
@@ -540,11 +580,12 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
                     expectedPin = prefs.getString(PreferenceManager.KEY_BIOMETRICS_PIN, "") ?: "",
                     showCloseButton = true,
                     onConfirm = {
-                        showDisableVerification = false
-                        disableBiometric()
+                        showVerification = false
+                        isVerified = true
                     },
                     onDismiss = {
-                        showDisableVerification = false
+                        showVerification = false
+                        navigateBack()
                     }
                 )
             }
@@ -555,17 +596,14 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
                     expectedPassword = prefs.getString(PreferenceManager.KEY_BIOMETRICS_PASSWORD, "") ?: "",
                     showCloseButton = true,
                     onConfirm = {
-                        showDisableVerification = false
-                        disableBiometric()
+                        showVerification = false
+                        isVerified = true
                     },
                     onDismiss = {
-                        showDisableVerification = false
+                        showVerification = false
+                        navigateBack()
                     }
                 )
-            }
-            else -> {
-                // If the method is not configured, disable it without confirmation
-                disableBiometric()
             }
         }
     }

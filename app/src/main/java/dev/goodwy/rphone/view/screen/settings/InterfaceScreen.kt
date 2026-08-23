@@ -65,7 +65,6 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.cardCornerSmall
 import dev.goodwy.rphone.view.components.RillAnimatedSection
 import dev.goodwy.rphone.view.components.RillExpressiveCard
@@ -79,6 +78,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import androidx.core.graphics.toColorInt
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ramcosta.composedestinations.generated.destinations.AvatarsPreferenceScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.CallerUIScreenDestination
 import dev.goodwy.rphone.R

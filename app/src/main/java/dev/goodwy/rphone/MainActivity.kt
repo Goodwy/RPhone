@@ -169,12 +169,7 @@ class MainActivity : FragmentActivity() {
                         appLockEnabled = prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK, false)
                         lockOnMinimize = prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK_ON_MINIMIZE, false)
                     }
-//                    var isUnlocked by remember {
-//                        mutableStateOf(!(biometricType.isNotEmpty() && appLockEnabled))
-//                    }
-                    val isUnlocked by remember {
-                        derivedStateOf { _isUnlocked && !isInBackground }
-                    }
+                    val isUnlocked by rememberUpdatedState(_isUnlocked)
 
                     val lastOpenedTab = remember {
                         prefs.getString(PreferenceManager.KEY_LAST_OPENED_TAB, null)
@@ -603,19 +598,32 @@ class MainActivity : FragmentActivity() {
                     // ── Biometric overlay (above blur, inside Box) ─────────
                     if (!isUnlocked) {
                         val activity = this@MainActivity
-                        LaunchedEffect(biometricType) {
+                        LaunchedEffect(biometricType, appLockEnabled) {
                             if (biometricType.isEmpty() || !appLockEnabled) {
                                 _isUnlocked = true
                                 return@LaunchedEffect
                             }
                             if (biometricType == "system") {
+                                // DELAY: Allow Compose to render the background blur effect.
+                                // Without this, the system’s BiometricPrompt is ignored on many devices.
+                                kotlinx.coroutines.delay(150)
+
                                 val executor = androidx.core.content.ContextCompat.getMainExecutor(activity)
                                 val prompt = androidx.biometric.BiometricPrompt(
                                     activity, executor,
                                     object : androidx.biometric.BiometricPrompt.AuthenticationCallback() {
-                                        override fun onAuthenticationSucceeded(r: androidx.biometric.BiometricPrompt.AuthenticationResult) { _isUnlocked = true }
-                                        override fun onAuthenticationError(code: Int, msg: CharSequence) { finish() }
-                                        override fun onAuthenticationFailed() { finish() }
+                                        override fun onAuthenticationSucceeded(result: androidx.biometric.BiometricPrompt.AuthenticationResult) {
+                                            _isUnlocked = true
+                                        }
+                                        override fun onAuthenticationError(code: Int, msg: CharSequence) {
+                                            // Code 5 = ERROR_CANCELED (the user clicked ‘Cancel’)
+                                            if (code != 5) {
+                                                finish()
+                                            }
+                                        }
+                                        override fun onAuthenticationFailed() {
+                                            // Finger not recognised. Do nothing; try again
+                                        }
                                     }
                                 )
                                 prompt.authenticate(
@@ -635,7 +643,6 @@ class MainActivity : FragmentActivity() {
                                 onConfirm = { _isUnlocked = true }, onDismiss = { finish() }
                             )
                         } else if (biometricType == "password") {
-
                             dev.goodwy.rphone.view.screen.settings.PasswordSetupDialog(
                                 title = stringResource(R.string.enter_password), isVerify = true,
                                 expectedPassword = prefs.getString(PreferenceManager.KEY_BIOMETRICS_PASSWORD, "") ?: "",
@@ -658,38 +665,21 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-//    override fun onUserLeaveHint() {
-//        super.onUserLeaveHint()
-//        // Lock when the Home button is pressed or when switching between tasks
-//        if (appLockEnabled && lockOnMinimize) {
-//            isInBackground = true
-//            _isUnlocked = false
-//        }
-//    }
-
     override fun onStop() {
         super.onStop()
-        // When the app is minimized, we block it
+        // Lock ONLY when minimising (if the relevant setting is enabled)
         if (appLockEnabled && lockOnMinimize) {
             isInBackground = true
-            _isUnlocked = false
         }
     }
 
     override fun onResume() {
         super.onResume()
-        isInBackground = false
-        // If the lock is off, let’s unlock it straight away
-        if (biometricType.isEmpty() || !appLockEnabled) {
-            _isUnlocked = true
-        } else if (lockOnMinimize) {
-            // We request that the item be unlocked upon return
+        // If we’ve returned from the background and the ‘lock on minimisation’ setting is enabled, we’ll ask for the password
+        if (appLockEnabled && lockOnMinimize && isInBackground) {
             _isUnlocked = false
         }
-        // If lockOnMinimize = false:
-        // - the application does NOT LOCK when minimised
-        // - it will only be locked if it has been completely unloaded from memory
-        // - in this case, _isUnlocked remains in its current state
+        isInBackground = false
     }
 
     override fun onNewIntent(intent: Intent) {

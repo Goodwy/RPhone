@@ -117,16 +117,8 @@ fun AZListContent(
     val settingsState by prefs.settingsChanged.collectAsStateWithLifecycle()
     val showFavorites = false //!prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, true)
 
-    val haptic = LocalHapticFeedback.current
-    val hapticScrollEnabled = prefs.getBoolean(PreferenceManager.KEY_HAPTIC_LIST_SCROLL, false)
     val displayOrder = remember(settingsState) { prefs.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0) }
     val sortOrder = remember(settingsState) { prefs.getInt(PreferenceManager.KEY_CONTACT_SORT_ORDER, 0) }
-
-    if (hapticScrollEnabled) {
-        LaunchedEffect(listState.firstVisibleItemIndex) {
-            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-        }
-    }
 
     val finalGrouped = remember(contacts, grouped) {
         if (grouped != null) return@remember grouped
@@ -393,10 +385,7 @@ fun ContactListItem(
                         if (horizontalDragDetected) return@combinedClickable
                         onClick()
                     },
-                    onLongClick = if (onSelectToggle != null) {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onSelectToggle
-                    } else null
+                    onLongClick = onSelectToggle
                 )
                 .pointerInput(Unit) {
                     awaitEachGesture {
