@@ -23,6 +23,7 @@ import androidx.core.graphics.drawable.IconCompat
 import androidx.core.net.toUri
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.PreferenceManager
+import dev.goodwy.rphone.controller.util.RecorderManager
 import dev.goodwy.rphone.data.manager.CallStateManager
 import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 import dev.goodwy.rphone.view.screen.BiometricCallActivity
@@ -231,9 +232,15 @@ class CallService : InCallService() {
 
             if (state == Call.STATE_ACTIVE) {
                 redialCount = 0
+                if (preferenceManager.getBoolean(PreferenceManager.KEY_CALL_RECORDING, false) &&
+                    preferenceManager.getBoolean(PreferenceManager.KEY_CALL_RECORDING_AUTO, false)) {
+                    val number = call.details.handle?.schemeSpecificPart ?: ""
+                    RecorderManager.startRecording(this@CallService, number)
+                }
             }
 
             if (state == Call.STATE_DISCONNECTED) {
+                RecorderManager.stopRecording()
                 val cause = call.details.disconnectCause
                 handleDisconnect(call, cause)
 
@@ -493,6 +500,7 @@ class CallService : InCallService() {
 
     override fun onCallRemoved(call: Call) {
         super.onCallRemoved(call)
+        RecorderManager.stopRecording()
         call.unregisterCallback(callCallback)
         updateCallState()
         if (allCalls.value.isEmpty()) {

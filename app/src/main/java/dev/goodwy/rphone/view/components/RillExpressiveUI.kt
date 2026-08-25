@@ -961,33 +961,37 @@ fun RillSwitchListItem(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true
 ) {
     val context = LocalContext.current
     val prefs = koinInject<PreferenceManager>()
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.96f else 1f,
+        targetValue = if (isPressed && enabled) 0.96f else 1f,
         animationSpec = spring(stiffness = Spring.StiffnessMedium),
         label = "SwitchItemScale"
     )
 
     Surface(
         onClick = {
-            if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                performAppHaptic(
-                    context,
-                    prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light",
-                    prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
-                )
+            if (enabled) {
+                if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
+                    performAppHaptic(
+                        context,
+                        prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light",
+                        prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
+                    )
+                }
+                onCheckedChange(!checked)
             }
-            onCheckedChange(!checked)
         },
         shape = RoundedCornerShape(cardCornerSmall),
         color = cardColor, //Color.Transparent,
         modifier = modifier
             .fillMaxWidth()
-            .scale(scale),
+            .scale(scale)
+            .alpha(if (enabled) 1f else 0.5f),
         shadowElevation = 0.dp,
         interactionSource = interactionSource
     ) {
@@ -1030,6 +1034,7 @@ fun RillSwitchListItem(
             Switch(
                 checked = checked,
                 onCheckedChange = onCheckedChange,
+                enabled = enabled,
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = MaterialTheme.colorScheme.primary,
                     checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,

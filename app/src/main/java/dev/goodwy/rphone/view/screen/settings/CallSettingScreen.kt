@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.rounded.Backpack
 import androidx.compose.material.icons.rounded.CropFree
+import androidx.compose.material.icons.rounded.Mic
 import androidx.compose.material.icons.rounded.PictureInPicture
 import androidx.compose.material.icons.rounded.SettingsPhone
 import androidx.compose.material.icons.rounded.SimCard
@@ -57,6 +58,8 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
     var autoSpeaker by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_AUTO_SPEAKER, false)) }
     var defaultSim by remember { mutableStateOf(prefs.getInt(PreferenceManager.KEY_DEFAULT_SIM, prefs.getDefaultSimIndexDefault())) }
     var fullscreenCalls by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_ALWAYS_FULLSCREEN_CALLS, false)) }
+    var callRecording by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_CALL_RECORDING, false)) }
+    var autoRecording by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_CALL_RECORDING_AUTO, false)) }
 
     var visible by remember { mutableStateOf(false) }
     val screenAlpha by animateFloatAsState(
@@ -148,6 +151,42 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
                                         }
                                     }
                                 }
+                            )
+                        }
+                    }
+                }
+            }
+
+            // ── Call Recording ───────────────────────────────────────────────
+            item {
+                RillAnimatedSection(delayMs = 90L) {
+                    Column {
+                        SettingsSectionLabel(stringResource(R.string.call_recording))
+                        RillExpressiveCard {
+                            RillSwitchListItem(
+                                headline = stringResource(R.string.call_recording),
+                                supporting = stringResource(R.string.call_recording_subtitle),
+                                leadingIcon = Icons.Rounded.Mic,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+                                checked = callRecording,
+                                onCheckedChange = {
+                                    callRecording = it
+                                    prefs.setBoolean(PreferenceManager.KEY_CALL_RECORDING, it)
+                                }
+                            )
+                            RillSwitchListItem(
+                                headline = stringResource(R.string.call_recording_auto),
+                                supporting = stringResource(R.string.call_recording_auto_subtitle),
+                                leadingIcon = Icons.Rounded.Mic,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+                                checked = autoRecording,
+                                onCheckedChange = {
+                                    autoRecording = it
+                                    prefs.setBoolean(PreferenceManager.KEY_CALL_RECORDING_AUTO, it)
+                                },
+                                enabled = callRecording
                             )
                         }
                     }

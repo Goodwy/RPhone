@@ -43,12 +43,14 @@ import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.CallEnd
 import androidx.compose.material.icons.rounded.Cancel
 import androidx.compose.material.icons.rounded.Dialpad
+import androidx.compose.material.icons.rounded.FiberManualRecord
 import androidx.compose.material.icons.rounded.Headset
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material.icons.rounded.Mic
 import androidx.compose.material.icons.rounded.MicOff
 import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.Stop
 import androidx.compose.material.icons.rounded.SwapCalls
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -93,6 +95,7 @@ import coil.compose.AsyncImage
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.CallService
 import dev.goodwy.rphone.controller.util.PreferenceManager
+import dev.goodwy.rphone.controller.util.RecorderManager
 import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 import dev.goodwy.rphone.cardCornerSmall
 import dev.goodwy.rphone.controller.util.NoteManager
@@ -182,6 +185,7 @@ fun ExpressiveCallScreen(
     var typedDigits by remember { mutableStateOf("") }
     var showMore by remember { mutableStateOf(false) }
     var isEnding by remember { mutableStateOf(false) }
+    val isRecording by RecorderManager.isRecording.collectAsStateWithLifecycle()
 
     fun callDisconnect(isIncoming: Boolean = false) {
         if (isIncoming) isEnding = true
@@ -439,14 +443,24 @@ fun ExpressiveCallScreen(
                             else -> stringResource(R.string.call_status_connecting)
                         }
 
-                        Text(
-                            text = statusText,
-                            style = MaterialTheme.typography.titleMedium,
-                            color = if (callState == Call.STATE_HOLDING) MaterialTheme.colorScheme.tertiary
-                                    else MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (isRecording) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(8.dp)
+                                        .background(Color.Red, CircleShape)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                            }
+                            Text(
+                                text = statusText,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = if (callState == Call.STATE_HOLDING) MaterialTheme.colorScheme.tertiary
+                                else MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Text(
@@ -622,6 +636,22 @@ fun ExpressiveCallScreen(
                                                     if (callState == Call.STATE_HOLDING) call.unhold() else call.hold()
                                                 }
                                             )
+                                            val isCallRecordingEnabled = preferenceManager.getBoolean(PreferenceManager.KEY_CALL_RECORDING, false)
+                                            if (isCallRecordingEnabled) {
+                                                MoreItem(
+                                                    headline = if (isRecording) stringResource(R.string.stop) else stringResource(R.string.record),
+                                                    leadingIcon = if (isRecording) Icons.Rounded.Stop else Icons.Rounded.FiberManualRecord,
+                                                    enabled = callState == Call.STATE_ACTIVE,
+                                                    onClick = {
+                                                        view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                                        if (isRecording) {
+                                                            RecorderManager.stopRecording()
+                                                        } else {
+                                                            RecorderManager.startRecording(context, phoneNumber)
+                                                        }
+                                                    }
+                                                )
+                                            }
                                         }
                                     }
 

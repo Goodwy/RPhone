@@ -558,4 +558,15 @@
     <string name="notif_missed_call_text">Missed call from %1$s at %2$s</string>
     <string name="notif_via_sim">via %1$s</string>
     <string name="notif_active_call">Active call</string>
+
+    <!-- Call Recording -->
+    <string name="call_recording">Call Recording</string>
+    <string name="call_recording_subtitle">Enable or disable call recording</string>
+    <string name="call_recording_auto">Auto Recording</string>
+    <string name="call_recording_auto_subtitle">Automatically start recording when call is answered</string>
+    <string name="record">Record</string>
+    <string name="stop">Stop</string>
+    <string name="recording">Recording…</string>
+    <string name="recording_saved">Recording saved</string>
+    <string name="recording_error">Could not start recording</string>
 </resources>
