@@ -30,6 +30,10 @@ import androidx.navigation.compose.rememberNavController
 import dev.goodwy.rphone.controller.CallService
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.CallActivity
+import dev.goodwy.rphone.controller.MainViewModel
+import dev.goodwy.rphone.controller.NavigationTarget
+import dev.goodwy.rphone.controller.CallViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import dev.goodwy.rphone.view.components.BottomBar
 import dev.goodwy.rphone.liquidglass.LocalLiquidGlassBackdrop
 import dev.goodwy.rphone.liquidglass.backdrops.rememberLayerBackdrop
@@ -113,26 +117,17 @@ import org.koin.core.context.GlobalContext
 
 class MainActivity : FragmentActivity() {
     private var intentState by mutableStateOf<Intent?>(null)
-    private var isInBackground by mutableStateOf(false)
-    private var _isUnlocked by mutableStateOf(true)
-    private var biometricType: String = ""
-    private var appLockEnabled: Boolean = false
-    private var lockOnMinimize: Boolean = false
     private lateinit var prefs: PreferenceManager
+    private val callViewModel: CallViewModel by viewModel()
+    private val mainViewModel: MainViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         intentState = intent
-        // enableEdgeToEdge() triggers Adreno GPU driver SIGSEGV on first RenderThread draw.
-        // Edge-to-edge is set via theme XML instead (windowDrawsSystemBarBackgrounds etc).
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         prefs = GlobalContext.get().get<PreferenceManager>()
-        biometricType = prefs.getString(PreferenceManager.KEY_BIOMETRICS_TYPE, "") ?: ""
-        appLockEnabled = prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK, false)
-        lockOnMinimize = prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK_ON_MINIMIZE, false)
-        _isUnlocked = !(biometricType.isNotEmpty() && appLockEnabled)
 
         setContent {
             Rill4Theme {
@@ -162,14 +157,11 @@ class MainActivity : FragmentActivity() {
                         }
                     )
                 } else {
-                    // ── Biometric app-lock ──────────────────────────────────────
                     val settingsVer by prefs.settingsChanged.collectAsStateWithLifecycle()
-                    LaunchedEffect(settingsVer) {
-                        biometricType = prefs.getString(PreferenceManager.KEY_BIOMETRICS_TYPE, "") ?: ""
-                        appLockEnabled = prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK, false)
-                        lockOnMinimize = prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK_ON_MINIMIZE, false)
-                    }
-                    val isUnlocked by rememberUpdatedState(_isUnlocked)
+                    val biometricType = remember(settingsVer) { prefs.getString(PreferenceManager.KEY_BIOMETRICS_TYPE, "") ?: "" }
+                    val appLockEnabled = remember(settingsVer) { prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK, false) }
+                    
+                val isUnlocked by mainViewModel.isUnlocked.collectAsStateWithLifecycle()
 
                     val lastOpenedTab = remember {
                         prefs.getString(PreferenceManager.KEY_LAST_OPENED_TAB, null)
@@ -202,7 +194,7 @@ class MainActivity : FragmentActivity() {
                     )
 
                     // ── Ongoing Call Banner + Main nav host ───────────────────────
-                    val callSession by CallService.currentCallSession.collectAsStateWithLifecycle()
+                    val callSession by callViewModel.currentCallSession.collectAsStateWithLifecycle()
                     val hasOngoingCall =
                         callSession != null && callSession?.state != android.telecom.Call.STATE_RINGING
 
@@ -600,7 +592,7 @@ class MainActivity : FragmentActivity() {
                         val activity = this@MainActivity
                         LaunchedEffect(biometricType, appLockEnabled) {
                             if (biometricType.isEmpty() || !appLockEnabled) {
-                                _isUnlocked = true
+                                mainViewModel.unlock()
                                 return@LaunchedEffect
                             }
                             if (biometricType == "system") {
@@ -613,7 +605,7 @@ class MainActivity : FragmentActivity() {
                                     activity, executor,
                                     object : androidx.biometric.BiometricPrompt.AuthenticationCallback() {
                                         override fun onAuthenticationSucceeded(result: androidx.biometric.BiometricPrompt.AuthenticationResult) {
-                                            _isUnlocked = true
+                                            mainViewModel.unlock()
                                         }
                                         override fun onAuthenticationError(code: Int, msg: CharSequence) {
                                             // Code 5 = ERROR_CANCELED (the user clicked ‘Cancel’)
@@ -640,13 +632,13 @@ class MainActivity : FragmentActivity() {
                             dev.goodwy.rphone.view.screen.settings.PinSetupDialog(
                                 title = stringResource(R.string.enter_pin), isVerify = true,
                                 expectedPin = prefs.getString(PreferenceManager.KEY_BIOMETRICS_PIN, "") ?: "",
-                                onConfirm = { _isUnlocked = true }, onDismiss = { finish() }
+                                onConfirm = { mainViewModel.unlock() }, onDismiss = { finish() }
                             )
                         } else if (biometricType == "password") {
                             dev.goodwy.rphone.view.screen.settings.PasswordSetupDialog(
                                 title = stringResource(R.string.enter_password), isVerify = true,
                                 expectedPassword = prefs.getString(PreferenceManager.KEY_BIOMETRICS_PASSWORD, "") ?: "",
-                                onConfirm = { _isUnlocked = true }, onDismiss = { finish() }
+                                onConfirm = { mainViewModel.unlock() }, onDismiss = { finish() }
                             )
                         }
                     } // end outer Box
@@ -667,19 +659,12 @@ class MainActivity : FragmentActivity() {
 
     override fun onStop() {
         super.onStop()
-        // Lock ONLY when minimising (if the relevant setting is enabled)
-        if (appLockEnabled && lockOnMinimize) {
-            isInBackground = true
-        }
+        mainViewModel.onStop()
     }
 
     override fun onResume() {
         super.onResume()
-        // If we’ve returned from the background and the ‘lock on minimisation’ setting is enabled, we’ll ask for the password
-        if (appLockEnabled && lockOnMinimize && isInBackground) {
-            _isUnlocked = false
-        }
-        isInBackground = false
+        mainViewModel.onResume()
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -693,71 +678,30 @@ class MainActivity : FragmentActivity() {
 
     private fun handleIntent(intent: Intent?, navController: androidx.navigation.NavController) {
         intent ?: return
-        val data = intent.data
-        val action = intent.action
+        val target = mainViewModel.getNavigationTarget(intent, this) ?: return
 
-        when (action) {
-            "dev.goodwy.rphone.ACTION_VIEW_RECENTS" -> {
+        when (target) {
+            is NavigationTarget.Recents -> {
                 navController.navigate(RecentScreenDestination.route) {
                     popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                     launchSingleTop = true
                 }
             }
-            Intent.ACTION_VIEW -> {
-                val mimeType = intent.type
-                if (mimeType == "vnd.android.cursor.dir/calls" ||
-                    data?.toString()?.contains("call_log") == true ||
-                    data?.toString()?.contains("calls") == true) {
-                    navController.navigate(RecentScreenDestination.route) {
-                        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                        launchSingleTop = true
-                    }
-                } else if (data?.scheme == "tel") {
-                    val number = data.schemeSpecificPart
-                    navController.navigate(DialPadScreenDestination(initialNumber = number).route)
-                } else if (data?.toString()?.contains("contacts") == true ||
-                    data?.toString()?.contains("com.android.contacts") == true ||
-                    intent.hasExtra("contact_id")) {
-                    val id = data?.lastPathSegment ?: intent.getStringExtra("contact_id")
-                    if (id != null) {
-                        navController.navigate(ContactDetailsScreenDestination(contactId = id).route)
-                    }
-                }
+            is NavigationTarget.Dialpad -> {
+                navController.navigate(DialPadScreenDestination(initialNumber = target.number).route)
             }
-            Intent.ACTION_DIAL -> {
-                if (data?.scheme == "tel") {
-                    val number = data.schemeSpecificPart
-                    navController.navigate(DialPadScreenDestination(initialNumber = number).route)
-                }
+            is NavigationTarget.ContactDetails -> {
+                navController.navigate(ContactDetailsScreenDestination(contactId = target.contactId).route)
             }
-            Intent.ACTION_CALL -> {
-                if (data?.scheme == "tel") {
-                    val number = data.schemeSpecificPart
-                    if (isAlreadyDefaultDialer(this)) {
-                        makeCall(this, number = number)
-                    } else {
-                        navController.navigate(DialPadScreenDestination(initialNumber = number).route)
-                    }
-                }
-            }
-            Intent.ACTION_INSERT -> {
-                val name = intent.getStringExtra(ContactsContract.Intents.Insert.NAME)
-                val phone = intent.getStringExtra(ContactsContract.Intents.Insert.PHONE)
-                navController.navigate(ContactEditScreenDestination(initialName = name, initialPhone = phone).route) {
+            is NavigationTarget.ContactEdit -> {
+                navController.navigate(ContactEditScreenDestination(
+                    contactId = target.contactId,
+                    initialName = target.initialName,
+                    initialPhone = target.initialPhone
+                ).route) {
                     launchSingleTop = true
                     popUpTo(navController.graph.startDestinationId) {
                         saveState = true
-                    }
-                }
-            }
-            Intent.ACTION_EDIT -> {
-                val id = data?.lastPathSegment
-                if (id != null) {
-                    navController.navigate(ContactEditScreenDestination(contactId = id).route) {
-                        launchSingleTop = true
-                        popUpTo(navController.graph.startDestinationId) {
-                            saveState = true
-                        }
                     }
                 }
             }

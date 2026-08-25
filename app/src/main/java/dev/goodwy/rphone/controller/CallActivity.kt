@@ -35,9 +35,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.CallBackgroundStore
 import dev.goodwy.rphone.controller.util.PreferenceManager
+import dev.goodwy.rphone.modal.`interface`.CallSession
 import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 import dev.goodwy.rphone.view.screen.ExpressiveCallScreen
 import dev.goodwy.rphone.view.theme.Rill4Theme
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -60,7 +62,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
 
     private val contactsRepo: IContactsRepository by inject()
     private val preferenceManager: PreferenceManager by inject()
-    private val callViewModel: CallViewModel by inject()
+    private val callViewModel: CallViewModel by viewModel()
     private var proximityWakeLock: PowerManager.WakeLock? = null
     private var isFinishingCall = false
     private var keyguardDismissRequested = false
@@ -77,8 +79,8 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
 
         CallBackgroundStore.attach(preferenceManager)
 
-        if (CallService.allCalls.value.none { it.state != Call.STATE_DISCONNECTED } &&
-            CallService.currentCallSession.value == null
+        if (callViewModel.allCalls.value.none { it.state != Call.STATE_DISCONNECTED } &&
+            callViewModel.currentCallSession.value == null
         ) {
             finish()
             return
@@ -97,8 +99,8 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
 
         setContent {
             Rill4Theme {
-                val session by CallService.currentCallSession.collectAsStateWithLifecycle()
-                val audioState by CallService.audioState.collectAsStateWithLifecycle()
+                val session by callViewModel.currentCallSession.collectAsStateWithLifecycle()
+                val audioState by callViewModel.audioState.collectAsStateWithLifecycle()
                 val settingsState by preferenceManager.settingsChanged.collectAsStateWithLifecycle()
                 val callerMetadata by callViewModel.callerMetadata.collectAsStateWithLifecycle()
 
@@ -199,7 +201,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
 
                     if (session == null) {
                         delay(400)
-                        if (CallService.allCalls.value.none { it.state != Call.STATE_DISCONNECTED }) {
+                        if (callViewModel.allCalls.value.none { it.state != Call.STATE_DISCONNECTED }) {
                             dismissCallScreen()
                         }
                     }
@@ -381,7 +383,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        if (!isFinishingCall && CallService.allCalls.value.any { it.state != Call.STATE_DISCONNECTED }) {
+        if (!isFinishingCall && callViewModel.allCalls.value.any { it.state != Call.STATE_DISCONNECTED }) {
             turnScreenOnAndShowWhileLocked()
         }
     }
@@ -390,7 +392,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
         if (isFinishingCall) return
         isFinishingCall = true
 
-        if (CallService.allCalls.value.any { it.state != Call.STATE_DISCONNECTED }) {
+        if (callViewModel.allCalls.value.any { it.state != Call.STATE_DISCONNECTED }) {
             isFinishingCall = false
             return
         }
@@ -414,12 +416,12 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
 
     override fun onStart() {
         super.onStart()
-        CallService.isActivityVisible.value = true
+        callViewModel.setIsActivityVisible(true)
     }
 
     override fun onStop() {
         super.onStop()
-        CallService.isActivityVisible.value = false
+        callViewModel.setIsActivityVisible(false)
     }
 
     private fun acquireProximityLock() {

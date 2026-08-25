@@ -1,11 +1,13 @@
 package dev.goodwy.rphone.controller
 
+import android.app.KeyguardManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.BroadcastReceiver
 import android.content.IntentFilter
 import android.graphics.PixelFormat
+import android.os.Build
 import android.os.IBinder
 import android.provider.Settings
 import android.telecom.CallAudioState
@@ -58,6 +60,8 @@ import dev.goodwy.rphone.view.theme.MyColors.dialpadKeyColor
 import dev.goodwy.rphone.view.theme.Rill4Theme
 import dev.goodwy.rphone.view.theme.color_call_button
 import dev.goodwy.rphone.view.theme.color_call_end
+import dev.goodwy.rphone.modal.`interface`.ICallRepository
+import org.koin.android.ext.android.inject
 import kotlinx.coroutines.*
 
 class FloatingCallService : Service() {
@@ -67,6 +71,7 @@ class FloatingCallService : Service() {
     private var menuView:   ComposeView? = null
     private val lifecycleOwner = ServiceLifecycleOwner()
     private val scope          = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private val callRepository: ICallRepository by inject()
 
     private val contactNameState = mutableStateOf("?")
     private val phoneNumberState  = mutableStateOf("")
@@ -78,13 +83,25 @@ class FloatingCallService : Service() {
             if (intent?.action != Intent.ACTION_CONFIGURATION_CHANGED) return
             scope.launch {
                 delay(80) // let window system settle after rotation
-                val display = wm.defaultDisplay
-                @Suppress("DEPRECATION")
-                val screenW = display.width
-                @Suppress("DEPRECATION")
-                val screenH = display.height
-                bubbleParams.x = bubbleParams.x.coerceIn(0, (screenW - 200).coerceAtLeast(0))
-                bubbleParams.y = bubbleParams.y.coerceIn(0, (screenH - 200).coerceAtLeast(0))
+                val screenW: Int
+                val screenH: Int
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    val metrics = wm.currentWindowMetrics
+                    screenW = metrics.bounds.width()
+                    screenH = metrics.bounds.height()
+                } else {
+                    @Suppress("DEPRECATION")
+                    val display = wm.defaultDisplay
+                    @Suppress("DEPRECATION")
+                    screenW = display.width
+                    @Suppress("DEPRECATION")
+                    screenH = display.height
+                }
+                val density = resources.displayMetrics.density
+                val bubbleSizePx = (72 * density).toInt()
+
+                bubbleParams.x = bubbleParams.x.coerceIn(0, (screenW - bubbleSizePx).coerceAtLeast(0))
+                bubbleParams.y = bubbleParams.y.coerceIn(0, (screenH - bubbleSizePx).coerceAtLeast(0))
                 try { bubbleView?.let { wm.updateViewLayout(it, bubbleParams) } } catch (_: Exception) {}
             }
         }
@@ -109,7 +126,8 @@ class FloatingCallService : Service() {
         WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
         WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
-                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
+                WindowManager.LayoutParams.FLAG_SECURE,
         PixelFormat.TRANSLUCENT
     ).apply { gravity = Gravity.TOP or Gravity.START }
 
@@ -150,6 +168,7 @@ class FloatingCallService : Service() {
 
     private fun createBubble() {
         val cv = ComposeView(this).apply {
+            setFilterTouchesWhenObscured(true)
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
             setViewTreeLifecycleOwner(lifecycleOwner)
             setViewTreeSavedStateRegistryOwner(lifecycleOwner)
@@ -161,6 +180,10 @@ class FloatingCallService : Service() {
 
     @Composable
     private fun BubbleUI(name: String, photoUri: String?, onTap: () -> Unit) {
+        val context = LocalContext.current
+        val km = remember { context.getSystemService(KeyguardManager::class.java) }
+        val isLocked = km.isKeyguardLocked
+
         var entered by remember { mutableStateOf(false) }
         LaunchedEffect(Unit) { delay(50); entered = true }
 
@@ -214,7 +237,7 @@ class FloatingCallService : Service() {
                                 change.consume()
                                 bubbleParams.x = (bubbleParams.x + delta.x.toInt()).coerceAtLeast(0)
                                 bubbleParams.y = (bubbleParams.y + delta.y.toInt()).coerceAtLeast(0)
-                                try { wm.updateViewLayout(bubbleView, bubbleParams) } catch (_: Exception) {}
+                                try { bubbleView?.let { wm.updateViewLayout(it, bubbleParams) } } catch (_: Exception) {}
                             }
                             if (!change.pressed) { if (!dragged) onTap(); break }
                         } while (true)
@@ -229,7 +252,7 @@ class FloatingCallService : Service() {
                 shadowElevation = 1.dp,
                 modifier        = Modifier.size(58.dp)
             ) {
-                if (!photoUri.isNullOrEmpty()) {
+                if (!isLocked && !photoUri.isNullOrEmpty()) {
                     RillAvatar(
                         name     = name,
                         photoUri = photoUri,
@@ -237,12 +260,21 @@ class FloatingCallService : Service() {
                     )
                 } else {
                     Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            text       = name.firstOrNull()?.uppercaseChar()?.toString() ?: "?",
-                            fontWeight = FontWeight.Bold,
-                            fontSize   = 22.sp,
-                            color      = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
+                        if (isLocked) {
+                            Icon(
+                                imageVector = Icons.Rounded.Call,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        } else {
+                            Text(
+                                text       = name.firstOrNull()?.uppercaseChar()?.toString() ?: "?",
+                                fontWeight = FontWeight.Bold,
+                                fontSize   = 22.sp,
+                                color      = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
                     }
                 }
             }
@@ -322,8 +354,8 @@ class FloatingCallService : Service() {
         scope.launch {
             delay(280)
             when (action) {
-                is MenuAction.Speaker    -> CallService.setAudioRoute(action.route)
-                is MenuAction.Mute       -> CallService.setMuted(action.mute)
+                is MenuAction.Speaker    -> callRepository.setAudioRoute(action.route)
+                is MenuAction.Mute       -> callRepository.mute(action.mute)
                 is MenuAction.Notes      -> FloatingNotesService.start(action.ctx, action.name, action.number)
                 is MenuAction.BackToCall -> action.ctx.startActivity(
                     Intent(action.ctx, CallActivity::class.java).apply {
@@ -331,7 +363,7 @@ class FloatingCallService : Service() {
                     }
                 )
                 MenuAction.Close -> { delay(150); removeBubble(); stopSelf() }
-                MenuAction.Hangup -> CallService.declineCall()
+                MenuAction.Hangup -> callRepository.declineCall()
             }
             delay(200)
             try { menuView?.let { wm.removeViewImmediate(it) } } catch (_: Exception) {}
@@ -360,7 +392,10 @@ class FloatingCallService : Service() {
         onAction: (MenuAction) -> Unit
     ) {
         val context    = LocalContext.current
-        val audioState by CallService.audioState.collectAsStateWithLifecycle()
+        val km = remember { context.getSystemService(KeyguardManager::class.java) }
+        val isLocked = km.isKeyguardLocked
+
+        val audioState by callRepository.audioState.collectAsStateWithLifecycle()
         val isMuted    = audioState?.isMuted ?: false
         val isSpeaker  = audioState?.route == CallAudioState.ROUTE_SPEAKER
 
@@ -409,24 +444,6 @@ class FloatingCallService : Service() {
                             .padding(top = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(0.dp)
                     ) {
-                        // Drag handle
-//                        Box(
-//                            modifier = Modifier
-//                                .width(40.dp)
-//                                .height(4.dp)
-//                                .align(Alignment.CenterHorizontally)
-//                        ) {
-//                            Surface(
-//                                modifier        = Modifier.fillMaxSize(),
-//                                shape           = CircleShape,
-//                                color           = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.22f),
-//                                tonalElevation  = 0.dp,
-//                                shadowElevation = 0.dp
-//                            ) {}
-//                        }
-//
-//                        Spacer(Modifier.height(14.dp))
-
                         // Contact info row
                         Row(
                             modifier              = Modifier.fillMaxWidth(),
@@ -439,12 +456,12 @@ class FloatingCallService : Service() {
                                 .padding(top = 16.dp)
                             ) {
                                 Text(
-                                    text       = contactName,
+                                    text       = if (isLocked) stringResource(R.string.notif_active_call) else contactName,
                                     style      = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color      = MaterialTheme.colorScheme.onSurface
                                 )
-                                if (phoneNumber.isNotEmpty() && phoneNumber != contactName) {
+                                if (!isLocked && phoneNumber.isNotEmpty() && phoneNumber != contactName) {
                                     Text(
                                         text  = phoneNumber,
                                         style = MaterialTheme.typography.bodySmall,
@@ -677,7 +694,7 @@ class FloatingCallService : Service() {
 
     private fun observeAll() {
         scope.launch {
-            CallService.currentCallSession.collect { if (it == null) { removeBubble(); stopSelf() } }
+            callRepository.currentCallSession.collect { if (it == null) { removeBubble(); stopSelf() } }
         }
         scope.launch {
             CallActivity.isInForeground.collect { inForeground ->

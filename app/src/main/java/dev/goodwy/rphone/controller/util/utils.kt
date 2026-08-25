@@ -3,7 +3,6 @@ package dev.goodwy.rphone.controller.util
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.role.RoleManager
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -17,18 +16,13 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.BlockedNumberContract.BlockedNumbers
 import android.provider.ContactsContract
-import android.provider.ContactsContract.CommonDataKinds.BaseTypes
-import android.provider.ContactsContract.CommonDataKinds.Event
 import android.telecom.PhoneAccountHandle
 import android.telecom.TelecomManager
-import android.telephony.PhoneNumberUtils
 import android.telephony.TelephonyManager
 import android.text.Html
-import android.text.format.DateUtils
 import android.view.Gravity
 import android.widget.TextView
 import android.widget.Toast
-import androidx.annotation.RequiresPermission
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -38,133 +32,10 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.net.toUri
-import dev.goodwy.rphone.DAY_SECONDS
-import dev.goodwy.rphone.HOUR_SECONDS
-import dev.goodwy.rphone.MINUTE_SECONDS
 import dev.goodwy.rphone.R
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-
-private fun isYesterday(timestamp: Long): Boolean {
-    return DateUtils.isToday(timestamp + DateUtils.DAY_IN_MILLIS)
-}
-
-private fun isSameYear(timestamp1: Long, timestamp2: Long): Boolean {
-    val cal1 = Calendar.getInstance().apply { timeInMillis = timestamp1 }
-    val cal2 = Calendar.getInstance().apply { timeInMillis = timestamp2 }
-    return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR)
-}
-
-private fun Context.getRelativeDay(timestamp: Long): String? {
-    return when {
-        DateUtils.isToday(timestamp) -> getString(R.string.today)
-        isYesterday(timestamp) -> getString(R.string.yesterday)
-        else -> null
-    }
-}
-
-fun Context.formatDateHeader(timestamp: Long): String {
-    val relative = getRelativeDay(timestamp)
-    if (relative != null) return relative
-
-    val pattern = if (isSameYear(timestamp, System.currentTimeMillis())) "d MMMM" else "d MMMM yyyy"
-    return SimpleDateFormat(pattern, Locale.getDefault()).format(Date(timestamp))
-}
-
-fun Context.formatDate(timestamp: Long, onlyTime: Boolean = false): String {
-    val relative = getRelativeDay(timestamp)
-    val isJustNow = isJustNow(timestamp)
-    val time = isJustNow ?: android.text.format.DateFormat.getTimeFormat(this).format(Date(timestamp))
-    return if (onlyTime) time
-            else if (isJustNow != null) time
-            else if (relative != null) "$relative, $time"
-            else "${formatDateHeader(timestamp)}, $time"
-}
-
-private fun Context.isJustNow(timestamp: Long): String? {
-    val now = System.currentTimeMillis()
-    val diff = now - timestamp
-    return when {
-        diff < DateUtils.MINUTE_IN_MILLIS -> getString(R.string.just_now)
-        else -> null
-    }
-}
-
-fun formatDuration(durationSeconds: Long): String {
-    return DateUtils.formatElapsedTime(durationSeconds)
-}
-
-/** Returns true if the device currently has 2 or more call-capable SIMs (dual/multi-SIM). */
-fun hasDualSim(context: Context): Boolean {
-    return try {
-        val hasPhoneState = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED
-        if (!hasPhoneState) return false
-        val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as? TelecomManager ?: return false
-        telecomManager.callCapablePhoneAccounts.size >= 2
-    } catch (_: Exception) {
-        false
-    }
-}
-
-fun formatPhoneNumber(number: String): String {
-    return PhoneNumberUtils.formatNumber(number, Locale.getDefault().country) ?: number
-}
-
-fun normalizePhoneNumber(number: String): String {
-    return PhoneNumberUtils.normalizeNumber(number)
-}
-
-fun areNumbersEqual(num1: String?, num2: String?): Boolean {
-    if (num1 == null || num2 == null) return false
-    return PhoneNumberUtils.compare(num1, num2)
-}
-
-fun deduplicateNumbers(numbers: List<String>): List<String> {
-    val unique = mutableListOf<String>()
-    numbers.forEach { number ->
-        val existingIndex = unique.indexOfFirst { areNumbersEqual(it, number) }
-        if (existingIndex == -1) {
-            unique.add(number)
-        } else {
-            // Prefer the number with a '+' or the longer one (usually more complete)
-            val existing = unique[existingIndex]
-            if (number.contains("+") && !existing.contains("+")) {
-                unique[existingIndex] = number
-            } else if (number.length > existing.length && (number.contains("+") == existing.contains("+"))) {
-                unique[existingIndex] = number
-            }
-        }
-    }
-    return unique
-}
-
-fun getSystemVoicemailNumber(context: Context): String? {
-    val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
-    if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
-        try {
-            val accounts = telecomManager.callCapablePhoneAccounts
-            val defaultHandle =
-                telecomManager.getDefaultOutgoingPhoneAccount(Uri.fromParts("tel", "123", null).scheme)
-
-            val handle = defaultHandle ?: accounts.firstOrNull()
-            if (handle != null) {
-                val num = telecomManager.getVoiceMailNumber(handle)
-                if (!num.isNullOrEmpty()) return num
-            }
-        } catch (e: SecurityException) {
-        } catch (e: Exception) {}
-
-        try {
-            val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-            val num = tm.voiceMailNumber
-            if (!num.isNullOrEmpty()) return num
-        } catch (e: SecurityException) {
-        } catch (e: Exception) {}
-    }
-    return null
-}
 
 fun makeCall(context: Context, number: String, accountHandle: PhoneAccountHandle? = null, contactId: String? = null) {
     val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
@@ -244,28 +115,6 @@ fun placeCallWithSimPreference(
     }
 }
 
-
-/**
- * Strips everything except digits and a leading '+' so two differently-formatted
- * representations of the same number ("+1 (555) 123-4567" vs "5551234567") can be compared.
- */
-fun normalizeNumberDigits(number: String): String =
-    number.filter { it.isDigit() || it == '+' }
-
-/**
- * Loose equality check for two phone numbers: compares the last 9 digits (enough to avoid
- * false positives while still matching across differing country-code / leading-zero / spacing
- * conventions). Used to decide whether a call-log number belongs to a saved contact.
- */
-fun numbersLikelyMatch(a: String, b: String): Boolean {
-    val da = normalizeNumberDigits(a).filter { it.isDigit() }
-    val db = normalizeNumberDigits(b).filter { it.isDigit() }
-    if (da.isEmpty() || db.isEmpty()) return false
-    val tailLen = minOf(9, da.length, db.length)
-    if (tailLen <= 0) return false
-    return da.takeLast(tailLen) == db.takeLast(tailLen)
-}
-
 fun openInContacts(context: Context, contactId: String) {
     val intent = Intent(Intent.ACTION_VIEW).apply {
         data = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, contactId)
@@ -309,72 +158,6 @@ fun getAppVersion(context: Context): Pair<String, Long> {
         e.printStackTrace()
         Pair("Unknown", -1L)
     }
-}
-
-fun isAlreadyDefaultDialer(context: Context): Boolean {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        val roleManager = context.getSystemService(Context.ROLE_SERVICE) as RoleManager
-        roleManager.isRoleHeld(RoleManager.ROLE_DIALER)
-    } else {
-        val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
-        val defaultDialerPackage = telecomManager.defaultDialerPackage
-        defaultDialerPackage == context.packageName
-    }
-}
-
-fun getDefaultDialerIntent(context: Context): Intent {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        val roleManager = context.getSystemService(Context.ROLE_SERVICE) as RoleManager
-        roleManager.createRequestRoleIntent(RoleManager.ROLE_DIALER)
-    } else {
-        Intent(TelecomManager.ACTION_CHANGE_DEFAULT_DIALER).apply {
-            putExtra(TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME, context.packageName)
-        }
-    }
-}
-
-data class DeviceImeiInfo(
-    val imei1: String? = null,
-    val imei2: String? = null,
-    val meid: String? = null,
-    val serial: String? = null
-)
-
-@SuppressLint("HardwareIds")
-@RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE")
-fun getDeviceImeiInfo(context: Context): DeviceImeiInfo {
-    val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-    var imei1: String? = null
-    var imei2: String? = null
-    var meid: String? = null
-    var serial: String? = null
-
-    if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                imei1 = try { tm.getImei(0) } catch (e: Exception) { null }
-                imei2 = try { tm.getImei(1) } catch (e: Exception) { null }
-                meid = try { tm.getMeid() } catch (e: Exception) { null }
-            }
-            if (imei1.isNullOrEmpty()) {
-                @Suppress("DEPRECATION")
-                imei1 = try { tm.deviceId } catch (e: Exception) { null }
-            }
-            @Suppress("DEPRECATION")
-            serial = try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                    Build.getSerial()
-                } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                    Build.SERIAL
-                } else null
-            } catch (e: Exception) { null }
-        } catch (e: SecurityException) {
-            e.printStackTrace()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-    return DeviceImeiInfo(imei1 = imei1, imei2 = imei2, meid = meid, serial = serial)
 }
 
 fun processSecretCode(context: Context, fullCode: String): Boolean {
@@ -659,40 +442,6 @@ fun processSecretCode(context: Context, fullCode: String): Boolean {
     return handled
 }
 
-// Goodwy
-fun Context.formatSecondsToShortTimeString(totalSeconds: Int): String {
-    val days = totalSeconds / DAY_SECONDS
-    val hours = (totalSeconds % DAY_SECONDS) / HOUR_SECONDS
-    val minutes = (totalSeconds % HOUR_SECONDS) / MINUTE_SECONDS
-    val seconds = totalSeconds % MINUTE_SECONDS
-    val timesString = StringBuilder()
-    if (days > 0) {
-        val daysString = String.format(resources.getString(R.string.days_letter), days)
-        timesString.append("$daysString ")
-    }
-
-    if (hours > 0) {
-        val hoursString = String.format(resources.getString(R.string.hours_letter), hours)
-        timesString.append("$hoursString ")
-    }
-
-    if (minutes > 0) {
-        val minutesString = String.format(resources.getString(R.string.minutes_letter), minutes)
-        timesString.append("$minutesString ")
-    }
-
-    if (seconds > 0) {
-        val secondsString = String.format(resources.getString(R.string.seconds_letter), seconds)
-        timesString.append(secondsString)
-    }
-
-    var result = timesString.toString().trim()
-    if (result.isEmpty()) {
-        result = String.format(resources.getString(R.string.minutes_letter), 0)
-    }
-    return result
-}
-
 fun String.isLetter(): Boolean {
     return this.length == 1 && this[0].isLetter()
 }
@@ -729,9 +478,9 @@ fun getPhoneTypeText(context: Context, type: Int?, label: String?): String {
 
 fun getEventTypeText(context: Context, type: Int, label: String?): String {
     return when (type) {
-        Event.TYPE_CUSTOM -> label ?: context.resources.getString(R.string.no_label)
-        Event.TYPE_ANNIVERSARY -> context.resources.getString(R.string.anniversary)
-        Event.TYPE_BIRTHDAY -> context.resources.getString(R.string.birthday)
+        ContactsContract.CommonDataKinds.Event.TYPE_CUSTOM -> label ?: context.resources.getString(R.string.no_label)
+        ContactsContract.CommonDataKinds.Event.TYPE_ANNIVERSARY -> context.resources.getString(R.string.anniversary)
+        ContactsContract.CommonDataKinds.Event.TYPE_BIRTHDAY -> context.resources.getString(R.string.birthday)
         else -> context.resources.getString(R.string.other)
     }
 }
@@ -802,74 +551,6 @@ fun Color.darken(amount: Float = 0.2f): Color {
     )
 }
 
-//fun stringToMillis(dateString: String): Long? {
-//    return try {
-//        LocalDate.parse(dateString, DateTimeFormatter.ISO_LOCAL_DATE)
-//            .atStartOfDay()
-//            .toInstant(java.time.ZoneOffset.UTC)
-//            .toEpochMilli()
-//    } catch (_: Exception) {
-//        null
-//    }
-//}
-fun stringToMillis(dateString: String): Long? {
-    if (dateString.isBlank()) return null
-
-    return try {
-        when {
-            // Date format: YYYY-MM-DD
-            dateString.matches(Regex("\\d{4}-\\d{2}-\\d{2}")) -> {
-                val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                sdf.parse(dateString)?.time
-            }
-            // Date format without the year: --MM-DD
-            dateString.matches(Regex("--\\d{2}-\\d{2}")) -> {
-                // We use `split` instead of `substring` for security reasons
-                val datePart = dateString.substring(2) // "10-22"
-                val parts = datePart.split("-")
-                if (parts.size == 2) {
-                    val month = parts[0]
-                    val day = parts[1]
-                    val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-                    val dateWithYear = "$currentYear-$month-$day"
-                    val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                    sdf.parse(dateWithYear)?.time
-                } else {
-                    null
-                }
-            }
-            else -> null
-        }
-    } catch (e: Exception) {
-        null
-    }
-}
-
-//fun millisToString(dateMillis: Long?): String {
-//    if (dateMillis == null) return ""
-//    return try {
-//        val date = Date(dateMillis)
-//        val instant = date.toInstant()
-//        val localDate = instant.atZone(java.time.ZoneId.systemDefault()).toLocalDate()
-//        localDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
-//    } catch (_: Exception) {
-//        ""
-//    }
-//}
-fun millisToString(dateMillis: Long?, originalFormat: String? = null): String {
-    if (dateMillis == null) return ""
-
-    // If the original format did not include the year, we return it in the format --MM-DD
-    if (originalFormat?.startsWith("--") == true) {
-        val sdf = SimpleDateFormat("MM-dd", Locale.getDefault())
-        return "--${sdf.format(Date(dateMillis))}"
-    }
-
-    // Standard format with the year
-    val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-    return sdf.format(Date(dateMillis))
-}
-
 fun Context.getBlockedNumbers(): ArrayList<String> {
     val blockedNumbers = ArrayList<String>()
     if (!isAlreadyDefaultDialer(this)) {
@@ -884,7 +565,6 @@ fun Context.getBlockedNumbers(): ArrayList<String> {
     )
 
     queryCursor(uri, projection) { cursor ->
-//        val id = cursor.getLongValue(BlockedNumbers.COLUMN_ID)
         val number = cursor.getStringValue(BlockedNumbers.COLUMN_ORIGINAL_NUMBER) ?: ""
         val normalizedNumber = cursor.getStringValue(BlockedNumbers.COLUMN_E164_NUMBER) ?: number
         val comparableNumber = normalizedNumber.trimToComparableNumber()
@@ -892,22 +572,6 @@ fun Context.getBlockedNumbers(): ArrayList<String> {
     }
 
     return blockedNumbers
-}
-
-// checks if string is a phone number
-fun String.isPhoneNumber(): Boolean {
-    return this.matches("^[0-9+\\-\\)\\( *#]+\$".toRegex())
-}
-
-// if we are comparing phone numbers, compare just the last 9 digits
-fun String.trimToComparableNumber(): String {
-    // don't trim if it's not a phone number
-    if (!this.isPhoneNumber()) {
-        return this
-    }
-    val normalizedNumber = normalizePhoneNumber(this)
-    val startIndex = 0.coerceAtLeast(normalizedNumber.length - 9)
-    return normalizedNumber.substring(startIndex)
 }
 
 fun Context.queryCursor(
@@ -939,17 +603,6 @@ fun Cursor.getLongValue(key: String) = getLong(getColumnIndexOrThrow(key))
 
 fun Cursor.getStringValue(key: String) = getString(getColumnIndexOrThrow(key))
 
-fun Context.isPackageInstalled(packageName: String?): Boolean {
-    if (packageName == null) return false
-    return try {
-        val packageManager = packageManager
-        val intent = packageManager.getLaunchIntentForPackage(packageName)
-        intent != null && packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).isNotEmpty()
-    } catch (e: Exception) {
-        false
-    }
-}
-
 @Composable
 fun HtmlTextView(
     html: String,
@@ -959,7 +612,8 @@ fun HtmlTextView(
     AndroidView(
         factory = { context ->
             TextView(context).apply {
-                text = Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT)
+                @Suppress("DEPRECATION")
+                text = Html.fromHtml(html)
                 gravity = Gravity.CENTER
                 textAlignment = android.view.View.TEXT_ALIGNMENT_CENTER
                 setTextColor(textColor)
@@ -967,7 +621,8 @@ fun HtmlTextView(
         },
         modifier = modifier,
         update = { view ->
-            view.text = Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT)
+            @Suppress("DEPRECATION")
+            view.text = Html.fromHtml(html)
             view.gravity = Gravity.CENTER
             view.textAlignment = android.view.View.TEXT_ALIGNMENT_CENTER
             view.setTextColor(textColor)
