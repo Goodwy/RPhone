@@ -146,6 +146,8 @@
     <string name="dialpad_animations_subtitle">Show animations when typing digits</string>
     <string name="hide_voice_search">Hide voice search</string>
     <string name="hide_voice_search_subtitle">Hides the voice search button</string>
+    <string name="swipe_to_call">Swipe to call and message</string>
+    <string name="swipe_to_call_subtitle">Swipe right to call, left to message in recents</string>
 
     <string name="сaller_ui">Caller UI</string>
     <string name="сaller_ui_subtitle">Customize the in-call screen layout and controls</string>

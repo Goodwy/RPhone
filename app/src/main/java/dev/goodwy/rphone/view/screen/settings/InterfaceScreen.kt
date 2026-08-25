@@ -136,6 +136,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
     var incomingCallUI      by remember(settingsState) { mutableStateOf(prefs.getInt(PreferenceManager.KEY_INCOMING_CALL_UI_MODE, 10)) }
     var scrollAnimation     by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SCROLL_ANIMATION, false)) }
     var dialpadAnimation    by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_DIALPAD_ANIMATION, true)) }
+    var swipeToCall         by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SWIPE_TO_CALL, true)) }
     var hideVoiceSearch    by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_HIDE_VOICE_SEARCH, false)) }
     var liquidGlass         by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_LIQUID_GLASS, false)) }
     var blurEffects         by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_BLUR_EFFECTS, false)) }
@@ -831,6 +832,18 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                     iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
                                     trailingIcon = Icons.Default.ChevronRight,
                                     onClick = { navigator.navigate(CallerUIScreenDestination) }
+                                )
+                                RillSwitchListItem(
+                                    headline = stringResource(R.string.swipe_to_call),
+                                    supporting = stringResource(R.string.swipe_to_call_subtitle),
+                                    leadingIcon = Icons.Default.SwapHoriz,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
+                                    checked = swipeToCall,
+                                    onCheckedChange = {
+                                        swipeToCall = it
+                                        prefs.setBoolean(PreferenceManager.KEY_SWIPE_TO_CALL, it)
+                                    }
                                 )
 //                                RillListItem(
 //                                    headline = "Calls Section Elements",
