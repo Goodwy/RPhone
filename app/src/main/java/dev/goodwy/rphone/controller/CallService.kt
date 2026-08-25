@@ -8,6 +8,7 @@ import android.app.Person
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.provider.BlockedNumberContract
@@ -21,6 +22,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.net.toUri
+import dev.goodwy.rphone.MainActivity
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.data.manager.CallStateManager
@@ -46,7 +48,7 @@ data class CallSession(
 
 class CallService : InCallService() {
 
-//    private val contactsRepository: IContactsRepository by inject()
+    private val contactsRepository: IContactsRepository by inject()
     private val preferenceManager: PreferenceManager by inject()
     private val callStateManager: CallStateManager by inject()
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
@@ -282,14 +284,14 @@ class CallService : InCallService() {
         }
 
         // Need to create a Receiver (android.telecom.action.SHOW_MISSED_CALLS_NOTIFICATION) to prevent the system notification from being duplicated
-//        val wasNeverConnected = call.details.connectTimeMillis == 0L
-//        val isIncoming = call.details.callDirection == Call.Details.DIRECTION_INCOMING
-//
-//        if (isIncoming && wasNeverConnected && (cause?.code == DisconnectCause.MISSED || cause?.code == DisconnectCause.REMOTE || cause?.code == DisconnectCause.REJECTED)) {
-//            if (!isNumberBlocked(number) || preferenceManager.getInt(PreferenceManager.KEY_BLOCK_LOG_VISIBILITY, 0) == 1) {
-//                showMissedCallNotification(call)
-//            }
-//        }
+        val wasNeverConnected = call.details.connectTimeMillis == 0L
+        val isIncoming = call.details.callDirection == Call.Details.DIRECTION_INCOMING
+
+        if (isIncoming && wasNeverConnected && (cause?.code == DisconnectCause.MISSED || cause?.code == DisconnectCause.REMOTE || cause?.code == DisconnectCause.REJECTED)) {
+            if (!isNumberBlocked(number) || preferenceManager.getInt(PreferenceManager.KEY_BLOCK_LOG_VISIBILITY, 0) == 1) {
+                showMissedCallNotification(call)
+            }
+        }
     }
 
     private fun isNumberBlocked(number: String): Boolean {
@@ -330,68 +332,81 @@ class CallService : InCallService() {
         notificationManager.notify(number.hashCode(), builder.build())
     }
 
-//    private fun showMissedCallNotification(call: Call) {
-//        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-//
-//        val channel = NotificationChannel(
-//            MISSED_CHANNEL_ID,
-//            getString(R.string.notif_channel_missed_calls),
-//            NotificationManager.IMPORTANCE_DEFAULT
-//        ).apply {
-//            lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-//            enableVibration(true)
-//            setShowBadge(true)
-//        }
-//        notificationManager.createNotificationChannel(channel)
-//
-//        val handle = call.details.handle
-//        val number = handle?.schemeSpecificPart ?: ""
-//
-//        val contact = if (number.isNotEmpty()) {
-//            try {
-//                contactsRepository.getContactByNumber(number)
-//            } catch (e: Exception) { null }
-//        } else null
-//
-//        val contactName = contact?.name ?: number.ifEmpty { getString(R.string.label_unknown_number) }
-//        val contactPhoto = getContactBitmap(contact?.photoUri)
-//
-//        val telecomManager = getSystemService(Context.TELECOM_SERVICE) as TelecomManager
-//        val simLabel = call.details.accountHandle?.let {
-//            try { telecomManager.getPhoneAccount(it)?.label?.toString() } catch (e: SecurityException) { null }
-//        }
-//
-//        val intent = Intent(this, MainActivity::class.java).apply {
-//            action = "com.grinch.rivo4.ACTION_VIEW_RECENTS"
-//            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-//        }
-//        val pendingIntent = PendingIntent.getActivity(this, 10, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-//
-//        val timeString = android.text.format.DateFormat.getTimeFormat(this).format(java.util.Date())
-//
-//        val missedCallText = buildString {
-//            append(getString(R.string.notif_missed_call_text, contactName, timeString))
-//            if (simLabel != null) {
-//                append(" ")
-//                append(getString(R.string.notif_via_sim, simLabel))
-//            }
-//        }
-//
-//        val builder = NotificationCompat.Builder(this,
-//            MISSED_CHANNEL_ID
-//        )
-//            .setSmallIcon(android.R.drawable.sym_call_missed)
-//            .setContentTitle(getString(R.string.notif_missed_call_title))
-//            .setContentText(missedCallText)
-//            .setLargeIcon(contactPhoto)
-//            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-//            .setCategory(NotificationCompat.CATEGORY_MESSAGE)
-//            .setContentIntent(pendingIntent)
-//            .setAutoCancel(true)
-//            .setColor(Color.RED)
-//
-//        notificationManager.notify(number.hashCode(), builder.build())
-//    }
+    private fun showMissedCallNotification(call: Call) {
+        val details = call.details
+        val handle = details.handle
+        val number = handle?.schemeSpecificPart ?: ""
+        val accountHandle = details.accountHandle
+
+        serviceScope.launch {
+            val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+
+            val channel = NotificationChannel(
+                MISSED_CHANNEL_ID,
+                getString(R.string.notif_channel_missed_calls),
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                enableVibration(true)
+                setShowBadge(true)
+            }
+            notificationManager.createNotificationChannel(channel)
+
+            val contact = if (number.isNotEmpty()) {
+                try {
+                    contactsRepository.getContactByNumber(number)
+                } catch (e: Exception) {
+                    null
+                }
+            } else null
+
+            val contactName = contact?.displayName ?: number.ifEmpty { getString(R.string.label_unknown_number) }
+            val contactPhoto = getContactBitmap(contact?.photoUri)
+
+            val telecomManager = getSystemService(TELECOM_SERVICE) as TelecomManager
+            val simLabel = accountHandle?.let {
+                try {
+                    telecomManager.getPhoneAccount(it)?.label?.toString()
+                } catch (e: SecurityException) {
+                    null
+                }
+            }
+
+            val intent = Intent(this@CallService, MainActivity::class.java).apply {
+                action = "dev.goodwy.rphone.ACTION_VIEW_RECENTS"
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+            val pendingIntent = PendingIntent.getActivity(
+                this@CallService,
+                10,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val timeString = android.text.format.DateFormat.getTimeFormat(this@CallService).format(java.util.Date())
+
+            val missedCallText = buildString {
+                append(getString(R.string.notif_missed_call_text, contactName, timeString))
+                if (simLabel != null) {
+                    append(" ")
+                    append(getString(R.string.notif_via_sim, simLabel))
+                }
+            }
+
+            val builder = NotificationCompat.Builder(this@CallService, MISSED_CHANNEL_ID)
+                .setSmallIcon(android.R.drawable.sym_call_missed)
+                .setContentTitle(getString(R.string.notif_missed_call_title))
+                .setContentText(missedCallText)
+                .setLargeIcon(contactPhoto)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+                .setColor(Color.RED)
+
+            notificationManager.notify(number.hashCode(), builder.build())
+        }
+    }
 
     private fun updateCallState() {
         val calls = calls ?: emptyList()

@@ -281,6 +281,14 @@
                 android:resource="@xml/recent_calls_widget_info" />
         </receiver>
 
+        <receiver
+            android:name=".controller.MissedCallReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.telecom.action.SHOW_MISSED_CALLS_NOTIFICATION" />
+            </intent-filter>
+        </receiver>
+
         <service
             android:name=".widget.RecentCallsWidgetService"
             android:exported="false"
