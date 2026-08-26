@@ -34,6 +34,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -607,6 +608,7 @@ fun CallLogFullContent(
         var showSimPicker by remember { mutableStateOf(false) }
         var pendingNumber by remember { mutableStateOf<String?>(null) }
         val simPref = remember(settingsState) { prefs.getInt(PreferenceManager.KEY_DEFAULT_SIM, prefs.getDefaultSimIndexDefault()) }
+        val swipeToCallEnabled by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SWIPE_TO_CALL, true)) }
 
         // Track previous filter index for slide direction
         val filterEntries = CallLogFilter.entries
@@ -916,61 +918,104 @@ fun CallLogFullContent(
                                     val selectionMode = selectedEntries.isNotEmpty()
                                     RillScrollAnimatedItem(delayMs = (index.coerceAtMost(5) * 30).toLong()) {
                                         Box(modifier = Modifier.padding(horizontal = 16.dp)) {
-                                            Surface(
+                                            SwipeableCallLogContainer(
+                                                enabled = swipeToCallEnabled && !selectionMode,
+                                                onSwipeRight = {
+                                                    placeCallWithSimPreference(context, lg.number, simPref) {
+                                                        pendingNumber = lg.number; showSimPicker = true
+                                                    }
+                                                },
+                                                onSwipeLeft = {
+                                                    val intent = Intent(Intent.ACTION_VIEW).apply {
+                                                        data = "sms:${lg.number}".toUri()
+                                                    }
+                                                    context.startActivity(intent)
+                                                },
                                                 shape = RoundedCornerShape(
                                                     topStart = if (isSelected) cardCornerBig else topStart,
                                                     topEnd = if (isSelected) cardCornerBig else topEnd,
                                                     bottomStart = if (isSelected) cardCornerBig else bottomStart,
                                                     bottomEnd = if (isSelected) cardCornerBig else bottomEnd
                                                 ),
-                                                color = MaterialTheme.colorScheme.surface,
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(bottom = bottomPadding)
+                                                modifier = Modifier.padding(bottom = bottomPadding)
                                             ) {
-                                                CallLogTile(
-                                                    log = lg,
-                                                    isSelected = isSelected,
-                                                    selectionMode = selectionMode,
-                                                    directCall = directCall,
-                                                    onTileClick = { log ->
-                                                        if (selectionMode) {
-                                                            onToggleSelection(log)
-                                                        } else {
-                                                            navigator.navigate(ContactDetailsScreenDestination(contactId = log.contactId ?: "null", phoneNumber = log.number))
-                                                        }
-                                                    },
-                                                    onLongClick = { log ->
-                                                        onToggleSelection(log)
-                                                    },
-                                                    onAvatarClick = { log ->
-                                                        if (log.contactId != null) {
-                                                            navigator.navigate(ContactDetailsScreenDestination(contactId = log.contactId, phoneNumber = log.number))
-                                                        } else {
-                                                            navigator.navigate(ContactEditScreenDestination(initialPhone = log.number))
-                                                        }
-                                                    },
-                                                    onCallClick = { log ->
-                                                        if (selectionMode) {
-                                                            onToggleSelection(log)
-                                                        } else {
-                                                            placeCallWithSimPreference(context, log.number, simPref) {
-                                                                pendingNumber = log.number; showSimPicker = true
+                                                Surface(
+                                                    shape = RoundedCornerShape(
+                                                        topStart = if (isSelected) cardCornerBig else topStart,
+                                                        topEnd = if (isSelected) cardCornerBig else topEnd,
+                                                        bottomStart = if (isSelected) cardCornerBig else bottomStart,
+                                                        bottomEnd = if (isSelected) cardCornerBig else bottomEnd
+                                                    ),
+                                                    color = MaterialTheme.colorScheme.surface,
+                                                    modifier = Modifier.fillMaxWidth()
+                                                ) {
+                                                    CallLogTile(
+                                                        log = lg,
+                                                        isSelected = isSelected,
+                                                        selectionMode = selectionMode,
+                                                        directCall = directCall,
+                                                        onTileClick = { log ->
+                                                            if (selectionMode) {
+                                                                onToggleSelection(log)
+                                                            } else {
+                                                                navigator.navigate(
+                                                                    ContactDetailsScreenDestination(
+                                                                        contactId = log.contactId
+                                                                            ?: "null",
+                                                                        phoneNumber = log.number
+                                                                    )
+                                                                )
                                                             }
-                                                        }
-                                                    },
-                                                    onDelete = { viewModel.refreshLogs() },
-                                                    onShowHistory = {
-                                                        val contactId = lg.contactId
-                                                        val phoneNumber = lg.number
+                                                        },
+                                                        onLongClick = { log ->
+                                                            onToggleSelection(log)
+                                                        },
+                                                        onAvatarClick = { log ->
+                                                            if (log.contactId != null) {
+                                                                navigator.navigate(
+                                                                    ContactDetailsScreenDestination(
+                                                                        contactId = log.contactId,
+                                                                        phoneNumber = log.number
+                                                                    )
+                                                                )
+                                                            } else {
+                                                                navigator.navigate(
+                                                                    ContactEditScreenDestination(
+                                                                        initialPhone = log.number
+                                                                    )
+                                                                )
+                                                            }
+                                                        },
+                                                        onCallClick = { log ->
+                                                            if (selectionMode) {
+                                                                onToggleSelection(log)
+                                                            } else {
+                                                                placeCallWithSimPreference(
+                                                                    context,
+                                                                    log.number,
+                                                                    simPref
+                                                                ) {
+                                                                    pendingNumber =
+                                                                        log.number; showSimPicker =
+                                                                    true
+                                                                }
+                                                            }
+                                                        },
+                                                        onDelete = { viewModel.refreshLogs() },
+                                                        onShowHistory = {
+                                                            val contactId = lg.contactId
+                                                            val phoneNumber = lg.number
 //                                                        navController.navigate("call_log_detail_screen?contactId=${contactId ?: "null"}&phoneNumber=${phoneNumber}")
-                                                        navigator.navigate(CallLogFullScreenDestination(
-                                                            contactId = contactId,
-                                                            phoneNumber = phoneNumber
-                                                        ))
-                                                    },
-                                                    showSimLabel = showSimLabel,
-                                                )
+                                                            navigator.navigate(
+                                                                CallLogFullScreenDestination(
+                                                                    contactId = contactId,
+                                                                    phoneNumber = phoneNumber
+                                                                )
+                                                            )
+                                                        },
+                                                        showSimLabel = showSimLabel,
+                                                    )
+                                                }
                                             }
                                         }
                                     }
