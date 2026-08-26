@@ -1,6 +1,10 @@
 package dev.goodwy.rphone
 
 import androidx.room.Room
+import dev.goodwy.rphone.modal.`interface`.ICallRepository
+import dev.goodwy.rphone.modal.repository.CallRepositoryImpl
+import dev.goodwy.rphone.controller.MainViewModel
+import dev.goodwy.rphone.controller.CallNotificationManager
 import dev.goodwy.rphone.controller.CallLogViewModel
 import dev.goodwy.rphone.controller.ContactsViewModel
 import dev.goodwy.rphone.controller.PlayStoreViewModel
@@ -45,10 +49,13 @@ val appModule = module {
     single<ICallerRepository> { CallerRepositoryImpl(get()) }
     single { GetCallerNameUseCase(get()) }
     single { CallStateManager(get()) }
+    single { CallNotificationManager(androidContext(), get()) }
+    single<ICallRepository> { CallRepositoryImpl() }
 
     viewModel { ContactsViewModel(androidApplication(), get(), get()) }
     viewModel { CallLogViewModel(androidApplication(), get(), androidContext().contentResolver, get()) }
-    viewModel { CallViewModel(get()) }
+    viewModel { CallViewModel(get(), get()) }
+    viewModel { MainViewModel(get()) }
     single<PurchaseHelper> {
         PlayStoreViewModel(androidApplication(), get())
     }

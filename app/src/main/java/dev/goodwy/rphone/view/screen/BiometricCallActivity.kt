@@ -24,7 +24,8 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.CallActivity
-import dev.goodwy.rphone.controller.CallService
+import dev.goodwy.rphone.controller.CallViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.view.screen.settings.PasswordDialogContent
 import dev.goodwy.rphone.view.screen.settings.PinDialogContent
@@ -34,6 +35,7 @@ import org.koin.android.ext.android.inject
 class BiometricCallActivity : FragmentActivity() {
 
     private val prefs: PreferenceManager by inject()
+    private val callViewModel: CallViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,10 +55,10 @@ class BiometricCallActivity : FragmentActivity() {
         val biometricType = prefs.getString(PreferenceManager.KEY_BIOMETRICS_TYPE, "") ?: ""
 
         // Verify we should actually gate this specific call
-        val callPhoneNumber = CallService.currentCallSession.value?.call?.details?.handle?.schemeSpecificPart
+        val callPhoneNumber = callViewModel.currentCallSession.value?.call?.details?.handle?.schemeSpecificPart
         if (!prefs.shouldGateCallWithBiometric(callPhoneNumber) || biometricType.isEmpty()) {
             // Lock scope excludes this number — perform action directly
-            val call = CallService.currentCallSession.value?.call
+            val call = callViewModel.currentCallSession.value?.call
             when (action) {
                 "ANSWER" -> {
                     try { call?.answer(VideoProfile.STATE_AUDIO_ONLY) } catch (_: Exception) {}
@@ -74,7 +76,7 @@ class BiometricCallActivity : FragmentActivity() {
         setContent {
             Rill4Theme {
                 val activity = this
-                val call = CallService.currentCallSession.collectAsStateWithLifecycle().value?.call
+                val call = callViewModel.currentCallSession.collectAsStateWithLifecycle().value?.call
                 if (call != null) BiometricFloatingUi(
                     biometricType  = biometricType,
                     activity       = activity,
