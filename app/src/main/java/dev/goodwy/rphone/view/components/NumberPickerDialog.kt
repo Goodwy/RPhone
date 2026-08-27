@@ -5,119 +5,85 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.rounded.Call
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import dev.goodwy.rphone.R
-import dev.goodwy.rphone.cardCornerBig
 import dev.goodwy.rphone.cardCornerMedium
 import dev.goodwy.rphone.cardCornerSmall
+import dev.goodwy.rphone.view.theme.MyColors.cardColor
 
 @Composable
 fun NumberPickerDialog(
     numbers: List<String>,
     onDismissRequest: () -> Unit,
-    onNumberSelected: (String) -> Unit
+    onNumberSelected: (String) -> Unit,
+    icon: ImageVector = Icons.Rounded.Call
 ) {
-    Dialog(
+    RillDialog(
         onDismissRequest = onDismissRequest,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        title = stringResource(R.string.select),
+        icon = Icons.Rounded.Check,
+        confirmButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
     ) {
-        Surface(
+        RillExpressiveCard(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .wrapContentHeight()
-                .padding(top = 100.dp),
-            shape = RoundedCornerShape(32.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerLow
+                .heightIn(max = 600.dp),
+            shape = RoundedCornerShape(cardCornerMedium)
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 8.dp)
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    text = stringResource(R.string.select),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 24.dp)
-                )
-
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    itemsIndexed(
-                        items = numbers,
-                        contentType = { _, _ -> "number" }
-                    ) { index, number ->
-                        val isOnly   = numbers.size == 1
-                        val isFirst  = index == 0
-                        val isLast   = index == numbers.lastIndex
-
-                        val shape = when {
-                            isOnly  -> RoundedCornerShape(cardCornerBig)
-                            isFirst -> RoundedCornerShape(
-                                topStart = cardCornerMedium, topEnd = cardCornerMedium,
-                                bottomStart = cardCornerSmall, bottomEnd = cardCornerSmall
-                            )
-                            isLast  -> RoundedCornerShape(
-                                topStart = cardCornerSmall, topEnd = cardCornerSmall,
-                                bottomStart = cardCornerMedium, bottomEnd = cardCornerMedium
-                            )
-                            else    -> RoundedCornerShape(cardCornerSmall)
-                        }
-
-                        Surface(
-                            onClick = { onNumberSelected(number) },
-                            shape = shape,
-                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                            modifier = Modifier.fillMaxWidth()
+                itemsIndexed(
+                    items = numbers,
+                    contentType = { _, _ -> "number" }
+                ) { _, number ->
+                    Surface(
+                        onClick = { onNumberSelected(number) },
+                        shape = RoundedCornerShape(cardCornerSmall),
+                        color = cardColor,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                            Surface(
+                                modifier = Modifier.size(42.dp),
+                                shape = RoundedCornerShape(50),
+                                color = MaterialTheme.colorScheme.secondaryContainer
                             ) {
-                                Surface(
-                                    modifier = Modifier.size(48.dp),
-                                    shape = RoundedCornerShape(12.dp),
-                                    color = MaterialTheme.colorScheme.primaryContainer
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Icon(
-                                            Icons.Default.Phone,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.onPrimaryContainer
-                                        )
-                                    }
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        icon,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSecondaryContainer
+                                    )
                                 }
-
-                                Spacer(modifier = Modifier.width(16.dp))
-
-                                Text(
-                                    text = number,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.SemiBold
-                                )
                             }
+
+                            Spacer(modifier = Modifier.width(16.dp))
+
+                            Text(
+                                text = number,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
                         }
                     }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                TextButton(
-                    onClick = onDismissRequest,
-                    modifier = Modifier.align(Alignment.End)
-                ) {
-                    Text(stringResource(R.string.cancel))
                 }
             }
         }

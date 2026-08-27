@@ -12,7 +12,7 @@ class CallViewModel(
     private val callRepository: ICallRepository,
     private val callStateManager: CallStateManager
 ) : ViewModel() {
-    
+
     val currentCallSession: StateFlow<CallSession?> = callRepository.currentCallSession
     val allCalls: StateFlow<List<Call>> = callRepository.allCalls
     val audioState = callRepository.audioState

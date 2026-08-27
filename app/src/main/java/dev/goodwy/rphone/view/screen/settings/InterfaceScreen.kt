@@ -56,6 +56,7 @@ import androidx.compose.material.icons.rounded.MicNone
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.PhoneInTalk
+import androidx.compose.material.icons.rounded.Swipe
 import androidx.compose.material.icons.rounded._123
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -834,9 +835,9 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                     onClick = { navigator.navigate(CallerUIScreenDestination) }
                                 )
                                 RillSwitchListItem(
-                                    headline = stringResource(R.string.swipe_to_call),
-                                    supporting = stringResource(R.string.swipe_to_call_subtitle),
-                                    leadingIcon = Icons.Default.SwapHoriz,
+                                    headline = stringResource(R.string.swipe_actions),
+                                    supporting = stringResource(R.string.swipe_actions_subtitle),
+                                    leadingIcon = Icons.Rounded.Swipe,
                                     iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
                                     iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
                                     checked = swipeToCall,

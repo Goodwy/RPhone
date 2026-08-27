@@ -6,7 +6,6 @@ import android.content.res.Configuration
 import dev.goodwy.rphone.view.theme.TabTransitionStyle
 import android.content.Context
 import android.content.Intent
-import android.provider.CallLog
 import android.telecom.TelecomManager
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
@@ -34,7 +33,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -56,9 +54,8 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import android.os.Build
-import androidx.compose.foundation.clickable
+import android.provider.CallLog
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import dev.goodwy.rphone.bottomBarHeight
 import dev.goodwy.rphone.cardCornerBig
 import dev.goodwy.rphone.cardCornerSmall
@@ -71,12 +68,19 @@ import dev.goodwy.rphone.liquidglass.LocalLiquidGlassBackdrop
 import org.koin.compose.viewmodel.koinActivityViewModel
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.core.net.toUri
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.ContactsViewModel
@@ -84,8 +88,12 @@ import dev.goodwy.rphone.modal.data.CallLogEntry
 import dev.goodwy.rphone.modal.data.Contact
 import com.ramcosta.composedestinations.generated.destinations.CallLogFullScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.SettingsScreenDestination
+import dev.goodwy.rphone.controller.CallNotificationManager
+import dev.goodwy.rphone.controller.CallService
 import dev.goodwy.rphone.controller.util.BlockedNumbersManager
 import dev.goodwy.rphone.controller.util.hasDualSim
+import dev.goodwy.rphone.controller.util.toast
+import dev.goodwy.rphone.view.theme.customColors
 import kotlin.collections.component1
 import kotlin.collections.component2
 
@@ -104,6 +112,7 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
         }
     }
 
+    val notificationManager = koinInject<CallNotificationManager>()
     val prefs = koinInject<PreferenceManager>()
     val pillNav = remember { prefs.getBoolean(PreferenceManager.KEY_PILL_NAV, false) }
     val favoritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, false)
@@ -127,10 +136,33 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
         selectedEntries = emptySet()
     }
 
-    LaunchedEffect(Unit) {
-        fabVisible = true
-        if (prefs.getBoolean(PreferenceManager.KEY_OPEN_DIALPAD_DEFAULT, false)) {
-            showDialpad = true
+//    LaunchedEffect(Unit) {
+//        fabVisible = true
+//        if (prefs.getBoolean(PreferenceManager.KEY_OPEN_DIALPAD_DEFAULT, false)) {
+//            showDialpad = true
+//        }
+//
+//        CallService.clearAllMissedCallNotifications(context)
+//    }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                // It triggers when the window is first opened, when it is restored from minimised state,
+                // and when it is restored from another screen
+                fabVisible = true
+                if (prefs.getBoolean(PreferenceManager.KEY_OPEN_DIALPAD_DEFAULT, false)) {
+                    showDialpad = true
+                }
+
+                notificationManager.clearAllMissedCallNotifications(context)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 
@@ -176,24 +208,24 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
         }
     }
 
-    var childHScrolling by remember { mutableStateOf(false) }
-    val nestedScrollConnection = remember {
-        object : NestedScrollConnection {
-            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                // A child LazyRow is consuming horizontal scroll – block our swipe nav
-                if (kotlin.math.abs(available.x) > kotlin.math.abs(available.y)) {
-                    childHScrolling = true
-                }
-                return Offset.Zero
-            }
-        }
-    }
+//    var childHScrolling by remember { mutableStateOf(false) }
+//    val nestedScrollConnection = remember {
+//        object : NestedScrollConnection {
+//            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+//                // A child LazyRow is consuming horizontal scroll – block our swipe nav
+//                if (kotlin.math.abs(available.x) > kotlin.math.abs(available.y)) {
+//                    childHScrolling = true
+//                }
+//                return Offset.Zero
+//            }
+//        }
+//    }
 
     val showBottomBar = favoritesEnabled || contactsEnabled || dialpadEnabled ||notesEnabled || searchEnabled || settingsEnabled
     Scaffold(
         modifier = Modifier
-            .fillMaxSize()
-            .nestedScroll(nestedScrollConnection),
+            .fillMaxSize(),
+//            .nestedScroll(nestedScrollConnection),
 //            .pointerInput(Unit) {
 //                // Use PointerEventPass.Final so children (LazyColumn) get events first.
 //                // Only trigger navigation when the horizontal movement clearly dominates
@@ -340,7 +372,6 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
                                 selectedEntries = emptySet()
                             },
                             onClearAll = {
-//                            viewModel.clearCallLogs()
                                 // We delete only the filtered recent ones
                                 val filteredIdsToDelete = filteredLogs.flatMap { it.ids }
                                 viewModel.deleteCallLogsByIds(filteredIdsToDelete)
@@ -552,6 +583,7 @@ fun CallLogFullContent(
     val prefs = koinInject<PreferenceManager>()
     val favouritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, false)
     val contactsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS, true)
+    var pendingDeleteIds by remember { mutableStateOf<List<Long>>(emptyList()) }
 
     if (isGranted) {
         val viewModel: CallLogViewModel = koinActivityViewModel()
@@ -931,12 +963,9 @@ fun CallLogFullContent(
                                                     }
                                                     context.startActivity(intent)
                                                 },
-                                                shape = RoundedCornerShape(
-                                                    topStart = if (isSelected) cardCornerBig else topStart,
-                                                    topEnd = if (isSelected) cardCornerBig else topEnd,
-                                                    bottomStart = if (isSelected) cardCornerBig else bottomStart,
-                                                    bottomEnd = if (isSelected) cardCornerBig else bottomEnd
-                                                ),
+                                                onDelete = {
+                                                    pendingDeleteIds = lg.ids
+                                                },
                                                 modifier = Modifier.padding(bottom = bottomPadding)
                                             ) {
                                                 Surface(
@@ -1001,11 +1030,12 @@ fun CallLogFullContent(
                                                                 }
                                                             }
                                                         },
-                                                        onDelete = { viewModel.refreshLogs() },
+                                                        onDelete = {
+                                                            pendingDeleteIds = lg.ids
+                                                        },
                                                         onShowHistory = {
                                                             val contactId = lg.contactId
                                                             val phoneNumber = lg.number
-//                                                        navController.navigate("call_log_detail_screen?contactId=${contactId ?: "null"}&phoneNumber=${phoneNumber}")
                                                             navigator.navigate(
                                                                 CallLogFullScreenDestination(
                                                                     contactId = contactId,
@@ -1025,6 +1055,38 @@ fun CallLogFullContent(
                         }
                     }
                 }
+            }
+        }
+
+        // Delete confirmation dialog
+        if (pendingDeleteIds.isNotEmpty()) {
+            RillDialog(
+                onDismissRequest = { pendingDeleteIds = emptyList() },
+                title = stringResource(R.string.delete_call_logs),
+                icon = ImageVector.vectorResource(id = R.drawable.ic_delete),
+                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
+                confirmButton = {
+                    TextButton(onClick = {
+                        viewModel.deleteCallLogsByIds(pendingDeleteIds)
+                        pendingDeleteIds = emptyList()
+                    }) {
+                        Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { pendingDeleteIds = emptyList() }) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                }
+            ) {
+                Text(
+                    stringResource(R.string.delete_call_logs_selected, pendingDeleteIds.size),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     } else {

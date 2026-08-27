@@ -49,6 +49,7 @@
     <string name="call_query">Appeler %s</string>
     <string name="voice_input">Saisie vocale</string>
     <string name="filter_results">Filtrer les résultats</string>
+    <string name="lookup">Rechercher</string>
 
     <!-- Billing -->
     <string name="no_connection">Pas de connexion</string>
@@ -142,6 +143,8 @@
     <string name="dialpad_animations_subtitle">Afficher les animations lors de la saisie des chiffres</string>
     <string name="hide_voice_search">Masquer la recherche vocale</string>
     <string name="hide_voice_search_subtitle">Masque le bouton de recherche vocale</string>
+    <string name="swipe_actions">Actions par balayage</string>
+    <string name="swipe_actions_subtitle">Balayez sur une entrée du journal d\'appels récents pour la supprimer, envoyer un SMS ou passer un appel</string>
 
     <string name="avatars_settings">Paramètres des avatars</string>
     <string name="avatars_settings_subtitle">Personnaliser les couleurs, les cadres et plus</string>
@@ -395,6 +398,12 @@
     <string name="settings_call_default_background_set">Une image personnalisée est affichée pour chaque appel</string>
     <string name="settings_call_default_background_none">Non défini — les appels utilisent le thème de l\'application</string>
 
+    <!-- Shortcuts -->
+    <string name="add_to_home_screen">Ajouter à l\'écran d\'accueil</string>
+    <string name="shortcut_view_contact_subtitle">Le raccourci ouvre la page d\'infos de ce contact</string>
+    <string name="shortcut_call_subtitle">Le raccourci appelle ce contact immédiatement</string>
+    <string name="shortcut_save_number">Enregistrez d\'abord ce numéro dans vos contacts</string>
+
     <!-- Contacts -->
     <string name="contacts">Contacts</string>
     <string name="view_contact">Voir le contact</string>
@@ -546,4 +555,5 @@
     <string name="notif_missed_call_text">Appel manqué de %1$s à %2$s</string>
     <string name="notif_via_sim">via %1$s</string>
     <string name="notif_active_call">Appel actif</string>
+    <string name="notif_call_back">Rappeler</string>
 </resources>

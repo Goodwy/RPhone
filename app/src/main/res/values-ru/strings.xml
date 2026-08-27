@@ -49,6 +49,7 @@
     <string name="call_query">Позвонить %s</string>
     <string name="voice_input">Голосовой ввод</string>
     <string name="filter_results">Фильтр результата</string>
+    <string name="lookup">Поиск по номеру</string>
 
     <!-- Billing -->
     <string name="no_connection">Нет связи</string>
@@ -99,7 +100,7 @@
     <string name="privacy_policy">Политика конфиденциальности</string>
 
     <!-- Contributors -->
-    <string name="contributors">Авторы</string>
+    <string name="contributors">Участники</string>
     <string name="development_team">Команда разработчиков</string>
     <string name="apps_that_inspired_us">Приложения, которыми мы вдохновлялись</string>
 
@@ -142,6 +143,8 @@
     <string name="dialpad_animations_subtitle">Показывать анимацию появления цифр при наборе номера</string>
     <string name="hide_voice_search">Скрыть голосовой поиск</string>
     <string name="hide_voice_search_subtitle">Скрывает кнопку голосового поиска</string>
+    <string name="swipe_actions">Действия смахиванием</string>
+    <string name="swipe_actions_subtitle">Смахивайте по записи в журнале звонков, чтобы удалить её, отправить SMS или позвонить</string>
 
     <string name="avatars_settings">Настройки аватаров</string>
     <string name="avatars_settings_subtitle">Настройка цветов, рамок и других параметров</string>
@@ -306,7 +309,7 @@
 
     <string name="unmerging_contacts">Разделить контакты</string>
     <string name="unmerging_contacts_subtitle">Поиск и разделение объединенных контактов</string>
-    <string name="unmerging_contacts_description">Контактные данные получены из нескольких источников. Выберите один из них для редактирования или отвяжите все, чтобы они стали отдельными контактами.</string>
+    <string name="unmerging_contacts_description">Контактные данные получены из нескольких источников. Выберите один из них для редактирования или разделите, чтобы они стали отдельными контактами.</string>
     <string name="no_merged_contacts_found">Объединенных контактов не найдено</string>
     <string name="merged_from_sources">Объединено из %s источников</string>
     <string name="unlink">Разделить</string>
@@ -396,6 +399,12 @@
     <string name="settings_call_default_background">Фон вызова по умолчанию</string>
     <string name="settings_call_default_background_set">При каждом звонке отображается индивидуальное изображение</string>
     <string name="settings_call_default_background_none">Не задано — при звонках используется тема приложения</string>
+
+    <!-- Shortcuts -->
+    <string name="add_to_home_screen">Добавить на главный экран</string>
+    <string name="shortcut_view_contact_subtitle">Ярлык для открытия информации о контакте</string>
+    <string name="shortcut_call_subtitle">Ярлык для мгновенного звонка контакту</string>
+    <string name="shortcut_save_number">Сначала сохраните этот номер в контактах</string>
 
     <!-- Contacts -->
     <string name="contacts">Контакты</string>
@@ -554,4 +563,5 @@
     <string name="notif_missed_call_text">Пропущенный вызов от %1$s в %2$s</string>
     <string name="notif_via_sim">через %1$s</string>
     <string name="notif_active_call">Активный вызов</string>
+    <string name="notif_call_back">Перезвонить</string>
 </resources>

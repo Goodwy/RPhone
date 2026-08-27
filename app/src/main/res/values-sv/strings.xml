@@ -49,6 +49,7 @@
     <string name="call_query">Ring %s</string>
     <string name="voice_input">Röstinmatning</string>
     <string name="filter_results">Filtrera resultat</string>
+    <string name="lookup">Slå upp</string>
 
     <!-- Billing -->
     <string name="no_connection">Ingen anslutning</string>
@@ -142,6 +143,8 @@
     <string name="dialpad_animations_subtitle">Visa animationer vid inmatning av siffror</string>
     <string name="hide_voice_search">Dölj röstsökning</string>
     <string name="hide_voice_search_subtitle">Döljer knappen för röstsökning</string>
+    <string name="swipe_actions">Svepåtgärder</string>
+    <string name="swipe_actions_subtitle">Svep på en senaste samtalsloggpost för att ta bort den, skicka ett SMS eller ringa</string>
 
     <string name="avatars_settings">Avatar-inställningar</string>
     <string name="avatars_settings_subtitle">Anpassa färger, ramar och mer</string>
@@ -395,6 +398,12 @@
     <string name="settings_call_default_background_set">En anpassad bild visas vid varje samtal</string>
     <string name="settings_call_default_background_none">Inte inställd — samtal använder apptemat</string>
 
+    <!-- Shortcuts -->
+    <string name="add_to_home_screen">Lägg till på startsidan</string>
+    <string name="shortcut_view_contact_subtitle">Genvägen öppnar den här kontakts informationssida</string>
+    <string name="shortcut_call_subtitle">Genvägen ringer den här kontakten direkt</string>
+    <string name="shortcut_save_number">Spara först detta nummer i dina kontakter</string>
+
     <!-- Contacts -->
     <string name="contacts">Kontakter</string>
     <string name="view_contact">Visa kontakt</string>
@@ -546,4 +555,5 @@
     <string name="notif_missed_call_text">Missat samtal från %1$s kl. %2$s</string>
     <string name="notif_via_sim">via %1$s</string>
     <string name="notif_active_call">Aktivt samtal</string>
+    <string name="notif_call_back">Ring upp</string>
 </resources>

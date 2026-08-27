@@ -13,11 +13,7 @@ import androidx.compose.foundation.interaction.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.StickyNote2
 import androidx.compose.material.icons.automirrored.rounded.ArrowRight
-import androidx.compose.material.icons.automirrored.rounded.VolumeDown
-import androidx.compose.material.icons.automirrored.rounded.VolumeUp
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -39,18 +35,15 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -66,7 +59,6 @@ import dev.goodwy.rphone.view.theme.color_call_button
 import dev.goodwy.rphone.view.theme.color_call_end
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
-import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -281,7 +273,7 @@ fun HorizontalSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit) {
     val handleWidthPx = with(density) { handleWidth.toPx() }
     val paddingHandle = with(density) { (trackHeight - handleHeight).toPx() }
     var trackWidthPx by remember { mutableFloatStateOf(0f) }
-    
+
     val maxDrag by remember(trackWidthPx, handleWidthPx, paddingHandle) {
         derivedStateOf {
             if (trackWidthPx > 0f) (trackWidthPx / 2f) - (handleWidthPx / 2f) - (paddingHandle) + with(density) { 1.dp.toPx() }
@@ -294,7 +286,7 @@ fun HorizontalSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit) {
     val dragNormal = remember { derivedStateOf { abs(dragProgress.value) } }
 
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
-    
+
     val handlePulseScale by infiniteTransition.animateFloat(
         initialValue = 1f,
         targetValue = 1.05f,
@@ -328,11 +320,11 @@ fun HorizontalSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit) {
     )
 
     val iconTint by animateColorAsState(
-        targetValue = if (dragNormal.value > 0.1f) Color.White 
-                     else Color.Black,
+        targetValue = if (dragNormal.value > 0.1f) Color.White
+        else Color.Black,
         label = "iconTint"
     )
-    
+
     val iconRotation by remember { derivedStateOf {
         dragProgress.value * 135f
     } }
@@ -430,7 +422,7 @@ fun HorizontalSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit) {
             contentAlignment = Alignment.Center
         ) {
             val icon = Icons.Rounded.Call
-            
+
             Crossfade(targetState = icon, animationSpec = tween(150), label = "icon") { targetIcon ->
                 Icon(
                     targetIcon,
@@ -457,7 +449,7 @@ fun VerticalSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit) {
     val triggerThreshold = maxDrag * 0.7f
 
     val dragProgress = remember { derivedStateOf { offsetY.value / maxDrag } }
-    
+
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
     val pulseScale by infiniteTransition.animateFloat(
         initialValue = 1f,
@@ -561,7 +553,7 @@ fun VerticalSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit) {
                 },
                 label = "bgColor"
             )
-            
+
             val iconTint by animateColorAsState(
                 targetValue = if (abs(offsetY.value) > 15f) Color.White else color_call_button,
                 label = "iconTint"
@@ -619,7 +611,7 @@ fun VerticalSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit) {
                 contentAlignment = Alignment.Center
             ) {
                 val icon = if (offsetY.value > 5f) Icons.Rounded.CallEnd else Icons.Rounded.Call
-                
+
                 Crossfade(targetState = icon, label = "icon") { targetIcon ->
                     Icon(
                         targetIcon,
@@ -640,16 +632,16 @@ fun IPhoneSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit, onMessage: 
     val density = LocalDensity.current
     val view = LocalView.current
     val isDark = isSystemInDarkTheme()
-    
+
     val trackWidth = 320.dp
     val trackHeight = 94.dp
     val handleSize = 78.dp
     val handlePadding = 8.dp
-    
+
     val trackWidthPx = with(density) { trackWidth.toPx() }
     val handleSizePx = with(density) { handleSize.toPx() }
     val handlePaddingPx = with(density) { handlePadding.toPx() }
-    
+
     val maxDrag = trackWidthPx - handleSizePx - (handlePaddingPx * 2)
 
     val trackBgColor = MaterialTheme.colorScheme.onSurface.copy(alpha = if (isDark) 0.15f else 0.1f)
@@ -699,12 +691,12 @@ fun IPhoneSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit, onMessage: 
                 }
                 Text(
                     stringResource(R.string.decline),
-                    style = MaterialTheme.typography.labelMedium, 
+                    style = MaterialTheme.typography.labelMedium,
                     color = buttonContentColor,
                     modifier = Modifier.padding(top = 8.dp)
                 )
             }
-            
+
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 IconButton(
                     onClick = onMessage,
@@ -723,7 +715,7 @@ fun IPhoneSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit, onMessage: 
                 }
                 Text(
                     stringResource(R.string.message),
-                    style = MaterialTheme.typography.labelMedium, 
+                    style = MaterialTheme.typography.labelMedium,
                     color = buttonContentColor,
                     modifier = Modifier.padding(top = 8.dp)
                 )
@@ -753,7 +745,7 @@ fun IPhoneSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit, onMessage: 
 
             val baseTextColor = MaterialTheme.colorScheme.onSurface
             val shimmerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-            
+
             val brush = Brush.linearGradient(
                 colors = listOf(shimmerColor, baseTextColor, shimmerColor),
                 start = Offset(trackWidthPx * shimmerOffset - 150f, 0f),

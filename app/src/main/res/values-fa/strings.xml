@@ -50,6 +50,7 @@
     <string name="call_query">تماس با %s</string>
     <string name="voice_input">ورودی صوتی</string>
     <string name="filter_results">فیلتر نتایج</string>
+    <string name="lookup">جستجو</string>
 
     <!-- Billing -->
     <string name="no_connection">بدون اتصال</string>
@@ -143,6 +144,8 @@
     <string name="dialpad_animations_subtitle">نمایش انیمیشن‌ها هنگام تایپ اعداد</string>
     <string name="hide_voice_search">پنهان کردن جستجوی صوتی</string>
     <string name="hide_voice_search_subtitle">دکمه جستجوی صوتی را پنهان می‌کند</string>
+    <string name="swipe_actions">اقدامات کشیدن</string>
+    <string name="swipe_actions_subtitle">برای حذف، ارسال پیامک یا برقراری تماس، روی یک ورودی لاگ تماس اخیر بکشید</string>
 
     <string name="avatars_settings">تنظیمات آواتار</string>
     <string name="avatars_settings_subtitle">سفارشی‌سازی رنگ‌ها، قاب‌ها و موارد بیشتر</string>
@@ -396,6 +399,12 @@
     <string name="settings_call_default_background_set">یک تصویر سفارشی در هر تماس نمایش داده می‌شود</string>
     <string name="settings_call_default_background_none">تنظیم نشده — تماس‌ها از تم برنامه استفاده می‌کنند</string>
 
+    <!-- Shortcuts -->
+    <string name="add_to_home_screen">افزودن به صفحه اصلی</string>
+    <string name="shortcut_view_contact_subtitle">میان‌بر صفحه اطلاعات این مخاطب را باز می‌کند</string>
+    <string name="shortcut_call_subtitle">میان‌بر بلافاصله با این مخاطب تماس می‌گیرد</string>
+    <string name="shortcut_save_number">ابتدا این شماره را در مخاطبان خود ذخیره کنید</string>
+
     <!-- Contacts -->
     <string name="contacts">مخاطبان</string>
     <string name="view_contact">مشاهده مخاطب</string>
@@ -547,4 +556,5 @@
     <string name="notif_missed_call_text">تماس از دست رفته از %1$s در %2$s</string>
     <string name="notif_via_sim">از طریق %1$s</string>
     <string name="notif_active_call">تماس فعال</string>
+    <string name="notif_call_back">بازگشت به تماس</string>
 </resources>

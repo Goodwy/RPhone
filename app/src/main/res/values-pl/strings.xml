@@ -49,6 +49,7 @@
     <string name="call_query">Zadzwoń do %s</string>
     <string name="voice_input">Wejście głosowe</string>
     <string name="filter_results">Filtruj wyniki</string>
+    <string name="lookup">Sprawdź</string>
 
     <!-- Billing -->
     <string name="no_connection">Brak połączenia</string>
@@ -142,6 +143,8 @@
     <string name="dialpad_animations_subtitle">Pokazuj animacje podczas wpisywania cyfr</string>
     <string name="hide_voice_search">Ukryj wyszukiwanie głosowe</string>
     <string name="hide_voice_search_subtitle">Ukrywa przycisk wyszukiwania głosowego</string>
+    <string name="swipe_actions">Akcje przesunięcia</string>
+    <string name="swipe_actions_subtitle">Przesuń po wpisie w dzienniku połączeń, aby go usunąć, wysłać SMS lub wykonać połączenie</string>
 
     <string name="avatars_settings">Ustawienia awatarów</string>
     <string name="avatars_settings_subtitle">Dostosowywanie kolorów, ramek i innych</string>
@@ -395,6 +398,12 @@
     <string name="settings_call_default_background_set">Niestandardowy obraz jest wyświetlany podczas każdego połączenia</string>
     <string name="settings_call_default_background_none">Nie ustawiono — połączenia używają motywu aplikacji</string>
 
+    <!-- Shortcuts -->
+    <string name="add_to_home_screen">Dodaj do ekranu głównego</string>
+    <string name="shortcut_view_contact_subtitle">Skrót otwiera stronę informacji o tym kontakcie</string>
+    <string name="shortcut_call_subtitle">Skrót natychmiast dzwoni do tego kontaktu</string>
+    <string name="shortcut_save_number">Najpierw zapisz ten numer w swoich kontaktach</string>
+
     <!-- Contacts -->
     <string name="contacts">Kontakty</string>
     <string name="view_contact">Wyświetl kontakt</string>
@@ -552,4 +561,5 @@
     <string name="notif_missed_call_text">Nieodebrane połączenie od %1$s o %2$s</string>
     <string name="notif_via_sim">przez %1$s</string>
     <string name="notif_active_call">Aktywne połączenie</string>
+    <string name="notif_call_back">Oddzwoń</string>
 </resources>

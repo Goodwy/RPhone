@@ -50,6 +50,7 @@
     <string name="call_query">התקשר ל-%s</string>
     <string name="voice_input">קלט קולי</string>
     <string name="filter_results">סנן תוצאות</string>
+    <string name="lookup">חיפוש</string>
 
     <!-- Billing -->
     <string name="no_connection">אין חיבור</string>
@@ -143,6 +144,8 @@
     <string name="dialpad_animations_subtitle">הצג אנימציות בעת הקלדת ספרות</string>
     <string name="hide_voice_search">הסתר חיפוש קולי</string>
     <string name="hide_voice_search_subtitle">מסתיר את כפתור החיפוש הקולי</string>
+    <string name="swipe_actions">פעולות החלקה</string>
+    <string name="swipe_actions_subtitle">החלק על רשומה ביומן השיחות האחרונות כדי למחוק אותה, לשלוח SMS או לבצע שיחה</string>
 
     <string name="avatars_settings">הגדרות אווטאר</string>
     <string name="avatars_settings_subtitle">התאמה אישית של צבעים, מסגרות ועוד</string>
@@ -396,6 +399,12 @@
     <string name="settings_call_default_background_set">תמונה מותאמת אישית מוצגת בכל שיחה</string>
     <string name="settings_call_default_background_none">לא הוגדר — שיחות משתמשות בערכת הנושא של האפליקציה</string>
 
+    <!-- Shortcuts -->
+    <string name="add_to_home_screen">הוסף למסך הבית</string>
+    <string name="shortcut_view_contact_subtitle">קיצור הדרך פותח את דף המידע של איש קשר זה</string>
+    <string name="shortcut_call_subtitle">קיצור הדרך מתקשר לאיש קשר זה מיד</string>
+    <string name="shortcut_save_number">שמור קודם מספר זה באנשי הקשר שלך</string>
+
     <!-- Contacts -->
     <string name="contacts">אנשי קשר</string>
     <string name="view_contact">הצג איש קשר</string>
@@ -550,4 +559,5 @@
     <string name="notif_missed_call_text">שיחה שהוחמצה מ-%1$s בשעה %2$s</string>
     <string name="notif_via_sim">דרך %1$s</string>
     <string name="notif_active_call">שיחה פעילה</string>
+    <string name="notif_call_back">התקשר בחזרה</string>
 </resources>

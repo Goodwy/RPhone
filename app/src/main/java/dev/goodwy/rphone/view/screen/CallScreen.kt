@@ -287,7 +287,7 @@ fun ExpressiveCallScreen(
                             if (contact != null) ocName = getDisplayName(contact, displayOrder)
                         }
                     }
-                    
+
                     Surface(
                         onClick = {
                             view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
@@ -373,7 +373,7 @@ fun ExpressiveCallScreen(
                             text = statusText,
                             style = MaterialTheme.typography.titleMedium,
                             color = if (callState == Call.STATE_HOLDING) MaterialTheme.colorScheme.tertiary
-                                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                            else MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -539,8 +539,8 @@ fun ExpressiveCallScreen(
                                             )
                                             MoreItem(
                                                 headline = if (otherCall != null) stringResource(R.string.swap)
-                                                            else if (callState == Call.STATE_HOLDING) stringResource(R.string.resume)
-                                                            else stringResource(R.string.hold),
+                                                else if (callState == Call.STATE_HOLDING) stringResource(R.string.resume)
+                                                else stringResource(R.string.hold),
                                                 leadingIcon = if (otherCall != null) Icons.Rounded.SwapCalls
                                                 else if (callState == Call.STATE_HOLDING) Icons.Rounded.PlayArrow
                                                 else Icons.Default.Pause,
@@ -648,17 +648,18 @@ fun ExpressiveCallScreen(
                                 else -> Icons.AutoMirrored.Rounded.VolumeDown
                             }
 
+                            val bluetoothLabel = stringResource(R.string.audio_route_bluetooth)
                             val audioLabel = when (audioRoute) {
                                 CallAudioState.ROUTE_SPEAKER -> stringResource(R.string.audio_route_speaker)
                                 CallAudioState.ROUTE_BLUETOOTH -> {
                                     try {
-                                        audioState?.activeBluetoothDevice?.name ?: "Bluetooth"
+                                        audioState?.activeBluetoothDevice?.name ?: bluetoothLabel
                                     } catch (e: SecurityException) {
-                                        "Bluetooth"
+                                        bluetoothLabel
                                     }
                                 }
-                                CallAudioState.ROUTE_WIRED_HEADSET -> "Earpiece"
-                                else -> "Handset"
+                                CallAudioState.ROUTE_WIRED_HEADSET -> stringResource(R.string.audio_route_headset)
+                                else -> stringResource(R.string.audio_route_handset)
                             }
                             AnimatedCallButton(
                                 modifier = Modifier.weight(1f),

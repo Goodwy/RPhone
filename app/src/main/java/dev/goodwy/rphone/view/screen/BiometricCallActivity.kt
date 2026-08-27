@@ -25,12 +25,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.CallActivity
 import dev.goodwy.rphone.controller.CallViewModel
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.view.screen.settings.PasswordDialogContent
 import dev.goodwy.rphone.view.screen.settings.PinDialogContent
 import dev.goodwy.rphone.view.theme.Rill4Theme
 import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class BiometricCallActivity : FragmentActivity() {
 
@@ -40,16 +40,8 @@ class BiometricCallActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-            setShowWhenLocked(true)
-            setTurnScreenOn(true)
-        } else {
-            @Suppress("DEPRECATION")
-            window.addFlags(
-                android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                android.view.WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
-            )
-        }
+        setShowWhenLocked(true)
+        setTurnScreenOn(true)
 
         val action = intent?.getStringExtra("NOTIFICATION_PENDING_ACTION") ?: run { finish(); return }
         val biometricType = prefs.getString(PreferenceManager.KEY_BIOMETRICS_TYPE, "") ?: ""

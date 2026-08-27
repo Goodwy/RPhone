@@ -105,6 +105,7 @@ import dev.goodwy.rphone.controller.UssdRepository
 import dev.goodwy.rphone.controller.util.SocialUtils
 import dev.goodwy.rphone.controller.util.SocialUtils.getInstalledMessenger
 import dev.goodwy.rphone.controller.util.SocialUtils.messengerPackages
+import dev.goodwy.rphone.controller.util.forceLtr
 import dev.goodwy.rphone.modal.data.CallLogEntry
 import dev.goodwy.rphone.modal.data.Contact
 import dev.goodwy.rphone.modal.data.getDisplayName
@@ -831,8 +832,9 @@ fun DialPadContent(
                                         verticalArrangement = Arrangement.spacedBy(2.dp),
                                     ) {
                                         filteredSearchLogsResults.forEach { log ->
+                                            val displayName = if (log.name == log.number) log.number.forceLtr() else log.name?.ifEmpty { log.number } ?: log.number.ifEmpty { "Unknown" }
                                             SingleTile(
-                                                title = log.name ?: log.number,
+                                                title = displayName,
                                                 subtitle = if (log.name == log.number) null else log.number,
                                                 phoneNumber = log.number,
                                                 photoUri = log.photoUri,
@@ -1306,8 +1308,9 @@ fun DialPadContent(
                                             verticalArrangement = Arrangement.spacedBy(2.dp),
                                         ) {
                                             filteredSearchLogsResults.forEach { log ->
+                                                val displayName = if (log.name == log.number) log.number.forceLtr() else log.name?.ifEmpty { log.number } ?: log.number.ifEmpty { "Unknown" }
                                                 SingleTile(
-                                                    title = log.name ?: log.number,
+                                                    title = displayName,
                                                     subtitle = if (log.name == log.number) null else log.number,
                                                     phoneNumber = log.number,
                                                     photoUri = log.photoUri,

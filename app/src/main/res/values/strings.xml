@@ -53,6 +53,7 @@
     <string name="call_query">Call %s</string>
     <string name="voice_input">Voice Input</string>
     <string name="filter_results">Filter results</string>
+    <string name="lookup">Lookup</string>
 
     <!-- Billing -->
     <string name="no_connection">No connection</string>
@@ -146,8 +147,8 @@
     <string name="dialpad_animations_subtitle">Show animations when typing digits</string>
     <string name="hide_voice_search">Hide voice search</string>
     <string name="hide_voice_search_subtitle">Hides the voice search button</string>
-    <string name="swipe_to_call">Swipe to call and message</string>
-    <string name="swipe_to_call_subtitle">Swipe right to call, left to message in recents</string>
+    <string name="swipe_actions">Swipe actions</string>
+    <string name="swipe_actions_subtitle">Swipe on a recent call log entry to delete, send an SMS, or make a call</string>
 
     <string name="сaller_ui">Caller UI</string>
     <string name="сaller_ui_subtitle">Customize the in-call screen layout and controls</string>
@@ -371,8 +372,8 @@
     <string name="no_call_history_found">No call history found</string>
     <string name="delete_call_logs">Delete call logs</string>
     <string name="delete_call_logs_selected">Are you sure you want to delete %s selected call logs?</string>
-    <string name="deleted_from_call_log">Deleted from call log</string>
-    <string name="could_not_delete">Could not delete</string>
+    <string name="deleted_from_call_log">Deleted from call log</string> <!-- Not used -->
+    <string name="could_not_delete">Could not delete</string> <!-- Not used -->
     <string name="clear_all_filtered_logs">Clear all filtered logs</string>
     <string name="clear_all_filtered_logs_selected">This will delete all displayed call history. This action cannot be undone.</string>
 
@@ -402,6 +403,12 @@
     <string name="settings_call_default_background">Default call background</string>
     <string name="settings_call_default_background_set">A custom image is shown on every call</string>
     <string name="settings_call_default_background_none">Not set — calls use the app theme</string>
+
+    <!-- Shortcuts -->
+    <string name="add_to_home_screen">Add to home screen</string>
+    <string name="shortcut_view_contact_subtitle">Shortcut opens this contact\'s info page</string>
+    <string name="shortcut_call_subtitle">Shortcut calls this contact right away</string>
+    <string name="shortcut_save_number">First, save this number in your contacts</string>
 
     <!-- Contacts -->
     <string name="contacts">Contacts</string>
@@ -560,4 +567,5 @@
     <string name="notif_missed_call_text">Missed call from %1$s at %2$s</string>
     <string name="notif_via_sim">via %1$s</string>
     <string name="notif_active_call">Active call</string>
+    <string name="notif_call_back">Call back</string>
 </resources>

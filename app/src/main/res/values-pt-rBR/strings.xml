@@ -49,6 +49,7 @@
     <string name="call_query">Ligar para %s</string>
     <string name="voice_input">Entrada de voz</string>
     <string name="filter_results">Filtrar resultados</string>
+    <string name="lookup">Pesquisar</string>
 
     <!-- Billing -->
     <string name="no_connection">Sem conexão</string>
@@ -142,6 +143,8 @@
     <string name="dialpad_animations_subtitle">Mostrar animações ao digitar dígitos</string>
     <string name="hide_voice_search">Ocultar pesquisa por voz</string>
     <string name="hide_voice_search_subtitle">Oculta o botão de pesquisa por voz</string>
+    <string name="swipe_actions">Ações de deslize</string>
+    <string name="swipe_actions_subtitle">Deslize sobre uma entrada do registro de chamadas recentes para excluir, enviar um SMS ou fazer uma chamada</string>
 
     <string name="avatars_settings">Configurações de avatares</string>
     <string name="avatars_settings_subtitle">Personalizar cores, molduras e mais</string>
@@ -395,6 +398,12 @@
     <string name="settings_call_default_background_set">Uma imagem personalizada é exibida em cada chamada</string>
     <string name="settings_call_default_background_none">Não definido — as chamadas usam o tema do aplicativo</string>
 
+    <!-- Shortcuts -->
+    <string name="add_to_home_screen">Adicionar à tela inicial</string>
+    <string name="shortcut_view_contact_subtitle">O atalho abre a página de informações deste contato</string>
+    <string name="shortcut_call_subtitle">O atalho liga imediatamente para este contato</string>
+    <string name="shortcut_save_number">Primeiro, salve este número em seus contatos</string>
+
     <!-- Contacts -->
     <string name="contacts">Contatos</string>
     <string name="view_contact">Ver contato</string>
@@ -549,4 +558,5 @@
     <string name="notif_missed_call_text">Chamada perdida de %1$s às %2$s</string>
     <string name="notif_via_sim">via %1$s</string>
     <string name="notif_active_call">Chamada ativa</string>
+    <string name="notif_call_back">Retornar chamada</string>
 </resources>

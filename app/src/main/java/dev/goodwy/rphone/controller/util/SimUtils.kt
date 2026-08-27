@@ -63,32 +63,21 @@ fun getDeviceImeiInfo(context: Context): DeviceImeiInfo {
     var imei1: String? = null
     var imei2: String? = null
     var meid: String? = null
-    var serial: String? = null
 
     if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                imei1 = try { tm.getImei(0) } catch (e: Exception) { null }
-                imei2 = try { tm.getImei(1) } catch (e: Exception) { null }
-                meid = try { tm.getMeid() } catch (e: Exception) { null }
-            }
+            imei1 = try { tm.getImei(0) } catch (e: Exception) { null }
+            imei2 = try { tm.getImei(1) } catch (e: Exception) { null }
+            meid = try { tm.getMeid() } catch (e: Exception) { null }
             if (imei1.isNullOrEmpty()) {
                 @Suppress("DEPRECATION")
                 imei1 = try { tm.deviceId } catch (e: Exception) { null }
             }
-            @Suppress("DEPRECATION")
-            serial = try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                    Build.getSerial()
-                } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                    Build.SERIAL
-                } else null
-            } catch (e: Exception) { null }
         } catch (e: SecurityException) {
             e.printStackTrace()
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
-    return DeviceImeiInfo(imei1 = imei1, imei2 = imei2, meid = meid, serial = serial)
+    return DeviceImeiInfo(imei1 = imei1, imei2 = imei2, meid = meid, serial = null)
 }

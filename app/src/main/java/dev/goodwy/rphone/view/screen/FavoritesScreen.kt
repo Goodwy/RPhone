@@ -55,10 +55,10 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.material.icons.automirrored.filled.StarHalf
-import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.CheckBox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.ui.geometry.Offset
@@ -666,7 +666,7 @@ fun FavoriteContactCard(
                 DropdownMenuItem(
                     contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
                     text = { Text(stringResource(R.string.select)) },
-                    leadingIcon = { Icon(Icons.Default.CheckBox, null) },
+                    leadingIcon = { Icon(Icons.Rounded.CheckBox, null) },
                     onClick = {
                         showMenu = false
                         onSelectToggle(contact.id)

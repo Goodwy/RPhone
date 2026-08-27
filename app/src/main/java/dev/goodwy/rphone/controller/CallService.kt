@@ -8,7 +8,6 @@ import android.telecom.CallAudioState
 import android.telecom.DisconnectCause
 import android.telecom.InCallService
 import android.telecom.TelecomManager
-import android.telecom.VideoProfile
 import androidx.core.net.toUri
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.PreferenceManager
@@ -24,6 +23,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
+import kotlin.getValue
 
 class CallService : InCallService() {
 
@@ -31,7 +31,7 @@ class CallService : InCallService() {
     private val callStateManager: CallStateManager by inject()
     private val notificationManager: CallNotificationManager by inject()
     private val callRepository: ICallRepository by inject()
-    
+
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var redialCount = 0
     private val callStartTimes = mutableMapOf<Call, Long>()
@@ -39,7 +39,7 @@ class CallService : InCallService() {
     override fun onCreate() {
         super.onCreate()
         (callRepository as? CallRepositoryImpl)?.bindService(this)
-        
+
         serviceScope.launch {
             callRepository.isActivityVisible.collect {
                 callRepository.currentCallSession.value?.call?.let { currentCall ->
@@ -125,10 +125,24 @@ class CallService : InCallService() {
                 }
             }
         }
+
+        // Need to create a Receiver (android.telecom.action.SHOW_MISSED_CALLS_NOTIFICATION) to prevent the system notification from being duplicated
+        val wasNeverConnected = call.details.connectTimeMillis == 0L
+        val isIncoming = call.details.callDirection == Call.Details.DIRECTION_INCOMING
+
+        if (isIncoming && wasNeverConnected && (cause?.code == DisconnectCause.MISSED || cause?.code == DisconnectCause.REMOTE || cause?.code == DisconnectCause.REJECTED)) {
+            if (!isNumberBlocked(number) || preferenceManager.getInt(PreferenceManager.KEY_BLOCK_LOG_VISIBILITY, 0) == 1) {
+                val handle = call.details.handle
+                val number = handle?.schemeSpecificPart ?: ""
+                val contactName = getContactNameFromCache(number)
+                val photoUri = getContactPhotoFromCache(number)
+                notificationManager.showMissedCallNotification(call, contactName, photoUri)
+            }
+        }
     }
 
     private fun isNumberBlocked(number: String): Boolean {
-        if (number.isEmpty()) return false
+        if (number.isBlank()) return false
         return try {
             BlockedNumberContract.isBlocked(this, number)
         } catch (_: Exception) {
@@ -150,6 +164,23 @@ class CallService : InCallService() {
         if (preferenceManager.getBoolean(PreferenceManager.KEY_BLOCK_NOTIFICATION, true)) {
             notificationManager.showBlockedNotification(number)
         }
+    }
+
+    private fun getContactNameFromCache(number: String): String {
+        if (number.isEmpty()) return getString(R.string.label_unknown_number)
+        val metadata = callStateManager.callerMetadata.value
+        return if (metadata != null && metadata.number == number && metadata.name.isNotEmpty()) {
+            metadata.name
+        } else {
+            number
+        }
+    }
+
+    private fun getContactPhotoFromCache(number: String): String? {
+        val metadata = callStateManager.callerMetadata.value
+        return if (metadata != null && metadata.number == number) {
+            metadata.photoUri
+        } else null
     }
 
     private fun updateCallState() {
@@ -178,9 +209,10 @@ class CallService : InCallService() {
 
         val priorityCall = callsList.find { it.state == Call.STATE_RINGING }
             ?: activePreferred
+            ?: callsList.find { it.state == Call.STATE_RINGING }
             ?: callsList.find { it.state == Call.STATE_DIALING || it.state == Call.STATE_CONNECTING }
             ?: callsList.find { it.state == Call.STATE_ACTIVE }
-            ?: callsList.find { it == currentPreferred }
+            ?: callsList.find { it == preferred }
             ?: callsList.find { it.state == Call.STATE_HOLDING }
             ?: callsList.firstOrNull { it.state != Call.STATE_DISCONNECTED }
 
@@ -194,9 +226,15 @@ class CallService : InCallService() {
 
     private fun updateNotification(call: Call) {
         val metadata = callStateManager.callerMetadata.value
+        val handle = call.details.handle
+        val number = handle?.schemeSpecificPart ?: ""
+        val contactName = getContactNameFromCache(number)
+        val photoUri = getContactPhotoFromCache(number)
+
         val notification = notificationManager.buildCallNotification(
             call,
-            metadata,
+            contactName,
+            photoUri,
             callRepository.audioState.value
         )
         startForeground(
@@ -207,10 +245,7 @@ class CallService : InCallService() {
 
         // Start/stop floating bubble based on preference
         if (call.state != Call.STATE_DISCONNECTED && call.state != Call.STATE_DISCONNECTING) {
-            val handle = call.details.handle
-            val number = handle?.schemeSpecificPart ?: ""
-            val name = metadata?.name ?: number.ifEmpty { getString(R.string.label_unknown_number) }
-            maybeStartFloatingCall(name, number, metadata?.photoUri)
+            maybeStartFloatingCall(contactName, number, metadata?.photoUri)
         }
     }
 

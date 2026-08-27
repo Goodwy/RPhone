@@ -36,6 +36,9 @@ import androidx.compose.material.icons.automirrored.filled.StarHalf
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.CheckBox
+import androidx.compose.material.icons.rounded.ContentCopy
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -488,7 +491,7 @@ fun ContactListItem(
                     DropdownMenuItem(
                         contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
                         text = { Text(stringResource(R.string.select)) },
-                        leadingIcon = { Icon(Icons.Default.CheckBox, null) },
+                        leadingIcon = { Icon(Icons.Rounded.CheckBox, null) },
                         onClick = {
                             showMenu = false
                             onSelectToggle()
@@ -510,7 +513,7 @@ fun ContactListItem(
                 DropdownMenuItem(
                     contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
                     text = { Text(stringResource(R.string.edit_contact)) },
-                    leadingIcon = { Icon(Icons.Default.Edit, null) },
+                    leadingIcon = { Icon(Icons.Rounded.Edit, null) },
                     onClick = {
                         showMenu = false
                         navigator.navigate(ContactEditScreenDestination(contactId = contact.id))
@@ -534,7 +537,7 @@ fun ContactListItem(
                     DropdownMenuItem(
                         contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
                         text = { Text(stringResource(R.string.copy)) },
-                        leadingIcon = { Icon(Icons.Default.ContentCopy, null) },
+                        leadingIcon = { Icon(Icons.Rounded.ContentCopy, null) },
                         onClick = {
                             showMenu = false
                             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager

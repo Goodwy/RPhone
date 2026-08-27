@@ -24,7 +24,7 @@ interface ICallRepository {
 
     fun setPreferredCall(call: Call?)
     fun getPreferredCall(): Call?
-    
+
     // Actions that proxy to InCallService
     fun answerCall()
     fun declineCall()

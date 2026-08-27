@@ -23,12 +23,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -64,6 +67,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.R
+import dev.goodwy.rphone.cardSpacedBy
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.liquidglass.LocalLiquidGlassBackdrop
 import dev.goodwy.rphone.liquidglass.drawBackdrop
@@ -114,7 +118,14 @@ fun RillDialog(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
+                .windowInsetsPadding(WindowInsets.displayCutout)
+                .then(
+                    if (isLandscape) {
+                        Modifier.padding(vertical = 24.dp, horizontal = 64.dp)
+                    } else {
+                        Modifier.padding(24.dp)
+                    }
+                ),
             contentAlignment = Alignment.Center
         ) {
             Surface(
@@ -181,7 +192,7 @@ fun RillDialog(
                             .weight(1f, fill = false)
                             .verticalScroll(rememberScrollState())
                             .padding(horizontal = 24.dp, vertical = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalArrangement = Arrangement.spacedBy(cardSpacedBy),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         content()

@@ -49,6 +49,7 @@
     <string name="call_query">Κλήση %s</string>
     <string name="voice_input">Φωνητική είσοδος</string>
     <string name="filter_results">Φιλτράρισμα αποτελεσμάτων</string>
+    <string name="lookup">Αναζήτηση</string>
 
     <!-- Billing -->
     <string name="no_connection">Χωρίς σύνδεση</string>
@@ -142,6 +143,8 @@
     <string name="dialpad_animations_subtitle">Εμφάνιση κινήσεων κατά την πληκτρολόγηση ψηφίων</string>
     <string name="hide_voice_search">Απόκρυψη φωνητικής αναζήτησης</string>
     <string name="hide_voice_search_subtitle">Αποκρύπτει το κουμπί φωνητικής αναζήτησης</string>
+    <string name="swipe_actions">Ενέργειες σβησίματος</string>
+    <string name="swipe_actions_subtitle">Σύρετε σε μια καταχώρηση πρόσφατης κλήσης για διαγραφή, αποστολή SMS ή πραγματοποίηση κλήσης</string>
 
     <string name="avatars_settings">Ρυθμίσεις avatar</string>
     <string name="avatars_settings_subtitle">Προσαρμογή χρωμάτων, πλαισίων και άλλων</string>
@@ -395,6 +398,12 @@
     <string name="settings_call_default_background_set">Εμφανίζεται προσαρμοσμένη εικόνα σε κάθε κλήση</string>
     <string name="settings_call_default_background_none">Δεν έχει οριστεί — οι κλήσεις χρησιμοποιούν το θέμα της εφαρμογής</string>
 
+    <!-- Shortcuts -->
+    <string name="add_to_home_screen">Προσθήκη στην αρχική οθόνη</string>
+    <string name="shortcut_view_contact_subtitle">Η συντόμευση ανοίγει τη σελίδα πληροφοριών αυτής της επαφής</string>
+    <string name="shortcut_call_subtitle">Η συντόμευση καλεί αμέσως αυτήν την επαφή</string>
+    <string name="shortcut_save_number">Αποθηκεύστε πρώτα αυτόν τον αριθμό στις επαφές σας</string>
+
     <!-- Contacts -->
     <string name="contacts">Επαφές</string>
     <string name="view_contact">Προβολή επαφής</string>
@@ -546,4 +555,5 @@
     <string name="notif_missed_call_text">Αναπάντητη κλήση από %1$s στις %2$s</string>
     <string name="notif_via_sim">μέσω %1$s</string>
     <string name="notif_active_call">Ενεργή κλήση</string>
+    <string name="notif_call_back">Καλέστε ξανά</string>
 </resources>

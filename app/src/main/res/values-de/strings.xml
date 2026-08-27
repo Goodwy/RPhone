@@ -49,6 +49,7 @@
     <string name="call_query">%s anrufen</string>
     <string name="voice_input">Spracheingabe</string>
     <string name="filter_results">Ergebnisse filtern</string>
+    <string name="lookup">Nachschlagen</string>
 
     <!-- Billing -->
     <string name="no_connection">Keine Verbindung</string>
@@ -142,6 +143,8 @@
     <string name="dialpad_animations_subtitle">Animationen bei der Eingabe von Ziffern anzeigen</string>
     <string name="hide_voice_search">Sprachsuche ausblenden</string>
     <string name="hide_voice_search_subtitle">Blendet die Schaltfläche für die Sprachsuche aus</string>
+    <string name="swipe_actions">Wischaktionen</string>
+    <string name="swipe_actions_subtitle">Auf einen letzten Anrufprotokolleintrag wischen, um ihn zu löschen, eine SMS zu senden oder anzurufen</string>
 
     <string name="avatars_settings">Avatar-Einstellungen</string>
     <string name="avatars_settings_subtitle">Farben, Rahmen und mehr anpassen</string>
@@ -395,6 +398,12 @@
     <string name="settings_call_default_background_set">Bei jedem Anruf wird ein benutzerdefiniertes Bild angezeigt</string>
     <string name="settings_call_default_background_none">Nicht festgelegt — Anrufe verwenden das App-Design</string>
 
+    <!-- Shortcuts -->
+    <string name="add_to_home_screen">Zum Startbildschirm hinzufügen</string>
+    <string name="shortcut_view_contact_subtitle">Verknüpfung öffnet die Infoseite dieses Kontakts</string>
+    <string name="shortcut_call_subtitle">Verknüpfung ruft diesen Kontakt sofort an</string>
+    <string name="shortcut_save_number">Speichern Sie diese Nummer zuerst in Ihren Kontakten</string>
+
     <!-- Contacts -->
     <string name="contacts">Kontakte</string>
     <string name="view_contact">Kontakt anzeigen</string>
@@ -546,4 +555,5 @@
     <string name="notif_missed_call_text">Verpasster Anruf von %1$s um %2$s</string>
     <string name="notif_via_sim">über %1$s</string>
     <string name="notif_active_call">Aktiver Anruf</string>
+    <string name="notif_call_back">Rückruf</string>
 </resources>

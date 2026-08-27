@@ -49,6 +49,7 @@
     <string name="call_query">%s\'i Ara</string>
     <string name="voice_input">Sesli Giriş</string>
     <string name="filter_results">Sonuçları Filtrele</string>
+    <string name="lookup">Ara</string>
 
     <!-- Billing -->
     <string name="no_connection">Bağlantı yok</string>
@@ -142,6 +143,8 @@
     <string name="dialpad_animations_subtitle">Rakam yazarken animasyonları göster</string>
     <string name="hide_voice_search">Sesli aramayı gizle</string>
     <string name="hide_voice_search_subtitle">Sesli arama düğmesini gizler</string>
+    <string name="swipe_actions">Kaydırma işlemleri</string>
+    <string name="swipe_actions_subtitle">Silmek, SMS göndermek veya arama yapmak için son arama kaydının üzerinde kaydırın</string>
 
     <string name="avatars_settings">Avatar Ayarları</string>
     <string name="avatars_settings_subtitle">Renkleri, çerçeveleri ve daha fazlasını özelleştirme</string>
@@ -395,6 +398,12 @@
     <string name="settings_call_default_background_set">Her aramada özel bir resim gösterilir</string>
     <string name="settings_call_default_background_none">Ayarlanmadı — aramalar uygulama temasını kullanır</string>
 
+    <!-- Shortcuts -->
+    <string name="add_to_home_screen">Ana ekrana ekle</string>
+    <string name="shortcut_view_contact_subtitle">Kısayol bu kişinin bilgi sayfasını açar</string>
+    <string name="shortcut_call_subtitle">Kısayol bu kişiyi hemen arar</string>
+    <string name="shortcut_save_number">Önce bu numarayı kişilerinize kaydedin</string>
+
     <!-- Contacts -->
     <string name="contacts">Kişiler</string>
     <string name="view_contact">Kişiyi Görüntüle</string>
@@ -546,4 +555,5 @@
     <string name="notif_missed_call_text">%1$s\'den %2$s\'de cevaplanmayan arama</string>
     <string name="notif_via_sim">%1$s üzerinden</string>
     <string name="notif_active_call">Aktif arama</string>
+    <string name="notif_call_back">Geri ara</string>
 </resources>

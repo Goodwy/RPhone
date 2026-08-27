@@ -1,8 +1,9 @@
 package dev.goodwy.rphone.controller.util
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.SearchManager
+import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -33,9 +34,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.net.toUri
 import dev.goodwy.rphone.R
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 fun makeCall(context: Context, number: String, accountHandle: PhoneAccountHandle? = null, contactId: String? = null) {
     val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
@@ -442,6 +440,7 @@ fun processSecretCode(context: Context, fullCode: String): Boolean {
     return handled
 }
 
+// Goodwy
 fun String.isLetter(): Boolean {
     return this.length == 1 && this[0].isLetter()
 }
@@ -565,6 +564,7 @@ fun Context.getBlockedNumbers(): ArrayList<String> {
     )
 
     queryCursor(uri, projection) { cursor ->
+//        val id = cursor.getLongValue(BlockedNumbers.COLUMN_ID)
         val number = cursor.getStringValue(BlockedNumbers.COLUMN_ORIGINAL_NUMBER) ?: ""
         val normalizedNumber = cursor.getStringValue(BlockedNumbers.COLUMN_E164_NUMBER) ?: number
         val comparableNumber = normalizedNumber.trimToComparableNumber()
@@ -602,6 +602,19 @@ fun Context.queryCursor(
 fun Cursor.getLongValue(key: String) = getLong(getColumnIndexOrThrow(key))
 
 fun Cursor.getStringValue(key: String) = getString(getColumnIndexOrThrow(key))
+
+fun Context.launchInternetSearch(query: String) {
+    Intent(Intent.ACTION_WEB_SEARCH).apply {
+        putExtra(SearchManager.QUERY, query)
+        try {
+            startActivity(this)
+        } catch (_: ActivityNotFoundException) {
+            toast("Unable to open search")
+        } catch (e: Exception) {
+            toast(e.toString())
+        }
+    }
+}
 
 @Composable
 fun HtmlTextView(

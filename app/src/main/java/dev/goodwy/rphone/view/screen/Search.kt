@@ -58,6 +58,7 @@ import dev.goodwy.rphone.cardCornerSmall
 import dev.goodwy.rphone.controller.CallLogViewModel
 import dev.goodwy.rphone.controller.util.NoteManager
 import dev.goodwy.rphone.controller.util.PreferenceManager
+import dev.goodwy.rphone.controller.util.forceLtr
 import dev.goodwy.rphone.controller.util.normalizeNumberDigits
 import dev.goodwy.rphone.modal.data.CallLogEntry
 import dev.goodwy.rphone.view.components.SingleTile
@@ -65,6 +66,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinActivityViewModel
+import kotlin.text.ifEmpty
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Destination<RootGraph>
@@ -431,8 +433,9 @@ fun ContactSearchContent(
                             )
                             RillExpressiveCard {
                                 nonContactResults.forEach { entry ->
+                                    val displayName = if (entry.name == entry.number) entry.number.forceLtr() else entry.name?.ifEmpty { entry.number } ?: entry.number.ifEmpty { "Unknown" }
                                     SingleTile(
-                                        title = entry.name?.ifEmpty { entry.number } ?: entry.number,
+                                        title = displayName,
                                         subtitle = if (entry.name.isNullOrEmpty() || entry.name == entry.number) null else entry.number,
                                         icon = Icons.Default.Person,
                                         phoneNumber = entry.number,

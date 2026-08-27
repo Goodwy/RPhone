@@ -22,6 +22,8 @@ import androidx.compose.material.icons.automirrored.outlined.StickyNote2
 import androidx.compose.material.icons.automirrored.rounded.Help
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.CheckBox
+import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.*
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -457,7 +459,7 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator, 
                         DropdownMenuItem(
                             contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
                             text = { Text(stringResource(R.string.select)) },
-                            leadingIcon = { Icon(Icons.Default.CheckBox, null) },
+                            leadingIcon = { Icon(Icons.Rounded.CheckBox, null) },
                             onClick = {
                                 selectedNote?.let { selectedNotes = setOf(it.file.absolutePath) }
                                 selectedNote = null
@@ -470,7 +472,7 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator, 
                         DropdownMenuItem(
                             contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
                             text = { Text(shareText) },
-                            leadingIcon = { Icon(Icons.Default.Share, null) },
+                            leadingIcon = { Icon(Icons.Rounded.Share, null) },
                             onClick = {
                                 val note = selectedNote!!
                                 val intent = Intent(Intent.ACTION_SEND).apply {

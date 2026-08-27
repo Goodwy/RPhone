@@ -33,7 +33,8 @@ data class Contributor(
 )
 
 val appContributors = listOf(
-    Contributor("Goodwy", "Developer", GITHUB_DEV),
+    Contributor("Goodwy", "Maintainer", GITHUB_DEV),
+    Contributor("UranophileLab", "Core contributors", "https://github.com/UranophileLab"),
 )
 
 val otherContributors = listOf(

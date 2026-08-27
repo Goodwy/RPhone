@@ -685,6 +685,7 @@ fun BatchActionBar(
                 )
                 DropdownMenu(shape = RoundedCornerShape(16.dp), expanded = showSelectionMenuOuter, onDismissRequest = { showSelectionMenuOuter = false }) {
                     DropdownMenuItem(
+                        contentPadding = PaddingValues(start = 16.dp, end = 20.dp),
                         text = { Text(stringResource(R.string.share)) },
                         leadingIcon = { Icon(Icons.Default.Share, null) },
                         onClick = {
@@ -694,6 +695,7 @@ fun BatchActionBar(
                     )
                     if (onAddToFav != null) {
                         DropdownMenuItem(
+                            contentPadding = PaddingValues(start = 16.dp, end = 20.dp),
                             text = { Text(stringResource(R.string.add_to_favorites)) },
                             leadingIcon = { Icon(Icons.Default.Star, null) },
                             onClick = {
@@ -703,6 +705,7 @@ fun BatchActionBar(
                         )
                     }
                     DropdownMenuItem(
+                        contentPadding = PaddingValues(start = 16.dp, end = 20.dp),
                         text = { Text(stringResource(R.string.remove_from_favorites)) },
                         leadingIcon = { Icon(Icons.AutoMirrored.Filled.StarHalf, null) },
                         onClick = {

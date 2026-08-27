@@ -49,6 +49,7 @@
     <string name="call_query">%s को कॉल करें</string>
     <string name="voice_input">वॉइस इनपुट</string>
     <string name="filter_results">परिणाम फ़िल्टर करें</string>
+    <string name="lookup">खोजें</string>
 
     <!-- Billing -->
     <string name="no_connection">कोई कनेक्शन नहीं</string>
@@ -142,6 +143,8 @@
     <string name="dialpad_animations_subtitle">अंक टाइप करते समय एनिमेशन दिखाएँ</string>
     <string name="hide_voice_search">वॉइस खोज छुपाएं</string>
     <string name="hide_voice_search_subtitle">वॉइस खोज बटन छुपाता है</string>
+    <string name="swipe_actions">स्वाइप क्रियाएँ</string>
+    <string name="swipe_actions_subtitle">हाल की कॉल लॉग प्रविष्टि पर स्वाइप करें इसे हटाने, एसएमएस भेजने या कॉल करने के लिए</string>
 
     <string name="avatars_settings">अवतार सेटिंग्स</string>
     <string name="avatars_settings_subtitle">रंग, फ्रेम और अधिक कस्टमाइज़ करना</string>
@@ -395,6 +398,12 @@
     <string name="settings_call_default_background_set">हर कॉल पर कस्टम इमेज दिखाई जाती है</string>
     <string name="settings_call_default_background_none">सेट नहीं — कॉल ऐप थीम का उपयोग करती हैं</string>
 
+    <!-- Shortcuts -->
+    <string name="add_to_home_screen">होम स्क्रीन पर जोड़ें</string>
+    <string name="shortcut_view_contact_subtitle">शॉर्टकट इस संपर्क का जानकारी पेज खोलता है</string>
+    <string name="shortcut_call_subtitle">शॉर्टकट इस संपर्क को तुरंत कॉल करता है</string>
+    <string name="shortcut_save_number">पहले इस नंबर को अपने संपर्कों में सहेजें</string>
+
     <!-- Contacts -->
     <string name="contacts">संपर्क</string>
     <string name="view_contact">संपर्क देखें</string>
@@ -546,4 +555,5 @@
     <string name="notif_missed_call_text">%2$s पर %1$s से छूटी हुई कॉल</string>
     <string name="notif_via_sim">%1$s के माध्यम से</string>
     <string name="notif_active_call">सक्रिय कॉल</string>
+    <string name="notif_call_back">वापस कॉल करें</string>
 </resources>

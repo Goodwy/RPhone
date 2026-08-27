@@ -84,6 +84,7 @@ import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material.icons.rounded.QrCode2
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.Wallpaper
+import androidx.compose.material.icons.rounded.Widgets
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -126,6 +127,7 @@ import dev.goodwy.rphone.cardCornerMedium
 import dev.goodwy.rphone.cardSpacedBy
 import dev.goodwy.rphone.controller.util.BlockedNumbersManager
 import dev.goodwy.rphone.controller.util.CallBackgroundStore
+import dev.goodwy.rphone.controller.util.ContactShortcutUtils
 import dev.goodwy.rphone.controller.util.SocialUtils
 import dev.goodwy.rphone.controller.util.SocialUtils.launchSendWhatsAppIntent
 import dev.goodwy.rphone.controller.util.areNumbersEqual
@@ -292,7 +294,7 @@ fun ContactDetailsScreen(
         )
     }
 
-    val telecomManager = remember { context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager }
+//    val telecomManager = remember { context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager }
     val prefs = koinInject<PreferenceManager>()
     val simPref = remember { prefs.getInt(PreferenceManager.KEY_DEFAULT_SIM, prefs.getDefaultSimIndexDefault()) }
     val displayOrder by remember {
@@ -312,6 +314,9 @@ fun ContactDetailsScreen(
     var showQrDialogPicker by remember { mutableStateOf(false) }
     var pendingQrNumber by remember { mutableStateOf<String?>(null) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showShortcutNumberPicker by remember { mutableStateOf(false) }
+    var showShortcutActionPicker by remember { mutableStateOf(false) }
+    var pendingShortcutNumber by remember { mutableStateOf<String?>(null) }
     var showNoteEditor by remember { mutableStateOf(false) }
     var showMoveDialog by remember { mutableStateOf(false) }
     var showSharePicker by remember { mutableStateOf(false) }
@@ -481,7 +486,7 @@ fun ContactDetailsScreen(
         NumberPickerDialog(numbers = contact!!.phoneNumbers, onDismissRequest = { showMessagePicker = false }, onNumberSelected = { showMessagePicker = false; initiateMessage(it) })
     }
     if (showEmailPicker && contact != null) {
-        NumberPickerDialog(numbers = contact!!.emails.map {it.value}, onDismissRequest = { showEmailPicker = false }, onNumberSelected = { showEmailPicker = false; initiateEmail(it) })
+        NumberPickerDialog(numbers = contact!!.emails.map {it.value}, onDismissRequest = { showEmailPicker = false }, onNumberSelected = { showEmailPicker = false; initiateEmail(it) }, icon = Icons.Rounded.Email)
     }
     if (showSimPicker && pendingNumber != null) {
         SimPickerDialog(onDismissRequest = { showSimPicker = false }, onSimSelected = { handle -> makeCall(context, pendingNumber!!, handle); showSimPicker = false })
@@ -496,6 +501,47 @@ fun ContactDetailsScreen(
             onNumberSelected = { pendingQrNumber = it; showQrDialogPicker = false; showQrDialog = true }
         )
     }
+
+    val shortcutNumbers = remember(contact, phoneNumber) {
+        contact?.phoneNumbers?.filter { it.isNotBlank() }?.takeIf { it.isNotEmpty() }
+            ?: listOfNotNull(phoneNumber?.takeIf { it.isNotBlank() && it != "Unknown" })
+    }
+    if (showShortcutNumberPicker) {
+        NumberPickerDialog(
+            numbers = shortcutNumbers,
+            onDismissRequest = { showShortcutNumberPicker = false },
+            onNumberSelected = { number ->
+                showShortcutNumberPicker = false
+                pendingShortcutNumber = number
+                showShortcutActionPicker = true
+            }
+        )
+    }
+    if (showShortcutActionPicker && pendingShortcutNumber != null) {
+        val shortcutNumber = pendingShortcutNumber!!
+        val shortcutKeyId = contact?.id ?: shortcutNumber
+        val toast = stringResource(R.string.shortcut_save_number)
+        ShortcutActionDialog(
+            onOpenContactInfo = {
+                showShortcutActionPicker = false
+                if (contact != null) {
+                    ContactShortcutUtils.pinOpenContactShortcut(
+                        context, contact!!.id, displayName, contact!!.photoUri
+                    )
+                } else {
+                    context.toast(toast)
+                }
+            },
+            onCallDirectly = {
+                showShortcutActionPicker = false
+                ContactShortcutUtils.pinCallShortcut(
+                    context, shortcutKeyId, displayName, shortcutNumber, contact?.photoUri
+                )
+            },
+            onDismiss = { showShortcutActionPicker = false }
+        )
+    }
+
     if (showDeleteDialog) {
         RillDialog(
             onDismissRequest = { showDeleteDialog = false },
@@ -858,7 +904,7 @@ fun ContactDetailsScreen(
                                         val numberSize = contact!!.phoneDetails.size
                                         contact!!.phoneDetails.forEachIndexed { index, phoneDetail ->
                                             val recentText = stringResource(R.string.recent_number)
-                                            val recent = if (normalizePhoneNumber(phoneDetail.number) == phoneNumber) " • $recentText" else ""
+                                            val recent = if (normalizePhoneNumber(phoneDetail.number) == phoneNumber && numberSize > 1) " • $recentText" else ""
                                             val isDefault = defaultPhone != null && phoneDetail.number == defaultPhone.number
                                             val default = stringResource(R.string.default_number)
                                             val label =
@@ -1402,6 +1448,38 @@ fun ContactDetailsScreen(
                                             if (contact != null && contact!!.phoneNumbers.size > 1) showSharePicker = true
                                             else shareContact(displayPhone) }
                                     )
+                                    if (contact != null || shortcutNumbers.isNotEmpty()) {
+                                        RillListItem(
+                                            headline = stringResource(R.string.add_to_home_screen),
+                                            leadingIcon = Icons.Rounded.Widgets,
+                                            onClick = {
+                                                if (contact != null) {
+                                                    if (shortcutNumbers.size > 1) {
+                                                        showShortcutNumberPicker = true
+                                                    } else if (shortcutNumbers.isEmpty()) {
+                                                        ContactShortcutUtils.pinOpenContactShortcut(
+                                                            context,
+                                                            contact!!.id,
+                                                            displayName,
+                                                            contact!!.photoUri
+                                                        )
+                                                    } else {
+                                                        pendingShortcutNumber = shortcutNumbers.first()
+                                                        showShortcutActionPicker = true
+                                                    }
+                                                } else if (shortcutNumbers.isNotEmpty()) {
+                                                    val shortcutNumber = shortcutNumbers.first()
+                                                    ContactShortcutUtils.pinCallShortcut(
+                                                        context,
+                                                        shortcutNumber,
+                                                        displayName,
+                                                        shortcutNumber,
+                                                        null
+                                                    )
+                                                }
+                                            }
+                                        )
+                                    }
                                     if (contact != null && contactSources.size < 2) {
                                         RillListItem(
                                             headline = stringResource(R.string.move_contact),
@@ -1659,7 +1737,7 @@ fun ContactDetailsScreen(
                                         )
                                     contact!!.phoneDetails.forEachIndexed { index, phoneDetail ->
                                         val recentText = stringResource(R.string.recent_number)
-                                        val recent = if (normalizePhoneNumber(phoneDetail.number) == phoneNumber) " • $recentText" else ""
+                                        val recent = if (normalizePhoneNumber(phoneDetail.number) == phoneNumber && numberSize > 1) " • $recentText" else ""
                                         val isDefault = defaultPhone != null && phoneDetail.number == defaultPhone.number
                                         val default = stringResource(R.string.default_number)
                                         val label =
@@ -2248,6 +2326,38 @@ fun ContactDetailsScreen(
                                         else shareContact(displayPhone)
                                     }
                                 )
+                                if (contact != null || shortcutNumbers.isNotEmpty()) {
+                                    RillListItem(
+                                        headline = stringResource(R.string.add_to_home_screen),
+                                        leadingIcon = Icons.Rounded.Widgets,
+                                        onClick = {
+                                            if (contact != null) {
+                                                if (shortcutNumbers.size > 1) {
+                                                    showShortcutNumberPicker = true
+                                                } else if (shortcutNumbers.isEmpty()) {
+                                                    ContactShortcutUtils.pinOpenContactShortcut(
+                                                        context,
+                                                        contact!!.id,
+                                                        displayName,
+                                                        contact!!.photoUri
+                                                    )
+                                                } else {
+                                                    pendingShortcutNumber = shortcutNumbers.first()
+                                                    showShortcutActionPicker = true
+                                                }
+                                            } else if (shortcutNumbers.isNotEmpty()) {
+                                                val shortcutNumber = shortcutNumbers.first()
+                                                ContactShortcutUtils.pinCallShortcut(
+                                                    context,
+                                                    shortcutNumber,
+                                                    displayName,
+                                                    shortcutNumber,
+                                                    null
+                                                )
+                                            }
+                                        }
+                                    )
+                                }
                                 if (contact != null && contactSources.size < 2) {
                                     RillListItem(
                                         headline = stringResource(R.string.move_contact),

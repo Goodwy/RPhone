@@ -50,6 +50,7 @@
     <string name="call_query">רופן %s</string>
     <string name="voice_input">שטים איינגאַב</string>
     <string name="filter_results">פֿילטער רעזולטאַטן</string>
+    <string name="lookup">זוכן</string>
 
     <!-- Billing -->
     <string name="no_connection">קיין פֿאַרבינדונג</string>
@@ -143,6 +144,8 @@
     <string name="dialpad_animations_subtitle">ווײַזן אַנימאַציעס בײַ אַרײַנטיפּן ציפֿערן</string>
     <string name="hide_voice_search">באַהאַלטן שטים זוכן</string>
     <string name="hide_voice_search_subtitle">באַהאַלטן דעם שטים זוכן קנעפּל</string>
+    <string name="swipe_actions">גליט אַקציעס</string>
+    <string name="swipe_actions_subtitle">גליט אויף אַ לעצטע רוף לאָג אײַנטראָג צו אַוועקנעמען, שיקן אַ SMS, אָדער מאַכן אַ רוף</string>
 
     <string name="avatars_settings">אַוואַטאַר איינשטעלונגען</string>
     <string name="avatars_settings_subtitle">פּערזענליכטיק פֿאַרבן, ראַמען און מער</string>
@@ -396,6 +399,12 @@
     <string name="settings_call_default_background_set">אַ פּערזענלעך בילד ווערט געוויזן אויף יעדן רוף</string>
     <string name="settings_call_default_background_none">נישט איינגעשטעלט — רופן ניצן די אַפּ טעמע</string>
 
+    <!-- Shortcuts -->
+    <string name="add_to_home_screen">צולייגן צו היים פאַרשטעל</string>
+    <string name="shortcut_view_contact_subtitle">דער קורצוועג עפֿנט דעם קאָנטאַקט ס אינפֿאָרמאַציע בלאַט</string>
+    <string name="shortcut_call_subtitle">דער קורצוועג רופט דעם קאָנטאַקט גלייך</string>
+    <string name="shortcut_save_number">היט ערשט דעם נומער אין דײַנע קאָנטאַקטן</string>
+
     <!-- Contacts -->
     <string name="contacts">קאָנטאַקטן</string>
     <string name="view_contact">ווײַזן קאָנטאַקט</string>
@@ -553,4 +562,5 @@
     <string name="notif_missed_call_text">פֿאַרפֿעלטער רוף פֿון %1$s אין %2$s</string>
     <string name="notif_via_sim">דורך %1$s</string>
     <string name="notif_active_call">אַקטיווער רוף</string>
+    <string name="notif_call_back">רוף צוריק</string>
 </resources>

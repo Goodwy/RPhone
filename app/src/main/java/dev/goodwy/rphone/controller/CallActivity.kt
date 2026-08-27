@@ -39,7 +39,6 @@ import dev.goodwy.rphone.modal.`interface`.CallSession
 import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 import dev.goodwy.rphone.view.screen.ExpressiveCallScreen
 import dev.goodwy.rphone.view.theme.Rill4Theme
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -62,7 +61,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
 
     private val contactsRepo: IContactsRepository by inject()
     private val preferenceManager: PreferenceManager by inject()
-    private val callViewModel: CallViewModel by viewModel()
+    private val callViewModel: CallViewModel by inject()
     private var proximityWakeLock: PowerManager.WakeLock? = null
     private var isFinishingCall = false
     private var keyguardDismissRequested = false

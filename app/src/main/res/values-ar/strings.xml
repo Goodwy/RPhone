@@ -50,6 +50,7 @@
     <string name="call_query">الاتصال بـ %s</string>
     <string name="voice_input">إدخال صوتي</string>
     <string name="filter_results">تصفية النتائج</string>
+    <string name="lookup">بحث</string>
 
     <!-- Billing -->
     <string name="no_connection">لا يوجد اتصال</string>
@@ -143,6 +144,8 @@
     <string name="dialpad_animations_subtitle">إظهار الرسوم المتحركة عند كتابة الأرقام</string>
     <string name="hide_voice_search">إخفاء البحث الصوتي</string>
     <string name="hide_voice_search_subtitle">يخفي زر البحث الصوتي</string>
+    <string name="swipe_actions">إجراءات السحب</string>
+    <string name="swipe_actions_subtitle">اسحب على إدخال سجل المكالمات الحديث لحذفه أو إرسال رسالة نصية أو إجراء مكالمة</string>
 
     <string name="avatars_settings">إعدادات الصور الرمزية</string>
     <string name="avatars_settings_subtitle">تخصيص الألوان والإطارات والمزيد</string>
@@ -396,6 +399,12 @@
     <string name="settings_call_default_background_set">يتم عرض صورة مخصصة في كل مكالمة</string>
     <string name="settings_call_default_background_none">غير محددة — تستخدم المكالمات سمة التطبيق</string>
 
+    <!-- Shortcuts -->
+    <string name="add_to_home_screen">إضافة إلى الشاشة الرئيسية</string>
+    <string name="shortcut_view_contact_subtitle">يفتح الاختصار صفحة معلومات جهة الاتصال هذه</string>
+    <string name="shortcut_call_subtitle">يتصل الاختصار بجهة الاتصال هذه فورًا</string>
+    <string name="shortcut_save_number">احفظ هذا الرقم في جهات الاتصال الخاصة بك أولاً</string>
+
     <!-- Contacts -->
     <string name="contacts">جهات الاتصال</string>
     <string name="view_contact">عرض جهة الاتصال</string>
@@ -559,4 +568,5 @@
     <string name="notif_missed_call_text">مكالمة فائتة من %1$s الساعة %2$s</string>
     <string name="notif_via_sim">عبر %1$s</string>
     <string name="notif_active_call">مكالمة نشطة</string>
+    <string name="notif_call_back">معاودة الاتصال</string>
 </resources>

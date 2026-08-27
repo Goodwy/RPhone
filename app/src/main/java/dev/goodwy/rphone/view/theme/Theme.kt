@@ -27,14 +27,7 @@ import dev.goodwy.rphone.controller.util.PreferenceManager
 import org.koin.compose.koinInject
 import java.io.File
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80, secondary = PurpleGrey80, tertiary = Pink80
-)
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40, secondary = PurpleGrey40, tertiary = Pink40
-)
-
-private fun buildCustomColorScheme(primary: Color, dark: Boolean): androidx.compose.material3.ColorScheme {
+private fun buildCustomColorScheme(primary: Color, dark: Boolean): ColorScheme {
     val argb = primary.toArgb()
     val r = android.graphics.Color.red(argb)
     val g = android.graphics.Color.green(argb)
@@ -110,15 +103,6 @@ private fun buildCustomColorScheme(primary: Color, dark: Boolean): androidx.comp
             onSecondaryContainer = Color.White,
             inverseOnSurface = Color(0xFF1C1B1F)
         ).copy(
-//            background           = Color(0xFF1C1B1F),
-//            surface              = Color(0xFF1C1B1F),
-//            surfaceVariant       = Color(0xFF49454F),
-//            surfaceContainer     = Color(0xFF211F26),
-//            surfaceContainerLowest  = Color(0xFF0F0D13)
-//            surfaceContainerLow  = Color(0xFF1D1B20),
-//            surfaceContainerHigh = Color(0xFF2B2930),
-//            surfaceContainerHighest = Color(0xFF36343B),
-
             background = Color(0xFF17191F),
             surfaceContainerLowest = Color(0xFF0D0E12), // Dialpad Key
             surface = Color(0xFF17191F),
@@ -153,15 +137,6 @@ private fun buildCustomColorScheme(primary: Color, dark: Boolean): androidx.comp
             onSecondaryContainer = Color.Black,
             inverseOnSurface = Color.White
         ).copy(
-//            background           = Color(0xFFFFFBFE),
-//            surface              = Color(0xFFFFFBFE),
-//            surfaceVariant       = Color(0xFFE7E0EC),
-//            surfaceContainer     = Color(0xFFF3EDF7),
-//            surfaceContainerLow  = Color(0xFFF7F2FA),
-//            surfaceContainerHigh = Color(0xFFECE6F0),
-//            surfaceContainerHighest = Color(0xFFE6E0E9),
-//            surfaceContainerLowest  = Color(0xFFFFFFFF),
-
             background = Color(0xFFEDEDF6),
             surfaceContainerLowest = Color(0xFFFAF8FE), // Dialpad Key
             surface = Color(0xFFEDEDF6),
@@ -202,28 +177,6 @@ fun Rill4Theme(
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
             if (darkTheme) dynamicDarkColorScheme(context).copy(
                 //Default color, Darker -> Lighter
-//                background = Color(0xFF0D0E12),
-//                surfaceContainerLowest = Color(0xFF000000),
-//                surface = Color(0xFF0D0E12),
-//                surfaceContainerLow = Color(0xFF121318),
-//                surfaceContainer = Color(0xFF1D1F27), // Dialpad
-//                surfaceContainerHigh = Color(0xFF17191F),
-//                surfaceContainerHighest = Color(0xFF23262E),
-//                surfaceVariant = Color(0xFF23262E),
-//                surfaceBright = Color(0xFF292C34),
-//                surfaceDim = Color(0xFF0D0E12),
-
-                //Google Phone & Contact
-//                background = Color(0xFF17191F),
-//                surfaceContainerLowest = Color(0xFF0D0E12), // Dialpad Key
-//                surface = Color(0xFF17191F), // Popup Menu
-//                surfaceContainerLow = Color(0xFF121318), // Bottom Bar, Alt Card, ModalBottomSheet
-//                surfaceContainer = Color(0xFF1D1F27), // Dialpad, Card Phone, Search
-//                surfaceContainerHigh = Color(0xFF20222A), // Little Button
-//                surfaceContainerHighest = Color(0xFF292C34), // Button Incoming Call, Card Contacts
-//                surfaceVariant = Color(0xFF23262E), // Bottom Bar Contacts, Search Contacts, Header Card Contacts
-
-                //My color
                 background = Color(0xFF17191F),
                 surfaceContainerLowest = Color(0xFF0D0E12), // Dialpad Key
                 surface = Color(0xFF17191F),
@@ -236,28 +189,6 @@ fun Rill4Theme(
             )
             else dynamicLightColorScheme(context).copy(
                 //Default color, Lighter -> Darker
-//                background = Color(0xFFFAF8FE),
-//                surfaceContainerLowest = Color(0xFFFFFFFF),
-//                surface = Color(0xFFFAF8FE),
-//                surfaceContainerLow = Color(0xFFF3F3FA),
-//                surfaceContainer = Color(0xFFEDEDF6), // Dialpad
-//                surfaceContainerHigh = Color(0xFFE7E7F1),
-//                surfaceContainerHighest = Color(0xFFE1E2ED),
-//                surfaceVariant = Color(0xFFE1E2ED),
-//                surfaceBright = Color(0xFFFAF8FE),
-//                surfaceDim = Color(0xFFD8D9E4),
-
-                //Google Phone & Contact
-//                background = Color(0xFFEDEDF6),
-//                surfaceContainerLowest = Color(0xFFFAF8FE), // Dialpad Key, Card Phone, Button Incoming Call, Card Contacts, Search
-//                surface = Color(0xFFEDEDF6), // Popup Menu
-//                surfaceContainerLow = Color(0xFFF3F3FA), // Alt Card, ModalBottomSheet
-//                surfaceContainer = Color(0xFFE7E7F1), //
-//                surfaceContainerHigh = Color(0xFFE5E6F0), // Little Button
-//                surfaceContainerHighest = Color(0xFFE7E7F1), // Bottom Bar, Dialpad
-//                surfaceVariant = Color(0xFFE1E2ED), // Bottom Bar Contacts, Search Contacts, Header Card Contacts
-
-                //My color
                 background = Color(0xFFEDEDF6),
                 surfaceContainerLowest = Color(0xFFFAF8FE), // Dialpad Key
                 surface = Color(0xFFEDEDF6),

@@ -19,10 +19,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.CallMade
 import androidx.compose.material.icons.automirrored.filled.CallMissed
 import androidx.compose.material.icons.automirrored.filled.CallReceived
+import androidx.compose.material.icons.automirrored.filled.StarHalf
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.Call
+import androidx.compose.material.icons.rounded.CheckBox
+import androidx.compose.material.icons.rounded.ContentCopy
+import androidx.compose.material.icons.rounded.TravelExplore
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,12 +38,14 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.forceLtr
 import dev.goodwy.rphone.controller.util.formatDate
 import dev.goodwy.rphone.controller.util.formatSecondsToShortTimeString
 import dev.goodwy.rphone.controller.util.getPhoneTypeText
+import dev.goodwy.rphone.controller.util.launchInternetSearch
 import dev.goodwy.rphone.controller.util.toast
 import dev.goodwy.rphone.modal.data.CallLogEntry
 import dev.goodwy.rphone.view.theme.customColors
@@ -105,9 +111,10 @@ fun CallLogTile(
 
     Box(modifier = Modifier.fillMaxWidth()) {
         val simLabel = if (showSimLabel && log.simLabel != null) " • " + log.simLabel else ""
+        val displayName = if (log.name == log.number) log.number.forceLtr() else log.name?.ifEmpty { log.number } ?: log.number.ifEmpty { "Unknown" }
         CallLogListItem(
             headline = buildString {
-                append(if (log.name == log.number) log.number.forceLtr() else log.name?.ifEmpty { log.number } ?: log.number.ifEmpty { "Unknown" })
+                append(displayName)
                 if (log.count > 1) append(" (${log.count})")
             },
             supporting = buildString {
@@ -118,7 +125,7 @@ fun CallLogTile(
                     append(context.formatDate(log.date, true) + simLabel)
                 }
             },
-            avatarName  = log.name ?: log.number,
+            avatarName  = displayName,
             photoUri    = log.photoUri,
             supportingIcon = when (log.type) {
                 CallLog.Calls.MISSED_TYPE   -> Icons.AutoMirrored.Filled.CallMissed
@@ -162,7 +169,7 @@ fun CallLogTile(
                 DropdownMenuItem(
                     contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
                     text = { Text(stringResource(R.string.select)) },
-                    leadingIcon = { Icon(Icons.Default.CheckBox, null) },
+                    leadingIcon = { Icon(Icons.Rounded.CheckBox, null) },
                     onClick = { showMenu = false; onLongClick(log) }
                 )
                 HorizontalDivider(
@@ -192,7 +199,7 @@ fun CallLogTile(
                 DropdownMenuItem(
                     contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
                     text = { Text(stringResource(R.string.copy)) },
-                    leadingIcon = { Icon(Icons.Default.ContentCopy, null) },
+                    leadingIcon = { Icon(Icons.Rounded.ContentCopy, null) },
                     onClick = {
                         showMenu = false
                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
@@ -211,37 +218,37 @@ fun CallLogTile(
                 DropdownMenuItem(
                     contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
                     text = { Text(stringResource(R.string.show_full_history)) },
-                    leadingIcon = { Icon(Icons.Default.AccessTime, null) },
+                    leadingIcon = { Icon(Icons.Rounded.AccessTime, null) },
                     onClick = {
                         showMenu = false
                         onShowHistory()
                     }
                 )
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                )
-                val deleted = stringResource(R.string.deleted_from_call_log)
-                val notDeleted = stringResource(R.string.could_not_delete)
+                if (log.number.isNotBlank()) {
                     DropdownMenuItem(
-                    contentPadding = PaddingValues(start = 20.dp, end = 24.dp),
-                    text = { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) },
-                    leadingIcon = { Icon(ImageVector.vectorResource(id = R.drawable.ic_delete), null, tint = MaterialTheme.colorScheme.error) },
-                    onClick = {
-                        showMenu = false
-                        try {
-                            // Delete only this specific call log entry by its exact timestamp
-                            context.contentResolver.delete(
-                                CallLog.Calls.CONTENT_URI,
-                                "${CallLog.Calls.NUMBER} = ? AND ${CallLog.Calls.DATE} = ?",
-                                arrayOf(log.number, log.date.toString())
-                            )
-                            onDelete?.invoke()
-                            context.toast(deleted)
-                        } catch (_: Exception) {
-                            context.toast(notDeleted)
+                        contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
+                        text = { Text(stringResource(R.string.lookup)) },
+                        leadingIcon = { Icon(Icons.Rounded.TravelExplore, null) },
+                        onClick = {
+                            showMenu = false
+                            context.launchInternetSearch(log.number)
                         }
-                    }
-                )
+                    )
+                }
+                if (onDelete != null) {
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    )
+                    DropdownMenuItem(
+                        contentPadding = PaddingValues(start = 20.dp, end = 24.dp),
+                        text = { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) },
+                        leadingIcon = { Icon(ImageVector.vectorResource(id = R.drawable.ic_delete), null, tint = MaterialTheme.colorScheme.error) },
+                        onClick = {
+                            showMenu = false
+                            onDelete()
+                        }
+                    )
+                }
             }
         }
     }
@@ -260,7 +267,7 @@ fun BatchCallLogActionBar(
     onSelectAll: () -> Unit,
     isAllSelected: Boolean
 ) {
-//    var showSelectionMenuOuter by remember { mutableStateOf(false) }
+    var showSelectionMenuOuter by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
     var showClearAllConfirm by remember { mutableStateOf(false) }
     var showBlockConfirm by remember { mutableStateOf(false) }
@@ -287,13 +294,13 @@ fun BatchCallLogActionBar(
                 toast = if (isAllSelected) stringResource(R.string.deselect_all) else stringResource(R.string.select_all)
             )
             Spacer(modifier = Modifier.weight(1f))
-            if (onCallLogs != null) {
-                RillIconButton(
-                    onClick = onCallLogs,
-                    imageVector = Icons.Rounded.AccessTime,
-                    contentDescription = stringResource(R.string.show_full_history)
-                )
-            }
+//            if (onCallLogs != null) {
+//                RillIconButton(
+//                    onClick = onCallLogs,
+//                    imageVector = Icons.Rounded.AccessTime,
+//                    contentDescription = stringResource(R.string.show_full_history)
+//                )
+//            }
             if (onBlock != null) {
                 RillIconButton(
                     onClick = { showBlockConfirm = true },
@@ -301,24 +308,67 @@ fun BatchCallLogActionBar(
                     contentDescription = stringResource(R.string.action_block_number)
                 )
             }
-            if (onClearAll != null) {
-                RillIconButton(
-                    onClick = { showClearAllConfirm = true },
-                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_delete_sweep),
-                    contentDescription = stringResource(R.string.clear_all_filtered_logs)
-                )
-            }
+//            if (onClearAll != null) {
+//                RillIconButton(
+//                    onClick = { showClearAllConfirm = true },
+//                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_delete_sweep),
+//                    contentDescription = stringResource(R.string.clear_all_filtered_logs)
+//                )
+//            }
             RillIconButton(
                 onClick = { showDeleteConfirm = true },
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_delete),
                 contentDescription = stringResource(R.string.delete_call_logs)
             )
-            if (onShare != null) {
+//            if (onShare != null) {
+//                RillIconButton(
+//                    onClick = onShare,
+//                    imageVector = Icons.Default.Share,
+//                    contentDescription = stringResource(R.string.share)
+//                )
+//            }
+
+            Box {
                 RillIconButton(
-                    onClick = onShare,
-                    imageVector = Icons.Default.Share,
-                    contentDescription = stringResource(R.string.share)
+                    onClick = { showSelectionMenuOuter = true },
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = stringResource(R.string.more)
                 )
+                DropdownMenu(shape = RoundedCornerShape(16.dp), expanded = showSelectionMenuOuter, onDismissRequest = { showSelectionMenuOuter = false }) {
+                    if (onClearAll != null) {
+                        DropdownMenuItem(
+                            contentPadding = PaddingValues(start = 16.dp, end = 20.dp),
+                            text = { Text(stringResource(R.string.clear_all_filtered_logs), color = MaterialTheme.colorScheme.error, lineHeight = 14.sp) },
+                            leadingIcon = { Icon(ImageVector.vectorResource(id = R.drawable.ic_delete_sweep), stringResource(R.string.clear_all_filtered_logs), tint = MaterialTheme.colorScheme.error) },
+                            onClick = {
+                                showSelectionMenuOuter = false
+                                showClearAllConfirm = true
+                            }
+                        )
+                    }
+                    if (onShare != null) {
+                        DropdownMenuItem(
+                            contentPadding = PaddingValues(start = 16.dp, end = 20.dp),
+                            text = { Text(stringResource(R.string.share), lineHeight = 14.sp) },
+                            leadingIcon = { Icon(Icons.Default.Share, stringResource(R.string.share)) },
+                            onClick = {
+                                showSelectionMenuOuter = false
+                                onShare()
+                            }
+                        )
+                    }
+                    if (onCallLogs != null) {
+                        DropdownMenuItem(
+                            contentPadding = PaddingValues(start = 16.dp, end = 20.dp),
+                            text = { Text(stringResource(R.string.show_full_history), lineHeight = 14.sp) },
+                            leadingIcon = { Icon(Icons.Rounded.AccessTime, stringResource(R.string.show_full_history)) },
+                            onClick = {
+                                showSelectionMenuOuter = false
+                                onCallLogs()
+                            }
+                        )
+                    }
+                }
             }
         }
     }

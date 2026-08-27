@@ -30,10 +30,6 @@ import androidx.navigation.compose.rememberNavController
 import dev.goodwy.rphone.controller.CallService
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.CallActivity
-import dev.goodwy.rphone.controller.MainViewModel
-import dev.goodwy.rphone.controller.NavigationTarget
-import dev.goodwy.rphone.controller.CallViewModel
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import dev.goodwy.rphone.view.components.BottomBar
 import dev.goodwy.rphone.liquidglass.LocalLiquidGlassBackdrop
 import dev.goodwy.rphone.liquidglass.backdrops.rememberLayerBackdrop
@@ -107,12 +103,16 @@ import com.ramcosta.composedestinations.generated.destinations.RecentScreenDesti
 import com.ramcosta.composedestinations.generated.destinations.SettingsScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.SoundVibrationScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.SpamScreenDestination
+import dev.goodwy.rphone.controller.CallViewModel
+import dev.goodwy.rphone.controller.MainViewModel
+import dev.goodwy.rphone.controller.NavigationTarget
 import dev.goodwy.rphone.controller.PurchaseHelper
 import dev.goodwy.rphone.controller.util.makeCall
 import dev.goodwy.rphone.view.components.TabSpec
 import dev.goodwy.rphone.view.components.parseTabOrder
 import dev.goodwy.rphone.view.components.performAppHaptic
 import dev.goodwy.rphone.view.theme.isLandscapeMode
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.context.GlobalContext
 
 class MainActivity : FragmentActivity() {
@@ -125,6 +125,8 @@ class MainActivity : FragmentActivity() {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         intentState = intent
+        // enableEdgeToEdge() triggers Adreno GPU driver SIGSEGV on first RenderThread draw.
+        // Edge-to-edge is set via theme XML instead (windowDrawsSystemBarBackgrounds etc).
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         prefs = GlobalContext.get().get<PreferenceManager>()
@@ -160,8 +162,8 @@ class MainActivity : FragmentActivity() {
                     val settingsVer by prefs.settingsChanged.collectAsStateWithLifecycle()
                     val biometricType = remember(settingsVer) { prefs.getString(PreferenceManager.KEY_BIOMETRICS_TYPE, "") ?: "" }
                     val appLockEnabled = remember(settingsVer) { prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK, false) }
-                    
-                val isUnlocked by mainViewModel.isUnlocked.collectAsStateWithLifecycle()
+
+                    val isUnlocked by mainViewModel.isUnlocked.collectAsStateWithLifecycle()
 
                     val lastOpenedTab = remember {
                         prefs.getString(PreferenceManager.KEY_LAST_OPENED_TAB, null)
@@ -659,11 +661,13 @@ class MainActivity : FragmentActivity() {
 
     override fun onStop() {
         super.onStop()
+        // Lock ONLY when minimising (if the relevant setting is enabled)
         mainViewModel.onStop()
     }
 
     override fun onResume() {
         super.onResume()
+        // If we’ve returned from the background and the ‘lock on minimisation’ setting is enabled, we’ll ask for the password
         mainViewModel.onResume()
     }
 

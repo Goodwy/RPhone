@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Person
 import android.content.Context
+import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -16,11 +17,13 @@ import android.telecom.CallAudioState
 import android.telecom.TelecomManager
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getString
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.net.toUri
+import dev.goodwy.rphone.MainActivity
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.PreferenceManager
-import dev.goodwy.rphone.domain.model.CallerMetadata
 
 class CallNotificationManager(
     private val context: Context,
@@ -34,11 +37,25 @@ class CallNotificationManager(
         const val NOTIFICATION_ID = 101
     }
 
+    // Repository of active missed call notifications
+    private val activeMissedCallIds = mutableSetOf<Int>()
+
+    fun clearAllMissedCallNotifications(context: Context) {
+        val notificationManager = context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        // We delete all the IDs that we have saved
+        activeMissedCallIds.forEach { id ->
+            notificationManager.cancel(id)
+        }
+        // We’re clearing the list so we don’t delete them again
+        activeMissedCallIds.clear()
+    }
+
     private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     fun buildCallNotification(
         call: Call,
-        metadata: CallerMetadata?,
+        contactName: String,
+        photoUri: String?,
         audioState: CallAudioState?
     ): Notification {
         val fullscreenCalls = preferenceManager.getBoolean(PreferenceManager.KEY_ALWAYS_FULLSCREEN_CALLS, false)
@@ -66,16 +83,7 @@ class CallNotificationManager(
         }
         notificationManager.createNotificationChannel(channel)
 
-        val handle = call.details.handle
-        val number = handle?.schemeSpecificPart ?: ""
-        
-        val contactName = if (metadata != null && metadata.number == number) {
-            metadata.name
-        } else {
-            number.ifEmpty { context.getString(R.string.label_unknown_number) }
-        }
-
-        val contactPhoto = getContactBitmap(metadata?.photoUri)
+        val contactPhoto = getContactBitmap(photoUri)
 
         val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
         val accountHandle = call.details.accountHandle
@@ -254,7 +262,7 @@ class CallNotificationManager(
                 )
                 builder.addAction(
                     if (isMuted) R.drawable.ic_notif_mic_off else R.drawable.ic_notif_mic_on,
-                    if (isMuted) "Unmute" else "Mute",
+                    if (isMuted) context.getString(R.string.unmute) else context.getString(R.string.mute),
                     mutePendingIntent
                 )
             }
@@ -268,7 +276,7 @@ class CallNotificationManager(
 
     fun showBlockedNotification(number: String) {
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_menu_close_clear_cancel)
+            .setSmallIcon(R.drawable.ic_close)
             .setContentTitle(context.getString(R.string.notif_blocked_call_title))
             .setContentText(context.getString(R.string.notif_blocked_call_text, number))
             .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -286,5 +294,132 @@ class CallNotificationManager(
         } catch (_: Exception) {
             null
         }
+    }
+
+    fun showMissedCallNotification(
+        call: Call,
+        contactName: String,
+        photoUri: String?
+    ) {
+        val channel = NotificationChannel(
+            MISSED_CHANNEL_ID,
+            context.getString(R.string.notif_channel_missed_calls),
+            NotificationManager.IMPORTANCE_DEFAULT
+        ).apply {
+            lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+            enableVibration(true)
+            setShowBadge(true)
+        }
+        notificationManager.createNotificationChannel(channel)
+
+        val handle = call.details.handle
+        val number = handle?.schemeSpecificPart ?: ""
+
+        val contactPhoto = getContactBitmap(photoUri)
+        val notificationId = number.hashCode()
+        activeMissedCallIds.add(notificationId)
+
+        val intent = Intent(context, MainActivity::class.java).apply {
+            action = "dev.goodwy.rphone.ACTION_VIEW_RECENTS"
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        val pendingIntent = PendingIntent.getActivity(context, 10, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+
+
+//        val telecomManager = getSystemService(TELECOM_SERVICE) as TelecomManager
+//        val simLabel = call.details.accountHandle?.let {
+//            try { telecomManager.getPhoneAccount(it)?.label?.toString() } catch (e: SecurityException) { null }
+//        }
+//
+//        val timeString = android.text.format.DateFormat.getTimeFormat(this).format(java.util.Date())
+//
+//        val missedCallText = buildString {
+//            append(getString(R.string.notif_missed_call_text, contactName, timeString))
+//            if (simLabel != null) {
+//                append(" ")
+//                append(getString(R.string.notif_via_sim, simLabel))
+//            }
+//        }
+
+//        val missedCallText = buildString {
+//            append(contactName)
+//            if (simLabel != null) {
+//                append(" ")
+//                val sim = getString(R.string.notif_via_sim, simLabel)
+//                append("($sim)")
+//            }
+//        }
+
+        val callActionIntent = Intent(context, NotificationActivity::class.java).apply {
+            action = NotificationActivity.ACTION_CALL
+            putExtra(NotificationActivity.EXTRA_NUMBER, number)
+        }
+        val callPendingIntent = PendingIntent.getActivity(
+            context,
+            notificationId,
+            callActionIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val smsActionIntent = Intent(context, NotificationActivity::class.java).apply {
+            action = NotificationActivity.ACTION_SMS
+            putExtra(NotificationActivity.EXTRA_NUMBER, number)
+        }
+        val smsPendingIntent = PendingIntent.getActivity(
+            context,
+            notificationId + 1,
+            smsActionIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val personBuilder = androidx.core.app.Person.Builder()
+            .setName(contactName)
+            .setImportant(true)
+
+        if (contactPhoto != null) {
+            personBuilder.setIcon(IconCompat.createWithBitmap(contactPhoto))
+        }
+        val person = personBuilder.build()
+
+        val builder = NotificationCompat.Builder(context,
+            MISSED_CHANNEL_ID
+        )
+            .setSmallIcon(R.drawable.ic_phone_missed)
+//            .setContentTitle(getString(R.string.notif_missed_call_title))
+//            .setContentText(missedCallText)
+//            .setLargeIcon(contactPhoto)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .setColor(ContextCompat.getColor(context, R.color.notification_color))
+            .setStyle(
+                NotificationCompat.MessagingStyle(person)
+                    .addMessage(
+                        NotificationCompat.MessagingStyle.Message(
+                            context.getString(R.string.notif_missed_call_title),
+                            System.currentTimeMillis(),
+                            person
+                        )
+                    )
+                    .setGroupConversation(false)
+            )
+            .setColorized(false)
+            .addAction(
+                NotificationCompat.Action.Builder(
+                    R.drawable.ic_widget_call,
+                    context.getString(R.string.notif_call_back),
+                    callPendingIntent
+                ).build()
+            )
+            .addAction(
+                NotificationCompat.Action.Builder(
+                    R.drawable.ic_message_filled,
+                    context.getString(R.string.message),
+                    smsPendingIntent
+                ).build()
+            )
+
+        notificationManager.notify(notificationId, builder.build())
     }
 }

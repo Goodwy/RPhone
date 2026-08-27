@@ -21,6 +21,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.rounded.Call
+import androidx.compose.material.icons.rounded.CheckBox
+import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -40,8 +42,6 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.PreferenceManager
-import dev.goodwy.rphone.view.components.RillAvatar
-import dev.goodwy.rphone.view.components.performAppHaptic
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import org.koin.compose.koinInject
 import androidx.core.net.toUri
@@ -218,7 +218,7 @@ fun SingleTile(
                     DropdownMenuItem(
                         contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
                         text = { Text(stringResource(R.string.select)) },
-                        leadingIcon = { Icon(Icons.Default.CheckBox, null) },
+                        leadingIcon = { Icon(Icons.Rounded.CheckBox, null) },
                         onClick = { showMenu = false; onSelectMode() }
                     )
                     HorizontalDivider(
@@ -247,7 +247,7 @@ fun SingleTile(
                     DropdownMenuItem(
                         contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
                         text = { Text(stringResource(R.string.copy)) },
-                        leadingIcon = { Icon(Icons.Default.ContentCopy, null) },
+                        leadingIcon = { Icon(Icons.Rounded.ContentCopy, null) },
                         onClick = {
                             showMenu = false
                             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager

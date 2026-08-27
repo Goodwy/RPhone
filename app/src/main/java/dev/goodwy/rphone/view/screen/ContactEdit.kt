@@ -30,6 +30,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
@@ -60,6 +61,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -69,6 +71,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -98,6 +101,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.goodwy.rphone.controller.util.CallBackgroundStore
+import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.device_only
 import dev.goodwy.rphone.private_only
 import dev.goodwy.rphone.view.components.RillDialog
@@ -337,6 +341,11 @@ fun ContactEditScreen(
 
     // Track Changes
     fun hasChanges(): Boolean {
+        if (tempPhotoUri != null) {
+            photoUri = tempPhotoUri
+            tempPhotoUri = null
+        }
+
         val currentContact = Contact(
             id = contactId ?: "0",
             namePrefix = namePrefix,
@@ -384,12 +393,14 @@ fun ContactEditScreen(
             isPrivate = false
         )
 
-        // Checking the background changes
+        val hasPhotoChange = tempPhotoUri != null ||
+                (existingContact?.photoUri != photoUri)
+
         val hasBackgroundChange = selectedBackgroundUri != null ||
                 tempCallBackground != null ||
                 tempBackgroundDeleted
 
-        return currentContact != originalContact || hasBackgroundChange
+        return currentContact != originalContact || hasBackgroundChange || hasPhotoChange
     }
 
     // Status for the exit confirmation dialog
@@ -847,16 +858,20 @@ fun ContactEditScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(contentAlignment = Alignment.BottomEnd) {
+                            val displayPhotoUri = tempPhotoUri ?: photoUri
                             RillAvatar(
                                 name = getDisplayName(currentContactForPreview),
-                                photoUri = photoUri,
+                                photoUri = displayPhotoUri,
                                 modifier = Modifier.size(120.dp),
                                 shape = CircleShape
                             )
 
-                            if (photoUri != null) {
+                            if (displayPhotoUri != null) {
                                 SmallFloatingActionButton(
-                                    onClick = { photoUri = null },
+                                    onClick = {
+                                        photoUri = null
+                                        tempPhotoUri = null
+                                    },
                                     containerColor = MaterialTheme.colorScheme.customColors.colorRed,
                                     contentColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
                                     shape = CircleShape,
@@ -872,7 +887,7 @@ fun ContactEditScreen(
                                 ) {
                                     Icon(
                                         ImageVector.vectorResource(id = R.drawable.ic_delete),
-                                        null,
+                                        stringResource(R.string.delete),
                                         modifier = Modifier.size(20.dp)
                                     )
                                 }
@@ -1325,19 +1340,13 @@ fun ContactEditScreen(
                                     }
                                 )
                             }
-                            TextButton(
+                            AddButton(
+                                text = stringResource(R.string.add_phone),
                                 onClick = {
                                     phoneDetails.add(blankPhoneDetail)
                                     phoneNumbers.add("")
-                                },
-                                modifier = Modifier
-                                    .align(Alignment.Start)
-                                    .padding(horizontal = paddingHorizontal)
-                            ) {
-                                Icon(Icons.Default.Add, null)
-                                Spacer(Modifier.width(8.dp))
-                                Text(stringResource(R.string.add_phone))
-                            }
+                                }
+                            )
                         }
                     }
 
@@ -1368,16 +1377,10 @@ fun ContactEditScreen(
                                     }
                                 )
                             }
-                            TextButton(
-                                onClick = { emails.add(blankEmail) },
-                                modifier = Modifier
-                                    .align(Alignment.Start)
-                                    .padding(horizontal = paddingHorizontal)
-                            ) {
-                                Icon(Icons.Default.Add, null)
-                                Spacer(Modifier.width(8.dp))
-                                Text(stringResource(R.string.add_email))
-                            }
+                            AddButton(
+                                text = stringResource(R.string.add_email),
+                                onClick = { emails.add(blankEmail) }
+                            )
                         }
                     }
 
@@ -1407,16 +1410,10 @@ fun ContactEditScreen(
                                     }
                                 )
                             }
-                            TextButton(
-                                onClick = { events.add(blankEvent) },
-                                modifier = Modifier
-                                    .align(Alignment.Start)
-                                    .padding(horizontal = paddingHorizontal)
-                            ) {
-                                Icon(Icons.Default.Add, null)
-                                Spacer(Modifier.width(8.dp))
-                                Text(stringResource(R.string.add_event))
-                            }
+                            AddButton(
+                                text = stringResource(R.string.add_event),
+                                onClick = { events.add(blankEvent) }
+                            )
                         }
                     }
 
@@ -1446,16 +1443,10 @@ fun ContactEditScreen(
                                     }
                                 )
                             }
-                            TextButton(
-                                onClick = { addresses.add(blankAddress) },
-                                modifier = Modifier
-                                    .align(Alignment.Start)
-                                    .padding(horizontal = paddingHorizontal)
-                            ) {
-                                Icon(Icons.Default.Add, null)
-                                Spacer(Modifier.width(8.dp))
-                                Text(stringResource(R.string.add_address))
-                            }
+                            AddButton(
+                                text = stringResource(R.string.add_address),
+                                onClick = { addresses.add(blankAddress) }
+                            )
                         }
                     }
 
@@ -1594,16 +1585,20 @@ fun ContactEditScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(contentAlignment = Alignment.BottomEnd) {
+                            val displayPhotoUri = tempPhotoUri ?: photoUri
                             RillAvatar(
                                 name = getDisplayName(currentContactForPreview),
-                                photoUri = photoUri,
+                                photoUri = displayPhotoUri,
                                 modifier = Modifier.size(120.dp),
                                 shape = CircleShape
                             )
 
-                            if (photoUri != null) {
+                            if (displayPhotoUri != null) {
                                 SmallFloatingActionButton(
-                                    onClick = { photoUri = null },
+                                    onClick = {
+                                        photoUri = null
+                                        tempPhotoUri = null
+                                    },
                                     containerColor = MaterialTheme.colorScheme.customColors.colorRed,
                                     contentColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
                                     shape = CircleShape,
@@ -1619,7 +1614,7 @@ fun ContactEditScreen(
                                 ) {
                                     Icon(
                                         ImageVector.vectorResource(id = R.drawable.ic_delete),
-                                        null,
+                                        stringResource(R.string.delete),
                                         modifier = Modifier.size(20.dp)
                                     )
                                 }
@@ -2058,19 +2053,13 @@ fun ContactEditScreen(
                                 }
                             )
                         }
-                        TextButton(
+                        AddButton(
+                            text = stringResource(R.string.add_phone),
                             onClick = {
                                 phoneDetails.add(blankPhoneDetail)
                                 phoneNumbers.add("")
-                            },
-                            modifier = Modifier
-                                .align(Alignment.Start)
-                                .padding(horizontal = paddingHorizontal)
-                        ) {
-                            Icon(Icons.Default.Add, null)
-                            Spacer(Modifier.width(8.dp))
-                            Text(stringResource(R.string.add_phone))
-                        }
+                            }
+                        )
                     }
                 }
 
@@ -2101,16 +2090,10 @@ fun ContactEditScreen(
                                 }
                             )
                         }
-                        TextButton(
-                            onClick = { emails.add(blankEmail) },
-                            modifier = Modifier
-                                .align(Alignment.Start)
-                                .padding(horizontal = paddingHorizontal)
-                        ) {
-                            Icon(Icons.Default.Add, null)
-                            Spacer(Modifier.width(8.dp))
-                            Text(stringResource(R.string.add_email))
-                        }
+                        AddButton(
+                            text = stringResource(R.string.add_email),
+                            onClick = { emails.add(blankEmail) }
+                        )
                     }
                 }
 
@@ -2147,16 +2130,10 @@ fun ContactEditScreen(
                                 }
                             )
                         }
-                        TextButton(
-                            onClick = { events.add(blankEvent) },
-                            modifier = Modifier
-                                .align(Alignment.Start)
-                                .padding(horizontal = paddingHorizontal)
-                        ) {
-                            Icon(Icons.Default.Add, null)
-                            Spacer(Modifier.width(8.dp))
-                            Text(stringResource(R.string.add_event))
-                        }
+                        AddButton(
+                            text = stringResource(R.string.add_event),
+                            onClick = { events.add(blankEvent) }
+                        )
                     }
                 }
 
@@ -2193,16 +2170,10 @@ fun ContactEditScreen(
                                 }
                             )
                         }
-                        TextButton(
-                            onClick = { addresses.add(blankAddress) },
-                            modifier = Modifier
-                                .align(Alignment.Start)
-                                .padding(horizontal = paddingHorizontal)
-                        ) {
-                            Icon(Icons.Default.Add, null)
-                            Spacer(Modifier.width(8.dp))
-                            Text(stringResource(R.string.add_address))
-                        }
+                        AddButton(
+                            text = stringResource(R.string.add_address),
+                            onClick = { addresses.add(blankAddress) }
+                        )
                     }
                 }
 
@@ -2942,6 +2913,35 @@ fun FieldOption(
             colors = CheckboxDefaults.colors(
                 checkedColor = MaterialTheme.colorScheme.primary
             )
+        )
+    }
+}
+
+@Composable
+fun AddButton(
+    text: String,
+    onClick: () -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .padding(horizontal = paddingHorizontal - 12.dp)
+            .clip(RoundedCornerShape(50))
+            .combinedClickable(
+                onClick = onClick,
+                interactionSource = null,
+                indication = ripple(bounded = true),
+            ),
+        shape = RoundedCornerShape(50),
+        color = Color.Transparent
+    ) {
+        Text(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            color = MaterialTheme.colorScheme.primary
         )
     }
 }

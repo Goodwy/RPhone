@@ -50,11 +50,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import dev.goodwy.rphone.R
+import dev.goodwy.rphone.controller.util.forceLtr
 import dev.goodwy.rphone.view.components.RillAvatar
 import dev.goodwy.rphone.view.theme.MyColors.dialpadKeyColor
 import dev.goodwy.rphone.view.theme.Rill4Theme
@@ -63,6 +63,7 @@ import dev.goodwy.rphone.view.theme.color_call_end
 import dev.goodwy.rphone.modal.`interface`.ICallRepository
 import org.koin.android.ext.android.inject
 import kotlinx.coroutines.*
+import kotlin.text.ifEmpty
 
 class FloatingCallService : Service() {
 
@@ -102,7 +103,6 @@ class FloatingCallService : Service() {
 
                 bubbleParams.x = bubbleParams.x.coerceIn(0, (screenW - bubbleSizePx).coerceAtLeast(0))
                 bubbleParams.y = bubbleParams.y.coerceIn(0, (screenH - bubbleSizePx).coerceAtLeast(0))
-                try { bubbleView?.let { wm.updateViewLayout(it, bubbleParams) } } catch (_: Exception) {}
             }
         }
     }
@@ -168,18 +168,18 @@ class FloatingCallService : Service() {
 
     private fun createBubble() {
         val cv = ComposeView(this).apply {
-            setFilterTouchesWhenObscured(true)
+            filterTouchesWhenObscured = true
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
             setViewTreeLifecycleOwner(lifecycleOwner)
             setViewTreeSavedStateRegistryOwner(lifecycleOwner)
-            setContent { Rill4Theme { BubbleUI(contactNameState.value, photoUriState.value) { if (menuView == null) showMenu() else dismissMenu() } } }
+            setContent { Rill4Theme { BubbleUI(contactNameState.value, phoneNumberState.value, photoUriState.value) { if (menuView == null) showMenu() else dismissMenu() } } }
         }
         bubbleView = cv
         try { wm.addView(cv, bubbleParams) } catch (_: Exception) { stopSelf() }
     }
 
     @Composable
-    private fun BubbleUI(name: String, photoUri: String?, onTap: () -> Unit) {
+    private fun BubbleUI(name: String, phoneNumber: String, photoUri: String?, onTap: () -> Unit) {
         val context = LocalContext.current
         val km = remember { context.getSystemService(KeyguardManager::class.java) }
         val isLocked = km.isKeyguardLocked
@@ -259,22 +259,19 @@ class FloatingCallService : Service() {
                         modifier = Modifier.fillMaxSize()
                     )
                 } else {
-                    Box(contentAlignment = Alignment.Center) {
-                        if (isLocked) {
-                            Icon(
-                                imageVector = Icons.Rounded.Call,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = Modifier.size(28.dp)
-                            )
-                        } else {
-                            Text(
-                                text       = name.firstOrNull()?.uppercaseChar()?.toString() ?: "?",
-                                fontWeight = FontWeight.Bold,
-                                fontSize   = 22.sp,
-                                color      = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        }
+                    val displayName = if (name == phoneNumber) phoneNumber.forceLtr() else name.ifEmpty { phoneNumber }
+                    if (isLocked) {
+                        Icon(
+                            imageVector = Icons.Rounded.Call,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    } else {
+                        RillAvatar(
+                            name     = displayName,
+                            modifier = Modifier.fillMaxSize()
+                        )
                     }
                 }
             }
