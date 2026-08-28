@@ -119,6 +119,32 @@ class PreferenceManager(context: Context) {
         scope.launch { dataStore.edit { it[floatPreferencesKey(key)] = value } }
     }
 
+    /** Returns a map of all preferences in the DataStore for backup purposes. */
+    fun getAllPreferences(): Map<String, Any> {
+        return _prefsCache.value.asMap().mapKeys { it.key.name }.mapValues { it.value }
+    }
+
+    /** Restores preferences from a map, typically from a backup. */
+    fun restoreAllPreferences(preferences: Map<String, Any>) {
+        scope.launch {
+            dataStore.edit { prefs ->
+                preferences.forEach { (key, value) ->
+                    when (value) {
+                        is Boolean -> prefs[booleanPreferencesKey(key)] = value
+                        is Int -> prefs[intPreferencesKey(key)] = value
+                        is Long -> prefs[longPreferencesKey(key)] = value
+                        is Float -> prefs[floatPreferencesKey(key)] = value
+                        is String -> prefs[stringPreferencesKey(key)] = value
+                        is Double -> prefs[floatPreferencesKey(key)] = value.toFloat()
+                        // Handle comma-separated strings that represent Sets (legacy or current backup format)
+                        // If it's a known set key, we might want to handle it specifically, 
+                        // but usually the app reads them as CSV anyway.
+                    }
+                }
+            }
+        }
+    }
+
     /** Returns true if an incoming call from [phoneNumber] should be gated behind biometric. */
     fun shouldGateCallWithBiometric(phoneNumber: String?): Boolean {
         if (!getBoolean(KEY_BIOMETRICS_CALL_LOCK, false)) return false

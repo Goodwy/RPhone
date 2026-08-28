@@ -260,26 +260,6 @@ class ContactsRepository(
         }
     }
 
-    private fun getNumbersForContactId(contactId: String): List<String> {
-        val numbers = mutableListOf<String>()
-        try {
-            contentResolver.query(
-                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                arrayOf(ContactsContract.CommonDataKinds.Phone.NUMBER),
-                "${ContactsContract.CommonDataKinds.Phone.CONTACT_ID} = ?",
-                arrayOf(contactId),
-                null
-            )?.use { cursor ->
-                while (cursor.moveToNext()) {
-                    cursor.getString(0)?.let { numbers.add(it) }
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        return numbers
-    }
-
     override suspend fun getContactById(contactId: String): Contact? = withContext(Dispatchers.IO) {
         if (contactId.startsWith("p")) {
             val id = contactId.substring(1).toLongOrNull() ?: return@withContext null

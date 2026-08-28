@@ -132,8 +132,6 @@ class CallService : InCallService() {
 
         if (isIncoming && wasNeverConnected && (cause?.code == DisconnectCause.MISSED || cause?.code == DisconnectCause.REMOTE || cause?.code == DisconnectCause.REJECTED)) {
             if (!isNumberBlocked(number) || preferenceManager.getInt(PreferenceManager.KEY_BLOCK_LOG_VISIBILITY, 0) == 1) {
-                val handle = call.details.handle
-                val number = handle?.schemeSpecificPart ?: ""
                 val contactName = getContactNameFromCache(number)
                 val photoUri = getContactPhotoFromCache(number)
                 notificationManager.showMissedCallNotification(call, contactName, photoUri)
@@ -209,7 +207,6 @@ class CallService : InCallService() {
 
         val priorityCall = callsList.find { it.state == Call.STATE_RINGING }
             ?: activePreferred
-            ?: callsList.find { it.state == Call.STATE_RINGING }
             ?: callsList.find { it.state == Call.STATE_DIALING || it.state == Call.STATE_CONNECTING }
             ?: callsList.find { it.state == Call.STATE_ACTIVE }
             ?: callsList.find { it == preferred }

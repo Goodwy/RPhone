@@ -63,7 +63,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
     private val preferenceManager: PreferenceManager by inject()
     private val callViewModel: CallViewModel by inject()
     private var proximityWakeLock: PowerManager.WakeLock? = null
-    private var isFinishingCall = false
+    private val isFinishingCall = java.util.concurrent.atomic.AtomicBoolean(false)
     private var keyguardDismissRequested = false
     private val identityCache = mutableMapOf<String, CachedCallIdentity>()
 
@@ -382,17 +382,16 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        if (!isFinishingCall && callViewModel.allCalls.value.any { it.state != Call.STATE_DISCONNECTED }) {
+        if (!isFinishingCall.get() && callViewModel.allCalls.value.any { it.state != Call.STATE_DISCONNECTED }) {
             turnScreenOnAndShowWhileLocked()
         }
     }
 
     private fun dismissCallScreen() {
-        if (isFinishingCall) return
-        isFinishingCall = true
+        if (isFinishingCall.getAndSet(true)) return
 
         if (callViewModel.allCalls.value.any { it.state != Call.STATE_DISCONNECTED }) {
-            isFinishingCall = false
+            isFinishingCall.set(false)
             return
         }
 

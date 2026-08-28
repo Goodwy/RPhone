@@ -17,8 +17,7 @@ import android.telecom.CallAudioState
 import android.telecom.TelecomManager
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getString
-import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.content.getSystemService
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.net.toUri
 import dev.goodwy.rphone.MainActivity
@@ -39,6 +38,7 @@ class CallNotificationManager(
 
     // Repository of active missed call notifications
     private val activeMissedCallIds = mutableSetOf<Int>()
+    private val createdChannels = mutableSetOf<String>()
 
     fun clearAllMissedCallNotifications(context: Context) {
         val notificationManager = context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
@@ -60,28 +60,34 @@ class CallNotificationManager(
     ): Notification {
         val fullscreenCalls = preferenceManager.getBoolean(PreferenceManager.KEY_ALWAYS_FULLSCREEN_CALLS, false)
         val isRinging = call.state == Call.STATE_RINGING
+        val channelId = if (isRinging) {
+            if (fullscreenCalls) FULLSCREEN_INCOMING_CHANNEL_ID else INCOMING_CHANNEL_ID
+        } else CHANNEL_ID
 
-        val channel = if (isRinging) {
-            NotificationChannel(
-                if (fullscreenCalls) FULLSCREEN_INCOMING_CHANNEL_ID else INCOMING_CHANNEL_ID,
-                if (fullscreenCalls) context.getString(R.string.notif_channel_fullscreen_incoming_calls) else context.getString(R.string.notif_channel_incoming_calls),
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                enableVibration(true)
-                setBypassDnd(true)
+        if (!createdChannels.contains(channelId)) {
+            val channel = if (isRinging) {
+                NotificationChannel(
+                    channelId,
+                    if (fullscreenCalls) context.getString(R.string.notif_channel_fullscreen_incoming_calls) else context.getString(R.string.notif_channel_incoming_calls),
+                    NotificationManager.IMPORTANCE_HIGH
+                ).apply {
+                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                    enableVibration(true)
+                    setBypassDnd(true)
+                }
+            } else {
+                NotificationChannel(
+                    CHANNEL_ID,
+                    context.getString(R.string.notif_channel_outgoing_calls),
+                    NotificationManager.IMPORTANCE_LOW
+                ).apply {
+                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                    enableVibration(false)
+                }
             }
-        } else {
-            NotificationChannel(
-                CHANNEL_ID,
-                context.getString(R.string.notif_channel_outgoing_calls),
-                NotificationManager.IMPORTANCE_LOW
-            ).apply {
-                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                enableVibration(false)
-            }
+            notificationManager.createNotificationChannel(channel)
+            createdChannels.add(channelId)
         }
-        notificationManager.createNotificationChannel(channel)
 
         val contactPhoto = getContactBitmap(photoUri)
 
@@ -137,9 +143,6 @@ class CallNotificationManager(
                 append(context.getString(R.string.notif_via_sim, simLabel))
             }
         }
-        val channelId = if (isRinging) {
-            if (fullscreenCalls) FULLSCREEN_INCOMING_CHANNEL_ID else INCOMING_CHANNEL_ID
-        } else CHANNEL_ID
 
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val personBuilder = Person.Builder().setName(contactName).setImportant(true)
