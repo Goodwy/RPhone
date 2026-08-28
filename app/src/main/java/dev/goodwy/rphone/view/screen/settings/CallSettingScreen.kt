@@ -57,6 +57,7 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
     var autoSpeaker by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_AUTO_SPEAKER, false)) }
     var defaultSim by remember { mutableStateOf(prefs.getInt(PreferenceManager.KEY_DEFAULT_SIM, prefs.getDefaultSimIndexDefault())) }
     var fullscreenCalls by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_ALWAYS_FULLSCREEN_CALLS, false)) }
+    var waveToAnswer by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_WAVE_TO_ANSWER, false)) }
 
     var visible by remember { mutableStateOf(false) }
     val screenAlpha by animateFloatAsState(
@@ -215,6 +216,18 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
                                 onCheckedChange = {
                                     fullscreenCalls = it
                                     prefs.setBoolean(PreferenceManager.KEY_ALWAYS_FULLSCREEN_CALLS, it)
+                                }
+                            )
+                            RillSwitchListItem(
+                                headline   = stringResource(R.string.wave_to_answer),
+                                supporting = stringResource(R.string.wave_to_answer_subtitle),
+                                leadingIcon = Icons.Rounded.SpatialTracking,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
+                                checked = waveToAnswer,
+                                onCheckedChange = {
+                                    waveToAnswer = it
+                                    prefs.setBoolean(PreferenceManager.KEY_WAVE_TO_ANSWER, it)
                                 }
                             )
                             RillSwitchListItem(
