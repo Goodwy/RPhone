@@ -152,7 +152,11 @@ class FloatingCallService : Service() {
         super.onCreate()
         wm = getSystemService(WINDOW_SERVICE) as WindowManager
         lifecycleOwner.onCreate()
-        registerReceiver(configReceiver, IntentFilter(Intent.ACTION_CONFIGURATION_CHANGED))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(configReceiver, IntentFilter(Intent.ACTION_CONFIGURATION_CHANGED), RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(configReceiver, IntentFilter(Intent.ACTION_CONFIGURATION_CHANGED))
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

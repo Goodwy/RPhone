@@ -134,7 +134,6 @@ class MainActivity : FragmentActivity() {
         setContent {
             Rill4Theme {
                 val context = LocalContext.current
-                val appInfo = getAppVersion(context)
                 val navController = rememberNavController()
 
                 val favouritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, false)

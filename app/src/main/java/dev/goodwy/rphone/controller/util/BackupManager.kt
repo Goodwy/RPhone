@@ -31,9 +31,9 @@ object BackupManager {
             val backupFile = File(getBackupDir(context), "RPhone_Backup_$timestamp.rphone")
 
             ZipOutputStream(FileOutputStream(backupFile)).use { zip ->
-                // 1. Backup SharedPreferences
-                val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-                val prefsJson = prefsToJson(prefs)
+                // 1. Backup Preferences (DataStore via PreferenceManager)
+                val manager = PreferenceManager(context)
+                val prefsJson = prefsToJson(manager.getAllPreferences())
                 zip.putNextEntry(ZipEntry("prefs.json"))
                 zip.write(prefsJson.toByteArray(Charsets.UTF_8))
                 zip.closeEntry()
@@ -77,10 +77,10 @@ object BackupManager {
         } catch (_: Exception) { false }
     }
 
-    private fun prefsToJson(prefs: SharedPreferences): String {
+    private fun prefsToJson(prefsData: Map<String, Any>): String {
         val json = JSONObject()
         val meta = JSONObject() // store type hints for ambiguous types
-        prefs.all.forEach { (key, value) ->
+        prefsData.forEach { (key, value) ->
             when (value) {
                 is Boolean -> json.put(key, value)
                 is Int -> json.put(key, value)
@@ -91,7 +91,6 @@ object BackupManager {
                     meta.put(key, "float")
                 }
                 is String -> json.put(key, value)
-                is Set<*> -> json.put(key, value.joinToString(","))
             }
         }
         val wrapper = JSONObject()
@@ -102,8 +101,8 @@ object BackupManager {
 
     private fun restorePrefs(context: Context, json: String) {
         try {
-            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            val editor = prefs.edit()
+            val manager = PreferenceManager(context)
+            val restoredMap = mutableMapOf<String, Any>()
 
             // Support both new wrapper format and legacy flat format
             val raw = JSONObject(json)
@@ -111,22 +110,14 @@ object BackupManager {
             val meta = if (raw.has("meta")) raw.getJSONObject("meta") else JSONObject()
 
             jsonObj.keys().forEach { key ->
-                when (val value = jsonObj.get(key)) {
-                    is Boolean -> editor.putBoolean(key, value)
-                    is Int -> editor.putInt(key, value)
-                    is Long -> {
-                        if (value in Int.MIN_VALUE..Int.MAX_VALUE) editor.putInt(key, value.toInt())
-                        else editor.putLong(key, value)
-                    }
-                    is Double -> {
-                        // Check meta to distinguish float from large int stored as double
-                        if (meta.optString(key) == "float") editor.putFloat(key, value.toFloat())
-                        else editor.putFloat(key, value.toFloat())
-                    }
-                    is String -> editor.putString(key, value)
+                val value = jsonObj.get(key)
+                when {
+                    meta.optString(key) == "float" -> restoredMap[key] = (value as? Double)?.toFloat() ?: value
+                    value is Double -> restoredMap[key] = value.toFloat() // DataStore prefers Float
+                    else -> restoredMap[key] = value
                 }
             }
-            editor.apply()
+            manager.restoreAllPreferences(restoredMap)
         } catch (_: Exception) {}
     }
 
