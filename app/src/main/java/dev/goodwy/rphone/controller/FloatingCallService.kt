@@ -54,6 +54,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import dev.goodwy.rphone.R
+import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.util.forceLtr
 import dev.goodwy.rphone.view.components.RillAvatar
 import dev.goodwy.rphone.view.theme.MyColors.dialpadKeyColor
@@ -73,17 +74,19 @@ class FloatingCallService : Service() {
     private val lifecycleOwner = ServiceLifecycleOwner()
     private val scope          = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private val callRepository: ICallRepository by inject()
+    private val preferenceManager: PreferenceManager by inject()
 
     private val contactNameState = mutableStateOf("?")
     private val phoneNumberState  = mutableStateOf("")
     private val photoUriState     = mutableStateOf<String?>(null)
     private val menuVisibleState  = mutableStateOf(false)
+    private var menuDelayJob: Job? = null
 
     private val configReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action != Intent.ACTION_CONFIGURATION_CHANGED) return
             scope.launch {
-                delay(80) // let window system settle after rotation
+                delay(120) // let window system settle after rotation
                 val screenW: Int
                 val screenH: Int
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -103,6 +106,10 @@ class FloatingCallService : Service() {
 
                 bubbleParams.x = bubbleParams.x.coerceIn(0, (screenW - bubbleSizePx).coerceAtLeast(0))
                 bubbleParams.y = bubbleParams.y.coerceIn(0, (screenH - bubbleSizePx).coerceAtLeast(0))
+
+                try {
+                    bubbleView?.let { wm.updateViewLayout(it, bubbleParams) }
+                } catch (_: Exception) {}
             }
         }
     }
@@ -161,6 +168,10 @@ class FloatingCallService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (!Settings.canDrawOverlays(this)) { stopSelf(); return START_NOT_STICKY }
+
+        bubbleParams.x = preferenceManager.getInt(PreferenceManager.KEY_FLOATING_BUBBLE_X, 24)
+        bubbleParams.y = preferenceManager.getInt(PreferenceManager.KEY_FLOATING_BUBBLE_Y, 320)
+
         contactNameState.value = intent?.getStringExtra(EXTRA_CONTACT_NAME) ?: "?"
         phoneNumberState.value  = intent?.getStringExtra(EXTRA_PHONE_NUMBER) ?: ""
         photoUriState.value     = intent?.getStringExtra(EXTRA_PHOTO_URI)
@@ -239,9 +250,15 @@ class FloatingCallService : Service() {
                                 dragged = true
                             if (dragged) {
                                 change.consume()
-                                bubbleParams.x = (bubbleParams.x + delta.x.toInt()).coerceAtLeast(0)
-                                bubbleParams.y = (bubbleParams.y + delta.y.toInt()).coerceAtLeast(0)
-                                try { bubbleView?.let { wm.updateViewLayout(it, bubbleParams) } } catch (_: Exception) {}
+                                val nextX = (bubbleParams.x + delta.x.toInt()).coerceAtLeast(0)
+                                val nextY = (bubbleParams.y + delta.y.toInt()).coerceAtLeast(0)
+                                if (nextX != bubbleParams.x || nextY != bubbleParams.y) {
+                                    bubbleParams.x = nextX
+                                    bubbleParams.y = nextY
+                                    try { bubbleView?.let { wm.updateViewLayout(it, bubbleParams) } } catch (_: Exception) {}
+                                    preferenceManager.setInt(PreferenceManager.KEY_FLOATING_BUBBLE_X, nextX)
+                                    preferenceManager.setInt(PreferenceManager.KEY_FLOATING_BUBBLE_Y, nextY)
+                                }
                             }
                             if (!change.pressed) { if (!dragged) onTap(); break }
                         } while (true)
@@ -311,6 +328,7 @@ class FloatingCallService : Service() {
 
     private fun showMenu() {
         if (menuView != null) return
+        menuDelayJob?.cancel()
         menuVisibleState.value = false
         bubbleView?.visibility = View.GONE
         val cv = ComposeView(this).apply {
@@ -331,10 +349,14 @@ class FloatingCallService : Service() {
         }
         menuView = cv
         try { wm.addView(cv, menuParams) } catch (_: Exception) { dismissMenu(); return }
-        scope.launch { delay(40); menuVisibleState.value = true }
+        menuDelayJob = scope.launch {
+            delay(40)
+            menuVisibleState.value = true
+        }
     }
 
     private fun dismissMenu() {
+        menuDelayJob?.cancel()
         menuVisibleState.value = false
         // Hide the bubble the moment the close animation starts, then bring it back once the
         // floating popup window has actually been torn down (unless the call screen itself is
@@ -344,13 +366,14 @@ class FloatingCallService : Service() {
             delay(440)
             try { menuView?.let { wm.removeViewImmediate(it) } } catch (_: Exception) {}
             menuView = null
-            if (!CallActivity.isInForeground.value) {
+            if (!CallActivity.isInForeground.value && bubbleView != null) {
                 bubbleView?.visibility = View.VISIBLE
             }
         }
     }
 
     private fun performAction(action: MenuAction) {
+        menuDelayJob?.cancel()
         menuVisibleState.value = false
         scope.launch {
             delay(280)
@@ -369,7 +392,7 @@ class FloatingCallService : Service() {
             delay(200)
             try { menuView?.let { wm.removeViewImmediate(it) } } catch (_: Exception) {}
             menuView = null
-            if (action != MenuAction.Close && !CallActivity.isInForeground.value) {
+            if (action != MenuAction.Close && !CallActivity.isInForeground.value && bubbleView != null) {
                 bubbleView?.visibility = View.VISIBLE
             }
         }

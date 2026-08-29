@@ -643,17 +643,7 @@ class MainActivity : FragmentActivity() {
                             )
                         }
                     } // end outer Box
-
-                    LaunchedEffect(intent) {
-                        handleIntent(intent, navController)
-                    }
                 }
-
-                // Will check and automatically reset the settings upon return
-//                LaunchedEffect(Unit) {
-//                    val purchaseHelper: PurchaseHelper = GlobalContext.get().get()
-//                    purchaseHelper.checkProStatus()
-//                }
             }
         }
     }

@@ -155,7 +155,7 @@ class CallLogViewModel(
             // every app open after the first one).
             val changed = result.size != cachedLogs.size ||
                     result.zip(cachedLogs).any { (a, b) ->
-                        a.number != b.number || a.date != b.date || a.type != b.type
+                        a.number != b.number || a.date != b.date || a.type != b.type || a.name != b.name || a.isBlocked != b.isBlocked
                     }
             cachedLogs = result
             saveToDisk(result)
@@ -169,7 +169,7 @@ class CallLogViewModel(
 
     // ── Disk cache helpers ────────────────────────────────────────────────────
 
-    private suspend fun saveToDisk(logs: List<CallLogEntry>) {
+    private suspend fun saveToDisk(logs: List<CallLogEntry>) = withContext(Dispatchers.IO) {
         try {
             val arr = JSONArray()
             logs.forEach { e ->
