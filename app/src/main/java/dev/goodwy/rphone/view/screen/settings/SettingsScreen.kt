@@ -3,6 +3,7 @@ package dev.goodwy.rphone.view.screen.settings
 import android.app.Activity
 import android.app.DownloadManager
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.view.Surface
 import androidx.activity.compose.BackHandler
@@ -319,13 +320,13 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
             Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surfaceContainerHigh) {
                 Column(Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     CircularProgressIndicator()
-                    Text("Restoring backup…", style = MaterialTheme.typography.bodyLarge)
+                    Text(stringResource(R.string.restoring_backup), style = MaterialTheme.typography.bodyLarge)
                 }
             }
         }
-        is BackupDialogState.BackupSuccess -> AlertDialog(onDismissRequest = { backupState = BackupDialogState.Idle }, icon = { Icon(Icons.Default.CheckCircle, null, tint = MaterialTheme.colorScheme.customColors.colorGreen) }, title = { Text("Backup created") }, text = { Text("Backup saved to:\n${state.path}") }, confirmButton = { TextButton(onClick = { backupState = BackupDialogState.Idle }) { Text("OK") } })
-        is BackupDialogState.RestoreSuccess -> AlertDialog(onDismissRequest = { backupState = BackupDialogState.Idle }, icon = { Icon(Icons.Default.CheckCircle, null, tint = MaterialTheme.colorScheme.customColors.colorGreen) }, title = { Text("Restore complete") }, text = { Text("Your data has been restored successfully. Please restart the app.") }, confirmButton = { TextButton(onClick = { backupState = BackupDialogState.Idle }) { Text("OK") } })
-        is BackupDialogState.Error -> AlertDialog(onDismissRequest = { backupState = BackupDialogState.Idle }, icon = { Icon(Icons.Default.Error, null, tint = MaterialTheme.colorScheme.customColors.colorRed) }, title = { Text("Operation failed") }, text = { Text(state.message) }, confirmButton = { TextButton(onClick = { backupState = BackupDialogState.Idle }) { Text("OK") } })
+        is BackupDialogState.BackupSuccess -> AlertDialog(onDismissRequest = { backupState = BackupDialogState.Idle }, icon = { Icon(Icons.Default.CheckCircle, null, tint = MaterialTheme.colorScheme.customColors.colorDarkGreen) }, title = { Text("Backup created") }, text = { Text("Backup saved to:\n${state.path}") }, confirmButton = { TextButton(onClick = { backupState = BackupDialogState.Idle }) { Text("OK") } })
+        is BackupDialogState.RestoreSuccess -> AlertDialog(onDismissRequest = { backupState = BackupDialogState.Idle }, icon = { Icon(Icons.Default.CheckCircle, null, tint = MaterialTheme.colorScheme.customColors.colorDarkGreen) }, title = { Text("Restore complete") }, text = { Text("Your data has been restored successfully. Please restart the app.") }, confirmButton = { TextButton(onClick = { backupState = BackupDialogState.Idle }) { Text("OK") } })
+        is BackupDialogState.Error -> AlertDialog(onDismissRequest = { backupState = BackupDialogState.Idle }, icon = { Icon(Icons.Default.Error, null, tint = MaterialTheme.colorScheme.error) }, title = { Text("Operation failed") }, text = { Text(state.message) }, confirmButton = { TextButton(onClick = { backupState = BackupDialogState.Idle }) { Text("OK") } })
         else -> {}
     }
 
@@ -921,41 +922,47 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 }
 
                 // ── Backup & Restore ─────────────────────────────────────────────
-//            item {
-//                RillAnimatedSection(delayMs = 260L) {
-//                    Column {
-//                        SettingsSectionLabel("Backup & Restore")
-//                        RillExpressiveCard {
-//                            RillListItem(
-//                                headline   = "Create Backup",
-//                                supporting = "Save app configuration and notes",
-//                                leadingIcon = Icons.Default.Backup,
-//                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
-//                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
-//                                trailingIcon = Icons.Default.ChevronRight,
-//                                onClick = {
-//                                    scope.launch {
-//                                        val file = BackupManager.createBackup(context)
-//                                        backupState = if (file != null) {
-//                                            val uri = androidx.core.content.FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
-//                                            val shareIntent = Intent(Intent.ACTION_SEND).apply {
-//                                                type = "application/octet-stream"
-//                                                putExtra(Intent.EXTRA_STREAM, uri)
-//                                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-//                                            }
-//                                            context.startActivity(Intent.createChooser(shareIntent, "Save Backup"))
-//                                            BackupDialogState.BackupSuccess(file.absolutePath)
-//                                        } else {
-//                                            BackupDialogState.Error("Failed to create backup")
-//                                        }
-//                                    }
-//                                }
-//                            )
-//                            RillListItem(headline = "Restore Backup", supporting = "Restore app configuration and notes", leadingIcon = Icons.Default.Restore, iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple, iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple, trailingIcon = Icons.Default.ChevronRight, onClick = { restoreLauncher.launch("*/*") })
-//                        }
-//                    }
-//                }
-//            }
+            item {
+                RillAnimatedSection(delayMs = 260L) {
+                    Column {
+                        SettingsSectionLabel(stringResource(R.string.backup_and_restore))
+                        RillExpressiveCard {
+                            RillListItem(
+                                headline   = "Create Backup",
+                                supporting = "Save app configuration and notes",
+                                leadingIcon = Icons.Default.Backup,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
+                                trailingIcon = Icons.Default.ChevronRight,
+                                onClick = {
+                                    scope.launch {
+                                        val file = BackupManager.createBackup(context)
+                                        backupState = if (file != null) {
+                                            val uri = androidx.core.content.FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
+                                            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                                type = "application/octet-stream"
+                                                putExtra(Intent.EXTRA_STREAM, uri)
+                                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                            }
+                                            context.startActivity(Intent.createChooser(shareIntent, "Save Backup"))
+                                            BackupDialogState.BackupSuccess(file.absolutePath)
+                                        } else {
+                                            BackupDialogState.Error("Failed to create backup")
+                                        }
+                                    }
+                                }
+                            )
+                            RillListItem(
+                                headline = "Restore Backup",
+                                supporting = "Restore app configuration and notes",
+                                leadingIcon = Icons.Default.Restore,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
+                                trailingIcon = Icons.Default.ChevronRight, onClick = { restoreLauncher.launch("*/*") })
+                        }
+                    }
+                }
+            }
 
                 // ── Other ────────────────────────────────────────────────────────
                 item {

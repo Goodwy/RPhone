@@ -568,4 +568,8 @@
     <string name="notif_via_sim">via %1$s</string>
     <string name="notif_active_call">Active call</string>
     <string name="notif_call_back">Call back</string>
+
+    <!-- Backup & Restore -->
+    <string name="backup_and_restore">Backup &amp; Restore</string>
+    <string name="restoring_backup">Restoring backup…</string>
 </resources>

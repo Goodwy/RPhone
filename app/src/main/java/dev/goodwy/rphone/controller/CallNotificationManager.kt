@@ -69,7 +69,7 @@ class CallNotificationManager(
                 NotificationChannel(
                     channelId,
                     if (fullscreenCalls) context.getString(R.string.notif_channel_fullscreen_incoming_calls) else context.getString(R.string.notif_channel_incoming_calls),
-                    NotificationManager.IMPORTANCE_HIGH
+                    if (fullscreenCalls) NotificationManager.IMPORTANCE_LOW else NotificationManager.IMPORTANCE_HIGH
                 ).apply {
                     lockscreenVisibility = Notification.VISIBILITY_PUBLIC
                     enableVibration(true)
