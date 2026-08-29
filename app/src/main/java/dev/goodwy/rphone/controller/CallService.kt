@@ -35,6 +35,7 @@ class CallService : InCallService() {
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var redialCount = 0
     private val callStartTimes = mutableMapOf<Call, Long>()
+    private var lastFloatingCallMetadata: Triple<String, String, String?>? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -372,6 +373,11 @@ class CallService : InCallService() {
     private fun maybeStartFloatingCall(contactName: String, number: String, photoUri: String?) {
         if (!preferenceManager.getBoolean(PreferenceManager.KEY_FLOATING_CALL, false)) return
         if (!android.provider.Settings.canDrawOverlays(this)) return
+
+        val metadata = Triple(contactName, number, photoUri)
+        if (lastFloatingCallMetadata == metadata) return
+        lastFloatingCallMetadata = metadata
+
         FloatingCallService.start(this, contactName, number, photoUri)
     }
 
