@@ -42,7 +42,7 @@ class PreferenceManager(context: Context) {
     private val dataStore = getSharedDataStore(appContext)
 
     // Internal cache for synchronous access
-    private val _prefsCache = MutableStateFlow<Preferences>(runBlocking { dataStore.data.first() })
+    private val _prefsCache = MutableStateFlow<Preferences>(emptyPreferences())
 
     private val _settingsChanged = MutableStateFlow(0)
     val settingsChanged: StateFlow<Int> = _settingsChanged.asStateFlow()

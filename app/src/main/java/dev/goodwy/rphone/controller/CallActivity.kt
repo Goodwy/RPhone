@@ -130,7 +130,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
                     onDispose { }
                 }
 
-                LaunchedEffect(callState, settingsState) {
+                LaunchedEffect(callState, settingsState, audioState) {
                     val keepScreenOn =
                         preferenceManager.getBoolean(PreferenceManager.KEY_KEEP_SCREEN_ON, true)
                     if (keepScreenOn) {
@@ -423,8 +423,11 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
     }
 
     private fun acquireProximityLock() {
-        if (preferenceManager.getBoolean(PreferenceManager.KEY_PROXIMITY_SENSOR, true)) {
+        val isSpeaker = callViewModel.audioState.value?.route == android.telecom.CallAudioState.ROUTE_SPEAKER
+        if (!isSpeaker && preferenceManager.getBoolean(PreferenceManager.KEY_PROXIMITY_SENSOR, true)) {
             proximityWakeLock?.let { if (!it.isHeld) it.acquire(20*60*1000L /*20 minutes*/) }
+        } else {
+            releaseProximityLock()
         }
     }
 
