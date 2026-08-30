@@ -27,7 +27,10 @@ import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.rounded.Backup
 import androidx.compose.material.icons.rounded.Call
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.Error
 import androidx.compose.material.icons.rounded.Fingerprint
 import androidx.compose.material.icons.rounded.LogoDev
 import androidx.compose.material.icons.rounded.Merge
@@ -36,6 +39,7 @@ import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.PeopleAlt
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.PrivacyTip
+import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material.icons.rounded.StarRate
 import androidx.compose.material.icons.rounded.VolunteerActivism
 import androidx.compose.material3.*
@@ -213,7 +217,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
             },
             title = { Text("Up to date") },
             text = { Text("The app is running the latest version (v$appVersion).") },
-            confirmButton = { TextButton(onClick = { updateDialogState = UpdateDialogState.Idle }) { Text("OK") } }
+            confirmButton = { TextButton(onClick = { updateDialogState = UpdateDialogState.Idle }) { Text(stringResource(R.string.ok)) } }
         )
 
         // ── Confirmation popup before downloading ──
@@ -308,7 +312,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
             icon = { Icon(Icons.Default.Error, null, tint = MaterialTheme.colorScheme.customColors.colorRed) },
             title = { Text("Check failed") },
             text = { Text("Could not check for updates. Please try again later.") },
-            confirmButton = { TextButton(onClick = { updateDialogState = UpdateDialogState.Idle }) { Text("OK") } }
+            confirmButton = { TextButton(onClick = { updateDialogState = UpdateDialogState.Idle }) { Text(stringResource(R.string.ok)) } }
         )
 
         else -> {}
@@ -324,10 +328,33 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 }
             }
         }
-        is BackupDialogState.BackupSuccess -> AlertDialog(onDismissRequest = { backupState = BackupDialogState.Idle }, icon = { Icon(Icons.Default.CheckCircle, null, tint = MaterialTheme.colorScheme.customColors.colorDarkGreen) }, title = { Text("Backup created") }, text = { Text("Backup saved to:\n${state.path}") }, confirmButton = { TextButton(onClick = { backupState = BackupDialogState.Idle }) { Text("OK") } })
-        is BackupDialogState.RestoreSuccess -> AlertDialog(onDismissRequest = { backupState = BackupDialogState.Idle }, icon = { Icon(Icons.Default.CheckCircle, null, tint = MaterialTheme.colorScheme.customColors.colorDarkGreen) }, title = { Text("Restore complete") }, text = { Text("Your data has been restored successfully. Please restart the app.") }, confirmButton = { TextButton(onClick = { backupState = BackupDialogState.Idle }) { Text("OK") } })
-        is BackupDialogState.Error -> AlertDialog(onDismissRequest = { backupState = BackupDialogState.Idle }, icon = { Icon(Icons.Default.Error, null, tint = MaterialTheme.colorScheme.error) }, title = { Text("Operation failed") }, text = { Text(state.message) }, confirmButton = { TextButton(onClick = { backupState = BackupDialogState.Idle }) { Text("OK") } })
+        is BackupDialogState.BackupSuccess -> AlertDialog(onDismissRequest = { backupState = BackupDialogState.Idle }, icon = { Icon(Icons.Rounded.CheckCircle, null, tint = MaterialTheme.colorScheme.customColors.colorDarkGreen) }, title = { Text(stringResource(R.string.backup_created)) }, text = { Text(stringResource(R.string.backup_created_description, state.path)) }, confirmButton = { TextButton(onClick = { backupState = BackupDialogState.Idle }) { Text(stringResource(R.string.ok)) } })
+        is BackupDialogState.RestoreSuccess -> AlertDialog(onDismissRequest = { backupState = BackupDialogState.Idle }, icon = { Icon(Icons.Rounded.CheckCircle, null, tint = MaterialTheme.colorScheme.customColors.colorDarkGreen) }, title = { Text(stringResource(R.string.restore_complete)) }, text = { Text(stringResource(R.string.restore_complete_description)) }, confirmButton = { TextButton(onClick = { backupState = BackupDialogState.Idle }) { Text(stringResource(R.string.ok)) } })
+        is BackupDialogState.Error -> AlertDialog(onDismissRequest = { backupState = BackupDialogState.Idle }, icon = { Icon(Icons.Rounded.Error, null, tint = MaterialTheme.colorScheme.error) }, title = { Text(stringResource(R.string.operation_failed)) }, text = { Text(state.message) }, confirmButton = { TextButton(onClick = { backupState = BackupDialogState.Idle }) { Text(stringResource(R.string.ok)) } })
         else -> {}
+    }
+
+    val failedToCreateBackup = stringResource(R.string.failed_to_create_backup)
+    fun createBackup() {
+        scope.launch {
+            val file = BackupManager.createBackup(context)
+            backupState = if (file != null) {
+                val uri = androidx.core.content.FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
+                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                    type = "application/octet-stream"
+                    putExtra(Intent.EXTRA_STREAM, uri)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                context.startActivity(Intent.createChooser(shareIntent, "Save Backup"))
+                BackupDialogState.BackupSuccess(file.absolutePath)
+            } else {
+                BackupDialogState.Error(failedToCreateBackup)
+            }
+        }
+    }
+
+    fun restoreBackup() {
+        restoreLauncher.launch("*/*")
     }
 
     // ── Search in Settings ─────────────────────────────────────────────────
@@ -376,6 +403,8 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.incoming_call_ui_vertical_swipe),
                 stringResource(R.string.hide_voice_search),
                 stringResource(R.string.hide_voice_search_subtitle),
+                stringResource(R.string.swipe_actions),
+                stringResource(R.string.swipe_actions_subtitle),
             )
         ) {
             navigator.navigate(InterfaceScreenDestination)
@@ -617,6 +646,24 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
             )
         ) {
             navigator.navigate(DonateScreenDestination)
+        },
+        SettingsSearchEntry(
+            headline = stringResource(R.string.create_backup),
+            supporting = stringResource(R.string.create_backup_subtitle),
+            leadingIcon = Icons.Rounded.Backup,
+            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
+            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
+        ) {
+            createBackup()
+        },
+        SettingsSearchEntry(
+            headline = stringResource(R.string.restore_backup),
+            supporting = stringResource(R.string.restore_backup_subtitle),
+            leadingIcon = Icons.Rounded.Restore,
+            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
+            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
+        ) {
+            restoreBackup()
         },
         SettingsSearchEntry(
             headline = stringResource(R.string.about),
@@ -928,37 +975,21 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                         SettingsSectionLabel(stringResource(R.string.backup_and_restore))
                         RillExpressiveCard {
                             RillListItem(
-                                headline   = "Create Backup",
-                                supporting = "Save app configuration and notes",
-                                leadingIcon = Icons.Default.Backup,
+                                headline   = stringResource(R.string.create_backup),
+                                supporting = stringResource(R.string.create_backup_subtitle),
+                                leadingIcon = Icons.Rounded.Backup,
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
                                 trailingIcon = Icons.Default.ChevronRight,
-                                onClick = {
-                                    scope.launch {
-                                        val file = BackupManager.createBackup(context)
-                                        backupState = if (file != null) {
-                                            val uri = androidx.core.content.FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
-                                            val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                                                type = "application/octet-stream"
-                                                putExtra(Intent.EXTRA_STREAM, uri)
-                                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                            }
-                                            context.startActivity(Intent.createChooser(shareIntent, "Save Backup"))
-                                            BackupDialogState.BackupSuccess(file.absolutePath)
-                                        } else {
-                                            BackupDialogState.Error("Failed to create backup")
-                                        }
-                                    }
-                                }
+                                onClick = { createBackup() }
                             )
                             RillListItem(
-                                headline = "Restore Backup",
-                                supporting = "Restore app configuration and notes",
-                                leadingIcon = Icons.Default.Restore,
+                                headline   = stringResource(R.string.restore_backup),
+                                supporting = stringResource(R.string.restore_backup_subtitle),
+                                leadingIcon = Icons.Rounded.Restore,
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
-                                trailingIcon = Icons.Default.ChevronRight, onClick = { restoreLauncher.launch("*/*") })
+                                trailingIcon = Icons.Default.ChevronRight, onClick = { restoreBackup() })
                         }
                     }
                 }

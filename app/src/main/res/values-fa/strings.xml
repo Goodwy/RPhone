@@ -557,4 +557,18 @@
     <string name="notif_via_sim">از طریق %1$s</string>
     <string name="notif_active_call">تماس فعال</string>
     <string name="notif_call_back">بازگشت به تماس</string>
+
+    <!-- Backup & Restore -->
+    <string name="backup_and_restore">پشتیبان‌گیری و بازیابی</string>
+    <string name="restoring_backup">در حال بازیابی پشتیبان…</string>
+    <string name="backup_created">پشتیبان ایجاد شد</string>
+    <string name="backup_created_description">پشتیبان در این مسیر ذخیره شد: %s</string>
+    <string name="restore_complete">بازیابی کامل شد</string>
+    <string name="restore_complete_description">داده‌های شما با موفقیت بازیابی شدند. لطفاً برنامه را مجدداً راه‌اندازی کنید.</string>
+    <string name="operation_failed">عملیات ناموفق</string>
+    <string name="create_backup">ایجاد پشتیبان</string>
+    <string name="create_backup_subtitle">ذخیره تنظیمات برنامه و یادداشت‌های تماس</string>
+    <string name="failed_to_create_backup">ایجاد پشتیبان ناموفق</string>
+    <string name="restore_backup">بازیابی پشتیبان</string>
+    <string name="restore_backup_subtitle">بازیابی تنظیمات برنامه و یادداشت‌های تماس</string>
 </resources>

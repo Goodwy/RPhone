@@ -569,4 +569,18 @@
     <string name="notif_via_sim">عبر %1$s</string>
     <string name="notif_active_call">مكالمة نشطة</string>
     <string name="notif_call_back">معاودة الاتصال</string>
+
+    <!-- Backup & Restore -->
+    <string name="backup_and_restore">النسخ الاحتياطي والاستعادة</string>
+    <string name="restoring_backup">جاري استعادة النسخ الاحتياطي…</string>
+    <string name="backup_created">تم إنشاء النسخ الاحتياطي</string>
+    <string name="backup_created_description">تم حفظ النسخ الاحتياطي في: %s</string>
+    <string name="restore_complete">اكتملت الاستعادة</string>
+    <string name="restore_complete_description">تم استعادة بياناتك بنجاح. يرجى إعادة تشغيل التطبيق.</string>
+    <string name="operation_failed">فشلت العملية</string>
+    <string name="create_backup">إنشاء نسخ احتياطي</string>
+    <string name="create_backup_subtitle">حفظ تكوين التطبيق وملاحظات المكالمات</string>
+    <string name="failed_to_create_backup">فشل إنشاء النسخ الاحتياطي</string>
+    <string name="restore_backup">استعادة النسخ الاحتياطي</string>
+    <string name="restore_backup_subtitle">استعادة تكوين التطبيق وملاحظات المكالمات</string>
 </resources>

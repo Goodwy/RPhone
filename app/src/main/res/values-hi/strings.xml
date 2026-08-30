@@ -556,4 +556,18 @@
     <string name="notif_via_sim">%1$s के माध्यम से</string>
     <string name="notif_active_call">सक्रिय कॉल</string>
     <string name="notif_call_back">वापस कॉल करें</string>
+
+    <!-- Backup & Restore -->
+    <string name="backup_and_restore">बैकअप और पुनर्स्थापना</string>
+    <string name="restoring_backup">बैकअप पुनर्स्थापित किया जा रहा है…</string>
+    <string name="backup_created">बैकअप बनाया गया</string>
+    <string name="backup_created_description">बैकअप यहाँ सहेजा गया: %s</string>
+    <string name="restore_complete">पुनर्स्थापना पूर्ण</string>
+    <string name="restore_complete_description">आपका डेटा सफलतापूर्वक पुनर्स्थापित किया गया। कृपया ऐप को पुनः आरंभ करें।</string>
+    <string name="operation_failed">कार्य विफल</string>
+    <string name="create_backup">बैकअप बनाएँ</string>
+    <string name="create_backup_subtitle">ऐप कॉन्फ़िगरेशन और कॉल नोट्स सहेजें</string>
+    <string name="failed_to_create_backup">बैकअप बनाने में विफल</string>
+    <string name="restore_backup">बैकअप पुनर्स्थापित करें</string>
+    <string name="restore_backup_subtitle">ऐप कॉन्फ़िगरेशन और कॉल नोट्स पुनर्स्थापित करें</string>
 </resources>

@@ -556,4 +556,18 @@
     <string name="notif_via_sim">via %1$s</string>
     <string name="notif_active_call">Aktivt samtal</string>
     <string name="notif_call_back">Ring upp</string>
+
+    <!-- Backup & Restore -->
+    <string name="backup_and_restore">Säkerhetskopiering och återställning</string>
+    <string name="restoring_backup">Återställer säkerhetskopia…</string>
+    <string name="backup_created">Säkerhetskopia skapad</string>
+    <string name="backup_created_description">Säkerhetskopia sparad i: %s</string>
+    <string name="restore_complete">Återställning slutförd</string>
+    <string name="restore_complete_description">Dina data har återställts. Starta om appen.</string>
+    <string name="operation_failed">Åtgärden misslyckades</string>
+    <string name="create_backup">Skapa säkerhetskopia</string>
+    <string name="create_backup_subtitle">Spara appkonfiguration och samtalsanteckningar</string>
+    <string name="failed_to_create_backup">Misslyckades med att skapa säkerhetskopia</string>
+    <string name="restore_backup">Återställ säkerhetskopia</string>
+    <string name="restore_backup_subtitle">Återställ appkonfiguration och samtalsanteckningar</string>
 </resources>

@@ -572,4 +572,14 @@
     <!-- Backup & Restore -->
     <string name="backup_and_restore">Backup &amp; Restore</string>
     <string name="restoring_backup">Restoring backup…</string>
+    <string name="backup_created">Backup created</string>
+    <string name="backup_created_description">Backup saved to: %s</string>
+    <string name="restore_complete">Restore complete</string>
+    <string name="restore_complete_description">Your data has been restored successfully. Please restart the app.</string>
+    <string name="operation_failed">Operation failed</string>
+    <string name="create_backup">Create Backup</string>
+    <string name="create_backup_subtitle">Save app configuration and call notes</string>
+    <string name="failed_to_create_backup">Failed to create backup</string>
+    <string name="restore_backup">Restore Backup</string>
+    <string name="restore_backup_subtitle">Restore app configuration and call notes</string>
 </resources>

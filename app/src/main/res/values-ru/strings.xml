@@ -564,4 +564,18 @@
     <string name="notif_via_sim">через %1$s</string>
     <string name="notif_active_call">Активный вызов</string>
     <string name="notif_call_back">Перезвонить</string>
+
+    <!-- Backup & Restore -->
+    <string name="backup_and_restore">Резервное копирование и восстановление</string>
+    <string name="restoring_backup">Восстановление резервной копии…</string>
+    <string name="backup_created">Резервная копия создана</string>
+    <string name="backup_created_description">Резервная копия сохранена в: %s</string>
+    <string name="restore_complete">Восстановление завершено</string>
+    <string name="restore_complete_description">Ваши данные были успешно восстановлены. Пожалуйста, перезапустите приложение.</string>
+    <string name="operation_failed">Операция завершилась неудачей</string>
+    <string name="create_backup">Создать резервную копию</string>
+    <string name="create_backup_subtitle">Сохранить настройки приложения и заметки о звонках</string>
+    <string name="failed_to_create_backup">Не удалось создать резервную копию</string>
+    <string name="restore_backup">Восстановить резервную копию</string>
+    <string name="restore_backup_subtitle">Восстановить настройки приложения и заметки о звонках</string>
 </resources>

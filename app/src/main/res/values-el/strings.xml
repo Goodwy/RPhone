@@ -556,4 +556,18 @@
     <string name="notif_via_sim">μέσω %1$s</string>
     <string name="notif_active_call">Ενεργή κλήση</string>
     <string name="notif_call_back">Καλέστε ξανά</string>
+
+    <!-- Backup & Restore -->
+    <string name="backup_and_restore">Δημιουργία αντιγράφων ασφαλείας &amp; Επαναφορά</string>
+    <string name="restoring_backup">Επαναφορά αντιγράφου ασφαλείας…</string>
+    <string name="backup_created">Δημιουργήθηκε αντίγραφο ασφαλείας</string>
+    <string name="backup_created_description">Το αντίγραφο ασφαλείας αποθηκεύτηκε στο: %s</string>
+    <string name="restore_complete">Η επαναφορά ολοκληρώθηκε</string>
+    <string name="restore_complete_description">Τα δεδομένα σας επαναφέρθηκαν με επιτυχία. Παρακαλώ επανεκκινήστε την εφαρμογή.</string>
+    <string name="operation_failed">Η λειτουργία απέτυχε</string>
+    <string name="create_backup">Δημιουργία αντιγράφου ασφαλείας</string>
+    <string name="create_backup_subtitle">Αποθήκευση ρυθμίσεων εφαρμογής και σημειώσεων κλήσεων</string>
+    <string name="failed_to_create_backup">Αποτυχία δημιουργίας αντιγράφου ασφαλείας</string>
+    <string name="restore_backup">Επαναφορά αντιγράφου ασφαλείας</string>
+    <string name="restore_backup_subtitle">Επαναφορά ρυθμίσεων εφαρμογής και σημειώσεων κλήσεων</string>
 </resources>

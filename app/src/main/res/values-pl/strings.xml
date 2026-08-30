@@ -562,4 +562,18 @@
     <string name="notif_via_sim">przez %1$s</string>
     <string name="notif_active_call">Aktywne połączenie</string>
     <string name="notif_call_back">Oddzwoń</string>
+
+    <!-- Backup & Restore -->
+    <string name="backup_and_restore">Kopia zapasowa i przywracanie</string>
+    <string name="restoring_backup">Przywracanie kopii zapasowej…</string>
+    <string name="backup_created">Kopia zapasowa utworzona</string>
+    <string name="backup_created_description">Kopia zapasowa zapisana w: %s</string>
+    <string name="restore_complete">Przywracanie zakończone</string>
+    <string name="restore_complete_description">Twoje dane zostały pomyślnie przywrócone. Uruchom ponownie aplikację.</string>
+    <string name="operation_failed">Operacja nie powiodła się</string>
+    <string name="create_backup">Utwórz kopię zapasową</string>
+    <string name="create_backup_subtitle">Zapisz konfigurację aplikacji i notatki z połączeń</string>
+    <string name="failed_to_create_backup">Nie udało się utworzyć kopii zapasowej</string>
+    <string name="restore_backup">Przywróć kopię zapasową</string>
+    <string name="restore_backup_subtitle">Przywróć konfigurację aplikacji i notatki z połączeń</string>
 </resources>

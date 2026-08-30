@@ -559,4 +559,18 @@
     <string name="notif_via_sim">a través de %1$s</string>
     <string name="notif_active_call">Llamada activa</string>
     <string name="notif_call_back">Devolver llamada</string>
+
+    <!-- Backup & Restore -->
+    <string name="backup_and_restore">Copia de seguridad y restauración</string>
+    <string name="restoring_backup">Restaurando copia de seguridad…</string>
+    <string name="backup_created">Copia de seguridad creada</string>
+    <string name="backup_created_description">Copia de seguridad guardada en: %s</string>
+    <string name="restore_complete">Restauración completada</string>
+    <string name="restore_complete_description">Tus datos han sido restaurados correctamente. Reinicia la aplicación.</string>
+    <string name="operation_failed">Operación fallida</string>
+    <string name="create_backup">Crear copia de seguridad</string>
+    <string name="create_backup_subtitle">Guardar configuración de la aplicación y notas de llamadas</string>
+    <string name="failed_to_create_backup">Error al crear la copia de seguridad</string>
+    <string name="restore_backup">Restaurar copia de seguridad</string>
+    <string name="restore_backup_subtitle">Restaurar configuración de la aplicación y notas de llamadas</string>
 </resources>

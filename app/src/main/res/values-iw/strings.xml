@@ -560,4 +560,18 @@
     <string name="notif_via_sim">דרך %1$s</string>
     <string name="notif_active_call">שיחה פעילה</string>
     <string name="notif_call_back">התקשר בחזרה</string>
+
+    <!-- Backup & Restore -->
+    <string name="backup_and_restore">גיבוי ושחזור</string>
+    <string name="restoring_backup">משחזר גיבוי…</string>
+    <string name="backup_created">גיבוי נוצר</string>
+    <string name="backup_created_description">הגיבוי נשמר ב: %s</string>
+    <string name="restore_complete">השחזור הושלם</string>
+    <string name="restore_complete_description">הנתונים שלך שוחזרו בהצלחה. אנא הפעל מחדש את האפליקציה.</string>
+    <string name="operation_failed">הפעולה נכשלה</string>
+    <string name="create_backup">צור גיבוי</string>
+    <string name="create_backup_subtitle">שמור תצורת אפליקציה והערות שיחה</string>
+    <string name="failed_to_create_backup">נכשל ביצירת גיבוי</string>
+    <string name="restore_backup">שחזר גיבוי</string>
+    <string name="restore_backup_subtitle">שחזר תצורת אפליקציה והערות שיחה</string>
 </resources>

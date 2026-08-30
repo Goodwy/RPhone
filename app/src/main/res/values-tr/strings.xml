@@ -556,4 +556,18 @@
     <string name="notif_via_sim">%1$s üzerinden</string>
     <string name="notif_active_call">Aktif arama</string>
     <string name="notif_call_back">Geri ara</string>
+
+    <!-- Backup & Restore -->
+    <string name="backup_and_restore">Yedekleme ve Geri Yükleme</string>
+    <string name="restoring_backup">Yedek geri yükleniyor…</string>
+    <string name="backup_created">Yedek oluşturuldu</string>
+    <string name="backup_created_description">Yedek şuraya kaydedildi: %s</string>
+    <string name="restore_complete">Geri yükleme tamamlandı</string>
+    <string name="restore_complete_description">Verileriniz başarıyla geri yüklendi. Lütfen uygulamayı yeniden başlatın.</string>
+    <string name="operation_failed">İşlem başarısız</string>
+    <string name="create_backup">Yedek oluştur</string>
+    <string name="create_backup_subtitle">Uygulama yapılandırmasını ve arama notlarını kaydet</string>
+    <string name="failed_to_create_backup">Yedek oluşturulamadı</string>
+    <string name="restore_backup">Yedeği geri yükle</string>
+    <string name="restore_backup_subtitle">Uygulama yapılandırmasını ve arama notlarını geri yükle</string>
 </resources>

@@ -556,4 +556,18 @@
     <string name="notif_via_sim">über %1$s</string>
     <string name="notif_active_call">Aktiver Anruf</string>
     <string name="notif_call_back">Rückruf</string>
+
+    <!-- Backup & Restore -->
+    <string name="backup_and_restore">Backup &amp; Wiederherstellung</string>
+    <string name="restoring_backup">Backup wird wiederhergestellt…</string>
+    <string name="backup_created">Backup erstellt</string>
+    <string name="backup_created_description">Backup gespeichert unter: %s</string>
+    <string name="restore_complete">Wiederherstellung abgeschlossen</string>
+    <string name="restore_complete_description">Ihre Daten wurden erfolgreich wiederhergestellt. Bitte starten Sie die App neu.</string>
+    <string name="operation_failed">Vorgang fehlgeschlagen</string>
+    <string name="create_backup">Backup erstellen</string>
+    <string name="create_backup_subtitle">App-Konfiguration und Anrufnotizen speichern</string>
+    <string name="failed_to_create_backup">Backup konnte nicht erstellt werden</string>
+    <string name="restore_backup">Backup wiederherstellen</string>
+    <string name="restore_backup_subtitle">App-Konfiguration und Anrufnotizen wiederherstellen</string>
 </resources>

@@ -563,4 +563,18 @@
     <string name="notif_via_sim">דורך %1$s</string>
     <string name="notif_active_call">אַקטיווער רוף</string>
     <string name="notif_call_back">רוף צוריק</string>
+
+    <!-- Backup & Restore -->
+    <string name="backup_and_restore">באַקאַפּ און צוריקשטעלן</string>
+    <string name="restoring_backup">שטעלט צוריק באַקאַפּ…</string>
+    <string name="backup_created">באַקאַפּ געשאַפֿן</string>
+    <string name="backup_created_description">באַקאַפּ געהיט אין: %s</string>
+    <string name="restore_complete">צוריקשטעלונג פֿאַרענדיקט</string>
+    <string name="restore_complete_description">דײַנע דאַטן זענען צוריקגעשטעלט געוואָרן. ביטע אָנהייב די אַפּ פֿון ניי.</string>
+    <string name="operation_failed">אָפּעראַציע דורכגעפֿאַלן</string>
+    <string name="create_backup">שאַף באַקאַפּ</string>
+    <string name="create_backup_subtitle">היט אַפּ קאָנפֿיגוראַציע און רוף הערות</string>
+    <string name="failed_to_create_backup">האָט נישט געקענט שאַפֿן באַקאַפּ</string>
+    <string name="restore_backup">שטעל צוריק באַקאַפּ</string>
+    <string name="restore_backup_subtitle">שטעל צוריק אַפּ קאָנפֿיגוראַציע און רוף הערות</string>
 </resources>

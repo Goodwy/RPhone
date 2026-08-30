@@ -304,6 +304,15 @@ class CallService : InCallService() {
     override fun onCallRemoved(call: Call) {
         super.onCallRemoved(call)
         call.unregisterCallback(callCallback)
+
+        // If the call being deleted is the same one for which a floating window was launched,
+        // we must clear the cache to allow it to be launched for the next call.
+        val number = call.details?.handle?.schemeSpecificPart ?: ""
+        val currentMetadata = lastFloatingCallMetadata
+        if (currentMetadata != null && currentMetadata.second == number) {
+            lastFloatingCallMetadata = null
+        }
+
         updateCallState()
         if (callRepository.allCalls.value.isEmpty()) {
             callStateManager.onCallEnded()
