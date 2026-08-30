@@ -92,7 +92,7 @@ fun ExpressiveCallScreen(
     val preferenceManager = koinInject<PreferenceManager>()
     val contactsRepo = koinInject<IContactsRepository>()
     val callViewModel = koinInject<CallViewModel>()
-    val telecomManager = remember { context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager }
+    // telecomManager removed as it's now handled by ViewModel
 
     val allCalls by callViewModel.allCalls.collectAsStateWithLifecycle()
     val otherCall = remember(allCalls, call) {
@@ -100,33 +100,10 @@ fun ExpressiveCallScreen(
         allCalls.find { it != call && it.state != Call.STATE_DISCONNECTED }
     }
 
-    val accountHandle = call.details.accountHandle
-    val simLabelFallback = accountHandle?.let { stringResource(R.string.call_screen_sim_label, it.id) }
-    val simLabel = remember(accountHandle, simLabelFallback) {
-        if (accountHandle != null) {
-            val account = try {
-                telecomManager.getPhoneAccount(accountHandle)
-            } catch (_: Exception) {
-                null
-            }
-
-            val label = account?.label?.toString()
-            if (!label.isNullOrEmpty()) {
-                label
-            } else {
-                simLabelFallback
-            }
-        } else {
-            null
-        }
-    }
+    val simLabel by callViewModel.simLabel.collectAsStateWithLifecycle()
     val isMuted = audioState?.isMuted ?: false
 
-    var callDuration by remember(initialConnectTime) {
-        mutableLongStateOf(
-            if (initialConnectTime > 0) (System.currentTimeMillis() - initialConnectTime) / 1000 else 0L
-        )
-    }
+    val callDuration by callViewModel.callDuration.collectAsStateWithLifecycle()
     var showKeypad by remember { mutableStateOf(false) }
     var showAudioPicker by remember { mutableStateOf(false) }
     var typedDigits by remember { mutableStateOf("") }
@@ -143,25 +120,10 @@ fun ExpressiveCallScreen(
         preferenceManager.getBoolean(PreferenceManager.KEY_SHOW_CALL_SCREEN_AVATAR, true)
     }
 
-    val connectTime = remember(call) { call.details.connectTimeMillis }
-
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-    LaunchedEffect(callState, connectTime) {
-        if (callState == Call.STATE_ACTIVE && connectTime > 0) {
-            while (true) {
-                callDuration = (System.currentTimeMillis() - connectTime) / 1000
-                delay(1000)
-            }
-        } else if (callState == Call.STATE_ACTIVE && connectTime == 0L) {
-            val startTime = System.currentTimeMillis()
-            while (true) {
-                callDuration = (System.currentTimeMillis() - startTime) / 1000
-                delay(1000)
-            }
-        }
-    }
+    // LaunchedEffect for duration removed (handled by ViewModel)
 
     BackHandler(showKeypad) {
         showKeypad = false
@@ -250,7 +212,10 @@ fun ExpressiveCallScreen(
 
     LaunchedEffect(noteText) {
         if (phoneNumber.isNotEmpty() && noteText.isNotBlank()) {
-            NoteManager.writeNote(context, contactName, phoneNumber, noteText)
+            delay(1000)
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                NoteManager.writeNote(context, contactName, phoneNumber, noteText)
+            }
         }
     }
 
@@ -400,14 +365,15 @@ fun ExpressiveCallScreen(
                             )
                         }
 
-                        if (simLabel != null) {
+                        val currentSimLabel = simLabel
+                        if (currentSimLabel != null) {
                             Surface(
                                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                                 shape = RoundedCornerShape(8.dp),
                                 modifier = Modifier.padding(top = 8.dp)
                             ) {
                                 Text(
-                                    text = simLabel,
+                                    text = currentSimLabel,
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),

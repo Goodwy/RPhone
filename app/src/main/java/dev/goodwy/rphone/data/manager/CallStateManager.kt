@@ -17,17 +17,27 @@ import kotlinx.coroutines.launch
 class CallStateManager(private val getCallerNameUseCase: GetCallerNameUseCase) {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     
-    private val _callerMetadata = MutableStateFlow<CallerMetadata?>(null)
-    val callerMetadata: StateFlow<CallerMetadata?> = _callerMetadata.asStateFlow()
+    private val _callerMetadataMap = MutableStateFlow<Map<String, CallerMetadata>>(emptyMap())
+    val callerMetadataMap: StateFlow<Map<String, CallerMetadata>> = _callerMetadataMap.asStateFlow()
 
     fun onNewCallReceived(number: String, cnam: String?) {
         scope.launch {
             val metadata = getCallerNameUseCase(number, cnam)
-            _callerMetadata.value = metadata
+            synchronized(this) {
+                val currentMap = _callerMetadataMap.value
+                _callerMetadataMap.value = currentMap + (number to metadata)
+            }
         }
     }
     
-    fun onCallEnded() {
-        _callerMetadata.value = null
+    fun onCallEnded(number: String? = null) {
+        if (number == null) {
+            _callerMetadataMap.value = emptyMap()
+        } else {
+            synchronized(this) {
+                val currentMap = _callerMetadataMap.value
+                _callerMetadataMap.value = currentMap - number
+            }
+        }
     }
 }

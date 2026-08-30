@@ -54,7 +54,7 @@ val appModule = module {
 
     viewModel { ContactsViewModel(androidApplication(), get(), get()) }
     viewModel { CallLogViewModel(androidApplication(), get(), androidContext().contentResolver, get()) }
-    viewModel { CallViewModel(get(), get()) }
+    viewModel { CallViewModel(androidContext(), get(), get()) }
     viewModel { MainViewModel(get()) }
     single<PurchaseHelper> {
         DonateViewModel(get())

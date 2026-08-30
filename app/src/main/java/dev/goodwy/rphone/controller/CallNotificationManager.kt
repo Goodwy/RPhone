@@ -20,6 +20,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.net.toUri
+import kotlinx.coroutines.withContext
 import dev.goodwy.rphone.MainActivity
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.PreferenceManager
@@ -55,7 +56,7 @@ class CallNotificationManager(
     fun buildCallNotification(
         call: Call,
         contactName: String,
-        photoUri: String?,
+        contactPhoto: Bitmap?,
         audioState: CallAudioState?
     ): Notification {
         val fullscreenCalls = preferenceManager.getBoolean(PreferenceManager.KEY_ALWAYS_FULLSCREEN_CALLS, false)
@@ -89,7 +90,7 @@ class CallNotificationManager(
             createdChannels.add(channelId)
         }
 
-        val contactPhoto = getContactBitmap(photoUri)
+        // Removed contactPhoto = getContactBitmap(photoUri) - handled via parameter
 
         val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
         val accountHandle = call.details.accountHandle
@@ -288,18 +289,19 @@ class CallNotificationManager(
         notificationManager.notify(number.hashCode(), builder.build())
     }
 
-    private fun getContactBitmap(photoUri: String?): Bitmap? {
-        if (photoUri == null) return null
-        return try {
+    suspend fun getContactBitmap(photoUri: String?): Bitmap? = withContext(kotlinx.coroutines.Dispatchers.IO) {
+        if (photoUri == null) return@withContext null
+        try {
             val uri = photoUri.toUri()
-            val inputStream = context.contentResolver.openInputStream(uri)
-            BitmapFactory.decodeStream(inputStream)
+            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                BitmapFactory.decodeStream(inputStream)
+            }
         } catch (_: Exception) {
             null
         }
     }
 
-    fun showMissedCallNotification(
+    suspend fun showMissedCallNotification(
         call: Call,
         contactName: String,
         photoUri: String?
