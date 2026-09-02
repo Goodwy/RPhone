@@ -8,6 +8,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
@@ -23,10 +24,7 @@ class CallStateManager(private val getCallerNameUseCase: GetCallerNameUseCase) {
     fun onNewCallReceived(number: String, cnam: String?) {
         scope.launch {
             val metadata = getCallerNameUseCase(number, cnam)
-            synchronized(this) {
-                val currentMap = _callerMetadataMap.value
-                _callerMetadataMap.value = currentMap + (number to metadata)
-            }
+            _callerMetadataMap.update { current -> current + (number to metadata) }
         }
     }
     
@@ -34,10 +32,7 @@ class CallStateManager(private val getCallerNameUseCase: GetCallerNameUseCase) {
         if (number == null) {
             _callerMetadataMap.value = emptyMap()
         } else {
-            synchronized(this) {
-                val currentMap = _callerMetadataMap.value
-                _callerMetadataMap.value = currentMap - number
-            }
+            _callerMetadataMap.update { current -> current - number }
         }
     }
 }

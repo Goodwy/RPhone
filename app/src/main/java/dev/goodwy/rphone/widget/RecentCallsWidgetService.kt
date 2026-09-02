@@ -84,7 +84,7 @@ class RecentCallsFactory(
     // Use a stable ID derived from the number string, not position
     override fun getItemId(position: Int): Long =
         if (position in items.indices) items[position].number.hashCode().toLong() else position.toLong()
-    override fun hasStableIds(): Boolean = false
+    override fun hasStableIds(): Boolean = true
     override fun getLoadingView(): RemoteViews? = null
     override fun getViewTypeCount(): Int = 1
 

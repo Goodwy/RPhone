@@ -591,6 +591,8 @@ class MainActivity : FragmentActivity() {
                     // ── Biometric overlay (above blur, inside Box) ─────────
                     if (!isUnlocked) {
                         val activity = this@MainActivity
+                        val executor = remember(activity) { androidx.core.content.ContextCompat.getMainExecutor(activity) }
+                        
                         LaunchedEffect(biometricType, appLockEnabled) {
                             if (biometricType.isEmpty() || !appLockEnabled) {
                                 mainViewModel.unlock()
@@ -601,7 +603,6 @@ class MainActivity : FragmentActivity() {
                                 // Without this, the system’s BiometricPrompt is ignored on many devices.
                                 kotlinx.coroutines.delay(150)
 
-                                val executor = androidx.core.content.ContextCompat.getMainExecutor(activity)
                                 val prompt = androidx.biometric.BiometricPrompt(
                                     activity, executor,
                                     object : androidx.biometric.BiometricPrompt.AuthenticationCallback() {
@@ -611,22 +612,22 @@ class MainActivity : FragmentActivity() {
                                         override fun onAuthenticationError(code: Int, msg: CharSequence) {
                                             // Code 5 = ERROR_CANCELED (the user clicked ‘Cancel’)
                                             if (code != 5) {
-                                                finish()
+                                                activity.finish()
                                             }
-                                        }
-                                        override fun onAuthenticationFailed() {
-                                            // Finger not recognised. Do nothing; try again
                                         }
                                     }
                                 )
-                                prompt.authenticate(
-                                    androidx.biometric.BiometricPrompt.PromptInfo.Builder()
-                                        .setTitle(getString(R.string.app_name))
-                                        .setSubtitle("Verify your identity to continue")
-                                        .setNegativeButtonText(getString(R.string.cancel))
-                                        .setAllowedAuthenticators(androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK)
-                                        .build()
-                                )
+                                
+                                val promptInfo = androidx.biometric.BiometricPrompt.PromptInfo.Builder()
+                                    .setTitle(activity.getString(R.string.app_name))
+                                    .setSubtitle("Verify your identity to continue")
+                                    .setNegativeButtonText(activity.getString(R.string.cancel))
+                                    .setAllowedAuthenticators(androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK)
+                                    .build()
+
+                                try {
+                                    prompt.authenticate(promptInfo)
+                                } catch (_: Exception) {}
                             }
                         }
                         if (biometricType == "pin") {

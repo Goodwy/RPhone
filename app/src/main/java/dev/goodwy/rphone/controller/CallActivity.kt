@@ -423,8 +423,12 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
     }
 
     private fun acquireProximityLock() {
-        val isSpeaker = callViewModel.audioState.value?.route == android.telecom.CallAudioState.ROUTE_SPEAKER
-        if (!isSpeaker && preferenceManager.getBoolean(PreferenceManager.KEY_PROXIMITY_SENSOR, true)) {
+        val route = callViewModel.audioState.value?.route
+        val isHandsFree = route == android.telecom.CallAudioState.ROUTE_SPEAKER ||
+                route == android.telecom.CallAudioState.ROUTE_BLUETOOTH ||
+                route == android.telecom.CallAudioState.ROUTE_WIRED_HEADSET
+
+        if (!isHandsFree && preferenceManager.getBoolean(PreferenceManager.KEY_PROXIMITY_SENSOR, true)) {
             proximityWakeLock?.let { if (!it.isHeld) it.acquire(20*60*1000L /*20 minutes*/) }
         } else {
             releaseProximityLock()

@@ -112,7 +112,11 @@ class FloatingNotesService : Service() {
     }
 
     private fun removeOverlay() {
-        try { overlayView?.let { windowManager.removeViewImmediate(it) } } catch (_: Exception) {}
+        try {
+            overlayView?.let {
+                if (it.isAttachedToWindow) windowManager.removeViewImmediate(it)
+            }
+        } catch (_: Exception) {}
         overlayView = null
     }
 
