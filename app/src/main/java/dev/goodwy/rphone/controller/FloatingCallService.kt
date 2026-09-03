@@ -364,12 +364,20 @@ class FloatingCallService : Service() {
         bubbleView?.visibility = View.GONE
         scope.launch {
             delay(440)
-            try { menuView?.let { wm.removeViewImmediate(it) } } catch (_: Exception) {}
-            menuView = null
+            removeMenuView()
             if (!CallActivity.isInForeground.value && bubbleView != null) {
                 bubbleView?.visibility = View.VISIBLE
             }
         }
+    }
+
+    private fun removeMenuView() {
+        try {
+            menuView?.let {
+                if (it.isAttachedToWindow) wm.removeViewImmediate(it)
+            }
+        } catch (_: Exception) {}
+        menuView = null
     }
 
     private fun performAction(action: MenuAction) {
@@ -390,8 +398,7 @@ class FloatingCallService : Service() {
                 MenuAction.Hangup -> callRepository.declineCall()
             }
             delay(200)
-            try { menuView?.let { wm.removeViewImmediate(it) } } catch (_: Exception) {}
-            menuView = null
+            removeMenuView()
             if (action != MenuAction.Close && !CallActivity.isInForeground.value && bubbleView != null) {
                 bubbleView?.visibility = View.VISIBLE
             }
@@ -726,8 +733,7 @@ class FloatingCallService : Service() {
                 if (inForeground && menuView != null) {
                     menuVisibleState.value = false
                     delay(440)
-                    try { menuView?.let { wm.removeViewImmediate(it) } } catch (_: Exception) {}
-                    menuView = null
+                    removeMenuView()
                 }
             }
         }
@@ -735,14 +741,20 @@ class FloatingCallService : Service() {
 
     private fun removeBubble() {
         menuVisibleState.value = false
-        try { menuView?.let { wm.removeViewImmediate(it) } } catch (_: Exception) {}
-        menuView = null
-        try { bubbleView?.let { wm.removeViewImmediate(it) } } catch (_: Exception) {}
+        removeMenuView()
+        try {
+            bubbleView?.let {
+                if (it.isAttachedToWindow) wm.removeViewImmediate(it)
+            }
+        } catch (_: Exception) {}
         bubbleView = null
     }
 
     override fun onDestroy() {
-        unregisterReceiver(configReceiver)
-        scope.cancel(); lifecycleOwner.onDestroy(); removeBubble(); super.onDestroy()
+        try { unregisterReceiver(configReceiver) } catch (_: Exception) {}
+        scope.cancel()
+        lifecycleOwner.onDestroy()
+        removeBubble()
+        super.onDestroy()
     }
 }

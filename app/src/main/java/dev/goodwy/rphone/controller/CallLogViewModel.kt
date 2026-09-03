@@ -86,8 +86,9 @@ class CallLogViewModel(
             combine(
                 _allCallLogs,
                 _selectedFilter,
-                MutableStateFlow(preferenceManager.getInt(PreferenceManager.KEY_BLOCK_LOG_VISIBILITY, 0))
-            ) { logs, filter, blockVisibility ->
+                preferenceManager.settingsChanged
+            ) { logs, filter, _ ->
+                val blockVisibility = preferenceManager.getInt(PreferenceManager.KEY_BLOCK_LOG_VISIBILITY, 0)
                 Triple(logs, filter, blockVisibility)
             }.collect { (logs, filter, blockVisibility) ->
                 filterLogs(logs, filter, blockVisibility)
