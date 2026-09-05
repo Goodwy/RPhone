@@ -320,6 +320,7 @@ class PreferenceManager(context: Context) {
         const val KEY_SPEED_DIAL            = "speed_dial"
         const val KEY_T9_DIALING            = "t9_dialing"
         const val KEY_PROXIMITY_SENSOR = "proximity_sensor"
+        const val KEY_WAVE_TO_ANSWER = "wave_to_answer"
         const val KEY_INCOMING_CALL_POPUP = "incoming_call_popup"
         const val KEY_AUTO_REDIAL_BUSY = "auto_redial_busy"
         const val KEY_REDIAL_ATTEMPTS = "redial_attempts"

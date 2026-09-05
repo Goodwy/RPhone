@@ -11,6 +11,7 @@ import android.telecom.TelecomManager
 import androidx.core.net.toUri
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.PreferenceManager
+import dev.goodwy.rphone.controller.util.WaveToAnswerManager
 import dev.goodwy.rphone.data.manager.CallStateManager
 import dev.goodwy.rphone.modal.`interface`.CallSession
 import dev.goodwy.rphone.modal.`interface`.ICallRepository
@@ -33,6 +34,8 @@ class CallService : InCallService() {
     private val notificationManager: CallNotificationManager by inject()
     private val callRepository: ICallRepository by inject()
 
+    private lateinit var waveToAnswerManager: WaveToAnswerManager
+
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var redialCount = 0
     private val callStartTimes = mutableMapOf<Call, Long>()
@@ -41,6 +44,12 @@ class CallService : InCallService() {
     override fun onCreate() {
         super.onCreate()
         (callRepository as? CallRepositoryImpl)?.bindService(this)
+
+        waveToAnswerManager = WaveToAnswerManager(this) {
+            if (preferenceManager.getBoolean(PreferenceManager.KEY_WAVE_TO_ANSWER, false)) {
+                callRepository.answerCall()
+            }
+        }
 
         serviceScope.launch {
             callRepository.isActivityVisible.collect {
@@ -186,6 +195,14 @@ class CallService : InCallService() {
     private fun updateCallState() {
         val callsList = calls ?: emptyList()
         callRepository.updateAllCalls(callsList)
+
+        // Start/Stop Wave to Answer gesture detection
+        val anyRinging = callsList.any { it.state == Call.STATE_RINGING }
+        if (anyRinging && preferenceManager.getBoolean(PreferenceManager.KEY_WAVE_TO_ANSWER, false)) {
+            waveToAnswerManager.start()
+        } else {
+            waveToAnswerManager.stop()
+        }
 
         callsList.forEach { c ->
             if (c.state == Call.STATE_ACTIVE) {
@@ -380,6 +397,7 @@ class CallService : InCallService() {
 
     override fun onDestroy() {
         super.onDestroy()
+        waveToAnswerManager.stop()
         (callRepository as? CallRepositoryImpl)?.unbindService()
         serviceScope.cancel()
     }

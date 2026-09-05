@@ -200,6 +200,8 @@
     <string name="auto_speaker_subtitle">Automatically switch to loudspeaker when phone is away from ear, and back to earpiece when near</string>
     <string name="fullscreen_calls">Full-screen calls</string>
     <string name="fullscreen_calls_subtitle">Incoming calls are always displayed in full-screen mode</string>
+    <string name="wave_to_answer">Wave to Answer</string>
+    <string name="wave_to_answer_subtitle">Wave your hand over the proximity sensor to answer incoming calls</string>
 
     <string name="sound_and_vibration">Sound &amp; Vibration</string>
     <string name="sound_and_vibration_subtitle">Ringtones, dialpad tones, and haptics across app</string>
