@@ -13,7 +13,7 @@ interface IContactsRepository {
     suspend fun saveContact(contact: Contact)
     suspend fun deleteContact(contactId: String)
     suspend fun deleteContacts(contactIds: List<String>)
-    suspend fun moveContacts(contactIds: List<String>, accountName: String?, accountType: String?)
+    suspend fun moveContacts(contactIds: List<String>, accountName: String?, accountType: String?): Map<String, String>
     suspend fun getAvailableAccounts(): List<Account>
     suspend fun getAvailableAccountsForMoving(): List<Account>
     suspend fun findDuplicates(): List<List<Contact>>

@@ -954,9 +954,9 @@ class ContactsRepository(
         Unit
     }
 
-    override suspend fun moveContacts(contactIds: List<String>, accountName: String?, accountType: String?) = withContext(Dispatchers.IO) {
-
-        if (contactIds.isEmpty()) return@withContext
+    override suspend fun moveContacts(contactIds: List<String>, accountName: String?, accountType: String?): Map<String, String> = withContext(Dispatchers.IO) {
+        val idMapping = mutableMapOf<String, String>()
+        if (contactIds.isEmpty()) return@withContext idMapping
 
         // We separate private and public contacts
         val privateIds = contactIds.filter { it.startsWith("p") }
@@ -974,8 +974,15 @@ class ContactsRepository(
                         accountType = accountType
                     )
                     saveContact(publicContact)
-                    // Deleting the private version
                     deleteContact(id)
+
+                    // Ищем новый ID для приватного контакта
+                    val newId = contact.phoneNumbers.firstNotNullOfOrNull { number ->
+                        getContactByNumber(number)?.id?.takeIf { it.isNotBlank() }
+                    }
+                    if (newId != null) {
+                        idMapping[id] = newId
+                    }
                 }
             }
         }
@@ -1004,7 +1011,21 @@ class ContactsRepository(
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+
+            // Give the Android system time to aggregate (recreate) the contact
+            delay(300)
+
+            // We're looking for new IDs for public contacts
+            publicIds.forEach { oldId ->
+                val originalContact = getContactById(oldId) ?: return@forEach
+                val newId = originalContact.phoneNumbers.firstNotNullOfOrNull { number ->
+                    getContactByNumber(number)?.id?.takeIf { it.isNotBlank() && it != oldId }
+                } ?: oldId // If the ID hasn't changed, keep the old one
+                idMapping[oldId] = newId
+            }
         }
+
+        return@withContext idMapping
     }
 
     override suspend fun getAvailableAccountsForMoving(): List<Account> = withContext(Dispatchers.IO) {

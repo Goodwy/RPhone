@@ -336,11 +336,13 @@ class ContactsViewModel(
         }
     }
 
-    fun moveContacts(contactIds: List<String>, account: Account?) {
+    fun moveContacts(contactIds: List<String>, account: Account?): Map<String, String> {
+        var newIdsMap: Map<String, String> = emptyMap()
         viewModelScope.launch {
-            contactsRepo.moveContacts(contactIds, account?.name, account?.type)
+            newIdsMap = contactsRepo.moveContacts(contactIds, account?.name, account?.type)
             fetchContacts()
         }
+        return newIdsMap
     }
 
     fun findDuplicates(onResult: (List<List<Contact>>) -> Unit) {

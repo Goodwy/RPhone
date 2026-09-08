@@ -1527,10 +1527,11 @@ fun ContactDetailsScreen(
                                                                 else "${contact!!.accountName}|${contact!!.accountType}",
                                             contactsViewModel = contactsViewModel,
                                             onDismiss = { showMoveDialog = false },
-                                            onSuccess = { selectedAccount, isPrivate ->
+                                            onSuccess = { selectedAccount, isPrivate, newContactId ->
                                                 context.toast(textToast)
                                                 // Updating local data
                                                 contact = contact!!.copy(
+                                                    id = newContactId,
                                                     accountName = selectedAccount?.name,
                                                     accountType = selectedAccount?.type,
                                                     isPrivate = isPrivate
@@ -2410,10 +2411,11 @@ fun ContactDetailsScreen(
                                                             else "${contact!!.accountName}|${contact!!.accountType}",
                                         contactsViewModel = contactsViewModel,
                                         onDismiss = { showMoveDialog = false },
-                                        onSuccess = { selectedAccount, isPrivate ->
+                                        onSuccess = { selectedAccount, isPrivate, newContactId ->
                                             context.toast(textToast)
                                             // Updating local data
                                             contact = contact!!.copy(
+                                                id = newContactId,
                                                 accountName = selectedAccount?.name,
                                                 accountType = selectedAccount?.type,
                                                 isPrivate = isPrivate

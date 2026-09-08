@@ -179,20 +179,25 @@ fun MoveSingleContactDialog(
     currentAccountKey: String? = null,
     contactsViewModel: ContactsViewModel,
     onDismiss: () -> Unit,
-    onSuccess: (Account?, isPrivate: Boolean) -> Unit = {_, _ -> }
+    onSuccess: (Account?, isPrivate: Boolean, newContactId: String) -> Unit = {_, _, _ -> }
 ) {
     MoveToAccountDialog(
         availableAccounts = availableAccounts,
         currentAccountKey = currentAccountKey,
         onDismiss = onDismiss,
         onAccountSelected = { account, isPrivate ->
-            if (isPrivate) {
+            val newIdsMap = if (isPrivate) {
                 contactsViewModel.makeContactPrivate(contact.id)
+                emptyMap()
             } else {
                 val list = listOf(contact.id)
                 contactsViewModel.moveContacts(list, account)
             }
-            onSuccess(account, isPrivate)
+
+            // Find a new ID or keep the old one
+            val finalId = newIdsMap[contact.id] ?: contact.id
+
+            onSuccess(account, isPrivate, finalId)
             onDismiss()
         }
     )

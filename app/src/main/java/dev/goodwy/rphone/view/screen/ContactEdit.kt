@@ -1319,14 +1319,18 @@ fun ContactEditScreen(
                                 EditPhoneField(
                                     value = phoneDetail.number,
                                     onValueChange = {
-                                        phoneDetails[index] = ContactPhoneDetail(phoneDetail.type, phoneDetail.label, it)
-                                        phoneNumbers[index] = it
+                                        if (index < phoneDetails.size && index < phoneNumbers.size) {
+                                            phoneDetails[index] = ContactPhoneDetail(phoneDetail.type, phoneDetail.label, it)
+                                            phoneNumbers[index] = it
+                                        }
                                     },
                                     label = getPhoneTypeText(context, phoneDetail.type, phoneDetail.label),
                                     onDelete = if (phoneDetails.size > 1) {
                                         {
-                                            phoneDetails.removeAt(index)
-                                            phoneNumbers.removeAt(index)
+                                            if (index < phoneDetails.size && index < phoneNumbers.size) {
+                                                phoneDetails.removeAt(index)
+                                                phoneNumbers.removeAt(index)
+                                            }
                                         }
                                     } else null,
                                     onLabelChange = { newLabel, newType ->
@@ -1366,7 +1370,7 @@ fun ContactEditScreen(
                                     value = email.value,
                                     onValueChange = { emails[index] = ContactEmail(email.type, email.label, it) },
                                     label = getEmailTypeText(context, email.type, email.label),
-                                    onDelete = if (emails.size > 1) { { emails.removeAt(index) } } else null,
+                                    onDelete = if (emails.size > 1) { { if (index < emails.size) { emails.removeAt(index) } } } else null,
                                     onLabelChange = { newLabel, newType ->
                                         val newTypeValue = newType ?: Email.TYPE_CUSTOM
                                         emails[index] = ContactEmail(
@@ -1399,7 +1403,7 @@ fun ContactEditScreen(
                                     value = event.date,
                                     onValueChange = { events[index] = ContactEvent(event.type, event.label, it) },
                                     label = getEventTypeText(context, event.type, event.label),
-                                    onDelete = if (events.size > 1) { { events.removeAt(index) } } else null,
+                                    onDelete = if (events.size > 1) { { if (index < events.size) { events.removeAt(index) } } } else null,
                                     onLabelChange = { newLabel, newType ->
                                         val newTypeValue = newType ?: Event.TYPE_CUSTOM
                                         events[index] = ContactEvent(
@@ -1432,7 +1436,7 @@ fun ContactEditScreen(
                                     value = address.formattedAddress,
                                     onValueChange = { addresses[index] = ContactAddress(address.type, address.label, it) },
                                     label = getAddressTypeText(context, address.type, address.label),
-                                    onDelete = if (addresses.size > 1) { { addresses.removeAt(index) } } else null,
+                                    onDelete = if (addresses.size > 1) { { if (index < addresses.size) { addresses.removeAt(index) } } } else null,
                                     onLabelChange = { newLabel, newType ->
                                         val newTypeValue = newType ?: StructuredPostal.TYPE_CUSTOM
                                         addresses[index] = ContactAddress(
@@ -2032,14 +2036,18 @@ fun ContactEditScreen(
                             EditPhoneField(
                                 value = phoneDetail.number,
                                 onValueChange = {
-                                    phoneDetails[index] = ContactPhoneDetail(phoneDetail.type, phoneDetail.label, it)
-                                    phoneNumbers[index] = it
+                                    if (index < phoneDetails.size && index < phoneNumbers.size) {
+                                        phoneDetails[index] = ContactPhoneDetail(phoneDetail.type, phoneDetail.label, it)
+                                        phoneNumbers[index] = it
+                                    }
                                 },
                                 label = getPhoneTypeText(context, phoneDetail.type, phoneDetail.label),
                                 onDelete = if (phoneDetails.size > 1) {
                                     {
-                                        phoneDetails.removeAt(index)
-                                        phoneNumbers.removeAt(index)
+                                        if (index < phoneDetails.size && index < phoneNumbers.size) {
+                                            phoneDetails.removeAt(index)
+                                            phoneNumbers.removeAt(index)
+                                        }
                                     }
                                 } else null,
                                 onLabelChange = { newLabel, newType ->
@@ -2079,7 +2087,7 @@ fun ContactEditScreen(
                                 value = email.value,
                                 onValueChange = { emails[index] = ContactEmail(email.type, email.label, it) },
                                 label = getEmailTypeText(context, email.type, email.label),
-                                onDelete = if (emails.size > 1) { { emails.removeAt(index) } } else null,
+                                onDelete = if (emails.size > 1) { { if (index < emails.size) { emails.removeAt(index) } } } else null,
                                 onLabelChange = { newLabel, newType ->
                                     val newTypeValue = newType ?: Email.TYPE_CUSTOM
                                     emails[index] = ContactEmail(
@@ -2108,18 +2116,11 @@ fun ContactEditScreen(
                         ),verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         events.forEachIndexed { index, event ->
-//                        EditFieldDate(
-//                            value = event.date,
-//                            onValueChange = { events[index] = ContactEvent(event.type, event.label, it) },
-//                            label = getEventTypeText(context, event.type, event.label),
-//                            icon = Icons.Default.Event,
-//                            onDelete = if (events.size > 1) { { events.removeAt(index) } } else null
-//                        )
                             EditEventField(
                                 value = event.date,
                                 onValueChange = { events[index] = ContactEvent(event.type, event.label, it) },
                                 label = getEventTypeText(context, event.type, event.label),
-                                onDelete = if (events.size > 1) { { events.removeAt(index) } } else null,
+                                onDelete = if (events.size > 1) { { if (index < events.size) { events.removeAt(index) } } } else null,
                                 onLabelChange = { newLabel, newType ->
                                     val newTypeValue = newType ?: Event.TYPE_CUSTOM
                                     events[index] = ContactEvent(
@@ -2148,18 +2149,11 @@ fun ContactEditScreen(
                         ),verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         addresses.forEachIndexed { index, address ->
-//                        EditField(
-//                            value = address.formattedAddress,
-//                            onValueChange = { addresses[index] = ContactAddress(address.type, address.label, it) },
-//                            label = getAddressTypeText(context, address.type, address.label),
-//                            icon = Icons.Default.LocationOn,
-//                            onDelete = if (addresses.size > 1) { { addresses.removeAt(index) } } else null
-//                        )
                             EditAddressField(
                                 value = address.formattedAddress,
                                 onValueChange = { addresses[index] = ContactAddress(address.type, address.label, it) },
                                 label = getAddressTypeText(context, address.type, address.label),
-                                onDelete = if (addresses.size > 1) { { addresses.removeAt(index) } } else null,
+                                onDelete = if (addresses.size > 1) { { if (index < addresses.size) { addresses.removeAt(index) } } } else null,
                                 onLabelChange = { newLabel, newType ->
                                     val newTypeValue = newType ?: StructuredPostal.TYPE_CUSTOM
                                     addresses[index] = ContactAddress(
