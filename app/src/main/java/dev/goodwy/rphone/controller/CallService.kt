@@ -1,6 +1,9 @@
 package dev.goodwy.rphone.controller
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Build
 import android.provider.BlockedNumberContract
 import android.telecom.Call
@@ -25,6 +28,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
 import kotlin.getValue
+import kotlin.time.Duration.Companion.milliseconds
 
 class CallService : InCallService() {
 
@@ -38,9 +42,32 @@ class CallService : InCallService() {
     private val callStartTimes = mutableMapOf<Call, Long>()
     private var lastFloatingCallMetadata: Triple<String, String, String?>? = null
 
+    // BroadcastReceiver for monitoring when the screen is locked or turned off
+    private val screenStateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            when (intent.action) {
+                Intent.ACTION_SCREEN_OFF,
+                Intent.ACTION_SCREEN_ON,
+                Intent.ACTION_USER_PRESENT -> {
+                    callRepository.currentCallSession.value?.call?.let { currentCall ->
+                        updateNotification(currentCall)
+                    }
+                }
+            }
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
         (callRepository as? CallRepositoryImpl)?.bindService(this)
+
+        // Register the receiver to track screen locks
+        val filter = IntentFilter().apply {
+            addAction(Intent.ACTION_SCREEN_OFF)
+            addAction(Intent.ACTION_SCREEN_ON)
+            addAction(Intent.ACTION_USER_PRESENT) // Screen Unlocked
+        }
+        registerReceiver(screenStateReceiver, filter)
 
         serviceScope.launch {
             callRepository.isActivityVisible.collect {
@@ -86,8 +113,11 @@ class CallService : InCallService() {
 
                 val remaining = calls?.filter { it.state != Call.STATE_DISCONNECTED } ?: emptyList()
                 if (remaining.isEmpty()) {
-                    removeForeground()
-                    cancelNotification()
+                    serviceScope.launch {
+                        delay(150.milliseconds)
+                        removeForeground()
+                        cancelNotification()
+                    }
                 }
             } else {
                 updateNotification(call)
@@ -119,7 +149,7 @@ class CallService : InCallService() {
             if (redialCount < maxAttempts) {
                 redialCount++
                 serviceScope.launch {
-                    delay(delayMs)
+                    delay(delayMs.milliseconds)
                     val intent = Intent(Intent.ACTION_CALL, "tel:$number".toUri()).apply {
                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     }
@@ -223,7 +253,12 @@ class CallService : InCallService() {
         }
     }
 
-    private fun updateNotification(call: Call) {
+    private fun isDeviceLocked(): Boolean {
+        val keyguardManager = getSystemService(Context.KEYGUARD_SERVICE) as android.app.KeyguardManager
+        return keyguardManager.isKeyguardLocked
+    }
+
+    private fun updateNotification(call: Call, forcedHigh: Boolean? = null) {
         serviceScope.launch {
             val handle = call.details.handle
             val number = handle?.schemeSpecificPart ?: ""
@@ -231,11 +266,14 @@ class CallService : InCallService() {
             val photoUri = getContactPhotoFromCache(number)
             val contactPhoto = notificationManager.getContactBitmap(photoUri)
 
+            val isHigh = forcedHigh ?: isDeviceLocked()
+
             val notification = notificationManager.buildCallNotification(
                 call,
                 contactName,
                 contactPhoto,
-                callRepository.audioState.value
+                callRepository.audioState.value,
+                isHigh
             )
             startForeground(
                 CallNotificationManager.NOTIFICATION_ID,
@@ -324,8 +362,11 @@ class CallService : InCallService() {
         }
         val callsList = callRepository.allCalls.value
         if (callsList.isEmpty()) {
-            removeForeground()
-            cancelNotification()
+            serviceScope.launch {
+                delay(100.milliseconds)
+                removeForeground()
+                cancelNotification()
+            }
         } else {
             callRepository.currentCallSession.value?.call?.let { updateNotification(it) }
         }
@@ -380,6 +421,11 @@ class CallService : InCallService() {
 
     override fun onDestroy() {
         super.onDestroy()
+
+        try {
+            unregisterReceiver(screenStateReceiver)
+        } catch (_: Exception) {}
+
         (callRepository as? CallRepositoryImpl)?.unbindService()
         serviceScope.cancel()
     }

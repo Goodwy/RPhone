@@ -17,7 +17,6 @@ import android.telecom.CallAudioState
 import android.telecom.TelecomManager
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.getSystemService
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.net.toUri
 import kotlinx.coroutines.withContext
@@ -30,7 +29,8 @@ class CallNotificationManager(
     private val preferenceManager: PreferenceManager
 ) {
     companion object {
-        const val CHANNEL_ID = "call_channel"
+        const val CHANNEL_ID_LOW = "call_channel_low"
+        const val CHANNEL_ID_HIGH = "call_channel_high"
         const val INCOMING_CHANNEL_ID = "incoming_call_channel_v3"
         const val FULLSCREEN_INCOMING_CHANNEL_ID = "fullscreen_incoming_call_channel_v3"
         const val MISSED_CHANNEL_ID = "missed_call_channel_v3"
@@ -57,15 +57,19 @@ class CallNotificationManager(
         call: Call,
         contactName: String,
         contactPhoto: Bitmap?,
-        audioState: CallAudioState?
+        audioState: CallAudioState?,
+        high: Boolean = false
     ): Notification {
         val fullscreenCalls = preferenceManager.getBoolean(PreferenceManager.KEY_ALWAYS_FULLSCREEN_CALLS, false)
         val isRinging = call.state == Call.STATE_RINGING
         val channelId = if (isRinging) {
             if (fullscreenCalls) FULLSCREEN_INCOMING_CHANNEL_ID else INCOMING_CHANNEL_ID
-        } else CHANNEL_ID
+        } else {
+            if (high) CHANNEL_ID_HIGH else CHANNEL_ID_LOW
+        }
 
         if (!createdChannels.contains(channelId)) {
+//            notificationManager.deleteNotificationChannel(channelId)
             val channel = if (isRinging) {
                 NotificationChannel(
                     channelId,
@@ -78,9 +82,9 @@ class CallNotificationManager(
                 }
             } else {
                 NotificationChannel(
-                    CHANNEL_ID,
-                    context.getString(R.string.notif_channel_outgoing_calls),
-                    NotificationManager.IMPORTANCE_LOW
+                    if (high) CHANNEL_ID_HIGH else CHANNEL_ID_LOW,
+                    if (high) "Call Notification on a Locked Screen" else context.getString(R.string.notif_channel_outgoing_calls),
+                    if (high) NotificationManager.IMPORTANCE_HIGH else NotificationManager.IMPORTANCE_LOW
                 ).apply {
                     lockscreenVisibility = Notification.VISIBILITY_PUBLIC
                     enableVibration(false)
@@ -162,7 +166,6 @@ class CallNotificationManager(
                 .setOngoing(true)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setOnlyAlertOnce(!isRinging)
-                .setUsesChronometer(true)
                 .setStyle(
                     if (isRinging) {
                         Notification.CallStyle.forIncomingCall(person, declinePendingIntent, answerPendingIntent)
@@ -180,7 +183,7 @@ class CallNotificationManager(
                 builder.setShowWhen(false)
             } else {
                 val connectTime = call.details.connectTimeMillis
-                if (connectTime > 0) {
+                if (call.state == Call.STATE_ACTIVE && connectTime > 0) {
                     builder.setWhen(connectTime)
                     builder.setUsesChronometer(true)
                     builder.setShowWhen(true)
@@ -279,7 +282,7 @@ class CallNotificationManager(
     }
 
     fun showBlockedNotification(number: String) {
-        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID_LOW)
             .setSmallIcon(R.drawable.ic_close)
             .setContentTitle(context.getString(R.string.notif_blocked_call_title))
             .setContentText(context.getString(R.string.notif_blocked_call_text, number))
@@ -326,34 +329,9 @@ class CallNotificationManager(
 
         val intent = Intent(context, MainActivity::class.java).apply {
             action = "dev.goodwy.rphone.ACTION_VIEW_RECENTS"
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
         }
         val pendingIntent = PendingIntent.getActivity(context, 10, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-
-
-//        val telecomManager = getSystemService(TELECOM_SERVICE) as TelecomManager
-//        val simLabel = call.details.accountHandle?.let {
-//            try { telecomManager.getPhoneAccount(it)?.label?.toString() } catch (e: SecurityException) { null }
-//        }
-//
-//        val timeString = android.text.format.DateFormat.getTimeFormat(this).format(java.util.Date())
-//
-//        val missedCallText = buildString {
-//            append(getString(R.string.notif_missed_call_text, contactName, timeString))
-//            if (simLabel != null) {
-//                append(" ")
-//                append(getString(R.string.notif_via_sim, simLabel))
-//            }
-//        }
-
-//        val missedCallText = buildString {
-//            append(contactName)
-//            if (simLabel != null) {
-//                append(" ")
-//                val sim = getString(R.string.notif_via_sim, simLabel)
-//                append("($sim)")
-//            }
-//        }
 
         val callActionIntent = Intent(context, NotificationActivity::class.java).apply {
             action = NotificationActivity.ACTION_CALL

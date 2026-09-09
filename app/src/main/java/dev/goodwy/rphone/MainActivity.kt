@@ -675,10 +675,28 @@ class MainActivity : FragmentActivity() {
         val target = mainViewModel.getNavigationTarget(intent, this) ?: return
 
         when (target) {
+//            is NavigationTarget.Recents -> {
+//                navController.navigate(RecentScreenDestination.route) {
+//                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+//                    launchSingleTop = true
+//                }
+//            }
             is NavigationTarget.Recents -> {
                 navController.navigate(RecentScreenDestination.route) {
-                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                        inclusive = false // Don't remove the home screen
+                    }
                     launchSingleTop = true
+                    restoreState = true
+
+                    // Disable the animation for instant opening from a notification
+                    anim {
+                        enter = 0
+                        exit = 0
+                        popEnter = 0
+                        popExit = 0
+                    }
                 }
             }
             is NavigationTarget.Dialpad -> {
