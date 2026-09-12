@@ -429,7 +429,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
                 route == android.telecom.CallAudioState.ROUTE_WIRED_HEADSET
 
         if (!isHandsFree && preferenceManager.getBoolean(PreferenceManager.KEY_PROXIMITY_SENSOR, true)) {
-            proximityWakeLock?.let { if (!it.isHeld) it.acquire(20*60*1000L /*20 minutes*/) }
+            proximityWakeLock?.let { if (!it.isHeld) it.acquire(60*60*1000L /* 1 hour */) }
         } else {
             releaseProximityLock()
         }

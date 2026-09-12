@@ -21,7 +21,9 @@ import dev.goodwy.rphone.modal.repository.CallRepositoryImpl
 import dev.goodwy.rphone.view.screen.BiometricCallActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -41,6 +43,7 @@ class CallService : InCallService() {
     private var redialCount = 0
     private val callStartTimes = mutableMapOf<Call, Long>()
     private var lastFloatingCallMetadata: Triple<String, String, String?>? = null
+    private var notificationUpdateJob: Job? = null
 
     // BroadcastReceiver for monitoring when the screen is locked or turned off
     private val screenStateReceiver = object : BroadcastReceiver() {
@@ -259,12 +262,15 @@ class CallService : InCallService() {
     }
 
     private fun updateNotification(call: Call, forcedHigh: Boolean? = null) {
-        serviceScope.launch {
+        notificationUpdateJob?.cancel()
+        notificationUpdateJob = serviceScope.launch {
             val handle = call.details.handle
             val number = handle?.schemeSpecificPart ?: ""
             val contactName = getContactNameFromCache(number)
             val photoUri = getContactPhotoFromCache(number)
             val contactPhoto = notificationManager.getContactBitmap(photoUri)
+
+            if (!isActive) return@launch
 
             val isHigh = forcedHigh ?: isDeviceLocked()
 
