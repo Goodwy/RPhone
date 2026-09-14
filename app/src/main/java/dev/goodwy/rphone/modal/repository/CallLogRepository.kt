@@ -18,6 +18,8 @@ import androidx.core.net.toUri
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.modal.data.getDisplayName
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 class CallLogRepository(
@@ -29,18 +31,33 @@ class CallLogRepository(
     private val preferenceManager = PreferenceManager(context)
     private val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as? TelecomManager
 
+    private var cachedContactMap: Map<String, Contact>? = null
+    private var lastContactMapUpdate = 0L
+    private val CONTACT_MAP_TTL = 60_000L // 1 minute
+    private val contactMapMutex = Mutex()
+
     override suspend fun getCallLogs(): List<CallLogEntry> = withContext(Dispatchers.IO) {
         val callLogs = mutableListOf<CallLogEntry>()
 
-        // Optimization: Fetch all contacts once for quick lookup
-        val allContacts = try { contactsRepo.getContacts() } catch (e: Exception) { emptyList() }
-        val contactMap = mutableMapOf<String, Contact>()
-        allContacts.forEach { contact ->
-            contact.phoneNumbers.forEach { number ->
-                val normalized = normalizePhoneNumber(number)
-                // Use last 10 digits as key for flexible matching (local vs international)
-                val key = if (normalized.length >= 10) normalized.takeLast(10) else normalized
-                contactMap[key] = contact
+        val contactMap = contactMapMutex.withLock {
+            val now = System.currentTimeMillis()
+            if (cachedContactMap != null && now - lastContactMapUpdate < CONTACT_MAP_TTL) {
+                cachedContactMap!!
+            } else {
+                // Optimization: Fetch all contacts once for quick lookup
+                val allContacts = try { contactsRepo.getContacts() } catch (e: Exception) { emptyList() }
+                val map = mutableMapOf<String, Contact>()
+                allContacts.forEach { contact ->
+                    contact.phoneNumbers.forEach { number ->
+                        val normalized = normalizePhoneNumber(number)
+                        // Use last 10 digits as key for flexible matching (local vs international)
+                        val key = if (normalized.length >= 10) normalized.takeLast(10) else normalized
+                        map[key] = contact
+                    }
+                }
+                cachedContactMap = map
+                lastContactMapUpdate = now
+                map
             }
         }
 

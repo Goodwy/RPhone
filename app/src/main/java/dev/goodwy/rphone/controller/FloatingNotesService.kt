@@ -121,8 +121,8 @@ class FloatingNotesService : Service() {
     }
 
     override fun onDestroy() {
-        lifecycleOwner.onDestroy()
         removeOverlay()
+        lifecycleOwner.onDestroy()
         super.onDestroy()
     }
 }

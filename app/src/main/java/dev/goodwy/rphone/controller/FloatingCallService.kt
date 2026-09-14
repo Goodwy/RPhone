@@ -753,8 +753,8 @@ class FloatingCallService : Service() {
     override fun onDestroy() {
         try { unregisterReceiver(configReceiver) } catch (_: Exception) {}
         scope.cancel()
-        lifecycleOwner.onDestroy()
         removeBubble()
+        lifecycleOwner.onDestroy()
         super.onDestroy()
     }
 }
