@@ -48,25 +48,30 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.rounded.BlurLinear
 import androidx.compose.material.icons.rounded.BlurOff
+import androidx.compose.material.icons.rounded.CallEnd
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.FontDownload
 import androidx.compose.material.icons.rounded.FormatSize
+import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material.icons.rounded.MicNone
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.PhoneInTalk
+import androidx.compose.material.icons.rounded.RoundedCorner
 import androidx.compose.material.icons.rounded.Swipe
 import androidx.compose.material.icons.rounded._123
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
-import dev.goodwy.rphone.cardCornerSmall
+import dev.goodwy.rphone.cardCornerExtraSmall
 import dev.goodwy.rphone.view.components.RillAnimatedSection
 import dev.goodwy.rphone.view.components.RillExpressiveCard
 import dev.goodwy.rphone.view.components.RillListItem
@@ -81,9 +86,9 @@ import org.koin.compose.koinInject
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ramcosta.composedestinations.generated.destinations.AvatarsPreferenceScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.BlurEffectsElementsScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.CallerUIScreenDestination
 import dev.goodwy.rphone.R
-import dev.goodwy.rphone.cardCornerMedium
 import dev.goodwy.rphone.controller.util.darken
 import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillIconBox
@@ -94,11 +99,15 @@ import dev.goodwy.rphone.view.theme.color_call_end
 import dev.goodwy.rphone.view.theme.color_default_primary
 import dev.goodwy.rphone.view.theme.customColors
 import com.ramcosta.composedestinations.generated.destinations.DonateScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.LiquidGlassElementsScreenDestination
 import dev.goodwy.rphone.controller.PurchaseHelper
+import dev.goodwy.rphone.view.components.RillSliderListItem
 import dev.goodwy.rphone.view.components.Title
+import dev.goodwy.rphone.view.theme.RillShapeDefaults
 import kotlinx.coroutines.delay
 import java.io.File
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.milliseconds
 
 data class ThemeOption(val key: String, val label: String)
 
@@ -138,9 +147,11 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
     var scrollAnimation     by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SCROLL_ANIMATION, false)) }
     var dialpadAnimation    by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_DIALPAD_ANIMATION, true)) }
     var swipeToCall         by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SWIPE_TO_CALL, true)) }
-    var hideVoiceSearch    by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_HIDE_VOICE_SEARCH, false)) }
+    var hideVoiceSearch     by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_HIDE_VOICE_SEARCH, false)) }
     var liquidGlass         by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_LIQUID_GLASS, false)) }
     var blurEffects         by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_BLUR_EFFECTS, false)) }
+    var cardRoundness       by remember(settingsState) { mutableStateOf(prefs.getInt(PreferenceManager.KEY_CARD_ROUNDNESS, RillShapeDefaults.DefaultRoundness)) }
+    var blurIntensity       by remember(settingsState) { mutableStateOf(prefs.getInt(PreferenceManager.KEY_BLUR_INTENSITY, 20)) }
 
     // Call UI section checkboxes dialog
     var showCallUIDialog   by remember(settingsState) { mutableStateOf(false) }
@@ -354,7 +365,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                     modifier = Modifier
                                         .background(
                                             color = cardColor,
-                                            shape = RoundedCornerShape(cardCornerSmall)
+                                            shape = RoundedCornerShape(cardCornerExtraSmall)
                                         )
                                         .padding(12.dp)
                                 ) {
@@ -424,7 +435,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                                             enabledShake = true
                                                             showSnackbar = true
                                                             scope.launch {
-                                                                delay(3000)
+                                                                delay(3000.milliseconds)
                                                                 showSnackbar = false
                                                             }
                                                         } else {
@@ -475,7 +486,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                             enabledShake = true
                                             showSnackbar = true
                                             scope.launch {
-                                                delay(3000)
+                                                delay(3000.milliseconds)
                                                 showSnackbar = false
                                             }
                                         }
@@ -486,7 +497,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                     Column(modifier = Modifier
                                         .background(
                                             color = cardColor,
-                                            shape = RoundedCornerShape(cardCornerSmall)
+                                            shape = RoundedCornerShape(cardCornerExtraSmall)
                                         )
                                         .padding(vertical = 12.dp)
                                     ) {
@@ -590,7 +601,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                             enabledShake = true
                                             showSnackbar = true
                                             scope.launch {
-                                                delay(3000)
+                                                delay(3000.milliseconds)
                                                 showSnackbar = false
                                             }
                                         }
@@ -598,9 +609,9 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                     .alpha(if (isPro) 1f else 0.4f)
                                     .background(
                                         color = cardColor,
-                                        shape = RoundedCornerShape(cardCornerSmall)
+                                        shape = RoundedCornerShape(cardCornerExtraSmall)
                                     )
-                                    .padding(start = 12.dp, end = 6.dp, top = 12.dp, bottom = 12.dp)
+                                    .padding(start = 16.dp, end = 6.dp, top = 12.dp, bottom = 12.dp)
                                 ) {
                                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                                         RillIconBox(
@@ -648,46 +659,43 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
 //                                        }
                                     }
                                 }
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                    modifier = Modifier
-                                        .background(
-                                            color = cardColor,
-                                            shape = RoundedCornerShape(cardCornerSmall)
-                                        )
-                                        .padding(
-                                            start = 12.dp,
-                                            end = 16.dp,
-                                            top = 12.dp,
-                                            bottom = 12.dp
-                                        )
-                                ) {
-                                    RillIconBox(
-                                        icon = Icons.Rounded.FormatSize,
-                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkCyan,
-                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorCyan
-                                    )
-                                    Slider(
-                                        value = fontSizeScale,
-                                        onValueChange = { fontSizeScale = it },
-                                        onValueChangeFinished = { prefs.setFloat(PreferenceManager.KEY_CUSTOM_FONT_SIZE, fontSizeScale) },
-                                        valueRange = 0.8f..1.4f,
-                                        steps = 11,
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                    Text("${(fontSizeScale * 100).roundToInt()}%",
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.clickable(
-                                            indication = ripple(bounded = false, radius = 32.dp),
-                                            interactionSource = null,
-                                        ) {
-                                            fontSizeScale = 1.0f
-                                            prefs.setFloat(PreferenceManager.KEY_CUSTOM_FONT_SIZE, fontSizeScale)
-                                        }
-                                    )
-                                }
+
+                                RillSliderListItem(
+                                    headline = stringResource(R.string.font_size),
+                                    supporting = "${(fontSizeScale * 100).roundToInt()}%",
+                                    leadingIcon = Icons.Rounded.FormatSize,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkCyan,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorCyan,
+                                    value = fontSizeScale,
+                                    valueRange = 0.8f..1.4f,
+                                    steps = 11,
+                                    onValueChange = { fontSizeScale = it },
+                                    onValueChangeFinished = {
+                                        prefs.setFloat(PreferenceManager.KEY_CUSTOM_FONT_SIZE, fontSizeScale)
+                                    },
+                                    onValueClick = {
+                                        fontSizeScale = 1.0f
+                                        prefs.setFloat(PreferenceManager.KEY_CUSTOM_FONT_SIZE, fontSizeScale)
+                                    }
+                                )
+                                RillSliderListItem(
+                                    headline = stringResource(R.string.rounding_radius),
+                                    supporting = "$cardRoundness",
+                                    leadingIcon = Icons.Rounded.RoundedCorner,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkCyan,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorCyan,
+                                    value = cardRoundness.toFloat().coerceAtLeast(4f),
+                                    valueRange = 4f..32f,
+                                    steps = 6,
+                                    onValueChange = { cardRoundness = it.roundToInt() },
+                                    onValueChangeFinished = {
+                                        prefs.setInt(PreferenceManager.KEY_CARD_ROUNDNESS, cardRoundness)
+                                    },
+                                    onValueClick = {
+                                        cardRoundness = RillShapeDefaults.DefaultRoundness
+                                        prefs.setInt(PreferenceManager.KEY_CARD_ROUNDNESS, cardRoundness)
+                                    }
+                                )
                             }
                         }
                     }
@@ -724,19 +732,17 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                             )
                                         }
                                     )
-//                                    if (liquidGlass) {
-//                                        RillListItem(
-//                                            headline = "Elements to have liquid glass effect",
-//                                            supporting = "Choose which UI elements use the liquid glass effect",
-//                                            leadingIcon = Icons.Rounded.Layers,
-//                                            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPink,
-//                                            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPink,
-//                                            trailingIcon = Icons.Default.ChevronRight,
-//                                            onClick = {
-//                                                navigator.navigate(com.ramcosta.composedestinations.generated.destinations.LiquidGlassElementsScreenDestination)
-//                                            }
-//                                        )
-//                                    }
+                                    if (liquidGlass) {
+                                        RillListItem(
+                                            headline = stringResource(R.string.liquid_glass_elements),
+                                            supporting = stringResource(R.string.liquid_glass_elements_subtitle),
+                                            leadingIcon = Icons.Rounded.Layers,
+                                            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPink,
+                                            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPink,
+                                            trailingIcon = Icons.Default.ChevronRight,
+                                            onClick = { navigator.navigate(LiquidGlassElementsScreenDestination) }
+                                        )
+                                    }
 
                                     if (!liquidGlass) {
                                         RillSwitchListItem(
@@ -754,19 +760,42 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                                 )
                                             }
                                         )
-//                                        if (blurEffects) {
-//                                            RillListItem(
-//                                                headline = "Elements to have blur effect",
-//                                                supporting = "Choose which UI elements use the blur effect",
-//                                                leadingIcon = Icons.Rounded.Layers,
-//                                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
-//                                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
-//                                                trailingIcon = Icons.Default.ChevronRight,
-//                                                onClick = {
-//                                                    navigator.navigate(com.ramcosta.composedestinations.generated.destinations.BlurEffectsElementsScreenDestination)
-//                                                }
-//                                            )
-//                                        }
+                                        if (blurEffects && !liquidGlass) {
+                                            RillListItem(
+                                                headline = stringResource(R.string.blur_effect_elements),
+                                                supporting = stringResource(R.string.blur_effect_elements_subtitle),
+                                                leadingIcon = Icons.Rounded.Layers,
+                                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
+                                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
+                                                trailingIcon = Icons.Default.ChevronRight,
+                                                onClick = { navigator.navigate(BlurEffectsElementsScreenDestination) }
+                                            )
+                                        }
+                                    }
+                                    if (liquidGlass || blurEffects) {
+                                        RillSliderListItem(
+                                            headline = stringResource(R.string.blur_intensity),
+                                            supporting = "${(blurIntensity * 5)}%",
+                                            leadingIcon = Icons.Rounded.BlurLinear,
+                                            modifierLeadingIcon = Modifier.rotate(180f),
+                                            iconContainerColor =
+                                                if (liquidGlass) MaterialTheme.colorScheme.customColors.colorDarkPink
+                                                else MaterialTheme.colorScheme.customColors.colorDarkOrange,
+                                            iconBgContainerColor =
+                                                if (liquidGlass) MaterialTheme.colorScheme.customColors.colorPink
+                                                else MaterialTheme.colorScheme.customColors.colorOrange,
+                                            value = blurIntensity.toFloat().coerceAtLeast(0f),
+                                            valueRange = 0f..20f,
+                                            steps = 9,
+                                            onValueChange = { blurIntensity = it.roundToInt() },
+                                            onValueChangeFinished = {
+                                                prefs.setInt(PreferenceManager.KEY_BLUR_INTENSITY, blurIntensity)
+                                            },
+                                            onValueClick = {
+                                                blurIntensity = 20
+                                                prefs.setInt(PreferenceManager.KEY_BLUR_INTENSITY, blurIntensity)
+                                            }
+                                        )
                                     }
                                 }
                                 RillSwitchListItem(
@@ -811,11 +840,11 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                     iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
                                     iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
                                     options = listOf(
-                                        "Default Swipe" to 10,
-                                        "Horizontal Swipe" to 0,
-                                        "Buttons" to 1,
-                                        "Slide to Answer (iOS)" to 2,
-                                        "Vertical Swipe" to 3
+                                        stringResource(R.string.incoming_call_ui_default_swipe) to 10,
+                                        stringResource(R.string.incoming_call_ui_horizontal_swipe) to 0,
+                                        stringResource(R.string.incoming_call_ui_buttons) to 1,
+                                        stringResource(R.string.incoming_call_ui_slide_to_answer) to 2,
+                                        stringResource(R.string.incoming_call_ui_vertical_swipe) to 3
                                     ),
                                     selectedValue = incomingCallUI,
                                     onValueChange = {
@@ -828,7 +857,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                 RillListItem(
                                     headline = stringResource(R.string.сaller_ui),
                                     supporting = stringResource(R.string.сaller_ui_subtitle),
-                                    leadingIcon = Icons.Rounded.Person,
+                                    leadingIcon = Icons.Rounded.CallEnd,
                                     iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
                                     iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
                                     trailingIcon = Icons.Default.ChevronRight,
@@ -911,7 +940,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
 //                    }
 //                }
 
-                item { SettingsBottomPadding() }
+                item { SettingsBottomPadding(120.dp) }
             }
 
             AnimatedVisibility(
@@ -923,7 +952,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
             ) {
                 Snackbar(
                     modifier = Modifier.navigationBarsPadding().padding(24.dp),
-                    shape = RoundedCornerShape(cardCornerMedium),
+                    shape = MaterialTheme.shapes.large,
                     containerColor = MaterialTheme.colorScheme.surfaceVariant,
                     action = {
                         TextButton(

@@ -123,13 +123,26 @@
     <string name="hex_color_subtitle">أدخل رمز سداسي عشري صالح من 6 أرقام</string>
     <string name="custom_font">خط مخصص</string>
     <string name="custom_font_subtitle">اختر ملف .ttf لاستخدامه في جميع أنحاء التطبيق</string>
+    <string name="font_size">حجم الخط</string>
+    <string name="rounding_radius">نصف قطر الاستدارة</string>
     <string name="visual_effects">تأثيرات بصرية</string>
     <string name="not_supported_on_this_device">غير مدعوم على هذا الجهاز</string>
     <string name="not_supported_on_this_device_subtitle">يتطلب تأثير التمويه والزجاج السائل Android 12 أو أحدث</string>
     <string name="material_liquid_you_glass">الزجاج السائل Material You</string>
-    <string name="material_liquid_you_glass_subtitle">تطبيق تأثير زجاج سائل على التنقل</string>
+    <string name="material_liquid_you_glass_subtitle">تطبيق تأثير الزجاج السائل</string>
     <string name="material_blur_effects">تأثيرات التمويه Material</string>
-    <string name="material_blur_effects_subtitle">تطبيق تأثير تمويه الخلفية على التنقل</string>
+    <string name="material_blur_effects_subtitle">تطبيق تأثير تمويه الخلفية</string>
+    <string name="blur_intensity">شدة التمويه</string>
+    <string name="liquid_glass_elements">عناصر الزجاج السائل</string>
+    <string name="liquid_glass_elements_subtitle">اختر عناصر الواجهة التي تستخدم تأثير الزجاج السائل</string>
+    <string name="blur_effect_elements">عناصر تأثير التمويه</string>
+    <string name="blur_effect_elements_subtitle">اختر عناصر الواجهة التي تستخدم تأثير التمويه</string>
+    <string name="bottom_navigation_bar">شريط التنقل السفلي</string>
+    <string name="liquid_glass_bottom_navigation_bar">تطبيق تأثير الزجاج السائل على شريط التنقل السفلي</string>
+    <string name="blur_effect_bottom_navigation_bar">تطبيق تأثير التمويه على شريط التنقل السفلي</string>
+    <string name="call_screen">شاشة المكالمة</string>
+    <string name="liquid_glass_call_screen">تطبيق تأثير الزجاج السائل على شاشة المكالمة</string>
+    <string name="blur_effect_call_screen">تطبيق تأثير التمويه على شاشة المكالمة</string>
     <string name="scroll_animation">رسوم متحركة للتمرير</string>
     <string name="scroll_animation_device">رسوم متحركة للظهور لعناصر القائمة أثناء التمرير</string>
     <string name="call_ui">واجهة المكالمة</string>
@@ -326,7 +339,14 @@
     <string name="private_contacts">جهات الاتصال الخاصة</string>
     <string name="private_contacts_subtitle">إدارة جهات الاتصال المحلية المشفرة الخاصة بك</string>
 
+    <!-- Voicemail -->
+    <string name="settings_voicemail_title">البريد الصوتي</string>
+
     <!-- Call -->
+    <string name="call_failed_airplane_mode">لا يمكن إجراء مكالمة أثناء تشغيل وضع الطيران</string>
+    <string name="call_failed_no_network">فشلت المكالمة: شبكة الهاتف غير متوفرة</string>
+    <string name="call_failed_restricted">فشلت المكالمة: المكالمة مقيدة</string>
+    <string name="call_failed_generic">تعذر إكمال المكالمة</string>
     <string name="call">اتصال</string>
     <string name="incoming">واردة</string>
     <string name="outgoing">صادرة</string>

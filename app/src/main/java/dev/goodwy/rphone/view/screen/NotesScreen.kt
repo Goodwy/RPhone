@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Help
@@ -43,6 +44,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -70,6 +72,7 @@ import dev.goodwy.rphone.view.components.RillIconButton
 import dev.goodwy.rphone.view.components.RillTextButton
 import dev.goodwy.rphone.view.components.Title
 import dev.goodwy.rphone.view.components.TopBar
+import dev.goodwy.rphone.view.theme.RillShapeDefaults
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinActivityViewModel
 import java.text.SimpleDateFormat
@@ -198,6 +201,7 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator, 
 //    val contactsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS, true)
 //    val dialpadEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD, true)
     val searchEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SEARCH, false)
+    val cardCornerExtraLarge  = prefs.getInt(PreferenceManager.KEY_CARD_ROUNDNESS, RillShapeDefaults.DefaultRoundness).dp
 
     Scaffold(
         modifier = Modifier
@@ -321,7 +325,7 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator, 
                                     ) + fadeOut(tween(380))
                                 ) {
                                     DropdownMenu(
-                                        shape = RoundedCornerShape(16.dp),
+                                        shape = MaterialTheme.shapes.large,
                                         expanded = showOverflow,
                                         onDismissRequest = { showOverflow = false },
                                         offset = DpOffset(0.dp, 24.dp),
@@ -411,6 +415,7 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator, 
                                     photoUri = photoUri,
                                     isSelected = selectedNotes.contains(note.file.absolutePath),
                                     highlightQuery = if (isHighlighted) highlightQuery else null,
+                                    cardCorner = cardCornerExtraLarge,
                                     onClick = {
                                         if (selectionMode) {
                                             val key = note.file.absolutePath
@@ -451,7 +456,7 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator, 
                     exit  = slideOutVertically(targetOffsetY = { -it }, animationSpec = tween(420, easing = FastOutLinearInEasing)) + fadeOut(tween(380))
                 ) {
                     DropdownMenu(
-                        shape = RoundedCornerShape(16.dp),
+                        shape = MaterialTheme.shapes.large,
                         expanded = selectedNote != null,
                         onDismissRequest = { selectedNote = null },
                         offset = DpOffset(56.dp, 76.dp),
@@ -575,6 +580,7 @@ fun NoteCard(
     photoUri: String? = null,
     isSelected: Boolean = false,
     highlightQuery: String? = null,
+    cardCorner: Dp,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     onAvatarLongClick: (() -> Unit)? = null,
@@ -586,7 +592,7 @@ fun NoteCard(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val cornerRadius by animateDpAsState(
-        if (isPressed) 32.dp else 20.dp,
+        if (isPressed || isSelected) cardCorner + 16.dp else cardCorner,
         spring(stiffness = Spring.StiffnessMediumLow),
         label = "ButtonShapeAnimation"
     )
@@ -733,7 +739,7 @@ fun NoteEditorDialog(
             onDismiss()
         },
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        shape = MaterialTheme.shapes.extraLarge.copy(bottomStart = CornerSize(0.dp), bottomEnd = CornerSize(0.dp)),
         containerColor = MaterialTheme.colorScheme.surface,
         dragHandle = null
     ) {
@@ -795,11 +801,31 @@ fun NoteEditorDialog(
                         onDismiss()
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                        contentColor = MaterialTheme.colorScheme.onErrorContainer
+                        containerColor = MaterialTheme.colorScheme.customColors.colorRed,
+                        contentColor = MaterialTheme.colorScheme.customColors.colorDarkRed
                     ),
                     shape = RoundedCornerShape(cornerRadiusDelete)
                 ) { Icon(ImageVector.vectorResource(id = R.drawable.ic_delete), stringResource(R.string.delete)) }
+
+                val interactionSaveSource = remember { MutableInteractionSource() }
+                val isSavePressed by interactionSaveSource.collectIsPressedAsState()
+                val cornerRadiusSave by animateDpAsState(
+                    if (isSavePressed) 12.dp else 40.dp,
+                    spring(stiffness = Spring.StiffnessMediumLow),
+                    label = "ButtonSaveAnimation"
+                )
+                Button(
+                    interactionSource = interactionSaveSource,
+                    onClick = {
+                        NoteManager.writeNote(context, contactName, phoneNumber, text)
+                        onDismiss()
+                    },
+//                    colors = ButtonDefaults.buttonColors(
+//                        containerColor = MaterialTheme.colorScheme.errorContainer,
+//                        contentColor = MaterialTheme.colorScheme.onErrorContainer
+//                    ),
+                    shape = RoundedCornerShape(cornerRadiusSave)
+                ) { Icon(Icons.Rounded.Check, stringResource(R.string.save)) }
             }
             Spacer(Modifier.height(12.dp))
             OutlinedTextField(
@@ -809,7 +835,7 @@ fun NoteEditorDialog(
                     .fillMaxWidth()
                     .heightIn(min = 200.dp),
                 placeholder = { Text(stringResource(R.string.type_your_note)) },
-                shape = RoundedCornerShape(16.dp),
+                shape = MaterialTheme.shapes.large,
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = cardColor,
                     unfocusedContainerColor = cardColor

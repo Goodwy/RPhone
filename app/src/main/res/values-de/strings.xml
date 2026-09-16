@@ -122,13 +122,26 @@
     <string name="hex_color_subtitle">Geben Sie einen gültigen 6-stelligen Hex-Code ein</string>
     <string name="custom_font">Benutzerdefinierte Schriftart</string>
     <string name="custom_font_subtitle">Wählen Sie eine .ttf-Datei für die App</string>
+    <string name="font_size">Schriftgröße</string>
+    <string name="rounding_radius">Eckenradius</string>
     <string name="visual_effects">Visuelle Effekte</string>
     <string name="not_supported_on_this_device">Auf diesem Gerät nicht unterstützt</string>
     <string name="not_supported_on_this_device_subtitle">Unschärfe und Liquid Glass erfordern Android 12 oder höher</string>
-    <string name="material_liquid_you_glass">Material Liquid You Glass</string>
-    <string name="material_liquid_you_glass_subtitle">Einen flüssigen Glaseffekt auf die Navigation anwenden</string>
+    <string name="material_liquid_you_glass">Material Flüssigkeit Glas</string>
+    <string name="material_liquid_you_glass_subtitle">Einen Flüssigglaseffekt anwenden</string>
     <string name="material_blur_effects">Material-Unschärfeeffekte</string>
-    <string name="material_blur_effects_subtitle">Einen Hintergrundunschärfeeffekt auf die Navigation anwenden</string>
+    <string name="material_blur_effects_subtitle">Einen Hintergrundunschärfeeffekt anwenden</string>
+    <string name="blur_intensity">Unschärfeintensität</string>
+    <string name="liquid_glass_elements">Flüssigglas-Elemente</string>
+    <string name="liquid_glass_elements_subtitle">Wählen Sie, welche UI-Elemente den Flüssigglaseffekt verwenden</string>
+    <string name="blur_effect_elements">Unschärfeeffekt-Elemente</string>
+    <string name="blur_effect_elements_subtitle">Wählen Sie, welche UI-Elemente den Unschärfeeffekt verwenden</string>
+    <string name="bottom_navigation_bar">Untere Navigationsleiste</string>
+    <string name="liquid_glass_bottom_navigation_bar">Den Flüssigglaseffekt auf die untere Navigationsleiste anwenden</string>
+    <string name="blur_effect_bottom_navigation_bar">Einen Unschärfeeffekt auf die untere Navigationsleiste anwenden</string>
+    <string name="call_screen">Anrufbildschirm</string>
+    <string name="liquid_glass_call_screen">Den Flüssigglaseffekt auf den Anrufbildschirm anwenden</string>
+    <string name="blur_effect_call_screen">Einen Unschärfeeffekt auf den Anrufbildschirm anwenden</string>
     <string name="scroll_animation">Scroll-Animation</string>
     <string name="scroll_animation_device">Einblendanimation für Listenelemente beim Scrollen</string>
     <string name="call_ui">Anruf-UI</string>
@@ -325,7 +338,14 @@
     <string name="private_contacts">Private Kontakte</string>
     <string name="private_contacts_subtitle">Verschlüsselte lokale Kontakte verwalten</string>
 
+    <!-- Voicemail -->
+    <string name="settings_voicemail_title">Voicemail</string>
+
     <!-- Call -->
+    <string name="call_failed_airplane_mode">Anruf nicht möglich, solange der Flugmodus aktiviert ist</string>
+    <string name="call_failed_no_network">Anruf fehlgeschlagen: Mobilfunknetz nicht verfügbar</string>
+    <string name="call_failed_restricted">Anruf fehlgeschlagen: Anruf ist eingeschränkt</string>
+    <string name="call_failed_generic">Anruf konnte nicht abgeschlossen werden</string>
     <string name="call">Anruf</string>
     <string name="incoming">Eingehend</string>
     <string name="outgoing">Ausgehend</string>

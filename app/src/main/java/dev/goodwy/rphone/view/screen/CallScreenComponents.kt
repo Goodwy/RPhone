@@ -49,16 +49,26 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import dev.goodwy.rphone.R
-import dev.goodwy.rphone.cardCornerSmall
+import dev.goodwy.rphone.cardCornerExtraSmall
 import dev.goodwy.rphone.controller.util.PreferenceManager
+import dev.goodwy.rphone.liquidglass.LocalLiquidGlassBackdrop
+import dev.goodwy.rphone.liquidglass.drawBackdrop
+import dev.goodwy.rphone.liquidglass.drawPlainBackdrop
+import dev.goodwy.rphone.liquidglass.effects.blur
+import dev.goodwy.rphone.liquidglass.effects.colorControls
+import dev.goodwy.rphone.liquidglass.effects.lens
+import dev.goodwy.rphone.liquidglass.highlight.Highlight
+import dev.goodwy.rphone.liquidglass.shadow.Shadow
 import dev.goodwy.rphone.view.components.RillIconBox
 import dev.goodwy.rphone.view.screen.onboarding.wavyCircleShape
+import dev.goodwy.rphone.view.theme.MyColors.bottomBarColor
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import dev.goodwy.rphone.view.theme.MyColors.dialpadKeyColor
 import dev.goodwy.rphone.view.theme.color_call_button
 import dev.goodwy.rphone.view.theme.color_call_end
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import java.util.Calendar
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -106,6 +116,241 @@ fun KeypadButton(
     }
 }
 
+@Composable
+fun PocketModeOverlay(
+    onDismiss: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.95f))
+            .clickable(enabled = false) {},
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(32.dp)
+        ) {
+            Surface(
+                modifier = Modifier.size(80.dp),
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f),
+                contentColor = MaterialTheme.colorScheme.primary
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        Icons.Rounded.ScreenLockPortrait,
+                        contentDescription = null,
+                        modifier = Modifier.size(42.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+            Spacer(Modifier.height(24.dp))
+            Text(
+                text = "Pocket Mode Active",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = "Screen touches are locked to prevent accidental touches in your pocket.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.White.copy(alpha = 0.7f),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+            Spacer(Modifier.height(32.dp))
+            FilledTonalButton(
+                onClick = onDismiss,
+                shape = CircleShape
+            ) {
+                Icon(Icons.Rounded.LockOpen, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("Dismiss Touch Guard")
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun QuickResponsesBottomSheet(
+    phoneNumber: String,
+    contactName: String,
+    onDismiss: () -> Unit,
+    onSend: (String) -> Unit,
+    onOpenSmsApp: () -> Unit,
+//    onScheduleReminder: (Long, String) -> Unit
+) {
+    val prefs = koinInject<PreferenceManager>()
+    val responses = remember { prefs.getQuickResponses() }
+    var customText by remember { mutableStateOf("") }
+    var isCustomVisible by remember { mutableStateOf(false) }
+
+    val tomorrowMorningMinutes = remember {
+        val now = Calendar.getInstance()
+        val tomorrow = Calendar.getInstance().apply {
+            add(Calendar.DAY_OF_YEAR, 1)
+            set(Calendar.HOUR_OF_DAY, 9)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        val diff = tomorrow.timeInMillis - now.timeInMillis
+        (diff / (1000 * 60)).coerceAtLeast(15)
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = 20.dp, vertical = 8.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Quick Response",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Decline call and reply to ${contactName.ifBlank { phoneNumber }}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                IconButton(onClick = onOpenSmsApp) {
+                    Icon(
+                        Icons.Rounded.OpenInNew,
+                        contentDescription = "Open SMS app",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            responses.forEach { responseText ->
+                Surface(
+                    onClick = { onSend(responseText) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerLowest
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Rounded.Send,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        Text(
+                            text = responseText,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            if (!isCustomVisible) {
+                OutlinedButton(
+                    onClick = { isCustomVisible = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp)
+                ) {
+                    Icon(Icons.Rounded.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text("Write a custom message...")
+                }
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedTextField(
+                        value = customText,
+                        onValueChange = { customText = it },
+                        placeholder = { Text("Type custom message...") },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(14.dp),
+                        singleLine = true
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    IconButton(
+                        onClick = {
+                            if (customText.isNotBlank()) {
+                                onSend(customText.trim())
+                            }
+                        },
+                        enabled = customText.isNotBlank()
+                    ) {
+                        Icon(
+                            Icons.Rounded.Send,
+                            contentDescription = "Send",
+                            tint = if (customText.isNotBlank()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                        )
+                    }
+                }
+            }
+
+//            Spacer(Modifier.height(16.dp))
+//            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+//            Spacer(Modifier.height(12.dp))
+//
+//            Text(
+//                text = "Remind Me to Call Back",
+//                style = MaterialTheme.typography.titleMedium,
+//                fontWeight = FontWeight.SemiBold
+//            )
+//            Spacer(Modifier.height(8.dp))
+//
+//            Row(
+//                modifier = Modifier.fillMaxWidth(),
+//                horizontalArrangement = Arrangement.spacedBy(8.dp)
+//            ) {
+//                listOf(
+//                    "In 15m" to 15L,
+//                    "In 1h" to 60L,
+//                    "Tomorrow 9 AM" to tomorrowMorningMinutes
+//                ).forEach { (label, minutes) ->
+//                    FilledTonalButton(
+//                        onClick = { onScheduleReminder(minutes, label) },
+//                        modifier = Modifier.weight(1f),
+//                        shape = RoundedCornerShape(12.dp),
+//                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 10.dp)
+//                    ) {
+//                        Icon(Icons.Rounded.Alarm, contentDescription = null, modifier = Modifier.size(14.dp))
+//                        Spacer(Modifier.width(4.dp))
+//                        Text(label, style = MaterialTheme.typography.labelSmall, maxLines = 1)
+//                    }
+//                }
+//            }
+
+            Spacer(Modifier.height(16.dp))
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PulsingAvatar(photoUri: String?) {
     val prefs = koinInject<PreferenceManager>()
@@ -261,22 +506,29 @@ fun AnimatedCallButton(
 }
 
 @Composable
-fun HorizontalSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit) {
+fun HorizontalSwipeToAnswer(
+    useLg: Boolean,
+    useBlur: Boolean,
+    blurIntensity: Float,
+    onAnswer: () -> Unit,
+    onDecline: () -> Unit
+) {
     val coroutineScope = rememberCoroutineScope()
     val offsetX = remember { Animatable(0f) }
-    val density = LocalDensity.current
+    val localDensity = LocalDensity.current
     val view = LocalView.current
+    val globalBackdrop = LocalLiquidGlassBackdrop.current
 
     val trackHeight = 96.dp
     val handleWidth = 110.dp
     val handleHeight = 72.dp
-    val handleWidthPx = with(density) { handleWidth.toPx() }
-    val paddingHandle = with(density) { (trackHeight - handleHeight).toPx() }
+    val handleWidthPx = with(localDensity) { handleWidth.toPx() }
+    val paddingHandle = with(localDensity) { (trackHeight - handleHeight).toPx() }
     var trackWidthPx by remember { mutableFloatStateOf(0f) }
 
     val maxDrag by remember(trackWidthPx, handleWidthPx, paddingHandle) {
         derivedStateOf {
-            if (trackWidthPx > 0f) (trackWidthPx / 2f) - (handleWidthPx / 2f) - (paddingHandle) + with(density) { 1.dp.toPx() }
+            if (trackWidthPx > 0f) (trackWidthPx / 2f) - (handleWidthPx / 2f) - (paddingHandle) + with(localDensity) { 1.dp.toPx() }
             else 0f
         }
     }
@@ -325,127 +577,162 @@ fun HorizontalSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit) {
         label = "iconTint"
     )
 
-    val iconRotation by remember { derivedStateOf {
-        dragProgress.value * 135f
-    } }
+    val iconRotation by remember { derivedStateOf { dragProgress.value * 135f } }
+    val buttonBgColor = if (useLg || useBlur) bottomBarColor.copy(alpha = 0.35f) else MaterialTheme.colorScheme.surfaceVariant
 
-    Box(
+    Surface(
+        shape           = CircleShape,
+        color           = buttonBgColor,
+        shadowElevation = 0.dp,
+        tonalElevation  = 0.dp,
         modifier = Modifier
             .padding(bottom = 36.dp)
             .fillMaxWidth()
             .height(trackHeight)
             .padding(horizontal = 16.dp)
             .onSizeChanged { trackWidthPx = it.width.toFloat() }
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .then(
+                if (useLg && globalBackdrop != null) Modifier.drawBackdrop(
+                    backdrop = globalBackdrop,
+                    shape = { CircleShape },
+                    shadow = { Shadow(radius = 8.dp) },
+                    effects = {
+                        val d = density
+                        colorControls(saturation = 1.3f)
+                        blur(blurIntensity * d)
+                        lens(refractionHeight = 18f * d, refractionAmount = 52f * d)
+                    },
+                    highlight = { Highlight.Default }
+                )
+                else if (useBlur && globalBackdrop != null) Modifier.drawPlainBackdrop(
+                    backdrop = globalBackdrop,
+                    shape    = { CircleShape },
+                    shadow = { Shadow(radius = 8.dp) },
+                    effects  = { blur(blurIntensity * density) }
+                )
+                else Modifier
+            )
     ) {
-        Text(
-            stringResource(R.string.decline),
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .padding(start = 32.dp)
-                .alpha((1f - (dragProgress.value * -2f).coerceIn(0f, 1f)) * hintAlpha),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = declineRed.copy(alpha = 0.8f)
-        )
+        Box {
+            Text(
+                stringResource(R.string.decline),
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(start = 32.dp)
+                    .alpha((1f - (dragProgress.value * -2f).coerceIn(0f, 1f)) * hintAlpha),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = declineRed.copy(alpha = 0.8f)
+            )
 
-        Text(
-            stringResource(R.string.answer),
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(end = 32.dp)
-                .alpha((1f - (dragProgress.value * 2f).coerceIn(0f, 1f)) * hintAlpha),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = answerGreen.copy(alpha = 0.8f)
-        )
+            Text(
+                stringResource(R.string.answer),
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 32.dp)
+                    .alpha((1f - (dragProgress.value * 2f).coerceIn(0f, 1f)) * hintAlpha),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = answerGreen.copy(alpha = 0.8f)
+            )
 
-        Box(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .offset { IntOffset(offsetX.value.roundToInt(), 0) }
-                .graphicsLayer {
-                    val idleFactor = (1f - dragNormal.value * 5f).coerceIn(0f, 1f)
-                    scaleX = 1f + (handlePulseScale - 1f) * idleFactor
-                    scaleY = 1f + (handlePulseScale - 1f) * idleFactor
-                }
-                .width(handleWidth)
-                .height(handleHeight)
-                .clip(CircleShape)
-                .background(handleBgColor)
-                .pointerInput(Unit) {
-                    detectHorizontalDragGestures(
-                        onDragEnd = {
-                            coroutineScope.launch {
-                                when {
-                                    offsetX.value > triggerThreshold -> {
-                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                                            view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
-                                        } else {
-                                            view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+            Box(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .offset { IntOffset(offsetX.value.roundToInt(), 0) }
+                    .graphicsLayer {
+                        val idleFactor = (1f - dragNormal.value * 5f).coerceIn(0f, 1f)
+                        scaleX = 1f + (handlePulseScale - 1f) * idleFactor
+                        scaleY = 1f + (handlePulseScale - 1f) * idleFactor
+                    }
+                    .width(handleWidth)
+                    .height(handleHeight)
+                    .clip(CircleShape)
+                    .background(handleBgColor)
+                    .pointerInput(Unit) {
+                        detectHorizontalDragGestures(
+                            onDragEnd = {
+                                coroutineScope.launch {
+                                    when {
+                                        offsetX.value > triggerThreshold -> {
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                                view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+                                            } else {
+                                                view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                                            }
+                                            onAnswer()
                                         }
-                                        onAnswer()
-                                    }
 
-                                    offsetX.value < -triggerThreshold -> {
-                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                                            view.performHapticFeedback(HapticFeedbackConstants.REJECT)
-                                        } else {
-                                            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                                        offsetX.value < -triggerThreshold -> {
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                                view.performHapticFeedback(HapticFeedbackConstants.REJECT)
+                                            } else {
+                                                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                                            }
+                                            onDecline()
                                         }
-                                        onDecline()
-                                    }
 
-                                    else -> offsetX.animateTo(
-                                        0f,
-                                        spring(
-                                            dampingRatio = 0.75f,
-                                            stiffness = Spring.StiffnessMedium
+                                        else -> offsetX.animateTo(
+                                            0f,
+                                            spring(
+                                                dampingRatio = 0.75f,
+                                                stiffness = Spring.StiffnessMedium
+                                            )
                                         )
+                                    }
+                                }
+                            },
+                            onHorizontalDrag = { change, dragAmount ->
+                                change.consume()
+                                coroutineScope.launch {
+                                    val newOffset = (offsetX.value + dragAmount).coerceIn(
+                                        -maxDrag * 1.1f,
+                                        maxDrag * 1.1f
                                     )
+                                    offsetX.snapTo(newOffset)
                                 }
                             }
-                        },
-                        onHorizontalDrag = { change, dragAmount ->
-                            change.consume()
-                            coroutineScope.launch {
-                                val newOffset = (offsetX.value + dragAmount).coerceIn(
-                                    -maxDrag * 1.1f,
-                                    maxDrag * 1.1f
-                                )
-                                offsetX.snapTo(newOffset)
-                            }
-                        }
-                    )
-                },
-            contentAlignment = Alignment.Center
-        ) {
-            val icon = Icons.Rounded.Call
+                        )
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                val icon = Icons.Rounded.Call
 
-            Crossfade(targetState = icon, animationSpec = tween(150), label = "icon") { targetIcon ->
-                Icon(
-                    targetIcon,
-                    contentDescription = null,
-                    tint = iconTint,
-                    modifier = Modifier
-                        .size(32.dp)
-                        .graphicsLayer { rotationZ = iconRotation }
-                )
+                Crossfade(
+                    targetState = icon,
+                    animationSpec = tween(150),
+                    label = "icon"
+                ) { targetIcon ->
+                    Icon(
+                        targetIcon,
+                        contentDescription = null,
+                        tint = iconTint,
+                        modifier = Modifier
+                            .size(32.dp)
+                            .graphicsLayer { rotationZ = iconRotation }
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun VerticalSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit) {
+fun VerticalSwipeToAnswer(
+    useLg: Boolean,
+    useBlur: Boolean,
+    blurIntensity: Float,
+    onAnswer: () -> Unit,
+    onDecline: () -> Unit
+) {
     val coroutineScope = rememberCoroutineScope()
     val offsetY = remember { Animatable(0f) }
-    val density = LocalDensity.current
+    val localDensity = LocalDensity.current
     val view = LocalView.current
+    val globalBackdrop = LocalLiquidGlassBackdrop.current
 
     val handleSize = 80.dp
-    val maxDrag = with(density) { 100.dp.toPx() }
+    val maxDrag = with(localDensity) { 100.dp.toPx() }
     val triggerThreshold = maxDrag * 0.7f
 
     val dragProgress = remember { derivedStateOf { offsetY.value / maxDrag } }
@@ -558,13 +845,15 @@ fun VerticalSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit) {
                 targetValue = if (abs(offsetY.value) > 15f) Color.White else color_call_button,
                 label = "iconTint"
             )
-
-            Box(
+            Surface(
+                shape           = CircleShape,
+                color           = if (useLg || useBlur) handleBgColor.copy(0.6f) else handleBgColor,
+                shadowElevation = 0.dp,
+                tonalElevation  = 0.dp,
                 modifier = Modifier
                     .offset { IntOffset(0, offsetY.value.roundToInt()) }
                     .size(handleSize)
                     .shadow(if (abs(offsetY.value) > 5f) 12.dp else 4.dp, CircleShape)
-                    .background(handleBgColor, CircleShape)
                     .pointerInput(Unit) {
                         detectVerticalDragGestures(
                             onDragEnd = {
@@ -572,18 +861,26 @@ fun VerticalSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit) {
                                     when {
                                         offsetY.value < -triggerThreshold -> {
                                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                                                view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+                                                view.performHapticFeedback(
+                                                    HapticFeedbackConstants.CONFIRM
+                                                )
                                             } else {
-                                                view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                                                view.performHapticFeedback(
+                                                    HapticFeedbackConstants.VIRTUAL_KEY
+                                                )
                                             }
                                             onAnswer()
                                         }
 
                                         offsetY.value > triggerThreshold -> {
                                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                                                view.performHapticFeedback(HapticFeedbackConstants.REJECT)
+                                                view.performHapticFeedback(
+                                                    HapticFeedbackConstants.REJECT
+                                                )
                                             } else {
-                                                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                                                view.performHapticFeedback(
+                                                    HapticFeedbackConstants.LONG_PRESS
+                                                )
                                             }
                                             onDecline()
                                         }
@@ -607,18 +904,42 @@ fun VerticalSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit) {
                                 }
                             }
                         )
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                val icon = if (offsetY.value > 5f) Icons.Rounded.CallEnd else Icons.Rounded.Call
-
-                Crossfade(targetState = icon, label = "icon") { targetIcon ->
-                    Icon(
-                        targetIcon,
-                        contentDescription = null,
-                        tint = iconTint,
-                        modifier = Modifier.size(36.dp)
+                    }
+                    .then(
+                        if (useLg && globalBackdrop != null) Modifier.drawBackdrop(
+                            backdrop = globalBackdrop,
+                            shape = { CircleShape },
+                            shadow = { Shadow(radius = 8.dp) },
+                            effects = {
+                                val d = density
+                                colorControls(saturation = 1.3f)
+                                blur(blurIntensity * d)
+                                lens(refractionHeight = 18f * d, refractionAmount = 52f * d)
+                            },
+                            highlight = { Highlight.Default }
+                        )
+                        else if (useBlur && globalBackdrop != null) Modifier.drawPlainBackdrop(
+                            backdrop = globalBackdrop,
+                            shape    = { CircleShape },
+                            shadow = { Shadow(radius = 8.dp) },
+                            effects  = { blur(blurIntensity * density) }
+                        )
+                        else Modifier
                     )
+            ) {
+                Box(
+                    contentAlignment = Alignment.Center
+                ) {
+                    val icon = if (offsetY.value > 5f) Icons.Rounded.CallEnd else Icons.Rounded.Call
+
+                    Crossfade(targetState = icon, label = "icon") { targetIcon ->
+                        Icon(
+                            targetIcon,
+                            contentDescription = null,
+                            tint = iconTint,
+                            modifier = Modifier.size(36.dp)
+                        )
+                    }
                 }
             }
         }
@@ -626,25 +947,34 @@ fun VerticalSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit) {
 }
 
 @Composable
-fun IPhoneSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit, onMessage: () -> Unit) {
+fun IPhoneSwipeToAnswer(
+    useLg: Boolean,
+    useBlur: Boolean,
+    blurIntensity: Float,
+    onAnswer: () -> Unit,
+    onDecline: () -> Unit,
+    onMessage: () -> Unit
+) {
     val coroutineScope = rememberCoroutineScope()
     val offsetX = remember { Animatable(0f) }
-    val density = LocalDensity.current
+    val localDensity = LocalDensity.current
     val view = LocalView.current
     val isDark = isSystemInDarkTheme()
+    val globalBackdrop = LocalLiquidGlassBackdrop.current
 
     val trackWidth = 320.dp
     val trackHeight = 94.dp
     val handleSize = 78.dp
     val handlePadding = 8.dp
 
-    val trackWidthPx = with(density) { trackWidth.toPx() }
-    val handleSizePx = with(density) { handleSize.toPx() }
-    val handlePaddingPx = with(density) { handlePadding.toPx() }
+    val trackWidthPx = with(localDensity) { trackWidth.toPx() }
+    val handleSizePx = with(localDensity) { handleSize.toPx() }
+    val handlePaddingPx = with(localDensity) { handlePadding.toPx() }
 
     val maxDrag = trackWidthPx - handleSizePx - (handlePaddingPx * 2)
 
-    val trackBgColor = MaterialTheme.colorScheme.onSurface.copy(alpha = if (isDark) 0.15f else 0.1f)
+    val trackBgColor =
+        if (useLg || useBlur) bottomBarColor else MaterialTheme.colorScheme.onSurface.copy(alpha = if (isDark) 0.15f else 0.1f)
     val buttonContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
     val handleBgColor = Color.White
 
@@ -676,11 +1006,32 @@ fun IPhoneSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit, onMessage: 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 IconButton(
                     onClick = onDecline,
+                    colors = IconButtonDefaults.iconButtonColors(containerColor = trackBgColor.copy(alpha = 0.35f)),
                     modifier = Modifier
                         .size(60.dp)
-                        .background(
-                            trackBgColor,
-                            CircleShape
+                        .then(
+                            if (useLg && globalBackdrop != null) Modifier.drawBackdrop(
+                                backdrop = globalBackdrop,
+                                shape = { CircleShape },
+                                shadow = { Shadow(radius = 8.dp) },
+                                effects = {
+                                    val d = density
+                                    colorControls(saturation = 1.3f)
+                                    blur(blurIntensity * d)
+                                    lens(refractionHeight = 18f * d, refractionAmount = 52f * d)
+                                },
+                                highlight = { Highlight.Default }
+                            )
+                            else if (useBlur && globalBackdrop != null) Modifier.drawPlainBackdrop(
+                                backdrop = globalBackdrop,
+                                shape    = { CircleShape },
+                                shadow = { Shadow(radius = 8.dp) },
+                                effects  = { blur(blurIntensity * density) }
+                            )
+                            else Modifier.background(
+                                trackBgColor,
+                                CircleShape
+                            )
                         )
                 ) {
                     Icon(
@@ -700,11 +1051,32 @@ fun IPhoneSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit, onMessage: 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 IconButton(
                     onClick = onMessage,
+                    colors = IconButtonDefaults.iconButtonColors(containerColor = trackBgColor.copy(alpha = 0.35f)),
                     modifier = Modifier
                         .size(60.dp)
-                        .background(
-                            trackBgColor,
-                            CircleShape
+                        .then(
+                            if (useLg && globalBackdrop != null) Modifier.drawBackdrop(
+                                backdrop = globalBackdrop,
+                                shape = { CircleShape },
+                                shadow = { Shadow(radius = 8.dp) },
+                                effects = {
+                                    val d = density
+                                    colorControls(saturation = 1.3f)
+                                    blur(blurIntensity * d)
+                                    lens(refractionHeight = 18f * d, refractionAmount = 52f * d)
+                                },
+                                highlight = { Highlight.Default }
+                            )
+                            else if (useBlur && globalBackdrop != null) Modifier.drawPlainBackdrop(
+                                backdrop = globalBackdrop,
+                                shape    = { CircleShape },
+                                shadow = { Shadow(radius = 8.dp) },
+                                effects  = { blur(blurIntensity * density) }
+                            )
+                            else Modifier.background(
+                                trackBgColor,
+                                CircleShape
+                            )
                         )
                 ) {
                     Icon(
@@ -724,24 +1096,48 @@ fun IPhoneSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit, onMessage: 
 
         Box(
             modifier = Modifier
-                .width(trackWidth)
-                .height(trackHeight)
-                .clip(CircleShape),
+                .width(trackWidth + 16.dp)
+                .height(trackHeight + 16.dp)
+                .clip(CircleShape)
+                .padding(8.dp),
             contentAlignment = Alignment.CenterStart
         ) {
-            Box(
+            Surface(
+                shape           = CircleShape,
+                color           = trackBgColor.copy(alpha = 0.35f),
+                shadowElevation = 0.dp,
+                tonalElevation  = 0.dp,
                 modifier = Modifier
                     .height(trackHeight)
                     .align(Alignment.CenterEnd)
                     .width(
-                        with(density) {
+                        with(localDensity) {
                             val width = trackWidthPx - offsetX.value
                             width.coerceAtLeast(0f).toDp()
                         }
                     )
-                    .clip(CircleShape)
-                    .background(trackBgColor)
-            )
+                    .then(
+                        if (useLg && globalBackdrop != null) Modifier.drawBackdrop(
+                            backdrop = globalBackdrop,
+                            shape = { CircleShape },
+                            shadow = { Shadow(radius = 8.dp) },
+                            effects = {
+                                val d = density
+                                colorControls(saturation = 1.3f)
+                                blur(blurIntensity * d)
+                                lens(refractionHeight = 18f * d, refractionAmount = 52f * d)
+                            },
+                            highlight = { Highlight.Default }
+                        )
+                        else if (useBlur && globalBackdrop != null) Modifier.drawPlainBackdrop(
+                            backdrop = globalBackdrop,
+                            shape    = { CircleShape },
+                            shadow = { Shadow(radius = 8.dp) },
+                            effects  = { blur(blurIntensity * density) }
+                        )
+                        else Modifier
+                    )
+            ) {}
 
             val baseTextColor = MaterialTheme.colorScheme.onSurface
             val shimmerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
@@ -820,12 +1216,16 @@ fun IPhoneSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit, onMessage: 
 
 @Composable
 fun IncomingCallButtons(
+    useLg: Boolean,
+    useBlur: Boolean,
+    blurIntensity: Float,
     onAnswer: () -> Unit,
     onDecline: () -> Unit,
     onAnswerAndDecline: (() -> Unit)?
 ) {
-    val declineColor = color_call_end
-    val answerColor = color_call_button
+    val declineColor = if (useLg || useBlur) color_call_end.copy(alpha = 0.65f) else color_call_end
+    val answerColor = if (useLg || useBlur) color_call_button.copy(alpha = 0.65f) else color_call_button
+    val globalBackdrop = LocalLiquidGlassBackdrop.current
 
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
     val scale by infiniteTransition.animateFloat(
@@ -851,7 +1251,7 @@ fun IncomingCallButtons(
                 val interaction = remember { MutableInteractionSource() }
                 val isPressed by interaction.collectIsPressedAsState()
                 val radius by animateDpAsState(
-                    if (isPressed) 28.dp else 42.dp,
+                    if (isPressed) 24.dp else 42.dp,
                     spring(stiffness = Spring.StiffnessMedium),
                     label = "btnDeclineRadius"
                 )
@@ -863,7 +1263,28 @@ fun IncomingCallButtons(
                 )
                 Surface(
                     onClick = onDecline,
-                    modifier = Modifier.size(height = 68.dp, width = 82.dp),
+                    modifier = Modifier.size(height = 68.dp, width = 82.dp)
+                        .then(
+                            if (useLg && globalBackdrop != null) Modifier.drawBackdrop(
+                                backdrop = globalBackdrop,
+                                shape = { RoundedCornerShape(radius) },
+                                shadow = { Shadow(radius = 8.dp) },
+                                effects = {
+                                    val d = density
+                                    colorControls(saturation = 1.3f)
+                                    blur(blurIntensity * d)
+                                    lens(refractionHeight = 18f * d, refractionAmount = 52f * d)
+                                },
+                                highlight = { Highlight.Default }
+                            )
+                            else if (useBlur && globalBackdrop != null) Modifier.drawPlainBackdrop(
+                                backdrop = globalBackdrop,
+                                shape    = { RoundedCornerShape(radius) },
+                                shadow = { Shadow(radius = 8.dp) },
+                                effects  = { blur(blurIntensity * density) }
+                            )
+                            else Modifier
+                        ),
                     shape = RoundedCornerShape(radius),
                     color = declineColor,
                     interactionSource = interaction
@@ -896,7 +1317,7 @@ fun IncomingCallButtons(
                 val interaction = remember { MutableInteractionSource() }
                 val isPressed by interaction.collectIsPressedAsState()
                 val radius by animateDpAsState(
-                    if (isPressed) 28.dp else 42.dp,
+                    if (isPressed) 24.dp else 42.dp,
                     spring(stiffness = Spring.StiffnessMedium),
                     label = "btnRadius"
                 )
@@ -907,7 +1328,28 @@ fun IncomingCallButtons(
                         .background(declineColor.copy(alpha = 0.1f), RoundedCornerShape(radius))
                 )
                 Surface(onClick = onAnswerAndDecline,
-                    modifier = Modifier.size(height = 68.dp, width = 82.dp),
+                    modifier = Modifier.size(height = 68.dp, width = 82.dp)
+                        .then(
+                            if (useLg && globalBackdrop != null) Modifier.drawBackdrop(
+                                backdrop = globalBackdrop,
+                                shape = { RoundedCornerShape(radius) },
+                                shadow = { Shadow(radius = 8.dp) },
+                                effects = {
+                                    val d = density
+                                    colorControls(saturation = 1.3f)
+                                    blur(blurIntensity * d)
+                                    lens(refractionHeight = 18f * d, refractionAmount = 52f * d)
+                                },
+                                highlight = { Highlight.Default }
+                            )
+                            else if (useBlur && globalBackdrop != null) Modifier.drawPlainBackdrop(
+                                backdrop = globalBackdrop,
+                                shape    = { RoundedCornerShape(radius) },
+                                shadow = { Shadow(radius = 8.dp) },
+                                effects  = { blur(blurIntensity * density) }
+                            )
+                            else Modifier
+                        ),
                     shape = RoundedCornerShape(radius),
                     color = answerColor,
                     interactionSource = interaction
@@ -941,7 +1383,7 @@ fun IncomingCallButtons(
                 val interaction = remember { MutableInteractionSource() }
                 val isPressed by interaction.collectIsPressedAsState()
                 val radius by animateDpAsState(
-                    if (isPressed) 28.dp else 42.dp,
+                    if (isPressed) 24.dp else 42.dp,
                     spring(stiffness = Spring.StiffnessMedium),
                     label = "btnAnswerRadius"
                 )
@@ -952,7 +1394,28 @@ fun IncomingCallButtons(
                         .background(answerColor.copy(alpha = 0.2f), RoundedCornerShape(radius))
                 )
                 Surface(onClick = onAnswer,
-                    modifier = Modifier.size(height = 68.dp, width = 82.dp),
+                    modifier = Modifier.size(height = 68.dp, width = 82.dp)
+                        .then(
+                            if (useLg && globalBackdrop != null) Modifier.drawBackdrop(
+                                backdrop = globalBackdrop,
+                                shape = { RoundedCornerShape(radius) },
+                                shadow = { Shadow(radius = 8.dp) },
+                                effects = {
+                                    val d = density
+                                    colorControls(saturation = 1.3f)
+                                    blur(blurIntensity * d)
+                                    lens(refractionHeight = 18f * d, refractionAmount = 52f * d)
+                                },
+                                highlight = { Highlight.Default }
+                            )
+                            else if (useBlur && globalBackdrop != null) Modifier.drawPlainBackdrop(
+                                backdrop = globalBackdrop,
+                                shape    = { RoundedCornerShape(radius) },
+                                shadow = { Shadow(radius = 8.dp) },
+                                effects  = { blur(blurIntensity * density) }
+                            )
+                            else Modifier
+                        ),
                     shape = RoundedCornerShape(radius),
                     color = answerColor,
                     interactionSource = interaction
@@ -983,12 +1446,20 @@ fun IncomingCallButtons(
 }
 
 @Composable
-fun DefaultSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit, onMessage: () -> Unit) {
+fun DefaultSwipeToAnswer(
+    useLg: Boolean,
+    useBlur: Boolean,
+    blurIntensity: Float,
+    onAnswer: () -> Unit,
+    onDecline: () -> Unit,
+    onMessage: () -> Unit
+) {
     val coroutineScope = rememberCoroutineScope()
     val offsetX = remember { Animatable(0f) }
-    val density = LocalDensity.current
+    val localDensity = LocalDensity.current
     val view = LocalView.current
     val isDark = isSystemInDarkTheme()
+    val globalBackdrop = LocalLiquidGlassBackdrop.current
 
     val trackWidth = 320.dp
     val trackHeight = 80.dp
@@ -996,13 +1467,14 @@ fun DefaultSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit, onMessage:
     val handleWidth = 96.dp
     val handlePadding = 6.dp
 
-    val trackWidthPx = with(density) { trackWidth.toPx() }
-    val handleWidthPx = with(density) { handleWidth.toPx() }
-    val handlePaddingPx = with(density) { handlePadding.toPx() }
+    val trackWidthPx = with(localDensity) { trackWidth.toPx() }
+    val handleWidthPx = with(localDensity) { handleWidth.toPx() }
+    val handlePaddingPx = with(localDensity) { handlePadding.toPx() }
 
     val maxDrag = trackWidthPx - handleWidthPx - (handlePaddingPx * 2)
 
-    val buttonBgColor = MaterialTheme.colorScheme.onSurface.copy(alpha = if (isDark) 0.15f else 0.1f)
+    val buttonBgColor =
+        if (useLg || useBlur) bottomBarColor else MaterialTheme.colorScheme.onSurface.copy(alpha = if (isDark) 0.15f else 0.1f)
     val buttonContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
     val buttonIconColor = MaterialTheme.colorScheme.onSurface
     val handleBgColor = Color.White
@@ -1035,11 +1507,32 @@ fun DefaultSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit, onMessage:
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 IconButton(
                     onClick = onDecline,
+                    colors = IconButtonDefaults.iconButtonColors(containerColor = buttonBgColor.copy(alpha = 0.35f)),
                     modifier = Modifier
                         .size(60.dp)
-                        .background(
-                            buttonBgColor,
-                            CircleShape
+                        .then(
+                            if (useLg && globalBackdrop != null) Modifier.drawBackdrop(
+                                backdrop = globalBackdrop,
+                                shape = { CircleShape },
+                                shadow = { Shadow(radius = 8.dp) },
+                                effects = {
+                                    val d = density
+                                    colorControls(saturation = 1.3f)
+                                    blur(blurIntensity * d)
+                                    lens(refractionHeight = 18f * d, refractionAmount = 52f * d)
+                                },
+                                highlight = { Highlight.Default }
+                            )
+                            else if (useBlur && globalBackdrop != null) Modifier.drawPlainBackdrop(
+                                backdrop = globalBackdrop,
+                                shape    = { CircleShape },
+                                shadow = { Shadow(radius = 8.dp) },
+                                effects  = { blur(blurIntensity * density) }
+                            )
+                            else Modifier.background(
+                                buttonBgColor,
+                                CircleShape
+                            )
                         )
                 ) {
                     Icon(
@@ -1059,11 +1552,32 @@ fun DefaultSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit, onMessage:
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 IconButton(
                     onClick = onMessage,
+                    colors = IconButtonDefaults.iconButtonColors(containerColor = buttonBgColor.copy(alpha = 0.35f)),
                     modifier = Modifier
                         .size(60.dp)
-                        .background(
-                            buttonBgColor,
-                            CircleShape
+                        .then(
+                            if (useLg && globalBackdrop != null) Modifier.drawBackdrop(
+                                backdrop = globalBackdrop,
+                                shape = { CircleShape },
+                                shadow = { Shadow(radius = 8.dp) },
+                                effects = {
+                                    val d = density
+                                    colorControls(saturation = 1.3f)
+                                    blur(blurIntensity * d)
+                                    lens(refractionHeight = 18f * d, refractionAmount = 52f * d)
+                                },
+                                highlight = { Highlight.Default }
+                            )
+                            else if (useBlur && globalBackdrop != null) Modifier.drawPlainBackdrop(
+                                backdrop = globalBackdrop,
+                                shape    = { CircleShape },
+                                shadow = { Shadow(radius = 8.dp) },
+                                effects  = { blur(blurIntensity * density) }
+                            )
+                            else Modifier.background(
+                                buttonBgColor,
+                                CircleShape
+                            )
                         )
                 ) {
                     Icon(
@@ -1083,30 +1597,53 @@ fun DefaultSwipeToAnswer(onAnswer: () -> Unit, onDecline: () -> Unit, onMessage:
 
         Box(
             modifier = Modifier
-                .width(trackWidth)
-                .height(trackHeight)
-                .clip(CircleShape),
+                .width(trackWidth + 16.dp)
+                .height(trackHeight + 16.dp)
+                .clip(CircleShape)
+                .padding(8.dp),
             contentAlignment = Alignment.CenterStart
         ) {
-            Box(
+            Surface(
+                shape           = CircleShape,
+                color           = buttonBgColor.copy(alpha = 0.35f),
+                shadowElevation = 0.dp,
+                tonalElevation  = 0.dp,
                 modifier = Modifier
                     .height(trackHeight)
                     .align(Alignment.CenterEnd)
                     .width(
-                        with(density) {
+                        with(localDensity) {
                             val width = trackWidthPx - offsetX.value
                             width.coerceAtLeast(0f).toDp()
                         }
                     )
-                    .clip(CircleShape)
-                    .background(buttonBgColor)
-            )
+                    .then(
+                        if (useLg && globalBackdrop != null) Modifier.drawBackdrop(
+                            backdrop = globalBackdrop,
+                            shape = { CircleShape },
+                            shadow = { Shadow(radius = 8.dp) },
+                            effects = {
+                                val d = density
+                                colorControls(saturation = 1.3f)
+                                blur(blurIntensity * d)
+                                lens(refractionHeight = 18f * d, refractionAmount = 52f * d)
+                            },
+                            highlight = { Highlight.Default }
+                        )
+                        else if (useBlur && globalBackdrop != null) Modifier.drawPlainBackdrop(
+                            backdrop = globalBackdrop,
+                            shape    = { CircleShape },
+                            shadow = { Shadow(radius = 8.dp) },
+                            effects  = { blur(blurIntensity * density) }
+                        )
+                        else Modifier
+                    )
+            ) {}
 
-            val baseTextColor = buttonIconColor
             val shimmerColor = buttonIconColor.copy(alpha = 0.4f)
 
             val brush = Brush.linearGradient(
-                colors = listOf(shimmerColor, baseTextColor, shimmerColor),
+                colors = listOf(shimmerColor, buttonIconColor, shimmerColor),
                 start = Offset(trackWidthPx * shimmerOffset - 150f, 0f),
                 end = Offset(trackWidthPx * shimmerOffset + 150f, 0f)
             )
@@ -1208,7 +1745,7 @@ fun MoreItem(
 
     Surface(
         color = cardColor,
-        shape = RoundedCornerShape(cardCornerSmall),
+        shape = RoundedCornerShape(cardCornerExtraSmall),
         modifier = Modifier
             .fillMaxWidth()
             .scale(scale),

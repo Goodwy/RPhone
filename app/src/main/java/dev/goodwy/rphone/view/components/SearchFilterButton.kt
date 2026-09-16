@@ -85,7 +85,7 @@ fun SearchFilterButton(modifier: Modifier = Modifier, size: Dp = 52.dp) {
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            shape = RoundedCornerShape(20.dp)
+            shape = MaterialTheme.shapes.largeIncreased
         ) {
             Text(
                 stringResource(R.string.filter_results),

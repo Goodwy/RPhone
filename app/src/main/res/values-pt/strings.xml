@@ -122,13 +122,26 @@
     <string name="hex_color_subtitle">Introduza um código hexadecimal válido de 6 dígitos</string>
     <string name="custom_font">Tipo de letra personalizado</string>
     <string name="custom_font_subtitle">Escolha um ficheiro .ttf para usar na aplicação</string>
+    <string name="font_size">Tamanho do tipo de letra</string>
+    <string name="rounding_radius">Raio de arredondamento</string>
     <string name="visual_effects">Efeitos visuais</string>
     <string name="not_supported_on_this_device">Não suportado neste dispositivo</string>
     <string name="not_supported_on_this_device_subtitle">O desfoque e o Vidro Líquido requerem Android 12 ou superior</string>
     <string name="material_liquid_you_glass">Vidro Líquido Material You</string>
-    <string name="material_liquid_you_glass_subtitle">Aplicar um efeito de vidro líquido à navegação</string>
+    <string name="material_liquid_you_glass_subtitle">Aplicar um efeito de vidro líquido</string>
     <string name="material_blur_effects">Efeitos de desfoque Material</string>
-    <string name="material_blur_effects_subtitle">Aplicar um efeito de desfoque de fundo à navegação</string>
+    <string name="material_blur_effects_subtitle">Aplicar um efeito de desfoque de fundo</string>
+    <string name="blur_intensity">Intensidade do desfoque</string>
+    <string name="liquid_glass_elements">Elementos de vidro líquido</string>
+    <string name="liquid_glass_elements_subtitle">Escolha quais elementos da interface usam o efeito de vidro líquido</string>
+    <string name="blur_effect_elements">Elementos com efeito de desfoque</string>
+    <string name="blur_effect_elements_subtitle">Escolha quais elementos da interface usam o efeito de desfoque</string>
+    <string name="bottom_navigation_bar">Barra de navegação inferior</string>
+    <string name="liquid_glass_bottom_navigation_bar">Aplicar o efeito de vidro líquido à barra de navegação inferior</string>
+    <string name="blur_effect_bottom_navigation_bar">Aplicar um efeito de desfoque à barra de navegação inferior</string>
+    <string name="call_screen">Ecrã de chamada</string>
+    <string name="liquid_glass_call_screen">Aplicar o efeito de vidro líquido ao ecrã de chamada</string>
+    <string name="blur_effect_call_screen">Aplicar um efeito de desfoque ao ecrã de chamada</string>
     <string name="scroll_animation">Animação de deslocamento</string>
     <string name="scroll_animation_device">Animação de aparecimento para itens de lista ao deslocar</string>
     <string name="call_ui">Interface de chamada</string>
@@ -325,7 +338,14 @@
     <string name="private_contacts">Contactos privados</string>
     <string name="private_contacts_subtitle">Gerir os seus contactos locais encriptados</string>
 
+    <!-- Voicemail -->
+    <string name="settings_voicemail_title">Correio de voz</string>
+
     <!-- Call -->
+    <string name="call_failed_airplane_mode">Não é possível efetuar chamadas com o modo de avião ativado</string>
+    <string name="call_failed_no_network">Chamada falhada: rede móvel indisponível</string>
+    <string name="call_failed_restricted">Chamada falhada: chamada restrita</string>
+    <string name="call_failed_generic">Não foi possível completar a chamada</string>
     <string name="call">Chamada</string>
     <string name="incoming">Recebida</string>
     <string name="outgoing">Efetuada</string>

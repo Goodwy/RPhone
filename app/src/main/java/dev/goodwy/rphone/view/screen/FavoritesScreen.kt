@@ -657,7 +657,7 @@ fun FavoriteContactCard(
         exit  = slideOutVertically(targetOffsetY = { -it }, animationSpec = tween(420, easing = FastOutLinearInEasing)) + fadeOut(tween(380))
     ) {
         DropdownMenu(
-            shape = RoundedCornerShape(16.dp),
+            shape = MaterialTheme.shapes.large,
             expanded = showMenu,
             onDismissRequest = { showMenu = false },
             offset = DpOffset(0.dp, menuOffsetY),

@@ -122,13 +122,26 @@
     <string name="hex_color_subtitle">Εισαγάγετε έναν έγκυρο 6ψήφιο δεκαεξαδικό κωδικό</string>
     <string name="custom_font">Προσαρμοσμένη γραμματοσειρά</string>
     <string name="custom_font_subtitle">Επιλέξτε ένα αρχείο .ttf για χρήση σε όλη την εφαρμογή</string>
+    <string name="font_size">Μέγεθος γραμματοσειράς</string>
+    <string name="rounding_radius">Ακτίνα στρογγυλοποίησης</string>
     <string name="visual_effects">Οπτικά εφέ</string>
     <string name="not_supported_on_this_device">Δεν υποστηρίζεται σε αυτήν τη συσκευή</string>
     <string name="not_supported_on_this_device_subtitle">Το θόλωμα και το Υγρό Γυαλί απαιτούν Android 12 ή νεότερο</string>
     <string name="material_liquid_you_glass">Υγρό Γυαλί Material You</string>
-    <string name="material_liquid_you_glass_subtitle">Εφαρμογή εφέ υγρού γυαλιού στην πλοήγηση</string>
+    <string name="material_liquid_you_glass_subtitle">Εφαρμογή εφέ υγρού γυαλιού</string>
     <string name="material_blur_effects">Εφέ θολώματος Material</string>
-    <string name="material_blur_effects_subtitle">Εφαρμογή εφέ θολώματος φόντου στην πλοήγηση</string>
+    <string name="material_blur_effects_subtitle">Εφαρμογή εφέ θολώματος φόντου</string>
+    <string name="blur_intensity">Ένταση θολώματος</string>
+    <string name="liquid_glass_elements">Στοιχεία υγρού γυαλιού</string>
+    <string name="liquid_glass_elements_subtitle">Επιλέξτε ποια στοιχεία διεπαφής χρησιμοποιούν το εφέ υγρού γυαλιού</string>
+    <string name="blur_effect_elements">Στοιχεία με εφέ θολώματος</string>
+    <string name="blur_effect_elements_subtitle">Επιλέξτε ποια στοιχεία διεπαφής χρησιμοποιούν το εφέ θολώματος</string>
+    <string name="bottom_navigation_bar">Κάτω γραμμή πλοήγησης</string>
+    <string name="liquid_glass_bottom_navigation_bar">Εφαρμογή του εφέ υγρού γυαλιού στην κάτω γραμμή πλοήγησης</string>
+    <string name="blur_effect_bottom_navigation_bar">Εφαρμογή εφέ θολώματος στην κάτω γραμμή πλοήγησης</string>
+    <string name="call_screen">Οθόνη κλήσης</string>
+    <string name="liquid_glass_call_screen">Εφαρμογή του εφέ υγρού γυαλιού στην οθόνη κλήσης</string>
+    <string name="blur_effect_call_screen">Εφαρμογή εφέ θολώματος στην οθόνη κλήσης</string>
     <string name="scroll_animation">Κίνηση κύλισης</string>
     <string name="scroll_animation_device">Κίνηση εμφάνισης για στοιχεία λίστας κατά την κύλιση</string>
     <string name="call_ui">Διεπαφή κλήσης</string>
@@ -325,7 +338,14 @@
     <string name="private_contacts">Ιδιωτικές επαφές</string>
     <string name="private_contacts_subtitle">Διαχείριση κρυπτογραφημένων τοπικών επαφών σας</string>
 
+    <!-- Voicemail -->
+    <string name="settings_voicemail_title">Φωνητικό ταχυδρομείο</string>
+
     <!-- Call -->
+    <string name="call_failed_airplane_mode">Δεν είναι δυνατή η πραγματοποίηση κλήσης όταν η λειτουργία πτήσης είναι ενεργή</string>
+    <string name="call_failed_no_network">Αποτυχία κλήσης: το δίκτυο κινητής τηλεφωνίας δεν είναι διαθέσιμο</string>
+    <string name="call_failed_restricted">Αποτυχία κλήσης: η κλήση είναι περιορισμένη</string>
+    <string name="call_failed_generic">Η κλήση δεν μπόρεσε να ολοκληρωθεί</string>
     <string name="call">Κλήση</string>
     <string name="incoming">Εισερχόμενη</string>
     <string name="outgoing">Εξερχόμενη</string>

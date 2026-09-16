@@ -5,7 +5,7 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [PrivateContactEntity::class], version = 2, exportSchema = false)
+@Database(entities = [PrivateContactEntity::class], version = 3, exportSchema = false)
 abstract class RillDatabase : RoomDatabase() {
     abstract fun privateContactDao(): PrivateContactDao
 
@@ -13,6 +13,12 @@ abstract class RillDatabase : RoomDatabase() {
         val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE private_contacts ADD COLUMN notes TEXT DEFAULT NULL")
+            }
+        }
+
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE private_contacts ADD COLUMN isHidden INTEGER NOT NULL DEFAULT 0")
             }
         }
     }

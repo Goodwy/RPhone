@@ -30,7 +30,6 @@ object ContactUtils {
             account.type.contains("telegram", ignoreCase = true) -> "Telegram"
             account.type.contains("xiaomi", ignoreCase = true) -> "Mi Account"
             account.type.contains("sim", ignoreCase = true) -> "SIM Card"
-            account.name.contains("@") -> account.name.substringBefore("@")
             else -> account.name
         }
     }

@@ -3,7 +3,6 @@ package dev.goodwy.rphone.view.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Call
@@ -17,7 +16,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.goodwy.rphone.R
-import dev.goodwy.rphone.cardCornerMedium
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
 
 @Composable
@@ -36,7 +34,7 @@ fun ShortcutActionDialog(
             }
         }
     ) {
-        RillExpressiveCard(shape = RoundedCornerShape(cardCornerMedium)) {
+        RillExpressiveCard(shape = MaterialTheme.shapes.large) {
             ShortcutActionRow(
                 icon = Icons.Rounded.AccountCircle,
                 label = stringResource(R.string.view_contact),

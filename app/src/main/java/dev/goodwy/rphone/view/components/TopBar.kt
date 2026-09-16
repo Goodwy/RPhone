@@ -36,6 +36,7 @@ import dev.goodwy.rphone.controller.util.PreferenceManager
 import com.ramcosta.composedestinations.generated.destinations.SearchScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.SettingsScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import dev.goodwy.rphone.view.theme.RillShapeDefaults
 import org.koin.compose.koinInject
 
 /** The pill-shaped, non-editable "Search in Ever Dialer" bar — tapping it opens the single
@@ -69,8 +70,8 @@ fun SearchBarPill(navigator: DestinationsNavigator, modifier: Modifier = Modifie
             navigator.navigate(SearchScreenDestination())
         },
         modifier = modifier.height(52.dp).scale(searchScale),
-        shape = CircleShape,
-        color = cardColor, //MaterialTheme.colorScheme.surfaceContainerHigh,
+        shape = MaterialTheme.shapes.extraLarge,
+        color = cardColor,
         interactionSource = searchSource
     ) {
         Row(
@@ -172,6 +173,7 @@ fun TopBar(
         label = "searchScale"
     )
     val hideVoiceSearch = remember { prefs.getBoolean(PreferenceManager.KEY_HIDE_VOICE_SEARCH, false) }
+    val cardCorner  = remember { prefs.getInt(PreferenceManager.KEY_CARD_ROUNDNESS, RillShapeDefaults.DefaultRoundness) }
 
     Surface(
         modifier = Modifier
@@ -189,6 +191,7 @@ fun TopBar(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // Search bar
+            val shape = if (cardCorner > 12) CircleShape else MaterialTheme.shapes.extraExtraLarge
             Surface(
                 onClick = {
                     if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
@@ -197,8 +200,8 @@ fun TopBar(
                     navigator.navigate(SearchScreenDestination())
                 },
                 modifier = Modifier.weight(1f).height(52.dp).scale(searchScale),
-                shape = CircleShape,
-                color = cardColor, //MaterialTheme.colorScheme.surfaceContainerHigh,
+                shape = shape,
+                color = cardColor,
                 interactionSource = searchSource
             ) {
                 Row(

@@ -122,13 +122,26 @@
     <string name="hex_color_subtitle">Geçerli bir 6 haneli hex kodu girin</string>
     <string name="custom_font">Özel Yazı Tipi</string>
     <string name="custom_font_subtitle">Uygulamada kullanmak için bir .ttf dosyası seçin</string>
+    <string name="font_size">Yazı tipi boyutu</string>
+    <string name="rounding_radius">Yuvarlatma yarıçapı</string>
     <string name="visual_effects">Görsel Efektler</string>
     <string name="not_supported_on_this_device">Bu cihazda desteklenmiyor</string>
     <string name="not_supported_on_this_device_subtitle">Bulanıklık ve Sıvı Cam Android 12 veya üstü gerektirir</string>
     <string name="material_liquid_you_glass">Sıvı Cam Material You</string>
-    <string name="material_liquid_you_glass_subtitle">Navigasyona sıvı cam efekti uygulayın</string>
-    <string name="material_blur_effects">Material Bulanıklık Efektleri</string>
-    <string name="material_blur_effects_subtitle">Navigasyona arka plan bulanıklığı efekti uygulayın</string>
+    <string name="material_liquid_you_glass_subtitle">Sıvı cam efekti uygula</string>
+    <string name="material_blur_effects">Material bulanıklık efektleri</string>
+    <string name="material_blur_effects_subtitle">Arka plan bulanıklık efekti uygula</string>
+    <string name="blur_intensity">Bulanıklık yoğunluğu</string>
+    <string name="liquid_glass_elements">Sıvı cam öğeleri</string>
+    <string name="liquid_glass_elements_subtitle">Hangi arayüz öğelerinin sıvı cam efektini kullanacağını seçin</string>
+    <string name="blur_effect_elements">Bulanıklık efekti öğeleri</string>
+    <string name="blur_effect_elements_subtitle">Hangi arayüz öğelerinin bulanıklık efektini kullanacağını seçin</string>
+    <string name="bottom_navigation_bar">Alt gezinme çubuğu</string>
+    <string name="liquid_glass_bottom_navigation_bar">Alt gezinme çubuğuna sıvı cam efekti uygula</string>
+    <string name="blur_effect_bottom_navigation_bar">Alt gezinme çubuğuna bulanıklık efekti uygula</string>
+    <string name="call_screen">Arama ekranı</string>
+    <string name="liquid_glass_call_screen">Arama ekranına sıvı cam efekti uygula</string>
+    <string name="blur_effect_call_screen">Arama ekranına bulanıklık efekti uygula</string>
     <string name="scroll_animation">Kaydırma Animasyonu</string>
     <string name="scroll_animation_device">Kaydırırken liste öğeleri için belirme animasyonu</string>
     <string name="call_ui">Arama Arayüzü</string>
@@ -325,7 +338,14 @@
     <string name="private_contacts">Özel Kişiler</string>
     <string name="private_contacts_subtitle">Şifrelenmiş yerel kişilerinizi yönetin</string>
 
+    <!-- Voicemail -->
+    <string name="settings_voicemail_title">Sesli mesaj</string>
+
     <!-- Call -->
+    <string name="call_failed_airplane_mode">Uçak modu açıkken arama yapılamaz</string>
+    <string name="call_failed_no_network">Arama başarısız: hücresel ağ kullanılamıyor</string>
+    <string name="call_failed_restricted">Arama başarısız: arama kısıtlı</string>
+    <string name="call_failed_generic">Arama tamamlanamadı</string>
     <string name="call">Ara</string>
     <string name="incoming">Gelen</string>
     <string name="outgoing">Giden</string>

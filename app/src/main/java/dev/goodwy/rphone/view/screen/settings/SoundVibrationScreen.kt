@@ -23,7 +23,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.CallReceived
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.outlined.DoNotDisturb
 import androidx.compose.material.icons.rounded.Audiotrack
 import androidx.compose.material.icons.rounded.CallEnd
 import androidx.compose.material.icons.rounded.RingVolume
@@ -44,7 +43,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.goodwy.rphone.R
-import dev.goodwy.rphone.cardCornerSmall
+import dev.goodwy.rphone.cardCornerExtraSmall
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillAnimatedSection
@@ -443,7 +442,7 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
                                     modifier = Modifier
                                         .background(
                                             color = cardColor,
-                                            shape = RoundedCornerShape(cardCornerSmall)
+                                            shape = RoundedCornerShape(cardCornerExtraSmall)
                                         )
                                         .padding(horizontal = 16.dp, vertical = 8.dp),
                                     verticalArrangement = Arrangement.spacedBy(4.dp)

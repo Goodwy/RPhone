@@ -19,14 +19,14 @@ def subscriptionYearId = localProperties.getProperty('SUBSCRIPTION_YEAR_ID_X1', 
 
 android {
     namespace = 'dev.goodwy.rphone'
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "dev.goodwy.rphone"
         minSdk = 29
-        targetSdk = 35
-        versionCode = 41
-        versionName = "0.4.1"
+        targetSdk = 37
+        versionCode = 48
+        versionName = "0.5.RC"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -154,7 +154,7 @@ dependencies {
     debugImplementation 'androidx.compose.ui:ui-tooling'
 
     // Goodwy
-    "gplayImplementation" 'com.android.billingclient:billing:8.0.0'
-    "rustoreImplementation" 'ru.rustore.sdk:bom:2026.04.01'
-    "rustoreImplementation" 'ru.rustore.sdk:pay:10.3.1'
+    gplayImplementation 'com.android.billingclient:billing:8.0.0'
+    rustoreImplementation 'ru.rustore.sdk:bom:2026.04.01'
+    rustoreImplementation 'ru.rustore.sdk:pay:10.3.1'
 }

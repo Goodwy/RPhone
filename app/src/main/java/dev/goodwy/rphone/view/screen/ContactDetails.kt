@@ -10,7 +10,6 @@ import android.content.res.Configuration
 import android.media.RingtoneManager
 import android.net.Uri
 import android.provider.ContactsContract
-import android.telecom.TelecomManager
 import android.view.Surface
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.*
@@ -60,6 +59,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
@@ -107,8 +107,7 @@ import org.koin.compose.koinInject
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import dev.goodwy.rphone.cardCornerBig
-import dev.goodwy.rphone.cardCornerSmall
+import dev.goodwy.rphone.cardCornerExtraSmall
 import dev.goodwy.rphone.controller.util.ContactUtils
 import dev.goodwy.rphone.controller.util.copyToClipboard
 import dev.goodwy.rphone.controller.util.getAddressTypeText
@@ -123,7 +122,6 @@ import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import dev.goodwy.rphone.view.theme.customColors
 import com.ramcosta.composedestinations.generated.destinations.CallLogFullScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactEditScreenDestination
-import dev.goodwy.rphone.cardCornerMedium
 import dev.goodwy.rphone.cardSpacedBy
 import dev.goodwy.rphone.controller.util.BlockedNumbersManager
 import dev.goodwy.rphone.controller.util.CallBackgroundStore
@@ -138,6 +136,7 @@ import dev.goodwy.rphone.modal.data.getDisplayName
 import dev.goodwy.rphone.modal.repository.ContactsRepository
 import dev.goodwy.rphone.private_only
 import java.util.Calendar
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 private fun CallBackgroundRow(
@@ -217,7 +216,7 @@ fun ContactDetailsScreen(
     fun navigateBack() {
         isClosing = true
         scope.launch {
-            kotlinx.coroutines.delay(420)
+            kotlinx.coroutines.delay(420.milliseconds)
             navigator.navigateUp()
         }
     }
@@ -410,13 +409,13 @@ fun ContactDetailsScreen(
 
     val screenAlpha by animateFloatAsState(
         targetValue = if (screenVisible && !isClosing) 1f else 0f,
-        animationSpec = if (isClosing) tween(380, easing = androidx.compose.animation.core.FastOutLinearInEasing)
-                        else tween(500, easing = androidx.compose.animation.core.LinearOutSlowInEasing),
+        animationSpec = if (isClosing) tween(380, easing = FastOutLinearInEasing)
+                        else tween(500, easing = LinearOutSlowInEasing),
         label = "screenAlpha"
     )
     val screenOffsetY by animateDpAsState(
         targetValue = if (screenVisible && !isClosing) 0.dp else if (isClosing) 80.dp else 56.dp,
-        animationSpec = if (isClosing) tween(400, easing = androidx.compose.animation.core.FastOutLinearInEasing)
+        animationSpec = if (isClosing) tween(400, easing = FastOutLinearInEasing)
                         else spring(
                             stiffness = Spring.StiffnessLow,
                             dampingRatio = Spring.DampingRatioMediumBouncy
@@ -937,7 +936,7 @@ fun ContactDetailsScreen(
                                                 )
                                                 // Dropdown menu
                                                 DropdownMenu(
-                                                    shape = RoundedCornerShape(16.dp),
+                                                    shape = MaterialTheme.shapes.large,
                                                     expanded = showOverflowMenu,
                                                     onDismissRequest = { showOverflowMenu = false },
                                                     offset = offsetMenu,
@@ -1055,7 +1054,7 @@ fun ContactDetailsScreen(
                                             )
                                             // Dropdown menu
                                             DropdownMenu(
-                                                shape = RoundedCornerShape(16.dp),
+                                                shape = MaterialTheme.shapes.large,
                                                 expanded = showOverflowMenu,
                                                 onDismissRequest = { showOverflowMenu = false },
                                                 offset = offsetMenu,
@@ -1172,11 +1171,9 @@ fun ContactDetailsScreen(
                                                 .fillMaxWidth()
                                                 .background(
                                                     color = cardColor,
-                                                    shape = RoundedCornerShape(
-                                                        topStart = cardCornerSmall,
-                                                        topEnd = cardCornerSmall,
-                                                        bottomStart = cardCornerBig,
-                                                        bottomEnd = cardCornerBig
+                                                    shape = MaterialTheme.shapes.extraLarge.copy(
+                                                        topStart = CornerSize(cardCornerExtraSmall),
+                                                        topEnd = CornerSize(cardCornerExtraSmall)
                                                     )
                                                 )
                                                 .combinedClickable(
@@ -1367,11 +1364,9 @@ fun ContactDetailsScreen(
                                                         ), // We'll make up for the indentation
                                                     colors = ButtonDefaults.textButtonColors()
                                                         .copy(containerColor = cardColor),
-                                                    shape = RoundedCornerShape(
-                                                        topStart = cardCornerSmall,
-                                                        topEnd = cardCornerSmall,
-                                                        bottomStart = cardCornerBig,
-                                                        bottomEnd = cardCornerBig
+                                                    shape = MaterialTheme.shapes.extraLarge.copy(
+                                                        topStart = CornerSize(cardCornerExtraSmall),
+                                                        topEnd = CornerSize(cardCornerExtraSmall)
                                                     ),
                                                 ) {
                                                     Text(stringResource(R.string.show_full_history))
@@ -1793,7 +1788,7 @@ fun ContactDetailsScreen(
                                             )
                                             // Dropdown menu
                                             DropdownMenu(
-                                                shape = RoundedCornerShape(16.dp),
+                                                shape = MaterialTheme.shapes.large,
                                                 expanded = showOverflowMenu,
                                                 onDismissRequest = {
                                                     showOverflowMenu = false
@@ -1928,7 +1923,7 @@ fun ContactDetailsScreen(
                                         )
                                         // Dropdown menu
                                         DropdownMenu(
-                                            shape = RoundedCornerShape(16.dp),
+                                            shape = MaterialTheme.shapes.large,
                                             expanded = showOverflowMenu,
                                             onDismissRequest = { showOverflowMenu = false },
                                             offset = offsetMenu,
@@ -2046,11 +2041,9 @@ fun ContactDetailsScreen(
                                             .fillMaxWidth()
                                             .background(
                                                 color = cardColor,
-                                                shape = RoundedCornerShape(
-                                                    topStart = cardCornerSmall,
-                                                    topEnd = cardCornerSmall,
-                                                    bottomStart = cardCornerBig,
-                                                    bottomEnd = cardCornerBig
+                                                shape = MaterialTheme.shapes.extraLarge.copy(
+                                                    topStart = CornerSize(cardCornerExtraSmall),
+                                                    topEnd = CornerSize(cardCornerExtraSmall)
                                                 )
                                             )
                                             .combinedClickable(
@@ -2245,11 +2238,9 @@ fun ContactDetailsScreen(
                                                     ), // We'll make up for the indentation
                                                 colors = ButtonDefaults.textButtonColors()
                                                     .copy(containerColor = cardColor),
-                                                shape = RoundedCornerShape(
-                                                    topStart = cardCornerSmall,
-                                                    topEnd = cardCornerSmall,
-                                                    bottomStart = cardCornerBig,
-                                                    bottomEnd = cardCornerBig
+                                                shape = MaterialTheme.shapes.extraLarge.copy(
+                                                    topStart = CornerSize(cardCornerExtraSmall),
+                                                    topEnd = CornerSize(cardCornerExtraSmall)
                                                 ),
                                             ) {
                                                 Text(stringResource(R.string.show_full_history))
@@ -2480,14 +2471,14 @@ fun QrCodeDialog(name: String, phone: String?, email: String?, onDismiss: () -> 
     val vCard = remember(name, phone, email) { QrCodeUtils.generateVCard(name, phone, email) }
     val qrBitmap = remember(vCard) { QrCodeUtils.generateQrCode(vCard, 600) }
     Dialog(onDismissRequest = onDismiss) {
-        Card(shape = RoundedCornerShape(28.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
+        Card(shape = MaterialTheme.shapes.extraLarge, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
             Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(stringResource(R.string.contact_qr), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(16.dp))
                 qrBitmap?.let {
                     Image(bitmap = it.asImageBitmap(), contentDescription = "QR Code", modifier = Modifier
                         .size(240.dp)
-                        .background(Color.White, RoundedCornerShape(12.dp))
+                        .background(Color.White, MaterialTheme.shapes.medium)
                         .padding(12.dp))
                 }
                 Spacer(Modifier.height(16.dp))
@@ -2496,7 +2487,7 @@ fun QrCodeDialog(name: String, phone: String?, email: String?, onDismiss: () -> 
                 Spacer(Modifier.height(24.dp))
                 Button(onClick = onDismiss, modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 2.dp), shape = RoundedCornerShape(12.dp)) { Text(stringResource(R.string.close)) }
+                    .padding(horizontal = 2.dp), shape = MaterialTheme.shapes.medium) { Text(stringResource(R.string.close)) }
             }
         }
     }
@@ -2534,7 +2525,7 @@ fun SourceItem(
     Surface(
         modifier = modifier,
         color = cardColor,
-        shape = RoundedCornerShape(cardCornerSmall),
+        shape = RoundedCornerShape(cardCornerExtraSmall),
         shadowElevation = 0.dp
     ) {
         Row(
@@ -2643,7 +2634,7 @@ fun SourcesDialog(
                         .padding(bottom = 16.dp)
                 )
 
-                RillExpressiveCard(shape = RoundedCornerShape(cardCornerMedium)) {
+                RillExpressiveCard(shape = MaterialTheme.shapes.large) {
                     sources.forEachIndexed { _, source ->
                         val account = if (!source.accountName.isNullOrEmpty()) {
                             Account(source.accountName, source.accountType ?: "")
@@ -2654,7 +2645,7 @@ fun SourcesDialog(
 
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(cardCornerSmall),
+                            shape = RoundedCornerShape(cardCornerExtraSmall),
                             colors = CardDefaults.cardColors(containerColor = cardColor)
                         ) {
                             Row(
@@ -2771,11 +2762,9 @@ fun SourcesDialog(
                         modifier = Modifier
                             .fillMaxWidth()
                             .offset(x = 0.dp, y = (-4).dp),
-                        shape = RoundedCornerShape(
-                            topStart = cardCornerSmall,
-                            topEnd = cardCornerSmall,
-                            bottomStart = cardCornerMedium,
-                            bottomEnd = cardCornerMedium
+                        shape = MaterialTheme.shapes.large.copy(
+                            topStart = CornerSize(cardCornerExtraSmall),
+                            topEnd = CornerSize(cardCornerExtraSmall)
                         ),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -2876,7 +2865,7 @@ fun CallBackgroundBottomSheet(
                         max = (screenWidth * aspectRatio * 0.75f)
                     )
                     .weight(1f)
-                    .clip(RoundedCornerShape(cardCornerBig))
+                    .clip(MaterialTheme.shapes.extraLarge)
                     .background(MaterialTheme.colorScheme.surfaceContainerLowest)
             ) {
                 if (displayBackground != null) {

@@ -64,8 +64,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.bottomBarHeight
-import dev.goodwy.rphone.cardCornerBig
-import dev.goodwy.rphone.cardCornerSmall
+import dev.goodwy.rphone.cardCornerExtraSmall
 import dev.goodwy.rphone.cardSpacedBy
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.ContactsViewModel
@@ -77,7 +76,9 @@ import com.ramcosta.composedestinations.generated.destinations.ContactDetailsScr
 import com.ramcosta.composedestinations.generated.destinations.ContactEditScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.goodwy.rphone.controller.util.forceLtr
+import dev.goodwy.rphone.modal.data.getDisplayContactInfo
 import dev.goodwy.rphone.modal.data.getDisplayName
+import dev.goodwy.rphone.view.theme.RillShapeDefaults
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinActivityViewModel
@@ -122,6 +123,7 @@ fun AZListContent(
 
     val displayOrder = remember(settingsState) { prefs.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0) }
     val sortOrder = remember(settingsState) { prefs.getInt(PreferenceManager.KEY_CONTACT_SORT_ORDER, 0) }
+    val cardCornerExtraLarge  = prefs.getInt(PreferenceManager.KEY_CARD_ROUNDNESS, RillShapeDefaults.DefaultRoundness).dp
 
     val finalGrouped = remember(contacts, grouped) {
         if (grouped != null) return@remember grouped
@@ -210,16 +212,16 @@ fun AZListContent(
                     val isSelected = selectedIds.contains(contact.id)
 
                     val shape = when {
-                        isOnly || isSelected -> RoundedCornerShape(cardCornerBig)
+                        isOnly || isSelected -> RoundedCornerShape(cardCornerExtraLarge)
                         isFirst -> RoundedCornerShape(
-                            topStart = cardCornerBig, topEnd = cardCornerBig,
-                            bottomStart = cardCornerSmall, bottomEnd = cardCornerSmall
+                            topStart = cardCornerExtraLarge, topEnd = cardCornerExtraLarge,
+                            bottomStart = cardCornerExtraSmall, bottomEnd = cardCornerExtraSmall
                         )
                         isLast  -> RoundedCornerShape(
-                            topStart = cardCornerSmall, topEnd = cardCornerSmall,
-                            bottomStart = cardCornerBig, bottomEnd = cardCornerBig
+                            topStart = cardCornerExtraSmall, topEnd = cardCornerExtraSmall,
+                            bottomStart = cardCornerExtraLarge, bottomEnd = cardCornerExtraLarge
                         )
-                        else    -> RoundedCornerShape(cardCornerSmall)
+                        else    -> RoundedCornerShape(cardCornerExtraSmall)
                     }
                     val bottomPadding = if (!isLast) cardSpacedBy else 0.dp
 
@@ -370,16 +372,14 @@ fun ContactListItem(
     }
     Surface(
         color = if (isSelected) cardColorSelected else cardColor,
-        shape = RoundedCornerShape(cardCornerSmall),
+        shape = RoundedCornerShape(cardCornerExtraSmall),
         modifier = Modifier
             .fillMaxWidth()
             .scale(scale),
         shadowElevation = 0.dp
     ) {
 //        val defaultOrFirstPhone = contact.phoneDetails.firstOrNull { it.isPrimary }?.number ?: contact.phoneNumbers.firstOrNull()
-        val contactInfo = if (contact.phoneNumbers.isNotEmpty()) contact.phoneNumbers.joinToString(", ").forceLtr()
-                                else if (contact.emails.isNotEmpty()) contact.emails.joinToString(", ") { it.value }
-                                else null
+        val contactInfo = getDisplayContactInfo(contact)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -482,10 +482,10 @@ fun ContactListItem(
             exit  = slideOutVertically(targetOffsetY = { -it }, animationSpec = tween(420, easing = FastOutLinearInEasing)) + fadeOut(tween(380))
         ) {
             DropdownMenu(
-                shape = RoundedCornerShape(16.dp),
+                shape = MaterialTheme.shapes.large,
                 expanded = showMenu,
                 onDismissRequest = { showMenu = false },
-                offset = DpOffset(42.dp, 48.dp),
+                offset = DpOffset(62.dp, 48.dp),
             ) {
                 if (onSelectToggle != null) {
                     DropdownMenuItem(

@@ -39,6 +39,7 @@ class CallLogRepository(
     override suspend fun getCallLogs(): List<CallLogEntry> = withContext(Dispatchers.IO) {
         val callLogs = mutableListOf<CallLogEntry>()
 
+
         val contactMap = contactMapMutex.withLock {
             val now = System.currentTimeMillis()
             if (cachedContactMap != null && now - lastContactMapUpdate < CONTACT_MAP_TTL) {

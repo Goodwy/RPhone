@@ -4,9 +4,12 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
 import android.telecom.TelecomManager
+import android.telephony.PhoneNumberUtils
 import android.telephony.TelephonyManager
 import androidx.annotation.RequiresPermission
 import androidx.core.content.ContextCompat
@@ -19,6 +22,49 @@ fun hasDualSim(context: Context): Boolean {
         val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as? TelecomManager ?: return false
         telecomManager.callCapablePhoneAccounts.size >= 2
     } catch (_: Exception) {
+        false
+    }
+}
+
+fun isAirplaneModeOn(context: Context): Boolean {
+    return try {
+        android.provider.Settings.Global.getInt(context.contentResolver, android.provider.Settings.Global.AIRPLANE_MODE_ON, 0) != 0
+    } catch (e: Exception) {
+        false
+    }
+}
+
+@RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
+fun isWifiConnected(context: Context): Boolean {
+    return try {
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return false
+        val network = cm.activeNetwork ?: return false
+        val caps = cm.getNetworkCapabilities(network) ?: return false
+        caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+    } catch (e: Exception) {
+        false
+    }
+}
+
+fun isVoicemailNumber(context: Context, number: String?): Boolean {
+    if (number.isNullOrBlank()) return false
+    val clean = number.trim()
+    if (clean.equals("voicemail", ignoreCase = true) || clean.startsWith("voicemail:", ignoreCase = true)) {
+        return true
+    }
+    val prefs = PreferenceManager(context)
+    val configuredVm = prefs.getString(PreferenceManager.KEY_VOICEMAIL_NUMBER, null)
+    if (!configuredVm.isNullOrBlank() && areNumbersEqual(clean, configuredVm)) {
+        return true
+    }
+    val sysVm = getSystemVoicemailNumber(context)
+    if (!sysVm.isNullOrBlank() && areNumbersEqual(clean, sysVm)) {
+        return true
+    }
+    return try {
+        @Suppress("DEPRECATION")
+        PhoneNumberUtils.isVoiceMailNumber(clean)
+    } catch (e: Exception) {
         false
     }
 }

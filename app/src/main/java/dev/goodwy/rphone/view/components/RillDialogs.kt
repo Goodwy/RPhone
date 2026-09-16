@@ -77,6 +77,7 @@ import dev.goodwy.rphone.liquidglass.effects.colorControls
 import dev.goodwy.rphone.liquidglass.effects.lens
 import dev.goodwy.rphone.liquidglass.highlight.Highlight
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
+import dev.goodwy.rphone.view.theme.RillShapeDefaults
 import dev.goodwy.rphone.view.theme.color_call_end
 import org.koin.compose.koinInject
 
@@ -98,7 +99,7 @@ fun RillDialog(
     LaunchedEffect(Unit) { showState.value = true }
     val prefs = koinInject<PreferenceManager>()
     val settingsState by prefs.settingsChanged.collectAsStateWithLifecycle()
-    val roundness = remember(settingsState) { prefs.getInt(PreferenceManager.KEY_CARD_ROUNDNESS, 28) }
+    val roundness = remember(settingsState) { prefs.getInt(PreferenceManager.KEY_CARD_ROUNDNESS, RillShapeDefaults.DefaultRoundness) }
 
     val scale by animateFloatAsState(
         targetValue = if (showState.value) 1f else 0.95f,

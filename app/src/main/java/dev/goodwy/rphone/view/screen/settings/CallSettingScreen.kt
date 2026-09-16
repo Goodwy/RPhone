@@ -51,7 +51,7 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
     val context = LocalContext.current
 
     var proximityBg by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_PROXIMITY_BG, true)) }
-    var pocketModePrevention by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_POCKET_MODE_PREVENTION, false)) }
+    var pocketModePrevention by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_POCKET_MODE, false)) }
     var floatingCall by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_FLOATING_CALL, false)) }
     var directCallOnTap by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_DIRECT_CALL_ON_TAP, false)) }
     var autoSpeaker by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_AUTO_SPEAKER, false)) }
@@ -181,7 +181,7 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
                                 checked = pocketModePrevention,
                                 onCheckedChange = {
                                     pocketModePrevention = it
-                                    prefs.setBoolean(PreferenceManager.KEY_POCKET_MODE_PREVENTION, it)
+                                    prefs.setBoolean(PreferenceManager.KEY_POCKET_MODE, it)
                                 }
                             )
                             RillSwitchListItem(

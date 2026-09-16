@@ -45,6 +45,7 @@ import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import org.koin.compose.koinInject
 import androidx.core.net.toUri
+import dev.goodwy.rphone.cardCornerExtraSmall
 import kotlin.math.abs
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -63,9 +64,11 @@ fun SingleTile(
     phoneNumber: String? = null,
     onAvatarClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
+    onCall: (() -> Unit)? = null,
     useLongClick: Boolean = true,
-    showAddToContact: Boolean = false,
+    showCreateContact: Boolean = false,
     onSelectMode: (() -> Unit)? = null,
+    menuOffset: DpOffset = DpOffset(56.dp, 64.dp),
     onClick: () -> Unit
 ) {
     val context = LocalContext.current
@@ -85,7 +88,7 @@ fun SingleTile(
         ?.takeIf { it.length >= 5 } ?: subtitle
 
     Surface(
-        shape = RoundedCornerShape(4.dp),
+        shape = RoundedCornerShape(cardCornerExtraSmall),
         color = cardColor,
         modifier = Modifier.fillMaxWidth().scale(scale)
     ) {
@@ -209,10 +212,10 @@ fun SingleTile(
             exit  = slideOutVertically(targetOffsetY = { -it }, animationSpec = tween(420, easing = FastOutLinearInEasing)) + fadeOut(tween(380))
         ) {
             DropdownMenu(
-                shape = RoundedCornerShape(16.dp),
+                shape = MaterialTheme.shapes.large,
                 expanded = showMenu,
                 onDismissRequest = { showMenu = false },
-                offset = DpOffset(56.dp, 64.dp),
+                offset = menuOffset,
             ) {
                 if (onSelectMode != null) {
                     DropdownMenuItem(
@@ -225,13 +228,15 @@ fun SingleTile(
                         color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                     )
                 }
-                DropdownMenuItem(
-                    contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
-                    text = { Text(stringResource(R.string.call)) },
-                    leadingIcon = { Icon(Icons.Rounded.Call, null) },
-                    onClick = { showMenu = false; onClick() }
-                )
-                if (!numberForMenu.isNullOrEmpty()) {
+                if (!numberForMenu.isNullOrEmpty() && phoneNumber != null) {
+                    if (onCall != null) {
+                        DropdownMenuItem(
+                            contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
+                            text = { Text(stringResource(R.string.call)) },
+                            leadingIcon = { Icon(Icons.Rounded.Call, null) },
+                            onClick = { showMenu = false; onCall() }
+                        )
+                    }
                     DropdownMenuItem(
                         contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
                         text = { Text(stringResource(R.string.message)) },
@@ -244,20 +249,10 @@ fun SingleTile(
                             context.startActivity(intent)
                         }
                     )
-                    DropdownMenuItem(
-                        contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
-                        text = { Text(stringResource(R.string.copy)) },
-                        leadingIcon = { Icon(Icons.Rounded.ContentCopy, null) },
-                        onClick = {
-                            showMenu = false
-                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                            clipboard.setPrimaryClip(ClipData.newPlainText("Phone number", numberForMenu))
-                        }
-                    )
-                    if (showAddToContact) {
+                    if (showCreateContact) {
                         DropdownMenuItem(
                             contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
-                            text = { Text(stringResource(R.string.add_to_contact)) },
+                            text = { Text(stringResource(R.string.create_contact)) },
                             leadingIcon = { Icon(Icons.Default.PersonAdd, null) },
                             onClick = {
                                 showMenu = false
@@ -270,6 +265,16 @@ fun SingleTile(
                         )
                     }
                 }
+                DropdownMenuItem(
+                    contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
+                    text = { Text(stringResource(R.string.copy)) },
+                    leadingIcon = { Icon(Icons.Rounded.ContentCopy, null) },
+                    onClick = {
+                        showMenu = false
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        clipboard.setPrimaryClip(ClipData.newPlainText("Phone number", numberForMenu ?: title))
+                    }
+                )
             }
         }
     }

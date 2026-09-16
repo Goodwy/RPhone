@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Merge
@@ -37,8 +38,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.goodwy.rphone.R
-import dev.goodwy.rphone.cardCornerBig
-import dev.goodwy.rphone.cardCornerSmall
+import dev.goodwy.rphone.cardCornerExtraSmall
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.view.components.ContactListItem
 import dev.goodwy.rphone.view.components.NavigationIcon
@@ -48,6 +48,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinActivityViewModel
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Destination<RootGraph>
@@ -78,7 +79,7 @@ fun ContactMergeDuplicatesScreen(
     fun navigateBack() {
         isClosing = true
         scope.launch {
-            delay(280)
+            delay(280.milliseconds)
             navigator.navigateUp()
         }
     }
@@ -223,18 +224,16 @@ fun DuplicateGroupCard(
 
                 isUnmerging = true
                 scope.launch {
-                    delay(300)
+                    delay(300.milliseconds)
                     onMerge(group.first(), group.drop(1))
                 }
             },
             modifier = Modifier
                 .fillMaxWidth()
                 .offset(x = 0.dp, y = (-4).dp),
-            shape = RoundedCornerShape(
-                topStart = cardCornerSmall,
-                topEnd = cardCornerSmall,
-                bottomStart = cardCornerBig,
-                bottomEnd = cardCornerBig
+            shape = MaterialTheme.shapes.extraLarge.copy(
+                topStart = CornerSize(cardCornerExtraSmall),
+                topEnd = CornerSize(cardCornerExtraSmall)
             ),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,

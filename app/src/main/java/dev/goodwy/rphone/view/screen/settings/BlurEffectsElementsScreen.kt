@@ -6,6 +6,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.rounded.AccessTime
+import androidx.compose.material.icons.rounded.CallEnd
+import androidx.compose.material.icons.rounded.CallToAction
+import androidx.compose.material.icons.rounded.SmartButton
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -27,6 +30,7 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.view.components.Title
+import dev.goodwy.rphone.view.theme.customColors
 import org.koin.compose.koinInject
 
 private data class BlurElement(
@@ -34,24 +38,42 @@ private data class BlurElement(
     val headline: String,
     val supporting: String,
     val icon: ImageVector,
-    val iconColor: Color
+    val iconColor: Color,
+    val iconBgColor: Color
 )
 
-private val BLUR_ELEMENTS = listOf(
-    BlurElement(
-        key = PreferenceManager.KEY_BLUR_BOTTOM_NAV,
-        headline = "Bottom Navigation Bar",
-        supporting = "Apply blur to the pill-style bottom navigation bar",
-        icon = Icons.Outlined.ViewStream,
-        iconColor = Color(0xFF00BCD4)
-    ),
-    BlurElement(
-        key = PreferenceManager.KEY_BLUR_DROPDOWN_MENU,
-        headline = "Dropdown Menu",
-        supporting = "Apply blur to context and overflow dropdown menus",
-        icon = Icons.Outlined.MoreVert,
-        iconColor = Color(0xFF9C27B0)
-    ),
+@Composable
+private fun rememberBlurElements(): List<BlurElement> {
+    val customColors = MaterialTheme.colorScheme.customColors
+    val bottomNavigationBar = stringResource(R.string.bottom_navigation_bar)
+    val bottomNavigationBarSubtitle = stringResource(R.string.blur_effect_bottom_navigation_bar)
+    val callScreen = stringResource(R.string.call_screen)
+    val callScreenSubtitle = stringResource(R.string.blur_effect_call_screen)
+    return remember(customColors) {
+            listOf(
+                BlurElement(
+                    key = PreferenceManager.KEY_BLUR_BOTTOM_NAV,
+                    headline = bottomNavigationBar,
+                    supporting = bottomNavigationBarSubtitle,
+                    icon = Icons.Rounded.CallToAction,
+                    iconColor = customColors.colorDarkAmber,
+                    iconBgColor = customColors.colorAmber,
+                ),
+                BlurElement(
+                    key = PreferenceManager.KEY_BLUR_CALL_SCREEN,
+                    headline = callScreen,
+                    supporting = callScreenSubtitle,
+                    icon = Icons.Rounded.CallEnd,
+                    iconColor = customColors.colorDarkGreen,
+                    iconBgColor = customColors.colorGreen,
+                ),
+//    BlurElement(
+//        key = PreferenceManager.KEY_BLUR_DROPDOWN_MENU,
+//        headline = "Dropdown Menu",
+//        supporting = "Apply blur to context and overflow dropdown menus",
+//        icon = Icons.Outlined.MoreVert,
+//        iconColor = Color(0xFF9C27B0)
+//    ),
 //    BlurElement(
 //        key = PreferenceManager.KEY_BLUR_DIALPAD_CALL_BUTTON,
 //        headline = "Dialpad Call Button",
@@ -73,16 +95,19 @@ private val BLUR_ELEMENTS = listOf(
 //        icon = Icons.Rounded.AccessTime,
 //        iconColor = Color(0xFFFF9800)
 //    ),
-)
+            )
+        }
+    }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Destination<RootGraph>
 @Composable
 fun BlurEffectsElementsScreen(navigator: DestinationsNavigator) {
     val prefs = koinInject<PreferenceManager>()
+    val blurElements = rememberBlurElements()
 
-    val states = remember {
-        BLUR_ELEMENTS.associate { el ->
+    val states = remember(blurElements) {
+        blurElements.associate { el ->
             el.key to mutableStateOf(prefs.getBoolean(el.key, true))
         }
     }
@@ -99,7 +124,7 @@ fun BlurEffectsElementsScreen(navigator: DestinationsNavigator) {
                     if (isRotation90) WindowInsetsSides.Top + WindowInsetsSides.Horizontal
                     else WindowInsetsSides.Top
                 ),
-                title = { Title("Blur Effect Elements") },
+                title = { Title(stringResource(R.string.blur_effect_elements)) },
                 navigationIcon = {
                     NavigationIcon(onClick = { navigator.navigateUp() })
                 }
@@ -123,7 +148,7 @@ fun BlurEffectsElementsScreen(navigator: DestinationsNavigator) {
             item {
                 RillAnimatedSection(delayMs = 0L) {
                     Text(
-                        text = "Select which elements use the blur effect. Requires \"Material Blur Effects\" to be enabled.",
+                        text = stringResource(R.string.blur_effect_elements_subtitle),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
@@ -134,25 +159,20 @@ fun BlurEffectsElementsScreen(navigator: DestinationsNavigator) {
             item {
                 RillAnimatedSection(delayMs = 40L) {
                     RillExpressiveCard {
-                        BLUR_ELEMENTS.forEachIndexed { index, element ->
+                        blurElements.forEachIndexed { index, element ->
                             val checked by states[element.key]!!
                             RillSwitchListItem(
                                 headline = element.headline,
                                 supporting = element.supporting,
                                 leadingIcon = element.icon,
                                 iconContainerColor = element.iconColor,
+                                iconBgContainerColor = element.iconBgColor,
                                 checked = checked,
                                 onCheckedChange = { newValue ->
                                     states[element.key]!!.value = newValue
                                     prefs.setBoolean(element.key, newValue)
                                 }
                             )
-//                            if (index < BLUR_ELEMENTS.lastIndex) {
-//                                HorizontalDivider(
-//                                    modifier = Modifier.padding(horizontal = 16.dp),
-//                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-//                                )
-//                            }
                         }
                     }
                 }

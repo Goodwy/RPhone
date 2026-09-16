@@ -51,6 +51,7 @@ import dev.goodwy.rphone.view.components.Title
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinActivityViewModel
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Destination<RootGraph>
@@ -90,7 +91,7 @@ fun PrivateContactsScreen(
     fun navigateBack() {
         isClosing = true
         scope.launch {
-            delay(280)
+            delay(280.milliseconds)
             navigator.navigateUp()
         }
     }
@@ -227,7 +228,7 @@ fun PrivateContactCard(
                     Icon(Icons.Default.MoreVert, null)
                 }
                 DropdownMenu(
-                    shape = RoundedCornerShape(16.dp),
+                    shape = MaterialTheme.shapes.large,
                     expanded = showMenu,
                     onDismissRequest = { showMenu = false }
                 ) {

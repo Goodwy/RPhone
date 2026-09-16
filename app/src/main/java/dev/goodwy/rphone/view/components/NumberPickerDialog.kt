@@ -16,8 +16,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.goodwy.rphone.R
-import dev.goodwy.rphone.cardCornerMedium
-import dev.goodwy.rphone.cardCornerSmall
+import dev.goodwy.rphone.cardCornerExtraSmall
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
 
 @Composable
@@ -41,7 +40,7 @@ fun NumberPickerDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(max = 600.dp),
-            shape = RoundedCornerShape(cardCornerMedium)
+            shape = MaterialTheme.shapes.large
         ) {
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(2.dp),
@@ -53,7 +52,7 @@ fun NumberPickerDialog(
                 ) { _, number ->
                     Surface(
                         onClick = { onNumberSelected(number) },
-                        shape = RoundedCornerShape(cardCornerSmall),
+                        shape = RoundedCornerShape(cardCornerExtraSmall),
                         color = cardColor,
                         modifier = Modifier.fillMaxWidth()
                     ) {

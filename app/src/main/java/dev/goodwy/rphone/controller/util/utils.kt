@@ -37,6 +37,7 @@ import dev.goodwy.rphone.R
 
 fun makeCall(context: Context, number: String, accountHandle: PhoneAccountHandle? = null, contactId: String? = null) {
     val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
+
     val uri = if (number.startsWith("voicemail:")) {
         number.toUri()
     } else {
@@ -74,12 +75,44 @@ fun makeCall(context: Context, number: String, accountHandle: PhoneAccountHandle
         extras.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, preferredHandle)
     }
 
-    if (ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
-        telecomManager.placeCall(uri, extras)
-    } else {
+    val isAirplane = isAirplaneModeOn(context)
+    val isWifi = isWifiConnected(context)
 
-        val intent = Intent(Intent.ACTION_DIAL, uri)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+    if (ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
+        if (isAirplane && isWifi) {
+            // In airplane mode with Wi-Fi connected, route through system ACTION_CALL so privileged IMS/VoWiFi handles it
+            try {
+                val callIntent = Intent(Intent.ACTION_CALL, uri).apply {
+                    putExtras(extras)
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                context.startActivity(callIntent)
+                return
+            } catch (e: Exception) {
+                // fallback to placeCall below
+            }
+        }
+
+        try {
+            telecomManager.placeCall(uri, extras)
+        } catch (e: Exception) {
+            try {
+                val callIntent = Intent(Intent.ACTION_CALL, uri).apply {
+                    putExtras(extras)
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                context.startActivity(callIntent)
+            } catch (e2: Exception) {
+                val dialIntent = Intent(Intent.ACTION_DIAL, uri).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                context.startActivity(dialIntent)
+            }
+        }
+    } else {
+        val intent = Intent(Intent.ACTION_DIAL, uri).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
         context.startActivity(intent)
     }
 }
@@ -439,6 +472,18 @@ fun processSecretCode(context: Context, fullCode: String): Boolean {
 
     return handled
 }
+
+fun isCustomPermissionDevice(): Boolean {
+    val manufacturer = Build.MANUFACTURER.lowercase()
+    return manufacturer.contains("xiaomi") ||
+            manufacturer.contains("oppo") ||
+            manufacturer.contains("vivo") ||
+            manufacturer.contains("realme") ||
+            manufacturer.contains("huawei") ||
+            manufacturer.contains("meizu") ||
+            manufacturer.contains("oneplus")
+}
+
 
 // Goodwy
 fun String.isLetter(): Boolean {

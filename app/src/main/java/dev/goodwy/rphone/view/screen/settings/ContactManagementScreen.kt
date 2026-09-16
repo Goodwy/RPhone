@@ -53,8 +53,6 @@ import com.ramcosta.composedestinations.generated.destinations.ContactVisibility
 import com.ramcosta.composedestinations.generated.destinations.PrivateContactsScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.goodwy.rphone.R
-import dev.goodwy.rphone.cardCornerBig
-import dev.goodwy.rphone.cardCornerSmall
 import dev.goodwy.rphone.controller.util.ContactUtils.getAccountIcon
 import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillAnimatedSection
@@ -65,6 +63,7 @@ import dev.goodwy.rphone.view.theme.customColors
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinActivityViewModel
+import kotlin.time.Duration.Companion.milliseconds
 
 data class StandardizeStats(
     val totalContacts: Int,
@@ -145,7 +144,7 @@ fun ContactManagementScreen(
     fun navigateBack() {
         isClosing = true
         scope.launch {
-            delay(280)
+            delay(280.milliseconds)
             navigator.navigateUp()
         }
     }
@@ -331,41 +330,6 @@ fun ContactManagementScreen(
 
                 item { SettingsBottomPadding() }
             }
-        }
-    }
-}
-
-@Composable
-fun DuplicateGroupCard(
-    group: List<Contact>,
-    onMerge: (Contact, List<Contact>) -> Unit
-) {
-    RillExpressiveCard {
-        group.forEachIndexed { index, contact ->
-            RillListItem(
-                headline = contact.displayName,
-                supporting = contact.phoneNumbers.joinToString(", "),
-                avatarName = contact.displayName,
-                photoUri = contact.photoUri,
-                onClick = { }
-            )
-        }
-
-        Button(
-            onClick = { onMerge(group.first(), group.drop(1)) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .offset(x = 0.dp, y = (-4).dp),
-            shape = RoundedCornerShape(
-                topStart = cardCornerSmall,
-                topEnd = cardCornerSmall,
-                bottomStart = cardCornerBig,
-                bottomEnd = cardCornerBig
-            )
-        ) {
-            Icon(Icons.Rounded.Merge, null)
-            Spacer(Modifier.width(8.dp))
-            Text("Merge duplicates")
         }
     }
 }

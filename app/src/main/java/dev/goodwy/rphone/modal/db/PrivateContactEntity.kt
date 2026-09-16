@@ -35,6 +35,7 @@ data class PrivateContactEntity(
     val photoUri: String? = null,
     val isFavorite: Boolean = false,
     val customRingtone: String? = null,
+    val isHidden: Boolean = false,
     @ColumnInfo(name = "display_name")
     val displayName: String = ""
 ) {
@@ -58,7 +59,8 @@ data class PrivateContactEntity(
             photoUri = photoUri,
             isFavorite = isFavorite,
             customRingtone = customRingtone,
-            isPrivate = true
+            isPrivate = true,
+            isHidden = isHidden,
         )
     }
 
@@ -83,6 +85,7 @@ data class PrivateContactEntity(
                 photoUri = contact.photoUri,
                 isFavorite = contact.isFavorite,
                 customRingtone = contact.customRingtone,
+                isHidden = contact.isHidden,
                 displayName = ""
             )
             return entity.copy(displayName = entity.calculateDisplayName())

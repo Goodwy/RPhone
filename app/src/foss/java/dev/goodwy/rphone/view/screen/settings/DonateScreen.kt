@@ -46,19 +46,11 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.goodwy.rphone.COFFEE_URL
 import dev.goodwy.rphone.DONATE_URL
-import dev.goodwy.rphone.cardCornerMedium
 import dev.goodwy.rphone.controller.util.openLink
 import dev.goodwy.rphone.controller.util.toast
 import org.koin.compose.koinInject
 import kotlin.math.cos
 import kotlin.math.sin
-
-data class Donate(
-    val headline: String,
-    val supporting: String? = null,
-    val trailing: String? = null,
-    val label: String? = null,
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Destination<RootGraph>
@@ -175,7 +167,7 @@ fun DonateScreen(navigator: DestinationsNavigator) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(cardCornerMedium),
+                    shape = MaterialTheme.shapes.large,
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainerLow
                     )
@@ -264,7 +256,7 @@ fun DonateScreen(navigator: DestinationsNavigator) {
 
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(cardCornerMedium),
+                    shape = MaterialTheme.shapes.large,
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainerLow
                     )

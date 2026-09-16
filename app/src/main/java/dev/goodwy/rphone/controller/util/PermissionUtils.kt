@@ -16,12 +16,10 @@ fun getDefaultDialerIntent(context: Context): Intent {
 }
 
 fun Context.isPackageInstalled(packageName: String?): Boolean {
-    if (packageName == null) return false
+    if (packageName.isNullOrBlank()) return false
     return try {
-        val packageManager = packageManager
-        val intent = packageManager.getLaunchIntentForPackage(packageName)
-        intent != null && packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).isNotEmpty()
-    } catch (e: Exception) {
+        packageManager.getLaunchIntentForPackage(packageName) != null
+    } catch (_: Exception) {
         false
     }
 }

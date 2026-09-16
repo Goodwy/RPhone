@@ -122,20 +122,33 @@
     <string name="hex_color_subtitle">Введите действительный 6-значный Hex код цвета</string>
     <string name="custom_font">Пользовательский шрифт</string>
     <string name="custom_font_subtitle">Выберите файл .ttf для использования шрифта в приложении</string>
+    <string name="font_size">Размер шрифта</string>
+    <string name="rounding_radius">Радиус скругления</string>
     <string name="visual_effects">Визуальные эффекты</string>
     <string name="not_supported_on_this_device">Не поддерживается на этом устройстве</string>
     <string name="not_supported_on_this_device_subtitle">Для работы эффектов Размытия и Жидкого Стекла требуется Android 12 или более поздней версии</string>
     <string name="material_liquid_you_glass">Эффект жидкого стекла</string>
-    <string name="material_liquid_you_glass_subtitle">Применить эффект жидкого стекла к панели навигации</string>
+    <string name="material_liquid_you_glass_subtitle">Применить эффект жидкого стекла</string>
     <string name="material_blur_effects">Эффекты размытия</string>
-    <string name="material_blur_effects_subtitle">Применить эффект размытия к панели навигации</string>
+    <string name="material_blur_effects_subtitle">Применить эффект размытия фона</string>
+    <string name="blur_intensity">Интенсивность размытия</string>
+    <string name="liquid_glass_elements">Элементы с эффектом жидкого стекла</string>
+    <string name="liquid_glass_elements_subtitle">Выберите, для каких элементов интерфейса следует применять эффект жидкого стекла</string>
+    <string name="blur_effect_elements">Элементы с эффектом размытия</string>
+    <string name="blur_effect_elements_subtitle">Выберите, для каких элементов интерфейса следует применять эффект размытия</string>
+    <string name="bottom_navigation_bar">Нижняя панель навигации</string>
+    <string name="liquid_glass_bottom_navigation_bar">Примени эффект жидкого стекла к нижней панели навигации</string>
+    <string name="blur_effect_bottom_navigation_bar">Применить эффект размытия к нижней панели навигации</string>
+    <string name="call_screen">Экран вызова</string>
+    <string name="liquid_glass_call_screen">Примени эффект жидкого стекла к экрану вызова</string>
+    <string name="blur_effect_call_screen">Применить эффект размытия к экрану вызова</string>
     <string name="scroll_animation">Анимация прокрутки</string>
     <string name="scroll_animation_device">Анимация плавного появления элементов списка при прокрутке</string>
     <string name="call_ui">Интерфейс вызова</string>
     <string name="incoming_call_ui">Интерфейс входящего вызова</string>
     <string name="incoming_call_ui_subtitle">Выберите способ ответа на входящие звонки</string>
     <string name="incoming_call_ui_default_swipe">Стандартный свайп</string>
-    <string name="incoming_call_ui_horizontal_swipe">Горизонтальный свайп</string>
+    <string name="incoming_call_ui_horizontal_swipe">Горизонтальный свайп (Google)</string>
     <string name="incoming_call_ui_buttons">Кнопки</string>
     <string name="incoming_call_ui_slide_to_answer">Горизонтальный свайп (iOS)</string>
     <string name="incoming_call_ui_vertical_swipe">Вертикальный свайп</string>
@@ -325,7 +338,14 @@
     <string name="private_contacts">Приватные контакты</string>
     <string name="private_contacts_subtitle">Управление зашифрованными локальными контактами</string>
 
+    <!-- Voicemail -->
+    <string name="settings_voicemail_title">Голосовая почта</string>
+
     <!-- Call -->
+    <string name="call_failed_airplane_mode">Невозможно совершить звонок, если включен режим «В самолете»</string>
+    <string name="call_failed_no_network">Ошибка вызова: сотовая сеть недоступна</string>
+    <string name="call_failed_restricted">Сбой вызова: вызов запрещен</string>
+    <string name="call_failed_generic">Вызов не может быть совершен</string>
     <string name="call">Вызов</string>
     <string name="incoming">Входящий</string>
     <string name="outgoing">Исходящий</string>

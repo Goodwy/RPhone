@@ -27,14 +27,12 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import dev.goodwy.rphone.cardCornerMedium
-import dev.goodwy.rphone.cardCornerSmall
+import dev.goodwy.rphone.cardCornerExtraSmall
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.modal.`interface`.ICallLogRepository
 import dev.goodwy.rphone.modal.`interface`.IContactsRepository
@@ -45,12 +43,10 @@ import dev.goodwy.rphone.view.components.RillExpressiveCard
 import dev.goodwy.rphone.view.components.RillListItem
 import dev.goodwy.rphone.view.components.RillSwitchListItem
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
-import dev.goodwy.rphone.view.theme.color_call_end
 import dev.goodwy.rphone.view.theme.customColors
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import dev.goodwy.rphone.R
 import dev.goodwy.rphone.view.components.Title
 import org.koin.compose.koinInject
 
@@ -127,10 +123,10 @@ fun SpamScreen(navigator: DestinationsNavigator) {
                             }
                         }
                     } else {
-                        Surface(shape = RoundedCornerShape(cardCornerMedium), color = Color.Transparent, modifier = Modifier.wrapContentSize()) {
+                        Surface(shape = MaterialTheme.shapes.large, color = Color.Transparent, modifier = Modifier.wrapContentSize()) {
                             LazyColumn(modifier = Modifier.heightIn(max = 340.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                                 itemsIndexed(blockedWithInfo) { index, (number, name, photoUri) ->
-                                    Surface(shape = RoundedCornerShape(cardCornerSmall), color = cardColor, modifier = Modifier.fillMaxWidth()) {
+                                    Surface(shape = RoundedCornerShape(cardCornerExtraSmall), color = cardColor, modifier = Modifier.fillMaxWidth()) {
                                         Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
                                             RillAvatar(name = name, photoUri = photoUri, modifier = Modifier.size(46.dp))
                                             Spacer(Modifier.width(12.dp))
@@ -294,11 +290,11 @@ fun SpamScreen(navigator: DestinationsNavigator) {
                                             style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                     }
                                 } else {
-                                    Surface(shape = RoundedCornerShape(cardCornerMedium), color = Color.Transparent, modifier = Modifier.wrapContentSize()) {
+                                    Surface(shape = MaterialTheme.shapes.large, color = Color.Transparent, modifier = Modifier.wrapContentSize()) {
                                         LazyColumn(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                                             items(filteredRecents, key = { it.first }) { (number, name, photoUri) ->
                                                 val alreadyBlocked = blockedContactsList.contains(number)
-                                                Surface(shape = RoundedCornerShape(cardCornerSmall), color = if (alreadyBlocked) MaterialTheme.colorScheme.errorContainer.copy(0.3f) else cardColor) {
+                                                Surface(shape = RoundedCornerShape(cardCornerExtraSmall), color = if (alreadyBlocked) MaterialTheme.colorScheme.errorContainer.copy(0.3f) else cardColor) {
                                                     Row(Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
                                                         RillAvatar(name = name, photoUri = photoUri, modifier = Modifier.size(38.dp))
                                                         Spacer(Modifier.width(10.dp))
@@ -327,11 +323,11 @@ fun SpamScreen(navigator: DestinationsNavigator) {
                                             style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                     }
                                 } else {
-                                    Surface(shape = RoundedCornerShape(cardCornerMedium), color = Color.Transparent, modifier = Modifier.wrapContentSize()) {
+                                    Surface(shape = MaterialTheme.shapes.large, color = Color.Transparent, modifier = Modifier.wrapContentSize()) {
                                         LazyColumn(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                                             items(filteredContacts, key = { it.first }) { (number, name, photoUri) ->
                                                 val alreadyBlocked = blockedContactsList.contains(number)
-                                                Surface(shape = RoundedCornerShape(cardCornerSmall), color = if (alreadyBlocked) MaterialTheme.colorScheme.errorContainer.copy(0.3f) else cardColor) {
+                                                Surface(shape = RoundedCornerShape(cardCornerExtraSmall), color = if (alreadyBlocked) MaterialTheme.colorScheme.errorContainer.copy(0.3f) else cardColor) {
                                                     Row(Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
                                                         RillAvatar(name = name, photoUri = photoUri, modifier = Modifier.size(38.dp))
                                                         Spacer(Modifier.width(10.dp))

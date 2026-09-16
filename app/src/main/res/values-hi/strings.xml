@@ -122,13 +122,26 @@
     <string name="hex_color_subtitle">एक वैध 6-अंकीय हेक्स कोड दर्ज करें</string>
     <string name="custom_font">कस्टम फ़ॉन्ट</string>
     <string name="custom_font_subtitle">ऐप में उपयोग के लिए .ttf फ़ाइल चुनें</string>
+    <string name="font_size">फ़ॉन्ट आकार</string>
+    <string name="rounding_radius">गोलाई त्रिज्या</string>
     <string name="visual_effects">दृश्य प्रभाव</string>
     <string name="not_supported_on_this_device">इस डिवाइस पर समर्थित नहीं</string>
     <string name="not_supported_on_this_device_subtitle">ब्लर और लिक्विड ग्लास के लिए Android 12 या उच्चतर आवश्यक है</string>
     <string name="material_liquid_you_glass">लिक्विड ग्लास Material You</string>
-    <string name="material_liquid_you_glass_subtitle">नेविगेशन पर तरल कांच का प्रभाव लागू करें</string>
+    <string name="material_liquid_you_glass_subtitle">लिक्विड ग्लास प्रभाव लागू करें</string>
     <string name="material_blur_effects">Material ब्लर प्रभाव</string>
-    <string name="material_blur_effects_subtitle">नेविगेशन पर पृष्ठभूमि ब्लर प्रभाव लागू करें</string>
+    <string name="material_blur_effects_subtitle">पृष्ठभूमि ब्लर प्रभाव लागू करें</string>
+    <string name="blur_intensity">ब्लर तीव्रता</string>
+    <string name="liquid_glass_elements">लिक्विड ग्लास तत्व</string>
+    <string name="liquid_glass_elements_subtitle">चुनें कि कौन से UI तत्व लिक्विड ग्लास प्रभाव का उपयोग करते हैं</string>
+    <string name="blur_effect_elements">ब्लर प्रभाव तत्व</string>
+    <string name="blur_effect_elements_subtitle">चुनें कि कौन से UI तत्व ब्लर प्रभाव का उपयोग करते हैं</string>
+    <string name="bottom_navigation_bar">निचली नेविगेशन बार</string>
+    <string name="liquid_glass_bottom_navigation_bar">निचली नेविगेशन बार पर लिक्विड ग्लास प्रभाव लागू करें</string>
+    <string name="blur_effect_bottom_navigation_bar">निचली नेविगेशन बार पर ब्लर प्रभाव लागू करें</string>
+    <string name="call_screen">कॉल स्क्रीन</string>
+    <string name="liquid_glass_call_screen">कॉल स्क्रीन पर लिक्विड ग्लास प्रभाव लागू करें</string>
+    <string name="blur_effect_call_screen">कॉल स्क्रीन पर ब्लर प्रभाव लागू करें</string>
     <string name="scroll_animation">स्क्रॉल एनीमेशन</string>
     <string name="scroll_animation_device">स्क्रॉल करते समय सूची आइटम के लिए फ़ेड-इन एनीमेशन</string>
     <string name="call_ui">कॉल UI</string>
@@ -325,7 +338,14 @@
     <string name="private_contacts">निजी संपर्क</string>
     <string name="private_contacts_subtitle">अपने एन्क्रिप्टेड स्थानीय संपर्क प्रबंधित करें</string>
 
+    <!-- Voicemail -->
+    <string name="settings_voicemail_title">वॉइसमेल</string>
+
     <!-- Call -->
+    <string name="call_failed_airplane_mode">एयरप्लेन मोड चालू होने पर कॉल नहीं किया जा सकता</string>
+    <string name="call_failed_no_network">कॉल विफल: सेलुलर नेटवर्क अनुपलब्ध</string>
+    <string name="call_failed_restricted">कॉल विफल: कॉल प्रतिबंधित है</string>
+    <string name="call_failed_generic">कॉल पूरी नहीं हो सकी</string>
     <string name="call">कॉल</string>
     <string name="incoming">आने वाली</string>
     <string name="outgoing">जाने वाली</string>

@@ -122,13 +122,26 @@
     <string name="hex_color_subtitle">Wprowadź prawidłowy 6-cyfrowy kod hex</string>
     <string name="custom_font">Niestandardowa czcionka</string>
     <string name="custom_font_subtitle">Wybierz plik .ttf do użycia w aplikacji</string>
+    <string name="font_size">Rozmiar czcionki</string>
+    <string name="rounding_radius">Promień zaokrąglenia</string>
     <string name="visual_effects">Efekty wizualne</string>
     <string name="not_supported_on_this_device">Nieobsługiwane na tym urządzeniu</string>
     <string name="not_supported_on_this_device_subtitle">Rozmycie i Liquid Glass wymagają Androida 12 lub nowszego</string>
     <string name="material_liquid_you_glass">Liquid Glass Material You</string>
-    <string name="material_liquid_you_glass_subtitle">Zastosuj efekt płynnego szkła do nawigacji</string>
+    <string name="material_liquid_you_glass_subtitle">Zastosuj efekt płynnego szkła</string>
     <string name="material_blur_effects">Efekty rozmycia Material</string>
-    <string name="material_blur_effects_subtitle">Zastosuj efekt rozmycia tła do nawigacji</string>
+    <string name="material_blur_effects_subtitle">Zastosuj efekt rozmycia tła</string>
+    <string name="blur_intensity">Intensywność rozmycia</string>
+    <string name="liquid_glass_elements">Elementy płynnego szkła</string>
+    <string name="liquid_glass_elements_subtitle">Wybierz, które elementy interfejsu używają efektu płynnego szkła</string>
+    <string name="blur_effect_elements">Elementy z efektem rozmycia</string>
+    <string name="blur_effect_elements_subtitle">Wybierz, które elementy interfejsu używają efektu rozmycia</string>
+    <string name="bottom_navigation_bar">Dolny pasek nawigacji</string>
+    <string name="liquid_glass_bottom_navigation_bar">Zastosuj efekt płynnego szkła do dolnego paska nawigacji</string>
+    <string name="blur_effect_bottom_navigation_bar">Zastosuj efekt rozmycia do dolnego paska nawigacji</string>
+    <string name="call_screen">Ekran połączenia</string>
+    <string name="liquid_glass_call_screen">Zastosuj efekt płynnego szkła do ekranu połączenia</string>
+    <string name="blur_effect_call_screen">Zastosuj efekt rozmycia do ekranu połączenia</string>
     <string name="scroll_animation">Animacja przewijania</string>
     <string name="scroll_animation_device">Animacja pojawiania się elementów listy podczas przewijania</string>
     <string name="call_ui">Interfejs połączenia</string>
@@ -325,7 +338,14 @@
     <string name="private_contacts">Kontakty prywatne</string>
     <string name="private_contacts_subtitle">Zarządzaj swoimi zaszyfrowanymi lokalnymi kontaktami</string>
 
+    <!-- Voicemail -->
+    <string name="settings_voicemail_title">Poczta głosowa</string>
+
     <!-- Call -->
+    <string name="call_failed_airplane_mode">Nie można wykonać połączenia, gdy tryb samolotowy jest włączony</string>
+    <string name="call_failed_no_network">Połączenie nieudane: sieć komórkowa niedostępna</string>
+    <string name="call_failed_restricted">Połączenie nieudane: połączenie jest ograniczone</string>
+    <string name="call_failed_generic">Nie udało się ukończyć połączenia</string>
     <string name="call">Połączenie</string>
     <string name="incoming">Przychodzące</string>
     <string name="outgoing">Wychodzące</string>

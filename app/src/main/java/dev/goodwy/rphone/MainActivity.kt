@@ -305,7 +305,7 @@ class MainActivity : FragmentActivity() {
                                             DialPadScreenDestination.route
                                         )
 
-                                    route.contains(RecentScreenDestination.route) ->
+                                    else ->
                                         prefs.setString(
                                             PreferenceManager.KEY_LAST_OPENED_TAB,
                                             RecentScreenDestination.route

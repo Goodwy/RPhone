@@ -52,7 +52,6 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.DonateScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import dev.goodwy.rphone.cardCornerMedium
 import dev.goodwy.rphone.controller.PurchaseHelper
 import dev.goodwy.rphone.controller.util.CallBackgroundStore
 import dev.goodwy.rphone.view.components.SupportProjectItem
@@ -62,6 +61,7 @@ import dev.goodwy.rphone.view.theme.customColors
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Destination<RootGraph>
@@ -268,7 +268,7 @@ fun CallerUIScreen(navigator: DestinationsNavigator) {
                                             enabledShake = true
                                             showSnackbar = true
                                             scope.launch {
-                                                delay(3000)
+                                                delay(3000.milliseconds)
                                                 showSnackbar = false
                                             }
                                         }
@@ -486,7 +486,7 @@ fun CallerUIScreen(navigator: DestinationsNavigator) {
             ) {
                 Snackbar(
                     modifier = Modifier.navigationBarsPadding().padding(24.dp),
-                    shape = RoundedCornerShape(cardCornerMedium),
+                    shape = MaterialTheme.shapes.large,
                     containerColor = MaterialTheme.colorScheme.surfaceVariant,
                     action = {
                         TextButton(

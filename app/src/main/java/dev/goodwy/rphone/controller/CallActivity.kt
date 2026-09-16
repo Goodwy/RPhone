@@ -1,6 +1,7 @@
 package dev.goodwy.rphone.controller
 
 import android.app.KeyguardManager
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
@@ -8,6 +9,8 @@ import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.telecom.Call
+import android.telecom.TelecomManager
+import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.WindowManager
 import androidx.activity.SystemBarStyle
@@ -21,6 +24,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,6 +39,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.CallBackgroundStore
 import dev.goodwy.rphone.controller.util.PreferenceManager
+import dev.goodwy.rphone.liquidglass.LocalLiquidGlassBackdrop
+import dev.goodwy.rphone.liquidglass.backdrops.rememberLayerBackdrop
 import dev.goodwy.rphone.modal.`interface`.CallSession
 import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 import dev.goodwy.rphone.view.screen.ExpressiveCallScreen
@@ -78,10 +84,21 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
 
         CallBackgroundStore.attach(preferenceManager)
 
-        if (callViewModel.allCalls.value.none { it.state != Call.STATE_DISCONNECTED } &&
+        val telecomManager = getSystemService(Context.TELECOM_SERVICE) as? TelecomManager
+        val isTelecomInCall = try {
+            telecomManager?.isInCall == true
+        } catch (e: SecurityException) {
+            false
+        }
+
+        if (!isTelecomInCall &&
+            callViewModel.allCalls.value.none { it.state != Call.STATE_DISCONNECTED } &&
             callViewModel.currentCallSession.value == null
         ) {
-            finish()
+            setShowWhenLocked(false)
+            setTurnScreenOn(false)
+            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            finishAndRemoveTask()
             return
         }
 
@@ -101,7 +118,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
                 val session by callViewModel.currentCallSession.collectAsStateWithLifecycle()
                 val audioState by callViewModel.audioState.collectAsStateWithLifecycle()
                 val settingsState by preferenceManager.settingsChanged.collectAsStateWithLifecycle()
-                val callerMetadata by callViewModel.callerMetadata.collectAsStateWithLifecycle()
+//                val callerMetadata by callViewModel.callerMetadata.collectAsStateWithLifecycle()
 
                 var retainedSession by remember { mutableStateOf<CallSession?>(null) }
                 LaunchedEffect(session) {
@@ -242,17 +259,21 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
                                 targetCall.details?.connectTimeMillis ?: 0L
                             }
 
-                            ExpressiveCallScreen(
-                                call = targetCall,
-                                callState = targetState,
-                                contactName = targetIdentity.name,
-                                phoneNumber = targetIdentity.number,
-                                photoUri = targetIdentity.photoUri,
-                                audioState = audioState,
-                                initialConnectTime = connectTime,
-                                backgroundUri = targetIdentity.backgroundUri,
-                                skipIncomingScreen = answeredFromNotification
-                            )
+                            val liquidGlassBackdrop = rememberLayerBackdrop()
+                            CompositionLocalProvider(LocalLiquidGlassBackdrop provides liquidGlassBackdrop) {
+                                ExpressiveCallScreen(
+                                    call = targetCall,
+                                    callState = targetState,
+                                    contactName = targetIdentity.name,
+                                    phoneNumber = targetIdentity.number,
+                                    photoUri = targetIdentity.photoUri,
+                                    audioState = audioState,
+                                    initialConnectTime = connectTime,
+                                    backgroundUri = targetIdentity.backgroundUri,
+                                    skipIncomingScreen = answeredFromNotification,
+                                    liquidGlassBackdrop = liquidGlassBackdrop
+                                )
+                            }
                         }
                     }
                 }
@@ -356,6 +377,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
 
     override fun onResume() {
         super.onResume()
+        turnScreenOnAndShowWhileLocked()
         isInForeground.value = true
     }
 
@@ -376,6 +398,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
 
     override fun onDestroy() {
         super.onDestroy()
+        callViewModel.setIsActivityVisible(false)
         releaseProximityLock()
     }
 
@@ -397,19 +420,34 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
 
         setShowWhenLocked(false)
         setTurnScreenOn(false)
-        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        @Suppress("DEPRECATION")
+        window.clearFlags(
+            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+                    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
+                    WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
+        )
         finishAndRemoveTask()
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        turnScreenOnAndShowWhileLocked()
     }
 
     private fun turnScreenOnAndShowWhileLocked() {
         setShowWhenLocked(true)
         setTurnScreenOn(true)
-        if (!keyguardDismissRequested) {
-            keyguardDismissRequested = true
-            val keyguardManager = getSystemService(KEYGUARD_SERVICE) as KeyguardManager
-            keyguardManager.requestDismissKeyguard(this, null)
-        }
-        window.addFlags(WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON)
+        @Suppress("DEPRECATION")
+        window.addFlags(
+            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+                    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
+                    WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
+                    WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON
+        )
+        val keyguardManager = getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
+        keyguardManager?.requestDismissKeyguard(this, null)
     }
 
     override fun onStart() {
@@ -419,7 +457,9 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
 
     override fun onStop() {
         super.onStop()
-        callViewModel.setIsActivityVisible(false)
+        if (proximityWakeLock?.isHeld != true) {
+            callViewModel.setIsActivityVisible(false)
+        }
     }
 
     private fun acquireProximityLock() {
@@ -429,13 +469,21 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
                 route == android.telecom.CallAudioState.ROUTE_WIRED_HEADSET
 
         if (!isHandsFree && preferenceManager.getBoolean(PreferenceManager.KEY_PROXIMITY_SENSOR, true)) {
-            proximityWakeLock?.let { if (!it.isHeld) it.acquire(60*60*1000L /* 1 hour */) }
+            try {
+                proximityWakeLock?.let { if (!it.isHeld) it.acquire(60*60*1000L /* 1 hour */) }
+            } catch (e: Exception) {
+                Log.e("CallActivity", "Failed to acquire proximity lock", e)
+            }
         } else {
             releaseProximityLock()
         }
     }
 
     private fun releaseProximityLock() {
-        proximityWakeLock?.let { if (it.isHeld) it.release() }
+        try {
+            proximityWakeLock?.let { if (it.isHeld) it.release() }
+        } catch (e: Exception) {
+            Log.e("CallActivity", "Failed to release proximity lock", e)
+        }
     }
 }

@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
-import dev.goodwy.rphone.cardCornerSmall
+import dev.goodwy.rphone.cardCornerExtraSmall
 import dev.goodwy.rphone.R
 
 @Composable
@@ -102,7 +102,7 @@ fun SimPickerDialog(
 
                                 Surface(
                                     onClick = { onSimSelected(accountHandle) },
-                                    shape = RoundedCornerShape(cardCornerSmall),
+                                    shape = RoundedCornerShape(cardCornerExtraSmall),
                                     color = MaterialTheme.colorScheme.surfaceContainerHigh,
                                     modifier = Modifier.fillMaxWidth()
                                 ) {

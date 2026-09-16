@@ -283,11 +283,17 @@ fun Rill4Theme(
         darkTheme = darkTheme
     )
 
+    val cardRoundness = remember(settingsState) {
+        prefs.getInt(PreferenceManager.KEY_CARD_ROUNDNESS, RillShapeDefaults.DefaultRoundness).coerceAtLeast(4)
+    }
+    val shapes = remember(cardRoundness) { rillShapes(cardRoundness) }
+
     CompositionLocalProvider(
         LocalCustomColors provides customColors
     ) {
         MaterialTheme(
             colorScheme = colorScheme,
+            shapes = shapes,
             typography = typography,
             content = content
         )

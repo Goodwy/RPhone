@@ -37,6 +37,7 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.repeatable
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
@@ -58,12 +59,12 @@ import androidx.compose.ui.res.vectorResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.BuildConfig
 import dev.goodwy.rphone.R
-import dev.goodwy.rphone.cardCornerBig
-import dev.goodwy.rphone.cardCornerSmall
+import dev.goodwy.rphone.cardCornerExtraSmall
 import dev.goodwy.rphone.cardSpacedBy
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import dev.goodwy.rphone.view.theme.MyColors.cardColorSelected
 import dev.goodwy.rphone.view.theme.customColors
+import kotlin.math.roundToInt
 
 // ─── App Haptics Helper ────────────────────────────────────────────────────────
 
@@ -276,7 +277,7 @@ fun RillExpressiveCard(
     icon: ImageVector? = null,
     trailingIcon: ImageVector? = null,
     onTrailingIconClick: (() -> Unit)? = null,
-    shape: Shape = RoundedCornerShape(cardCornerBig),
+    shape: Shape = MaterialTheme.shapes.extraLarge,
     containerColor: Color = MaterialTheme.colorScheme.surfaceVariant, //cardColor,
     content: @Composable ColumnScope.() -> Unit
 ) {
@@ -297,7 +298,7 @@ fun RillExpressiveCard(
                         .fillMaxSize()
                         .background(
                             color = containerColor,
-                            shape = RoundedCornerShape(cardCornerSmall)
+                            shape = RoundedCornerShape(cardCornerExtraSmall)
                         )
                         .padding(horizontal = 24.dp).padding(top = 16.dp, bottom = 14.dp)
                 ) {
@@ -727,7 +728,7 @@ fun CallLogListItemSimple(
 
     Surface(
         color = if (selected) cardColorSelected else cardColor,
-        shape = RoundedCornerShape(cardCornerSmall),
+        shape = RoundedCornerShape(cardCornerExtraSmall),
         modifier = modifier
             .fillMaxWidth()
             .scale(scale),
@@ -843,7 +844,7 @@ fun RillListItem(
 
     Surface(
         color = cardColor,
-        shape = RoundedCornerShape(cardCornerSmall),
+        shape = RoundedCornerShape(cardCornerExtraSmall),
         modifier = modifier
             .fillMaxWidth()
             .scale(scale),
@@ -983,7 +984,7 @@ fun RillSwitchListItem(
             }
             onCheckedChange(!checked)
         },
-        shape = RoundedCornerShape(cardCornerSmall),
+        shape = RoundedCornerShape(cardCornerExtraSmall),
         color = cardColor, //Color.Transparent,
         modifier = modifier
             .fillMaxWidth()
@@ -1078,7 +1079,7 @@ fun RillSelectListItem(
             }
             showSelectionScreen = true
         },
-        shape = RoundedCornerShape(cardCornerSmall),
+        shape = RoundedCornerShape(cardCornerExtraSmall),
         color = cardColor,
         modifier = modifier
             .fillMaxWidth()
@@ -1147,6 +1148,85 @@ fun RillSelectListItem(
 }
 
 @Composable
+fun RillSliderListItem(
+    headline: String,
+    supporting: String,
+    leadingIcon: ImageVector? = null,
+    iconContainerColor: Color? = null,
+    iconBgContainerColor: Color? = null,
+    value: Float,
+    valueRange: ClosedFloatingPointRange<Float>,
+    steps: Int,
+    onValueChange: (Float) -> Unit,
+    onValueChangeFinished: () -> Unit,
+    onValueClick: ((Float) -> Unit)? = null,
+    modifier: Modifier = Modifier,
+    modifierLeadingIcon: Modifier = Modifier,
+) {
+    Surface(
+        shape = RoundedCornerShape(cardCornerExtraSmall),
+        color = cardColor, //Color.Transparent,
+        modifier = modifier
+            .fillMaxWidth(),
+        shadowElevation = 0.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 16.dp,)
+                .padding(top = 10.dp, bottom = 8.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (leadingIcon != null) {
+                RillIconBox(
+                    icon = leadingIcon,
+                    iconContainerColor = iconContainerColor,
+                    iconBgContainerColor = iconBgContainerColor,
+                    modifier = modifierLeadingIcon
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+            }
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Row {
+                    Text(
+                        text = headline,
+                        style = MaterialTheme.typography.bodyLarge,
+                        lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
+//                    fontWeight = FontWeight.SemiBold
+                        modifier = Modifier.weight(1f)
+                    )
+                    Text(
+                        text = supporting,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                        lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
+                        modifier = Modifier
+                            .then(
+                                if (onValueClick != null) Modifier.clickable(
+                                    indication = ripple(bounded = false, radius = 32.dp),
+                                    interactionSource = null,
+                                ) { onValueClick(value) } else Modifier
+                            )
+                    )
+                }
+                Slider(
+                    value = value,
+                    onValueChange = onValueChange,
+                    valueRange = valueRange,
+                    steps = steps,
+                    onValueChangeFinished = onValueChangeFinished,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    }
+}
+
+@Composable
 fun RillFilterChip(
     label: String,
     selected: Boolean,
@@ -1182,7 +1262,7 @@ fun RillFilterChip(
                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
             )
         },
-        shape = RoundedCornerShape(12.dp),
+        shape = MaterialTheme.shapes.largeIncreased,
         colors = FilterChipDefaults.filterChipColors(
             containerColor = containerColor,
             labelColor = labelColor,
@@ -1282,7 +1362,7 @@ fun SupportProjectItem(
 
     Surface(
         color = MaterialTheme.colorScheme.customColors.colorPurple.copy(0.9f), //cardColor,
-        shape = RoundedCornerShape(cardCornerBig),
+        shape = MaterialTheme.shapes.extraLarge,
         modifier = modifier
             .fillMaxWidth()
             .scale(scale),

@@ -22,10 +22,12 @@ import dev.goodwy.rphone.modal.db.PrivateContactDao
 import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 import androidx.core.net.toUri
 import androidx.core.graphics.scale
+import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.CallBackgroundStore
 import dev.goodwy.rphone.controller.util.ContactDumpUtils
 import dev.goodwy.rphone.controller.util.areNumbersEqual
 import dev.goodwy.rphone.controller.util.deduplicateNumbers
+import dev.goodwy.rphone.controller.util.isVoicemailNumber
 import dev.goodwy.rphone.device_only
 import dev.goodwy.rphone.modal.db.PrivateContactEntity
 import dev.goodwy.rphone.private_only
@@ -34,6 +36,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.delay
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlin.time.Duration.Companion.milliseconds
 
 class ContactsRepository(
     private val context: Context,
@@ -43,14 +46,16 @@ class ContactsRepository(
     private val contentResolver: ContentResolver = context.contentResolver
 //    private val preferenceManager = PreferenceManager(context)
 
-    override suspend fun getContacts(includePrivate: Boolean): List<Contact> = withContext(Dispatchers.IO) {
+    override suspend fun getContacts(includePrivate: Boolean, includeHidden: Boolean): List<Contact> = withContext(Dispatchers.IO) {
         val contactsMap = mutableMapOf<String, Contact>()
         val rawContactsMap = mutableMapOf<String, MutableList<String>>()
 
         if (includePrivate) {
             privateContactDao.getAll().forEach {
                 val contact = it.toContact()
-                contactsMap[contact.id] = contact
+                if (!contact.isHidden || includeHidden) {
+                    contactsMap[contact.id] = contact
+                }
             }
         }
 
@@ -104,9 +109,7 @@ class ContactsRepository(
             CommonDataKinds.StructuredName.FAMILY_NAME,
             CommonDataKinds.StructuredName.SUFFIX,
             CommonDataKinds.Organization.COMPANY,
-            CommonDataKinds.Organization.TITLE,
-            ContactsContract.RawContacts.ACCOUNT_NAME,
-            ContactsContract.RawContacts.ACCOUNT_TYPE
+            CommonDataKinds.Organization.TITLE
         )
 
         try {
@@ -126,24 +129,21 @@ class ContactsRepository(
                 val isPrimaryIdx = cursor.getColumnIndex(ContactsContract.Data.IS_PRIMARY)
                 val starredIdx = cursor.getColumnIndex(ContactsContract.Data.STARRED)
 //                val rawIdIdx = cursor.getColumnIndex(ContactsContract.Data.RAW_CONTACT_ID)
-                val accountNameIdx = cursor.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_NAME)
-                val accountTypeIdx = cursor.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_TYPE)
 
                 while (cursor.moveToNext()) {
                     val id = cursor.getString(idIdx) ?: continue
                     val mimeType = cursor.getString(mimeIdx)
                     val data1 = cursor.getString(data1Idx) ?: continue
                     val isStarred = cursor.getInt(starredIdx) == 1
-                    val accountName = cursor.getString(accountNameIdx)
-                    val accountType = cursor.getString(accountTypeIdx)
 
                     val contact = contactsMap.getOrPut(id) {
+                        val (accName, accType) = getAccountInfo(id)
                         Contact(
                             id = id,
                             photoUri = cursor.getString(photoIdx),
                             isFavorite = isStarred,
-                            accountName = accountName,
-                            accountType = accountType,
+                            accountName = accName,
+                            accountType = accType,
                             rawContactIds = rawContactsMap[id] ?: emptyList(),
                             hasMultipleSources = (rawContactsMap[id]?.size ?: 0) > 1
                         )
@@ -229,7 +229,7 @@ class ContactsRepository(
                     }
                 }
             }
-        } catch (e: SecurityException) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
 
@@ -255,7 +255,7 @@ class ContactsRepository(
                 if (cursor.moveToFirst()) resolved = cursor.getString(0)
             }
             resolved
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }
@@ -289,9 +289,7 @@ class ContactsRepository(
             CommonDataKinds.StructuredName.FAMILY_NAME,
             CommonDataKinds.StructuredName.SUFFIX,
             CommonDataKinds.Organization.COMPANY,
-            CommonDataKinds.Organization.TITLE,
-            ContactsContract.RawContacts.ACCOUNT_NAME,
-            ContactsContract.RawContacts.ACCOUNT_TYPE
+            CommonDataKinds.Organization.TITLE
         )
 
         var contact: Contact? = null
@@ -313,8 +311,6 @@ class ContactsRepository(
                 val isPrimaryIdx = cursor.getColumnIndex(ContactsContract.Data.IS_PRIMARY)
                 val starredIdx = cursor.getColumnIndex(ContactsContract.Data.STARRED)
                 val ringtoneIdx = cursor.getColumnIndex(ContactsContract.Data.CUSTOM_RINGTONE)
-                val accountNameIdx = cursor.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_NAME)
-                val accountTypeIdx = cursor.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_TYPE)
 
                 while (cursor.moveToNext()) {
                     val id = cursor.getString(idIdx) ?: continue
@@ -322,17 +318,18 @@ class ContactsRepository(
                     val data1 = cursor.getString(data1Idx) ?: continue
                     val isStarred = cursor.getInt(starredIdx) == 1
                     val ringtone = cursor.getString(ringtoneIdx)
-                    val accountName = cursor.getString(accountNameIdx)
-                    val accountType = cursor.getString(accountTypeIdx)
 
-                    val currentContact = contact ?: Contact(
-                        id = id,
-                        photoUri = cursor.getString(photoIdx),
-                        isFavorite = isStarred,
-                        customRingtone = ringtone,
-                        accountName = accountName,
-                        accountType = accountType
-                    )
+                    val currentContact = contact ?: run {
+                        val (accName, accType) = getAccountInfo(resolvedId)
+                        Contact(
+                            id = id,
+                            photoUri = cursor.getString(photoIdx),
+                            isFavorite = isStarred,
+                            customRingtone = ringtone,
+                            accountName = accName,
+                            accountType = accType
+                        )
+                    }
 
                     contact = when (mimeType) {
                         CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE -> {
@@ -532,6 +529,29 @@ class ContactsRepository(
 
     private fun getRawContactId(contactId: String): String? {
         return getRawContactIds(contactId).firstOrNull()
+    }
+
+    private fun getAccountInfo(contactId: String): Pair<String?, String?> {
+        try {
+            contentResolver.query(
+                ContactsContract.RawContacts.CONTENT_URI,
+                arrayOf(ContactsContract.RawContacts.ACCOUNT_NAME, ContactsContract.RawContacts.ACCOUNT_TYPE),
+                "${ContactsContract.RawContacts.CONTACT_ID} = ?",
+                arrayOf(contactId),
+                null
+            )?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val nameIdx = cursor.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_NAME)
+                    val typeIdx = cursor.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_TYPE)
+                    val name = if (nameIdx != -1) cursor.getString(nameIdx) else null
+                    val type = if (typeIdx != -1) cursor.getString(typeIdx) else null
+                    return Pair(name, type)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return Pair(null, null)
     }
 
     override suspend fun saveContact(contact: Contact) = withContext(Dispatchers.IO) {
@@ -903,7 +923,7 @@ class ContactsRepository(
     private suspend fun clearCallBackground(contactId: String) {
         val numbers: List<String> = try {
             getContactById(contactId)?.phoneNumbers ?: emptyList()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             emptyList()
         }
         CallBackgroundStore.clearBlocking(context, contactId, numbers)
@@ -954,7 +974,11 @@ class ContactsRepository(
         Unit
     }
 
-    override suspend fun moveContacts(contactIds: List<String>, accountName: String?, accountType: String?): Map<String, String> = withContext(Dispatchers.IO) {
+    override suspend fun moveContacts(
+        contactIds: List<String>,
+        accountName: String?,
+        accountType: String?
+    ): Map<String, String> = withContext(Dispatchers.IO) {
         val idMapping = mutableMapOf<String, String>()
         if (contactIds.isEmpty()) return@withContext idMapping
 
@@ -976,7 +1000,7 @@ class ContactsRepository(
                     saveContact(publicContact)
                     deleteContact(id)
 
-                    // Ищем новый ID для приватного контакта
+                    // We're looking for a new ID for a private contact
                     val newId = contact.phoneNumbers.firstNotNullOfOrNull { number ->
                         getContactByNumber(number)?.id?.takeIf { it.isNotBlank() }
                     }
@@ -1013,7 +1037,7 @@ class ContactsRepository(
             }
 
             // Give the Android system time to aggregate (recreate) the contact
-            delay(300)
+            delay(300.milliseconds)
 
             // We're looking for new IDs for public contacts
             publicIds.forEach { oldId ->
@@ -1120,7 +1144,16 @@ class ContactsRepository(
     }
 
     override suspend fun getContactByNumber(number: String): Contact? = withContext(Dispatchers.IO) {
-        // Check private contacts first
+//        if (isVoicemailNumber(context, number)) {
+//            return@withContext Contact(
+//                id = "voicemail",
+//                givenName = context.getString(R.string.settings_voicemail_title),
+//                photoUri = "voicemail://icon",
+//                phoneNumbers = listOf(number),
+//                phoneDetails = listOf(ContactPhoneDetail(7, null, number))
+//            )
+//        }
+
         privateContactDao.getAll().forEach {
             val contact = it.toContact()
             if (contact.phoneNumbers.any { num -> areNumbersEqual(num, number) }) {
@@ -1824,6 +1857,32 @@ class ContactsRepository(
         }
     }
 
+    override suspend fun setContactHidden(contactId: String, isHidden: Boolean) = withContext(Dispatchers.IO) {
+        if (contactId.startsWith("p")) {
+            val id = contactId.substring(1).toLongOrNull() ?: return@withContext
+            privateContactDao.setHidden(id, isHidden)
+        }
+    }
+
+    override suspend fun getHiddenNumbers(): List<String> = withContext(Dispatchers.IO) {
+        return@withContext try {
+            privateContactDao.getAll()
+                .filter { it.isHidden }
+                .flatMap { entity ->
+                    runCatching { Json.decodeFromString<List<String>>(entity.phoneNumbersJson) }
+                        .getOrDefault(emptyList())
+                }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    override suspend fun isNumberHidden(number: String): Boolean = withContext(Dispatchers.IO) {
+        if (number.isBlank()) return@withContext false
+        val clean = number.replace(" ", "")
+        return@withContext getHiddenNumbers().any { areNumbersEqual(it, clean) }
+    }
+
     // Goodwy
     data class ContactSource(
         val accountName: String?,
@@ -1941,10 +2000,10 @@ class ContactsRepository(
 
         val ops = ArrayList<ContentProviderOperation>()
 
-        for (i in 0 until rawIds.size) {
+        for ((i, element) in rawIds.withIndex()) {
             for (j in i + 1 until rawIds.size) {
-                val id1 = minOf(rawIds[i], rawIds[j])
-                val id2 = maxOf(rawIds[i], rawIds[j])
+                val id1 = minOf(element, rawIds[j])
+                val id2 = maxOf(element, rawIds[j])
 
                 ops.add(
                     ContentProviderOperation.newUpdate(ContactsContract.AggregationExceptions.CONTENT_URI)
@@ -1984,8 +2043,6 @@ class ContactsRepository(
             CommonDataKinds.StructuredName.SUFFIX,
             CommonDataKinds.Organization.COMPANY,
             CommonDataKinds.Organization.TITLE,
-            ContactsContract.RawContacts.ACCOUNT_NAME,
-            ContactsContract.RawContacts.ACCOUNT_TYPE,
             ContactsContract.Data.PHOTO_ID
         )
 
@@ -2009,8 +2066,6 @@ class ContactsRepository(
                 val data3Idx = cursor.getColumnIndex(ContactsContract.Data.DATA3)
                 val isPrimaryIdx = cursor.getColumnIndex(ContactsContract.Data.IS_PRIMARY)
                 val starredIdx = cursor.getColumnIndex(ContactsContract.Data.STARRED)
-                val accountNameIdx = cursor.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_NAME)
-                val accountTypeIdx = cursor.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_TYPE)
 
                 while (cursor.moveToNext()) {
                     val id = cursor.getString(idIdx)
@@ -2018,8 +2073,17 @@ class ContactsRepository(
                     val mimeType = cursor.getString(mimeIdx)
                     val data1 = cursor.getString(data1Idx) ?: continue
                     val isStarred = cursor.getInt(starredIdx) == 1
-                    val accountName = cursor.getString(accountNameIdx)
-                    val accountType = cursor.getString(accountTypeIdx)
+
+                    val accountName: String?
+                    val accountType: String?
+                    if (contact == null) {
+                        val (accName, accType) = getAccountInfo(rawContactId)
+                        accountName = accName
+                        accountType = accType
+                    } else {
+                        accountName = contact.accountName
+                        accountType = contact.accountType
+                    }
 
                     if (mimeType == CommonDataKinds.Photo.CONTENT_ITEM_TYPE) {
                         photoUri = cursor.getString(photoIdx)
@@ -2391,7 +2455,7 @@ class ContactsRepository(
         try {
             contentResolver.applyBatch(ContactsContract.AUTHORITY, ops)
 
-            delay(300)
+            delay(300.milliseconds)
             val afterRawIds = if (contact.id.isNotEmpty() && !contact.id.startsWith("p")) {
                 getRawContactIds(contact.id).map { it.toLong() }
             } else {
@@ -2406,11 +2470,10 @@ class ContactsRepository(
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        Unit
     }
 
     // A helper method for updating or inserting data
-    private suspend fun updateOrInsertData(
+    private fun updateOrInsertData(
         ops: ArrayList<ContentProviderOperation>,
         rawContactId: String,
         mimeType: String,
@@ -2512,10 +2575,10 @@ class ContactsRepository(
         val primaryId = sortedIds.first()
 
         // First, delete the old rules
-        for (i in 0 until sortedIds.size) {
+        for ((i, element) in sortedIds.withIndex()) {
             for (j in i + 1 until sortedIds.size) {
-                val id1 = minOf(sortedIds[i], sortedIds[j])
-                val id2 = maxOf(sortedIds[i], sortedIds[j])
+                val id1 = minOf(element, sortedIds[j])
+                val id2 = maxOf(element, sortedIds[j])
 
                 ops.add(
                     ContentProviderOperation.newDelete(ContactsContract.AggregationExceptions.CONTENT_URI)

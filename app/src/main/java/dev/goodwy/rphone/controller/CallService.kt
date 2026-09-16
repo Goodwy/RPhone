@@ -11,9 +11,11 @@ import android.telecom.CallAudioState
 import android.telecom.DisconnectCause
 import android.telecom.InCallService
 import android.telecom.TelecomManager
+import android.widget.Toast
 import androidx.core.net.toUri
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.PreferenceManager
+import dev.goodwy.rphone.controller.util.toast
 import dev.goodwy.rphone.data.manager.CallStateManager
 import dev.goodwy.rphone.modal.`interface`.CallSession
 import dev.goodwy.rphone.modal.`interface`.ICallRepository
@@ -164,6 +166,24 @@ class CallService : InCallService() {
         // Need to create a Receiver (android.telecom.action.SHOW_MISSED_CALLS_NOTIFICATION) to prevent the system notification from being duplicated
         val wasNeverConnected = call.details.connectTimeMillis == 0L
         val isIncoming = call.details.callDirection == Call.Details.DIRECTION_INCOMING
+        val isOutgoing = call.details.callDirection == Call.Details.DIRECTION_OUTGOING
+
+        if (isOutgoing && wasNeverConnected) {
+            val failMessage = when {
+                dev.goodwy.rphone.controller.util.isAirplaneModeOn(this) ->
+                    getString(R.string.call_failed_airplane_mode)
+                cause?.code == DisconnectCause.RESTRICTED ->
+                    getString(R.string.call_failed_restricted)
+                cause?.code == DisconnectCause.ERROR ->
+                    cause.description?.toString()?.takeIf { it.isNotBlank() } ?: getString(R.string.call_failed_generic)
+                else -> null
+            }
+            if (failMessage != null) {
+                serviceScope.launch(Dispatchers.Main) {
+                    toast(failMessage, Toast.LENGTH_LONG)
+                }
+            }
+        }
 
         if (isIncoming && wasNeverConnected && (cause?.code == DisconnectCause.MISSED || cause?.code == DisconnectCause.REMOTE || cause?.code == DisconnectCause.REJECTED)) {
             serviceScope.launch {

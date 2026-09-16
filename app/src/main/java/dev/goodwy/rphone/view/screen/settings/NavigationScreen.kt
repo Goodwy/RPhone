@@ -494,7 +494,7 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
 //                }
 //            }
 
-            item { SettingsBottomPadding() }
+            item { SettingsBottomPadding(120.dp) }
         }
     }
 }

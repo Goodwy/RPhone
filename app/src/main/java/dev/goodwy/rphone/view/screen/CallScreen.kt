@@ -1,10 +1,11 @@
 package dev.goodwy.rphone.view.screen
 
-import android.content.Context
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
+import android.net.Uri
+import android.os.Build
 import android.telecom.Call
-import android.telecom.TelecomManager
 import android.telecom.CallAudioState
 import android.telecom.VideoProfile
 import android.view.HapticFeedbackConstants
@@ -19,6 +20,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.StickyNote2
@@ -27,9 +29,7 @@ import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PauseCircle
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -50,14 +50,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.CallViewModel
 import dev.goodwy.rphone.modal.`interface`.IContactsRepository
-import dev.goodwy.rphone.cardCornerSmall
+import dev.goodwy.rphone.cardCornerExtraSmall
+import dev.goodwy.rphone.controller.sensor.PocketModeManager
 import dev.goodwy.rphone.controller.util.NoteManager
 import dev.goodwy.rphone.modal.data.getDisplayName
 import dev.goodwy.rphone.view.components.RillExpressiveCard
@@ -65,15 +65,24 @@ import dev.goodwy.rphone.view.components.RillSelectionDialog
 import dev.goodwy.rphone.view.theme.MyColors.bottomBarColor
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import dev.goodwy.rphone.view.theme.MyColors.dialpadKeyColor
-import dev.goodwy.rphone.view.theme.color_call_button
 import dev.goodwy.rphone.view.theme.color_call_end
 import dev.goodwy.rphone.controller.util.formatDuration
 import dev.goodwy.rphone.controller.util.PreferenceManager
+import dev.goodwy.rphone.liquidglass.LocalLiquidGlassBackdrop
+import dev.goodwy.rphone.liquidglass.backdrops.LayerBackdrop
+import dev.goodwy.rphone.liquidglass.drawBackdrop
+import dev.goodwy.rphone.liquidglass.drawPlainBackdrop
+import dev.goodwy.rphone.liquidglass.effects.blur
+import dev.goodwy.rphone.liquidglass.effects.colorControls
+import dev.goodwy.rphone.liquidglass.effects.lens
+import dev.goodwy.rphone.liquidglass.highlight.Highlight
+import dev.goodwy.rphone.liquidglass.shadow.Shadow
 import dev.goodwy.rphone.view.screen.settings.PasswordSetupDialog
 import dev.goodwy.rphone.view.screen.settings.PinSetupDialog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun ExpressiveCallScreen(
@@ -85,7 +94,8 @@ fun ExpressiveCallScreen(
     audioState: CallAudioState?,
     initialConnectTime: Long = 0L,
     backgroundUri: String? = null,
-    skipIncomingScreen: Boolean = false
+    skipIncomingScreen: Boolean = false,
+    liquidGlassBackdrop: LayerBackdrop
 ) {
     val view = LocalView.current
     val context = LocalContext.current
@@ -119,6 +129,20 @@ fun ExpressiveCallScreen(
     val showCallScreenAvatar = remember(settingsState) {
         preferenceManager.getBoolean(PreferenceManager.KEY_SHOW_CALL_SCREEN_AVATAR, true)
     }
+    val hideAvatarWithBg = remember(settingsState) {
+        preferenceManager.getBoolean(PreferenceManager.KEY_HIDE_AVATAR_WITH_BACKGROUND, false)
+    }
+    val hasBackground = !backgroundUri.isNullOrEmpty()
+    val shouldShowAvatar = showCallScreenAvatar && !(hideAvatarWithBg && hasBackground)
+
+    val globalBackdrop = LocalLiquidGlassBackdrop.current
+    val liquidGlass = remember(settingsState) { preferenceManager.getBoolean(PreferenceManager.KEY_LIQUID_GLASS, false) }
+    val lgCallScreen = remember(settingsState) { preferenceManager.getBoolean(PreferenceManager.KEY_LG_CALL_SCREEN, true) }
+    val blurEffects = remember(settingsState) { preferenceManager.getBoolean(PreferenceManager.KEY_BLUR_EFFECTS, false) }
+    val blurCallScreen = remember(settingsState) { preferenceManager.getBoolean(PreferenceManager.KEY_BLUR_CALL_SCREEN, true) }
+    val blurIntensity = remember(settingsState) { preferenceManager.getInt(PreferenceManager.KEY_BLUR_INTENSITY, 20).toFloat() }
+    val useLgCallScreen = liquidGlass && lgCallScreen && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && globalBackdrop != null
+    val useBlurCallScreen = blurEffects && blurCallScreen && !useLgCallScreen
 
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
@@ -173,6 +197,53 @@ fun ExpressiveCallScreen(
         )
     }
 
+    var showQuickResponsesSheet by remember { mutableStateOf(false) }
+    var showCallNotesSheet by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    val pocketModeEnabled = remember(settingsState) {
+        preferenceManager.getBoolean(PreferenceManager.KEY_POCKET_MODE, false)
+    }
+    var isPocketModeCovered by remember { mutableStateOf(false) }
+    var pocketModeDismissedManually by remember { mutableStateOf(false) }
+
+    DisposableEffect(callState, pocketModeEnabled) {
+        if (pocketModeEnabled && callState == Call.STATE_RINGING) {
+            val manager = PocketModeManager(context)
+            manager.startListening { isNear ->
+                isPocketModeCovered = isNear
+            }
+            onDispose {
+                manager.stopListening()
+            }
+        } else {
+            isPocketModeCovered = false
+            onDispose { }
+        }
+    }
+
+    val onSendQuickResponse: (String) -> Unit = { message ->
+        try {
+            call.reject(true, message)
+        } catch (e: Exception) {
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    call.reject(Call.REJECT_REASON_DECLINED)
+                } else {
+                    call.disconnect()
+                }
+            } catch (_: Exception) {}
+            try {
+                val intent = Intent(Intent.ACTION_SENDTO, "smsto:$phoneNumber".toUri()).apply {
+                    putExtra("sms_body", message)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(intent)
+            } catch (_: Exception) {}
+        }
+        showQuickResponsesSheet = false
+    }
+
     // Call notes --->
     var showNoteWindow by remember { mutableStateOf(false) }
     var noteText by remember { mutableStateOf("") }
@@ -212,7 +283,7 @@ fun ExpressiveCallScreen(
 
     LaunchedEffect(noteText) {
         if (phoneNumber.isNotEmpty() && noteText.isNotBlank()) {
-            delay(1000)
+            delay(1000.milliseconds)
             kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
                 NoteManager.writeNote(context, contactName, phoneNumber, noteText)
             }
@@ -230,7 +301,7 @@ fun ExpressiveCallScreen(
         .fillMaxSize()
         .background(MaterialTheme.colorScheme.surface)
     ) {
-        ExpressiveBackground(photoUri, backgroundUri)
+        ExpressiveBackground(photoUri, backgroundUri, liquidGlassBackdrop, useLgCallScreen || useBlurCallScreen)
 
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -346,7 +417,7 @@ fun ExpressiveCallScreen(
 
                         Text(
                             text = contactName,
-                            style = MaterialTheme.typography.displaySmall,
+                            style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurface,
                             textAlign = TextAlign.Center,
@@ -387,7 +458,7 @@ fun ExpressiveCallScreen(
 
                 if (!showKeypad && !showNoteWindow && !showMore) {
                     AnimatedVisibility(
-                        visible = showCallScreenAvatar && photoUri != null,
+                        visible = shouldShowAvatar && photoUri != null,
                         enter = fadeIn() + expandVertically(),
                         exit = fadeOut() + shrinkVertically()
                     ) {
@@ -412,308 +483,361 @@ fun ExpressiveCallScreen(
                 val controlBtnActiveFg = if (isDark) Color.Black else Color.White
                 val controlBtnFg = MaterialTheme.colorScheme.onSurface
 
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)),
-                    color = bottomBarColor
-                ) {
-                    Column(
+                val controlContent: @Composable () -> Unit = {
+                    Row(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .navigationBarsPadding()
-                            .padding(
-                                start = 20.dp,
-                                end = 20.dp,
-                                top = if (showKeypad || showNoteWindow || showMore) 20.dp else 22.dp,
-                                bottom = 20.dp
-                            ),
-                        horizontalAlignment = Alignment.CenterHorizontally,
+                            .padding(horizontal = 9.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment     = Alignment.CenterVertically
                     ) {
-                        AnimatedContent(
-                            targetState = showKeypad || showNoteWindow || showMore,
-                            transitionSpec = {
-                                (fadeIn() + expandVertically(
-                                    animationSpec = tween(300, easing = FastOutSlowInEasing)
-                                )) togetherWith (fadeOut() + shrinkVertically(
-                                    animationSpec = tween(300, easing = FastOutSlowInEasing)
-                                ))
-                            },
-                            label = "moreContent"
-                        ) { visible ->
-                            if (visible) {
-                                Column(modifier = Modifier.fillMaxWidth()) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(start = 12.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        Text(
-                                            if (showKeypad) stringResource(R.string.keypad)
-                                            else if (showNoteWindow) stringResource(R.string.add_note)
-                                            else stringResource(R.string.more),
-                                            style = MaterialTheme.typography.titleMedium
-                                        )
-                                        IconButton(onClick = {
-                                            showKeypad = false
-                                            showNoteWindow = false
-                                            showMore = false
-                                        }) { Icon(Icons.Rounded.Cancel, null) }
-                                    }
-                                    Spacer(modifier = Modifier.height(12.dp))
-
-                                    if (showMore) {
-                                        RillExpressiveCard {
-                                            MoreItem(
-                                                headline = stringResource(R.string.add_note),
-                                                leadingIcon = Icons.AutoMirrored.Outlined.StickyNote2,
-                                                onClick = {
-                                                    view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                                                    showNoteWindow = true
-                                                    showMore = false
-                                                    showKeypad = false
-                                                }
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .navigationBarsPadding()
+                                .padding(
+                                    start = 20.dp,
+                                    end = 20.dp,
+                                    top = if (showKeypad || showNoteWindow || showMore) 20.dp else 22.dp,
+                                    bottom = 20.dp
+                                ),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            AnimatedContent(
+                                targetState = showKeypad || showNoteWindow || showMore,
+                                transitionSpec = {
+                                    (fadeIn() + expandVertically(
+                                        animationSpec = tween(300, easing = FastOutSlowInEasing)
+                                    )) togetherWith (fadeOut() + shrinkVertically(
+                                        animationSpec = tween(300, easing = FastOutSlowInEasing)
+                                    ))
+                                },
+                                label = "moreContent"
+                            ) { visible ->
+                                if (visible) {
+                                    Column(modifier = Modifier.fillMaxWidth()) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(start = 12.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Text(
+                                                if (showKeypad) stringResource(R.string.keypad)
+                                                else if (showNoteWindow) stringResource(R.string.add_note)
+                                                else stringResource(R.string.more),
+                                                style = MaterialTheme.typography.titleMedium,
+                                                color = controlBtnFg
                                             )
-                                            MoreItem(
-                                                headline = stringResource(R.string.message),
-                                                leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_message_outline),
-                                                onClick = {
-                                                    view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                                                    val intent = Intent(Intent.ACTION_SENDTO).apply {
-                                                        data = "smsto:$phoneNumber".toUri()
-                                                    }
-                                                    context.startActivity(intent)
-                                                }
-                                            )
-                                            MoreItem(
-                                                headline = stringResource(R.string.add_call),
-                                                leadingIcon = Icons.Rounded.AddIcCall,
-                                                enabled = otherCall == null && callState != Call.STATE_DIALING,
-                                                onClick = {
-                                                    view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                                                    if (callState != Call.STATE_HOLDING) {
-                                                        try {
-                                                            call.hold()
-                                                        } catch (_: Exception) {
-                                                        }
-                                                    }
-                                                    val intent = Intent(Intent.ACTION_DIAL)
-                                                    context.startActivity(intent)
-                                                }
-                                            )
-                                            MoreItem(
-                                                headline = if (otherCall != null) stringResource(R.string.swap)
-                                                else if (callState == Call.STATE_HOLDING) stringResource(R.string.resume)
-                                                else stringResource(R.string.hold),
-                                                leadingIcon = if (otherCall != null) Icons.Rounded.SwapCalls
-                                                else if (callState == Call.STATE_HOLDING) Icons.Rounded.PlayArrow
-                                                else Icons.Default.Pause,
-                                                enabled = callState != Call.STATE_DIALING,
-                                                onClick = {
-                                                    view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                                                    if (callState == Call.STATE_HOLDING) call.unhold() else call.hold()
-                                                }
-                                            )
+                                            IconButton(onClick = {
+                                                showKeypad = false
+                                                showNoteWindow = false
+                                                showMore = false
+                                            }) { Icon(Icons.Rounded.Cancel, stringResource(R.string.cancel), tint = controlBtnFg) }
                                         }
-                                    }
+                                        Spacer(modifier = Modifier.height(12.dp))
 
-                                    if (showNoteWindow) {
-                                        RillExpressiveCard {
-                                            MoreItem(
-                                                headline = contactName,
-                                                leadingIcon = Icons.AutoMirrored.Outlined.StickyNote2,
-                                                trailingIcon = Icons.Default.Check,
-                                                enabled = callState != Call.STATE_DIALING,
-                                                onClick = {
-                                                    view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                                                    if (phoneNumber.isNotEmpty()) NoteManager.writeNote(context, contactName, phoneNumber, noteText)
-                                                    showNoteWindow = false
-                                                    showKeypad = false
-                                                    showMore = true
-                                                }
-                                            )
-                                            Surface(
-                                                color = cardColor,
-                                                shape = RoundedCornerShape(cardCornerSmall),
-                                                modifier = Modifier.fillMaxWidth(),
-                                                shadowElevation = 0.dp
-                                            ) {
-                                                OutlinedTextField(
-                                                    value = noteText,
-                                                    onValueChange = { noteText = it },
-                                                    modifier = Modifier
-                                                        .fillMaxWidth()
-                                                        .heightIn(min = 184.dp, max = 184.dp),
-                                                    placeholder = { Text(stringResource(R.string.type_your_note)) },
-                                                    shape = RoundedCornerShape(12.dp),
-                                                    minLines = 3,
-                                                    colors = OutlinedTextFieldDefaults.colors(
-                                                        focusedBorderColor = Color.Transparent,
-                                                        unfocusedBorderColor = Color.Transparent)
+                                        if (showMore) {
+                                            RillExpressiveCard {
+                                                MoreItem(
+                                                    headline = stringResource(R.string.add_note),
+                                                    leadingIcon = Icons.AutoMirrored.Outlined.StickyNote2,
+                                                    onClick = {
+                                                        view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                                        showNoteWindow = true
+                                                        showMore = false
+                                                        showKeypad = false
+                                                    }
+                                                )
+                                                MoreItem(
+                                                    headline = stringResource(R.string.message),
+                                                    leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_message_outline),
+                                                    onClick = {
+                                                        view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                                        val intent = Intent(Intent.ACTION_SENDTO).apply {
+                                                            data = "smsto:$phoneNumber".toUri()
+                                                        }
+                                                        context.startActivity(intent)
+                                                    }
+                                                )
+                                                MoreItem(
+                                                    headline = stringResource(R.string.add_call),
+                                                    leadingIcon = Icons.Rounded.AddIcCall,
+                                                    enabled = otherCall == null && callState != Call.STATE_DIALING,
+                                                    onClick = {
+                                                        view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                                        if (callState != Call.STATE_HOLDING) {
+                                                            try {
+                                                                call.hold()
+                                                            } catch (_: Exception) {
+                                                            }
+                                                        }
+                                                        val intent = Intent(Intent.ACTION_DIAL)
+                                                        context.startActivity(intent)
+                                                    }
+                                                )
+                                                MoreItem(
+                                                    headline = if (otherCall != null) stringResource(R.string.swap)
+                                                    else if (callState == Call.STATE_HOLDING) stringResource(R.string.resume)
+                                                    else stringResource(R.string.hold),
+                                                    leadingIcon = if (otherCall != null) Icons.Rounded.SwapCalls
+                                                    else if (callState == Call.STATE_HOLDING) Icons.Rounded.PlayArrow
+                                                    else Icons.Default.Pause,
+                                                    enabled = callState != Call.STATE_DIALING,
+                                                    onClick = {
+                                                        view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                                        if (callState == Call.STATE_HOLDING) call.unhold() else call.hold()
+                                                    }
                                                 )
                                             }
                                         }
-                                    }
 
-                                    if (showKeypad) {
-                                        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                                            InCallKeypad(
-                                                call = call,
-                                                typedDigits = typedDigits,
-                                                onDigitClick = { digit -> typedDigits += digit }
-                                            )
+                                        if (showNoteWindow) {
+                                            RillExpressiveCard {
+                                                MoreItem(
+                                                    headline = contactName,
+                                                    leadingIcon = Icons.AutoMirrored.Outlined.StickyNote2,
+                                                    trailingIcon = Icons.Default.Check,
+                                                    enabled = callState != Call.STATE_DIALING,
+                                                    onClick = {
+                                                        view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                                        if (phoneNumber.isNotEmpty()) NoteManager.writeNote(context, contactName, phoneNumber, noteText)
+                                                        showNoteWindow = false
+                                                        showKeypad = false
+                                                        showMore = true
+                                                    }
+                                                )
+                                                Surface(
+                                                    color = cardColor,
+                                                    shape = RoundedCornerShape(cardCornerExtraSmall),
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    shadowElevation = 0.dp
+                                                ) {
+                                                    OutlinedTextField(
+                                                        value = noteText,
+                                                        onValueChange = { noteText = it },
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .heightIn(min = 184.dp, max = 184.dp),
+                                                        placeholder = { Text(stringResource(R.string.type_your_note)) },
+                                                        shape = RoundedCornerShape(12.dp),
+                                                        minLines = 3,
+                                                        colors = OutlinedTextFieldDefaults.colors(
+                                                            focusedBorderColor = Color.Transparent,
+                                                            unfocusedBorderColor = Color.Transparent)
+                                                    )
+                                                }
+                                            }
                                         }
+
+                                        if (showKeypad) {
+                                            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                                                InCallKeypad(
+                                                    call = call,
+                                                    typedDigits = typedDigits,
+                                                    onDigitClick = { digit -> typedDigits += digit }
+                                                )
+                                            }
+                                        }
+                                        Spacer(modifier = Modifier.height(24.dp))
                                     }
-                                    Spacer(modifier = Modifier.height(24.dp))
                                 }
                             }
-                        }
 
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            AnimatedCallButton(
-                                modifier = Modifier.weight(1f),
-                                icon = Icons.Rounded.Dialpad,
-                                isActive = showKeypad,
-                                label = stringResource(R.string.keypad),
-                                btnColor = controlBtnColor,
-                                activeBtnColor = controlBtnActiveColor,
-                                fgColor = controlBtnFg,
-                                activeFgColor = controlBtnActiveFg
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                                showKeypad = !showKeypad
-                                showNoteWindow = false
-                                showMore = false
-                            }
+                                AnimatedCallButton(
+                                    modifier = Modifier.weight(1f),
+                                    icon = Icons.Rounded.Dialpad,
+                                    isActive = showKeypad,
+                                    label = stringResource(R.string.keypad),
+                                    btnColor = controlBtnColor,
+                                    activeBtnColor = controlBtnActiveColor,
+                                    fgColor = controlBtnFg,
+                                    activeFgColor = controlBtnActiveFg
+                                ) {
+                                    view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                    showKeypad = !showKeypad
+                                    showNoteWindow = false
+                                    showMore = false
+                                }
 
-                            AnimatedCallButton(
-                                modifier = Modifier.weight(1f),
-                                icon = if (isMuted) Icons.Rounded.MicOff else Icons.Rounded.Mic,
-                                isActive = isMuted,
-                                label = stringResource(R.string.mute),
-                                btnColor = controlBtnColor,
-                                activeBtnColor = controlBtnActiveColor,
-                                fgColor = controlBtnFg,
-                                activeFgColor = controlBtnActiveFg
-                            ) {
-                                view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                                callViewModel.toggleMute()
-                            }
+                                AnimatedCallButton(
+                                    modifier = Modifier.weight(1f),
+                                    icon = if (isMuted) Icons.Rounded.MicOff else Icons.Rounded.Mic,
+                                    isActive = isMuted,
+                                    label = stringResource(R.string.mute),
+                                    btnColor = controlBtnColor,
+                                    activeBtnColor = controlBtnActiveColor,
+                                    fgColor = controlBtnFg,
+                                    activeFgColor = controlBtnActiveFg
+                                ) {
+                                    view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                    callViewModel.toggleMute()
+                                }
 
-                            val audioRoute = audioState?.route ?: CallAudioState.ROUTE_EARPIECE
-                            val audioIcon = when (audioRoute) {
-                                CallAudioState.ROUTE_SPEAKER -> Icons.AutoMirrored.Rounded.VolumeUp
-                                CallAudioState.ROUTE_BLUETOOTH -> Icons.Rounded.Bluetooth
-                                CallAudioState.ROUTE_WIRED_HEADSET -> Icons.Rounded.Headset
-                                else -> Icons.AutoMirrored.Rounded.VolumeDown
-                            }
+                                val audioRoute = audioState?.route ?: CallAudioState.ROUTE_EARPIECE
+                                val audioIcon = when (audioRoute) {
+                                    CallAudioState.ROUTE_SPEAKER -> Icons.AutoMirrored.Rounded.VolumeUp
+                                    CallAudioState.ROUTE_BLUETOOTH -> Icons.Rounded.Bluetooth
+                                    CallAudioState.ROUTE_WIRED_HEADSET -> Icons.Rounded.Headset
+                                    else -> Icons.AutoMirrored.Rounded.VolumeDown
+                                }
 
-                            val bluetoothLabel = stringResource(R.string.audio_route_bluetooth)
-                            val audioLabel = when (audioRoute) {
-                                CallAudioState.ROUTE_SPEAKER -> stringResource(R.string.audio_route_speaker)
-                                CallAudioState.ROUTE_BLUETOOTH -> {
-                                    try {
+                                val bluetoothLabel = stringResource(R.string.audio_route_bluetooth)
+                                val audioLabel = when (audioRoute) {
+                                    CallAudioState.ROUTE_SPEAKER -> stringResource(R.string.audio_route_speaker)
+                                    CallAudioState.ROUTE_BLUETOOTH -> try {
                                         audioState?.activeBluetoothDevice?.name ?: bluetoothLabel
                                     } catch (e: SecurityException) {
                                         bluetoothLabel
                                     }
+                                    CallAudioState.ROUTE_WIRED_HEADSET -> stringResource(R.string.audio_route_headset)
+                                    else -> stringResource(R.string.audio_route_handset)
                                 }
-                                CallAudioState.ROUTE_WIRED_HEADSET -> stringResource(R.string.audio_route_headset)
-                                else -> stringResource(R.string.audio_route_handset)
-                            }
-                            AnimatedCallButton(
-                                modifier = Modifier.weight(1f),
-                                icon = audioIcon,
-                                isActive = audioRoute == CallAudioState.ROUTE_SPEAKER || audioRoute == CallAudioState.ROUTE_BLUETOOTH,
-                                label = audioLabel,
-                                btnColor = controlBtnColor,
-                                activeBtnColor = controlBtnActiveColor,
-                                fgColor = controlBtnFg,
-                                activeFgColor = controlBtnActiveFg
-                            ) {
-                                view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                                callViewModel.cycleAudioRoute()
+                                AnimatedCallButton(
+                                    modifier = Modifier.weight(1f),
+                                    icon = audioIcon,
+                                    isActive = audioRoute == CallAudioState.ROUTE_SPEAKER || audioRoute == CallAudioState.ROUTE_BLUETOOTH,
+                                    label = audioLabel,
+                                    btnColor = controlBtnColor,
+                                    activeBtnColor = controlBtnActiveColor,
+                                    fgColor = controlBtnFg,
+                                    activeFgColor = controlBtnActiveFg
+                                ) {
+                                    view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                    callViewModel.cycleAudioRoute()
+                                }
+
+                                AnimatedCallButton(
+                                    modifier = Modifier.weight(1f),
+                                    icon = Icons.Default.MoreVert,
+                                    isActive = showMore,
+                                    label = stringResource(R.string.more),
+                                    btnColor = controlBtnColor,
+                                    activeBtnColor = controlBtnActiveColor,
+                                    fgColor = controlBtnFg,
+                                    activeFgColor = controlBtnActiveFg
+                                ) {
+                                    view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                    showMore = !showMore
+                                    showNoteWindow = false
+                                    showKeypad = false
+                                }
                             }
 
-                            AnimatedCallButton(
-                                modifier = Modifier.weight(1f),
-                                icon = Icons.Default.MoreVert,
-                                isActive = showMore,
-                                label = stringResource(R.string.more),
-                                btnColor = controlBtnColor,
-                                activeBtnColor = controlBtnActiveColor,
-                                fgColor = controlBtnFg,
-                                activeFgColor = controlBtnActiveFg
-                            ) {
-                                view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                                showMore = !showMore
-                                showNoteWindow = false
-                                showKeypad = false
-                            }
-                        }
+                            val hangupWidthFraction =
+                                preferenceManager.getFloat(PreferenceManager.KEY_HANGUP_WIDTH, 0.5f)
+                            val endInteraction = remember { MutableInteractionSource() }
+                            val endPressed by endInteraction.collectIsPressedAsState()
+                            val endRadius by animateDpAsState(
+                                if (endPressed) 20.dp else 42.dp,
+                                spring(stiffness = Spring.StiffnessMedium),
+                                label = "endRadius"
+                            )
 
-                        val hangupWidthFraction =
-                            preferenceManager.getFloat(PreferenceManager.KEY_HANGUP_WIDTH, 0.5f)
-                        val endInteraction = remember { MutableInteractionSource() }
-                        val endPressed by endInteraction.collectIsPressedAsState()
-                        val endRadius by animateDpAsState(
-                            if (endPressed) 20.dp else 42.dp,
-                            spring(stiffness = Spring.StiffnessMedium),
-                            label = "endRadius"
-                        )
-
-                        Spacer(modifier = Modifier.height(24.dp))
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 4.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            val isCircleHangup = hangupWidthFraction <= 0.1f
-                            Surface(
-                                onClick = {
-                                    view.performHapticFeedback(HapticFeedbackConstants.REJECT)
-                                    if (noteText.isNotBlank() && phoneNumber.isNotEmpty()) {
-                                        NoteManager.writeNote(context, contactName, phoneNumber, noteText)
-                                    }
-                                    callDisconnect()
-                                },
-                                modifier = if (isCircleHangup) Modifier.size(76.dp)
-                                else Modifier.fillMaxWidth(hangupWidthFraction.coerceIn(0.1f, 1.0f)).height(68.dp),
-                                shape = if (isCircleHangup) CircleShape else RoundedCornerShape(endRadius),
-                                color = color_call_end,
-                                interactionSource = endInteraction
+                            Spacer(modifier = Modifier.height(24.dp))
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 4.dp),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        val showText = hangupWidthFraction > 0.5f
-                                        Icon(
-                                            Icons.Rounded.CallEnd,
-                                            stringResource(R.string.end_call),
-                                            tint = Color.White,
-                                            modifier = Modifier.size(if (showText) 26.dp else 32.dp)
-                                        )
-                                        if (showText) {
-                                            Text(
+                                val isCircleHangup = hangupWidthFraction <= 0.1f
+                                Surface(
+                                    onClick = {
+                                        view.performHapticFeedback(HapticFeedbackConstants.REJECT)
+                                        if (noteText.isNotBlank() && phoneNumber.isNotEmpty()) {
+                                            NoteManager.writeNote(context, contactName, phoneNumber, noteText)
+                                        }
+                                        callDisconnect()
+                                    },
+                                    modifier = if (isCircleHangup) Modifier.size(76.dp)
+                                    else Modifier
+                                        .fillMaxWidth(hangupWidthFraction.coerceIn(0.1f, 1.0f))
+                                        .height(68.dp),
+                                    shape = if (isCircleHangup) CircleShape else RoundedCornerShape(endRadius),
+                                    color = color_call_end,
+                                    interactionSource = endInteraction
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
+                                            val showText = hangupWidthFraction > 0.5f
+                                            Icon(
+                                                Icons.Rounded.CallEnd,
                                                 stringResource(R.string.end_call),
-                                                color = Color.White,
-                                                style = MaterialTheme.typography.labelLarge,
-                                                fontWeight = FontWeight.SemiBold
+                                                tint = Color.White,
+                                                modifier = Modifier.size(if (showText) 26.dp else 32.dp)
                                             )
+                                            if (showText) {
+                                                Text(
+                                                    stringResource(R.string.end_call),
+                                                    color = Color.White,
+                                                    style = MaterialTheme.typography.labelLarge,
+                                                    fontWeight = FontWeight.SemiBold
+                                                )
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
+                    }
+                }
+
+                val controlShape = MaterialTheme.shapes.extraExtraLarge.copy(bottomStart = CornerSize(0.dp), bottomEnd = CornerSize(0.dp))
+
+                if (useLgCallScreen) {
+                    Surface(
+                        shape           = controlShape,
+                        color           = bottomBarColor.copy(alpha = 0.35f),
+                        shadowElevation = 0.dp,
+                        tonalElevation  = 0.dp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .drawBackdrop(
+                                backdrop = globalBackdrop,
+                                shape = { controlShape },
+                                effects = {
+                                    val d = density
+                                    colorControls(saturation = 1.4f)
+                                    blur(blurIntensity * d)
+                                    lens(
+                                        refractionHeight = 23f * d,
+                                        refractionAmount = 64f * d
+                                    )
+                                },
+                                highlight = { Highlight.Default }
+                            )
+                    ) { controlContent() }
+                } else if (useBlurCallScreen && globalBackdrop != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    Surface(
+                        shape           = controlShape,
+                        color           = bottomBarColor.copy(alpha = 0.72f),
+                        shadowElevation = 0.dp,
+                        tonalElevation  = 0.dp,
+                        modifier        = Modifier
+                            .fillMaxWidth()
+                            .drawPlainBackdrop(
+                                backdrop = globalBackdrop,
+                                shape = { controlShape },
+                                effects = { blur(blurIntensity * density) }
+                            )
+                    ) { controlContent() }
+                } else {
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(controlShape),
+                        color = bottomBarColor
+                    ) {
+                        controlContent()
                     }
                 }
             } else {
@@ -728,6 +852,15 @@ fun ExpressiveCallScreen(
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
                     if ((useCustomUI != 2 && useCustomUI != 3 && useCustomUI != 10) || otherCall != null) {
+                        val buttonBgColor =
+                            if (useLgCallScreen || useBlurCallScreen) bottomBarColor.copy(alpha = 0.35f) else MaterialTheme.colorScheme.surfaceVariant
+                        val interaction = remember { MutableInteractionSource() }
+                        val isPressed by interaction.collectIsPressedAsState()
+                        val radius by animateDpAsState(
+                            if (isPressed) 16.dp else 40.dp,
+                            spring(stiffness = Spring.StiffnessMedium),
+                            label = "btnMessageRadius"
+                        )
                         Surface(
                             onClick = {
                                 view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
@@ -737,10 +870,37 @@ fun ExpressiveCallScreen(
                                 }
                                 context.startActivity(intent)
                             },
-                            shape = CircleShape,
-                            color = Color.Transparent,
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)),
-                            modifier = Modifier.height(45.dp).wrapContentWidth()
+                            shape = RoundedCornerShape(radius),
+                            color = buttonBgColor,
+                            interactionSource = interaction,
+//                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)),
+                            modifier = Modifier
+                                .height(45.dp)
+                                .wrapContentWidth()
+                                .then(
+                                    if (useLgCallScreen) Modifier.drawBackdrop(
+                                        backdrop = globalBackdrop,
+                                        shape = { RoundedCornerShape(radius) },
+                                        shadow = { Shadow(radius = 8.dp) },
+                                        effects = {
+                                            val d = density
+                                            colorControls(saturation = 1.3f)
+                                            blur(blurIntensity * d)
+                                            lens(
+                                                refractionHeight = 18f * d,
+                                                refractionAmount = 52f * d
+                                            )
+                                        },
+                                        highlight = { Highlight.Default }
+                                    )
+                                    else if (useBlurCallScreen && globalBackdrop != null) Modifier.drawPlainBackdrop(
+                                        backdrop = globalBackdrop,
+                                        shape = { RoundedCornerShape(radius) },
+                                        shadow = { Shadow(radius = 8.dp) },
+                                        effects = { blur(blurIntensity * density) }
+                                    )
+                                    else Modifier
+                                )
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
                                 Spacer(modifier = Modifier.width(18.dp))
@@ -755,6 +915,9 @@ fun ExpressiveCallScreen(
 
                     when {
                         useCustomUI == 1 || otherCall != null -> IncomingCallButtons(
+                            useLg = useLgCallScreen,
+                            useBlur = useBlurCallScreen,
+                            blurIntensity = blurIntensity,
                             onAnswer = { try { call.answer(VideoProfile.STATE_AUDIO_ONLY) } catch (_: Exception) {} },
                             onDecline = { callDisconnect(true) },
                             onAnswerAndDecline = if (otherCall != null) {
@@ -767,6 +930,9 @@ fun ExpressiveCallScreen(
                             } else null
                         )
                         useCustomUI == 2 -> IPhoneSwipeToAnswer(
+                            useLg = useLgCallScreen,
+                            useBlur = useBlurCallScreen,
+                            blurIntensity = blurIntensity,
                             onAnswer = { try { call.answer(VideoProfile.STATE_AUDIO_ONLY) } catch (_: Exception) {} },
                             onDecline = { callDisconnect(true) },
                             onMessage = {
@@ -779,6 +945,9 @@ fun ExpressiveCallScreen(
                             }
                         )
                         useCustomUI == 3 -> VerticalSwipeToAnswer(
+                            useLg = useLgCallScreen,
+                            useBlur = useBlurCallScreen,
+                            blurIntensity = blurIntensity,
                             onAnswer = {
                                 if (callBiometricUnlocked) {
                                     try { call.answer(VideoProfile.STATE_AUDIO_ONLY) } catch (_: Exception) {}
@@ -797,6 +966,9 @@ fun ExpressiveCallScreen(
                             }
                         )
                         useCustomUI == 0 -> HorizontalSwipeToAnswer(
+                            useLg = useLgCallScreen,
+                            useBlur = useBlurCallScreen,
+                            blurIntensity = blurIntensity,
                             onAnswer = {
                                 if (callBiometricUnlocked) {
                                     try { call.answer(VideoProfile.STATE_AUDIO_ONLY) } catch (_: Exception) {}
@@ -815,6 +987,9 @@ fun ExpressiveCallScreen(
                             }
                         )
                         else -> DefaultSwipeToAnswer(
+                            useLg = useLgCallScreen,
+                            useBlur = useBlurCallScreen,
+                            blurIntensity = blurIntensity,
                             onAnswer = {
                                 if (callBiometricUnlocked) {
                                     try { call.answer(VideoProfile.STATE_AUDIO_ONLY) } catch (_: Exception) {}
@@ -844,10 +1019,67 @@ fun ExpressiveCallScreen(
                 }
             }
         }
+
+        if (isPocketModeCovered && !pocketModeDismissedManually && callState == Call.STATE_RINGING) {
+            PocketModeOverlay(
+                onDismiss = { pocketModeDismissedManually = true }
+            )
+        }
+
+        if (showQuickResponsesSheet) {
+            QuickResponsesBottomSheet(
+                phoneNumber = phoneNumber,
+                contactName = contactName,
+                onDismiss = { showQuickResponsesSheet = false },
+                onSend = onSendQuickResponse,
+                onOpenSmsApp = {
+                    try {
+                        if (call.state == Call.STATE_RINGING) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                call.reject(Call.REJECT_REASON_DECLINED)
+                            } else {
+                                call.disconnect()
+                            }
+                        } else {
+                            call.disconnect()
+                        }
+                    } catch (_: Exception) {}
+                    val intent = Intent(Intent.ACTION_SENDTO).apply {
+                        data = "smsto:$phoneNumber".toUri()
+                    }
+                    context.startActivity(intent)
+                    showQuickResponsesSheet = false
+                },
+//                onScheduleReminder = { delayMinutes, label ->
+//                    scope.launch {
+//                        reminderManager.scheduleReminder(
+//                            phoneNumber = phoneNumber,
+//                            contactName = contactName.ifBlank { null },
+//                            delayMinutes = delayMinutes,
+//                            note = "Callback reminder from incoming call"
+//                        )
+//                        Toast.makeText(context, "Reminder set for $label", Toast.LENGTH_SHORT).show()
+//                    }
+//                    try {
+//                        if (call.state == Call.STATE_RINGING) {
+//                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+//                                call.reject(Call.REJECT_REASON_DECLINED)
+//                            } else {
+//                                call.disconnect()
+//                            }
+//                        } else {
+//                            call.disconnect()
+//                        }
+//                    } catch (_: Exception) {}
+//                    showQuickResponsesSheet = false
+//                }
+            )
+        }
     }
 
     if (showCallBiometricUnlock) {
         val biometricType = preferenceManager.getString(PreferenceManager.KEY_BIOMETRICS_TYPE, "") ?: ""
+        @SuppressLint("ContextCastToActivity")
         val callActivity = LocalContext.current as? FragmentActivity
         fun onBiometricFail() {
             showCallBiometricUnlock = false

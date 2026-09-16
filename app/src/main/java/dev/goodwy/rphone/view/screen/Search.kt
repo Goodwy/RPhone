@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.StickyNote2
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Dialpad
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.outlined.Call
 import androidx.compose.material.icons.rounded.MicNone
 import androidx.compose.material.icons.rounded.People
 import androidx.compose.material.icons.rounded.Search
@@ -40,8 +41,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import dev.goodwy.rphone.R
-import dev.goodwy.rphone.cardCornerBig
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
@@ -51,16 +50,23 @@ import dev.goodwy.rphone.view.components.*
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.ContactDetailsScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.ContactDetailsScreenDestination.invoke
 import com.ramcosta.composedestinations.generated.destinations.DialPadScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.NotesScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import dev.goodwy.rphone.cardCornerSmall
+import dev.goodwy.rphone.R
+import dev.goodwy.rphone.cardCornerExtraSmall
 import dev.goodwy.rphone.controller.CallLogViewModel
 import dev.goodwy.rphone.controller.util.NoteManager
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.util.forceLtr
+import dev.goodwy.rphone.controller.util.makeCall
 import dev.goodwy.rphone.controller.util.normalizeNumberDigits
+import dev.goodwy.rphone.controller.util.placeCallWithSimPreference
 import dev.goodwy.rphone.modal.data.CallLogEntry
+import dev.goodwy.rphone.modal.data.getDisplayContactInfo
+import dev.goodwy.rphone.modal.data.getDisplayName
 import dev.goodwy.rphone.view.components.SingleTile
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -138,6 +144,20 @@ fun ContactSearchContent(
     val filterState = remember(settingsVer) { prefs.getSearchFilterState() }
     val displayOrder = remember(settingsVer) { prefs.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0) }
     val hideVoiceSearch = remember(settingsVer) { prefs.getBoolean(PreferenceManager.KEY_HIDE_VOICE_SEARCH, false) }
+    val simPref = remember(settingsVer) { prefs.getInt(PreferenceManager.KEY_DEFAULT_SIM, prefs.getDefaultSimIndexDefault()) }
+
+    var showSimPicker by remember { mutableStateOf(false) }
+    var pendingNumber by remember { mutableStateOf<String?>(null) }
+
+    if (showSimPicker && pendingNumber != null) {
+        SimPickerDialog(
+            onDismissRequest = { showSimPicker = false },
+            onSimSelected = { handle ->
+                makeCall(context, pendingNumber!!, handle)
+                showSimPicker = false
+            }
+        )
+    }
 
     var queryFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(""))
@@ -328,7 +348,7 @@ fun ContactSearchContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
-                shape = RoundedCornerShape(cardCornerBig),
+                shape = MaterialTheme.shapes.extraLarge,
                 color = MaterialTheme.colorScheme.primaryContainer
             ) {
                 Row(
@@ -413,10 +433,47 @@ fun ContactSearchContent(
                             )
                             RillExpressiveCard {
                                 filteredContacts.forEach { contact ->
-                                    ContactListItem(
-                                        contact = contact,
-                                        navigator = navigator,
-                                        displayOrder = displayOrder
+//                                    ContactListItem(
+//                                        contact = contact,
+//                                        navigator = navigator,
+//                                        displayOrder = displayOrder
+//                                    )
+                                    val displayName = getDisplayName(contact, displayOrder)
+                                    val defaultOrFirstPhone = contact.phoneDetails.firstOrNull { it.isPrimary }?.number ?: contact.phoneNumbers.firstOrNull()
+                                    SingleTile(
+                                        title = displayName,
+                                        subtitle = getDisplayContactInfo(contact),
+                                        photoUri = contact.photoUri,
+                                        phoneNumber = defaultOrFirstPhone,
+                                        trailingContent = {
+//                                                navigator.navigate(DialPadScreenDestination(initialNumber = entry.number))
+                                            if (defaultOrFirstPhone != null) {
+                                                IconButton(onClick = {
+                                                    placeCallWithSimPreference(context, defaultOrFirstPhone, simPref) {
+                                                        pendingNumber = defaultOrFirstPhone; showSimPicker = true
+                                                    }
+                                                }) {
+                                                    Icon(Icons.Outlined.Call, contentDescription = stringResource(R.string.call), tint = MaterialTheme.colorScheme.primary)
+                                                }
+                                            }
+                                        },
+                                        onCall = {
+                                            if (defaultOrFirstPhone != null) {
+                                                placeCallWithSimPreference(context, defaultOrFirstPhone, simPref) {
+                                                    pendingNumber = defaultOrFirstPhone; showSimPicker = true
+                                                }
+                                            }
+                                        },
+                                        onClick = {
+                                            if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
+                                                performAppHaptic(
+                                                    context,
+                                                    prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light",
+                                                    prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
+                                                )
+                                            }
+                                            navigator.navigate(ContactDetailsScreenDestination(contactId = contact.id))
+                                        }
                                     )
                                 }
                             }
@@ -441,14 +498,30 @@ fun ContactSearchContent(
                                         phoneNumber = entry.number,
                                         trailingContent = {
                                             IconButton(onClick = {
-                                                navigator.navigate(DialPadScreenDestination(initialNumber = entry.number))
+//                                                navigator.navigate(DialPadScreenDestination(initialNumber = entry.number))
+                                                placeCallWithSimPreference(context, entry.number, simPref) {
+                                                    pendingNumber = entry.number; showSimPicker = true
+                                                }
                                             }) {
-                                                Icon(Icons.Default.Call, contentDescription = "Call", tint = MaterialTheme.colorScheme.primary)
+                                                Icon(Icons.Outlined.Call, contentDescription = "Call", tint = MaterialTheme.colorScheme.primary)
+                                            }
+                                        },
+                                        onCall = {
+                                            placeCallWithSimPreference(context, entry.number, simPref) {
+                                                pendingNumber = entry.number; showSimPicker = true
                                             }
                                         },
                                         onClick = {
-                                            navigator.navigate(DialPadScreenDestination(initialNumber = entry.number))
-                                        }
+                                            if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
+                                                performAppHaptic(
+                                                    context,
+                                                    prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light",
+                                                    prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
+                                                )
+                                            }
+                                            navigator.navigate(ContactDetailsScreenDestination(phoneNumber = entry.number))
+                                        },
+                                        showCreateContact = entry.contactId == null
                                     )
                                 }
                             }
@@ -497,26 +570,27 @@ fun ContactSearchContent(
                                         )
                                     }
                                 }
-                                TextButton(
-                                    onClick = {
-                                        NavBarVisibilityState.hideForSearchResult = true
-                                        navigator.navigate(NotesScreenDestination(highlightQuery = query))
-                                    },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .offset(
-                                            x = 0.dp,
-                                            y = (-4).dp
-                                        ), // We'll make up for the indentation
-                                    colors = ButtonDefaults.textButtonColors().copy(containerColor = cardColor),
-                                    shape = RoundedCornerShape(
-                                        topStart = cardCornerSmall,
-                                        topEnd = cardCornerSmall,
-                                        bottomStart = cardCornerBig,
-                                        bottomEnd = cardCornerBig
-                                    ),
-                                ) {
-                                    Text(stringResource(R.string.filter_all))
+                                if (contactNoteResults.size > 1) {
+                                    TextButton(
+                                        onClick = {
+                                            NavBarVisibilityState.hideForSearchResult = true
+                                            navigator.navigate(NotesScreenDestination(highlightQuery = query))
+                                        },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .offset(
+                                                x = 0.dp,
+                                                y = (-4).dp
+                                            ), // We'll make up for the indentation
+                                        colors = ButtonDefaults.textButtonColors()
+                                            .copy(containerColor = cardColor),
+                                        shape = MaterialTheme.shapes.extraLarge.copy(
+                                            topStart = CornerSize(cardCornerExtraSmall),
+                                            topEnd = CornerSize(cardCornerExtraSmall)
+                                        ),
+                                    ) {
+                                        Text(stringResource(R.string.filter_all))
+                                    }
                                 }
                             }
                         }

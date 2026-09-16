@@ -51,6 +51,11 @@ import org.koin.compose.koinInject
 import androidx.compose.ui.platform.LocalConfiguration
 import android.content.res.Configuration
 import android.os.Build
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.automirrored.filled.StickyNote2
 import androidx.compose.material.icons.automirrored.outlined.StickyNote2
 import androidx.compose.material.icons.filled.Assistant
@@ -62,6 +67,7 @@ import androidx.compose.material.icons.outlined.Assistant
 import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.AccessTimeFilled
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -76,8 +82,12 @@ import dev.goodwy.rphone.liquidglass.highlight.Highlight
 import dev.goodwy.rphone.liquidglass.LocalLiquidGlassBackdrop
 import dev.goodwy.rphone.view.theme.MyColors.bottomBarColor
 import com.ramcosta.composedestinations.generated.destinations.DialPadScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.InterfaceScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.NavigationScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.SearchScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.SettingsScreenDestination
+import dev.goodwy.rphone.view.theme.RillShapeDefaults
+import kotlin.time.Duration.Companion.milliseconds
 
 // Tab routes — only show the bar when one of these is active
 private val TAB_ROUTES = setOf(
@@ -89,7 +99,6 @@ private val TAB_ROUTES = setOf(
 //    SettingsScreenDestination.route,
 //    SearchScreenDestination.route
 )
-
 
 /** Describes a single bottom-navigation tab, driving both the pill-style and standard nav bars. */
 data class TabSpec(
@@ -130,6 +139,7 @@ fun BottomBar(navController: NavController) {
     val lgBottomNav         = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_LG_BOTTOM_NAV, true) }
     val blurEffects         = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_BLUR_EFFECTS, false) }
     val blurBottomNav       = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_BLUR_BOTTOM_NAV, true) }
+    val blurIntensity       = remember(settingsState) { prefs.getInt(PreferenceManager.KEY_BLUR_INTENSITY, 20).toFloat() }
     val showFavoritesTab    = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, false) }
     val showCallsTab        = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CALLS,     true) }
     val showContactsTab     = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS,  true) }
@@ -138,6 +148,7 @@ fun BottomBar(navController: NavController) {
     val showSearchTab       = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SEARCH,     false) }
     val showSettingsTab     = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SETTINGS,     true) }
     val tabOrder            = remember(settingsState) { parseTabOrder(prefs.getString(PreferenceManager.KEY_TAB_ORDER, null)) }
+    val cardCorner          = remember(settingsState) { prefs.getInt(PreferenceManager.KEY_CARD_ROUNDNESS, RillShapeDefaults.DefaultRoundness) }
     val labelStyle: TextStyle = MaterialTheme.typography.labelMedium
 
     val navBackStackEntry  by navController.currentBackStackEntryAsState()
@@ -150,7 +161,9 @@ fun BottomBar(navController: NavController) {
     val isDialpadSelected   = currentDestination?.hierarchy?.any { it.route == DialPadScreenDestination.route } == true
     val isNotesSelected     = currentDestination?.hierarchy?.any { it.route == NotesScreenDestination.route } == true
     val isSearchSelected    = currentDestination?.hierarchy?.any { it.route == SearchScreenDestination.route } == true
-    val isSettingsSelected  = currentDestination?.hierarchy?.any { it.route == SettingsScreenDestination.route } == true //{ it.route?.contains("settings", ignoreCase = true) == true } == true
+    val isSettingsSelected  = currentDestination?.hierarchy?.any {
+            it.route == SettingsScreenDestination.route || it.route == InterfaceScreenDestination.route || it.route == NavigationScreenDestination.route
+        } == true //{ it.route?.contains("settings", ignoreCase = true) == true } == true
 
     // Build visible tab routes dynamically based on prefs
     val visibleTabRoutes = remember(showFavoritesTab, showCallsTab, showContactsTab, showDialpadTab, showNotesTab, showSearchTab, showSettingsTab) {
@@ -163,6 +176,8 @@ fun BottomBar(navController: NavController) {
             if (showNotesTab)     add(NotesScreenDestination.route)
             if (showSearchTab)    add(SearchScreenDestination.route)
             if (showSettingsTab)  add(SettingsScreenDestination.route)
+            if (showSettingsTab)  add(InterfaceScreenDestination.route)
+            if (showSettingsTab)  add(NavigationScreenDestination.route)
         }
     }
 
@@ -213,7 +228,7 @@ fun BottomBar(navController: NavController) {
     LaunchedEffect(isOnTabScreen) {
         if (isOnTabScreen) {
             pillVisible = false
-            delay(16) // one frame — lets Compose commit the hidden state
+            delay(16.milliseconds) // one frame — lets Compose commit the hidden state
             pillVisible = true
         } else {
             pillVisible = false
@@ -355,7 +370,15 @@ fun BottomBar(navController: NavController) {
                 contentAlignment = Alignment.Center
             ) {
                 val globalBackdrop = LocalLiquidGlassBackdrop.current
-                val pillShape = RoundedCornerShape(32.dp)
+//                val pillShape = RoundedCornerShape(32.dp)
+                val pillShape =
+                    if (cardCorner > 12) CircleShape
+                    else if (cardCorner == 4) RoundedCornerShape(12.dp)
+                    else RoundedCornerShape(16.dp)
+                val itemShape =
+                    if (cardCorner > 12) CircleShape
+                    else if (cardCorner == 4) RoundedCornerShape(6.dp)
+                    else RoundedCornerShape(10.dp)
 
                 val useLgBottomNav = liquidGlass && lgBottomNav && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && globalBackdrop != null
                 val useBlurBottomNav = blurEffects && blurBottomNav && !useLgBottomNav
@@ -373,6 +396,7 @@ fun BottomBar(navController: NavController) {
                                 selectedIcon = tab.selectedIcon,
                                 unselectedIcon = tab.unselectedIcon,
                                 label = tab.label,
+                                shape = itemShape,
                                 iconOnly = iconOnly,
                                 onClick = tab.onClick
                             )
@@ -392,7 +416,7 @@ fun BottomBar(navController: NavController) {
                             effects = {
                                 val d = density
                                 colorControls(saturation = 1.4f)
-                                blur(2f * d)
+                                blur(blurIntensity * d)
                                 lens(
                                     refractionHeight = 23f * d,
                                     refractionAmount = 64f * d
@@ -410,7 +434,7 @@ fun BottomBar(navController: NavController) {
                         modifier        = Modifier.drawPlainBackdrop(
                             backdrop = globalBackdrop,
                             shape    = { pillShape },
-                            effects  = { blur(30f * density) }
+                            effects  = { blur(blurIntensity * density) }
                         )
                     ) { pillContent() }
                 } else {
@@ -451,7 +475,7 @@ fun BottomBar(navController: NavController) {
                         effects = {
                             val d = density
                             colorControls(saturation = 1.4f)
-                            blur(2f * d)
+                            blur(blurIntensity * d)
                             lens(
                                 refractionHeight = 23f * d,
                                 refractionAmount = 64f * d
@@ -461,7 +485,7 @@ fun BottomBar(navController: NavController) {
                     else if (useBlurBottomNav) Modifier.drawPlainBackdrop(
                         backdrop = globalBackdrop,
                         shape = { navBarShape },
-                        effects = { blur(30f * density) }
+                        effects = { blur(blurIntensity * density) }
                     )
                     else Modifier.background(bottomBarColor)
                 ),
@@ -475,7 +499,8 @@ fun BottomBar(navController: NavController) {
                     tonalElevation = 0.dp,
                     windowInsets = WindowInsets.navigationBars,
                     modifier = Modifier
-                        .fillMaxWidth().navigationBarsPadding()
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
 //                        .wrapContentHeight()
                         .height(bottomBarHeight)
                         .graphicsLayer { alpha = navBarAlpha }
@@ -525,12 +550,9 @@ private fun RowScope.AnimatedNavBarItem(
             selected  -> 1f
             else      -> 1f
         },
-        animationSpec = if (isPressed)
-            tween(durationMillis = 80, easing = FastOutSlowInEasing)
-        else if (selected)
-            spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioMediumBouncy)
-        else
-            tween(durationMillis = 200, easing = FastOutSlowInEasing),
+        animationSpec = if (isPressed) tween(durationMillis = 80, easing = FastOutSlowInEasing)
+                else if (selected) spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioMediumBouncy)
+                else tween(durationMillis = 200, easing = FastOutSlowInEasing),
         label         = "${label}Scale"
     )
 
@@ -551,12 +573,11 @@ private fun RowScope.AnimatedNavBarItem(
                 }
             }
         },
-        label           = if (iconOnly) null
-        else ({ Text(label, style = labelStyle, maxLines = 1, overflow = TextOverflow.Ellipsis) }),
+        label = if (iconOnly) null else ({ Text(label, style = labelStyle, maxLines = 1, overflow = TextOverflow.Ellipsis) }),
         alwaysShowLabel = !iconOnly,
-        selected        = selected,
+        selected = selected,
         interactionSource = interactionSource,
-        colors          = NavigationBarItemDefaults.colors(
+        colors = NavigationBarItemDefaults.colors(
             selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
             indicatorColor    = MaterialTheme.colorScheme.primaryContainer
         ),
@@ -572,6 +593,7 @@ private fun PillNavItem(
     selectedIcon: ImageVector,
     unselectedIcon: ImageVector,
     label: String,
+    shape: Shape,
     iconOnly: Boolean,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
@@ -586,7 +608,7 @@ private fun PillNavItem(
     )
     val iconTint by animateColorAsState(
         targetValue   = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
-        else MaterialTheme.colorScheme.onSurfaceVariant,
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
         animationSpec = tween(durationMillis = 420, easing = FastOutSlowInEasing),
         label         = "${label}IconTint"
     )
@@ -609,7 +631,7 @@ private fun PillNavItem(
     Box(
         modifier = modifier
             .scale(scale)
-            .clip(RoundedCornerShape(50.dp))
+            .clip(shape) //MaterialTheme.shapes.extraLarge
             .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = bgAlpha))
             .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
             .padding(horizontal = if (iconOnly) 16.dp else 14.dp, vertical = 10.dp),

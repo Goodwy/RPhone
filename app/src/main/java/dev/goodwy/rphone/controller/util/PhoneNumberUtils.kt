@@ -23,7 +23,6 @@ fun deduplicateNumbers(numbers: List<String>): List<String> {
         if (existingIndex == -1) {
             unique.add(number)
         } else {
-            // Prefer the number with a '+' or the longer one (usually more complete)
             val existing = unique[existingIndex]
             if (number.contains("+") && !existing.contains("+")) {
                 unique[existingIndex] = number

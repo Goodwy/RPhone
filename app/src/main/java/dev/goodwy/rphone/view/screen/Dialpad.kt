@@ -68,6 +68,7 @@ import dev.goodwy.rphone.liquidglass.effects.colorControls
 import dev.goodwy.rphone.liquidglass.highlight.Highlight
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material.icons.automirrored.outlined.Backspace
+import androidx.compose.material.icons.outlined.Call
 import androidx.compose.material.icons.rounded.People
 import androidx.compose.material.icons.rounded.SearchOff
 import androidx.compose.ui.Alignment
@@ -87,8 +88,6 @@ import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.bottomBarHeight
-import dev.goodwy.rphone.cardCornerBig
-import dev.goodwy.rphone.cardCornerMedium
 import dev.goodwy.rphone.controller.CallLogViewModel
 import dev.goodwy.rphone.liquidglass.LocalLiquidGlassBackdrop
 import dev.goodwy.rphone.view.components.PermissionDeniedView
@@ -108,9 +107,11 @@ import dev.goodwy.rphone.controller.util.SocialUtils.messengerPackages
 import dev.goodwy.rphone.controller.util.forceLtr
 import dev.goodwy.rphone.modal.data.CallLogEntry
 import dev.goodwy.rphone.modal.data.Contact
+import dev.goodwy.rphone.modal.data.getDisplayContactInfo
 import dev.goodwy.rphone.modal.data.getDisplayName
 import dev.goodwy.rphone.view.components.RillDialog
 import dev.goodwy.rphone.view.components.RillExpressiveButton
+import dev.goodwy.rphone.view.components.performAppHaptic
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -217,17 +218,14 @@ fun DialPadScreen(
         containerColor = MaterialTheme.colorScheme.surface,
         contentWindowInsets = WindowInsets(0)
     ) { innerPadding ->
-        val pillNav = remember { prefs.getBoolean(PreferenceManager.KEY_PILL_NAV, false) }
         Box(modifier = Modifier
             .padding(innerPadding)
-            .fillMaxSize()) {
+            .fillMaxSize()
+        ) {
             DialPadContent(
                 initialNumber = number,
                 navigator = navigator,
                 onDismiss = { navigator.navigateUp() },
-                modifier = Modifier
-                    .padding(bottom = if (pillNav) 88.dp else bottomBarHeight - 12.dp)
-                    .navigationBarsPadding()
             )
         }
     }
@@ -240,8 +238,7 @@ fun DialPadContent(
     navigator: DestinationsNavigator? = null,
     onDismiss: (() -> Unit)? = null,
     showHeader: Boolean = false,
-    isBottomSheet: Boolean = false,
-    modifier: Modifier = Modifier
+    isBottomSheet: Boolean = false
 ) {
     val permStateLogs = rememberPermissionState(Manifest.permission.READ_CALL_LOG)
     val isGrantedLogs = permStateLogs.status == PermissionStatus.Granted
@@ -315,7 +312,7 @@ fun DialPadContent(
                         Text(stringResource(R.string.ok))
                     }
                 },
-                shape = RoundedCornerShape(24.dp)
+                shape = MaterialTheme.shapes.extraLarge
             )
         }
 
@@ -762,7 +759,7 @@ fun DialPadContent(
                                         .padding(horizontal = 16.dp, vertical = 4.dp)
                                 )
                                 Surface(
-                                    shape = RoundedCornerShape(24.dp),
+                                    shape = MaterialTheme.shapes.extraLarge,
                                     color = if (isBottomSheet) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surface,
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
@@ -775,21 +772,25 @@ fun DialPadContent(
                                             val defaultOrFirstPhone = contact.phoneDetails.firstOrNull { it.isPrimary }?.number ?: contact.phoneNumbers.firstOrNull()
                                             SingleTile(
                                                 title = getDisplayName(contact, displayOrder), //contact.displayName,
-                                                subtitle = contact.phoneNumbers.firstOrNull(),
+                                                subtitle = getDisplayContactInfo(contact),
                                                 photoUri = contact.photoUri,
                                                 phoneNumber = defaultOrFirstPhone,
-                                                onAvatarClick = {
+                                                trailingContent = {
+                                                    if (defaultOrFirstPhone != null) {
+                                                        IconButton(onClick = { initiateCall(defaultOrFirstPhone) }) {
+                                                            Icon(Icons.Outlined.Call, contentDescription = stringResource(R.string.call), tint = MaterialTheme.colorScheme.primary)
+                                                        }
+                                                    }
+                                                },
+                                                onCall = { if (defaultOrFirstPhone != null) initiateCall(defaultOrFirstPhone) },
+                                                onClick = {
                                                     navigator?.navigate(
                                                         ContactDetailsScreenDestination(
                                                             contactId = contact.id
                                                         )
                                                     )
                                                 },
-                                                onClick = {
-                                                    val num =
-                                                        contact.phoneNumbers.firstOrNull() ?: return@SingleTile
-                                                    initiateCall(num)
-                                                }
+                                                menuOffset = DpOffset(56.dp, 0.dp),
                                             )
                                         }
                                     }
@@ -821,7 +822,7 @@ fun DialPadContent(
                                         .padding(horizontal = 16.dp, vertical = 4.dp)
                                 )
                                 Surface(
-                                    shape = RoundedCornerShape(24.dp),
+                                    shape = MaterialTheme.shapes.extraLarge,
                                     color = if (isBottomSheet) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surface,
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
@@ -836,22 +837,26 @@ fun DialPadContent(
                                             SingleTile(
                                                 title = displayName,
                                                 subtitle = if (log.name == log.number) null else log.number,
-                                                phoneNumber = log.number,
                                                 photoUri = log.photoUri,
-                                                onAvatarClick = if (log.contactId == null) {
-                                                    {
-                                                        val intent = Intent(Intent.ACTION_INSERT).apply {
-                                                            type = ContactsContract.RawContacts.CONTENT_TYPE
-                                                            putExtra(ContactsContract.Intents.Insert.PHONE, log.number)
-                                                        }
-                                                        context.startActivity(intent)
+                                                phoneNumber = log.number,
+                                                trailingContent = {
+                                                    IconButton(onClick = { initiateCall(log.number) }) {
+                                                        Icon(Icons.Outlined.Call, contentDescription = stringResource(R.string.call), tint = MaterialTheme.colorScheme.primary)
                                                     }
-                                                } else null,
-                                                onClick = {
-                                                    val num = log.number
-                                                    initiateCall(num)
                                                 },
-                                                showAddToContact = log.contactId == null
+                                                onCall = { initiateCall(log.number) },
+                                                onClick = {
+                                                    if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
+                                                        performAppHaptic(
+                                                            context,
+                                                            prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light",
+                                                            prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
+                                                        )
+                                                    }
+                                                    navigator?.navigate(ContactDetailsScreenDestination(phoneNumber = log.number))
+                                                },
+                                                showCreateContact = log.contactId == null,
+                                                menuOffset = DpOffset(56.dp, 0.dp),
                                             )
                                         }
                                     }
@@ -872,7 +877,7 @@ fun DialPadContent(
                             .navigationBarsPadding()
                             .padding(horizontal = 6.dp, vertical = 12.dp)
                             .then(if (!isBottomSheet) Modifier.statusBarsPadding() else Modifier),
-                        shape = RoundedCornerShape(cardCornerBig),
+                        shape = MaterialTheme.shapes.extraLarge,
 //                shadowElevation = 2.dp,
                         color = dialpadColor //MaterialTheme.colorScheme.surfaceContainerLow
                     ) {
@@ -888,7 +893,7 @@ fun DialPadContent(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .weight(1.2f)
-                                    .clip(RoundedCornerShape(16.dp))
+                                    .clip(MaterialTheme.shapes.large)
                                     .animateContentSize(
                                         animationSpec = spring(
                                             stiffness = Spring.StiffnessLow,
@@ -1030,7 +1035,7 @@ fun DialPadContent(
             LaunchedEffect(Unit) { focusManager.clearFocus() }
 
             BoxWithConstraints(
-                modifier = modifier
+                modifier = Modifier
                     .fillMaxSize()
                     .then(if (!isBottomSheet) Modifier.statusBarsPadding() else Modifier)
 //            .padding(top = 16.dp)
@@ -1060,14 +1065,14 @@ fun DialPadContent(
                     }
                     Surface(
                         modifier = Modifier.padding(horizontal = 16.dp),
-                        shape = RoundedCornerShape(cardCornerMedium),
+                        shape = MaterialTheme.shapes.large,
                         color = Color.Transparent
                     ) {
                         Column(
                             modifier = Modifier
 //                        .weight(1f)
                                 .fillMaxSize()
-                                .navigationBarsPadding()
+//                                .navigationBarsPadding()
                                 .verticalScroll(listScrollState),
                             verticalArrangement = Arrangement.Top
                         ) {
@@ -1235,7 +1240,7 @@ fun DialPadContent(
                                             .padding(horizontal = 16.dp, vertical = 4.dp)
                                     )
                                     Surface(
-                                        shape = RoundedCornerShape(24.dp),
+                                        shape = MaterialTheme.shapes.extraLarge,
                                         color = if (isBottomSheet) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surface,
                                         modifier = Modifier.fillMaxWidth()
                                     ) {
@@ -1249,20 +1254,25 @@ fun DialPadContent(
                                                 val defaultOrFirstPhone = contact.phoneDetails.firstOrNull { it.isPrimary }?.number ?: contact.phoneNumbers.firstOrNull()
                                                 SingleTile(
                                                     title = getDisplayName(contact, displayOrder), //contact.displayName,
-                                                    subtitle = contact.phoneNumbers.firstOrNull(),
+                                                    subtitle = getDisplayContactInfo(contact),
                                                     photoUri = contact.photoUri,
                                                     phoneNumber = defaultOrFirstPhone,
-                                                    onAvatarClick = {
+                                                    trailingContent = {
+                                                        if (defaultOrFirstPhone != null) {
+                                                            IconButton(onClick = { initiateCall(defaultOrFirstPhone) }) {
+                                                                Icon(Icons.Outlined.Call, contentDescription = stringResource(R.string.call), tint = MaterialTheme.colorScheme.primary)
+                                                            }
+                                                        }
+                                                    },
+                                                    onCall = { if (defaultOrFirstPhone != null) initiateCall(defaultOrFirstPhone) },
+                                                    onClick = {
                                                         navigator?.navigate(
                                                             ContactDetailsScreenDestination(
                                                                 contactId = contact.id
                                                             )
                                                         )
                                                     },
-                                                    onClick = {
-                                                        val num = contact.phoneNumbers.firstOrNull() ?: return@SingleTile
-                                                        initiateCall(num)
-                                                    }
+                                                    menuOffset = DpOffset(56.dp, 64.dp),
                                                 )
                                             }
                                         }
@@ -1297,7 +1307,7 @@ fun DialPadContent(
                                             .padding(horizontal = 16.dp, vertical = 4.dp)
                                     )
                                     Surface(
-                                        shape = RoundedCornerShape(24.dp),
+                                        shape = MaterialTheme.shapes.extraLarge,
                                         color = if (isBottomSheet) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surface,
                                         modifier = Modifier.fillMaxWidth()
                                     ) {
@@ -1312,22 +1322,26 @@ fun DialPadContent(
                                                 SingleTile(
                                                     title = displayName,
                                                     subtitle = if (log.name == log.number) null else log.number,
-                                                    phoneNumber = log.number,
                                                     photoUri = log.photoUri,
-                                                    onAvatarClick = if (log.contactId == null) {
-                                                        {
-                                                            val intent = Intent(Intent.ACTION_INSERT).apply {
-                                                                type = ContactsContract.RawContacts.CONTENT_TYPE
-                                                                putExtra(ContactsContract.Intents.Insert.PHONE, log.number)
-                                                            }
-                                                            context.startActivity(intent)
+                                                    phoneNumber = log.number,
+                                                    trailingContent = {
+                                                        IconButton(onClick = { initiateCall(log.number) }) {
+                                                            Icon(Icons.Outlined.Call, contentDescription = stringResource(R.string.call), tint = MaterialTheme.colorScheme.primary)
                                                         }
-                                                    } else null,
-                                                    onClick = {
-                                                        val num = log.number
-                                                        initiateCall(num)
                                                     },
-                                                    showAddToContact = log.contactId == null
+                                                    onCall = { initiateCall(log.number) },
+                                                    onClick = {
+                                                        if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
+                                                            performAppHaptic(
+                                                                context,
+                                                                prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light",
+                                                                prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
+                                                            )
+                                                        }
+                                                        navigator?.navigate(ContactDetailsScreenDestination(phoneNumber = log.number))
+                                                    },
+                                                    showCreateContact = log.contactId == null,
+                                                    menuOffset = DpOffset(56.dp, 64.dp),
                                                 )
                                             }
                                         }
@@ -1348,7 +1362,7 @@ fun DialPadContent(
 //                                        horizontal = 16.dp,
                                             vertical = 4.dp
                                         ),
-                                    shape = RoundedCornerShape(cardCornerBig),
+                                    shape = MaterialTheme.shapes.extraLarge,
                                     color = MaterialTheme.colorScheme.secondaryContainer
                                 ) {
                                     Row(
@@ -1414,7 +1428,8 @@ fun DialPadContent(
                         val fabShape = RoundedCornerShape(17.dp)
                         FloatingActionButton(
                             modifier = Modifier
-                                .padding(bottom = if (pillNav) 0.dp else 24.dp)
+                                .padding(bottom = if (isBottomSheet) 0.dp else if (pillNav) 88.dp else bottomBarHeight + 12.dp)
+                                .navigationBarsPadding()
                                 .then(
                                     if (dialpadTab) Modifier
                                         .padding(horizontal = 16.dp, vertical = 4.dp)
@@ -1500,8 +1515,9 @@ fun DialPadContent(
                                 Surface(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(bottom = if (pillNav) 0.dp else 24.dp),
-                                    shape = RoundedCornerShape(32.dp),
+                                        .padding(bottom = if (isBottomSheet) 12.dp else if (pillNav) 88.dp else bottomBarHeight + 12.dp)
+                                        .navigationBarsPadding(),
+                                    shape = MaterialTheme.shapes.extraLargeIncreased,
                                     color = dialpadColor, //MaterialTheme.colorScheme.surfaceContainerLow,
 //                            shadowElevation = 2.dp
                                 ) {
@@ -1566,7 +1582,7 @@ fun DialPadContent(
                                                     ) + fadeOut(tween(380))
                                                 ) {
                                                     DropdownMenu(
-                                                        shape = RoundedCornerShape(16.dp),
+                                                        shape = MaterialTheme.shapes.large,
                                                         expanded = showOverflowMenu,
                                                         onDismissRequest = {
                                                             showOverflowMenu = false
@@ -1634,7 +1650,7 @@ fun DialPadContent(
                                                 modifier = Modifier
                                                     .weight(1f)
 //                                            .defaultMinSize(minHeight = if (number.isEmpty()) 64.dp else 0.dp)
-                                                    .clip(RoundedCornerShape(cardCornerMedium))
+                                                    .clip(MaterialTheme.shapes.large)
                                                     .animateContentSize(
                                                         animationSpec = spring(
                                                             stiffness = Spring.StiffnessLow,
@@ -1747,24 +1763,12 @@ fun DialPadContent(
                                         ) {
                                             val lgBackdrop = LocalLiquidGlassBackdrop.current
                                             val lgDialpadEnabled = remember(settingsState) {
-                                                prefs.getBoolean(
-                                                    PreferenceManager.KEY_LIQUID_GLASS,
-                                                    false
-                                                ) &&
-                                                        prefs.getBoolean(
-                                                            PreferenceManager.KEY_LG_DIALPAD_CALL_BUTTON,
-                                                            false
-                                                        )
+                                                prefs.getBoolean(PreferenceManager.KEY_LIQUID_GLASS, false) &&
+                                                        prefs.getBoolean(PreferenceManager.KEY_LG_DIALPAD_CALL_BUTTON, false)
                                             }
                                             val blurDialpadEnabled = remember(settingsState) {
-                                                prefs.getBoolean(
-                                                    PreferenceManager.KEY_BLUR_EFFECTS,
-                                                    false
-                                                ) &&
-                                                        prefs.getBoolean(
-                                                            PreferenceManager.KEY_BLUR_DIALPAD_CALL_BUTTON,
-                                                            false
-                                                        ) &&
+                                                prefs.getBoolean(PreferenceManager.KEY_BLUR_EFFECTS, false) &&
+                                                        prefs.getBoolean(PreferenceManager.KEY_BLUR_DIALPAD_CALL_BUTTON, false) &&
                                                         !lgDialpadEnabled
                                             }
                                             DialerActionExpressive(

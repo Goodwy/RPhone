@@ -137,18 +137,13 @@ fun CallLogTile(
             },
             supportingColor = when (log.type) {
                 CallLog.Calls.MISSED_TYPE, CallLog.Calls.REJECTED_TYPE -> MaterialTheme.colorScheme.error
-                else                        -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.9f)
+                else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.9f)
             },
             onCallClick = { onCallClick(log) },
-            onAvatarClick = { if (onAvatarClick != null) onAvatarClick(log) else null
-            },
-            onAvatarLongClick = {
-                showMenu = true
-            },
+            onAvatarClick = { if (onAvatarClick != null) onAvatarClick(log) },
+            onAvatarLongClick = { showMenu = true },
             directCall = directCall,
-            onLongClick = {
-                onLongClick(log)
-            },
+            onLongClick = { onLongClick(log) },
             isMenuOpen  = showMenu && !selectionMode,
             onClick     = { onTileClick(log) },
             isSelected = isSelected,
@@ -161,10 +156,10 @@ fun CallLogTile(
             exit  = slideOutVertically(targetOffsetY = { -it }, animationSpec = tween(420, easing = FastOutLinearInEasing)) + fadeOut(tween(380))
         ) {
             DropdownMenu(
-                shape = RoundedCornerShape(16.dp),
+                shape = MaterialTheme.shapes.large,
                 expanded = showMenu,
                 onDismissRequest = { showMenu = false },
-                offset = DpOffset(56.dp, 64.dp),
+                offset = DpOffset(72.dp, 72.dp),
             ) {
                 DropdownMenuItem(
                     contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
@@ -334,7 +329,7 @@ fun BatchCallLogActionBar(
                     imageVector = Icons.Default.MoreVert,
                     contentDescription = stringResource(R.string.more)
                 )
-                DropdownMenu(shape = RoundedCornerShape(16.dp), expanded = showSelectionMenuOuter, onDismissRequest = { showSelectionMenuOuter = false }) {
+                DropdownMenu(shape = MaterialTheme.shapes.large, expanded = showSelectionMenuOuter, onDismissRequest = { showSelectionMenuOuter = false }) {
                     if (onClearAll != null) {
                         DropdownMenuItem(
                             contentPadding = PaddingValues(start = 16.dp, end = 20.dp),

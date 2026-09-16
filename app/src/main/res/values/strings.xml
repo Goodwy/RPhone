@@ -126,20 +126,33 @@
     <string name="hex_color_subtitle">Enter a valid 6-digit hex code</string>
     <string name="custom_font">Custom Font</string>
     <string name="custom_font_subtitle">Pick a .ttf file to use across the app</string>
-    <string name="visual_effects">Visual Effects</string>
+    <string name="font_size">Font size</string>
+    <string name="rounding_radius">Rounding radius</string>
+    <string name="visual_effects">Visual effects</string>
     <string name="not_supported_on_this_device">Not supported on this device</string>
     <string name="not_supported_on_this_device_subtitle">Blur and Liquid Glass require Android 12 or higher</string>
     <string name="material_liquid_you_glass">Material Liquid You Glass</string>
-    <string name="material_liquid_you_glass_subtitle">Apply a liquid glass refraction effect to navigation</string>
-    <string name="material_blur_effects">Material Blur Effects</string>
-    <string name="material_blur_effects_subtitle">Apply a background blur effect to navigation</string>
+    <string name="material_liquid_you_glass_subtitle">Apply a liquid glass effect</string>
+    <string name="material_blur_effects">Material Blur effects</string>
+    <string name="material_blur_effects_subtitle">Apply a background blur effect</string>
+    <string name="blur_intensity">Blur intensity</string>
+    <string name="liquid_glass_elements">Liquid Glass elements</string>
+    <string name="liquid_glass_elements_subtitle">Choose which UI elements use the liquid glass effect</string>
+    <string name="blur_effect_elements">Blur effect elements</string>
+    <string name="blur_effect_elements_subtitle">Choose which UI elements use the blur effect</string>
+    <string name="bottom_navigation_bar">Bottom navigation bar</string>
+    <string name="liquid_glass_bottom_navigation_bar">Apply the liquid glass effect to the bottom navigation bar</string>
+    <string name="blur_effect_bottom_navigation_bar">Apply a blur effect to the bottom navigation bar</string>
+    <string name="call_screen">Call screen</string>
+    <string name="liquid_glass_call_screen">Apply the liquid glass effect to the call screen</string>
+    <string name="blur_effect_call_screen">Apply a blur effect to the call screen</string>
     <string name="scroll_animation">Scroll Animation</string>
     <string name="scroll_animation_device">Fade-in animation for list items as you scroll</string>
     <string name="call_ui">Call UI</string>
     <string name="incoming_call_ui">Incoming Call UI</string>
     <string name="incoming_call_ui_subtitle">Choose how to answer incoming calls</string>
     <string name="incoming_call_ui_default_swipe">Default Swipe</string>
-    <string name="incoming_call_ui_horizontal_swipe">Horizontal Swipe</string>
+    <string name="incoming_call_ui_horizontal_swipe">Horizontal Swipe (Google)</string>
     <string name="incoming_call_ui_buttons">Buttons</string>
     <string name="incoming_call_ui_slide_to_answer">Slide to Answer (iOS)</string>
     <string name="incoming_call_ui_vertical_swipe">Vertical Swipe</string>
@@ -329,7 +342,14 @@
     <string name="private_contacts">Private Contacts</string>
     <string name="private_contacts_subtitle">Manage your encrypted local contacts</string>
 
+    <!-- Voicemail -->
+    <string name="settings_voicemail_title">Voicemail</string>
+
     <!-- Call -->
+    <string name="call_failed_airplane_mode">Cannot place call while Airplane mode is on</string>
+    <string name="call_failed_no_network">Call failed: Cellular network unavailable</string>
+    <string name="call_failed_restricted">Call failed: Call is restricted</string>
+    <string name="call_failed_generic">Call could not be completed</string>
     <string name="call">Call</string>
     <string name="incoming">Incoming</string>
     <string name="outgoing">Outgoing</string>

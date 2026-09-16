@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
 import dev.goodwy.rphone.liquidglass.backdrops.LayerBackdrop
 import dev.goodwy.rphone.liquidglass.highlight.Highlight
 import dev.goodwy.rphone.liquidglass.highlight.HighlightElement
@@ -46,6 +47,7 @@ fun Modifier.drawPlainBackdrop(
     backdrop: Backdrop,
     shape: () -> Shape,
     effects: BackdropEffectScope.() -> Unit,
+    shadow: (() -> Shadow?)? = { Shadow(radius = 2.dp) },
     layerBlock: (GraphicsLayerScope.() -> Unit)? = null,
     exportedBackdrop: LayerBackdrop? = null,
     onDrawBehind: (DrawScope.() -> Unit)? = null,
@@ -58,6 +60,16 @@ fun Modifier.drawPlainBackdrop(
         .then(
             if (layerBlock != null) {
                 Modifier.graphicsLayer(layerBlock)
+            } else {
+                Modifier
+            }
+        )
+        .then(
+            if (shadow != null) {
+                ShadowElement(
+                    shapeProvider = shapeProvider,
+                    shadow = shadow
+                )
             } else {
                 Modifier
             }

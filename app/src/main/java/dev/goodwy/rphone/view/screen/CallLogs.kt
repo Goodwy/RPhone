@@ -116,7 +116,7 @@ fun CallLogFullScreen(
 
     val filteredByContact = remember { MutableStateFlow<List<CallLogEntry>>(emptyList()) }
 
-    // Подписываемся на изменения allLogs и фильтруем в фоне
+    // Subscribe to changes in allLogs and filter them in the background
     LaunchedEffect(allLogs, contactId, phoneNumber, numbersList) {
         val result = withContext(Dispatchers.IO) {
             if (contactId == null && phoneNumber == null && numbersList == null) {

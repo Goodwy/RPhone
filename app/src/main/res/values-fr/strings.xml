@@ -122,13 +122,26 @@
     <string name="hex_color_subtitle">Entrez un code hexadécimal valide de 6 chiffres</string>
     <string name="custom_font">Police personnalisée</string>
     <string name="custom_font_subtitle">Choisissez un fichier .ttf à utiliser dans l\'application</string>
+    <string name="font_size">Taille de police</string>
+    <string name="rounding_radius">Rayon d\'arrondi</string>
     <string name="visual_effects">Effets visuels</string>
     <string name="not_supported_on_this_device">Non pris en charge sur cet appareil</string>
     <string name="not_supported_on_this_device_subtitle">Le flou et le verre liquide nécessitent Android 12 ou supérieur</string>
     <string name="material_liquid_you_glass">Verre liquide Material You</string>
-    <string name="material_liquid_you_glass_subtitle">Appliquer un effet de verre liquide à la navigation</string>
+    <string name="material_liquid_you_glass_subtitle">Appliquer un effet de verre liquide</string>
     <string name="material_blur_effects">Effets de flou Material</string>
-    <string name="material_blur_effects_subtitle">Appliquer un effet de flou d\'arrière-plan à la navigation</string>
+    <string name="material_blur_effects_subtitle">Appliquer un effet de flou d\'arrière-plan</string>
+    <string name="blur_intensity">Intensité du flou</string>
+    <string name="liquid_glass_elements">Éléments en verre liquide</string>
+    <string name="liquid_glass_elements_subtitle">Choisissez quels éléments d\'interface utilisent l\'effet de verre liquide</string>
+    <string name="blur_effect_elements">Éléments avec effet de flou</string>
+    <string name="blur_effect_elements_subtitle">Choisissez quels éléments d\'interface utilisent l\'effet de flou</string>
+    <string name="bottom_navigation_bar">Barre de navigation inférieure</string>
+    <string name="liquid_glass_bottom_navigation_bar">Appliquer l\'effet de verre liquide à la barre de navigation inférieure</string>
+    <string name="blur_effect_bottom_navigation_bar">Appliquer un effet de flou à la barre de navigation inférieure</string>
+    <string name="call_screen">Écran d\'appel</string>
+    <string name="liquid_glass_call_screen">Appliquer l\'effet de verre liquide à l\'écran d\'appel</string>
+    <string name="blur_effect_call_screen">Appliquer un effet de flou à l\'écran d\'appel</string>
     <string name="scroll_animation">Animation de défilement</string>
     <string name="scroll_animation_device">Animation d\'apparition pour les éléments de la liste lors du défilement</string>
     <string name="call_ui">Interface d\'appel</string>
@@ -325,7 +338,14 @@
     <string name="private_contacts">Contacts privés</string>
     <string name="private_contacts_subtitle">Gérer vos contacts locaux chiffrés</string>
 
+    <!-- Voicemail -->
+    <string name="settings_voicemail_title">Messagerie vocale</string>
+
     <!-- Call -->
+    <string name="call_failed_airplane_mode">Impossible de passer un appel lorsque le mode Avion est activé</string>
+    <string name="call_failed_no_network">Échec de l\'appel : réseau cellulaire indisponible</string>
+    <string name="call_failed_restricted">Échec de l\'appel : appel restreint</string>
+    <string name="call_failed_generic">L\'appel n\'a pas pu aboutir</string>
     <string name="call">Appel</string>
     <string name="incoming">Entrant</string>
     <string name="outgoing">Sortant</string>

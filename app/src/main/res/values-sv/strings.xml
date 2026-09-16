@@ -122,13 +122,26 @@
     <string name="hex_color_subtitle">Ange en giltig 6-siffrig hex-kod</string>
     <string name="custom_font">Anpassat typsnitt</string>
     <string name="custom_font_subtitle">Välj en .ttf-fil för användning i appen</string>
+    <string name="font_size">Teckenstorlek</string>
+    <string name="rounding_radius">Avrundningsradie</string>
     <string name="visual_effects">Visuella effekter</string>
     <string name="not_supported_on_this_device">Stöds inte på den här enheten</string>
     <string name="not_supported_on_this_device_subtitle">Oskärpa och Liquid Glass kräver Android 12 eller senare</string>
     <string name="material_liquid_you_glass">Liquid Glass Material You</string>
-    <string name="material_liquid_you_glass_subtitle">Applicera en flytande glaseffekt på navigeringen</string>
+    <string name="material_liquid_you_glass_subtitle">Använd en flytande glaseffekt</string>
     <string name="material_blur_effects">Material oskärpeeffekter</string>
-    <string name="material_blur_effects_subtitle">Applicera en bakgrundsoskärpa på navigeringen</string>
+    <string name="material_blur_effects_subtitle">Använd en bakgrundsoskärpeeffekt</string>
+    <string name="blur_intensity">Oskärpeintensitet</string>
+    <string name="liquid_glass_elements">Flytande glaselement</string>
+    <string name="liquid_glass_elements_subtitle">Välj vilka gränssnittselement som använder den flytande glaseffekten</string>
+    <string name="blur_effect_elements">Element med oskärpeeffekt</string>
+    <string name="blur_effect_elements_subtitle">Välj vilka gränssnittselement som använder oskärpeeffekten</string>
+    <string name="bottom_navigation_bar">Nedre navigeringsfältet</string>
+    <string name="liquid_glass_bottom_navigation_bar">Använd den flytande glaseffekten på det nedre navigeringsfältet</string>
+    <string name="blur_effect_bottom_navigation_bar">Använd en oskärpeeffekt på det nedre navigeringsfältet</string>
+    <string name="call_screen">Samtalskärm</string>
+    <string name="liquid_glass_call_screen">Använd den flytande glaseffekten på samtalskärmen</string>
+    <string name="blur_effect_call_screen">Använd en oskärpeeffekt på samtalskärmen</string>
     <string name="scroll_animation">Rullningsanimation</string>
     <string name="scroll_animation_device">Inmatningsanimation för listobjekt när du rullar</string>
     <string name="call_ui">Samtalsgränssnitt</string>
@@ -325,7 +338,14 @@
     <string name="private_contacts">Privata kontakter</string>
     <string name="private_contacts_subtitle">Hantera dina krypterade lokala kontakter</string>
 
+    <!-- Voicemail -->
+    <string name="settings_voicemail_title">Röstbrevlåda</string>
+
     <!-- Call -->
+    <string name="call_failed_airplane_mode">Kan inte ringa när flygplansläget är på</string>
+    <string name="call_failed_no_network">Samtal misslyckades: mobilnätet är inte tillgängligt</string>
+    <string name="call_failed_restricted">Samtal misslyckades: samtalet är begränsat</string>
+    <string name="call_failed_generic">Samtalet kunde inte slutföras</string>
     <string name="call">Samtal</string>
     <string name="incoming">Inkommande</string>
     <string name="outgoing">Utgående</string>

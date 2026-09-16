@@ -123,13 +123,26 @@
     <string name="hex_color_subtitle">یک کد هگزادسیمال معتبر 6 رقمی وارد کنید</string>
     <string name="custom_font">فونت سفارشی</string>
     <string name="custom_font_subtitle">یک فایل .ttf برای استفاده در سراسر برنامه انتخاب کنید</string>
+    <string name="font_size">اندازه قلم</string>
+    <string name="rounding_radius">شعاع گرد کردن</string>
     <string name="visual_effects">جلوه‌های بصری</string>
     <string name="not_supported_on_this_device">در این دستگاه پشتیبانی نمی‌شود</string>
     <string name="not_supported_on_this_device_subtitle">محو و شیشه مایع نیاز به Android 12 یا بالاتر دارد</string>
     <string name="material_liquid_you_glass">شیشه مایع Material You</string>
-    <string name="material_liquid_you_glass_subtitle">اعمال جلوه شیشه مایع به ناوبری</string>
+    <string name="material_liquid_you_glass_subtitle">اعمال جلوه شیشه مایع</string>
     <string name="material_blur_effects">جلوه‌های محو Material</string>
-    <string name="material_blur_effects_subtitle">اعمال جلوه محو پس‌زمینه به ناوبری</string>
+    <string name="material_blur_effects_subtitle">اعمال جلوه محو پس‌زمینه</string>
+    <string name="blur_intensity">شدت محو</string>
+    <string name="liquid_glass_elements">عناصر شیشه مایع</string>
+    <string name="liquid_glass_elements_subtitle">انتخاب کنید کدام عناصر رابط کاربری از جلوه شیشه مایع استفاده کنند</string>
+    <string name="blur_effect_elements">عناصر جلوه محو</string>
+    <string name="blur_effect_elements_subtitle">انتخاب کنید کدام عناصر رابط کاربری از جلوه محو استفاده کنند</string>
+    <string name="bottom_navigation_bar">نوار ناوبری پایین</string>
+    <string name="liquid_glass_bottom_navigation_bar">اعمال جلوه شیشه مایع به نوار ناوبری پایین</string>
+    <string name="blur_effect_bottom_navigation_bar">اعمال جلوه محو به نوار ناوبری پایین</string>
+    <string name="call_screen">صفحه تماس</string>
+    <string name="liquid_glass_call_screen">اعمال جلوه شیشه مایع به صفحه تماس</string>
+    <string name="blur_effect_call_screen">اعمال جلوه محو به صفحه تماس</string>
     <string name="scroll_animation">انیمیشن اسکرول</string>
     <string name="scroll_animation_device">انیمیشن ظاهر شدن برای آیتم‌های لیست هنگام اسکرول</string>
     <string name="call_ui">رابط کاربری تماس</string>
@@ -326,7 +339,14 @@
     <string name="private_contacts">مخاطبان خصوصی</string>
     <string name="private_contacts_subtitle">مدیریت مخاطبان محلی رمزگذاری شده شما</string>
 
+    <!-- Voicemail -->
+    <string name="settings_voicemail_title">پیام صوتی</string>
+
     <!-- Call -->
+    <string name="call_failed_airplane_mode">در حالت پرواز نمی‌توان تماس برقرار کرد</string>
+    <string name="call_failed_no_network">تماس ناموفق: شبکه تلفن همراه در دسترس نیست</string>
+    <string name="call_failed_restricted">تماس ناموفق: تماس محدود شده است</string>
+    <string name="call_failed_generic">تماس تکمیل نشد</string>
     <string name="call">تماس</string>
     <string name="incoming">ورودی</string>
     <string name="outgoing">خروجی</string>

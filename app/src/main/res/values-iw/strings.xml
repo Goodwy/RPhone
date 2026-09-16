@@ -123,13 +123,26 @@
     <string name="hex_color_subtitle">הזן קוד הקסדצימלי תקין של 6 ספרות</string>
     <string name="custom_font">גופן מותאם אישית</string>
     <string name="custom_font_subtitle">בחר קובץ .ttf לשימוש באפליקציה</string>
+    <string name="font_size">גודל גופן</string>
+    <string name="rounding_radius">רדיוס עיגול</string>
     <string name="visual_effects">אפקטים ויזואליים</string>
     <string name="not_supported_on_this_device">לא נתמך במכשיר זה</string>
     <string name="not_supported_on_this_device_subtitle">טשטוש וזכוכית נוזלית דורשים Android 12 ומעלה</string>
     <string name="material_liquid_you_glass">זכוכית נוזלית Material You</string>
-    <string name="material_liquid_you_glass_subtitle">החל אפקט זכוכית נוזלית על הניווט</string>
+    <string name="material_liquid_you_glass_subtitle">החל אפקט זכוכית נוזלית</string>
     <string name="material_blur_effects">אפקטי טשטוש Material</string>
-    <string name="material_blur_effects_subtitle">החל אפקט טשטוש רקע על הניווט</string>
+    <string name="material_blur_effects_subtitle">החל אפקט טשטוש רקע</string>
+    <string name="blur_intensity">עוצמת טשטוש</string>
+    <string name="liquid_glass_elements">רכיבי זכוכית נוזלית</string>
+    <string name="liquid_glass_elements_subtitle">בחר אילו רכיבי ממשק משתמשים באפקט הזכוכית הנוזלית</string>
+    <string name="blur_effect_elements">רכיבי אפקט טשטוש</string>
+    <string name="blur_effect_elements_subtitle">בחר אילו רכיבי ממשק משתמשים באפקט הטשטוש</string>
+    <string name="bottom_navigation_bar">סרגל ניווט תחתון</string>
+    <string name="liquid_glass_bottom_navigation_bar">החל את אפקט הזכוכית הנוזלית על סרגל הניווט התחתון</string>
+    <string name="blur_effect_bottom_navigation_bar">החל אפקט טשטוש על סרגל הניווט התחתון</string>
+    <string name="call_screen">מסך שיחה</string>
+    <string name="liquid_glass_call_screen">החל את אפקט הזכוכית הנוזלית על מסך השיחה</string>
+    <string name="blur_effect_call_screen">החל אפקט טשטוש על מסך השיחה</string>
     <string name="scroll_animation">אנימציית גלילה</string>
     <string name="scroll_animation_device">אנימציית הופעה לפריטי רשימה בעת הגלילה</string>
     <string name="call_ui">ממשק שיחה</string>
@@ -326,7 +339,14 @@
     <string name="private_contacts">אנשי קשר פרטיים</string>
     <string name="private_contacts_subtitle">נהל את אנשי הקשר המקומיים המוצפנים שלך</string>
 
+    <!-- Voicemail -->
+    <string name="settings_voicemail_title">תא קולי</string>
+
     <!-- Call -->
+    <string name="call_failed_airplane_mode">לא ניתן לבצע שיחה כשמצב טיסה פועל</string>
+    <string name="call_failed_no_network">השיחה נכשלה: רשת סלולרית אינה זמינה</string>
+    <string name="call_failed_restricted">השיחה נכשלה: השיחה מוגבלת</string>
+    <string name="call_failed_generic">לא ניתן היה להשלים את השיחה</string>
     <string name="call">שיחה</string>
     <string name="incoming">נכנסת</string>
     <string name="outgoing">יוצאת</string>

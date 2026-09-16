@@ -5,6 +5,9 @@ import android.view.Surface
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.rounded.CallEnd
+import androidx.compose.material.icons.rounded.CallToAction
+import androidx.compose.material.icons.rounded.SmartButton
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -26,6 +29,7 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.view.components.Title
+import dev.goodwy.rphone.view.theme.customColors
 import org.koin.compose.koinInject
 
 private data class LgElement(
@@ -33,24 +37,42 @@ private data class LgElement(
     val headline: String,
     val supporting: String,
     val icon: ImageVector,
-    val iconColor: Color
+    val iconColor: Color,
+    val iconBgColor: Color
 )
 
-private val LG_ELEMENTS = listOf(
-    LgElement(
-        key = PreferenceManager.KEY_LG_BOTTOM_NAV,
-        headline = "Bottom Navigation Bar",
-        supporting = "Apply liquid glass to the pill-style bottom navigation bar",
-        icon = Icons.Outlined.ViewStream,
-        iconColor = Color(0xFF00BCD4)
-    ),
-    LgElement(
-        key = PreferenceManager.KEY_LG_DROPDOWN_MENU,
-        headline = "Dropdown Menu",
-        supporting = "Apply liquid glass to context and overflow dropdown menus",
-        icon = Icons.Outlined.MoreVert,
-        iconColor = Color(0xFF9C27B0)
-    ),
+@Composable
+private fun rememberLgElements(): List<LgElement> {
+    val customColors = MaterialTheme.colorScheme.customColors
+    val bottomNavigationBar = stringResource(R.string.bottom_navigation_bar)
+    val bottomNavigationBarSubtitle = stringResource(R.string.liquid_glass_bottom_navigation_bar)
+    val callScreen = stringResource(R.string.call_screen)
+    val callScreenSubtitle = stringResource(R.string.liquid_glass_call_screen)
+    return remember(customColors) {
+        listOf(
+            LgElement(
+                key = PreferenceManager.KEY_LG_BOTTOM_NAV,
+                headline = bottomNavigationBar,
+                supporting = bottomNavigationBarSubtitle,
+                icon = Icons.Rounded.CallToAction,
+                iconColor = customColors.colorDarkAmber,
+                iconBgColor = customColors.colorAmber,
+            ),
+            LgElement(
+                key = PreferenceManager.KEY_LG_CALL_SCREEN,
+                headline = callScreen,
+                supporting = callScreenSubtitle,
+                icon = Icons.Rounded.CallEnd,
+                iconColor = customColors.colorDarkGreen,
+                iconBgColor = customColors.colorGreen,
+            ),
+//    LgElement(
+//        key = PreferenceManager.KEY_LG_DROPDOWN_MENU,
+//        headline = "Dropdown Menu",
+//        supporting = "Apply liquid glass to context and overflow dropdown menus",
+//        icon = Icons.Outlined.MoreVert,
+//        iconColor = Color(0xFF9C27B0)
+//    ),
 //    LgElement(
 //        key = PreferenceManager.KEY_LG_DIALPAD_CALL_BUTTON,
 //        headline = "Dialpad Call Button",
@@ -72,16 +94,19 @@ private val LG_ELEMENTS = listOf(
 //        icon = Icons.Outlined.History,
 //        iconColor = Color(0xFFFF9800)
 //    ),
-)
+        )
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Destination<RootGraph>
 @Composable
 fun LiquidGlassElementsScreen(navigator: DestinationsNavigator) {
     val prefs = koinInject<PreferenceManager>()
+    val lgElements = rememberLgElements()
 
-    val states = remember {
-        LG_ELEMENTS.associate { el ->
+    val states = remember(lgElements) {
+        lgElements.associate { el ->
             el.key to mutableStateOf(prefs.getBoolean(el.key, true))
         }
     }
@@ -98,7 +123,7 @@ fun LiquidGlassElementsScreen(navigator: DestinationsNavigator) {
                     if (isRotation90) WindowInsetsSides.Top + WindowInsetsSides.Horizontal
                     else WindowInsetsSides.Top
                 ),
-                title = { Title("Liquid Glass Elements") },
+                title = { Title(stringResource(R.string.liquid_glass_elements)) },
                 navigationIcon = {
                     NavigationIcon(onClick = { navigator.navigateUp() })
                 }
@@ -122,7 +147,7 @@ fun LiquidGlassElementsScreen(navigator: DestinationsNavigator) {
             item {
                 RillAnimatedSection(delayMs = 0L) {
                     Text(
-                        text = "Select which elements use the liquid glass effect. Requires \"Material Liquid You Glass\" to be enabled.",
+                        text = stringResource(R.string.liquid_glass_elements_subtitle),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
@@ -133,25 +158,20 @@ fun LiquidGlassElementsScreen(navigator: DestinationsNavigator) {
             item {
                 RillAnimatedSection(delayMs = 40L) {
                     RillExpressiveCard {
-                        LG_ELEMENTS.forEachIndexed { index, element ->
+                        lgElements.forEachIndexed { index, element ->
                             val checked by states[element.key]!!
                             RillSwitchListItem(
                                 headline = element.headline,
                                 supporting = element.supporting,
                                 leadingIcon = element.icon,
                                 iconContainerColor = element.iconColor,
+                                iconBgContainerColor = element.iconBgColor,
                                 checked = checked,
                                 onCheckedChange = { newValue ->
                                     states[element.key]!!.value = newValue
                                     prefs.setBoolean(element.key, newValue)
                                 }
                             )
-//                            if (index < LG_ELEMENTS.lastIndex) {
-//                                HorizontalDivider(
-//                                    modifier = Modifier.padding(horizontal = 16.dp),
-//                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-//                                )
-//                            }
                         }
                     }
                 }

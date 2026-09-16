@@ -106,6 +106,7 @@ import dev.goodwy.rphone.device_only
 import dev.goodwy.rphone.private_only
 import dev.goodwy.rphone.view.components.RillDialog
 import dev.goodwy.rphone.view.components.Title
+import dev.goodwy.rphone.view.theme.RillShapeDefaults
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinActivityViewModel
 
@@ -779,7 +780,7 @@ fun ContactEditScreen(
                                 )
                             }
                             DropdownMenu(
-                                shape = RoundedCornerShape(16.dp),
+                                shape = MaterialTheme.shapes.large,
                                 expanded = showSelectionMenuOuter,
                                 onDismissRequest = { showSelectionMenuOuter = false }
                             ) {
@@ -929,13 +930,13 @@ fun ContactEditScreen(
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier
                                         .size(width = 82.dp, height = 160.dp)
-                                        .clip(MaterialTheme.shapes.medium)
+                                        .clip(RoundedCornerShape(RillShapeDefaults.BaseMedium))
                                 )
                             } else {
                                 Box(
                                     modifier = Modifier
                                         .size(width = 82.dp, height = 160.dp)
-                                        .clip(MaterialTheme.shapes.medium)
+                                        .clip(RoundedCornerShape(RillShapeDefaults.BaseMedium))
                                         .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -1660,13 +1661,13 @@ fun ContactEditScreen(
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier
                                         .size(width = 82.dp, height = 160.dp)
-                                        .clip(MaterialTheme.shapes.medium)
+                                        .clip(RoundedCornerShape(RillShapeDefaults.BaseMedium))
                                 )
                             } else {
                                 Box(
                                     modifier = Modifier
                                         .size(width = 82.dp, height = 160.dp)
-                                        .clip(MaterialTheme.shapes.medium)
+                                        .clip(RoundedCornerShape(RillShapeDefaults.BaseMedium))
                                         .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                                     contentAlignment = Alignment.Center
                                 ) {

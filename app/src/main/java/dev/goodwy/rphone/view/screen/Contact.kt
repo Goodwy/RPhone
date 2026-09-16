@@ -683,7 +683,7 @@ fun BatchActionBar(
                     imageVector = Icons.Default.MoreVert,
                     contentDescription = stringResource(R.string.more)
                 )
-                DropdownMenu(shape = RoundedCornerShape(16.dp), expanded = showSelectionMenuOuter, onDismissRequest = { showSelectionMenuOuter = false }) {
+                DropdownMenu(shape = MaterialTheme.shapes.large, expanded = showSelectionMenuOuter, onDismissRequest = { showSelectionMenuOuter = false }) {
                     DropdownMenuItem(
                         contentPadding = PaddingValues(start = 16.dp, end = 20.dp),
                         text = { Text(stringResource(R.string.share)) },

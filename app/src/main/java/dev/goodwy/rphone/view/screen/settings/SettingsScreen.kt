@@ -20,6 +20,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.CallSplit
@@ -89,12 +90,14 @@ import dev.goodwy.rphone.controller.util.ContactUtils.getAccountIcon
 import dev.goodwy.rphone.controller.util.openLink
 import dev.goodwy.rphone.view.components.Title
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
+import dev.goodwy.rphone.view.theme.RillShapeDefaults
 import dev.goodwy.rphone.view.theme.TabTransitionStyle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import java.io.File
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Destination<RootGraph>(style = TabTransitionStyle::class)
@@ -114,6 +117,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
     val scope = rememberCoroutineScope()
 
     var proximityBg by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_PROXIMITY_BG, true)) }
+    val cardCorner  = remember { prefs.getInt(PreferenceManager.KEY_CARD_ROUNDNESS, RillShapeDefaults.DefaultRoundness) }
     val purchaseHelper: PurchaseHelper = koinInject()
     val isPro by purchaseHelper.isPro.collectAsStateWithLifecycle()
     val proCheckDone by purchaseHelper.proCheckDone.collectAsStateWithLifecycle()
@@ -138,7 +142,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
     fun navigateBack() {
         isClosing = true
         scope.launch {
-            delay(280)
+            delay(280.milliseconds)
             navigator.navigateUp()
         }
     }
@@ -257,7 +261,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
             LaunchedEffect(state.downloadId) {
                 val dm = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
                 while (true) {
-                    delay(300)
+                    delay(300.milliseconds)
                     val query = DownloadManager.Query().setFilterById(state.downloadId)
                     val cursor = dm.query(query)
                     if (!cursor.moveToFirst()) { cursor.close(); break }
@@ -382,6 +386,8 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.hex_color_subtitle),
                 stringResource(R.string.custom_font),
                 stringResource(R.string.custom_font_subtitle),
+                stringResource(R.string.font_size),
+                stringResource(R.string.rounding_radius),
                 stringResource(R.string.visual_effects),
                 stringResource(R.string.not_supported_on_this_device),
                 stringResource(R.string.not_supported_on_this_device_subtitle),
@@ -389,6 +395,11 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.material_liquid_you_glass_subtitle),
                 stringResource(R.string.material_blur_effects),
                 stringResource(R.string.material_blur_effects_subtitle),
+                stringResource(R.string.blur_intensity),
+                stringResource(R.string.liquid_glass_elements),
+                stringResource(R.string.blur_effect_elements),
+                stringResource(R.string.bottom_navigation_bar),
+                stringResource(R.string.call_screen),
                 stringResource(R.string.scroll_animation),
                 stringResource(R.string.scroll_animation_device),
                 stringResource(R.string.dialpad_animations),
@@ -765,8 +776,10 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
+                // Search bar
+                val shape = if (cardCorner > 12) CircleShape else MaterialTheme.shapes.extraExtraLarge
                 Surface(
-                    shape = RoundedCornerShape(28.dp),
+                    shape = shape,
                     color = cardColor,
                     modifier = Modifier.fillMaxWidth()
                 ) {

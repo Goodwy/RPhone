@@ -123,13 +123,26 @@
     <string name="hex_color_subtitle">אַרײַן אַ גילטיקן 6-ציפֿעריקן העקס קאָד</string>
     <string name="custom_font">פּערזענלעכער שריפֿט</string>
     <string name="custom_font_subtitle">קלויב אַ .ttf טעקע פֿאַר נוץ אין דער אַפּ</string>
+    <string name="font_size">שריפֿט גרייס</string>
+    <string name="rounding_radius">ראַונדינג ראַדיוס</string>
     <string name="visual_effects">וויזועלע עפעקטן</string>
     <string name="not_supported_on_this_device">נישט געשטיצט אויף דעם גערעט</string>
     <string name="not_supported_on_this_device_subtitle">בלער און פֿליסיק גלאָז פֿאַרלאַנגען Android 12 אָדער העכער</string>
     <string name="material_liquid_you_glass">פֿליסיק גלאָז Material You</string>
-    <string name="material_liquid_you_glass_subtitle">צולייגן אַ פֿליסיק גלאָז עפעקט צו נאַוויגאַציע</string>
+    <string name="material_liquid_you_glass_subtitle">צולייגן אַ פֿליסיק גלאָז עפעקט</string>
     <string name="material_blur_effects">Material בלער עפעקטן</string>
-    <string name="material_blur_effects_subtitle">צולייגן אַ הינטערגרונט בלער עפעקט צו נאַוויגאַציע</string>
+    <string name="material_blur_effects_subtitle">צולייגן אַ הינטערגרונט בלער עפעקט</string>
+    <string name="blur_intensity">בלער אינטענסיטעט</string>
+    <string name="liquid_glass_elements">פֿליסיק גלאָז עלעמענטן</string>
+    <string name="liquid_glass_elements_subtitle">קלויב וועלכע UI עלעמענטן ניצן דעם פֿליסיק גלאָז עפעקט</string>
+    <string name="blur_effect_elements">בלער עפעקט עלעמענטן</string>
+    <string name="blur_effect_elements_subtitle">קלויב וועלכע UI עלעמענטן ניצן דעם בלער עפעקט</string>
+    <string name="bottom_navigation_bar">אונטערשטער נאַוויגאַציע באַר</string>
+    <string name="liquid_glass_bottom_navigation_bar">צולייגן דעם פֿליסיק גלאָז עפעקט צום אונטערשטן נאַוויגאַציע באַר</string>
+    <string name="blur_effect_bottom_navigation_bar">צולייגן אַ בלער עפעקט צום אונטערשטן נאַוויגאַציע באַר</string>
+    <string name="call_screen">רוף פאַרשטעל</string>
+    <string name="liquid_glass_call_screen">צולייגן דעם פֿליסיק גלאָז עפעקט צום רוף פאַרשטעל</string>
+    <string name="blur_effect_call_screen">צולייגן אַ בלער עפעקט צום רוף פאַרשטעל</string>
     <string name="scroll_animation">גליט אַנימאַציע</string>
     <string name="scroll_animation_device">אַרײַנקומען אַנימאַציע פֿאַר ליסטע פּונקטן בשעת גליטן</string>
     <string name="call_ui">רוף אינ"פ</string>
@@ -326,7 +339,14 @@
     <string name="private_contacts">פּריוואַטע קאָנטאַקטן</string>
     <string name="private_contacts_subtitle">פֿאַרוואַלטן דײַנע פֿאַרשלעסלטע לאָקאַלע קאָנטאַקטן</string>
 
+    <!-- Voicemail -->
+    <string name="settings_voicemail_title">שטים פּאָסט</string>
+
     <!-- Call -->
+    <string name="call_failed_airplane_mode">מען קען נישט מאַכן אַ רוף ווען פֿליגער מאָדע איז אָן</string>
+    <string name="call_failed_no_network">רוף דורכגעפֿאַלן: צעלקער נעצווערק נישט פֿאַראַן</string>
+    <string name="call_failed_restricted">רוף דורכגעפֿאַלן: רוף איז באַגרענעצט</string>
+    <string name="call_failed_generic">דער רוף האָט נישט געקענט פֿאַרענדיקט ווערן</string>
     <string name="call">רוף</string>
     <string name="incoming">איינקומענדיק</string>
     <string name="outgoing">אויסגייענדיק</string>

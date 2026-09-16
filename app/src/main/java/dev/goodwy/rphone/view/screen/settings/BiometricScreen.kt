@@ -40,6 +40,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.automirrored.rounded.Backspace
 import androidx.compose.material.icons.filled.Check
@@ -74,7 +75,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.window.DialogProperties
 import androidx.fragment.app.FragmentActivity
-import dev.goodwy.rphone.cardCornerMedium
 import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillExpressiveCard
 import dev.goodwy.rphone.view.components.RillListItem
@@ -85,15 +85,16 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.goodwy.rphone.R
-import dev.goodwy.rphone.cardCornerBig
-import dev.goodwy.rphone.cardCornerSmall
+import dev.goodwy.rphone.cardCornerExtraSmall
 import dev.goodwy.rphone.modal.data.Contact
 import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 import dev.goodwy.rphone.view.components.RillAvatar
 import dev.goodwy.rphone.view.components.Title
+import dev.goodwy.rphone.view.theme.RillShapeDefaults
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Destination<RootGraph>
@@ -158,7 +159,7 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
 
     fun navigateBack() {
         isClosing = true
-        scope.launch { delay(260); navigator.navigateUp() }
+        scope.launch { delay(260.milliseconds); navigator.navigateUp() }
     }
 
     val systemBiometricsAvailable = remember {
@@ -311,7 +312,7 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
                                     modifier = Modifier
                                         .background(
                                             color = cardColor,
-                                            shape = RoundedCornerShape(cardCornerSmall)
+                                            shape = RoundedCornerShape(cardCornerExtraSmall)
                                         )
                                         .padding(12.dp)
                                 ) {
@@ -401,7 +402,7 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
                                             )
                                             .background(
                                                 color = cardColor,
-                                                shape = RoundedCornerShape(cardCornerSmall)
+                                                shape = RoundedCornerShape(cardCornerExtraSmall)
                                             )
                                             .fillMaxWidth()
                                             .padding(horizontal = 16.dp, vertical = 14.dp),
@@ -618,6 +619,8 @@ private fun ContactPickerDialog(
     onDone: (Set<String>) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val prefs = koinInject<PreferenceManager>()
+    val cardCorner  = remember { prefs.getInt(PreferenceManager.KEY_CARD_ROUNDNESS, RillShapeDefaults.DefaultRoundness) }
     // working copy — normalised to last-10-digit strings for matching
     var selectedNumbers by remember {
         mutableStateOf(initialSelectedNumbers.map { it.filter(Char::isDigit).takeLast(10) }.toSet())
@@ -670,7 +673,7 @@ private fun ContactPickerDialog(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        shape = MaterialTheme.shapes.extraLarge.copy(bottomStart = CornerSize(0.dp), bottomEnd = CornerSize(0.dp)),
         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         tonalElevation = 4.dp,
         scrimColor = Color.Transparent,
@@ -716,6 +719,7 @@ private fun ContactPickerDialog(
                         }
                     )
                     // Search bar
+                    val shape = if (cardCorner > 12) CircleShape else MaterialTheme.shapes.extraExtraLarge
                     OutlinedTextField(
                         value = searchQuery,
                         onValueChange = { searchQuery = it },
@@ -742,7 +746,7 @@ private fun ContactPickerDialog(
                             }
                         },
                         singleLine = true,
-                        shape = RoundedCornerShape(28.dp),
+                        shape = shape,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 8.dp),
@@ -784,7 +788,7 @@ private fun ContactPickerDialog(
                     Surface(
                         color = Color.Transparent,
                         modifier = Modifier.padding(horizontal = 16.dp).padding(top = 8.dp).fillMaxSize(),
-                        shape = RoundedCornerShape(cardCornerBig),
+                        shape = MaterialTheme.shapes.extraLarge,
                     ) {
                         LazyColumn(
 //                                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
@@ -801,7 +805,7 @@ private fun ContactPickerDialog(
                                 val interactionSource = remember { MutableInteractionSource() }
                                 val isPressed by interactionSource.collectIsPressedAsState()
                                 val cornerRadius by animateDpAsState(
-                                    if (checked || isPressed) 50.dp else cardCornerSmall,
+                                    if (checked || isPressed) 50.dp else cardCornerExtraSmall,
                                     spring(stiffness = Spring.StiffnessMediumLow),
                                     label = "cr${contact.id}"
                                 )
@@ -907,7 +911,7 @@ private fun BiometricTypeSheet(
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        shape = MaterialTheme.shapes.extraLarge.copy(bottomStart = CornerSize(0.dp), bottomEnd = CornerSize(0.dp)),
         containerColor = MaterialTheme.colorScheme.surface,
         dragHandle = null
     ) {
@@ -933,7 +937,7 @@ private fun BiometricTypeSheet(
             Spacer(modifier = Modifier.height(8.dp))
 
             // System Biometrics option
-            RillExpressiveCard(shape = RoundedCornerShape(cardCornerMedium)) {
+            RillExpressiveCard(shape = MaterialTheme.shapes.large) {
                 BiometricOptionRow(
                     icon = Icons.Rounded.Fingerprint,
                     iconTint = MaterialTheme.colorScheme.customColors.colorDarkPurple,
@@ -949,7 +953,7 @@ private fun BiometricTypeSheet(
             Spacer(modifier = Modifier.height(16.dp))
 
             SettingsSectionLabel(stringResource(R.string.custom_biometrics))
-            RillExpressiveCard(shape = RoundedCornerShape(cardCornerMedium)) {
+            RillExpressiveCard(shape = MaterialTheme.shapes.large) {
                 BiometricOptionRow(
                     icon = Icons.Rounded.Pin,
                     iconTint = MaterialTheme.colorScheme.customColors.colorDarkBlue,
@@ -975,8 +979,8 @@ private fun BiometricTypeSheet(
                 Spacer(modifier = Modifier.height(16.dp))
                 Surface(
                     onClick = { onSelect("") },
-                    shape = RoundedCornerShape(16.dp),
-                    color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f),
+                    shape = MaterialTheme.shapes.large,
+                    color = MaterialTheme.colorScheme.customColors.colorRed,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
@@ -984,9 +988,9 @@ private fun BiometricTypeSheet(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        Icon(Icons.Rounded.LockOpen, null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(20.dp))
+                        Icon(Icons.Rounded.LockOpen, null, tint = MaterialTheme.colorScheme.customColors.colorDarkRed, modifier = Modifier.size(20.dp))
                         Spacer(modifier = Modifier.width(12.dp))
-                        Text(stringResource(R.string.remove_biometric), color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Medium)
+                        Text(stringResource(R.string.remove_biometric), color = MaterialTheme.colorScheme.customColors.colorDarkRed, fontWeight = FontWeight.Medium)
                         Spacer(modifier = Modifier.width(6.dp))
                     }
                 }
@@ -1724,7 +1728,7 @@ object BiometricPromptHelper {
             .setTitle(title)
             .setSubtitle(subtitle ?: "")
             .setNegativeButtonText(context.getString(R.string.cancel))
-            .setAllowedAuthenticators(androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK)
+            .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_WEAK)
             .build()
         prompt.authenticate(promptInfo)
     }

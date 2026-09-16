@@ -27,9 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -54,11 +51,10 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import android.os.Build
-import android.provider.CallLog
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.shape.CornerSize
 import dev.goodwy.rphone.bottomBarHeight
-import dev.goodwy.rphone.cardCornerBig
-import dev.goodwy.rphone.cardCornerSmall
+import dev.goodwy.rphone.cardCornerExtraSmall
 import dev.goodwy.rphone.cardSpacedBy
 import dev.goodwy.rphone.liquidglass.drawBackdrop
 import dev.goodwy.rphone.liquidglass.effects.lens
@@ -89,13 +85,13 @@ import dev.goodwy.rphone.modal.data.Contact
 import com.ramcosta.composedestinations.generated.destinations.CallLogFullScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.SettingsScreenDestination
 import dev.goodwy.rphone.controller.CallNotificationManager
-import dev.goodwy.rphone.controller.CallService
 import dev.goodwy.rphone.controller.util.BlockedNumbersManager
 import dev.goodwy.rphone.controller.util.hasDualSim
-import dev.goodwy.rphone.controller.util.toast
+import dev.goodwy.rphone.view.theme.RillShapeDefaults
 import dev.goodwy.rphone.view.theme.customColors
 import kotlin.collections.component1
 import kotlin.collections.component2
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Destination<RootGraph>(start = true, style = TabTransitionStyle::class)
@@ -170,7 +166,7 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
         ModalBottomSheet(
             onDismissRequest = { showDialpad = false },
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-            shape = RoundedCornerShape(topStart = 38.dp, topEnd = 38.dp),
+            shape = MaterialTheme.shapes.extraExtraLarge.copy(bottomStart = CornerSize(0.dp), bottomEnd = CornerSize(0.dp)),
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow, //MaterialTheme.colorScheme.surface,
             tonalElevation = 4.dp,
             scrimColor = Color.Transparent,
@@ -526,7 +522,7 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
             ScrollToTopButton(
                 modifier = Modifier
                     .then(
-                        if (isLandscape) Modifier
+                        if (isLandscape || !showBottomBar) Modifier
                             .navigationBarsPadding()
                             .padding(bottom = 12.dp, end = endPadding)
                         else if (pillNav) Modifier
@@ -583,6 +579,7 @@ fun CallLogFullContent(
     val prefs = koinInject<PreferenceManager>()
     val favouritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, false)
     val contactsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS, true)
+    val cardCornerExtraLarge  = prefs.getInt(PreferenceManager.KEY_CARD_ROUNDNESS, RillShapeDefaults.DefaultRoundness).dp
     var pendingDeleteIds by remember { mutableStateOf<List<Long>>(emptyList()) }
 
     if (isGranted) {
@@ -657,13 +654,14 @@ fun CallLogFullContent(
             )
         }
 
-        if (logs.isEmpty()) {
+        val isDataLoading = logs.isEmpty() || allContacts.isEmpty()
+        if (isDataLoading) {
             // Only show a spinner on the very first launch when no disk cache exists.
             // On subsequent opens the disk cache fills instantly so this won't be seen.
             var showSpinner by remember { mutableStateOf(false) }
             LaunchedEffect(Unit) {
                 // Give the disk cache ~200ms to arrive; only show spinner if still empty
-                kotlinx.coroutines.delay(200)
+                kotlinx.coroutines.delay(200.milliseconds)
                 showSpinner = true
             }
             if (showSpinner) {
@@ -881,7 +879,15 @@ fun CallLogFullContent(
                                         )
                                     }
                                 }
-                                AnimatedVisibility(visible = !isFavoritesCollapsed) {
+                                AnimatedVisibility(
+                                    visible = !isFavoritesCollapsed,
+                                    enter = expandVertically(
+                                        animationSpec = tween(300, easing = FastOutSlowInEasing)
+                                    ) + fadeIn(),
+                                    exit = shrinkVertically(
+                                        animationSpec = tween(300, easing = FastOutSlowInEasing)
+                                    ) + fadeOut()
+                                ) {
                                     IPhoneFavoritesRow(
                                         favorites = favorites,
                                         isEditing = isEditingFavorites,
@@ -937,10 +943,10 @@ fun CallLogFullContent(
                             logsInGroup.forEachIndexed { index, lg ->
                                 val isFirst = index == 0
                                 val isLast = index == logsInGroup.size - 1
-                                val topStart = if (isFirst) cardCornerBig else cardCornerSmall
-                                val topEnd = if (isFirst) cardCornerBig else cardCornerSmall
-                                val bottomStart = if (isLast) cardCornerBig else cardCornerSmall
-                                val bottomEnd = if (isLast) cardCornerBig else cardCornerSmall
+                                val topStart = if (isFirst) cardCornerExtraLarge else cardCornerExtraSmall
+                                val topEnd = if (isFirst) cardCornerExtraLarge else cardCornerExtraSmall
+                                val bottomStart = if (isLast) cardCornerExtraLarge else cardCornerExtraSmall
+                                val bottomEnd = if (isLast) cardCornerExtraLarge else cardCornerExtraSmall
                                 val bottomPadding = if (!isLast) cardSpacedBy else 0.dp
                                 item(
                                     key = "log_${lg.number}_${lg.date}_${index}",
@@ -970,10 +976,10 @@ fun CallLogFullContent(
                                             ) {
                                                 Surface(
                                                     shape = RoundedCornerShape(
-                                                        topStart = if (isSelected) cardCornerBig else topStart,
-                                                        topEnd = if (isSelected) cardCornerBig else topEnd,
-                                                        bottomStart = if (isSelected) cardCornerBig else bottomStart,
-                                                        bottomEnd = if (isSelected) cardCornerBig else bottomEnd
+                                                        topStart = if (isSelected) cardCornerExtraLarge else topStart,
+                                                        topEnd = if (isSelected) cardCornerExtraLarge else topEnd,
+                                                        bottomStart = if (isSelected) cardCornerExtraLarge else bottomStart,
+                                                        bottomEnd = if (isSelected) cardCornerExtraLarge else bottomEnd
                                                     ),
                                                     color = MaterialTheme.colorScheme.surface,
                                                     modifier = Modifier.fillMaxWidth()

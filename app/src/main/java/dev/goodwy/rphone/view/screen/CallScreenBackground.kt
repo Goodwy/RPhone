@@ -31,13 +31,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import dev.goodwy.rphone.liquidglass.backdrops.LayerBackdrop
+import dev.goodwy.rphone.liquidglass.backdrops.layerBackdrop
 import dev.goodwy.rphone.view.theme.RillDurations
 
 private const val TopScrimFraction = 0.36f
 private const val BottomScrimFraction = 0.54f
 
 @Composable
-fun ExpressiveBackground(photoUri: String?, backgroundUri: String? = null) {
+fun ExpressiveBackground(
+    photoUri: String?,
+    backgroundUri: String? = null,
+    liquidGlassBackdrop: LayerBackdrop,
+    hideGradient: Boolean
+) {
     val context = LocalContext.current
     val scheme = MaterialTheme.colorScheme
     val surface = scheme.surface
@@ -79,7 +86,7 @@ fun ExpressiveBackground(photoUri: String?, backgroundUri: String? = null) {
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(surface)) {
+    Box(modifier = Modifier.fillMaxSize().layerBackdrop(liquidGlassBackdrop).background(surface)) {
         if (!customVisible) {
             FloatingParticles()
         }
@@ -120,7 +127,7 @@ fun ExpressiveBackground(photoUri: String?, backgroundUri: String? = null) {
                     )
             )
 
-            Box(
+            if (!hideGradient) Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(BottomScrimFraction)

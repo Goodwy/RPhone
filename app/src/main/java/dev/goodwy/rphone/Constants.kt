@@ -19,9 +19,11 @@ const val private_only = "private"
 
 val bottomBarHeight = 64.dp
 
-val cardCornerBig = 28.dp
-val cardCornerMedium = 16.dp
-val cardCornerSmall = 4.dp
+val cardCornerExtraLarge = 28.dp //MaterialTheme.shapes.extraLarge
+val cardCornerLarge = 16.dp //MaterialTheme.shapes.large
+val cardCornerMedium = 12.dp //MaterialTheme.shapes.medium
+val cardCornerSmall = 8.dp //MaterialTheme.shapes.small
+val cardCornerExtraSmall = 4.dp //MaterialTheme.shapes.extraSmall
 val cardSpacedBy = 2.dp
 
 const val HOUR_MINUTES = 60
