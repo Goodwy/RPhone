@@ -22,12 +22,10 @@ import dev.goodwy.rphone.modal.db.PrivateContactDao
 import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 import androidx.core.net.toUri
 import androidx.core.graphics.scale
-import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.CallBackgroundStore
 import dev.goodwy.rphone.controller.util.ContactDumpUtils
 import dev.goodwy.rphone.controller.util.areNumbersEqual
 import dev.goodwy.rphone.controller.util.deduplicateNumbers
-import dev.goodwy.rphone.controller.util.isVoicemailNumber
 import dev.goodwy.rphone.device_only
 import dev.goodwy.rphone.modal.db.PrivateContactEntity
 import dev.goodwy.rphone.private_only
@@ -36,6 +34,8 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.delay
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlin.collections.distinct
+import kotlin.collections.plus
 import kotlin.time.Duration.Companion.milliseconds
 
 class ContactsRepository(
@@ -47,6 +47,172 @@ class ContactsRepository(
 //    private val preferenceManager = PreferenceManager(context)
 
     override suspend fun getContacts(includePrivate: Boolean, includeHidden: Boolean): List<Contact> = withContext(Dispatchers.IO) {
+        val contactsMap = mutableMapOf<String, Contact>()
+        val rawContactsMap = mutableMapOf<String, MutableList<String>>()
+        val accountMap = mutableMapOf<String, Pair<String?, String?>>()
+
+        if (includePrivate) {
+            privateContactDao.getAll().forEach {
+                val contact = it.toContact()
+                if (!contact.isHidden || includeHidden) {
+                    contactsMap[contact.id] = contact
+                }
+            }
+        }
+
+        // 1. We retrieve RawContacts and immediately build the accountMap (1 pass through the database)
+        val rawProjection = arrayOf(
+            ContactsContract.RawContacts.CONTACT_ID,
+            ContactsContract.RawContacts._ID,
+            ContactsContract.RawContacts.ACCOUNT_NAME,
+            ContactsContract.RawContacts.ACCOUNT_TYPE
+        )
+        try {
+            contentResolver.query(
+                ContactsContract.RawContacts.CONTENT_URI,
+                rawProjection,
+                null, null, null
+            )?.use { cursor ->
+                val contactIdIdx = cursor.getColumnIndex(ContactsContract.RawContacts.CONTACT_ID)
+                val rawIdIdx = cursor.getColumnIndex(ContactsContract.RawContacts._ID)
+                val accNameIdx = cursor.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_NAME)
+                val accTypeIdx = cursor.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_TYPE)
+
+                while (cursor.moveToNext()) {
+                    val contactId = cursor.getString(contactIdIdx)
+                    val rawId = cursor.getString(rawIdIdx)
+                    if (contactId != null && rawId != null) {
+                        rawContactsMap.getOrPut(contactId) { mutableListOf() }.add(rawId)
+                        if (accountMap[contactId] == null) {
+                            val name = if (accNameIdx != -1) cursor.getString(accNameIdx) else null
+                            val type = if (accTypeIdx != -1) cursor.getString(accTypeIdx) else null
+                            accountMap[contactId] = Pair(name, type)
+                        }
+                    }
+                }
+            }
+        } catch (e: SecurityException) {
+            e.printStackTrace()
+        }
+
+        // 2. We request Data.CONTENT_URI, but filter only the MIMETYPE values we need
+        val selection = "${ContactsContract.Data.MIMETYPE} IN (?, ?, ?)"
+        val selectionArgs = arrayOf(
+            CommonDataKinds.Phone.CONTENT_ITEM_TYPE,
+            CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE,
+            CommonDataKinds.Email.CONTENT_ITEM_TYPE
+        )
+
+        val projection = arrayOf(
+            ContactsContract.Data.CONTACT_ID,
+            ContactsContract.Data.DISPLAY_NAME_PRIMARY,
+            ContactsContract.Data.PHOTO_URI,
+            ContactsContract.Data.MIMETYPE,
+            ContactsContract.Data.DATA1,
+            ContactsContract.Data.STARRED,
+            CommonDataKinds.StructuredName.PREFIX,
+            CommonDataKinds.StructuredName.GIVEN_NAME,
+            CommonDataKinds.StructuredName.MIDDLE_NAME,
+            CommonDataKinds.StructuredName.FAMILY_NAME,
+            CommonDataKinds.StructuredName.SUFFIX
+        )
+
+        try {
+            contentResolver.query(
+                ContactsContract.Data.CONTENT_URI,
+                projection,
+                selection,
+                selectionArgs,
+                "${ContactsContract.Data.DISPLAY_NAME_PRIMARY} ASC"
+            )?.use { cursor ->
+                val idIdx = cursor.getColumnIndex(ContactsContract.Data.CONTACT_ID)
+                val nameIdx = cursor.getColumnIndex(ContactsContract.Data.DISPLAY_NAME_PRIMARY)
+                val photoIdx = cursor.getColumnIndex(ContactsContract.Data.PHOTO_URI)
+                val mimeIdx = cursor.getColumnIndex(ContactsContract.Data.MIMETYPE)
+                val data1Idx = cursor.getColumnIndex(ContactsContract.Data.DATA1)
+                val starredIdx = cursor.getColumnIndex(ContactsContract.Data.STARRED)
+
+                val prefixIdx = cursor.getColumnIndex(CommonDataKinds.StructuredName.PREFIX)
+                val givenNameIdx = cursor.getColumnIndex(CommonDataKinds.StructuredName.GIVEN_NAME)
+                val middleNameIdx = cursor.getColumnIndex(CommonDataKinds.StructuredName.MIDDLE_NAME)
+                val familyNameIdx = cursor.getColumnIndex(CommonDataKinds.StructuredName.FAMILY_NAME)
+                val suffixIdx = cursor.getColumnIndex(CommonDataKinds.StructuredName.SUFFIX)
+
+                while (cursor.moveToNext()) {
+                    val id = cursor.getString(idIdx) ?: continue
+                    val mimeType = cursor.getString(mimeIdx)
+                    val data1 = cursor.getString(data1Idx) ?: continue
+                    val isStarred = cursor.getInt(starredIdx) == 1
+                    val currentName = cursor.getString(nameIdx) ?: ""
+                    val currentPhoto = cursor.getString(photoIdx)
+
+                    // We take an existing contact from Map or create a default one
+                    val current = contactsMap[id] ?: run {
+                        val accInfo = accountMap[id]
+                        Contact(
+                            id = id,
+                            givenName = currentName,
+                            photoUri = currentPhoto,
+                            isFavorite = isStarred,
+                            accountName = accInfo?.first,
+                            accountType = accInfo?.second,
+                            rawContactIds = rawContactsMap[id] ?: emptyList(),
+                            hasMultipleSources = (rawContactsMap[id]?.size ?: 0) > 1
+                        )
+                    }
+
+                    fun getStringSafely(idx: Int): String = if (idx != -1) cursor.getString(idx) ?: "" else ""
+
+                    // 3. Creating an immutable copy
+                    val updatedContact = when (mimeType) {
+                        CommonDataKinds.Phone.CONTENT_ITEM_TYPE -> {
+                            if (current.phoneNumbers.none { areNumbersEqual(it, data1) }) {
+                                current.copy(
+                                    phoneNumbers = current.phoneNumbers + data1,
+                                    phoneDetails = (current.phoneDetails + ContactPhoneDetail(number = data1)).distinctBy { it.number }
+                                )
+                            } else current
+                        }
+                        CommonDataKinds.Email.CONTENT_ITEM_TYPE -> {
+                            val email = ContactEmail(value = data1)
+                            if (current.emails.none { it == email }) {
+                                current.copy(emails = current.emails + email)
+                            } else current
+                        }
+                        CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE -> {
+                            val prefix = getStringSafely(prefixIdx)
+                            val givenName = getStringSafely(givenNameIdx)
+                            val middleName = getStringSafely(middleNameIdx)
+                            val familyName = getStringSafely(familyNameIdx)
+                            val suffix = getStringSafely(suffixIdx)
+
+                            if (prefix.isNotBlank() || givenName.isNotBlank() || middleName.isNotBlank() || familyName.isNotBlank() || suffix.isNotBlank()) {
+                                current.copy(
+                                    givenName = givenName,
+                                    namePrefix = prefix,
+                                    middleName = middleName,
+                                    familyName = familyName,
+                                    nameSuffix = suffix
+                                )
+                            } else {
+                                current.copy(givenName = currentName)
+                            }
+                        }
+                        else -> current
+                    }
+
+                    // 4. Put the updated copy back into the Map
+                    contactsMap[id] = updatedContact
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        return@withContext contactsMap.values.toList().sortedBy { it.displayName.lowercase() }
+    }
+
+    override suspend fun getContactsFull(includePrivate: Boolean, includeHidden: Boolean): List<Contact> = withContext(Dispatchers.IO) {
         val contactsMap = mutableMapOf<String, Contact>()
         val rawContactsMap = mutableMapOf<String, MutableList<String>>()
 
@@ -1872,7 +2038,7 @@ class ContactsRepository(
                     runCatching { Json.decodeFromString<List<String>>(entity.phoneNumbersJson) }
                         .getOrDefault(emptyList())
                 }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             emptyList()
         }
     }

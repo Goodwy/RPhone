@@ -7,8 +7,6 @@ import androidx.lifecycle.ViewModel
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.util.isAlreadyDefaultDialer
 import dev.goodwy.rphone.controller.util.makeCall
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 sealed class NavigationTarget {
     object Recents : NavigationTarget()
@@ -18,38 +16,6 @@ sealed class NavigationTarget {
 }
 
 class MainViewModel(private val prefs: PreferenceManager) : ViewModel() {
-
-    private var isInBackground = false
-
-    private val _isUnlocked = MutableStateFlow(true)
-    val isUnlocked = _isUnlocked.asStateFlow()
-
-    init {
-        val biometricType = prefs.getString(PreferenceManager.KEY_BIOMETRICS_TYPE, "") ?: ""
-        val appLockEnabled = prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK, false)
-        _isUnlocked.value = !(biometricType.isNotEmpty() && appLockEnabled)
-    }
-
-    fun onResume() {
-        val appLockEnabled = prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK, false)
-        val lockOnMinimize = prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK_ON_MINIMIZE, false)
-        if (appLockEnabled && lockOnMinimize && isInBackground) {
-            _isUnlocked.value = false
-        }
-        isInBackground = false
-    }
-
-    fun onStop() {
-        val appLockEnabled = prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK, false)
-        val lockOnMinimize = prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK_ON_MINIMIZE, false)
-        if (appLockEnabled && lockOnMinimize) {
-            isInBackground = true
-        }
-    }
-
-    fun unlock() {
-        _isUnlocked.value = true
-    }
 
     fun getNavigationTarget(intent: Intent, context: Context): NavigationTarget? {
         val data = intent.data

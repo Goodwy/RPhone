@@ -9,8 +9,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Portrait
+import androidx.compose.material.icons.rounded.RememberMe
 import androidx.compose.material.icons.rounded.TextFields
 import androidx.compose.material.icons.rounded.Title
+import androidx.compose.material.icons.rounded.Wallpaper
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -53,6 +55,7 @@ fun AvatarsPreferenceScreen(navigator: DestinationsNavigator) {
     var googleContactColorAvatars by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_GOOGLE_CONTACTS_AVATARS, false)) }
     var avatarFrame               by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_AVATAR_FRAME, false)) }
     var showPicture               by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SHOW_PICTURE, true)) }
+    var hideAvatarWithBg          by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_HIDE_AVATAR_WITH_BACKGROUND, false)) }
 
     val context = LocalContext.current
     val rotation =
@@ -191,7 +194,7 @@ fun AvatarsPreferenceScreen(navigator: DestinationsNavigator) {
                                 headline = stringResource(R.string.avatar_frame),
                                 supporting = stringResource(R.string.avatar_frame_subtitle),
                                 leadingIcon = if (avatarFrame) ImageVector.vectorResource(id = R.drawable.ic_person_border)
-                                else ImageVector.vectorResource(id = R.drawable.ic_person_no_border),
+                                                else ImageVector.vectorResource(id = R.drawable.ic_person_no_border),
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOliva,
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOliva,
                                 checked = avatarFrame,
@@ -205,6 +208,15 @@ fun AvatarsPreferenceScreen(navigator: DestinationsNavigator) {
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOliva,
                                 checked = showPicture,
                                 onCheckedChange = { showPicture = it; prefs.setBoolean(PreferenceManager.KEY_SHOW_PICTURE, it) }
+                            )
+                            RillSwitchListItem(
+                                headline = stringResource(R.string.settings_interface_hide_avatar_with_bg),
+                                supporting = stringResource(R.string.settings_interface_hide_avatar_with_bg_supporting),
+                                leadingIcon = if (hideAvatarWithBg) Icons.Rounded.Wallpaper else Icons.Rounded.RememberMe,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOliva,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOliva,
+                                checked = hideAvatarWithBg,
+                                onCheckedChange = { hideAvatarWithBg = it; prefs.setBoolean(PreferenceManager.KEY_HIDE_AVATAR_WITH_BACKGROUND, it) }
                             )
                         }
                     }

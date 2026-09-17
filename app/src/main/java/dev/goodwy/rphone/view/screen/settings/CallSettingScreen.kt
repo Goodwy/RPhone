@@ -11,9 +11,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.rounded.Backpack
 import androidx.compose.material.icons.rounded.CropFree
 import androidx.compose.material.icons.rounded.PictureInPicture
+import androidx.compose.material.icons.rounded.ScreenLockPortrait
 import androidx.compose.material.icons.rounded.SettingsPhone
 import androidx.compose.material.icons.rounded.SimCard
 import androidx.compose.material.icons.rounded.SpatialTracking
@@ -175,7 +175,7 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
                             RillSwitchListItem(
                                 headline   = stringResource(R.string.pocket_mode_prevention),
                                 supporting = stringResource(R.string.pocket_mode_prevention_subtitle),
-                                leadingIcon = Icons.Rounded.Backpack,
+                                leadingIcon = Icons.Rounded.ScreenLockPortrait,
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
                                 checked = pocketModePrevention,

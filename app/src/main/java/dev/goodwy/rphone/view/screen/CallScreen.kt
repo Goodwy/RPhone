@@ -57,6 +57,7 @@ import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.CallViewModel
 import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 import dev.goodwy.rphone.cardCornerExtraSmall
+import dev.goodwy.rphone.controller.lock.AppLockManager
 import dev.goodwy.rphone.controller.sensor.PocketModeManager
 import dev.goodwy.rphone.controller.util.NoteManager
 import dev.goodwy.rphone.modal.data.getDisplayName
@@ -1087,31 +1088,18 @@ fun ExpressiveCallScreen(
         }
         when (biometricType) {
             "system" -> {
-                LaunchedEffect(showCallBiometricUnlock) {
-                    val activity = callActivity ?: run { onBiometricFail(); return@LaunchedEffect }
-                    val executor = androidx.core.content.ContextCompat.getMainExecutor(activity)
-                    val prompt = androidx.biometric.BiometricPrompt(
-                        activity, executor,
-                        object : androidx.biometric.BiometricPrompt.AuthenticationCallback() {
-                            override fun onAuthenticationSucceeded(result: androidx.biometric.BiometricPrompt.AuthenticationResult) {
-                                callBiometricUnlocked = true
-                                biometricGatesScreen = false
-                                showCallBiometricUnlock = false
-                                pendingAction?.invoke(); pendingAction = null
-                            }
-                            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) { onBiometricFail() }
-                            override fun onAuthenticationFailed() { }
-                        }
-                    )
-                    prompt.authenticate(
-                        androidx.biometric.BiometricPrompt.PromptInfo.Builder()
-                            .setTitle(activity.getString(R.string.enter_pin))
-                            .setSubtitle("Verify your identity to access this call")
-                            .setNegativeButtonText(activity.getString(R.string.cancel))
-                            .setAllowedAuthenticators(androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK)
-                            .build()
-                    )
-                }
+                val activity = callActivity ?: run { onBiometricFail(); return }
+                AppLockManager.authenticate(
+                    activity = activity,
+                    title = stringResource(R.string.verify_your_identity_to_access_call),
+                    onSuccess = {
+                        callBiometricUnlocked = true
+                        biometricGatesScreen = false
+                        showCallBiometricUnlock = false
+                        pendingAction?.invoke(); pendingAction = null
+                    },
+                    onError = { _, _ -> onBiometricFail()}
+                )
             }
             "pin" -> {
                 PinSetupDialog(

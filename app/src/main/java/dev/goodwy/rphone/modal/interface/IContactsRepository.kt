@@ -7,6 +7,7 @@ import dev.goodwy.rphone.modal.repository.ContactsRepository.RawContactInfo
 
 interface IContactsRepository {
     suspend fun getContacts(includePrivate: Boolean = true, includeHidden: Boolean = false): List<Contact>
+    suspend fun getContactsFull(includePrivate: Boolean = true, includeHidden: Boolean = false): List<Contact>
     suspend fun getContactById(contactId: String): Contact?
     suspend fun getContactByNumber(number: String): Contact?
     suspend fun toggleFavorite(contactId: String, isFavorite: Boolean)

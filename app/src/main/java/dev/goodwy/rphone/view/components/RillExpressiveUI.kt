@@ -93,12 +93,7 @@ fun performAppHaptic(
             vm?.defaultVibrator?.vibrate(VibrationEffect.createOneShot(durationMs, amplitude))
         } else {
             val vibrator = context.getSystemService(Vibrator::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                vibrator?.vibrate(VibrationEffect.createOneShot(durationMs, amplitude))
-            } else {
-                @Suppress("DEPRECATION")
-                vibrator?.vibrate(durationMs)
-            }
+            vibrator?.vibrate(VibrationEffect.createOneShot(durationMs, amplitude))
         }
     } catch (_: Exception) {}
 }
@@ -112,13 +107,8 @@ fun performScrollHaptic(context: android.content.Context, amplitude: Int = 60) {
             vibrator?.vibrate(effect)
         } else {
             val vibrator = context.getSystemService(Vibrator::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val effect = VibrationEffect.createOneShot(10, amplitude.coerceIn(1, 255))
-                vibrator?.vibrate(effect)
-            } else {
-                @Suppress("DEPRECATION")
-                vibrator?.vibrate(10L)
-            }
+            val effect = VibrationEffect.createOneShot(10, amplitude.coerceIn(1, 255))
+            vibrator?.vibrate(effect)
         }
     } catch (_: Exception) {}
 }

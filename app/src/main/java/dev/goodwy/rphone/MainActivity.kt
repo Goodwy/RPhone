@@ -2,7 +2,6 @@ package dev.goodwy.rphone
 
 import android.content.Intent
 import android.os.Bundle
-import android.provider.ContactsContract
 import androidx.activity.compose.setContent
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
@@ -27,7 +26,6 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.compose.rememberNavController
-import dev.goodwy.rphone.controller.CallService
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.CallActivity
 import dev.goodwy.rphone.view.components.BottomBar
@@ -42,6 +40,7 @@ import com.ramcosta.composedestinations.generated.destinations.ContactDetailsScr
 import com.ramcosta.composedestinations.generated.destinations.DialPadScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactEditScreenDestination
 import android.content.res.Configuration
+import android.os.Build
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import android.view.Surface
@@ -72,7 +71,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import dev.goodwy.rphone.controller.util.getAppVersion
 import dev.goodwy.rphone.controller.util.isAlreadyDefaultDialer
 import dev.goodwy.rphone.view.screen.onboarding.MorphingOnboardingScreen
 import dev.goodwy.rphone.view.theme.MyColors.bottomBarColor
@@ -107,7 +105,7 @@ import dev.goodwy.rphone.controller.CallViewModel
 import dev.goodwy.rphone.controller.MainViewModel
 import dev.goodwy.rphone.controller.NavigationTarget
 import dev.goodwy.rphone.controller.PurchaseHelper
-import dev.goodwy.rphone.controller.util.makeCall
+import dev.goodwy.rphone.controller.lock.AppLockManager
 import dev.goodwy.rphone.view.components.TabSpec
 import dev.goodwy.rphone.view.components.parseTabOrder
 import dev.goodwy.rphone.view.components.performAppHaptic
@@ -120,21 +118,27 @@ class MainActivity : FragmentActivity() {
     private lateinit var prefs: PreferenceManager
     private val callViewModel: CallViewModel by viewModel()
     private val mainViewModel: MainViewModel by viewModel()
+    private var isAppLocked by mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         intentState = intent
         // enableEdgeToEdge() triggers Adreno GPU driver SIGSEGV on first RenderThread draw.
-        // Edge-to-edge is set via theme XML instead (windowDrawsSystemBarBackgrounds etc).
+        // Edge-to-edge is set via theme XML instead (windowDrawsSystemBarBackgrounds etc.).
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         prefs = GlobalContext.get().get<PreferenceManager>()
+
+        if (AppLockManager.isLocked(prefs)) {
+            isAppLocked = true
+        }
 
         setContent {
             Rill4Theme {
                 val context = LocalContext.current
                 val navController = rememberNavController()
+                val settingsVer by prefs.settingsChanged.collectAsStateWithLifecycle()
 
                 val favouritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, false)
                 val contactsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS, true)
@@ -147,8 +151,49 @@ class MainActivity : FragmentActivity() {
 //                val defBar = prefs.getInt(PreferenceManager.KEY_DEFAULT_BOTTOM_NAV, 0)
 //                val transitionStyle = prefs.getInt(PreferenceManager.KEY_TRANSITION_STYLE, 0)
                 val onboardingShown = remember { prefs.getBoolean(PreferenceManager.KEY_ONBOARDING_SHOWN, false) }
-
                 var showOnboarding by remember { mutableStateOf(!onboardingShown) }
+                val appLockEnabled = remember(settingsVer) { prefs.isAppLockEnabled() }
+
+                // ── Biometric overlay (above blur, inside Box) ─────────
+                if (isAppLocked && appLockEnabled) {
+                    val biometricType = remember(settingsVer) { prefs.getString(PreferenceManager.KEY_BIOMETRICS_TYPE, "") ?: "" }
+                    if (biometricType.isNotEmpty()) {
+                        when (biometricType) {
+                            "system" -> {
+                                val activity = this@MainActivity
+                                AppLockManager.authenticate(
+                                    activity = activity,
+                                    title = stringResource(R.string.verify_your_identity_to_continue),
+                                    onSuccess = {
+                                        isAppLocked = false
+                                    },
+                                    onError = { code, _ ->
+                                        // Code 5 = ERROR_CANCELED (the user clicked ‘Cancel’)
+                                        if (code != 5) {
+                                            activity.finish()
+                                        }
+                                    }
+                                )
+                            }
+                            "pin" -> {
+                                dev.goodwy.rphone.view.screen.settings.PinSetupDialog(
+                                    title = stringResource(R.string.enter_pin), isVerify = true,
+                                    expectedPin = prefs.getString(PreferenceManager.KEY_BIOMETRICS_PIN, "") ?: "",
+                                    onConfirm = { isAppLocked = false },
+                                    onDismiss = { finish() }
+                                )
+                            }
+                            "password" -> {
+                                dev.goodwy.rphone.view.screen.settings.PasswordSetupDialog(
+                                    title = stringResource(R.string.enter_password), isVerify = true,
+                                    expectedPassword = prefs.getString(PreferenceManager.KEY_BIOMETRICS_PASSWORD, "") ?: "",
+                                    onConfirm = { isAppLocked = false },
+                                    onDismiss = { finish() }
+                                )
+                            }
+                        }
+                    }
+                }
 
                 if (showOnboarding) {
                     MorphingOnboardingScreen(
@@ -158,12 +203,6 @@ class MainActivity : FragmentActivity() {
                         }
                     )
                 } else {
-                    val settingsVer by prefs.settingsChanged.collectAsStateWithLifecycle()
-                    val biometricType = remember(settingsVer) { prefs.getString(PreferenceManager.KEY_BIOMETRICS_TYPE, "") ?: "" }
-                    val appLockEnabled = remember(settingsVer) { prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK, false) }
-
-                    val isUnlocked by mainViewModel.isUnlocked.collectAsStateWithLifecycle()
-
                     val lastOpenedTab = remember {
                         prefs.getString(PreferenceManager.KEY_LAST_OPENED_TAB, null)
                     }
@@ -188,10 +227,16 @@ class MainActivity : FragmentActivity() {
                     }
 
                     // ── Biometric blur + lock ─────────────────────────────────
+                    val isBlurSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
                     val blurRadius by animateDpAsState(
-                        targetValue = if (!isUnlocked) 22.dp else 0.dp,
+                        targetValue = if (isAppLocked) 26.dp else 0.dp,
                         animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing),
                         label = "biometricBlur"
+                    )
+                    val scrimColor by animateColorAsState(
+                        targetValue = if (isAppLocked) Color.Black.copy(alpha = 0.95f) else Color.Transparent,
+                        animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing),
+                        label = "scrimColor"
                     )
 
                     // ── Ongoing Call Banner + Main nav host ───────────────────────
@@ -205,7 +250,7 @@ class MainActivity : FragmentActivity() {
                             modifier = Modifier
                                 .fillMaxSize()
                                 .then(
-                                    if (blurRadius > 0.dp)
+                                    if (isBlurSupported && blurRadius > 0.dp)
                                         Modifier.blur(
                                             blurRadius,
                                             edgeTreatment = BlurredEdgeTreatment.Unbounded
@@ -586,79 +631,28 @@ class MainActivity : FragmentActivity() {
                                 handleIntent(intentState, navController)
                             }
                         }
+                        if (!isBlurSupported) Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(scrimColor)
+                        )
                     } // end blurred Column
-
-                    // ── Biometric overlay (above blur, inside Box) ─────────
-                    if (!isUnlocked) {
-                        val activity = this@MainActivity
-                        val executor = remember(activity) { androidx.core.content.ContextCompat.getMainExecutor(activity) }
-                        
-                        LaunchedEffect(biometricType, appLockEnabled) {
-                            if (biometricType.isEmpty() || !appLockEnabled) {
-                                mainViewModel.unlock()
-                                return@LaunchedEffect
-                            }
-                            if (biometricType == "system") {
-                                // DELAY: Allow Compose to render the background blur effect.
-                                // Without this, the system’s BiometricPrompt is ignored on many devices.
-                                kotlinx.coroutines.delay(150)
-
-                                val prompt = androidx.biometric.BiometricPrompt(
-                                    activity, executor,
-                                    object : androidx.biometric.BiometricPrompt.AuthenticationCallback() {
-                                        override fun onAuthenticationSucceeded(result: androidx.biometric.BiometricPrompt.AuthenticationResult) {
-                                            mainViewModel.unlock()
-                                        }
-                                        override fun onAuthenticationError(code: Int, msg: CharSequence) {
-                                            // Code 5 = ERROR_CANCELED (the user clicked ‘Cancel’)
-                                            if (code != 5) {
-                                                activity.finish()
-                                            }
-                                        }
-                                    }
-                                )
-                                
-                                val promptInfo = androidx.biometric.BiometricPrompt.PromptInfo.Builder()
-                                    .setTitle(activity.getString(R.string.app_name))
-                                    .setSubtitle("Verify your identity to continue")
-                                    .setNegativeButtonText(activity.getString(R.string.cancel))
-                                    .setAllowedAuthenticators(androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK)
-                                    .build()
-
-                                try {
-                                    prompt.authenticate(promptInfo)
-                                } catch (_: Exception) {}
-                            }
-                        }
-                        if (biometricType == "pin") {
-                            dev.goodwy.rphone.view.screen.settings.PinSetupDialog(
-                                title = stringResource(R.string.enter_pin), isVerify = true,
-                                expectedPin = prefs.getString(PreferenceManager.KEY_BIOMETRICS_PIN, "") ?: "",
-                                onConfirm = { mainViewModel.unlock() }, onDismiss = { finish() }
-                            )
-                        } else if (biometricType == "password") {
-                            dev.goodwy.rphone.view.screen.settings.PasswordSetupDialog(
-                                title = stringResource(R.string.enter_password), isVerify = true,
-                                expectedPassword = prefs.getString(PreferenceManager.KEY_BIOMETRICS_PASSWORD, "") ?: "",
-                                onConfirm = { mainViewModel.unlock() }, onDismiss = { finish() }
-                            )
-                        }
-                    } // end outer Box
                 }
             }
         }
     }
 
-    override fun onStop() {
-        super.onStop()
-        // Lock ONLY when minimising (if the relevant setting is enabled)
-        mainViewModel.onStop()
-    }
-
     override fun onResume() {
         super.onResume()
-        // If we’ve returned from the background and the ‘lock on minimisation’ setting is enabled, we’ll ask for the password
-        mainViewModel.onResume()
+        AppLockManager.onAppForegrounded(prefs)
+        if (AppLockManager.isLocked(prefs)) {
+            isAppLocked = true
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        AppLockManager.onAppBackgrounded()
     }
 
     override fun onNewIntent(intent: Intent) {

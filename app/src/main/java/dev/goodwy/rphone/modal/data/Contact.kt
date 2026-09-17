@@ -1,5 +1,7 @@
 package dev.goodwy.rphone.modal.data
 
+import android.provider.ContactsContract.CommonDataKinds.Email
+import android.provider.ContactsContract.CommonDataKinds.Phone
 import dev.goodwy.rphone.controller.util.forceLtr
 import kotlinx.serialization.Serializable
 
@@ -49,16 +51,16 @@ data class ContactEvent(
 
 @Serializable
 data class ContactPhoneDetail(
-    val type: Int,
-    val label: String?,
+    val type: Int = Phone.TYPE_MOBILE,
+    val label: String? = null,
     val number: String,
     val isPrimary: Boolean = false
 )
 
 @Serializable
 data class ContactEmail(
-    val type: Int,
-    val label: String?,
+    val type: Int = Email.TYPE_HOME,
+    val label: String? = null,
     val value: String
 )
 

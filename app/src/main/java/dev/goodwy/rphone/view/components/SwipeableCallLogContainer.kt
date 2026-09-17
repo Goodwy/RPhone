@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -31,6 +32,9 @@ import kotlin.math.roundToInt
 @Composable
 fun SwipeableCallLogContainer(
     enabled: Boolean,
+    haptics: Boolean,
+    hapticsStrength: String,
+    hapticsIntensity: Float,
     onSwipeRight: () -> Unit, // Call
     onSwipeLeft: () -> Unit,  // Message
     onDelete: () -> Unit,
@@ -44,6 +48,7 @@ fun SwipeableCallLogContainer(
         return
     }
 
+    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val offsetX = remember { Animatable(0f) }
     val haptic = LocalHapticFeedback.current
@@ -107,7 +112,9 @@ fun SwipeableCallLogContainer(
                         // To the right (Call)
                         if (checkOffset >= singleThreshold && !triggeredRight) {
                             triggeredRight = true
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            if (haptics) {
+                                performAppHaptic(context, hapticsStrength, hapticsIntensity)
+                            }
                         } else if (checkOffset < singleThreshold && triggeredRight) {
                             triggeredRight = false
                         }
@@ -115,7 +122,9 @@ fun SwipeableCallLogContainer(
                         // Left 1 (Message)
                         if (checkOffset <= -singleThreshold && !triggeredMessage) {
                             triggeredMessage = true
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            if (haptics) {
+                                performAppHaptic(context, hapticsStrength, hapticsIntensity)
+                            }
                         } else if (checkOffset > -singleThreshold && triggeredMessage) {
                             triggeredMessage = false
                         }
@@ -123,7 +132,9 @@ fun SwipeableCallLogContainer(
                         // Left 2 (Delete)
                         if (checkOffset <= -threshold && !triggeredDelete) {
                             triggeredDelete = true
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            if (haptics) {
+                                performAppHaptic(context, hapticsStrength, hapticsIntensity)
+                            }
                         } else if (checkOffset > -threshold && triggeredDelete) {
                             triggeredDelete = false
                         }

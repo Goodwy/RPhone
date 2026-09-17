@@ -32,6 +32,10 @@ class ContactsViewModel(
     private val _allContacts = MutableStateFlow<List<Contact>>(emptyList())
     val allContacts: StateFlow<List<Contact>> = _allContacts.asStateFlow()
 
+    private val _allContactsFull = MutableStateFlow<List<Contact>>(emptyList())
+    val allContactsFull: StateFlow<List<Contact>> = _allContactsFull.asStateFlow()
+    private var isFullContactsLoaded = false
+
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
@@ -153,6 +157,16 @@ class ContactsViewModel(
             val result = contactsRepo.getContacts()
             _allContacts.value = result
             _isLoading.value = false
+        }
+    }
+
+    fun fetchContactsFull() {
+        if (!isFullContactsLoaded) {
+            isFullContactsLoaded = true
+            viewModelScope.launch {
+                val fullContacts = contactsRepo.getContactsFull()
+                _allContactsFull.value = fullContacts
+            }
         }
     }
 

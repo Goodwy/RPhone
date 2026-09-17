@@ -48,6 +48,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SearchOff
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Close
@@ -61,6 +62,7 @@ import androidx.compose.material.icons.rounded.PersonOff
 import androidx.compose.material.icons.rounded.PhonePaused
 import androidx.compose.material.icons.rounded.Pin
 import androidx.compose.material.icons.rounded.SelectAll
+import androidx.compose.material.icons.rounded.Timer
 import androidx.compose.material.icons.rounded.UnfoldLess
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.VisibilityOff
@@ -73,6 +75,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.fragment.app.FragmentActivity
 import dev.goodwy.rphone.view.components.NavigationIcon
@@ -86,9 +89,11 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.cardCornerExtraSmall
+import dev.goodwy.rphone.controller.lock.AppLockManager
 import dev.goodwy.rphone.modal.data.Contact
 import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 import dev.goodwy.rphone.view.components.RillAvatar
+import dev.goodwy.rphone.view.components.RillSelectionDialog
 import dev.goodwy.rphone.view.components.Title
 import dev.goodwy.rphone.view.theme.RillShapeDefaults
 import kotlinx.coroutines.delay
@@ -101,19 +106,39 @@ import kotlin.time.Duration.Companion.milliseconds
 @Composable
 fun BiometricScreen(navigator: DestinationsNavigator) {
     val prefs: PreferenceManager = koinInject()
+    val settingsState by prefs.settingsChanged.collectAsState()
     val contactsRepo: IContactsRepository = koinInject()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    var biometricsType by remember { mutableStateOf(prefs.getString(PreferenceManager.KEY_BIOMETRICS_TYPE, "") ?: "") }
-    var appLockEnabled by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK, false)) }
-    var appLockOnMinimizeEnabled by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK_ON_MINIMIZE, false)) }
-    var callLockEnabled by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_CALL_LOCK, false)) }
-    var callLockMode by remember { mutableStateOf(prefs.getString(PreferenceManager.KEY_BIOMETRICS_CALL_LOCK_MODE, "all") ?: "all") }
-    var callLockNumbers by remember { mutableStateOf(prefs.getString(PreferenceManager.KEY_BIOMETRICS_CALL_LOCK_NUMBERS, "") ?: "") }
+    var biometricsType by remember(settingsState) { mutableStateOf(prefs.getString(PreferenceManager.KEY_BIOMETRICS_TYPE, "") ?: "") }
+    var appLockEnabled by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK, false)) }
+//    var appLockOnMinimizeEnabled by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK_ON_MINIMIZE, false)) }
+    val timeout = remember(settingsState) { prefs.getAppLockTimeout() }
+    var callLockEnabled by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_BIOMETRICS_CALL_LOCK, false)) }
+    var callLockMode by remember(settingsState) { mutableStateOf(prefs.getString(PreferenceManager.KEY_BIOMETRICS_CALL_LOCK_MODE, "all") ?: "all") }
+    var callLockNumbers by remember(settingsState) { mutableStateOf(prefs.getString(PreferenceManager.KEY_BIOMETRICS_CALL_LOCK_NUMBERS, "") ?: "") }
     var showContactPicker by remember { mutableStateOf(false) }
-    var allContacts by remember { mutableStateOf(emptyList<Contact>()) }
+    var showTimeoutDialog by remember { mutableStateOf(false) }
 
+    val immediatelyOnExit = stringResource(R.string.immediately_on_exit)
+    val after1Minute = stringResource(R.string.after_1_minute)
+    val after5Minutes = stringResource(R.string.after_5_minutes)
+    val after15Minutes = stringResource(R.string.after_15_minutes)
+    val after30Minutes = stringResource(R.string.after_30_minutes)
+    val timeoutOptions = remember {
+        listOf(
+            PreferenceManager.APP_LOCK_TIMEOUT_IMMEDIATELY to immediatelyOnExit,
+            PreferenceManager.APP_LOCK_TIMEOUT_1_MIN to after1Minute,
+            PreferenceManager.APP_LOCK_TIMEOUT_5_MIN to after5Minutes,
+            PreferenceManager.APP_LOCK_TIMEOUT_15_MIN to after15Minutes,
+            PreferenceManager.APP_LOCK_TIMEOUT_30_MIN to after30Minutes
+        )
+    }
+
+    val currentTimeoutLabel = timeoutOptions.firstOrNull { it.first == timeout }?.second ?: immediatelyOnExit
+
+    var allContacts by remember { mutableStateOf(emptyList<Contact>()) }
     LaunchedEffect(Unit) {
         allContacts = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             contactsRepo.getContacts()
@@ -252,20 +277,30 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
                                     }
                                 )
                                 if (appLockEnabled) {
-                                    RillSwitchListItem(
-                                        headline = stringResource(R.string.lock_on_minimize),
-                                        supporting = stringResource(R.string.lock_on_minimize_subtitle),
-                                        leadingIcon = Icons.Rounded.UnfoldLess,
+//                                    RillSwitchListItem(
+//                                        headline = stringResource(R.string.lock_on_minimize),
+//                                        supporting = stringResource(R.string.lock_on_minimize_subtitle),
+//                                        leadingIcon = Icons.Rounded.UnfoldLess,
+//                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
+//                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
+//                                        checked = appLockOnMinimizeEnabled,
+//                                        onCheckedChange = {
+//                                            appLockOnMinimizeEnabled = it
+//                                            prefs.setBoolean(
+//                                                PreferenceManager.KEY_BIOMETRICS_APP_LOCK_ON_MINIMIZE,
+//                                                it
+//                                            )
+//                                        }
+//                                    )
+
+                                    RillListItem(
+                                        headline = stringResource(R.string.lock_timeout),
+                                        supporting = currentTimeoutLabel,
+                                        leadingIcon = Icons.Rounded.Timer,
                                         iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
                                         iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
-                                        checked = appLockOnMinimizeEnabled,
-                                        onCheckedChange = {
-                                            appLockOnMinimizeEnabled = it
-                                            prefs.setBoolean(
-                                                PreferenceManager.KEY_BIOMETRICS_APP_LOCK_ON_MINIMIZE,
-                                                it
-                                            )
-                                        }
+                                        trailingIcon = Icons.Default.ChevronRight,
+                                        onClick = { showTimeoutDialog = true }
                                     )
                                 }
                                 RillSwitchListItem(
@@ -477,6 +512,21 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
                 item { SettingsBottomPadding() }
             }
         }
+
+        if (showTimeoutDialog) {
+            RillSelectionDialog(
+                onDismissRequest = { showTimeoutDialog = false },
+                title = stringResource(R.string.lock_timeout),
+                items = timeoutOptions,
+                itemLabel = { it.second },
+                onItemSelected = { selected ->
+                    prefs.setAppLockTimeout(selected.first)
+                    showTimeoutDialog = false
+                },
+                icon = Icons.Default.Timer,
+                isSelected = { it.first == timeout }
+            )
+        }
     }
 
     fun disableBiometric() {
@@ -485,10 +535,8 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
         prefs.setString(PreferenceManager.KEY_BIOMETRICS_PIN, "")
         prefs.setString(PreferenceManager.KEY_BIOMETRICS_PASSWORD, "")
         prefs.setBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK, false)
-        prefs.setBoolean(PreferenceManager.KEY_BIOMETRICS_APP_LOCK_ON_MINIMIZE, false)
         prefs.setBoolean(PreferenceManager.KEY_BIOMETRICS_CALL_LOCK, false)
         appLockEnabled = false
-        appLockOnMinimizeEnabled = false
         callLockEnabled = false
     }
 
@@ -561,14 +609,14 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
     if (showVerification) {
         when (biometricsType) {
             "system" -> {
-                BiometricPromptHelper.authenticate(
-                    context = context,
-                    title = stringResource(R.string.confirm),
+                AppLockManager.authenticate(
+                    activity = context as FragmentActivity,
+                    title = stringResource(R.string.verify_your_identity_to_continue),
                     onSuccess = {
                         showVerification = false
                         isVerified = true
                     },
-                    onError = {
+                    onError = { _, _ ->
                         showVerification = false
                         navigateBack()
                     }
@@ -1573,7 +1621,7 @@ fun PasswordDialogContent(
                         )
                         .padding(2.dp)
                 ) {
-                    Icon(Icons.Rounded.Close, null)
+                    Icon(Icons.Rounded.Close, stringResource(R.string.close))
                 }
             }
         }
@@ -1699,38 +1747,3 @@ fun PasswordSetupDialog(
         }
     }
 }
-
-object BiometricPromptHelper {
-    fun authenticate(
-        context: Context,
-        title: String,
-        subtitle: String? = null,
-        onSuccess: () -> Unit,
-        onError: () -> Unit
-    ) {
-        val executor = androidx.core.content.ContextCompat.getMainExecutor(context)
-        val prompt = androidx.biometric.BiometricPrompt(
-            context as FragmentActivity,
-            executor,
-            object : androidx.biometric.BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationSucceeded(result: androidx.biometric.BiometricPrompt.AuthenticationResult) {
-                    onSuccess()
-                }
-                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                    onError()
-                }
-                override fun onAuthenticationFailed() {
-                    // keep prompt open
-                }
-            }
-        )
-        val promptInfo = androidx.biometric.BiometricPrompt.PromptInfo.Builder()
-            .setTitle(title)
-            .setSubtitle(subtitle ?: "")
-            .setNegativeButtonText(context.getString(R.string.cancel))
-            .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_WEAK)
-            .build()
-        prompt.authenticate(promptInfo)
-    }
-}
-

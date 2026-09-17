@@ -114,6 +114,7 @@ import dev.goodwy.rphone.view.components.RillExpressiveButton
 import dev.goodwy.rphone.view.components.performAppHaptic
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Keeps the in-progress dialed digits alive across the dialpad bottom sheet being dismissed
@@ -133,11 +134,11 @@ fun DialPadScreen(
     navigator: DestinationsNavigator,
     initialNumber: String? = null
 ) {
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true,
-        confirmValueChange = { true }
-    )
-    val prefs = koinInject<PreferenceManager>()
+//    val sheetState = rememberModalBottomSheetState(
+//        skipPartiallyExpanded = true,
+//        confirmValueChange = { true }
+//    )
+//    val prefs = koinInject<PreferenceManager>()
 
     // Lock the window so the keyboard never pushes the bottom sheet up.
     // WindowCompat.setDecorFitsSystemWindows(false) in MainActivity normally causes
@@ -237,7 +238,6 @@ fun DialPadContent(
     initialNumber: String? = null,
     navigator: DestinationsNavigator? = null,
     onDismiss: (() -> Unit)? = null,
-    showHeader: Boolean = false,
     isBottomSheet: Boolean = false
 ) {
     val permStateLogs = rememberPermissionState(Manifest.permission.READ_CALL_LOG)
@@ -387,7 +387,7 @@ fun DialPadContent(
             snapshotFlow {
                 Triple(number, allContacts, t9Enabled)
             }
-                .debounce(150) // We wait 150 ms after the last press
+                .debounce(150.milliseconds) // We wait 150 ms after the last press
                 .distinctUntilChanged()
                 .collect { (num, contacts, t9) ->
                     val cleanQuery = num.replace(" ", "").replace("-", "")
@@ -403,7 +403,7 @@ fun DialPadContent(
                                 val matchesNickname = t9 && contact.nickname.let { T9Matcher.isMatch(it, cleanQuery) } ?: false
                                 matchesNumber || matchesName || matchesNickname
                             }
-                            .take(30)
+                            .take(take)
                             .toList()
                     }
                 }
@@ -414,7 +414,7 @@ fun DialPadContent(
             snapshotFlow {
                 Triple(number, logs, t9Enabled)
             }
-                .debounce(150)
+                .debounce(150.milliseconds)
                 .distinctUntilChanged()
                 .collect { (num, logsList, t9) ->
                     val cleanQuery = num.replace(" ", "").replace("-", "")
@@ -427,7 +427,7 @@ fun DialPadContent(
                                 val matchesName = t9 && T9Matcher.isMatch(log.name ?: "", cleanQuery)
                                 matchesNumber || matchesName
                             }
-                            .take(30)
+                            .take(take)
                             .toList()
                             .groupBy { it.number.replace(" ", "").replace("-", "") }
                             .map { (_, logsGroup) -> logsGroup.maxByOrNull { it.date } }

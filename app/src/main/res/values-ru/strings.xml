@@ -294,6 +294,14 @@
     <string name="password_dont_match">Пароли не совпадают</string>
     <string name="lock_on_minimize">Блокировать при сворачивании</string>
     <string name="lock_on_minimize_subtitle">Если выключено, приложение будет блокироваться только при полной выгрузке из памяти</string>
+    <string name="verify_your_identity_to_continue">Подтвердите свою личность, чтобы продолжить</string>
+    <string name="verify_your_identity_to_access_call">Подтвердите свою личность, для приема или отклонения вызова</string>
+    <string name="lock_timeout">Таймаут блокировки</string>
+    <string name="immediately_on_exit">Сразу</string>
+    <string name="after_1_minute">Через 1 минуту</string>
+    <string name="after_5_minutes">Через 5 минут</string>
+    <string name="after_15_minutes">Через 15 минут</string>
+    <string name="after_30_minutes">Через 30 минут</string>
 
     <string name="manage_contacts">Управление контактами</string>
     <string name="manage_contacts_subtitle">Приватные контакты, отображение учетных записей и очистка контактов</string>
@@ -419,6 +427,8 @@
     <string name="settings_call_default_background">Фон вызова по умолчанию</string>
     <string name="settings_call_default_background_set">При каждом звонке отображается индивидуальное изображение</string>
     <string name="settings_call_default_background_none">Не задано — при звонках используется тема приложения</string>
+    <string name="settings_interface_hide_avatar_with_bg">Скрыть изображение профиля при наличии фона</string>
+    <string name="settings_interface_hide_avatar_with_bg_supporting">Скрывать аватар абонента на экране вызова, когда активен фон вызова</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">Добавить на главный экран</string>
@@ -598,4 +608,9 @@
     <string name="failed_to_create_backup">Не удалось создать резервную копию</string>
     <string name="restore_backup">Восстановить резервную копию</string>
     <string name="restore_backup_subtitle">Восстановить настройки приложения и заметки о звонках</string>
+
+    <!-- Pocket Mode -->
+    <string name="pocket_mode_active">Карманный режим включен</string>
+    <string name="pocket_mode_active_description">Функция сенсорного управления заблокирована, чтобы предотвратить случайные нажатия в кармане.</string>
+    <string name="pocket_mode_dismiss">Отключить защиту</string>
 </resources>

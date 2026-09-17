@@ -136,11 +136,15 @@ fun ContactSearchContent(
     val prefs = koinInject<PreferenceManager>()
     val contactsVM: ContactsViewModel = koinActivityViewModel()
     val callLogVM: CallLogViewModel = koinActivityViewModel()
+    val settingsVer by prefs.settingsChanged.collectAsStateWithLifecycle()
 
-    val contacts by contactsVM.allContacts.collectAsStateWithLifecycle()
+    LaunchedEffect(settingsVer) {
+        contactsVM.fetchContactsFull()
+    }
+
+    val contacts by contactsVM.allContactsFull.collectAsStateWithLifecycle()
     val callLogs by callLogVM.allCallLogs.collectAsStateWithLifecycle()
 
-    val settingsVer by prefs.settingsChanged.collectAsStateWithLifecycle()
     val filterState = remember(settingsVer) { prefs.getSearchFilterState() }
     val displayOrder = remember(settingsVer) { prefs.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0) }
     val hideVoiceSearch = remember(settingsVer) { prefs.getBoolean(PreferenceManager.KEY_HIDE_VOICE_SEARCH, false) }

@@ -298,6 +298,14 @@
     <string name="password_dont_match">Passwords don\'t match</string>
     <string name="lock_on_minimize">Lock when minimised</string>
     <string name="lock_on_minimize_subtitle">If this is turned off, the app will only be terminated when it is completely unloaded from memory</string>
+    <string name="verify_your_identity_to_continue">Verify your identity to continue</string>
+    <string name="verify_your_identity_to_access_call">Verify your identity to access this call</string>
+    <string name="lock_timeout">Lock timeout</string>
+    <string name="immediately_on_exit">Immediately on exit</string>
+    <string name="after_1_minute">After 1 minute</string>
+    <string name="after_5_minutes">After 5 minutes</string>
+    <string name="after_15_minutes">After 15 minutes</string>
+    <string name="after_30_minutes">After 30 minutes</string>
 
     <string name="manage_contacts">Manage Contacts</string>
     <string name="manage_contacts_subtitle">Private contacts, Accounts to show, and clean up your list</string>
@@ -423,6 +431,8 @@
     <string name="settings_call_default_background">Default call background</string>
     <string name="settings_call_default_background_set">A custom image is shown on every call</string>
     <string name="settings_call_default_background_none">Not set — calls use the app theme</string>
+    <string name="settings_interface_hide_avatar_with_bg">Hide profile picture when background is available</string>
+    <string name="settings_interface_hide_avatar_with_bg_supporting">Hide caller avatar on call screen when a call background image is active</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">Add to home screen</string>
@@ -602,4 +612,9 @@
     <string name="failed_to_create_backup">Failed to create backup</string>
     <string name="restore_backup">Restore Backup</string>
     <string name="restore_backup_subtitle">Restore app configuration and call notes</string>
+
+    <!-- Pocket Mode -->
+    <string name="pocket_mode_active">Pocket Mode Active</string>
+    <string name="pocket_mode_active_description">Screen touches are locked to prevent accidental touches in your pocket.</string>
+    <string name="pocket_mode_dismiss">Dismiss Touch Guard</string>
 </resources>

@@ -1,12 +1,9 @@
 package dev.goodwy.rphone.view.screen
 
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.telecom.VideoProfile
 import androidx.activity.compose.setContent
-import androidx.biometric.BiometricManager
-import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -19,12 +16,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.CallActivity
 import dev.goodwy.rphone.controller.CallViewModel
+import dev.goodwy.rphone.controller.lock.AppLockManager
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.view.screen.settings.PasswordDialogContent
 import dev.goodwy.rphone.view.screen.settings.PinDialogContent
@@ -114,25 +111,12 @@ private fun BiometricFloatingUi(
     ) {
         when (biometricType) {
             "system" -> {
-                LaunchedEffect(Unit) {
-                    val executor = ContextCompat.getMainExecutor(activity)
-                    val prompt = BiometricPrompt(
-                        activity, executor,
-                        object : BiometricPrompt.AuthenticationCallback() {
-                            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) { onSuccess() }
-                            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) { onDismiss() }
-                            override fun onAuthenticationFailed() {}
-                        }
-                    )
-                    prompt.authenticate(
-                        BiometricPrompt.PromptInfo.Builder()
-                            .setTitle("Ever Dialer")
-                            .setSubtitle("Verify your identity to access this call")
-                            .setNegativeButtonText("Cancel")
-                            .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_WEAK)
-                            .build()
-                    )
-                }
+                AppLockManager.authenticate(
+                    activity = activity,
+                    title = stringResource(R.string.verify_your_identity_to_access_call),
+                    onSuccess = { onSuccess() },
+                    onError = { _, _ -> onDismiss()}
+                )
             }
             "pin" -> {
                 Surface(

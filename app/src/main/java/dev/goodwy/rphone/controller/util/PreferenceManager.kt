@@ -42,7 +42,11 @@ class PreferenceManager(context: Context) {
     private val dataStore = getSharedDataStore(appContext)
 
     // Internal cache for synchronous access
-    private val _prefsCache = MutableStateFlow<Preferences>(emptyPreferences())
+    private val _prefsCache = MutableStateFlow<Preferences>(
+        // We perform a blocking read when creating an object,
+        // so that the cache isn't empty during a cold start in onCreate()
+        runBlocking { dataStore.data.first() }
+    )
 
     private val _settingsChanged = MutableStateFlow(0)
     val settingsChanged: StateFlow<Int> = _settingsChanged.asStateFlow()
@@ -574,7 +578,7 @@ class PreferenceManager(context: Context) {
         const val KEY_HIDE_VOICE_SEARCH        = "hide_voice_search"
     }
 
-    fun isAppLockEnabled(): Boolean = getBoolean(KEY_APP_LOCK_ENABLED, false)
+    fun isAppLockEnabled(): Boolean = getBoolean(KEY_BIOMETRICS_APP_LOCK, false) && getString(KEY_BIOMETRICS_TYPE, "")?.isNotEmpty() ?: false
     fun setAppLockEnabled(enabled: Boolean) = setBoolean(KEY_APP_LOCK_ENABLED, enabled)
     fun isBiometricLockEnabled(): Boolean = getBoolean(KEY_APP_LOCK_BIOMETRIC, true)
     fun setBiometricLockEnabled(enabled: Boolean) = setBoolean(KEY_APP_LOCK_BIOMETRIC, enabled)

@@ -200,7 +200,6 @@
             android:showForAllUsers="true"
             android:showWhenLocked="true"
             android:turnScreenOn="true"
-            android:inheritShowWhenLocked="true"
             android:taskAffinity=""
             android:directBootAware="true"
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden|uiMode|density|fontScale"

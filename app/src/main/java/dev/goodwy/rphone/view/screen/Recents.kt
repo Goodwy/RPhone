@@ -580,6 +580,9 @@ fun CallLogFullContent(
     val favouritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, false)
     val contactsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_CONTACTS, true)
     val cardCornerExtraLarge  = prefs.getInt(PreferenceManager.KEY_CARD_ROUNDNESS, RillShapeDefaults.DefaultRoundness).dp
+    val haptics = prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)
+    val hapticsStrength = prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light"
+    val hapticsIntensity = prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
     var pendingDeleteIds by remember { mutableStateOf<List<Long>>(emptyList()) }
 
     if (isGranted) {
@@ -654,7 +657,7 @@ fun CallLogFullContent(
             )
         }
 
-        val isDataLoading = logs.isEmpty() || allContacts.isEmpty()
+        val isDataLoading = logs.isEmpty() || (!favouritesEnabled && allContacts.isEmpty())
         if (isDataLoading) {
             // Only show a spinner on the very first launch when no disk cache exists.
             // On subsequent opens the disk cache fills instantly so this won't be seen.
@@ -958,6 +961,9 @@ fun CallLogFullContent(
                                         Box(modifier = Modifier.padding(horizontal = 16.dp)) {
                                             SwipeableCallLogContainer(
                                                 enabled = swipeToCallEnabled && !selectionMode,
+                                                haptics = haptics,
+                                                hapticsStrength = hapticsStrength,
+                                                hapticsIntensity = hapticsIntensity,
                                                 onSwipeRight = {
                                                     placeCallWithSimPreference(context, lg.number, simPref) {
                                                         pendingNumber = lg.number; showSimPicker = true

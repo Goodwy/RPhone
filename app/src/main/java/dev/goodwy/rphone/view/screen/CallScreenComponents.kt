@@ -66,6 +66,7 @@ import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import dev.goodwy.rphone.view.theme.MyColors.dialpadKeyColor
 import dev.goodwy.rphone.view.theme.color_call_button
 import dev.goodwy.rphone.view.theme.color_call_end
+import dev.goodwy.rphone.view.theme.customColors
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import java.util.Calendar
@@ -135,7 +136,7 @@ fun PocketModeOverlay(
             Surface(
                 modifier = Modifier.size(80.dp),
                 shape = CircleShape,
-                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f),
+                color = MaterialTheme.colorScheme.customColors.colorIndigo,
                 contentColor = MaterialTheme.colorScheme.primary
             ) {
                 Box(contentAlignment = Alignment.Center) {
@@ -143,23 +144,23 @@ fun PocketModeOverlay(
                         Icons.Rounded.ScreenLockPortrait,
                         contentDescription = null,
                         modifier = Modifier.size(42.dp),
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = MaterialTheme.colorScheme.customColors.colorDarkIndigo
                     )
                 }
             }
             Spacer(Modifier.height(24.dp))
             Text(
-                text = "Pocket Mode Active",
+                text = stringResource(R.string.pocket_mode_active),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = "Screen touches are locked to prevent accidental touches in your pocket.",
+                text = stringResource(R.string.pocket_mode_active_description),
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.White.copy(alpha = 0.7f),
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                textAlign = TextAlign.Center
             )
             Spacer(Modifier.height(32.dp))
             FilledTonalButton(
@@ -168,7 +169,7 @@ fun PocketModeOverlay(
             ) {
                 Icon(Icons.Rounded.LockOpen, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
-                Text("Dismiss Touch Guard")
+                Text(stringResource(R.string.pocket_mode_dismiss))
             }
         }
     }
