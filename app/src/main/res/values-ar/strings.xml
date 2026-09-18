@@ -295,6 +295,14 @@
     <string name="password_dont_match">كلمات المرور غير متطابقة</string>
     <string name="lock_on_minimize">القفل عند التصغير</string>
     <string name="lock_on_minimize_subtitle">إذا تم إيقاف تشغيل هذا، سيتم إنهاء التطبيق فقط عند إلغاء تحميله بالكامل من الذاكرة</string>
+    <string name="verify_your_identity_to_continue">تحقق من هويتك للمتابعة</string>
+    <string name="verify_your_identity_to_access_call">تحقق من هويتك للوصول إلى هذه المكالمة</string>
+    <string name="lock_timeout">مهلة القفل</string>
+    <string name="immediately_on_exit">فورًا عند الخروج</string>
+    <string name="after_1_minute">بعد دقيقة واحدة</string>
+    <string name="after_5_minutes">بعد 5 دقائق</string>
+    <string name="after_15_minutes">بعد 15 دقيقة</string>
+    <string name="after_30_minutes">بعد 30 دقيقة</string>
 
     <string name="manage_contacts">إدارة جهات الاتصال</string>
     <string name="manage_contacts_subtitle">جهات الاتصال الخاصة، والحسابات المراد عرضها، وتنظيف قائمتك</string>
@@ -418,6 +426,8 @@
     <string name="settings_call_default_background">خلفية المكالمة الافتراضية</string>
     <string name="settings_call_default_background_set">يتم عرض صورة مخصصة في كل مكالمة</string>
     <string name="settings_call_default_background_none">غير محددة — تستخدم المكالمات سمة التطبيق</string>
+    <string name="settings_interface_hide_avatar_with_bg">إخفاء صورة الملف الشخصي عند توفر خلفية</string>
+    <string name="settings_interface_hide_avatar_with_bg_supporting">إخفاء صورة المتصل على شاشة المكالمة عند تفعيل خلفية المكالمة</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">إضافة إلى الشاشة الرئيسية</string>
@@ -603,4 +613,9 @@
     <string name="failed_to_create_backup">فشل إنشاء النسخ الاحتياطي</string>
     <string name="restore_backup">استعادة النسخ الاحتياطي</string>
     <string name="restore_backup_subtitle">استعادة تكوين التطبيق وملاحظات المكالمات</string>
+
+    <!-- Pocket Mode -->
+    <string name="pocket_mode_active">وضع الجيب نشط</string>
+    <string name="pocket_mode_active_description">تم قفل لمسات الشاشة لمنع اللمس العرضي في جيبك.</string>
+    <string name="pocket_mode_dismiss">إيقاف حماية اللمس</string>
 </resources>

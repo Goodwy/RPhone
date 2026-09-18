@@ -453,6 +453,8 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.avatar_frame_subtitle),
                 stringResource(R.string.show_picture_in_avatar),
                 stringResource(R.string.show_picture_in_avatar_subtitle),
+                stringResource(R.string.settings_interface_hide_avatar_with_bg),
+                stringResource(R.string.settings_interface_hide_avatar_with_bg_supporting),
             )
         ) {
             navigator.navigate(AvatarsPreferenceScreenDestination)
@@ -577,6 +579,9 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.blacklist_subtitle),
                 stringResource(R.string.whitelist),
                 stringResource(R.string.whitelist_subtitle),
+                stringResource(R.string.lock_timeout),
+                stringResource(R.string.immediately_on_exit),
+                stringResource(R.string.after_1_minute),
             )
         ) {
             navigator.navigate(BiometricScreenDestination)

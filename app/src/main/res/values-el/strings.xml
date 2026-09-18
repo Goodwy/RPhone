@@ -294,6 +294,14 @@
     <string name="password_dont_match">Οι κωδικοί δεν ταιριάζουν</string>
     <string name="lock_on_minimize">Κλείδωμα κατά την ελαχιστοποίηση</string>
     <string name="lock_on_minimize_subtitle">Εάν αυτό είναι απενεργοποιημένο, η εφαρμογή θα τερματιστεί μόνο όταν εκφορτωθεί πλήρως από τη μνήμη</string>
+    <string name="verify_your_identity_to_continue">Επαληθεύστε την ταυτότητά σας για να συνεχίσετε</string>
+    <string name="verify_your_identity_to_access_call">Επαληθεύστε την ταυτότητά σας για να αποκτήσετε πρόσβαση σε αυτήν την κλήση</string>
+    <string name="lock_timeout">Χρονικό όριο κλειδώματος</string>
+    <string name="immediately_on_exit">Αμέσως κατά την έξοδο</string>
+    <string name="after_1_minute">Μετά από 1 λεπτό</string>
+    <string name="after_5_minutes">Μετά από 5 λεπτά</string>
+    <string name="after_15_minutes">Μετά από 15 λεπτά</string>
+    <string name="after_30_minutes">Μετά από 30 λεπτά</string>
 
     <string name="manage_contacts">Διαχείριση επαφών</string>
     <string name="manage_contacts_subtitle">Ιδιωτικές επαφές, λογαριασμοί προς εμφάνιση και καθαρισμός λίστας</string>
@@ -417,6 +425,8 @@
     <string name="settings_call_default_background">Προεπιλεγμένο φόντο κλήσης</string>
     <string name="settings_call_default_background_set">Εμφανίζεται προσαρμοσμένη εικόνα σε κάθε κλήση</string>
     <string name="settings_call_default_background_none">Δεν έχει οριστεί — οι κλήσεις χρησιμοποιούν το θέμα της εφαρμογής</string>
+    <string name="settings_interface_hide_avatar_with_bg">Απόκρυψη εικόνας προφίλ όταν υπάρχει διαθέσιμο φόντο</string>
+    <string name="settings_interface_hide_avatar_with_bg_supporting">Απόκρυψη του άβαταρ του καλούντος στην οθόνη κλήσης όταν είναι ενεργό ένα φόντο κλήσης</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">Προσθήκη στην αρχική οθόνη</string>
@@ -590,4 +600,9 @@
     <string name="failed_to_create_backup">Αποτυχία δημιουργίας αντιγράφου ασφαλείας</string>
     <string name="restore_backup">Επαναφορά αντιγράφου ασφαλείας</string>
     <string name="restore_backup_subtitle">Επαναφορά ρυθμίσεων εφαρμογής και σημειώσεων κλήσεων</string>
+
+    <!-- Pocket Mode -->
+    <string name="pocket_mode_active">Λειτουργία τσέπης ενεργή</string>
+    <string name="pocket_mode_active_description">Οι αφές της οθόνης είναι κλειδωμένες για την αποφυγή τυχαίων αφών στην τσέπη σας.</string>
+    <string name="pocket_mode_dismiss">Απενεργοποίηση προστασίας αφής</string>
 </resources>

@@ -294,6 +294,14 @@
     <string name="password_dont_match">Hasła nie pasują</string>
     <string name="lock_on_minimize">Blokuj przy minimalizacji</string>
     <string name="lock_on_minimize_subtitle">Jeśli ta opcja jest wyłączona, aplikacja zostanie zakończona tylko wtedy, gdy zostanie całkowicie usunięta z pamięci</string>
+    <string name="verify_your_identity_to_continue">Zweryfikuj swoją tożsamość, aby kontynuować</string>
+    <string name="verify_your_identity_to_access_call">Zweryfikuj swoją tożsamość, aby uzyskać dostęp do tego połączenia</string>
+    <string name="lock_timeout">Czas blokady</string>
+    <string name="immediately_on_exit">Natychmiast po wyjściu</string>
+    <string name="after_1_minute">Po 1 minucie</string>
+    <string name="after_5_minutes">Po 5 minutach</string>
+    <string name="after_15_minutes">Po 15 minutach</string>
+    <string name="after_30_minutes">Po 30 minutach</string>
 
     <string name="manage_contacts">Zarządzaj kontaktami</string>
     <string name="manage_contacts_subtitle">Kontakty prywatne, konta do wyświetlania i czyszczenie listy</string>
@@ -417,6 +425,8 @@
     <string name="settings_call_default_background">Domyślne tło połączenia</string>
     <string name="settings_call_default_background_set">Niestandardowy obraz jest wyświetlany podczas każdego połączenia</string>
     <string name="settings_call_default_background_none">Nie ustawiono — połączenia używają motywu aplikacji</string>
+    <string name="settings_interface_hide_avatar_with_bg">Ukryj zdjęcie profilowe, gdy dostępne jest tło</string>
+    <string name="settings_interface_hide_avatar_with_bg_supporting">Ukryj awatar dzwoniącego na ekranie połączenia, gdy aktywne jest tło połączenia</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">Dodaj do ekranu głównego</string>
@@ -596,4 +606,9 @@
     <string name="failed_to_create_backup">Nie udało się utworzyć kopii zapasowej</string>
     <string name="restore_backup">Przywróć kopię zapasową</string>
     <string name="restore_backup_subtitle">Przywróć konfigurację aplikacji i notatki z połączeń</string>
+
+    <!-- Pocket Mode -->
+    <string name="pocket_mode_active">Tryb kieszeniowy aktywny</string>
+    <string name="pocket_mode_active_description">Dotyki ekranu są zablokowane, aby zapobiec przypadkowym dotknięciom w kieszeni.</string>
+    <string name="pocket_mode_dismiss">Wyłącz ochronę dotykową</string>
 </resources>

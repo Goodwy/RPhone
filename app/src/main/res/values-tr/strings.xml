@@ -294,6 +294,14 @@
     <string name="password_dont_match">Parolalar eşleşmiyor</string>
     <string name="lock_on_minimize">Küçültüldüğünde Kilitle</string>
     <string name="lock_on_minimize_subtitle">Bu kapatılırsa, uygulama yalnızca bellekten tamamen kaldırıldığında sonlandırılır</string>
+    <string name="verify_your_identity_to_continue">Devam etmek için kimliğinizi doğrulayın</string>
+    <string name="verify_your_identity_to_access_call">Bu aramaya erişmek için kimliğinizi doğrulayın</string>
+    <string name="lock_timeout">Kilit zaman aşımı</string>
+    <string name="immediately_on_exit">Çıkışta hemen</string>
+    <string name="after_1_minute">1 dakika sonra</string>
+    <string name="after_5_minutes">5 dakika sonra</string>
+    <string name="after_15_minutes">15 dakika sonra</string>
+    <string name="after_30_minutes">30 dakika sonra</string>
 
     <string name="manage_contacts">Kişileri Yönet</string>
     <string name="manage_contacts_subtitle">Özel kişiler, gösterilecek hesaplar ve listenizi temizleyin</string>
@@ -417,6 +425,8 @@
     <string name="settings_call_default_background">Varsayılan arama arka planı</string>
     <string name="settings_call_default_background_set">Her aramada özel bir resim gösterilir</string>
     <string name="settings_call_default_background_none">Ayarlanmadı — aramalar uygulama temasını kullanır</string>
+    <string name="settings_interface_hide_avatar_with_bg">Arka plan mevcut olduğunda profil resmini gizle</string>
+    <string name="settings_interface_hide_avatar_with_bg_supporting">Bir arama arka planı etkinken arama ekranındaki arayan avatarını gizle</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">Ana ekrana ekle</string>
@@ -590,4 +600,9 @@
     <string name="failed_to_create_backup">Yedek oluşturulamadı</string>
     <string name="restore_backup">Yedeği geri yükle</string>
     <string name="restore_backup_subtitle">Uygulama yapılandırmasını ve arama notlarını geri yükle</string>
+
+    <!-- Pocket Mode -->
+    <string name="pocket_mode_active">Cep modu etkin</string>
+    <string name="pocket_mode_active_description">Cebinizde yanlışlıkla dokunmayı önlemek için ekran dokunuşları kilitlendi.</string>
+    <string name="pocket_mode_dismiss">Dokunma korumasını kapat</string>
 </resources>

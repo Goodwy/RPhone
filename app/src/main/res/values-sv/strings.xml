@@ -294,6 +294,14 @@
     <string name="password_dont_match">Lösenorden matchar inte</string>
     <string name="lock_on_minimize">Lås vid minimering</string>
     <string name="lock_on_minimize_subtitle">Om detta är avstängt kommer appen endast att avslutas när den är helt avlastad från minnet</string>
+    <string name="verify_your_identity_to_continue">Verifiera din identitet för att fortsätta</string>
+    <string name="verify_your_identity_to_access_call">Verifiera din identitet för att komma åt detta samtal</string>
+    <string name="lock_timeout">Låstidsgräns</string>
+    <string name="immediately_on_exit">Omedelbart vid avslut</string>
+    <string name="after_1_minute">Efter 1 minut</string>
+    <string name="after_5_minutes">Efter 5 minuter</string>
+    <string name="after_15_minutes">Efter 15 minuter</string>
+    <string name="after_30_minutes">Efter 30 minuter</string>
 
     <string name="manage_contacts">Hantera kontakter</string>
     <string name="manage_contacts_subtitle">Privata kontakter, konton att visa och rensa din lista</string>
@@ -417,6 +425,8 @@
     <string name="settings_call_default_background">Standard samtalsbakgrund</string>
     <string name="settings_call_default_background_set">En anpassad bild visas vid varje samtal</string>
     <string name="settings_call_default_background_none">Inte inställd — samtal använder apptemat</string>
+    <string name="settings_interface_hide_avatar_with_bg">Dölj profilbilden när en bakgrund är tillgänglig</string>
+    <string name="settings_interface_hide_avatar_with_bg_supporting">Dölj uppringarens avatar på samtalskärmen när en samtalsbakgrund är aktiv</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">Lägg till på startsidan</string>
@@ -590,4 +600,9 @@
     <string name="failed_to_create_backup">Misslyckades med att skapa säkerhetskopia</string>
     <string name="restore_backup">Återställ säkerhetskopia</string>
     <string name="restore_backup_subtitle">Återställ appkonfiguration och samtalsanteckningar</string>
+
+    <!-- Pocket Mode -->
+    <string name="pocket_mode_active">Fickläge aktivt</string>
+    <string name="pocket_mode_active_description">Skärmberöringar är låsta för att förhindra oavsiktliga beröringar i fickan.</string>
+    <string name="pocket_mode_dismiss">Inaktivera beröringsskydd</string>
 </resources>

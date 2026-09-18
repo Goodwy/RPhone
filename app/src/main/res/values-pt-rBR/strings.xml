@@ -294,6 +294,14 @@
     <string name="password_dont_match">As senhas não coincidem</string>
     <string name="lock_on_minimize">Bloquear ao minimizar</string>
     <string name="lock_on_minimize_subtitle">Se esta opção estiver desativada, o aplicativo só será encerrado quando for completamente descarregado da memória</string>
+    <string name="verify_your_identity_to_continue">Verifique sua identidade para continuar</string>
+    <string name="verify_your_identity_to_access_call">Verifique sua identidade para acessar esta chamada</string>
+    <string name="lock_timeout">Tempo limite de bloqueio</string>
+    <string name="immediately_on_exit">Imediatamente ao sair</string>
+    <string name="after_1_minute">Após 1 minuto</string>
+    <string name="after_5_minutes">Após 5 minutos</string>
+    <string name="after_15_minutes">Após 15 minutos</string>
+    <string name="after_30_minutes">Após 30 minutos</string>
 
     <string name="manage_contacts">Gerenciar contatos</string>
     <string name="manage_contacts_subtitle">Contatos privados, contas para mostrar e limpar sua lista</string>
@@ -417,6 +425,8 @@
     <string name="settings_call_default_background">Fundo de chamada padrão</string>
     <string name="settings_call_default_background_set">Uma imagem personalizada é exibida em cada chamada</string>
     <string name="settings_call_default_background_none">Não definido — as chamadas usam o tema do aplicativo</string>
+    <string name="settings_interface_hide_avatar_with_bg">Ocultar a foto de perfil quando houver um fundo disponível</string>
+    <string name="settings_interface_hide_avatar_with_bg_supporting">Ocultar o avatar do chamador na tela de chamada quando um fundo de chamada estiver ativo</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">Adicionar à tela inicial</string>
@@ -593,4 +603,9 @@
     <string name="failed_to_create_backup">Falha ao criar backup</string>
     <string name="restore_backup">Restaurar backup</string>
     <string name="restore_backup_subtitle">Restaurar configuração do aplicativo e notas de chamadas</string>
+
+    <!-- Pocket Mode -->
+    <string name="pocket_mode_active">Modo bolso ativo</string>
+    <string name="pocket_mode_active_description">Os toques na tela estão bloqueados para evitar toques acidentais no bolso.</string>
+    <string name="pocket_mode_dismiss">Desativar proteção de toque</string>
 </resources>

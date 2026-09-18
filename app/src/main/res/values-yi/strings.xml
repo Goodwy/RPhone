@@ -295,6 +295,14 @@
     <string name="password_dont_match">פאַרווערטער שטימען נישט</string>
     <string name="lock_on_minimize">שליסן בײַ פֿאַרקלענערן</string>
     <string name="lock_on_minimize_subtitle">אויב דאָס איז אויסגעשטעלט, וועט די אַפּ נאָר ענדיקן ווען זי ווערט גאָר אַראָפּגעלאָדן פֿון דעם זכּרון</string>
+    <string name="verify_your_identity_to_continue">באַשטעטיק דײַן אידענטיטעט צו פֿאָרזעצן</string>
+    <string name="verify_your_identity_to_access_call">באַשטעטיק דײַן אידענטיטעט צו צוקומען צו דעם רוף</string>
+    <string name="lock_timeout">שליסל צײַט אַרויס</string>
+    <string name="immediately_on_exit">גלייך בײַ אַרויסגיין</string>
+    <string name="after_1_minute">נאָך 1 מינוט</string>
+    <string name="after_5_minutes">נאָך 5 מינוט</string>
+    <string name="after_15_minutes">נאָך 15 מינוט</string>
+    <string name="after_30_minutes">נאָך 30 מינוט</string>
 
     <string name="manage_contacts">פֿאַרוואַלטן קאָנטאַקטן</string>
     <string name="manage_contacts_subtitle">פּריוואַטע קאָנטאַקטן, קאָנטען צו ווײַזן, און רייניקן דײַן ליסטע</string>
@@ -418,6 +426,8 @@
     <string name="settings_call_default_background">סטאנדאַרד רוף הינטערגרונט</string>
     <string name="settings_call_default_background_set">אַ פּערזענלעך בילד ווערט געוויזן אויף יעדן רוף</string>
     <string name="settings_call_default_background_none">נישט איינגעשטעלט — רופן ניצן די אַפּ טעמע</string>
+    <string name="settings_interface_hide_avatar_with_bg">באַהאַלטן פּראָפֿיל בילד ווען אַ הינטערגרונט איז פֿאַראַן</string>
+    <string name="settings_interface_hide_avatar_with_bg_supporting">באַהאַלטן דעם רופֿער אַוואַטאַר אויף דעם רוף פאַרשטעל ווען אַ רוף הינטערגרונט איז אַקטיוו</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">צולייגן צו היים פאַרשטעל</string>
@@ -597,4 +607,9 @@
     <string name="failed_to_create_backup">האָט נישט געקענט שאַפֿן באַקאַפּ</string>
     <string name="restore_backup">שטעל צוריק באַקאַפּ</string>
     <string name="restore_backup_subtitle">שטעל צוריק אַפּ קאָנפֿיגוראַציע און רוף הערות</string>
+
+    <!-- Pocket Mode -->
+    <string name="pocket_mode_active">קעשענע מאָדע אַקטיוו</string>
+    <string name="pocket_mode_active_description">פאַרשטעל באַרירונגען זענען פֿאַרשליסן צו פֿאַרהיטן צופאַליקע באַרירונגען אין דער קעשענע.</string>
+    <string name="pocket_mode_dismiss">אויסשטעלן באַריר שוץ</string>
 </resources>

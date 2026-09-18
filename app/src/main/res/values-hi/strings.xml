@@ -294,6 +294,14 @@
     <string name="password_dont_match">पासवर्ड मेल नहीं खाते</string>
     <string name="lock_on_minimize">छोटा करने पर लॉक करें</string>
     <string name="lock_on_minimize_subtitle">यदि यह बंद है, तो ऐप केवल तभी समाप्त होगा जब इसे मेमोरी से पूरी तरह से हटा दिया जाएगा</string>
+    <string name="verify_your_identity_to_continue">जारी रखने के लिए अपनी पहचान सत्यापित करें</string>
+    <string name="verify_your_identity_to_access_call">इस कॉल तक पहुँचने के लिए अपनी पहचान सत्यापित करें</string>
+    <string name="lock_timeout">लॉक टाइमआउट</string>
+    <string name="immediately_on_exit">बाहर निकलते ही तुरंत</string>
+    <string name="after_1_minute">1 मिनट बाद</string>
+    <string name="after_5_minutes">5 मिनट बाद</string>
+    <string name="after_15_minutes">15 मिनट बाद</string>
+    <string name="after_30_minutes">30 मिनट बाद</string>
 
     <string name="manage_contacts">संपर्क प्रबंधित करें</string>
     <string name="manage_contacts_subtitle">निजी संपर्क, दिखाने के लिए खाते, और अपनी सूची साफ़ करें</string>
@@ -417,6 +425,8 @@
     <string name="settings_call_default_background">डिफ़ॉल्ट कॉल बैकग्राउंड</string>
     <string name="settings_call_default_background_set">हर कॉल पर कस्टम इमेज दिखाई जाती है</string>
     <string name="settings_call_default_background_none">सेट नहीं — कॉल ऐप थीम का उपयोग करती हैं</string>
+    <string name="settings_interface_hide_avatar_with_bg">बैकग्राउंड उपलब्ध होने पर प्रोफ़ाइल तस्वीर छुपाएं</string>
+    <string name="settings_interface_hide_avatar_with_bg_supporting">कॉल बैकग्राउंड सक्रिय होने पर कॉल स्क्रीन पर कॉलर अवतार छुपाएं</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">होम स्क्रीन पर जोड़ें</string>
@@ -590,4 +600,9 @@
     <string name="failed_to_create_backup">बैकअप बनाने में विफल</string>
     <string name="restore_backup">बैकअप पुनर्स्थापित करें</string>
     <string name="restore_backup_subtitle">ऐप कॉन्फ़िगरेशन और कॉल नोट्स पुनर्स्थापित करें</string>
+
+    <!-- Pocket Mode -->
+    <string name="pocket_mode_active">पॉकेट मोड सक्रिय</string>
+    <string name="pocket_mode_active_description">जेब में गलती से टच होने से बचाने के लिए स्क्रीन टच लॉक कर दिए गए हैं।</string>
+    <string name="pocket_mode_dismiss">टच गार्ड बंद करें</string>
 </resources>

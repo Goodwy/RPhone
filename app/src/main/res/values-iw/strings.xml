@@ -295,6 +295,14 @@
     <string name="password_dont_match">הסיסמאות אינן תואמות</string>
     <string name="lock_on_minimize">נעל בעת מזעור</string>
     <string name="lock_on_minimize_subtitle">אם זה כבוי, האפליקציה תסתיים רק כאשר היא תורד לחלוטין מהזיכרון</string>
+    <string name="verify_your_identity_to_continue">אמת את זהותך כדי להמשיך</string>
+    <string name="verify_your_identity_to_access_call">אמת את זהותך כדי לגשת לשיחה זו</string>
+    <string name="lock_timeout">פסק זמן נעילה</string>
+    <string name="immediately_on_exit">מיד ביציאה</string>
+    <string name="after_1_minute">אחרי דקה</string>
+    <string name="after_5_minutes">אחרי 5 דקות</string>
+    <string name="after_15_minutes">אחרי 15 דקות</string>
+    <string name="after_30_minutes">אחרי 30 דקות</string>
 
     <string name="manage_contacts">ניהול אנשי קשר</string>
     <string name="manage_contacts_subtitle">אנשי קשר פרטיים, חשבונות להצגה, וניקוי הרשימה</string>
@@ -418,6 +426,8 @@
     <string name="settings_call_default_background">רקע שיחה ברירת מחדל</string>
     <string name="settings_call_default_background_set">תמונה מותאמת אישית מוצגת בכל שיחה</string>
     <string name="settings_call_default_background_none">לא הוגדר — שיחות משתמשות בערכת הנושא של האפליקציה</string>
+    <string name="settings_interface_hide_avatar_with_bg">הסתר תמונת פרופיל כאשר רקע זמין</string>
+    <string name="settings_interface_hide_avatar_with_bg_supporting">הסתר את אווטאר המתקשר במסך השיחה כאשר רקע שיחה פעיל</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">הוסף למסך הבית</string>
@@ -594,4 +604,9 @@
     <string name="failed_to_create_backup">נכשל ביצירת גיבוי</string>
     <string name="restore_backup">שחזר גיבוי</string>
     <string name="restore_backup_subtitle">שחזר תצורת אפליקציה והערות שיחה</string>
+
+    <!-- Pocket Mode -->
+    <string name="pocket_mode_active">מצב כיס פעיל</string>
+    <string name="pocket_mode_active_description">נעילות מגע במסך ננעלו כדי למנוע נגיעות מקריות בכיס.</string>
+    <string name="pocket_mode_dismiss">בטל הגנת מגע</string>
 </resources>

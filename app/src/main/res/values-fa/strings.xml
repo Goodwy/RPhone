@@ -295,6 +295,14 @@
     <string name="password_dont_match">رمزهای عبور مطابقت ندارند</string>
     <string name="lock_on_minimize">قفل هنگام کوچک‌سازی</string>
     <string name="lock_on_minimize_subtitle">اگر این گزینه خاموش باشد، برنامه فقط زمانی پایان می‌یابد که به طور کامل از حافظه تخلیه شود</string>
+    <string name="verify_your_identity_to_continue">برای ادامه هویت خود را تأیید کنید</string>
+    <string name="verify_your_identity_to_access_call">برای دسترسی به این تماس هویت خود را تأیید کنید</string>
+    <string name="lock_timeout">مهلت قفل</string>
+    <string name="immediately_on_exit">بلافاصله هنگام خروج</string>
+    <string name="after_1_minute">بعد از ۱ دقیقه</string>
+    <string name="after_5_minutes">بعد از ۵ دقیقه</string>
+    <string name="after_15_minutes">بعد از ۱۵ دقیقه</string>
+    <string name="after_30_minutes">بعد از ۳۰ دقیقه</string>
 
     <string name="manage_contacts">مدیریت مخاطبان</string>
     <string name="manage_contacts_subtitle">مخاطبان خصوصی، حساب‌های نمایش داده شده، و پاک کردن لیست شما</string>
@@ -418,6 +426,8 @@
     <string name="settings_call_default_background">پس‌زمینه پیش‌فرض تماس</string>
     <string name="settings_call_default_background_set">یک تصویر سفارشی در هر تماس نمایش داده می‌شود</string>
     <string name="settings_call_default_background_none">تنظیم نشده — تماس‌ها از تم برنامه استفاده می‌کنند</string>
+    <string name="settings_interface_hide_avatar_with_bg">پنهان کردن تصویر پروفایل در صورت وجود پس‌زمینه</string>
+    <string name="settings_interface_hide_avatar_with_bg_supporting">پنهان کردن آواتار تماس‌گیرنده در صفحه تماس وقتی پس‌زمینه تماس فعال است</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">افزودن به صفحه اصلی</string>
@@ -591,4 +601,9 @@
     <string name="failed_to_create_backup">ایجاد پشتیبان ناموفق</string>
     <string name="restore_backup">بازیابی پشتیبان</string>
     <string name="restore_backup_subtitle">بازیابی تنظیمات برنامه و یادداشت‌های تماس</string>
+
+    <!-- Pocket Mode -->
+    <string name="pocket_mode_active">حالت جیب فعال است</string>
+    <string name="pocket_mode_active_description">لمس‌های صفحه برای جلوگیری از لمس تصادفی در جیب شما قفل شده‌اند.</string>
+    <string name="pocket_mode_dismiss">غیرفعال کردن محافظ لمس</string>
 </resources>

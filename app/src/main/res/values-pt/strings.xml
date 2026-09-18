@@ -294,6 +294,14 @@
     <string name="password_dont_match">As palavras-passe não coincidem</string>
     <string name="lock_on_minimize">Bloquear ao minimizar</string>
     <string name="lock_on_minimize_subtitle">Se esta opção estiver desativada, a aplicação só será encerrada quando for completamente descarregada da memória</string>
+    <string name="verify_your_identity_to_continue">Verifique a sua identidade para continuar</string>
+    <string name="verify_your_identity_to_access_call">Verifique a sua identidade para aceder a esta chamada</string>
+    <string name="lock_timeout">Tempo limite de bloqueio</string>
+    <string name="immediately_on_exit">Imediatamente ao sair</string>
+    <string name="after_1_minute">Após 1 minuto</string>
+    <string name="after_5_minutes">Após 5 minutos</string>
+    <string name="after_15_minutes">Após 15 minutos</string>
+    <string name="after_30_minutes">Após 30 minutos</string>
 
     <string name="manage_contacts">Gerir contactos</string>
     <string name="manage_contacts_subtitle">Contactos privados, contas a mostrar e limpar a sua lista</string>
@@ -417,6 +425,8 @@
     <string name="settings_call_default_background">Fundo de chamada predefinido</string>
     <string name="settings_call_default_background_set">É exibida uma imagem personalizada em cada chamada</string>
     <string name="settings_call_default_background_none">Não definido — as chamadas usam o tema da aplicação</string>
+    <string name="settings_interface_hide_avatar_with_bg">Ocultar a imagem de perfil quando estiver disponível um fundo</string>
+    <string name="settings_interface_hide_avatar_with_bg_supporting">Ocultar o avatar do chamador no ecrã de chamada quando um fundo de chamada estiver ativo</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">Adicionar ao ecrã inicial</string>
@@ -593,4 +603,9 @@
     <string name="failed_to_create_backup">Falha ao criar cópia de segurança</string>
     <string name="restore_backup">Restaurar cópia de segurança</string>
     <string name="restore_backup_subtitle">Restaurar configuração da aplicação e notas de chamadas</string>
+
+    <!-- Pocket Mode -->
+    <string name="pocket_mode_active">Modo bolso ativo</string>
+    <string name="pocket_mode_active_description">Os toques no ecrã estão bloqueados para evitar toques acidentais no bolso.</string>
+    <string name="pocket_mode_dismiss">Desativar proteção de toque</string>
 </resources>
