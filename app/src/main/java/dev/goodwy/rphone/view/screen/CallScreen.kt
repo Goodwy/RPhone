@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Build
 import android.telecom.Call
 import android.telecom.CallAudioState
+import android.telecom.TelecomManager
 import android.telecom.VideoProfile
 import android.view.HapticFeedbackConstants
 import androidx.activity.compose.BackHandler
@@ -315,13 +316,17 @@ fun ExpressiveCallScreen(
                 exit = fadeOut() + shrinkVertically()
             ) {
                 otherCall?.let { oc ->
-                    var ocName by remember(oc) { mutableStateOf(oc.details.handle?.schemeSpecificPart ?: "Unknown") }
+                    val cnam = if (oc.details?.callerDisplayNamePresentation == TelecomManager.PRESENTATION_ALLOWED) {
+                        oc.details?.callerDisplayName?.takeIf { it.isNotBlank() }
+                    } else null
+                    var ocName by remember(oc, cnam) { mutableStateOf(cnam ?: oc.details?.handle?.schemeSpecificPart ?: "Unknown") }
                     val displayOrder = preferenceManager.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0)
-                    LaunchedEffect(oc) {
-                        val number = oc.details.handle?.schemeSpecificPart ?: ""
+                    LaunchedEffect(oc, cnam) {
+                        val number = oc.details?.handle?.schemeSpecificPart ?: ""
                         if (number.isNotEmpty()) {
                             val contact = try { contactsRepo.getContactByNumber(number) } catch (_: Exception) { null }
                             if (contact != null) ocName = getDisplayName(contact, displayOrder)
+                            else if (!cnam.isNullOrEmpty()) ocName = cnam
                         }
                     }
 
