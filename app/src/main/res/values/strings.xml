@@ -103,6 +103,13 @@
     <string name="source_code">Source code</string>
     <string name="privacy_policy">Privacy policy</string>
 
+    <!-- Updates -->
+    <string name="updates" translatable="false">Updates</string>
+    <string name="check_for_updates" translatable="false">Check for updates</string>
+    <string name="check_for_updates_subtitle" translatable="false">Check if a new version is available</string>
+    <string name="auto_check_for_updates" translatable="false">Auto check for updates</string>
+    <string name="auto_check_for_updates_subtitle" translatable="false">Check for updates automatically</string>
+
     <!-- Contributors -->
     <string name="contributors">Contributors</string>
     <string name="development_team">Development Team</string>

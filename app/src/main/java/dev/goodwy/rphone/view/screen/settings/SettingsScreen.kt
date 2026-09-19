@@ -28,6 +28,7 @@ import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.rounded.Autorenew
 import androidx.compose.material.icons.rounded.Backup
 import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.CheckCircle
@@ -42,6 +43,7 @@ import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.PrivacyTip
 import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material.icons.rounded.StarRate
+import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material.icons.rounded.VolunteerActivism
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -61,17 +63,19 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.goodwy.rphone.GITHUB_API_RELEASES
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.BackupManager
 import dev.goodwy.rphone.controller.util.PreferenceManager
-import dev.goodwy.rphone.controller.util.enqueueApkDownload
-import dev.goodwy.rphone.controller.util.getApkDestinationFile
+import dev.goodwy.rphone.controller.util.UpdateDialogState
+import dev.goodwy.rphone.controller.util.UpdateDialogs
 import dev.goodwy.rphone.controller.util.getAppVersion
-import dev.goodwy.rphone.controller.util.installApkAndScheduleDelete
+import dev.goodwy.rphone.controller.util.performUpdateCheck
 import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillAnimatedSection
 import dev.goodwy.rphone.view.components.RillExpressiveCard
 import dev.goodwy.rphone.view.components.RillListItem
+import dev.goodwy.rphone.view.components.RillSwitchListItem
 import dev.goodwy.rphone.view.components.ScrollHapticsEffect
 import dev.goodwy.rphone.view.components.SupportProjectItem
 import dev.goodwy.rphone.view.theme.customColors
@@ -198,129 +202,11 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
     }
 
     // ── Update Dialogs ────────────────────────────────────────────────────────
-    when (val state = updateDialogState) {
-
-        is UpdateDialogState.Checking -> Dialog(onDismissRequest = {}) {
-            Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surfaceContainerHigh) {
-                Column(Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    CircularProgressIndicator()
-                    Text("Checking for updates…", style = MaterialTheme.typography.bodyLarge)
-                }
-            }
-        }
-
-        is UpdateDialogState.UpToDate -> AlertDialog(
-            onDismissRequest = { updateDialogState = UpdateDialogState.Idle },
-            icon = {
-                Icon(
-                    Icons.Default.CheckCircle,
-                    null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(72.dp)
-                )
-            },
-            title = { Text("Up to date") },
-            text = { Text("The app is running the latest version (v$appVersion).") },
-            confirmButton = { TextButton(onClick = { updateDialogState = UpdateDialogState.Idle }) { Text(stringResource(R.string.ok)) } }
-        )
-
-        // ── Confirmation popup before downloading ──
-        is UpdateDialogState.ConfirmUpdate -> AlertDialog(
-            onDismissRequest = { updateDialogState = UpdateDialogState.Idle },
-            icon = { Icon(Icons.Default.SystemUpdate, null, tint = MaterialTheme.colorScheme.customColors.colorBlue) },
-            title = { Text("Update Available") },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Version v${state.latestVersion} is available.")
-                    Text("Would you like to download and install it now?", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            },
-            confirmButton = {
-                Button(onClick = {
-                    val url = state.apkUrl
-                    if (url != null) {
-                        val downloadId = enqueueApkDownload(context, url)
-                        if (downloadId != null) {
-                            updateDialogState = UpdateDialogState.Downloading(state.latestVersion, url, downloadId, 0f)
-                        } else {
-                            updateDialogState = UpdateDialogState.Error
-                        }
-                    } else {
-                        updateDialogState = UpdateDialogState.Error
-                    }
-                }) { Text("Download") }
-            },
-            dismissButton = {
-                TextButton(onClick = { updateDialogState = UpdateDialogState.Idle }) { Text("Not Now") }
-            }
-        )
-
-        // ── Accurate download progress ──
-        is UpdateDialogState.Downloading -> {
-            // Poll DownloadManager for real progress
-            LaunchedEffect(state.downloadId) {
-                val dm = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-                while (true) {
-                    delay(300.milliseconds)
-                    val query = DownloadManager.Query().setFilterById(state.downloadId)
-                    val cursor = dm.query(query)
-                    if (!cursor.moveToFirst()) { cursor.close(); break }
-
-                    val dmStatus = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
-                    val downloaded = cursor.getLong(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR))
-                    val total = cursor.getLong(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TOTAL_SIZE_BYTES))
-                    cursor.close()
-
-                    when (dmStatus) {
-                        DownloadManager.STATUS_SUCCESSFUL -> {
-                            updateDialogState = UpdateDialogState.Idle
-                            val file = getApkDestinationFile()
-                            installApkAndScheduleDelete(context, file)
-                            break
-                        }
-                        DownloadManager.STATUS_FAILED -> {
-                            updateDialogState = UpdateDialogState.Error
-                            break
-                        }
-                        else -> {
-                            val progress = if (total > 0L) (downloaded.toFloat() / total.toFloat()).coerceIn(0f, 1f) else 0f
-                            updateDialogState = state.copy(progress = progress)
-                        }
-                    }
-                }
-            }
-
-            Dialog(onDismissRequest = {}) {
-                Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surfaceContainerHigh) {
-                    Column(Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        Icon(Icons.Default.SystemUpdate, null, tint = MaterialTheme.colorScheme.customColors.colorBlue, modifier = Modifier.size(36.dp))
-                        Text("Downloading Update", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                        Text("v${state.latestVersion}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
-                            LinearProgressIndicator(
-                                progress = { state.progress },
-                                modifier = Modifier.fillMaxWidth(),
-                            )
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                Text("${(state.progress * 100).roundToInt()}%", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Text("Please wait…", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        is UpdateDialogState.Error -> AlertDialog(
-            onDismissRequest = { updateDialogState = UpdateDialogState.Idle },
-            icon = { Icon(Icons.Default.Error, null, tint = MaterialTheme.colorScheme.customColors.colorRed) },
-            title = { Text("Check failed") },
-            text = { Text("Could not check for updates. Please try again later.") },
-            confirmButton = { TextButton(onClick = { updateDialogState = UpdateDialogState.Idle }) { Text(stringResource(R.string.ok)) } }
-        )
-
-        else -> {}
-    }
+    UpdateDialogs(
+        updateDialogState = updateDialogState,
+        onStateChange = { updateDialogState = it },
+        appVersion = appVersion
+    )
 
     // ── Backup Dialogs ────────────────────────────────────────────────────────
     when (val state = backupState) {
@@ -691,6 +577,17 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
             navigator.navigate(AboutAppScreenDestination)
         },
         SettingsSearchEntry(
+            headline = stringResource(R.string.check_for_updates),
+            supporting = stringResource(R.string.check_for_updates_subtitle),
+            leadingIcon = Icons.Rounded.SystemUpdate,
+            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
+            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
+        ) {
+            scope.launch {
+                performUpdateCheck(appVersion) { updateDialogState = it }
+            }
+        },
+        SettingsSearchEntry(
             headline = stringResource(R.string.other_apps),
             leadingIcon = if (isGPlay) ImageVector.vectorResource(id = R.drawable.ic_google_play_vector) else ImageVector.vectorResource(id = R.drawable.ic_goodwy),
             iconContainerColor = Color.Black,
@@ -1042,6 +939,45 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                     }
                 }
 
+                // ── Updates ──────────────────────────────────────────────────────
+                item {
+                    RillAnimatedSection(delayMs = 340L) {
+                        Column {
+                            SettingsSectionLabel(stringResource(R.string.updates))
+                            RillExpressiveCard {
+                                var autoUpdateCheck by remember {
+                                    mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_AUTO_UPDATE_CHECK, true))
+                                }
+                                RillListItem(
+                                    headline = stringResource(R.string.check_for_updates),
+                                    supporting = stringResource(R.string.check_for_updates_subtitle),
+                                    leadingIcon = Icons.Rounded.SystemUpdate,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
+                                    trailingIcon = Icons.Default.ChevronRight,
+                                    onClick = {
+                                        scope.launch {
+                                            performUpdateCheck(appVersion) { updateDialogState = it }
+                                        }
+                                    }
+                                )
+                                RillSwitchListItem(
+                                    headline = stringResource(R.string.auto_check_for_updates),
+                                    supporting = stringResource(R.string.auto_check_for_updates_subtitle),
+                                    leadingIcon = Icons.Rounded.Autorenew,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
+                                    checked = autoUpdateCheck,
+                                    onCheckedChange = { checked ->
+                                        autoUpdateCheck = checked
+                                        prefs.setBoolean(PreferenceManager.KEY_AUTO_UPDATE_CHECK, checked)
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
                 item { SettingsBottomPadding(120.dp) }
             }
         }
@@ -1059,14 +995,7 @@ private data class SettingsSearchEntry(
     val onClick: () -> Unit
 )
 
-private sealed class UpdateDialogState {
-    object Idle : UpdateDialogState()
-    object Checking : UpdateDialogState()
-    object UpToDate : UpdateDialogState()
-    data class ConfirmUpdate(val latestVersion: String, val apkUrl: String?) : UpdateDialogState()
-    data class Downloading(val latestVersion: String, val apkUrl: String?, val downloadId: Long, val progress: Float) : UpdateDialogState()
-    object Error : UpdateDialogState()
-}
+
 
 private sealed class BackupDialogState {
     object Idle : BackupDialogState()

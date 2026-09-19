@@ -11,14 +11,44 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.widget.Toast
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.SystemUpdate
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.core.content.FileProvider
+import dev.goodwy.rphone.GITHUB_API_RELEASES
+import dev.goodwy.rphone.R
+import dev.goodwy.rphone.view.theme.customColors
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.io.File
 import java.io.FileInputStream
 import java.net.HttpURLConnection
 import java.net.URL
+import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.milliseconds
+
+sealed class UpdateDialogState {
+    object Idle : UpdateDialogState()
+    object Checking : UpdateDialogState()
+    object UpToDate : UpdateDialogState()
+    data class ConfirmUpdate(val latestVersion: String, val apkUrl: String?) : UpdateDialogState()
+    data class Downloading(val latestVersion: String, val apkUrl: String?, val downloadId: Long, val progress: Float = 0f) : UpdateDialogState()
+    object Error : UpdateDialogState()
+}
 
 data class ReleaseInfo(
     val tagName: String,
@@ -51,6 +81,20 @@ suspend fun fetchLatestRelease(apiUrl: String): ReleaseInfo? = withContext(Dispa
         }
         ReleaseInfo(tagName = tag.trimStart('v', 'V'), apkUrl = apkUrl)
     } catch (_: Exception) { null }
+}
+
+suspend fun performUpdateCheck(appVersion: String, onStateChange: (UpdateDialogState) -> Unit) {
+    onStateChange(UpdateDialogState.Checking)
+    val release = fetchLatestRelease(GITHUB_API_RELEASES)
+    if (release == null) {
+        onStateChange(UpdateDialogState.Error)
+    } else {
+        if (isNewerVersion(release.tagName, appVersion)) {
+            onStateChange(UpdateDialogState.ConfirmUpdate(release.tagName, release.apkUrl))
+        } else {
+            onStateChange(UpdateDialogState.UpToDate)
+        }
+    }
 }
 
 fun isNewerVersion(latest: String, current: String): Boolean {
@@ -172,3 +216,131 @@ fun downloadAndInstallApk(context: Context, apkUrl: String) {
 }
 
 fun installApk(context: Context, file: File) = installApkAndScheduleDelete(context, file)
+
+@Composable
+fun UpdateDialogs(
+    updateDialogState: UpdateDialogState,
+    onStateChange: (UpdateDialogState) -> Unit,
+    appVersion: String
+) {
+    val context = LocalContext.current
+    when (val state = updateDialogState) {
+        is UpdateDialogState.Checking -> Dialog(onDismissRequest = {}) {
+            Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surfaceContainerHigh) {
+                Column(Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    CircularProgressIndicator()
+                    Text("Checking for updates…", style = MaterialTheme.typography.bodyLarge)
+                }
+            }
+        }
+
+        is UpdateDialogState.UpToDate -> AlertDialog(
+            onDismissRequest = { onStateChange(UpdateDialogState.Idle) },
+            icon = {
+                Icon(
+                    Icons.Default.CheckCircle,
+                    null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(72.dp)
+                )
+            },
+            title = { Text("Up to date") },
+            text = { Text("The app is running the latest version (v$appVersion).") },
+            confirmButton = { TextButton(onClick = { onStateChange(UpdateDialogState.Idle) }) { Text(stringResource(R.string.ok)) } }
+        )
+
+        is UpdateDialogState.ConfirmUpdate -> AlertDialog(
+            onDismissRequest = { onStateChange(UpdateDialogState.Idle) },
+            icon = { Icon(Icons.Default.SystemUpdate, null, tint = MaterialTheme.colorScheme.customColors.colorBlue) },
+            title = { Text("Update Available") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Version v${state.latestVersion} is available.")
+                    Text("Would you like to download and install it now?", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            },
+            confirmButton = {
+                Button(onClick = {
+                    val url = state.apkUrl
+                    if (url != null) {
+                        val downloadId = enqueueApkDownload(context, url)
+                        if (downloadId != null) {
+                            onStateChange(UpdateDialogState.Downloading(state.latestVersion, url, downloadId, 0f))
+                        } else {
+                            onStateChange(UpdateDialogState.Error)
+                        }
+                    } else {
+                        onStateChange(UpdateDialogState.Error)
+                    }
+                }) { Text("Download") }
+            },
+            dismissButton = {
+                TextButton(onClick = { onStateChange(UpdateDialogState.Idle) }) { Text("Not Now") }
+            }
+        )
+
+        is UpdateDialogState.Downloading -> {
+            LaunchedEffect(state.downloadId) {
+                val dm = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+                while (true) {
+                    delay(300.milliseconds)
+                    val query = DownloadManager.Query().setFilterById(state.downloadId)
+                    val cursor = dm.query(query)
+                    if (!cursor.moveToFirst()) { cursor.close(); break }
+
+                    val dmStatus = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
+                    val downloaded = cursor.getLong(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR))
+                    val total = cursor.getLong(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TOTAL_SIZE_BYTES))
+                    cursor.close()
+
+                    when (dmStatus) {
+                        DownloadManager.STATUS_SUCCESSFUL -> {
+                            onStateChange(UpdateDialogState.Idle)
+                            val file = getApkDestinationFile()
+                            installApkAndScheduleDelete(context, file)
+                            break
+                        }
+                        DownloadManager.STATUS_FAILED -> {
+                            onStateChange(UpdateDialogState.Error)
+                            break
+                        }
+                        else -> {
+                            val progress = if (total > 0L) (downloaded.toFloat() / total.toFloat()).coerceIn(0f, 1f) else 0f
+                            onStateChange(state.copy(progress = progress))
+                        }
+                    }
+                }
+            }
+
+            Dialog(onDismissRequest = {}) {
+                Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surfaceContainerHigh) {
+                    Column(Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Icon(Icons.Default.SystemUpdate, null, tint = MaterialTheme.colorScheme.customColors.colorBlue, modifier = Modifier.size(36.dp))
+                        Text("Downloading Update", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                        Text("v${state.latestVersion}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
+                            LinearProgressIndicator(
+                                progress = { state.progress },
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text("${(state.progress * 100).roundToInt()}%", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("Please wait…", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        is UpdateDialogState.Error -> AlertDialog(
+            onDismissRequest = { onStateChange(UpdateDialogState.Idle) },
+            icon = { Icon(Icons.Default.Error, null, tint = MaterialTheme.colorScheme.customColors.colorRed) },
+            title = { Text("Check failed") },
+            text = { Text("Could not check for updates. Please try again later.") },
+            confirmButton = { TextButton(onClick = { onStateChange(UpdateDialogState.Idle) }) { Text(stringResource(R.string.ok)) } }
+        )
+
+        else -> {}
+    }
+}
