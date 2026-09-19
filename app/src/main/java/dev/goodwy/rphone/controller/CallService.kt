@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.Uri
 import android.os.Build
 import android.provider.BlockedNumberContract
 import android.telecom.Call
@@ -12,7 +13,6 @@ import android.telecom.DisconnectCause
 import android.telecom.InCallService
 import android.telecom.TelecomManager
 import android.widget.Toast
-import androidx.core.net.toUri
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.util.toast
@@ -155,7 +155,8 @@ class CallService : InCallService() {
                 redialCount++
                 serviceScope.launch {
                     delay(delayMs.milliseconds)
-                    val intent = Intent(Intent.ACTION_CALL, "tel:$number".toUri()).apply {
+                    val callUri = Uri.fromParts("tel", number, null)
+                    val intent = Intent(Intent.ACTION_CALL, callUri).apply {
                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     }
                     startActivity(intent)
@@ -272,7 +273,12 @@ class CallService : InCallService() {
             val connectTime = callStartTimes[priorityCall] ?: 0L
             callRepository.updateCurrentCallSession(CallSession(priorityCall, priorityCall.state, connectTimeMillis = connectTime))
         } else {
-            callRepository.updateCurrentCallSession(null)
+            val current = callRepository.currentCallSession.value
+            if (current != null && current.state != Call.STATE_DISCONNECTED) {
+                callRepository.updateCurrentCallSession(CallSession(current.call, Call.STATE_DISCONNECTED, connectTimeMillis = current.connectTimeMillis))
+            } else if (current == null) {
+                callRepository.updateCurrentCallSession(null)
+            }
         }
     }
 
@@ -336,7 +342,7 @@ class CallService : InCallService() {
         redialCount = 0
         call.registerCallback(callCallback)
 
-        val number = call.details.handle?.schemeSpecificPart ?.let { android.net.Uri.decode(it) } ?: ""
+        val number = call.details.handle?.schemeSpecificPart?.let { Uri.decode(it) } ?: ""
         val cnam = if (call.details.callerDisplayNamePresentation == TelecomManager.PRESENTATION_ALLOWED) {
             call.details.callerDisplayName
         } else null
@@ -348,13 +354,15 @@ class CallService : InCallService() {
         if (isUssd) return
         // ────────────────────────────────────────────────────────────────────
 
+        // Update call state synchronously so CallActivity sees active calls immediately
+        updateCallState()
+
         serviceScope.launch {
             if (isNumberBlocked(number)) {
                 handleBlockedCall(call, number)
                 return@launch
             }
 
-            updateCallState()
             updateNotification(call)
 
             val fullscreenCalls = preferenceManager.getBoolean(PreferenceManager.KEY_ALWAYS_FULLSCREEN_CALLS, false)
@@ -382,14 +390,14 @@ class CallService : InCallService() {
             lastFloatingCallMetadata = null
         }
 
+        callStateManager.onCallEnded(number)
         updateCallState()
-        if (callRepository.allCalls.value.isEmpty()) {
-            callStateManager.onCallEnded(number)
-        }
+
         val callsList = callRepository.allCalls.value
         if (callsList.isEmpty()) {
             serviceScope.launch {
                 delay(100.milliseconds)
+                callRepository.updateCurrentCallSession(null)
                 removeForeground()
                 cancelNotification()
             }

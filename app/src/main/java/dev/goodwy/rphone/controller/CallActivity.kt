@@ -287,9 +287,15 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
         val unknownLabel = stringResource(R.string.label_unknown)
         val number = remember(call) { call.details?.handle?.schemeSpecificPart.orEmpty() }
 
-        var identity by remember(number, unknownLabel) {
+        val cnam = remember(call.details?.callerDisplayName, call.details?.callerDisplayNamePresentation) {
+            if (call.details?.callerDisplayNamePresentation == TelecomManager.PRESENTATION_ALLOWED) {
+                call.details?.callerDisplayName?.takeIf { it.isNotBlank() }
+            } else null
+        }
+
+        var identity by remember(number, cnam, unknownLabel) {
             val base = cachedIdentity(number, settingsState)
-                ?: CallIdentity(number, number.ifEmpty { unknownLabel }, null, null)
+                ?: CallIdentity(number, cnam ?: number.ifEmpty { unknownLabel }, null, null)
             mutableStateOf(
                 if (base.backgroundUri == null) {
                     base.copy(backgroundUri = CallBackgroundStore.defaultModel(context))
@@ -299,7 +305,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
             )
         }
 
-        LaunchedEffect(number, settingsState) {
+        LaunchedEffect(number, cnam, settingsState) {
             val handle = number.ifEmpty { null }
 
             val handleResult = CallBackgroundStore.resolveResult(context, handle, null)
@@ -336,6 +342,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
             val resolved = CallIdentity(
                 number = number,
                 name = contact?.name?.takeIf { it.isNotBlank() }
+                    ?: cnam
                     ?: identity.name.takeIf { contactFailed && it.isNotBlank() }
                     ?: number.ifEmpty { unknownLabel },
                 photoUri = contact?.photoUri ?: identity.photoUri.takeIf { contactFailed },

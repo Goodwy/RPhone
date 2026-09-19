@@ -43,7 +43,7 @@ class RecentCallsWidgetProvider : AppWidgetProvider() {
         super.onReceive(context, intent)
         if (intent.action == ACTION_DIAL) {
             val number = intent.getStringExtra(EXTRA_PHONE_NUMBER) ?: return
-            val callUri = Uri.parse("tel:$number")
+            val callUri = Uri.fromParts("tel", number, null)
             try {
                 context.startActivity(
                     Intent(Intent.ACTION_CALL, callUri).apply {

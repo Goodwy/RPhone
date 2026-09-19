@@ -2,8 +2,8 @@ package dev.goodwy.rphone.controller
 
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import androidx.core.net.toUri
 
 //Empty activation to remove missed call notifications when you press to call or send a message
 //https://stackoverflow.com/questions/18261969/clicking-android-notification-actions-does-not-close-notification-drawer?noredirect=1&lq=1
@@ -25,13 +25,15 @@ class NotificationActivity : Activity() {
 
         when (intent.action) {
             ACTION_CALL -> {
-                Intent(Intent.ACTION_CALL, "tel:$number".toUri()).apply {
+                val callUri = Uri.fromParts("tel", number, null)
+                Intent(Intent.ACTION_CALL, callUri).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     startActivity(this)
                 }
             }
             ACTION_SMS -> {
-                Intent(Intent.ACTION_VIEW, "sms:$number".toUri()).apply {
+                val smsUri = Uri.fromParts("sms", number, null)
+                Intent(Intent.ACTION_VIEW, smsUri).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     startActivity(this)
                 }

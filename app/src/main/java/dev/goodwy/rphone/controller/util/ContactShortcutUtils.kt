@@ -10,6 +10,7 @@ import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import android.graphics.Typeface
+import android.net.Uri
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
@@ -56,7 +57,8 @@ object ContactShortcutUtils {
 
     /** Pins a shortcut that dials [number] immediately when tapped, skipping the app entirely. */
     fun pinCallShortcut(context: Context, keyId: String, displayName: String, number: String, photoUri: String?) {
-        val intent = Intent(Intent.ACTION_CALL, "tel:$number".toUri()).apply {
+        val callUri = Uri.fromParts("tel", number, null)
+        val intent = Intent(Intent.ACTION_CALL, callUri).apply {
             setClass(context, MainActivity::class.java)
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
