@@ -850,8 +850,7 @@ fun RillListItem(
                         if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
                             performAppHaptic(
                                 context,
-                                prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light")
-                                    ?: "light",
+                                prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light",
                                 prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
                             )
                         }

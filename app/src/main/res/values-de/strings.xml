@@ -99,6 +99,29 @@
     <string name="source_code">Quellcode</string>
     <string name="privacy_policy">Datenschutz</string>
 
+    <!-- Updates -->
+    <string name="updates">Updates</string>
+    <string name="check_for_updates">Nach Updates suchen</string>
+    <string name="check_for_updates_subtitle">Prüfen, ob eine neue Version verfügbar ist</string>
+    <string name="auto_check_for_updates">Automatisch nach Updates suchen</string>
+    <string name="auto_check_for_updates_subtitle">Automatisch nach Updates suchen</string>
+    <string name="checking_for_updates">Suche nach Updates…</string>
+    <string name="up_to_date">Auf dem neuesten Stand</string>
+    <string name="up_to_date_subtitle">Die App läuft auf der neuesten Version (v%1$s).</string>
+    <string name="update_available">Update verfügbar</string>
+    <string name="update_available_subtitle">Version v%1$s ist verfügbar.</string>
+    <string name="update_available_description">Möchten Sie die APK-Datei in den Downloads-Ordner herunterladen?</string>
+    <string name="download">Herunterladen</string>
+    <string name="not_now">Nicht jetzt</string>
+    <string name="downloading_update">Update wird heruntergeladen</string>
+    <string name="please_wait">Bitte warten…</string>
+    <string name="check_failed">Überprüfung fehlgeschlagen</string>
+    <string name="check_failed_subtitle">Updates konnten nicht überprüft werden. Bitte versuchen Sie es später erneut.</string>
+    <string name="download_complete">Download abgeschlossen</string>
+    <string name="download_complete_subtitle">Das Update auf Version %1$s wurde erfolgreich heruntergeladen.</string>
+    <string name="open_downloads_folder_manually">Downloads-Ordner manuell öffnen</string>
+    <string name="file_saved_to_downloads_folder">Die Datei wurde im Downloads-Ordner gespeichert.</string>
+
     <!-- Contributors -->
     <string name="contributors">Mitwirkende</string>
     <string name="development_team">Entwicklungsteam</string>
@@ -142,6 +165,8 @@
     <string name="call_screen">Anrufbildschirm</string>
     <string name="liquid_glass_call_screen">Den Flüssigglaseffekt auf den Anrufbildschirm anwenden</string>
     <string name="blur_effect_call_screen">Einen Unschärfeeffekt auf den Anrufbildschirm anwenden</string>
+    <string name="liquid_glass_dialpad">Den Flüssigglaseffekt auf das Wählfeld anwenden</string>
+    <string name="blur_effect_dialpad">Einen Unschärfeeffekt auf das Wählfeld anwenden</string>
     <string name="scroll_animation">Scroll-Animation</string>
     <string name="scroll_animation_device">Einblendanimation für Listenelemente beim Scrollen</string>
     <string name="call_ui">Anruf-UI</string>
@@ -209,6 +234,25 @@
     <string name="auto_speaker_subtitle">Automatisch auf Lautsprecher umschalten, wenn das Telefon vom Ohr entfernt ist, und zurück zum Hörer, wenn es nah ist</string>
     <string name="fullscreen_calls">Vollbild-Anrufe</string>
     <string name="fullscreen_calls_subtitle">Eingehende Anrufe werden immer im Vollbildmodus angezeigt</string>
+
+    <string name="quick_response">Schnellantwort</string>
+    <string name="quick_responses">Schnellantworten</string>
+    <string name="quick_responses_subtitle">Vorlagen für SMS-Ablehnungsantworten auf eingehende Anrufe verwalten</string>
+    <string name="quick_responses_description">Tippen Sie während eines eingehenden Anrufs auf die Nachrichten-Schaltfläche, um den Anruf abzulehnen und eine dieser vorgefertigten Antworten per SMS zu senden.</string>
+    <string name="add_response">Schnellantwort hinzufügen</string>
+    <string name="edit_response">Schnellantwort bearbeiten</string>
+    <string name="default_quick_responses_1">Kann jetzt nicht sprechen. Was gibt\'s?</string>
+    <string name="default_quick_responses_2">Ich rufe gleich zurück.</string>
+    <string name="default_quick_responses_3">Ich rufe später zurück.</string>
+    <string name="default_quick_responses_4">Kann jetzt nicht sprechen. Rufen Sie später an?</string>
+    <string name="write_your_own">Eigene Antwort schreiben…</string>
+    <string name="type_message">Nachricht eingeben</string>
+    <string name="canned_responses">Vorgefertigte Antworten (%s)</string>
+    <string name="no_quick_responses_configured">Keine Schnellantworten konfiguriert</string>
+    <string name="reset_to_defaults">Auf Standard zurücksetzen</string>
+    <string name="reset_to_defaults_description">Ursprüngliche voreingestellte Schnellantworten wiederherstellen?</string>
+    <string name="decline_call_and_reply_to">Anruf ablehnen und %s antworten</string>
+    <string name="send">Senden</string>
 
     <string name="sound_and_vibration">Sound &amp; Vibration</string>
     <string name="sound_and_vibration_subtitle">Klingeltöne, Wähltöne und Haptik in der App</string>

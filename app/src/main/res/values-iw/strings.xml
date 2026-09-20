@@ -100,6 +100,29 @@
     <string name="source_code">קוד מקור</string>
     <string name="privacy_policy">מדיניות פרטיות</string>
 
+    <!-- Updates -->
+    <string name="updates">עדכונים</string>
+    <string name="check_for_updates">בדוק עדכונים</string>
+    <string name="check_for_updates_subtitle">בדוק אם גרסה חדשה זמינה</string>
+    <string name="auto_check_for_updates">בדיקת עדכונים אוטומטית</string>
+    <string name="auto_check_for_updates_subtitle">בדוק עדכונים באופן אוטומטי</string>
+    <string name="checking_for_updates">בודק עדכונים…</string>
+    <string name="up_to_date">מעודכן</string>
+    <string name="up_to_date_subtitle">האפליקציה מריצה את הגרסה האחרונה (v%1$s).</string>
+    <string name="update_available">עדכון זמין</string>
+    <string name="update_available_subtitle">גרסה v%1$s זמינה.</string>
+    <string name="update_available_description">האם ברצונך להוריד את קובץ ה-APK לתיקיית ההורדות?</string>
+    <string name="download">הורד</string>
+    <string name="not_now">לא עכשיו</string>
+    <string name="downloading_update">מוריד עדכון</string>
+    <string name="please_wait">אנא המתן…</string>
+    <string name="check_failed">הבדיקה נכשלה</string>
+    <string name="check_failed_subtitle">לא ניתן היה לבדוק עדכונים. אנא נסה שוב מאוחר יותר.</string>
+    <string name="download_complete">ההורדה הושלמה</string>
+    <string name="download_complete_subtitle">העדכון לגרסה %1$s הורד בהצלחה.</string>
+    <string name="open_downloads_folder_manually">פתח את תיקיית ההורדות ידנית</string>
+    <string name="file_saved_to_downloads_folder">הקובץ נשמר בתיקיית ההורדות.</string>
+
     <!-- Contributors -->
     <string name="contributors">תורמים</string>
     <string name="development_team">צוות הפיתוח</string>
@@ -143,6 +166,8 @@
     <string name="call_screen">מסך שיחה</string>
     <string name="liquid_glass_call_screen">החל את אפקט הזכוכית הנוזלית על מסך השיחה</string>
     <string name="blur_effect_call_screen">החל אפקט טשטוש על מסך השיחה</string>
+    <string name="liquid_glass_dialpad">החל את אפקט הזכוכית הנוזלית על לוח החיוג</string>
+    <string name="blur_effect_dialpad">החל אפקט טשטוש על לוח החיוג</string>
     <string name="scroll_animation">אנימציית גלילה</string>
     <string name="scroll_animation_device">אנימציית הופעה לפריטי רשימה בעת הגלילה</string>
     <string name="call_ui">ממשק שיחה</string>
@@ -210,6 +235,25 @@
     <string name="auto_speaker_subtitle">עבור אוטומטית לרמקול כאשר הטלפון רחוק מהאוזן, ובחזרה לאפרכסת כאשר הוא קרוב</string>
     <string name="fullscreen_calls">שיחות במסך מלא</string>
     <string name="fullscreen_calls_subtitle">שיחות נכנסות מוצגות תמיד במצב מסך מלא</string>
+
+    <string name="quick_response">תגובה מהירה</string>
+    <string name="quick_responses">תגובות מהירות</string>
+    <string name="quick_responses_subtitle">ניהול תגובות SMS מוכנות לדחיית שיחות נכנסות</string>
+    <string name="quick_responses_description">הקש על כפתור ההודעה במהלך שיחה נכנסת כדי לדחות ולשלוח אחת מהתגובות המוכנות הללו ב-SMS.</string>
+    <string name="add_response">הוסף תגובה מהירה</string>
+    <string name="edit_response">ערוך תגובה מהירה</string>
+    <string name="default_quick_responses_1">לא יכול לדבר עכשיו. מה קרה?</string>
+    <string name="default_quick_responses_2">אתקשר אליך מיד בחזרה.</string>
+    <string name="default_quick_responses_3">אתקשר אליך מאוחר יותר.</string>
+    <string name="default_quick_responses_4">לא יכול לדבר עכשיו. תתקשר אליי מאוחר יותר?</string>
+    <string name="write_your_own">כתוב משלך…</string>
+    <string name="type_message">הקלד הודעה</string>
+    <string name="canned_responses">תגובות מוכנות (%s)</string>
+    <string name="no_quick_responses_configured">לא הוגדרו תגובות מהירות</string>
+    <string name="reset_to_defaults">אפס לברירת מחדל</string>
+    <string name="reset_to_defaults_description">לשחזר את התגובות המהירות המוגדרות מראש?</string>
+    <string name="decline_call_and_reply_to">דחה שיחה והשב ל-%s</string>
+    <string name="send">שלח</string>
 
     <string name="sound_and_vibration">צליל ורעידות</string>
     <string name="sound_and_vibration_subtitle">צלילי רינגטון, צלילי חיוג ומשוב הפטי בכל האפליקציה</string>

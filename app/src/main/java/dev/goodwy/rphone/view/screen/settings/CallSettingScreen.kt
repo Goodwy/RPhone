@@ -22,9 +22,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.goodwy.rphone.R
@@ -40,6 +42,7 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.compose.koinInject
 import androidx.core.net.toUri
+import com.ramcosta.composedestinations.generated.destinations.QuickResponsesScreenDestination
 import dev.goodwy.rphone.view.components.RillSelectListItem
 import dev.goodwy.rphone.view.components.Title
 
@@ -160,6 +163,15 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
                     Column {
                         SettingsSectionLabel(stringResource(R.string.call_behavior))
                         RillExpressiveCard {
+                            RillListItem(
+                                headline = stringResource(R.string.quick_responses),
+                                supporting = stringResource(R.string.quick_responses_subtitle),
+                                leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_message_filled),
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+                                trailingIcon = Icons.Default.ChevronRight,
+                                onClick = { navigator.navigate(QuickResponsesScreenDestination) }
+                            )
                             RillSwitchListItem(
                                 headline   = stringResource(R.string.proximity_sensor),
                                 supporting = stringResource(R.string.proximity_sensor_subtitle),

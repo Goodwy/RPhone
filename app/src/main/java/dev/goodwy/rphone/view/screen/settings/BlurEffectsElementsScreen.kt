@@ -8,6 +8,7 @@ import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.CallEnd
 import androidx.compose.material.icons.rounded.CallToAction
+import androidx.compose.material.icons.rounded.Dialpad
 import androidx.compose.material.icons.rounded.SmartButton
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -39,7 +40,8 @@ private data class BlurElement(
     val supporting: String,
     val icon: ImageVector,
     val iconColor: Color,
-    val iconBgColor: Color
+    val iconBgColor: Color,
+    val default: Boolean
 )
 
 @Composable
@@ -49,6 +51,8 @@ private fun rememberBlurElements(): List<BlurElement> {
     val bottomNavigationBarSubtitle = stringResource(R.string.blur_effect_bottom_navigation_bar)
     val callScreen = stringResource(R.string.call_screen)
     val callScreenSubtitle = stringResource(R.string.blur_effect_call_screen)
+    val dialpad = stringResource(R.string.keypad)
+    val dialpadSubtitle = stringResource(R.string.blur_effect_dialpad)
     return remember(customColors) {
             listOf(
                 BlurElement(
@@ -58,6 +62,7 @@ private fun rememberBlurElements(): List<BlurElement> {
                     icon = Icons.Rounded.CallToAction,
                     iconColor = customColors.colorDarkAmber,
                     iconBgColor = customColors.colorAmber,
+                    default = true
                 ),
                 BlurElement(
                     key = PreferenceManager.KEY_BLUR_CALL_SCREEN,
@@ -66,6 +71,16 @@ private fun rememberBlurElements(): List<BlurElement> {
                     icon = Icons.Rounded.CallEnd,
                     iconColor = customColors.colorDarkGreen,
                     iconBgColor = customColors.colorGreen,
+                    default = true
+                ),
+                BlurElement(
+                    key = PreferenceManager.KEY_BLUR_DIALPAD,
+                    headline = dialpad,
+                    supporting = dialpadSubtitle,
+                    icon = Icons.Rounded.Dialpad,
+                    iconColor = customColors.colorDarkGreen,
+                    iconBgColor = customColors.colorGreen,
+                    default = false
                 ),
 //    BlurElement(
 //        key = PreferenceManager.KEY_BLUR_DROPDOWN_MENU,
@@ -108,7 +123,7 @@ fun BlurEffectsElementsScreen(navigator: DestinationsNavigator) {
 
     val states = remember(blurElements) {
         blurElements.associate { el ->
-            el.key to mutableStateOf(prefs.getBoolean(el.key, true))
+            el.key to mutableStateOf(prefs.getBoolean(el.key, el.default))
         }
     }
 

@@ -100,6 +100,29 @@
     <string name="source_code">קאָד קוואַל</string>
     <string name="privacy_policy">פּריוואַטקייט פּאָליטיק</string>
 
+    <!-- Updates -->
+    <string name="updates">דערהויכענונגען</string>
+    <string name="check_for_updates">קוק פֿאַר דערהויכענונגען</string>
+    <string name="check_for_updates_subtitle">קוק צי אַ נייע ווערסיע איז פֿאַראַן</string>
+    <string name="auto_check_for_updates">אויטאָמאַטיש קוקן פֿאַר דערהויכענונגען</string>
+    <string name="auto_check_for_updates_subtitle">קוק אויטאָמאַטיש פֿאַר דערהויכענונגען</string>
+    <string name="checking_for_updates">קוקט פֿאַר דערהויכענונגען…</string>
+    <string name="up_to_date">אויף דעם לעצטן שטאַנד</string>
+    <string name="up_to_date_subtitle">די אַפּ לויפֿט אויף דער לעצטער ווערסיע (v%1$s).</string>
+    <string name="update_available">דערהויכענונג פֿאַראַן</string>
+    <string name="update_available_subtitle">ווערסיע v%1$s איז פֿאַראַן.</string>
+    <string name="update_available_description">ווילסטו אַראָפּלאָדן די APK טעקע אין דער אַראָפּלאָדן טעקע?</string>
+    <string name="download">אַראָפּלאָדן</string>
+    <string name="not_now">נישט איצט</string>
+    <string name="downloading_update">לאָדט אַראָפּ דערהויכענונג</string>
+    <string name="please_wait">ביטע וואַרט…</string>
+    <string name="check_failed">דער קוק איז דורכגעפֿאַלן</string>
+    <string name="check_failed_subtitle">האָט נישט געקענט קוקן פֿאַר דערהויכענונגען. ביטע פּרובירן שפּעטער.</string>
+    <string name="download_complete">אַראָפּלאָדן פֿאַרענדיקט</string>
+    <string name="download_complete_subtitle">די דערהויכענונג צו ווערסיע %1$s איז מיט דערפֿאָלג אַראָפּגעלאָדן געוואָרן.</string>
+    <string name="open_downloads_folder_manually">עפֿענען די אַראָפּלאָדן טעקע מיט דער האַנט</string>
+    <string name="file_saved_to_downloads_folder">די טעקע איז געהיט געוואָרן אין דער אַראָפּלאָדן טעקע.</string>
+
     <!-- Contributors -->
     <string name="contributors">בײַשטײַערער</string>
     <string name="development_team">אַנטוויקלונג מאַנשאַפֿט</string>
@@ -143,6 +166,8 @@
     <string name="call_screen">רוף פאַרשטעל</string>
     <string name="liquid_glass_call_screen">צולייגן דעם פֿליסיק גלאָז עפעקט צום רוף פאַרשטעל</string>
     <string name="blur_effect_call_screen">צולייגן אַ בלער עפעקט צום רוף פאַרשטעל</string>
+    <string name="liquid_glass_dialpad">צולייגן דעם פֿליסיק גלאָז עפעקט צום ווייל לוח</string>
+    <string name="blur_effect_dialpad">צולייגן אַ בלער עפעקט צום ווייל לוח</string>
     <string name="scroll_animation">גליט אַנימאַציע</string>
     <string name="scroll_animation_device">אַרײַנקומען אַנימאַציע פֿאַר ליסטע פּונקטן בשעת גליטן</string>
     <string name="call_ui">רוף אינ"פ</string>
@@ -210,6 +235,25 @@
     <string name="auto_speaker_subtitle">אויטאָמאַטיש אומשטעלן צו הויך-רעדער ווען טעלעפֿון איז ווײַט פֿון אויער, און צוריק צו אויער-רעדער ווען נאָענט</string>
     <string name="fullscreen_calls">פֿול-סקרין רופן</string>
     <string name="fullscreen_calls_subtitle">איינקומענדיקע רופן ווערן שטענדיק געוויזן אין פֿול-סקרין מאָדע</string>
+
+    <string name="quick_response">גיך ענטפֿער</string>
+    <string name="quick_responses">גיך ענטפֿערס</string>
+    <string name="quick_responses_subtitle">פֿאַרוואַלטן פֿאַרטיקע SMS אָפּוואַרף ענטפֿערס פֿאַר איינקומענדיקע רופן</string>
+    <string name="quick_responses_description">דריק דעם מעלדונג קנעפּל בעשאַס אַן איינקומענדיקן רוף צו אָפּוואַרפן און שיקן איינעם פֿון די פֿאַרטיקע ענטפֿערס דורך SMS.</string>
+    <string name="add_response">צולייגן גיך ענטפֿער</string>
+    <string name="edit_response">רעדאַקטירן גיך ענטפֿער</string>
+    <string name="default_quick_responses_1">קען נישט רעדן איצט. וואָס טוט זיך?</string>
+    <string name="default_quick_responses_2">איך וועל באַלד צוריקרופן.</string>
+    <string name="default_quick_responses_3">איך וועל שפּעטער צוריקרופן.</string>
+    <string name="default_quick_responses_4">קען נישט רעדן איצט. רוף מיך שפּעטער?</string>
+    <string name="write_your_own">שרײַב דײַנס…</string>
+    <string name="type_message">שרײַב אַ מעלדונג</string>
+    <string name="canned_responses">פֿאַרטיקע ענטפֿערס (%s)</string>
+    <string name="no_quick_responses_configured">קיין גיך ענטפֿערס נישט קאָנפֿיגורירט</string>
+    <string name="reset_to_defaults">צוריקשטעלן צו סטאנדאַרד</string>
+    <string name="reset_to_defaults_description">צוריקשטעלן די אָריגינעלע פֿאָראויסגעשטעלטע גיך ענטפֿערס?</string>
+    <string name="decline_call_and_reply_to">אָפּוואַרפן רוף און ענטפֿערן %s</string>
+    <string name="send">שיקן</string>
 
     <string name="sound_and_vibration">קלאַנג און וויבראַציע</string>
     <string name="sound_and_vibration_subtitle">רינגטאן, ווייל טאָנען און האַפּטיק אין גאַנצער אַפּ</string>

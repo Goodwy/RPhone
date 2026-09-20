@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.rounded.CallEnd
 import androidx.compose.material.icons.rounded.CallToAction
+import androidx.compose.material.icons.rounded.Dialpad
 import androidx.compose.material.icons.rounded.SmartButton
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -38,7 +39,8 @@ private data class LgElement(
     val supporting: String,
     val icon: ImageVector,
     val iconColor: Color,
-    val iconBgColor: Color
+    val iconBgColor: Color,
+    val default: Boolean
 )
 
 @Composable
@@ -48,6 +50,8 @@ private fun rememberLgElements(): List<LgElement> {
     val bottomNavigationBarSubtitle = stringResource(R.string.liquid_glass_bottom_navigation_bar)
     val callScreen = stringResource(R.string.call_screen)
     val callScreenSubtitle = stringResource(R.string.liquid_glass_call_screen)
+    val dialpad = stringResource(R.string.keypad)
+    val dialpadSubtitle = stringResource(R.string.liquid_glass_dialpad)
     return remember(customColors) {
         listOf(
             LgElement(
@@ -57,6 +61,7 @@ private fun rememberLgElements(): List<LgElement> {
                 icon = Icons.Rounded.CallToAction,
                 iconColor = customColors.colorDarkAmber,
                 iconBgColor = customColors.colorAmber,
+                default = true
             ),
             LgElement(
                 key = PreferenceManager.KEY_LG_CALL_SCREEN,
@@ -65,6 +70,16 @@ private fun rememberLgElements(): List<LgElement> {
                 icon = Icons.Rounded.CallEnd,
                 iconColor = customColors.colorDarkGreen,
                 iconBgColor = customColors.colorGreen,
+                default = true
+            ),
+            LgElement(
+                key = PreferenceManager.KEY_LG_DIALPAD,
+                headline = dialpad,
+                supporting = dialpadSubtitle,
+                icon = Icons.Rounded.Dialpad,
+                iconColor = customColors.colorDarkGreen,
+                iconBgColor = customColors.colorGreen,
+                default = false
             ),
 //    LgElement(
 //        key = PreferenceManager.KEY_LG_DROPDOWN_MENU,
@@ -107,7 +122,7 @@ fun LiquidGlassElementsScreen(navigator: DestinationsNavigator) {
 
     val states = remember(lgElements) {
         lgElements.associate { el ->
-            el.key to mutableStateOf(prefs.getBoolean(el.key, true))
+            el.key to mutableStateOf(prefs.getBoolean(el.key, el.default))
         }
     }
 

@@ -34,6 +34,7 @@ import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Error
 import androidx.compose.material.icons.rounded.Fingerprint
+import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material.icons.rounded.LogoDev
 import androidx.compose.material.icons.rounded.Merge
 import androidx.compose.material.icons.rounded.MoveUp
@@ -250,6 +251,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
     // ── Search in Settings ─────────────────────────────────────────────────
     var settingsSearchQuery by remember { mutableStateOf("") }
     val isGPlay = BuildConfig.FLAVOR == "gplay"
+    val isFoss = BuildConfig.FLAVOR == "foss"
     val settingsSearchEntries = listOf(
         SettingsSearchEntry(
             headline = stringResource(R.string.interface_settings),
@@ -303,9 +305,31 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.swipe_actions),
                 stringResource(R.string.swipe_actions_subtitle),
             )
-        ) {
-            navigator.navigate(InterfaceScreenDestination)
-        },
+        ) { navigator.navigate(InterfaceScreenDestination) },
+        SettingsSearchEntry(
+            headline = stringResource(R.string.liquid_glass_elements),
+            supporting = stringResource(R.string.liquid_glass_elements_subtitle),
+            leadingIcon = Icons.Rounded.Layers,
+            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPink,
+            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPink,
+            options = listOf(
+                stringResource(R.string.bottom_navigation_bar),
+                stringResource(R.string.call_screen),
+                stringResource(R.string.keypad),
+            )
+        ) { navigator.navigate(LiquidGlassElementsScreenDestination) },
+        SettingsSearchEntry(
+            headline = stringResource(R.string.blur_effect_elements),
+            supporting = stringResource(R.string.blur_effect_elements_subtitle),
+            leadingIcon = Icons.Rounded.Layers,
+            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
+            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
+            options = listOf(
+                stringResource(R.string.bottom_navigation_bar),
+                stringResource(R.string.call_screen),
+                stringResource(R.string.keypad),
+            )
+        ) { navigator.navigate(BlurEffectsElementsScreenDestination) },
         SettingsSearchEntry(
             headline = stringResource(R.string.сaller_ui),
             supporting = stringResource(R.string.сaller_ui_subtitle),
@@ -318,9 +342,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.customize_width),
                 stringResource(R.string.customize_width_subtitle),
             )
-        ) {
-            navigator.navigate(CallerUIScreenDestination)
-        },
+        ) { navigator.navigate(CallerUIScreenDestination) },
         SettingsSearchEntry(
             headline = stringResource(R.string.avatars_settings),
             supporting = stringResource(R.string.avatars_settings_subtitle),
@@ -342,9 +364,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.settings_interface_hide_avatar_with_bg),
                 stringResource(R.string.settings_interface_hide_avatar_with_bg_supporting),
             )
-        ) {
-            navigator.navigate(AvatarsPreferenceScreenDestination)
-        },
+        ) { navigator.navigate(AvatarsPreferenceScreenDestination) },
         SettingsSearchEntry(
             headline = stringResource(R.string.navigations),
             supporting = stringResource(R.string.navigations_subtitle),
@@ -361,9 +381,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.icon_only_bottom_bar),
                 stringResource(R.string.icon_only_bottom_bar_subtitle),
             )
-        ) {
-            navigator.navigate(NavigationScreenDestination)
-        },
+        ) { navigator.navigate(NavigationScreenDestination) },
         SettingsSearchEntry(
             headline = stringResource(R.string.call_settings),
             supporting = stringResource(R.string.call_settings_subtitle),
@@ -387,9 +405,23 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.fullscreen_calls),
                 stringResource(R.string.fullscreen_calls_subtitle),
             )
-        ) {
-            navigator.navigate(CallSettingScreenDestination)
-        },
+        ) { navigator.navigate(CallSettingScreenDestination) },
+        SettingsSearchEntry(
+            headline = stringResource(R.string.quick_responses),
+            supporting = stringResource(R.string.quick_responses_subtitle),
+            leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_message_filled),
+            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+            options = listOf(
+                stringResource(R.string.quick_responses_description),
+                stringResource(R.string.add_response),
+                stringResource(R.string.edit_response),
+                stringResource(R.string.default_quick_responses_1),
+                stringResource(R.string.default_quick_responses_2),
+                stringResource(R.string.default_quick_responses_3),
+                stringResource(R.string.default_quick_responses_4),
+            )
+        ) { navigator.navigate(QuickResponsesScreenDestination) },
         SettingsSearchEntry(
             headline = stringResource(R.string.sound_and_vibration),
             supporting = stringResource(R.string.sound_and_vibration_subtitle),
@@ -418,9 +450,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.haptic_interval_value),
                 stringResource(R.string.haptic_strength),
             )
-        ) {
-            navigator.navigate(SoundVibrationScreenDestination)
-        },
+        ) { navigator.navigate(SoundVibrationScreenDestination) },
         SettingsSearchEntry(
             headline = stringResource(R.string.manage_blocked),
             supporting = stringResource(R.string.manage_blocked_subtitle),
@@ -436,9 +466,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.show_in_logs),
                 stringResource(R.string.blocked_size),
             )
-        ) {
-            navigator.navigate(BlockedNumbersScreenDestination)
-        },
+        ) { navigator.navigate(BlockedNumbersScreenDestination) },
         SettingsSearchEntry(
             headline = stringResource(R.string.authentication),
             leadingIcon = Icons.Rounded.Fingerprint,
@@ -469,9 +497,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.immediately_on_exit),
                 stringResource(R.string.after_1_minute),
             )
-        ) {
-            navigator.navigate(BiometricScreenDestination)
-        },
+        ) { navigator.navigate(BiometricScreenDestination) },
         SettingsSearchEntry(
             headline = stringResource(R.string.manage_contacts),
             supporting = stringResource(R.string.manage_contacts_subtitle),
@@ -488,27 +514,21 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.standardize_phone_numbers),
                 stringResource(R.string.standardize_phone_numbers_subtitle),
             )
-        ) {
-            navigator.navigate(ContactManagementScreenDestination)
-        },
+        ) { navigator.navigate(ContactManagementScreenDestination) },
         SettingsSearchEntry(
             headline = stringResource(R.string.merging_contacts),
             supporting = stringResource(R.string.merging_contacts_subtitle),
             leadingIcon = Icons.Rounded.Merge,
             iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
-        ) {
-            navigator.navigate(ContactMergeDuplicatesScreenDestination)
-        },
+        ) { navigator.navigate(ContactMergeDuplicatesScreenDestination) },
         SettingsSearchEntry(
             headline = stringResource(R.string.unmerging_contacts),
             supporting = stringResource(R.string.unmerging_contacts_subtitle),
             leadingIcon = Icons.AutoMirrored.Rounded.CallSplit,
             iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
-        ) {
-            navigator.navigate(ContactUnmergeDuplicatesScreenDestination)
-        },
+        ) { navigator.navigate(ContactUnmergeDuplicatesScreenDestination) },
         SettingsSearchEntry(
             headline = stringResource(R.string.managing_contact_sources),
             supporting = stringResource(R.string.managing_contact_sources_subtitle),
@@ -519,9 +539,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.managing_contact_sources_description),
                 stringResource(R.string.contacts_stored_on_device),
             )
-        ) {
-            navigator.navigate(ContactVisibilityScreenDestination)
-        },
+        ) { navigator.navigate(ContactVisibilityScreenDestination) },
         SettingsSearchEntry(
             headline = stringResource(R.string.private_contacts),
             supporting = stringResource(R.string.private_contacts_subtitle),
@@ -532,9 +550,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.import_text),
                 stringResource(R.string.export_text),
             )
-        ) {
-            navigator.navigate(PrivateContactsScreenDestination)
-        },
+        ) { navigator.navigate(PrivateContactsScreenDestination) },
         SettingsSearchEntry(
             headline = stringResource(R.string.support_development),
             supporting = stringResource(R.string.support_development_description3),
@@ -546,47 +562,28 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.support_project_to_unlock),
                 stringResource(R.string.your_donation_ensures),
             )
-        ) {
-            navigator.navigate(DonateScreenDestination)
-        },
+        ) { navigator.navigate(DonateScreenDestination) },
         SettingsSearchEntry(
             headline = stringResource(R.string.create_backup),
             supporting = stringResource(R.string.create_backup_subtitle),
             leadingIcon = Icons.Rounded.Backup,
             iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
-        ) {
-            createBackup()
-        },
+        ) { createBackup() },
         SettingsSearchEntry(
             headline = stringResource(R.string.restore_backup),
             supporting = stringResource(R.string.restore_backup_subtitle),
             leadingIcon = Icons.Rounded.Restore,
             iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
-        ) {
-            restoreBackup()
-        },
+        ) { restoreBackup() },
         SettingsSearchEntry(
             headline = stringResource(R.string.about),
             supporting = "Version $appVersion ($storeName)",
             leadingIcon = Icons.Outlined.Info,
             iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOliva,
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOliva,
-        ) {
-            navigator.navigate(AboutAppScreenDestination)
-        },
-        SettingsSearchEntry(
-            headline = stringResource(R.string.check_for_updates),
-            supporting = stringResource(R.string.check_for_updates_subtitle),
-            leadingIcon = Icons.Rounded.SystemUpdate,
-            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
-            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
-        ) {
-            scope.launch {
-                performUpdateCheck(appVersion) { updateDialogState = it }
-            }
-        },
+        ) { navigator.navigate(AboutAppScreenDestination) },
         SettingsSearchEntry(
             headline = stringResource(R.string.other_apps),
             leadingIcon = if (isGPlay) ImageVector.vectorResource(id = R.drawable.ic_google_play_vector) else ImageVector.vectorResource(id = R.drawable.ic_goodwy),
@@ -614,19 +611,24 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
             options = listOf(
                 stringResource(R.string.development_team),
             )
-        ) {
-            navigator.navigate(ContributorsScreenDestination)
-        },
+        ) { navigator.navigate(ContributorsScreenDestination) },
     )
+
     val settingsSearchEntriesFinal = if (isGPlay) {
         settingsSearchEntries + SettingsSearchEntry(
             headline = stringResource(R.string.rate_app),
             leadingIcon = Icons.Rounded.StarRate,
             iconContainerColor = Color.Black,
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOliva,
-        ) {
-            navigator.navigate(AboutAppScreenDestination)
-        }
+        ) { navigator.navigate(AboutAppScreenDestination) }
+    } else if (isFoss) {
+        settingsSearchEntries + SettingsSearchEntry(
+            headline = stringResource(R.string.check_for_updates),
+            supporting = stringResource(R.string.check_for_updates_subtitle),
+            leadingIcon = Icons.Rounded.SystemUpdate,
+            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
+            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
+        ) { scope.launch { performUpdateCheck(appVersion) { updateDialogState = it } } }
     } else {
         settingsSearchEntries
     }
@@ -926,6 +928,20 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                                         trailingIcon = Icons.Default.ChevronRight,
                                         onClick = { navigator.navigate(DonateScreenDestination) })
                                 }
+                                val isFoss = BuildConfig.FLAVOR == "foss"
+                                if (isFoss) RillListItem(
+                                    headline = stringResource(R.string.check_for_updates),
+                                    supporting = stringResource(R.string.check_for_updates_subtitle),
+                                    leadingIcon = Icons.Rounded.SystemUpdate,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOliva,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOliva,
+                                    trailingIcon = Icons.Default.ChevronRight,
+                                    onClick = {
+                                        scope.launch {
+                                            performUpdateCheck(appVersion) { updateDialogState = it }
+                                        }
+                                    }
+                                )
                                 RillListItem(
                                     headline = stringResource(R.string.about),
                                     supporting = "Version $appVersion ($storeName)",
@@ -940,43 +956,30 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 }
 
                 // ── Updates ──────────────────────────────────────────────────────
-                item {
-                    RillAnimatedSection(delayMs = 340L) {
-                        Column {
-                            SettingsSectionLabel(stringResource(R.string.updates))
-                            RillExpressiveCard {
-                                var autoUpdateCheck by remember {
-                                    mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_AUTO_UPDATE_CHECK, true))
-                                }
-                                RillListItem(
-                                    headline = stringResource(R.string.check_for_updates),
-                                    supporting = stringResource(R.string.check_for_updates_subtitle),
-                                    leadingIcon = Icons.Rounded.SystemUpdate,
-                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
-                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
-                                    trailingIcon = Icons.Default.ChevronRight,
-                                    onClick = {
-                                        scope.launch {
-                                            performUpdateCheck(appVersion) { updateDialogState = it }
-                                        }
-                                    }
-                                )
-                                RillSwitchListItem(
-                                    headline = stringResource(R.string.auto_check_for_updates),
-                                    supporting = stringResource(R.string.auto_check_for_updates_subtitle),
-                                    leadingIcon = Icons.Rounded.Autorenew,
-                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
-                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
-                                    checked = autoUpdateCheck,
-                                    onCheckedChange = { checked ->
-                                        autoUpdateCheck = checked
-                                        prefs.setBoolean(PreferenceManager.KEY_AUTO_UPDATE_CHECK, checked)
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
+//                item {
+//                    RillAnimatedSection(delayMs = 340L) {
+//                        Column {
+//                            SettingsSectionLabel(stringResource(R.string.updates))
+//                            RillExpressiveCard {
+//                                var autoUpdateCheck by remember {
+//                                    mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_AUTO_UPDATE_CHECK, true))
+//                                }
+//                                RillSwitchListItem(
+//                                    headline = stringResource(R.string.auto_check_for_updates),
+//                                    supporting = stringResource(R.string.auto_check_for_updates_subtitle),
+//                                    leadingIcon = Icons.Rounded.Autorenew,
+//                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
+//                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
+//                                    checked = autoUpdateCheck,
+//                                    onCheckedChange = { checked ->
+//                                        autoUpdateCheck = checked
+//                                        prefs.setBoolean(PreferenceManager.KEY_AUTO_UPDATE_CHECK, checked)
+//                                    }
+//                                )
+//                            }
+//                        }
+//                    }
+//                }
 
                 item { SettingsBottomPadding(120.dp) }
             }
@@ -994,8 +997,6 @@ private data class SettingsSearchEntry(
     val options: List<String> = emptyList(),
     val onClick: () -> Unit
 )
-
-
 
 private sealed class BackupDialogState {
     object Idle : BackupDialogState()

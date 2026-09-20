@@ -476,14 +476,10 @@ class MainActivity : FragmentActivity() {
                                                     .then(
                                                         if (isRotation90) {
                                                             Modifier.windowInsetsPadding(
-                                                                WindowInsets.displayCutout/*.union(
-                                                                WindowInsets.systemBars
-                                                            )*/
+                                                                WindowInsets.displayCutout/*.union(WindowInsets.systemBars)*/
                                                             )
                                                         } else {
-                                                            Modifier.windowInsetsPadding(
-                                                                WindowInsets.systemBars
-                                                            )
+                                                            Modifier.windowInsetsPadding(WindowInsets.systemBars)
                                                         }
                                                     )
                                                     .width(82.dp),
@@ -567,9 +563,7 @@ class MainActivity : FragmentActivity() {
                                                 .background(MaterialTheme.colorScheme.background)
                                                 .fillMaxHeight().then(
                                                     if (isRotation270) {
-                                                        Modifier.windowInsetsPadding(
-                                                            WindowInsets.displayCutout
-                                                        )
+                                                        Modifier.windowInsetsPadding(WindowInsets.displayCutout)
                                                     } else {
                                                         Modifier.windowInsetsPadding(WindowInsets.systemBars)
                                                     }

@@ -100,6 +100,29 @@
     <string name="source_code">الكود المصدري</string>
     <string name="privacy_policy">سياسة الخصوصية</string>
 
+    <!-- Updates -->
+    <string name="updates">التحديثات</string>
+    <string name="check_for_updates">التحقق من التحديثات</string>
+    <string name="check_for_updates_subtitle">تحقق مما إذا كان هناك إصدار جديد متاح</string>
+    <string name="auto_check_for_updates">التحقق التلقائي من التحديثات</string>
+    <string name="auto_check_for_updates_subtitle">التحقق تلقائيًا من التحديثات</string>
+    <string name="checking_for_updates">جارٍ التحقق من التحديثات…</string>
+    <string name="up_to_date">محدَّث</string>
+    <string name="up_to_date_subtitle">التطبيق يعمل بأحدث إصدار (v%1$s).</string>
+    <string name="update_available">تحديث متاح</string>
+    <string name="update_available_subtitle">الإصدار v%1$s متاح.</string>
+    <string name="update_available_description">هل تريد تنزيل ملف APK إلى مجلد التنزيلات؟</string>
+    <string name="download">تنزيل</string>
+    <string name="not_now">ليس الآن</string>
+    <string name="downloading_update">جارٍ تنزيل التحديث</string>
+    <string name="please_wait">يرجى الانتظار…</string>
+    <string name="check_failed">فشل التحقق</string>
+    <string name="check_failed_subtitle">تعذر التحقق من التحديثات. يرجى المحاولة مرة أخرى لاحقًا.</string>
+    <string name="download_complete">اكتمل التنزيل</string>
+    <string name="download_complete_subtitle">تم تنزيل التحديث إلى الإصدار %1$s بنجاح.</string>
+    <string name="open_downloads_folder_manually">افتح مجلد التنزيلات يدويًا</string>
+    <string name="file_saved_to_downloads_folder">تم حفظ الملف في مجلد التنزيلات.</string>
+
     <!-- Contributors -->
     <string name="contributors">المساهمون</string>
     <string name="development_team">فريق التطوير</string>
@@ -143,6 +166,8 @@
     <string name="call_screen">شاشة المكالمة</string>
     <string name="liquid_glass_call_screen">تطبيق تأثير الزجاج السائل على شاشة المكالمة</string>
     <string name="blur_effect_call_screen">تطبيق تأثير التمويه على شاشة المكالمة</string>
+    <string name="liquid_glass_dialpad">تطبيق تأثير الزجاج السائل على لوحة المفاتيح</string>
+    <string name="blur_effect_dialpad">تطبيق تأثير التمويه على لوحة المفاتيح</string>
     <string name="scroll_animation">رسوم متحركة للتمرير</string>
     <string name="scroll_animation_device">رسوم متحركة للظهور لعناصر القائمة أثناء التمرير</string>
     <string name="call_ui">واجهة المكالمة</string>
@@ -210,6 +235,25 @@
     <string name="auto_speaker_subtitle">التبديل تلقائيًا إلى مكبر الصوت عندما يكون الهاتف بعيدًا عن الأذن، والعودة إلى سماعة الأذن عندما يكون قريبًا</string>
     <string name="fullscreen_calls">مكالمات ملء الشاشة</string>
     <string name="fullscreen_calls_subtitle">يتم دائمًا عرض المكالمات الواردة في وضع ملء الشاشة</string>
+
+    <string name="quick_response">رد سريع</string>
+    <string name="quick_responses">الردود السريعة</string>
+    <string name="quick_responses_subtitle">إدارة ردود SMS الجاهزة للرفض على المكالمات الواردة</string>
+    <string name="quick_responses_description">اضغط على زر الرسالة أثناء مكالمة واردة لرفضها وإرسال أحد هذه الردود الجاهزة عبر SMS.</string>
+    <string name="add_response">إضافة رد سريع</string>
+    <string name="edit_response">تعديل الرد السريع</string>
+    <string name="default_quick_responses_1">لا أستطيع التحدث الآن. ما الأمر؟</string>
+    <string name="default_quick_responses_2">سأعاود الاتصال بك فورًا.</string>
+    <string name="default_quick_responses_3">سأتصل بك لاحقًا.</string>
+    <string name="default_quick_responses_4">لا أستطيع التحدث الآن. اتصل بي لاحقًا؟</string>
+    <string name="write_your_own">اكتب ردك الخاص…</string>
+    <string name="type_message">اكتب رسالة</string>
+    <string name="canned_responses">الردود الجاهزة (%s)</string>
+    <string name="no_quick_responses_configured">لم يتم تكوين أي ردود سريعة</string>
+    <string name="reset_to_defaults">إعادة التعيين إلى الإعدادات الافتراضية</string>
+    <string name="reset_to_defaults_description">استعادة الردود السريعة الافتراضية الأصلية؟</string>
+    <string name="decline_call_and_reply_to">رفض المكالمة والرد على %s</string>
+    <string name="send">إرسال</string>
 
     <string name="sound_and_vibration">الصوت والاهتزاز</string>
     <string name="sound_and_vibration_subtitle">نغمات الرنين، ونغمات لوحة المفاتيح، والاهتزازات اللمسية في جميع أنحاء التطبيق</string>

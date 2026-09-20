@@ -99,6 +99,29 @@
     <string name="source_code">सोर्स कोड</string>
     <string name="privacy_policy">गोपनीयता नीति</string>
 
+    <!-- Updates -->
+    <string name="updates">अपडेट</string>
+    <string name="check_for_updates">अपडेट की जाँच करें</string>
+    <string name="check_for_updates_subtitle">जाँचें कि क्या नया संस्करण उपलब्ध है</string>
+    <string name="auto_check_for_updates">स्वचालित अपडेट जाँच</string>
+    <string name="auto_check_for_updates_subtitle">स्वचालित रूप से अपडेट की जाँच करें</string>
+    <string name="checking_for_updates">अपडेट की जाँच हो रही है…</string>
+    <string name="up_to_date">अद्यतित</string>
+    <string name="up_to_date_subtitle">ऐप नवीनतम संस्करण (v%1$s) चला रहा है।</string>
+    <string name="update_available">अपडेट उपलब्ध</string>
+    <string name="update_available_subtitle">संस्करण v%1$s उपलब्ध है।</string>
+    <string name="update_available_description">क्या आप APK फ़ाइल को Downloads फ़ोल्डर में डाउनलोड करना चाहते हैं?</string>
+    <string name="download">डाउनलोड करें</string>
+    <string name="not_now">अभी नहीं</string>
+    <string name="downloading_update">अपडेट डाउनलोड हो रहा है</string>
+    <string name="please_wait">कृपया प्रतीक्षा करें…</string>
+    <string name="check_failed">जाँच विफल</string>
+    <string name="check_failed_subtitle">अपडेट की जाँच नहीं की जा सकी। कृपया बाद में पुनः प्रयास करें।</string>
+    <string name="download_complete">डाउनलोड पूर्ण</string>
+    <string name="download_complete_subtitle">संस्करण %1$s में अपडेट सफलतापूर्वक डाउनलोड हो गया है।</string>
+    <string name="open_downloads_folder_manually">Downloads फ़ोल्डर मैन्युअल रूप से खोलें</string>
+    <string name="file_saved_to_downloads_folder">फ़ाइल Downloads फ़ोल्डर में सहेजी गई है।</string>
+
     <!-- Contributors -->
     <string name="contributors">योगदानकर्ता</string>
     <string name="development_team">विकास टीम</string>
@@ -142,6 +165,8 @@
     <string name="call_screen">कॉल स्क्रीन</string>
     <string name="liquid_glass_call_screen">कॉल स्क्रीन पर लिक्विड ग्लास प्रभाव लागू करें</string>
     <string name="blur_effect_call_screen">कॉल स्क्रीन पर ब्लर प्रभाव लागू करें</string>
+    <string name="liquid_glass_dialpad">कीपैड पर लिक्विड ग्लास प्रभाव लागू करें</string>
+    <string name="blur_effect_dialpad">कीपैड पर ब्लर प्रभाव लागू करें</string>
     <string name="scroll_animation">स्क्रॉल एनीमेशन</string>
     <string name="scroll_animation_device">स्क्रॉल करते समय सूची आइटम के लिए फ़ेड-इन एनीमेशन</string>
     <string name="call_ui">कॉल UI</string>
@@ -209,6 +234,25 @@
     <string name="auto_speaker_subtitle">जब फोन कान से दूर हो तो स्वचालित रूप से लाउडस्पीकर पर स्विच करें, और पास होने पर ईयरपीस पर वापस जाएँ</string>
     <string name="fullscreen_calls">फुल-स्क्रीन कॉल</string>
     <string name="fullscreen_calls_subtitle">आने वाली कॉल हमेशा फुल-स्क्रीन मोड में दिखाई जाती हैं</string>
+
+    <string name="quick_response">त्वरित उत्तर</string>
+    <string name="quick_responses">त्वरित उत्तर</string>
+    <string name="quick_responses_subtitle">इनकमिंग कॉल के लिए तैयार SMS अस्वीकृति उत्तर प्रबंधित करें</string>
+    <string name="quick_responses_description">इनकमिंग कॉल के दौरान संदेश बटन पर टैप करें, कॉल अस्वीकार करें और इनमें से कोई एक तैयार उत्तर SMS द्वारा भेजें।</string>
+    <string name="add_response">त्वरित उत्तर जोड़ें</string>
+    <string name="edit_response">त्वरित उत्तर संपादित करें</string>
+    <string name="default_quick_responses_1">अभी बात नहीं कर सकता। क्या हुआ?</string>
+    <string name="default_quick_responses_2">मैं अभी वापस कॉल करता हूँ।</string>
+    <string name="default_quick_responses_3">मैं बाद में कॉल करूँगा।</string>
+    <string name="default_quick_responses_4">अभी बात नहीं कर सकता। बाद में कॉल करें?</string>
+    <string name="write_your_own">अपना लिखें…</string>
+    <string name="type_message">संदेश टाइप करें</string>
+    <string name="canned_responses">तैयार उत्तर (%s)</string>
+    <string name="no_quick_responses_configured">कोई त्वरित उत्तर कॉन्फ़िगर नहीं किया गया</string>
+    <string name="reset_to_defaults">डिफ़ॉल्ट पर रीसेट करें</string>
+    <string name="reset_to_defaults_description">मूल प्रीसेट त्वरित उत्तर पुनर्स्थापित करें?</string>
+    <string name="decline_call_and_reply_to">कॉल अस्वीकार करें और %s को उत्तर दें</string>
+    <string name="send">भेजें</string>
 
     <string name="sound_and_vibration">ध्वनि और कंपन</string>
     <string name="sound_and_vibration_subtitle">रिंगटोन, डायलपैड टोन और ऐप भर में हैप्टिक्स</string>

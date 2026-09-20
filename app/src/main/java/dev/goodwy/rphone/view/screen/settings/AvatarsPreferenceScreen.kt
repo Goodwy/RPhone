@@ -87,7 +87,7 @@ fun AvatarsPreferenceScreen(navigator: DestinationsNavigator) {
                 )
                 .fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
                 RillAnimatedSection(delayMs = 60L) {

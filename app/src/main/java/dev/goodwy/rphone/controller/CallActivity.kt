@@ -341,7 +341,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
 
             val resolved = CallIdentity(
                 number = number,
-                name = contact?.name?.takeIf { it.isNotBlank() }
+                name = contact?.displayName?.takeIf { it.isNotBlank() }
                     ?: cnam
                     ?: identity.name.takeIf { contactFailed && it.isNotBlank() }
                     ?: number.ifEmpty { unknownLabel },

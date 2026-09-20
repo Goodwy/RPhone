@@ -99,6 +99,29 @@
     <string name="source_code">Källkod</string>
     <string name="privacy_policy">Integritetspolicy</string>
 
+    <!-- Updates -->
+    <string name="updates">Uppdateringar</string>
+    <string name="check_for_updates">Sök efter uppdateringar</string>
+    <string name="check_for_updates_subtitle">Kontrollera om en ny version är tillgänglig</string>
+    <string name="auto_check_for_updates">Sök automatiskt efter uppdateringar</string>
+    <string name="auto_check_for_updates_subtitle">Sök automatiskt efter uppdateringar</string>
+    <string name="checking_for_updates">Söker efter uppdateringar…</string>
+    <string name="up_to_date">Uppdaterad</string>
+    <string name="up_to_date_subtitle">Appen kör den senaste versionen (v%1$s).</string>
+    <string name="update_available">Uppdatering tillgänglig</string>
+    <string name="update_available_subtitle">Version v%1$s är tillgänglig.</string>
+    <string name="update_available_description">Vill du ladda ner APK-filen till mappen Nedladdningar?</string>
+    <string name="download">Ladda ner</string>
+    <string name="not_now">Inte nu</string>
+    <string name="downloading_update">Laddar ner uppdatering</string>
+    <string name="please_wait">Vänta…</string>
+    <string name="check_failed">Kontrollen misslyckades</string>
+    <string name="check_failed_subtitle">Kunde inte söka efter uppdateringar. Försök igen senare.</string>
+    <string name="download_complete">Nedladdning klar</string>
+    <string name="download_complete_subtitle">Uppdateringen till version %1$s har laddats ner.</string>
+    <string name="open_downloads_folder_manually">Öppna mappen Nedladdningar manuellt</string>
+    <string name="file_saved_to_downloads_folder">Filen har sparats i mappen Nedladdningar.</string>
+
     <!-- Contributors -->
     <string name="contributors">Bidragsgivare</string>
     <string name="development_team">Utvecklingsteam</string>
@@ -142,6 +165,8 @@
     <string name="call_screen">Samtalskärm</string>
     <string name="liquid_glass_call_screen">Använd den flytande glaseffekten på samtalskärmen</string>
     <string name="blur_effect_call_screen">Använd en oskärpeeffekt på samtalskärmen</string>
+    <string name="liquid_glass_dialpad">Använd den flytande glaseffekten på knappsatsen</string>
+    <string name="blur_effect_dialpad">Använd en oskärpeeffekt på knappsatsen</string>
     <string name="scroll_animation">Rullningsanimation</string>
     <string name="scroll_animation_device">Inmatningsanimation för listobjekt när du rullar</string>
     <string name="call_ui">Samtalsgränssnitt</string>
@@ -209,6 +234,25 @@
     <string name="auto_speaker_subtitle">Växla automatiskt till högtalare när telefonen är borta från örat, och tillbaka till hörluren när den är nära</string>
     <string name="fullscreen_calls">Helskärmssamtal</string>
     <string name="fullscreen_calls_subtitle">Inkommande samtal visas alltid i helskärmsläge</string>
+
+    <string name="quick_response">Snabbsvar</string>
+    <string name="quick_responses">Snabbsvar</string>
+    <string name="quick_responses_subtitle">Hantera färdiga SMS-avböjningssvar för inkommande samtal</string>
+    <string name="quick_responses_description">Tryck på meddelandeknappen under ett inkommande samtal för att avböja och skicka ett av dessa färdiga svar via SMS.</string>
+    <string name="add_response">Lägg till snabbsvar</string>
+    <string name="edit_response">Redigera snabbsvar</string>
+    <string name="default_quick_responses_1">Kan inte prata nu. Vad gäller det?</string>
+    <string name="default_quick_responses_2">Jag ringer tillbaka direkt.</string>
+    <string name="default_quick_responses_3">Jag ringer senare.</string>
+    <string name="default_quick_responses_4">Kan inte prata nu. Ring senare?</string>
+    <string name="write_your_own">Skriv ditt eget…</string>
+    <string name="type_message">Skriv ett meddelande</string>
+    <string name="canned_responses">Färdiga svar (%s)</string>
+    <string name="no_quick_responses_configured">Inga snabbsvar konfigurerade</string>
+    <string name="reset_to_defaults">Återställ till standard</string>
+    <string name="reset_to_defaults_description">Återställ ursprungliga förinställda snabbsvar?</string>
+    <string name="decline_call_and_reply_to">Avböj samtal och svara %s</string>
+    <string name="send">Skicka</string>
 
     <string name="sound_and_vibration">Ljud och vibration</string>
     <string name="sound_and_vibration_subtitle">Signaltoner, knappljud och haptik i hela appen</string>

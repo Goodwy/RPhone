@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStoreFile
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import dev.goodwy.rphone.R
 
 private val dataStoreScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 private var _sharedDataStore: DataStore<Preferences>? = null
@@ -209,13 +210,22 @@ class PreferenceManager(context: Context) {
 
     fun getQuickResponses(): List<String> {
         val stored = getString(KEY_QUICK_RESPONSES, null)
-        if (stored.isNullOrBlank()) return DEFAULT_QUICK_RESPONSES
+        if (stored.isNullOrBlank()) return defaultQuickResponses()
         val list = stored.split("|||").map { it.trim() }.filter { it.isNotEmpty() }
-        return if (list.isNotEmpty()) list else DEFAULT_QUICK_RESPONSES
+        return list.ifEmpty { defaultQuickResponses() }
     }
 
     fun setQuickResponses(responses: List<String>) {
         setString(KEY_QUICK_RESPONSES, responses.filter { it.isNotBlank() }.joinToString("|||"))
+    }
+
+    fun defaultQuickResponses(): List<String> {
+        return listOf(
+            appContext.getString(R.string.default_quick_responses_1),
+            appContext.getString(R.string.default_quick_responses_2),
+            appContext.getString(R.string.default_quick_responses_3),
+            appContext.getString(R.string.default_quick_responses_4)
+        )
     }
 
     fun contactBackgroundIdKey(contactId: String): String {
@@ -518,6 +528,7 @@ class PreferenceManager(context: Context) {
         const val KEY_LG_CONTACTS_FAB          = "lg_contacts_fab"
         const val KEY_LG_RECENTS_FAB           = "lg_recents_fab"
         const val KEY_LG_CALL_SCREEN           = "lg_call_screen"
+        const val KEY_LG_DIALPAD               = "lg_dialpad"
         const val KEY_BLUR_EFFECTS             = "blur_effects_ui"
         const val KEY_BLUR_INTENSITY             = "blur_intensity"
         // Material Blur effect elements
@@ -527,6 +538,7 @@ class PreferenceManager(context: Context) {
         const val KEY_BLUR_CONTACTS_FAB        = "blur_contacts_fab"
         const val KEY_BLUR_RECENTS_FAB         = "blur_recents_fab"
         const val KEY_BLUR_CALL_SCREEN         = "blur_call_screen"
+        const val KEY_BLUR_DIALPAD             = "BLUR_dialpad"
         const val KEY_AUTO_SPEAKER             = "auto_speaker"
         const val KEY_FLOATING_CALL            = "floating_ongoing_call"
         const val KEY_FLOATING_BUBBLE_X         = "floating_bubble_x"

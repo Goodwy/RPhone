@@ -99,6 +99,29 @@
     <string name="source_code">Πηγαίος κώδικας</string>
     <string name="privacy_policy">Πολιτική απορρήτου</string>
 
+    <!-- Updates -->
+    <string name="updates">Ενημερώσεις</string>
+    <string name="check_for_updates">Έλεγχος για ενημερώσεις</string>
+    <string name="check_for_updates_subtitle">Έλεγχος αν είναι διαθέσιμη νέα έκδοση</string>
+    <string name="auto_check_for_updates">Αυτόματος έλεγχος για ενημερώσεις</string>
+    <string name="auto_check_for_updates_subtitle">Αυτόματος έλεγχος για ενημερώσεις</string>
+    <string name="checking_for_updates">Έλεγχος για ενημερώσεις…</string>
+    <string name="up_to_date">Ενημερωμένο</string>
+    <string name="up_to_date_subtitle">Η εφαρμογή εκτελεί την τελευταία έκδοση (v%1$s).</string>
+    <string name="update_available">Διαθέσιμη ενημέρωση</string>
+    <string name="update_available_subtitle">Η έκδοση v%1$s είναι διαθέσιμη.</string>
+    <string name="update_available_description">Θέλετε να κατεβάσετε το αρχείο APK στον φάκελο Λήψεις;</string>
+    <string name="download">Λήψη</string>
+    <string name="not_now">Όχι τώρα</string>
+    <string name="downloading_update">Λήψη ενημέρωσης</string>
+    <string name="please_wait">Παρακαλώ περιμένετε…</string>
+    <string name="check_failed">Ο έλεγχος απέτυχε</string>
+    <string name="check_failed_subtitle">Δεν ήταν δυνατός ο έλεγχος για ενημερώσεις. Παρακαλώ δοκιμάστε ξανά αργότερα.</string>
+    <string name="download_complete">Η λήψη ολοκληρώθηκε</string>
+    <string name="download_complete_subtitle">Η ενημέρωση στην έκδοση %1$s κατέβηκε με επιτυχία.</string>
+    <string name="open_downloads_folder_manually">Ανοίξτε τον φάκελο Λήψεις χειροκίνητα</string>
+    <string name="file_saved_to_downloads_folder">Το αρχείο αποθηκεύτηκε στον φάκελο Λήψεις.</string>
+
     <!-- Contributors -->
     <string name="contributors">Συντελεστές</string>
     <string name="development_team">Ομάδα ανάπτυξης</string>
@@ -142,6 +165,8 @@
     <string name="call_screen">Οθόνη κλήσης</string>
     <string name="liquid_glass_call_screen">Εφαρμογή του εφέ υγρού γυαλιού στην οθόνη κλήσης</string>
     <string name="blur_effect_call_screen">Εφαρμογή εφέ θολώματος στην οθόνη κλήσης</string>
+    <string name="liquid_glass_dialpad">Εφαρμογή του εφέ υγρού γυαλιού στο πληκτρολόγιο</string>
+    <string name="blur_effect_dialpad">Εφαρμογή εφέ θολώματος στο πληκτρολόγιο</string>
     <string name="scroll_animation">Κίνηση κύλισης</string>
     <string name="scroll_animation_device">Κίνηση εμφάνισης για στοιχεία λίστας κατά την κύλιση</string>
     <string name="call_ui">Διεπαφή κλήσης</string>
@@ -209,6 +234,25 @@
     <string name="auto_speaker_subtitle">Αυτόματη εναλλαγή σε μεγάφωνο όταν το τηλέφωνο είναι μακριά από το αυτί και πίσω στο ακουστικό όταν είναι κοντά</string>
     <string name="fullscreen_calls">Κλήσεις πλήρους οθόνης</string>
     <string name="fullscreen_calls_subtitle">Οι εισερχόμενες κλήσεις εμφανίζονται πάντα σε λειτουργία πλήρους οθόνης</string>
+
+    <string name="quick_response">Γρήγορη απάντηση</string>
+    <string name="quick_responses">Γρήγορες απαντήσεις</string>
+    <string name="quick_responses_subtitle">Διαχείριση προκαθορισμένων απαντήσεων SMS απόρριψης για εισερχόμενες κλήσεις</string>
+    <string name="quick_responses_description">Πατήστε το κουμπί μηνύματος κατά τη διάρκεια μιας εισερχόμενης κλήσης για να την απορρίψετε και να στείλετε μία από αυτές τις προκαθορισμένες απαντήσεις μέσω SMS.</string>
+    <string name="add_response">Προσθήκη γρήγορης απάντησης</string>
+    <string name="edit_response">Επεξεργασία γρήγορης απάντησης</string>
+    <string name="default_quick_responses_1">Δεν μπορώ να μιλήσω τώρα. Τι συμβαίνει;</string>
+    <string name="default_quick_responses_2">Θα σε πάρω αμέσως πίσω.</string>
+    <string name="default_quick_responses_3">Θα σε πάρω αργότερα.</string>
+    <string name="default_quick_responses_4">Δεν μπορώ να μιλήσω τώρα. Πάρε με αργότερα;</string>
+    <string name="write_your_own">Γράψτε τη δική σας…</string>
+    <string name="type_message">Πληκτρολογήστε ένα μήνυμα</string>
+    <string name="canned_responses">Προκαθορισμένες απαντήσεις (%s)</string>
+    <string name="no_quick_responses_configured">Δεν έχουν ρυθμιστεί γρήγορες απαντήσεις</string>
+    <string name="reset_to_defaults">Επαναφορά προεπιλογών</string>
+    <string name="reset_to_defaults_description">Επαναφορά των αρχικών προκαθορισμένων γρήγορων απαντήσεων;</string>
+    <string name="decline_call_and_reply_to">Απόρριψη κλήσης και απάντηση στον %s</string>
+    <string name="send">Αποστολή</string>
 
     <string name="sound_and_vibration">Ήχος &amp; Δόνηση</string>
     <string name="sound_and_vibration_subtitle">Ήχοι κλήσης, ήχοι πληκτρολογίου και απτική ανάδραση σε όλη την εφαρμογή</string>

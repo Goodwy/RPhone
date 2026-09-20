@@ -99,6 +99,29 @@
     <string name="source_code">Исходный код</string>
     <string name="privacy_policy">Политика конфиденциальности</string>
 
+    <!-- Updates -->
+    <string name="updates">Обновления</string>
+    <string name="check_for_updates">Проверить обновления</string>
+    <string name="check_for_updates_subtitle">Проверить, доступна ли новая версия</string>
+    <string name="auto_check_for_updates">Автоматическая проверка наличия обновлений</string>
+    <string name="auto_check_for_updates_subtitle">Автоматическая проверка наличия обновлений</string>
+    <string name="checking_for_updates">Проверка наличия обновлений…</string>
+    <string name="up_to_date">Актуальная информация</string>
+    <string name="up_to_date_subtitle">В приложении установлена последняя версия (v%s).</string>
+    <string name="update_available">Доступно обновление</string>
+    <string name="update_available_subtitle">Доступна версия v%s.</string>
+    <string name="update_available_description">Хотите скачать APK файл в папку Загрузки?</string>
+    <string name="download">Скачать</string>
+    <string name="not_now">Не сейчас</string>
+    <string name="downloading_update">Загрузка обновления</string>
+    <string name="please_wait">Пожалуйста, подождите…</string>
+    <string name="check_failed">Проверка завершилась неудачно</string>
+    <string name="check_failed_subtitle">Не удалось проверить наличие обновлений. Пожалуйста, попробуйте позже.</string>
+    <string name="download_complete">Загрузка завершена</string>
+    <string name="download_complete_subtitle">Обновление до версии %1$s успешно загружено.</string>
+    <string name="open_downloads_folder_manually">Откройте папку Загрузки вручную</string>
+    <string name="file_saved_to_downloads_folder">Файл сохранен в папку Загрузки.</string>
+
     <!-- Contributors -->
     <string name="contributors">Участники</string>
     <string name="development_team">Команда разработчиков</string>
@@ -142,6 +165,8 @@
     <string name="call_screen">Экран вызова</string>
     <string name="liquid_glass_call_screen">Примени эффект жидкого стекла к экрану вызова</string>
     <string name="blur_effect_call_screen">Применить эффект размытия к экрану вызова</string>
+    <string name="liquid_glass_dialpad">Примените эффект жидкого стекла к клавиатуре</string>
+    <string name="blur_effect_dialpad">Применить эффект размытия к клавиатуре</string>
     <string name="scroll_animation">Анимация прокрутки</string>
     <string name="scroll_animation_device">Анимация плавного появления элементов списка при прокрутке</string>
     <string name="call_ui">Интерфейс вызова</string>
@@ -209,6 +234,26 @@
     <string name="auto_speaker_subtitle">Автоматически переключаться на громкую связь, когда телефон находится вдали от уха, и обратно на наушник, когда он находится рядом</string>
     <string name="fullscreen_calls">Полноэкранные звонки</string>
     <string name="fullscreen_calls_subtitle">Входящие звонки всегда отображаются в полноэкранном режиме</string>
+
+    <string name="quick_response">Быстрый ответ</string>
+    <string name="quick_responses">Быстрые ответы</string>
+    <string name="quick_responses_subtitle">Управление шаблонными SMS-ответами об отказе на входящие звонки</string>
+    <string name="quick_responses_description">Во время входящего звонка нажмите кнопку "Сообщение", чтобы отклонить звонок и отправить один из этих готовых ответов в виде SMS.</string>
+    <string name="add_response">Добавить быстрый ответ</string>
+    <string name="edit_response">Редактировать быстрый ответ</string>
+    <string name="default_quick_responses_1">Не могу говорить. Что случилось?</string>
+    <string name="default_quick_responses_2">Я сейчас перезвоню.</string>
+    <string name="default_quick_responses_3">Я перезвоню позже.</string>
+    <string name="default_quick_responses_4">Не могу говорить. Позвоните позже.</string>
+    <string name="write_your_own">Ваш ответ…</string>
+    <string name="type_message">Введите сообщение</string>
+    <string name="canned_responses">Шаблонные ответы (%s)</string>
+    <string name="no_quick_responses_configured">Быстрые ответы не настроены</string>
+    <string name="reset_to_defaults">Сброс до значений по умолчанию</string>
+    <string name="reset_to_defaults_description">Восстановить исходные предустановленные быстрые ответы?</string>
+    <string name="decline_call_and_reply_to">Отклонить звонок и ответить %s</string>
+    <string name="send">Отправить</string>
+
 
     <string name="sound_and_vibration">Звуки и вибрация</string>
     <string name="sound_and_vibration_subtitle">Мелодии звонка, звуки клавиатуры и тактильная обратная связь в приложении</string>

@@ -104,11 +104,27 @@
     <string name="privacy_policy">Privacy policy</string>
 
     <!-- Updates -->
-    <string name="updates" translatable="false">Updates</string>
-    <string name="check_for_updates" translatable="false">Check for updates</string>
-    <string name="check_for_updates_subtitle" translatable="false">Check if a new version is available</string>
-    <string name="auto_check_for_updates" translatable="false">Auto check for updates</string>
-    <string name="auto_check_for_updates_subtitle" translatable="false">Check for updates automatically</string>
+    <string name="updates">Updates</string>
+    <string name="check_for_updates">Check for updates</string>
+    <string name="check_for_updates_subtitle">Check if a new version is available</string>
+    <string name="auto_check_for_updates">Auto check for updates</string>
+    <string name="auto_check_for_updates_subtitle">Check for updates automatically</string>
+    <string name="checking_for_updates">Checking for updates…</string>
+    <string name="up_to_date">Up to date</string>
+    <string name="up_to_date_subtitle">The app is running the latest version (v%1$s).</string>
+    <string name="update_available">Update available</string>
+    <string name="update_available_subtitle">Version v%1$s is available.</string>
+    <string name="update_available_description">Would you like to download the APK file to the Downloads folder?</string>
+    <string name="download">Download</string>
+    <string name="not_now">Not now</string>
+    <string name="downloading_update">Downloading update</string>
+    <string name="please_wait">Please wait…</string>
+    <string name="check_failed">Check failed</string>
+    <string name="check_failed_subtitle">Could not check for updates. Please try again later.</string>
+    <string name="download_complete">Download complete</string>
+    <string name="download_complete_subtitle">The update to version %1$s has been successfully downloaded.</string>
+    <string name="open_downloads_folder_manually">Open the Downloads folder manually</string>
+    <string name="file_saved_to_downloads_folder">The file has been saved to the Downloads folder.</string>
 
     <!-- Contributors -->
     <string name="contributors">Contributors</string>
@@ -153,6 +169,8 @@
     <string name="call_screen">Call screen</string>
     <string name="liquid_glass_call_screen">Apply the liquid glass effect to the call screen</string>
     <string name="blur_effect_call_screen">Apply a blur effect to the call screen</string>
+    <string name="liquid_glass_dialpad">Apply the liquid glass effect to the keypad</string>
+    <string name="blur_effect_dialpad">Apply a blur effect to the keypad</string>
     <string name="scroll_animation">Scroll Animation</string>
     <string name="scroll_animation_device">Fade-in animation for list items as you scroll</string>
     <string name="call_ui">Call UI</string>
@@ -220,6 +238,25 @@
     <string name="auto_speaker_subtitle">Automatically switch to loudspeaker when phone is away from ear, and back to earpiece when near</string>
     <string name="fullscreen_calls">Full-screen calls</string>
     <string name="fullscreen_calls_subtitle">Incoming calls are always displayed in full-screen mode</string>
+
+    <string name="quick_response">Quick Response</string>
+    <string name="quick_responses">Quick Responses</string>
+    <string name="quick_responses_subtitle">Manage canned SMS decline responses for incoming calls</string>
+    <string name="quick_responses_description">Tap the message button during an incoming call to decline and send one of these canned replies via SMS.</string>
+    <string name="add_response">Add quick response</string>
+    <string name="edit_response">Edit quick response</string>
+    <string name="default_quick_responses_1">Can\'t talk now. What\'s up?</string>
+    <string name="default_quick_responses_2">I\'ll call you right back.</string>
+    <string name="default_quick_responses_3">I\'ll call you later.</string>
+    <string name="default_quick_responses_4">Can\'t talk now. Call me later?</string>
+    <string name="write_your_own">Write your own…</string>
+    <string name="type_message">Type a message</string>
+    <string name="canned_responses">Canned responses (%s)</string>
+    <string name="no_quick_responses_configured">No quick responses configured</string>
+    <string name="reset_to_defaults">Reset to Defaults</string>
+    <string name="reset_to_defaults_description">Restore original preset quick responses?</string>
+    <string name="decline_call_and_reply_to">Decline call and reply to %s</string>
+    <string name="send">Send</string>
 
     <string name="sound_and_vibration">Sound &amp; Vibration</string>
     <string name="sound_and_vibration_subtitle">Ringtones, dialpad tones, and haptics across app</string>

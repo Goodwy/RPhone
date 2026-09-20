@@ -99,6 +99,29 @@
     <string name="source_code">Kaynak Kodu</string>
     <string name="privacy_policy">Gizlilik Politikası</string>
 
+    <!-- Updates -->
+    <string name="updates">Güncellemeler</string>
+    <string name="check_for_updates">Güncellemeleri kontrol et</string>
+    <string name="check_for_updates_subtitle">Yeni bir sürümün olup olmadığını kontrol et</string>
+    <string name="auto_check_for_updates">Otomatik güncelleme kontrolü</string>
+    <string name="auto_check_for_updates_subtitle">Güncellemeleri otomatik olarak kontrol et</string>
+    <string name="checking_for_updates">Güncellemeler kontrol ediliyor…</string>
+    <string name="up_to_date">Güncel</string>
+    <string name="up_to_date_subtitle">Uygulama en son sürümü çalıştırıyor (v%1$s).</string>
+    <string name="update_available">Güncelleme mevcut</string>
+    <string name="update_available_subtitle">Sürüm v%1$s mevcut.</string>
+    <string name="update_available_description">APK dosyasını İndirilenler klasörüne indirmek ister misiniz?</string>
+    <string name="download">İndir</string>
+    <string name="not_now">Şimdi değil</string>
+    <string name="downloading_update">Güncelleme indiriliyor</string>
+    <string name="please_wait">Lütfen bekleyin…</string>
+    <string name="check_failed">Kontrol başarısız</string>
+    <string name="check_failed_subtitle">Güncellemeler kontrol edilemedi. Lütfen daha sonra tekrar deneyin.</string>
+    <string name="download_complete">İndirme tamamlandı</string>
+    <string name="download_complete_subtitle">%1$s sürümüne güncelleme başarıyla indirildi.</string>
+    <string name="open_downloads_folder_manually">İndirilenler klasörünü manuel olarak aç</string>
+    <string name="file_saved_to_downloads_folder">Dosya İndirilenler klasörüne kaydedildi.</string>
+
     <!-- Contributors -->
     <string name="contributors">Katkıda Bulunanlar</string>
     <string name="development_team">Geliştirme Ekibi</string>
@@ -142,6 +165,8 @@
     <string name="call_screen">Arama ekranı</string>
     <string name="liquid_glass_call_screen">Arama ekranına sıvı cam efekti uygula</string>
     <string name="blur_effect_call_screen">Arama ekranına bulanıklık efekti uygula</string>
+    <string name="liquid_glass_dialpad">Sıvı cam efektini tuş takımına uygula</string>
+    <string name="blur_effect_dialpad">Tuş takımına bulanıklık efekti uygula</string>
     <string name="scroll_animation">Kaydırma Animasyonu</string>
     <string name="scroll_animation_device">Kaydırırken liste öğeleri için belirme animasyonu</string>
     <string name="call_ui">Arama Arayüzü</string>
@@ -209,6 +234,25 @@
     <string name="auto_speaker_subtitle">Telefon kulaktan uzakta olduğunda otomatik olarak hoparlöre geçin ve yakın olduğunda ahizeye geri dönün</string>
     <string name="fullscreen_calls">Tam ekran aramalar</string>
     <string name="fullscreen_calls_subtitle">Gelen aramalar her zaman tam ekran modunda gösterilir</string>
+
+    <string name="quick_response">Hızlı yanıt</string>
+    <string name="quick_responses">Hızlı yanıtlar</string>
+    <string name="quick_responses_subtitle">Gelen aramalar için hazır SMS reddetme yanıtlarını yönetin</string>
+    <string name="quick_responses_description">Gelen bir arama sırasında mesaj düğmesine dokunarak aramayı reddedin ve bu hazır yanıtlardan birini SMS ile gönderin.</string>
+    <string name="add_response">Hızlı yanıt ekle</string>
+    <string name="edit_response">Hızlı yanıtı düzenle</string>
+    <string name="default_quick_responses_1">Şu an konuşamıyorum. Ne oldu?</string>
+    <string name="default_quick_responses_2">Hemen geri arayacağım.</string>
+    <string name="default_quick_responses_3">Seni sonra arayacağım.</string>
+    <string name="default_quick_responses_4">Şu an konuşamıyorum. Sonra arar mısın?</string>
+    <string name="write_your_own">Kendininkini yaz…</string>
+    <string name="type_message">Bir mesaj yaz</string>
+    <string name="canned_responses">Hazır yanıtlar (%s)</string>
+    <string name="no_quick_responses_configured">Yapılandırılmış hızlı yanıt yok</string>
+    <string name="reset_to_defaults">Varsayılanlara sıfırla</string>
+    <string name="reset_to_defaults_description">Orijinal ön ayarlı hızlı yanıtlar geri yüklensin mi?</string>
+    <string name="decline_call_and_reply_to">Aramayı reddet ve %s kişisine yanıt ver</string>
+    <string name="send">Gönder</string>
 
     <string name="sound_and_vibration">Ses ve Titreşim</string>
     <string name="sound_and_vibration_subtitle">Zil sesleri, tuş sesleri ve uygulama genelinde dokunsal geri bildirim</string>

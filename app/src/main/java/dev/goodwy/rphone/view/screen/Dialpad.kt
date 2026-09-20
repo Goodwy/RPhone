@@ -105,6 +105,8 @@ import dev.goodwy.rphone.controller.util.SocialUtils
 import dev.goodwy.rphone.controller.util.SocialUtils.getInstalledMessenger
 import dev.goodwy.rphone.controller.util.SocialUtils.messengerPackages
 import dev.goodwy.rphone.controller.util.forceLtr
+import dev.goodwy.rphone.liquidglass.backdrops.layerBackdrop
+import dev.goodwy.rphone.liquidglass.backdrops.rememberLayerBackdrop
 import dev.goodwy.rphone.modal.data.CallLogEntry
 import dev.goodwy.rphone.modal.data.Contact
 import dev.goodwy.rphone.modal.data.getDisplayContactInfo
@@ -970,7 +972,9 @@ fun DialPadContent(
                                 horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
                                 FadeScaleBox(
-                                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .fillMaxHeight(),
                                     visible = number.isNotEmpty()
                                 ) {
                                     DialerActionExpressive(
@@ -1006,11 +1010,15 @@ fun DialPadContent(
                                     contentDescription = stringResource(R.string.call),
                                     containerColor = color_call_button,
                                     contentColor = Color.White,
-                                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .fillMaxHeight(),
                                     isLarge = true
                                 )
                                 FadeScaleBox(
-                                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .fillMaxHeight(),
                                     visible = number.isNotEmpty()
                                 ) {
                                     DialerActionExpressive(
@@ -1034,781 +1042,923 @@ fun DialPadContent(
             // Prevent keyboard from auto-opening on composition
             LaunchedEffect(Unit) { focusManager.clearFocus() }
 
-            BoxWithConstraints(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .then(if (!isBottomSheet) Modifier.statusBarsPadding() else Modifier)
+            val dialpadBackdrop = rememberLayerBackdrop()
+
+            CompositionLocalProvider(LocalLiquidGlassBackdrop provides dialpadBackdrop) {
+                BoxWithConstraints(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .then(if (!isBottomSheet) Modifier.statusBarsPadding() else Modifier)
 //            .padding(top = 16.dp)
-            ) {
-                val screenHeight = maxHeight
-                val screenWidth = maxWidth
-
-                // Layout: search bar fixed at top, scrollable middle (results/pills/clipboard),
-                // dialpad card fixed at bottom. Nothing moves when results appear.
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-//                verticalArrangement = Arrangement.Top
-                    contentAlignment = Alignment.BottomEnd
                 ) {
-                    // ── Middle section: results / pills / clipboard (scrollable, fills space) ──
-                    var isDialpadVisible by remember { mutableStateOf(true) }
-                    val listScrollState = rememberScrollState()
-                    var lastScrollPosition by remember { mutableStateOf(0) }
+                    val screenHeight = maxHeight
+                    val screenWidth = maxWidth
 
-                    LaunchedEffect(listScrollState.isScrollInProgress) {
-                        snapshotFlow { listScrollState.isScrollInProgress }
-                            .collect { isScrolling ->
-                                if (isScrolling && isDialpadVisible && listScrollState.value > 0) {
-                                    isDialpadVisible = false
-                                }
-                            }
-                    }
-                    Surface(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        shape = MaterialTheme.shapes.large,
-                        color = Color.Transparent
+                    // Layout: search bar fixed at top, scrollable middle (results/pills/clipboard),
+                    // dialpad card fixed at bottom. Nothing moves when results appear.
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+//                verticalArrangement = Arrangement.Top
+                        contentAlignment = Alignment.BottomEnd
                     ) {
-                        Column(
+                        // ── Middle section: results / pills / clipboard (scrollable, fills space) ──
+                        var isDialpadVisible by remember { mutableStateOf(true) }
+                        val listScrollState = rememberScrollState()
+                        var lastScrollPosition by remember { mutableStateOf(0) }
+
+                        LaunchedEffect(listScrollState.isScrollInProgress) {
+                            snapshotFlow { listScrollState.isScrollInProgress }
+                                .collect { isScrolling ->
+                                    if (isScrolling && isDialpadVisible && listScrollState.value > 0) {
+                                        isDialpadVisible = false
+                                    }
+                                }
+                        }
+                        Surface(
                             modifier = Modifier
-//                        .weight(1f)
-                                .fillMaxSize()
-//                                .navigationBarsPadding()
-                                .verticalScroll(listScrollState),
-                            verticalArrangement = Arrangement.Top
+                                .padding(horizontal = 16.dp)
+                                .layerBackdrop(dialpadBackdrop),
+                            shape = MaterialTheme.shapes.large,
+                            color = Color.Transparent
                         ) {
-
-                            AnimatedVisibility(
-                                visible = number.isNotEmpty(),// && searchResults.isEmpty() && searchQuery.isEmpty(),
-                                enter = fadeIn() + expandVertically(),
-                                exit = fadeOut() + shrinkVertically()
+                            Column(
+                                modifier = Modifier
+//                        .weight(1f)
+                                    .fillMaxSize()
+//                                .navigationBarsPadding()
+                                    .verticalScroll(listScrollState),
+                                verticalArrangement = Arrangement.Top
                             ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(bottom = 8.dp, start = 2.dp, end = 2.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                                ) {
-                                    Surface(
-                                        onClick = {
-                                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                            navigator?.navigate(ContactEditScreenDestination(initialPhone = number))
-                                        },
-                                        shape = RoundedCornerShape(50.dp),
-                                        color = MaterialTheme.colorScheme.secondaryContainer,
-                                        modifier = Modifier.weight(1f)
-                                    ) {
-                                        Row(
-                                            modifier = Modifier.padding(
-                                                horizontal = 12.dp,
-                                                vertical = 10.dp
-                                            ),
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.Center
-                                        ) {
-                                            val create = stringResource(R.string.create_contact)
-                                            Icon(
-                                                Icons.Default.PersonAdd,
-                                                create,
-                                                modifier = Modifier.size(16.dp),
-                                                tint = MaterialTheme.colorScheme.onPrimaryContainer
-                                            )
-                                            Spacer(modifier = Modifier.width(6.dp))
-                                            Text(
-                                                create,
-                                                style = MaterialTheme.typography.labelLarge,
-                                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
-                                        }
-                                    }
-                                    Surface(
-                                        onClick = {
-                                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                            val intent =
-                                                Intent(Intent.ACTION_INSERT_OR_EDIT).apply {
-                                                    type =
-                                                        ContactsContract.Contacts.CONTENT_ITEM_TYPE
-                                                    putExtra(
-                                                        ContactsContract.Intents.Insert.PHONE,
-                                                        number
-                                                    )
-                                                }
-                                            context.startActivity(intent)
-                                        },
-                                        shape = RoundedCornerShape(50.dp),
-                                        color = MaterialTheme.colorScheme.secondaryContainer,
-                                        modifier = Modifier.weight(1f)
-                                    ) {
-                                        Row(
-                                            modifier = Modifier.padding(
-                                                horizontal = 12.dp,
-                                                vertical = 10.dp
-                                            ),
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.Center
-                                        ) {
-                                            val add = stringResource(R.string.add_to_contact)
-                                            Icon(
-                                                Icons.Default.Person,
-                                                add,
-                                                modifier = Modifier.size(16.dp),
-                                                tint = MaterialTheme.colorScheme.onSecondaryContainer
-                                            )
-                                            Spacer(modifier = Modifier.width(6.dp))
-                                            Text(
-                                                add,
-                                                style = MaterialTheme.typography.labelLarge,
-                                                color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
-                                        }
-                                    }
 
-                                    Surface(
-                                        onClick = {
-                                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                            if (
-                                                installedWhatsApp != null ||
-                                                installedTelegram != null ||
-                                                installedSignal != null
-                                            ) showSocialDialog = true
-                                            else initiateMessage(number)
-                                        },
-                                        shape = RoundedCornerShape(50.dp),
-                                        color = MaterialTheme.colorScheme.primaryContainer,
-                                        modifier = Modifier.weight(1f)
-                                    ) {
-                                        Row(
-                                            modifier = Modifier.padding(
-                                                horizontal = 12.dp,
-                                                vertical = 10.dp
-                                            ),
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.Center
-                                        ) {
-                                            val message = stringResource(R.string.message)
-                                            Icon(
-                                                painter = painterResource(id = R.drawable.ic_message_outline),
-                                                message,
-                                                modifier = Modifier.size(16.dp),
-                                                tint = MaterialTheme.colorScheme.onSecondaryContainer
-                                            )
-                                            Spacer(modifier = Modifier.width(6.dp))
-                                            Text(
-                                                message,
-                                                style = MaterialTheme.typography.labelLarge,
-                                                color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-
-                            val configuration = LocalConfiguration.current
-                            val screenHeightDp = configuration.screenHeightDp.dp
-                            val searchResultsBottomPadding = screenHeightDp * 0.50f
-                            val searchResultsPadding =
-                                if (filteredSearchLogsResults.isNotEmpty()) 16.dp else searchResultsBottomPadding
-                            // Search contacts results
-                            AnimatedVisibility(
-                                visible = searchResults.isNotEmpty(),
-                                enter = fadeIn(tween(380, easing = FastOutSlowInEasing)) +
-                                        expandVertically(tween(420, easing = FastOutSlowInEasing)),
-                                exit = fadeOut(tween(280, easing = FastOutLinearInEasing)) +
-                                        shrinkVertically(tween(320, easing = FastOutLinearInEasing))
-                            ) {
-                                Column(
-                                    modifier = Modifier//.padding(horizontal = 16.dp, vertical = 4.dp)
-                                        .padding(
-//                                        start = 16.dp,
-//                                        end = 16.dp,
-                                            top = 4.dp,
-                                            bottom = searchResultsPadding
-                                        )
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.contacts),
-                                        style = MaterialTheme.typography.labelLarge,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        fontWeight = FontWeight.Bold,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 16.dp, vertical = 4.dp)
-                                    )
-                                    Surface(
-                                        shape = MaterialTheme.shapes.extraLarge,
-                                        color = if (isBottomSheet) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surface,
-                                        modifier = Modifier.fillMaxWidth()
-                                    ) {
-                                        Column(
-                                            modifier = Modifier
-//                                        .padding(vertical = 8.dp)
-                                                .background(if (isBottomSheet) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surface),
-                                            verticalArrangement = Arrangement.spacedBy(2.dp),
-                                        ) {
-                                            searchResults.forEach { contact ->
-                                                val defaultOrFirstPhone = contact.phoneDetails.firstOrNull { it.isPrimary }?.number ?: contact.phoneNumbers.firstOrNull()
-                                                SingleTile(
-                                                    title = getDisplayName(contact, displayOrder), //contact.displayName,
-                                                    subtitle = getDisplayContactInfo(contact),
-                                                    photoUri = contact.photoUri,
-                                                    phoneNumber = defaultOrFirstPhone,
-                                                    trailingContent = {
-                                                        if (defaultOrFirstPhone != null) {
-                                                            IconButton(onClick = { initiateCall(defaultOrFirstPhone) }) {
-                                                                Icon(Icons.Outlined.Call, contentDescription = stringResource(R.string.call), tint = MaterialTheme.colorScheme.primary)
-                                                            }
-                                                        }
-                                                    },
-                                                    onCall = { if (defaultOrFirstPhone != null) initiateCall(defaultOrFirstPhone) },
-                                                    onClick = {
-                                                        navigator?.navigate(
-                                                            ContactDetailsScreenDestination(
-                                                                contactId = contact.id
-                                                            )
-                                                        )
-                                                    },
-                                                    menuOffset = DpOffset(56.dp, 64.dp),
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            // Search logs results
-                            AnimatedVisibility(
-                                visible = filteredSearchLogsResults.isNotEmpty(),
-                                enter = fadeIn(tween(380, easing = FastOutSlowInEasing)) +
-                                        expandVertically(tween(420, easing = FastOutSlowInEasing)),
-                                exit = fadeOut(tween(280, easing = FastOutLinearInEasing)) +
-                                        shrinkVertically(tween(320, easing = FastOutLinearInEasing))
-                            ) {
-                                Column(
-                                    modifier = Modifier//.padding(horizontal = 16.dp, vertical = 4.dp)
-                                        .padding(
-//                                        start = 16.dp,
-//                                        end = 16.dp,
-                                            top = 4.dp,
-                                            bottom = searchResultsBottomPadding
-                                        )
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.recents),
-                                        style = MaterialTheme.typography.labelLarge,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        fontWeight = FontWeight.Bold,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 16.dp, vertical = 4.dp)
-                                    )
-                                    Surface(
-                                        shape = MaterialTheme.shapes.extraLarge,
-                                        color = if (isBottomSheet) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surface,
-                                        modifier = Modifier.fillMaxWidth()
-                                    ) {
-                                        Column(
-                                            modifier = Modifier
-//                                        .padding(vertical = 8.dp)
-                                                .background(if (isBottomSheet) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surface),
-                                            verticalArrangement = Arrangement.spacedBy(2.dp),
-                                        ) {
-                                            filteredSearchLogsResults.forEach { log ->
-                                                val displayName = if (log.name == log.number) log.number.forceLtr() else log.name?.ifEmpty { log.number } ?: log.number.ifEmpty { "Unknown" }
-                                                SingleTile(
-                                                    title = displayName,
-                                                    subtitle = if (log.name == log.number) null else log.number,
-                                                    photoUri = log.photoUri,
-                                                    phoneNumber = log.number,
-                                                    trailingContent = {
-                                                        IconButton(onClick = { initiateCall(log.number) }) {
-                                                            Icon(Icons.Outlined.Call, contentDescription = stringResource(R.string.call), tint = MaterialTheme.colorScheme.primary)
-                                                        }
-                                                    },
-                                                    onCall = { initiateCall(log.number) },
-                                                    onClick = {
-                                                        if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                                                            performAppHaptic(
-                                                                context,
-                                                                prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light",
-                                                                prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
-                                                            )
-                                                        }
-                                                        navigator?.navigate(ContactDetailsScreenDestination(phoneNumber = log.number))
-                                                    },
-                                                    showCreateContact = log.contactId == null,
-                                                    menuOffset = DpOffset(56.dp, 64.dp),
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            // Clipboard banner
-                            AnimatedVisibility(
-                                visible = showClipboardBanner && number.isEmpty(),
-                                enter = fadeIn() + expandVertically(),
-                                exit = fadeOut() + shrinkVertically()
-                            ) {
-                                Surface(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(
-//                                        horizontal = 16.dp,
-                                            vertical = 4.dp
-                                        ),
-                                    shape = MaterialTheme.shapes.extraLarge,
-                                    color = MaterialTheme.colorScheme.secondaryContainer
+                                AnimatedVisibility(
+                                    visible = number.isNotEmpty(),// && searchResults.isEmpty() && searchQuery.isEmpty(),
+                                    enter = fadeIn() + expandVertically(),
+                                    exit = fadeOut() + shrinkVertically()
                                 ) {
                                     Row(
-                                        modifier = Modifier.padding(
-                                            start = 24.dp, end = 8.dp, top = 8.dp, bottom = 8.dp
-                                        ),
-                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(bottom = 8.dp, start = 2.dp, end = 2.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                                     ) {
-                                        Icon(
-                                            Icons.Default.ContentPaste,
-                                            null,
-                                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                        Text(
-                                            text = clipText,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .padding(horizontal = 20.dp)
-                                        )
-                                        TextButton(onClick = {
-                                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); replaceNumber(clipText); showClipboardBanner = false
-                                        }) {
-                                            Text(stringResource(R.string.use), color = MaterialTheme.colorScheme.primary)
-                                        }
-                                        IconButton(
-                                            onClick = { showClipboardBanner = false },
-//                                        modifier = Modifier.size(cardCornerBig)
+                                        Surface(
+                                            onClick = {
+                                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                                navigator?.navigate(
+                                                    ContactEditScreenDestination(
+                                                        initialPhone = number
+                                                    )
+                                                )
+                                            },
+                                            shape = RoundedCornerShape(50.dp),
+                                            color = MaterialTheme.colorScheme.secondaryContainer,
+                                            modifier = Modifier.weight(1f)
                                         ) {
-                                            Icon(Icons.Default.Close, stringResource(R.string.close))
+                                            Row(
+                                                modifier = Modifier.padding(
+                                                    horizontal = 12.dp,
+                                                    vertical = 10.dp
+                                                ),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.Center
+                                            ) {
+                                                val create = stringResource(R.string.create_contact)
+                                                Icon(
+                                                    Icons.Default.PersonAdd,
+                                                    create,
+                                                    modifier = Modifier.size(16.dp),
+                                                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                                )
+                                                Spacer(modifier = Modifier.width(6.dp))
+                                                Text(
+                                                    create,
+                                                    style = MaterialTheme.typography.labelLarge,
+                                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                            }
+                                        }
+                                        Surface(
+                                            onClick = {
+                                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                                val intent =
+                                                    Intent(Intent.ACTION_INSERT_OR_EDIT).apply {
+                                                        type =
+                                                            ContactsContract.Contacts.CONTENT_ITEM_TYPE
+                                                        putExtra(
+                                                            ContactsContract.Intents.Insert.PHONE,
+                                                            number
+                                                        )
+                                                    }
+                                                context.startActivity(intent)
+                                            },
+                                            shape = RoundedCornerShape(50.dp),
+                                            color = MaterialTheme.colorScheme.secondaryContainer,
+                                            modifier = Modifier.weight(1f)
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.padding(
+                                                    horizontal = 12.dp,
+                                                    vertical = 10.dp
+                                                ),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.Center
+                                            ) {
+                                                val add = stringResource(R.string.add_to_contact)
+                                                Icon(
+                                                    Icons.Default.Person,
+                                                    add,
+                                                    modifier = Modifier.size(16.dp),
+                                                    tint = MaterialTheme.colorScheme.onSecondaryContainer
+                                                )
+                                                Spacer(modifier = Modifier.width(6.dp))
+                                                Text(
+                                                    add,
+                                                    style = MaterialTheme.typography.labelLarge,
+                                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                            }
+                                        }
+
+                                        Surface(
+                                            onClick = {
+                                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                                if (
+                                                    installedWhatsApp != null ||
+                                                    installedTelegram != null ||
+                                                    installedSignal != null
+                                                ) showSocialDialog = true
+                                                else initiateMessage(number)
+                                            },
+                                            shape = RoundedCornerShape(50.dp),
+                                            color = MaterialTheme.colorScheme.primaryContainer,
+                                            modifier = Modifier.weight(1f)
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.padding(
+                                                    horizontal = 12.dp,
+                                                    vertical = 10.dp
+                                                ),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.Center
+                                            ) {
+                                                val message = stringResource(R.string.message)
+                                                Icon(
+                                                    painter = painterResource(id = R.drawable.ic_message_outline),
+                                                    message,
+                                                    modifier = Modifier.size(16.dp),
+                                                    tint = MaterialTheme.colorScheme.onSecondaryContainer
+                                                )
+                                                Spacer(modifier = Modifier.width(6.dp))
+                                                Text(
+                                                    message,
+                                                    style = MaterialTheme.typography.labelLarge,
+                                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                            }
                                         }
                                     }
                                 }
-                            }
 
-                            AnimatedVisibility(
-                                visible = searchResults.isEmpty() && filteredSearchLogsResults.isEmpty() && number.isNotEmpty(),
-                                enter = fadeIn(tween(380, easing = FastOutSlowInEasing)) +
-                                        expandVertically(tween(420, easing = FastOutSlowInEasing)),
-                                exit = fadeOut(tween(280, easing = FastOutLinearInEasing)) +
-                                        shrinkVertically(tween(320, easing = FastOutLinearInEasing))
-                            ) {
-                                PlaceholderView(
-                                    icon = Icons.Rounded.SearchOff,
-                                    title = stringResource(R.string.no_results),
-                                )
-                            }
-                        } // end scrollable middle Column
-                    }
-
-
-                    // Show dialpad button
-                    val pillNav = remember { prefs.getBoolean(PreferenceManager.KEY_PILL_NAV, false) }
-                    AnimatedVisibility(
-                        visible = !isDialpadVisible,
-                        enter = scaleIn() + fadeIn(),
-                        exit = scaleOut() + fadeOut()
-                    ) {
-                        val dialpadTab =
-                            prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD, true)
-                        val fabShape = RoundedCornerShape(17.dp)
-                        FloatingActionButton(
-                            modifier = Modifier
-                                .padding(bottom = if (isBottomSheet) 0.dp else if (pillNav) 88.dp else bottomBarHeight + 12.dp)
-                                .navigationBarsPadding()
-                                .then(
-                                    if (dialpadTab) Modifier
-                                        .padding(horizontal = 16.dp, vertical = 4.dp)
-                                    else Modifier
-                                        .navigationBarsPadding()
-                                        .padding(horizontal = 16.dp, vertical = 16.dp)
-                                ),
-                            onClick = { isDialpadVisible = true },
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            shape = fabShape,
-                            elevation = FloatingActionButtonDefaults.elevation(4.dp),
-                        ) { Icon(Icons.Default.Dialpad, stringResource(R.string.keypad)) }
-                    }
-
-                    // ── Dialpad card — hides with animation when search is active ──
-                    AnimatedVisibility(
-                        visible = isDialpadVisible || number.isEmpty(),
-                        enter = slideInVertically(
-                            initialOffsetY = { it },
-                            animationSpec = tween(
-                                durationMillis = 320,
-                                easing = FastOutSlowInEasing
-                            )
-                        ) + fadeIn(
-                            animationSpec = tween(
-                                durationMillis = 280,
-                                easing = FastOutSlowInEasing
-                            )
-                        ),
-                        exit = slideOutVertically(
-                            targetOffsetY = { it },
-                            animationSpec = tween(
-                                durationMillis = 260,
-                                easing = FastOutLinearInEasing
-                            )
-                        ) + fadeOut(
-                            animationSpec = tween(
-                                durationMillis = 200,
-                                easing = FastOutLinearInEasing
-                            )
-                        )
-                    ) {
-                        // ── Dialpad card — always at bottom, never moves ───────────────
-                        BoxWithConstraints(
-                            contentAlignment = Alignment.BottomCenter,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 12.dp)
-                        ) {
-                            // Scale based on the SMALLER of width-derived and height-derived factors
-                            // so the dialpad always fits on screen regardless of device size.
-                            val refWidth = 360f
-                            val availableWidth = maxWidth.value
-                            val widthScale = (availableWidth / refWidth).coerceIn(0.6f, 1.4f)
-
-                            // Height budget: total screen height minus search bar (~64dp) minus spacing (~24dp)
-                            // The dialpad card needs: header(~56dp) + 4 key rows + action row(~72dp) + padding(~40dp)
-                            // Reference key height = 68dp, so 4 rows = 272dp + overhead ~168dp = ~440dp total card
-                            val cardHeightBudget =
-                                (screenHeight.value - 64f - 24f).coerceAtLeast(200f)
-                            val refCardHeight = 440f
-                            val heightScale =
-                                (cardHeightBudget / refCardHeight).coerceIn(0.55f, 1.4f)
-
-                            val scaleFactor = minOf(widthScale, heightScale)
-
-                            val keyWidth: Dp = (108 * scaleFactor).dp
-                            val keyHeight: Dp = (56 * scaleFactor).dp //58
-//                            val actionSize: Dp = (64 * scaleFactor).dp
-                            val callW: Dp = (108 * scaleFactor).dp
-                            val callH: Dp = (58 * scaleFactor).dp
-                            val spacing = if (isBottomSheet) 8 else 6
-                            val keySpacing: Dp = (spacing * scaleFactor).dp //8
-
-                            Box( // Hides the bottom part of the list
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(if (isBottomSheet) 100.dp else 200.dp)
-                                    .background(if (isBottomSheet) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surface)
-                            )
-                            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                                Surface(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(bottom = if (isBottomSheet) 12.dp else if (pillNav) 88.dp else bottomBarHeight + 12.dp)
-                                        .navigationBarsPadding(),
-                                    shape = MaterialTheme.shapes.extraLargeIncreased,
-                                    color = dialpadColor, //MaterialTheme.colorScheme.surfaceContainerLow,
-//                            shadowElevation = 2.dp
+                                val configuration = LocalConfiguration.current
+                                val screenHeightDp = configuration.screenHeightDp.dp
+                                val searchResultsBottomPadding = screenHeightDp * 0.50f
+                                val searchResultsPadding =
+                                    if (filteredSearchLogsResults.isNotEmpty()) 16.dp else searchResultsBottomPadding
+                                // Search contacts results
+                                AnimatedVisibility(
+                                    visible = searchResults.isNotEmpty(),
+                                    enter = fadeIn(tween(380, easing = FastOutSlowInEasing)) +
+                                            expandVertically(
+                                                tween(
+                                                    420,
+                                                    easing = FastOutSlowInEasing
+                                                )
+                                            ),
+                                    exit = fadeOut(tween(280, easing = FastOutLinearInEasing)) +
+                                            shrinkVertically(
+                                                tween(
+                                                    320,
+                                                    easing = FastOutLinearInEasing
+                                                )
+                                            )
                                 ) {
-                                    val topBottom = if (isBottomSheet) 16 else 8
                                     Column(
-                                        modifier = Modifier.padding(
-                                            horizontal = 8.dp,
-                                            vertical = (topBottom * scaleFactor).coerceIn(
-                                                6f,
-                                                16f
-                                            ).dp //16
-                                        ),
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        verticalArrangement = Arrangement.spacedBy(keySpacing)
+                                        modifier = Modifier//.padding(horizontal = 16.dp, vertical = 4.dp)
+                                            .padding(
+//                                        start = 16.dp,
+//                                        end = 16.dp,
+                                                top = 4.dp,
+                                                bottom = searchResultsPadding
+                                            )
                                     ) {
-                                        // Header row
-                                        Row(
+                                        Text(
+                                            text = stringResource(R.string.contacts),
+                                            style = MaterialTheme.typography.labelLarge,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            fontWeight = FontWeight.Bold,
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(horizontal = if (isBottomSheet) 8.dp else 0.dp),
-                                            verticalAlignment = Alignment.CenterVertically
+                                                .padding(horizontal = 16.dp, vertical = 4.dp)
+                                        )
+                                        Surface(
+                                            shape = MaterialTheme.shapes.extraLarge,
+                                            color = if (isBottomSheet) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surface,
+                                            modifier = Modifier.fillMaxWidth()
                                         ) {
-                                            val pasteText = clipboard.getText()?.text
-                                                ?.filter { it.isDigit() || it == '+' || it == '*' || it == '#' }
-                                                ?: ""
-                                            if (number.isNotEmpty() || pasteText.isNotEmpty()) {
+                                            Column(
+                                                modifier = Modifier
+//                                        .padding(vertical = 8.dp)
+                                                    .background(if (isBottomSheet) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surface),
+                                                verticalArrangement = Arrangement.spacedBy(2.dp),
+                                            ) {
+                                                searchResults.forEach { contact ->
+                                                    val defaultOrFirstPhone =
+                                                        contact.phoneDetails.firstOrNull { it.isPrimary }?.number
+                                                            ?: contact.phoneNumbers.firstOrNull()
+                                                    SingleTile(
+                                                        title = getDisplayName(
+                                                            contact,
+                                                            displayOrder
+                                                        ), //contact.displayName,
+                                                        subtitle = getDisplayContactInfo(contact),
+                                                        photoUri = contact.photoUri,
+                                                        phoneNumber = defaultOrFirstPhone,
+                                                        trailingContent = {
+                                                            if (defaultOrFirstPhone != null) {
+                                                                IconButton(onClick = {
+                                                                    initiateCall(
+                                                                        defaultOrFirstPhone
+                                                                    )
+                                                                }) {
+                                                                    Icon(
+                                                                        Icons.Outlined.Call,
+                                                                        contentDescription = stringResource(
+                                                                            R.string.call
+                                                                        ),
+                                                                        tint = MaterialTheme.colorScheme.primary
+                                                                    )
+                                                                }
+                                                            }
+                                                        },
+                                                        onCall = {
+                                                            if (defaultOrFirstPhone != null) initiateCall(
+                                                                defaultOrFirstPhone
+                                                            )
+                                                        },
+                                                        onClick = {
+                                                            navigator?.navigate(
+                                                                ContactDetailsScreenDestination(
+                                                                    contactId = contact.id
+                                                                )
+                                                            )
+                                                        },
+                                                        menuOffset = DpOffset(56.dp, 64.dp),
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // Search logs results
+                                AnimatedVisibility(
+                                    visible = filteredSearchLogsResults.isNotEmpty(),
+                                    enter = fadeIn(tween(380, easing = FastOutSlowInEasing)) +
+                                            expandVertically(
+                                                tween(
+                                                    420,
+                                                    easing = FastOutSlowInEasing
+                                                )
+                                            ),
+                                    exit = fadeOut(tween(280, easing = FastOutLinearInEasing)) +
+                                            shrinkVertically(
+                                                tween(
+                                                    320,
+                                                    easing = FastOutLinearInEasing
+                                                )
+                                            )
+                                ) {
+                                    Column(
+                                        modifier = Modifier//.padding(horizontal = 16.dp, vertical = 4.dp)
+                                            .padding(
+//                                        start = 16.dp,
+//                                        end = 16.dp,
+                                                top = 4.dp,
+                                                bottom = searchResultsBottomPadding
+                                            )
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.recents),
+                                            style = MaterialTheme.typography.labelLarge,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            fontWeight = FontWeight.Bold,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 16.dp, vertical = 4.dp)
+                                        )
+                                        Surface(
+                                            shape = MaterialTheme.shapes.extraLarge,
+                                            color = if (isBottomSheet) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surface,
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            Column(
+                                                modifier = Modifier
+//                                        .padding(vertical = 8.dp)
+                                                    .background(if (isBottomSheet) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surface),
+                                                verticalArrangement = Arrangement.spacedBy(2.dp),
+                                            ) {
+                                                filteredSearchLogsResults.forEach { log ->
+                                                    val displayName =
+                                                        if (log.name == log.number) log.number.forceLtr() else log.name?.ifEmpty { log.number }
+                                                            ?: log.number.ifEmpty { "Unknown" }
+                                                    SingleTile(
+                                                        title = displayName,
+                                                        subtitle = if (log.name == log.number) null else log.number,
+                                                        photoUri = log.photoUri,
+                                                        phoneNumber = log.number,
+                                                        trailingContent = {
+                                                            IconButton(onClick = { initiateCall(log.number) }) {
+                                                                Icon(
+                                                                    Icons.Outlined.Call,
+                                                                    contentDescription = stringResource(
+                                                                        R.string.call
+                                                                    ),
+                                                                    tint = MaterialTheme.colorScheme.primary
+                                                                )
+                                                            }
+                                                        },
+                                                        onCall = { initiateCall(log.number) },
+                                                        onClick = {
+                                                            if (prefs.getBoolean(
+                                                                    PreferenceManager.KEY_APP_HAPTICS,
+                                                                    true
+                                                                )
+                                                            ) {
+                                                                performAppHaptic(
+                                                                    context,
+                                                                    prefs.getString(
+                                                                        PreferenceManager.KEY_APP_HAPTICS_STRENGTH,
+                                                                        "light"
+                                                                    ) ?: "light",
+                                                                    prefs.getFloat(
+                                                                        PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY,
+                                                                        0.5f
+                                                                    )
+                                                                )
+                                                            }
+                                                            navigator?.navigate(
+                                                                ContactDetailsScreenDestination(
+                                                                    phoneNumber = log.number
+                                                                )
+                                                            )
+                                                        },
+                                                        showCreateContact = log.contactId == null,
+                                                        menuOffset = DpOffset(56.dp, 64.dp),
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // Clipboard banner
+                                AnimatedVisibility(
+                                    visible = showClipboardBanner && number.isEmpty(),
+                                    enter = fadeIn() + expandVertically(),
+                                    exit = fadeOut() + shrinkVertically()
+                                ) {
+                                    Surface(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(
+//                                        horizontal = 16.dp,
+                                                vertical = 4.dp
+                                            ),
+                                        shape = MaterialTheme.shapes.extraLarge,
+                                        color = MaterialTheme.colorScheme.secondaryContainer
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(
+                                                start = 24.dp, end = 8.dp, top = 8.dp, bottom = 8.dp
+                                            ),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            Icon(
+                                                Icons.Default.ContentPaste,
+                                                null,
+                                                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                            Text(
+                                                text = clipText,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .padding(horizontal = 20.dp)
+                                            )
+                                            TextButton(onClick = {
+                                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); replaceNumber(
+                                                clipText
+                                            ); showClipboardBanner = false
+                                            }) {
+                                                Text(
+                                                    stringResource(R.string.use),
+                                                    color = MaterialTheme.colorScheme.primary
+                                                )
+                                            }
+                                            IconButton(
+                                                onClick = { showClipboardBanner = false },
+//                                        modifier = Modifier.size(cardCornerBig)
+                                            ) {
+                                                Icon(
+                                                    Icons.Default.Close,
+                                                    stringResource(R.string.close)
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+
+                                AnimatedVisibility(
+                                    visible = searchResults.isEmpty() && filteredSearchLogsResults.isEmpty() && number.isNotEmpty(),
+                                    enter = fadeIn(tween(380, easing = FastOutSlowInEasing)) +
+                                            expandVertically(
+                                                tween(
+                                                    420,
+                                                    easing = FastOutSlowInEasing
+                                                )
+                                            ),
+                                    exit = fadeOut(tween(280, easing = FastOutLinearInEasing)) +
+                                            shrinkVertically(
+                                                tween(
+                                                    320,
+                                                    easing = FastOutLinearInEasing
+                                                )
+                                            )
+                                ) {
+                                    PlaceholderView(
+                                        icon = Icons.Rounded.SearchOff,
+                                        title = stringResource(R.string.no_results),
+                                    )
+                                }
+                            } // end scrollable middle Column
+                        }
+
+
+                        // Show dialpad button
+                        val pillNav = remember { prefs.getBoolean(PreferenceManager.KEY_PILL_NAV, false) }
+                        AnimatedVisibility(
+                            visible = !isDialpadVisible,
+                            enter = scaleIn() + fadeIn(),
+                            exit = scaleOut() + fadeOut()
+                        ) {
+                            val dialpadTab =
+                                prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_DIALPAD, true)
+                            val fabShape = RoundedCornerShape(17.dp)
+                            FloatingActionButton(
+                                modifier = Modifier
+                                    .padding(bottom = if (isBottomSheet) 0.dp else if (pillNav) 88.dp else bottomBarHeight + 12.dp)
+                                    .navigationBarsPadding()
+                                    .then(
+                                        if (dialpadTab) Modifier
+                                            .padding(horizontal = 16.dp, vertical = 4.dp)
+                                        else Modifier
+                                            .navigationBarsPadding()
+                                            .padding(horizontal = 16.dp, vertical = 16.dp)
+                                    ),
+                                onClick = { isDialpadVisible = true },
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                shape = fabShape,
+                                elevation = FloatingActionButtonDefaults.elevation(4.dp),
+                            ) { Icon(Icons.Default.Dialpad, stringResource(R.string.keypad)) }
+                        }
+
+                        // ── Dialpad card — hides with animation when search is active ──
+                        AnimatedVisibility(
+                            visible = isDialpadVisible || number.isEmpty(),
+                            enter = slideInVertically(
+                                initialOffsetY = { it },
+                                animationSpec = tween(
+                                    durationMillis = 320,
+                                    easing = FastOutSlowInEasing
+                                )
+                            ) + fadeIn(
+                                animationSpec = tween(
+                                    durationMillis = 280,
+                                    easing = FastOutSlowInEasing
+                                )
+                            ),
+                            exit = slideOutVertically(
+                                targetOffsetY = { it },
+                                animationSpec = tween(
+                                    durationMillis = 260,
+                                    easing = FastOutLinearInEasing
+                                )
+                            ) + fadeOut(
+                                animationSpec = tween(
+                                    durationMillis = 200,
+                                    easing = FastOutLinearInEasing
+                                )
+                            )
+                        ) {
+                            // ── Dialpad card — always at bottom, never moves ───────────────
+                            BoxWithConstraints(
+                                contentAlignment = Alignment.BottomCenter,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp)
+                            ) {
+                                // Scale based on the SMALLER of width-derived and height-derived factors
+                                // so the dialpad always fits on screen regardless of device size.
+                                val refWidth = 360f
+                                val availableWidth = maxWidth.value
+                                val widthScale = (availableWidth / refWidth).coerceIn(0.6f, 1.4f)
+
+                                // Height budget: total screen height minus search bar (~64dp) minus spacing (~24dp)
+                                // The dialpad card needs: header(~56dp) + 4 key rows + action row(~72dp) + padding(~40dp)
+                                // Reference key height = 68dp, so 4 rows = 272dp + overhead ~168dp = ~440dp total card
+                                val cardHeightBudget =
+                                    (screenHeight.value - 64f - 24f).coerceAtLeast(200f)
+                                val refCardHeight = 440f
+                                val heightScale =
+                                    (cardHeightBudget / refCardHeight).coerceIn(0.55f, 1.4f)
+
+                                val scaleFactor = minOf(widthScale, heightScale)
+
+                                val keyWidth: Dp = (108 * scaleFactor).dp
+                                val keyHeight: Dp = (56 * scaleFactor).dp //58
+//                                val actionSize: Dp = (64 * scaleFactor).dp
+                                val callW: Dp = (108 * scaleFactor).dp
+                                val callH: Dp = (58 * scaleFactor).dp
+                                val spacing = if (isBottomSheet) 8 else 6
+                                val keySpacing: Dp = (spacing * scaleFactor).dp //8
+
+                                val liquidGlass = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_LIQUID_GLASS, false) }
+                                val lgDialpad = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_LG_DIALPAD, false) }
+                                val blurEffects = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_BLUR_EFFECTS, false) }
+                                val blurDialpad = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_BLUR_DIALPAD, false) }
+                                val blurIntensity = remember(settingsState) { prefs.getInt(PreferenceManager.KEY_BLUR_INTENSITY, 20).toFloat() }
+                                val globalBackdrop = LocalLiquidGlassBackdrop.current
+                                val useLgDialpad = liquidGlass && lgDialpad && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && globalBackdrop != null
+                                val useBlurDialpad = blurEffects && blurDialpad && !useLgDialpad
+
+                                if (!useLgDialpad && !useBlurDialpad) Box( // Hides the bottom part of the list
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(if (isBottomSheet) 100.dp else 200.dp)
+                                        .background(if (isBottomSheet) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surface)
+                                )
+                                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                                    val dialpadContent: @Composable () -> Unit = {
+                                        val topBottom = if (isBottomSheet) 16 else 8
+                                        Column(
+                                            modifier = Modifier.padding(
+                                                horizontal = 8.dp,
+                                                vertical = (topBottom * scaleFactor).coerceIn(6f, 16f).dp
+                                            ),
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.spacedBy(keySpacing)
+                                        ) {
+                                            // Header row
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(horizontal = if (isBottomSheet) 8.dp else 0.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                val pasteText = clipboard.getText()?.text
+                                                    ?.filter { it.isDigit() || it == '+' || it == '*' || it == '#' }
+                                                    ?: ""
+                                                if (number.isNotEmpty() || pasteText.isNotEmpty()) {
+                                                    Box(modifier = Modifier.padding(12.dp)) {
+                                                        val optionsSource =
+                                                            remember { MutableInteractionSource() }
+                                                        Icon(
+                                                            imageVector = Icons.Default.MoreVert,
+                                                            contentDescription = stringResource(R.string.more),
+                                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                            modifier = Modifier
+                                                                .combinedClickable(
+                                                                    onClick = {
+                                                                        showOverflowMenu = true
+                                                                    },
+                                                                    interactionSource = optionsSource,
+                                                                    indication = ripple(
+                                                                        bounded = false,
+                                                                        radius = 26.dp
+                                                                    )
+                                                                ),
+                                                        )
+                                                    }
+                                                    AnimatedVisibility(
+                                                        visible = showOverflowMenu,
+                                                        enter = slideInVertically(
+                                                            initialOffsetY = { -it },
+                                                            animationSpec = tween(
+                                                                320,
+                                                                easing = FastOutSlowInEasing
+                                                            )
+                                                        ) + fadeIn(tween(280)),
+                                                        exit = slideOutVertically(
+                                                            targetOffsetY = { -it },
+                                                            animationSpec = tween(
+                                                                420,
+                                                                easing = FastOutLinearInEasing
+                                                            )
+                                                        ) + fadeOut(tween(380))
+                                                    ) {
+                                                        DropdownMenu(
+                                                            shape = MaterialTheme.shapes.large,
+                                                            expanded = showOverflowMenu,
+                                                            onDismissRequest = {
+                                                                showOverflowMenu = false
+                                                            },
+                                                            offset = DpOffset((-24).dp, 32.dp),
+                                                        ) {
+                                                            if (number.isNotEmpty()) {
+                                                                DropdownMenuItem(
+                                                                    contentPadding = PaddingValues(
+                                                                        horizontal = 24.dp
+                                                                    ),
+                                                                    text = { Text(stringResource(R.string.add_pause)) },
+//                                                        leadingIcon = { Icon(Icons.Default.Delete, null, tint = MaterialTheme.colorScheme.error) },
+                                                                    onClick = {
+                                                                        showOverflowMenu = false
+                                                                        number += ","
+                                                                    }
+                                                                )
+                                                                DropdownMenuItem(
+                                                                    contentPadding = PaddingValues(
+                                                                        horizontal = 24.dp
+                                                                    ),
+                                                                    text = { Text(stringResource(R.string.add_wait)) },
+//                                                        leadingIcon = { Icon(Icons.Default.Share, null) },
+                                                                    onClick = {
+                                                                        showOverflowMenu = false
+                                                                        number += ";"
+                                                                    }
+                                                                )
+                                                                DropdownMenuItem(
+                                                                    contentPadding = PaddingValues(
+                                                                        horizontal = 24.dp
+                                                                    ),
+                                                                    text = { Text(stringResource(R.string.copy)) },
+//                                                        leadingIcon = { Icon(Icons.Default.ContentCopy, null) },
+                                                                    onClick = {
+                                                                        showOverflowMenu = false
+                                                                        clipboard.setText(
+                                                                            AnnotatedString(
+                                                                                number
+                                                                            )
+                                                                        )
+                                                                    }
+                                                                )
+                                                            }
+                                                            if (pasteText.isNotEmpty()) {
+                                                                DropdownMenuItem(
+                                                                    contentPadding = PaddingValues(
+                                                                        horizontal = 24.dp
+                                                                    ),
+                                                                    text = { Text(stringResource(R.string.paste)) },
+//                                                        leadingIcon = { Icon(Icons.Default.ContentPaste, null) },
+                                                                    onClick = {
+                                                                        showOverflowMenu = false
+                                                                        replaceNumber(pasteText)
+                                                                    }
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+                                                }
+
+                                                // Number display
+                                                Box(
+                                                    modifier = Modifier
+                                                        .weight(1f)
+//                                            .defaultMinSize(minHeight = if (number.isEmpty()) 64.dp else 0.dp)
+                                                        .clip(MaterialTheme.shapes.large)
+                                                        .animateContentSize(
+                                                            animationSpec = spring(
+                                                                stiffness = Spring.StiffnessLow,
+                                                                dampingRatio = Spring.DampingRatioMediumBouncy
+                                                            )
+                                                        )
+                                                        .padding(vertical = 8.dp),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    val numberLength = number.length
+                                                    // Smooth mathematical scaling formula:
+                                                    // Start with 30sp. The more characters there are, the more the font size decreases.
+                                                    val dynamicFontSize =
+                                                        (30f - (numberLength * 0.5f)).coerceIn(
+                                                            10f,
+                                                            30f
+                                                        ).toInt()
+                                                    DialpadNumberDisplay(
+                                                        number = number,
+                                                        fontSize = dynamicFontSize,
+                                                        cursorPosition = cursorPosition,
+                                                        onCursorPositionChange = {
+                                                            cursorPosition = it
+                                                        },
+                                                        onLongPress = {
+                                                            haptic.performHapticFeedback(
+                                                                HapticFeedbackType.LongPress
+                                                            )
+                                                            showOverflowMenu = true
+                                                        },
+                                                        enableAnimations = enableAnimations
+                                                    )
+                                                }
+
                                                 Box(modifier = Modifier.padding(12.dp)) {
-                                                    val optionsSource =
+                                                    val backspaceSource =
                                                         remember { MutableInteractionSource() }
+//                                    FadeScaleBox(visible = number.isNotEmpty()) {
                                                     Icon(
-                                                        imageVector = Icons.Default.MoreVert,
-                                                        contentDescription = stringResource(R.string.more),
-                                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                        imageVector = Icons.AutoMirrored.Outlined.Backspace,
+                                                        contentDescription = stringResource(R.string.backspace),
+                                                        tint = if (number.isNotEmpty()) MaterialTheme.colorScheme.onSurfaceVariant
+                                                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                                            alpha = 0.5f
+                                                        ),
                                                         modifier = Modifier
                                                             .combinedClickable(
-                                                                onClick = {
-                                                                    showOverflowMenu = true
-                                                                },
-                                                                interactionSource = optionsSource,
+                                                                onClick = { backspaceAtCursor() },
+                                                                onLongClick = { replaceNumber("") },
+                                                                interactionSource = backspaceSource,
                                                                 indication = ripple(
                                                                     bounded = false,
                                                                     radius = 26.dp
                                                                 )
                                                             ),
                                                     )
-                                                }
-                                                AnimatedVisibility(
-                                                    visible = showOverflowMenu,
-                                                    enter = slideInVertically(
-                                                        initialOffsetY = { -it },
-                                                        animationSpec = tween(
-                                                            320,
-                                                            easing = FastOutSlowInEasing
-                                                        )
-                                                    ) + fadeIn(tween(280)),
-                                                    exit = slideOutVertically(
-                                                        targetOffsetY = { -it },
-                                                        animationSpec = tween(
-                                                            420,
-                                                            easing = FastOutLinearInEasing
-                                                        )
-                                                    ) + fadeOut(tween(380))
-                                                ) {
-                                                    DropdownMenu(
-                                                        shape = MaterialTheme.shapes.large,
-                                                        expanded = showOverflowMenu,
-                                                        onDismissRequest = {
-                                                            showOverflowMenu = false
-                                                        },
-                                                        offset = DpOffset((-24).dp, 32.dp),
-                                                    ) {
-                                                        if (number.isNotEmpty()) {
-                                                            DropdownMenuItem(
-                                                                contentPadding = PaddingValues(
-                                                                    horizontal = 24.dp
-                                                                ),
-                                                                text = { Text(stringResource(R.string.add_pause)) },
-//                                                        leadingIcon = { Icon(Icons.Default.Delete, null, tint = MaterialTheme.colorScheme.error) },
-                                                                onClick = {
-                                                                    showOverflowMenu = false
-                                                                    number += ","
-                                                                }
-                                                            )
-                                                            DropdownMenuItem(
-                                                                contentPadding = PaddingValues(
-                                                                    horizontal = 24.dp
-                                                                ),
-                                                                text = { Text(stringResource(R.string.add_wait)) },
-//                                                        leadingIcon = { Icon(Icons.Default.Share, null) },
-                                                                onClick = {
-                                                                    showOverflowMenu = false
-                                                                    number += ";"
-                                                                }
-                                                            )
-                                                            DropdownMenuItem(
-                                                                contentPadding = PaddingValues(
-                                                                    horizontal = 24.dp
-                                                                ),
-                                                                text = { Text(stringResource(R.string.copy)) },
-//                                                        leadingIcon = { Icon(Icons.Default.ContentCopy, null) },
-                                                                onClick = {
-                                                                    showOverflowMenu = false
-                                                                    clipboard.setText(
-                                                                        AnnotatedString(
-                                                                            number
-                                                                        )
-                                                                    )
-                                                                }
-                                                            )
-                                                        }
-                                                        if (pasteText.isNotEmpty()) {
-                                                            DropdownMenuItem(
-                                                                contentPadding = PaddingValues(
-                                                                    horizontal = 24.dp
-                                                                ),
-                                                                text = { Text(stringResource(R.string.paste)) },
-//                                                        leadingIcon = { Icon(Icons.Default.ContentPaste, null) },
-                                                                onClick = {
-                                                                    showOverflowMenu = false
-                                                                    replaceNumber(pasteText)
-                                                                }
-                                                            )
-                                                        }
-                                                    }
-                                                }
-                                            }
-
-                                            // Number display
-                                            Box(
-                                                modifier = Modifier
-                                                    .weight(1f)
-//                                            .defaultMinSize(minHeight = if (number.isEmpty()) 64.dp else 0.dp)
-                                                    .clip(MaterialTheme.shapes.large)
-                                                    .animateContentSize(
-                                                        animationSpec = spring(
-                                                            stiffness = Spring.StiffnessLow,
-                                                            dampingRatio = Spring.DampingRatioMediumBouncy
-                                                        )
-                                                    )
-                                                    .padding(vertical = 8.dp),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                val numberLength = number.length
-                                                // Smooth mathematical scaling formula:
-                                                // Start with 30sp. The more characters there are, the more the font size decreases.
-                                                val dynamicFontSize = (30f - (numberLength * 0.5f)).coerceIn(10f, 30f).toInt()
-                                                DialpadNumberDisplay(
-                                                    number = number,
-                                                    fontSize = dynamicFontSize,
-                                                    cursorPosition = cursorPosition,
-                                                    onCursorPositionChange = {
-                                                        cursorPosition = it
-                                                    },
-                                                    onLongPress = {
-                                                        haptic.performHapticFeedback(
-                                                            HapticFeedbackType.LongPress
-                                                        )
-                                                        showOverflowMenu = true
-                                                    },
-                                                    enableAnimations = enableAnimations
-                                                )
-                                            }
-
-                                            Box(modifier = Modifier.padding(12.dp)) {
-                                                val backspaceSource =
-                                                    remember { MutableInteractionSource() }
-//                                    FadeScaleBox(visible = number.isNotEmpty()) {
-                                                Icon(
-                                                    imageVector = Icons.AutoMirrored.Outlined.Backspace,
-                                                    contentDescription = stringResource(R.string.backspace),
-                                                    tint = if (number.isNotEmpty()) MaterialTheme.colorScheme.onSurfaceVariant
-                                                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                                        alpha = 0.5f
-                                                    ),
-                                                    modifier = Modifier
-                                                        .combinedClickable(
-                                                            onClick = { backspaceAtCursor() },
-                                                            onLongClick = { replaceNumber("") },
-                                                            interactionSource = backspaceSource,
-                                                            indication = ripple(
-                                                                bounded = false,
-                                                                radius = 26.dp
-                                                            )
-                                                        ),
-                                                )
 //                                    }
-                                            }
-                                        }
-
-                                        // Dialpad keys
-                                        val keys = listOf(
-                                            listOf("1", "2", "3"),
-                                            listOf("4", "5", "6"),
-                                            listOf("7", "8", "9"),
-                                            listOf("*", "0", "#")
-                                        )
-                                        val subKeys = mapOf(
-                                            "1" to "   ",
-                                            "2" to "ABC",
-                                            "3" to "DEF",
-                                            "4" to "GHI",
-                                            "5" to "JKL",
-                                            "6" to "MNO",
-                                            "7" to "PQRS",
-                                            "8" to "TUV",
-                                            "9" to "WXYZ",
-                                            "0" to "+"
-                                        )
-
-                                        keys.forEach { row ->
-                                            Row(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                horizontalArrangement = Arrangement.SpaceEvenly
-                                            ) {
-                                                row.forEach { key ->
-                                                    DialPadKey(
-                                                        number = key,
-                                                        letters = subKeys[key] ?: "",
-                                                        soundPool = soundPool,
-                                                        context = context,
-                                                        onClick = { digit -> insertAtCursor(digit) },
-                                                        onLongClick = { digit ->
-                                                            insertAtCursor(
-                                                                digit
-                                                            )
-                                                        },
-                                                        overrideWidth = keyWidth,
-                                                        overrideHeight = keyHeight,
-                                                        scaleFactor = scaleFactor
-                                                    )
                                                 }
                                             }
-                                        }
 
-                                        // Action row
-                                        val top = if (isBottomSheet) 6.dp else 1.dp
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(start = 16.dp, end = 16.dp, top = top),
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.Center
-                                        ) {
-                                            val lgBackdrop = LocalLiquidGlassBackdrop.current
-                                            val lgDialpadEnabled = remember(settingsState) {
-                                                prefs.getBoolean(PreferenceManager.KEY_LIQUID_GLASS, false) &&
-                                                        prefs.getBoolean(PreferenceManager.KEY_LG_DIALPAD_CALL_BUTTON, false)
-                                            }
-                                            val blurDialpadEnabled = remember(settingsState) {
-                                                prefs.getBoolean(PreferenceManager.KEY_BLUR_EFFECTS, false) &&
-                                                        prefs.getBoolean(PreferenceManager.KEY_BLUR_DIALPAD_CALL_BUTTON, false) &&
-                                                        !lgDialpadEnabled
-                                            }
-                                            DialerActionExpressive(
-                                                onClick = {
-                                                    if (number.isNotEmpty()) {
-                                                        initiateCall(number)
-                                                    }
-                                                },
-                                                onLongClick = {
-                                                    val pasteText = clipboard.getText()?.text
-                                                        ?.filter { it.isDigit() || it == '+' || it == '*' || it == '#' }
-                                                        ?: ""
-                                                    if (number.isEmpty() && pasteText.isNotEmpty()) {
-                                                        replaceNumber(pasteText)
-                                                    } else {
-                                                        clipboard.setText(AnnotatedString(number))
-                                                    }
-                                                },
-                                                icon = Icons.Default.Call,
-                                                contentDescription = stringResource(R.string.call),
-                                                containerColor = color_call_button,
-                                                contentColor = Color.White,
-                                                modifier = Modifier
-                                                    .width(callW)
-                                                    .height(callH),
-                                                isLarge = true,
-                                                liquidGlassBackdrop = lgBackdrop,
-                                                liquidGlassEnabled = lgDialpadEnabled,
-                                                blurEnabled = blurDialpadEnabled
+                                            // Dialpad keys
+                                            val keys = listOf(
+                                                listOf("1", "2", "3"),
+                                                listOf("4", "5", "6"),
+                                                listOf("7", "8", "9"),
+                                                listOf("*", "0", "#")
                                             )
+                                            val subKeys = mapOf(
+                                                "1" to "   ",
+                                                "2" to "ABC",
+                                                "3" to "DEF",
+                                                "4" to "GHI",
+                                                "5" to "JKL",
+                                                "6" to "MNO",
+                                                "7" to "PQRS",
+                                                "8" to "TUV",
+                                                "9" to "WXYZ",
+                                                "0" to "+"
+                                            )
+
+                                            keys.forEach { row ->
+                                                Row(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    horizontalArrangement = Arrangement.SpaceEvenly
+                                                ) {
+                                                    row.forEach { key ->
+                                                        DialPadKey(
+                                                            number = key,
+                                                            letters = subKeys[key] ?: "",
+                                                            soundPool = soundPool,
+                                                            context = context,
+                                                            onClick = { digit ->
+                                                                insertAtCursor(
+                                                                    digit
+                                                                )
+                                                            },
+                                                            onLongClick = { digit ->
+                                                                insertAtCursor(
+                                                                    digit
+                                                                )
+                                                            },
+                                                            overrideWidth = keyWidth,
+                                                            overrideHeight = keyHeight,
+                                                            scaleFactor = scaleFactor
+                                                        )
+                                                    }
+                                                }
+                                            }
+
+                                            // Action row
+                                            val top = if (isBottomSheet) 6.dp else 1.dp
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(start = 16.dp, end = 16.dp, top = top),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.Center
+                                            ) {
+                                                val lgBackdrop = LocalLiquidGlassBackdrop.current
+                                                val lgDialpadEnabled = remember(settingsState) {
+                                                    prefs.getBoolean(PreferenceManager.KEY_LIQUID_GLASS, false) &&
+                                                            prefs.getBoolean(PreferenceManager.KEY_LG_DIALPAD_CALL_BUTTON, false)
+                                                }
+                                                val blurDialpadEnabled = remember(settingsState) {
+                                                    prefs.getBoolean(PreferenceManager.KEY_BLUR_EFFECTS, false) &&
+                                                            prefs.getBoolean(PreferenceManager.KEY_BLUR_DIALPAD_CALL_BUTTON, false) &&
+                                                            !lgDialpadEnabled
+                                                }
+                                                DialerActionExpressive(
+                                                    onClick = {
+                                                        if (number.isNotEmpty()) {
+                                                            initiateCall(number)
+                                                        }
+                                                    },
+                                                    onLongClick = {
+                                                        val pasteText = clipboard.getText()?.text
+                                                            ?.filter { it.isDigit() || it == '+' || it == '*' || it == '#' }
+                                                            ?: ""
+                                                        if (number.isEmpty() && pasteText.isNotEmpty()) {
+                                                            replaceNumber(pasteText)
+                                                        } else {
+                                                            clipboard.setText(AnnotatedString(number))
+                                                        }
+                                                    },
+                                                    icon = Icons.Default.Call,
+                                                    contentDescription = stringResource(R.string.call),
+                                                    containerColor = color_call_button,
+                                                    contentColor = Color.White,
+                                                    modifier = Modifier
+                                                        .width(callW)
+                                                        .height(callH),
+                                                    isLarge = true,
+                                                    liquidGlassBackdrop = lgBackdrop,
+                                                    liquidGlassEnabled = lgDialpadEnabled,
+                                                    blurEnabled = blurDialpadEnabled
+                                                )
+                                            }
                                         }
                                     }
-                                }
-                            }
-                        } // end BoxWithConstraints (dialpad card)
-                    } // end AnimatedVisibility (dialpad card)
 
-                    Spacer(modifier = Modifier.height(8.dp))
-                } // end outer Column
-            } // end BoxWithConstraints (screen)
+                                    // Dialpad Card
+                                    val dialpadCardShape = MaterialTheme.shapes.extraLargeIncreased
+                                    val baseModifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(bottom = if (isBottomSheet) 12.dp else if (pillNav) 88.dp else bottomBarHeight + 12.dp)
+                                        .navigationBarsPadding()
+                                    if (useLgDialpad) {
+                                        Surface(
+                                            shape           = dialpadCardShape,
+                                            color           = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.35f),
+                                            shadowElevation = 0.dp,
+                                            tonalElevation  = 0.dp,
+                                            modifier = baseModifier.drawBackdrop(
+                                                backdrop = globalBackdrop,
+                                                shape = { dialpadCardShape },
+                                                effects = {
+                                                    val d = density
+                                                    colorControls(saturation = 1.4f)
+                                                    blur(blurIntensity * d)
+                                                    lens(
+                                                        refractionHeight = 18f * d,
+                                                        refractionAmount = 52f * d
+                                                    )
+                                                },
+                                                highlight = { Highlight.Default }
+                                            )
+                                        ) { dialpadContent() }
+                                    } else if (useBlurDialpad && globalBackdrop != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                        Surface(
+                                            shape           = dialpadCardShape,
+                                            color           = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.72f),
+                                            shadowElevation = 0.dp,
+                                            tonalElevation  = 0.dp,
+                                            modifier        = baseModifier.drawPlainBackdrop(
+                                                    backdrop = globalBackdrop,
+                                                    shape = { dialpadCardShape },
+                                                    effects = { blur(blurIntensity * density) }
+                                                )
+                                        ) { dialpadContent() }
+                                    } else {
+                                        Surface(
+                                            modifier = baseModifier,
+                                            shape    = dialpadCardShape,
+                                            color    = dialpadColor,
+                                        ) { dialpadContent() }
+                                    }
+                                }
+                            } // end BoxWithConstraints (dialpad card)
+                        } // end AnimatedVisibility (dialpad card)
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                    } // end outer Column
+                } // end BoxWithConstraints (screen)
+            }
         }
     } else {
         if (isGrantedLogs) {

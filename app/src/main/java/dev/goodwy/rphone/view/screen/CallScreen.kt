@@ -3,7 +3,6 @@ package dev.goodwy.rphone.view.screen
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
-import android.net.Uri
 import android.os.Build
 import android.telecom.Call
 import android.telecom.CallAudioState
@@ -17,7 +16,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -82,7 +80,6 @@ import dev.goodwy.rphone.liquidglass.shadow.Shadow
 import dev.goodwy.rphone.view.screen.settings.PasswordSetupDialog
 import dev.goodwy.rphone.view.screen.settings.PinSetupDialog
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -200,8 +197,6 @@ fun ExpressiveCallScreen(
     }
 
     var showQuickResponsesSheet by remember { mutableStateOf(false) }
-    var showCallNotesSheet by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
 
     val pocketModeEnabled = remember(settingsState) {
         preferenceManager.getBoolean(PreferenceManager.KEY_POCKET_MODE, false)
@@ -870,11 +865,12 @@ fun ExpressiveCallScreen(
                         Surface(
                             onClick = {
                                 view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                                callDisconnect(true)
-                                val intent = Intent(Intent.ACTION_SENDTO).apply {
-                                    data = "smsto:$phoneNumber".toUri()
-                                }
-                                context.startActivity(intent)
+//                                callDisconnect(true)
+//                                val intent = Intent(Intent.ACTION_SENDTO).apply {
+//                                    data = "smsto:$phoneNumber".toUri()
+//                                }
+//                                context.startActivity(intent)
+                                showQuickResponsesSheet = true
                             },
                             shape = RoundedCornerShape(radius),
                             color = buttonBgColor,
@@ -943,11 +939,12 @@ fun ExpressiveCallScreen(
                             onDecline = { callDisconnect(true) },
                             onMessage = {
                                 view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                                callDisconnect(true)
-                                val intent = Intent(Intent.ACTION_SENDTO).apply {
-                                    data = "smsto:$phoneNumber".toUri()
-                                }
-                                context.startActivity(intent)
+//                                callDisconnect(true)
+//                                val intent = Intent(Intent.ACTION_SENDTO).apply {
+//                                    data = "smsto:$phoneNumber".toUri()
+//                                }
+//                                context.startActivity(intent)
+                                showQuickResponsesSheet = true
                             }
                         )
                         useCustomUI == 3 -> VerticalSwipeToAnswer(
@@ -1014,11 +1011,12 @@ fun ExpressiveCallScreen(
                             },
                             onMessage = {
                                 view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                                callDisconnect(true)
-                                val intent = Intent(Intent.ACTION_SENDTO).apply {
-                                    data = "smsto:$phoneNumber".toUri()
-                                }
-                                context.startActivity(intent)
+//                                callDisconnect(true)
+//                                val intent = Intent(Intent.ACTION_SENDTO).apply {
+//                                    data = "smsto:$phoneNumber".toUri()
+//                                }
+//                                context.startActivity(intent)
+                                showQuickResponsesSheet = true
                             }
                         )
                     }

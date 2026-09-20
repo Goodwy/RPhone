@@ -12,10 +12,13 @@ import androidx.compose.foundation.gestures.*
 import androidx.compose.foundation.interaction.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.*
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowRight
+import androidx.compose.material.icons.automirrored.rounded.Send
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,7 +72,6 @@ import dev.goodwy.rphone.view.theme.color_call_end
 import dev.goodwy.rphone.view.theme.customColors
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
-import java.util.Calendar
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -190,53 +192,69 @@ fun QuickResponsesBottomSheet(
     var customText by remember { mutableStateOf("") }
     var isCustomVisible by remember { mutableStateOf(false) }
 
-    val tomorrowMorningMinutes = remember {
-        val now = Calendar.getInstance()
-        val tomorrow = Calendar.getInstance().apply {
-            add(Calendar.DAY_OF_YEAR, 1)
-            set(Calendar.HOUR_OF_DAY, 9)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-        val diff = tomorrow.timeInMillis - now.timeInMillis
-        (diff / (1000 * 60)).coerceAtLeast(15)
-    }
+//    val tomorrowMorningMinutes = remember {
+//        val now = Calendar.getInstance()
+//        val tomorrow = Calendar.getInstance().apply {
+//            add(Calendar.DAY_OF_YEAR, 1)
+//            set(Calendar.HOUR_OF_DAY, 9)
+//            set(Calendar.MINUTE, 0)
+//            set(Calendar.SECOND, 0)
+//            set(Calendar.MILLISECOND, 0)
+//        }
+//        val diff = tomorrow.timeInMillis - now.timeInMillis
+//        (diff / (1000 * 60)).coerceAtLeast(15)
+//    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        dragHandle = null,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
-                .padding(horizontal = 20.dp, vertical = 8.dp)
+                .padding(horizontal = 20.dp)
+                .verticalScroll(rememberScrollState())
         ) {
+            // Drag handle
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp, bottom = 4.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(3.dp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                    modifier = Modifier.size(width = 36.dp, height = 4.dp)
+                ) {}
+            }
+
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(top = 6.dp).padding(horizontal = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Quick Response",
+                        text = stringResource(R.string.quick_response),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Decline call and reply to ${contactName.ifBlank { phoneNumber }}",
+                        text = stringResource(R.string.decline_call_and_reply_to, contactName.ifBlank { phoneNumber }),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                IconButton(onClick = onOpenSmsApp) {
-                    Icon(
-                        Icons.Rounded.OpenInNew,
-                        contentDescription = "Open SMS app",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
+//                IconButton(onClick = onOpenSmsApp) {
+//                    Icon(
+//                        Icons.AutoMirrored.Rounded.OpenInNew,
+//                        contentDescription = "Open SMS app",
+//                        tint = MaterialTheme.colorScheme.primary
+//                    )
+//                }
             }
 
             Spacer(Modifier.height(16.dp))
@@ -247,24 +265,24 @@ fun QuickResponsesBottomSheet(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 4.dp),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = MaterialTheme.shapes.large,
                     color = MaterialTheme.colorScheme.surfaceContainerLowest
                 ) {
                     Row(
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            Icons.Rounded.Send,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(Modifier.width(12.dp))
                         Text(
                             text = responseText,
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.weight(1f)
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        Icon(
+                            Icons.AutoMirrored.Rounded.Send,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }
@@ -273,44 +291,51 @@ fun QuickResponsesBottomSheet(
             Spacer(Modifier.height(8.dp))
 
             if (!isCustomVisible) {
-                OutlinedButton(
+                Button(
                     onClick = { isCustomVisible = true },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp)
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+                    shape = CircleShape
                 ) {
                     Icon(Icons.Rounded.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(8.dp))
-                    Text("Write a custom message...")
+                    Text(stringResource(R.string.write_your_own))
                 }
             } else {
-                Row(
+                TextField(
+                    value = customText,
+                    onValueChange = { customText = it },
+                    placeholder = { Text(stringResource(R.string.type_message)) },
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    OutlinedTextField(
-                        value = customText,
-                        onValueChange = { customText = it },
-                        placeholder = { Text("Type custom message...") },
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(14.dp),
-                        singleLine = true
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    IconButton(
-                        onClick = {
-                            if (customText.isNotBlank()) {
-                                onSend(customText.trim())
-                            }
-                        },
-                        enabled = customText.isNotBlank()
-                    ) {
-                        Icon(
-                            Icons.Rounded.Send,
-                            contentDescription = "Send",
-                            tint = if (customText.isNotBlank()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
-                        )
-                    }
-                }
+                    shape = CircleShape,
+                    singleLine = true,
+                    colors = TextFieldDefaults.colors(
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent
+                    ),
+                    trailingIcon = {
+                        IconButton(
+                            modifier = Modifier.width(72.dp).padding(horizontal = 8.dp),
+                            onClick = {
+                                if (customText.isNotBlank()) {
+                                    onSend(customText.trim())
+                                }
+                            },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = if (customText.isNotBlank()) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer
+                            ),
+                            shape = CircleShape,
+                            enabled = customText.isNotBlank()
+                        ) {
+                            Icon(
+                                Icons.AutoMirrored.Rounded.Send,
+                                modifier = Modifier.padding(start = 2.dp),
+                                contentDescription = stringResource(R.string.send),
+                            )
+                        }
+                    },
+                )
             }
 
 //            Spacer(Modifier.height(16.dp))

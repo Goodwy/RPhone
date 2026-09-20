@@ -100,6 +100,29 @@
     <string name="source_code">کد منبع</string>
     <string name="privacy_policy">سیاست حریم خصوصی</string>
 
+    <!-- Updates -->
+    <string name="updates">به‌روزرسانی‌ها</string>
+    <string name="check_for_updates">بررسی به‌روزرسانی‌ها</string>
+    <string name="check_for_updates_subtitle">بررسی کنید که آیا نسخه جدیدی موجود است</string>
+    <string name="auto_check_for_updates">بررسی خودکار به‌روزرسانی‌ها</string>
+    <string name="auto_check_for_updates_subtitle">به‌طور خودکار به‌روزرسانی‌ها را بررسی کنید</string>
+    <string name="checking_for_updates">در حال بررسی به‌روزرسانی‌ها…</string>
+    <string name="up_to_date">به‌روز</string>
+    <string name="up_to_date_subtitle">برنامه آخرین نسخه (v%1$s) را اجرا می‌کند.</string>
+    <string name="update_available">به‌روزرسانی موجود است</string>
+    <string name="update_available_subtitle">نسخه v%1$s موجود است.</string>
+    <string name="update_available_description">آیا می‌خواهید فایل APK را در پوشه Downloads دانلود کنید؟</string>
+    <string name="download">دانلود</string>
+    <string name="not_now">اکنون نه</string>
+    <string name="downloading_update">در حال دانلود به‌روزرسانی</string>
+    <string name="please_wait">لطفاً صبر کنید…</string>
+    <string name="check_failed">بررسی ناموفق بود</string>
+    <string name="check_failed_subtitle">امکان بررسی به‌روزرسانی‌ها وجود نداشت. لطفاً بعداً دوباره تلاش کنید.</string>
+    <string name="download_complete">دانلود کامل شد</string>
+    <string name="download_complete_subtitle">به‌روزرسانی به نسخه %1$s با موفقیت دانلود شد.</string>
+    <string name="open_downloads_folder_manually">پوشه Downloads را به‌صورت دستی باز کنید</string>
+    <string name="file_saved_to_downloads_folder">فایل در پوشه Downloads ذخیره شد.</string>
+
     <!-- Contributors -->
     <string name="contributors">همکاران</string>
     <string name="development_team">تیم توسعه</string>
@@ -143,6 +166,8 @@
     <string name="call_screen">صفحه تماس</string>
     <string name="liquid_glass_call_screen">اعمال جلوه شیشه مایع به صفحه تماس</string>
     <string name="blur_effect_call_screen">اعمال جلوه محو به صفحه تماس</string>
+    <string name="liquid_glass_dialpad">اعمال جلوه شیشه مایع به صفحه کلید</string>
+    <string name="blur_effect_dialpad">اعمال جلوه محو به صفحه کلید</string>
     <string name="scroll_animation">انیمیشن اسکرول</string>
     <string name="scroll_animation_device">انیمیشن ظاهر شدن برای آیتم‌های لیست هنگام اسکرول</string>
     <string name="call_ui">رابط کاربری تماس</string>
@@ -210,6 +235,25 @@
     <string name="auto_speaker_subtitle">به طور خودکار به بلندگو تغییر دهید زمانی که گوشی از گوش دور است، و زمانی که نزدیک است به گوشی برگردید</string>
     <string name="fullscreen_calls">تماس‌های تمام صفحه</string>
     <string name="fullscreen_calls_subtitle">تماس‌های ورودی همیشه در حالت تمام صفحه نمایش داده می‌شوند</string>
+
+    <string name="quick_response">پاسخ سریع</string>
+    <string name="quick_responses">پاسخ‌های سریع</string>
+    <string name="quick_responses_subtitle">مدیریت پاسخ‌های SMS آماده رد تماس برای تماس‌های ورودی</string>
+    <string name="quick_responses_description">در حین تماس ورودی روی دکمه پیام ضربه بزنید تا تماس را رد کرده و یکی از این پاسخ‌های آماده را از طریق SMS ارسال کنید.</string>
+    <string name="add_response">افزودن پاسخ سریع</string>
+    <string name="edit_response">ویرایش پاسخ سریع</string>
+    <string name="default_quick_responses_1">الان نمی‌توانم صحبت کنم. چه خبر؟</string>
+    <string name="default_quick_responses_2">بلافاصله تماس می‌گیرم.</string>
+    <string name="default_quick_responses_3">بعداً تماس می‌گیرم.</string>
+    <string name="default_quick_responses_4">الان نمی‌توانم صحبت کنم. بعداً تماس بگیرید؟</string>
+    <string name="write_your_own">پاسخ خود را بنویسید…</string>
+    <string name="type_message">پیامی بنویسید</string>
+    <string name="canned_responses">پاسخ‌های آماده (%s)</string>
+    <string name="no_quick_responses_configured">هیچ پاسخ سریعی پیکربندی نشده است</string>
+    <string name="reset_to_defaults">بازنشانی به پیش‌فرض</string>
+    <string name="reset_to_defaults_description">پاسخ‌های سریع پیش‌فرض اصلی بازیابی شوند؟</string>
+    <string name="decline_call_and_reply_to">رد تماس و پاسخ به %s</string>
+    <string name="send">ارسال</string>
 
     <string name="sound_and_vibration">صدا و لرزش</string>
     <string name="sound_and_vibration_subtitle">زنگ‌ها، صداهای صفحه کلید و بازخورد لمسی در سراسر برنامه</string>

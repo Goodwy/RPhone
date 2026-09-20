@@ -99,6 +99,29 @@
     <string name="source_code">Código fuente</string>
     <string name="privacy_policy">Política de privacidad</string>
 
+    <!-- Updates -->
+    <string name="updates">Actualizaciones</string>
+    <string name="check_for_updates">Buscar actualizaciones</string>
+    <string name="check_for_updates_subtitle">Comprobar si hay una nueva versión disponible</string>
+    <string name="auto_check_for_updates">Buscar actualizaciones automáticamente</string>
+    <string name="auto_check_for_updates_subtitle">Buscar actualizaciones automáticamente</string>
+    <string name="checking_for_updates">Buscando actualizaciones…</string>
+    <string name="up_to_date">Actualizado</string>
+    <string name="up_to_date_subtitle">La aplicación ejecuta la última versión (v%1$s).</string>
+    <string name="update_available">Actualización disponible</string>
+    <string name="update_available_subtitle">La versión v%1$s está disponible.</string>
+    <string name="update_available_description">¿Quieres descargar el archivo APK en la carpeta Descargas?</string>
+    <string name="download">Descargar</string>
+    <string name="not_now">Ahora no</string>
+    <string name="downloading_update">Descargando actualización</string>
+    <string name="please_wait">Por favor, espera…</string>
+    <string name="check_failed">Error en la comprobación</string>
+    <string name="check_failed_subtitle">No se pudieron buscar actualizaciones. Inténtalo de nuevo más tarde.</string>
+    <string name="download_complete">Descarga completada</string>
+    <string name="download_complete_subtitle">La actualización a la versión %1$s se ha descargado correctamente.</string>
+    <string name="open_downloads_folder_manually">Abrir la carpeta Descargas manualmente</string>
+    <string name="file_saved_to_downloads_folder">El archivo se ha guardado en la carpeta Descargas.</string>
+
     <!-- Contributors -->
     <string name="contributors">Colaboradores</string>
     <string name="development_team">Equipo de desarrollo</string>
@@ -142,6 +165,8 @@
     <string name="call_screen">Pantalla de llamada</string>
     <string name="liquid_glass_call_screen">Aplicar el efecto de vidrio líquido a la pantalla de llamada</string>
     <string name="blur_effect_call_screen">Aplicar un efecto de desenfoque a la pantalla de llamada</string>
+    <string name="liquid_glass_dialpad">Aplicar el efecto de vidrio líquido al teclado</string>
+    <string name="blur_effect_dialpad">Aplicar un efecto de desenfoque al teclado</string>
     <string name="scroll_animation">Animación de desplazamiento</string>
     <string name="scroll_animation_device">Animación de aparición para elementos de lista al desplazarse</string>
     <string name="call_ui">Interfaz de llamada</string>
@@ -209,6 +234,25 @@
     <string name="auto_speaker_subtitle">Cambiar automáticamente al altavoz cuando el teléfono está lejos del oído, y de vuelta al auricular cuando está cerca</string>
     <string name="fullscreen_calls">Llamadas a pantalla completa</string>
     <string name="fullscreen_calls_subtitle">Las llamadas entrantes siempre se muestran en modo de pantalla completa</string>
+
+    <string name="quick_response">Respuesta rápida</string>
+    <string name="quick_responses">Respuestas rápidas</string>
+    <string name="quick_responses_subtitle">Gestionar respuestas SMS predefinidas de rechazo para llamadas entrantes</string>
+    <string name="quick_responses_description">Toca el botón de mensaje durante una llamada entrante para rechazarla y enviar una de estas respuestas predefinidas por SMS.</string>
+    <string name="add_response">Añadir respuesta rápida</string>
+    <string name="edit_response">Editar respuesta rápida</string>
+    <string name="default_quick_responses_1">No puedo hablar ahora. ¿Qué pasa?</string>
+    <string name="default_quick_responses_2">Te llamo ahora mismo.</string>
+    <string name="default_quick_responses_3">Te llamo más tarde.</string>
+    <string name="default_quick_responses_4">No puedo hablar ahora. ¿Me llamas más tarde?</string>
+    <string name="write_your_own">Escribe la tuya…</string>
+    <string name="type_message">Escribe un mensaje</string>
+    <string name="canned_responses">Respuestas predefinidas (%s)</string>
+    <string name="no_quick_responses_configured">No hay respuestas rápidas configuradas</string>
+    <string name="reset_to_defaults">Restablecer valores predeterminados</string>
+    <string name="reset_to_defaults_description">¿Restaurar las respuestas rápidas predefinidas originales?</string>
+    <string name="decline_call_and_reply_to">Rechazar llamada y responder a %s</string>
+    <string name="send">Enviar</string>
 
     <string name="sound_and_vibration">Sonido y vibración</string>
     <string name="sound_and_vibration_subtitle">Tonos de llamada, tonos de marcación y háptica en toda la aplicación</string>

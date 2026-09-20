@@ -27,7 +27,7 @@ import androidx.core.graphics.withTranslation
 object ContactShortcutUtils {
 
     private val avatarColors = listOf(
-        "#C62828".toColorInt(),
+        "#00D0EA".toColorInt(),
         "#FF5B55".toColorInt(),
         "#FFC600".toColorInt(),
         "#BC56FF".toColorInt(),

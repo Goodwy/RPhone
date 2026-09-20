@@ -50,14 +50,10 @@ import dev.goodwy.rphone.SITE_URL
 import dev.goodwy.rphone.controller.util.getAppVersion
 import dev.goodwy.rphone.controller.util.openLink
 import dev.goodwy.rphone.controller.util.toast
-import dev.goodwy.rphone.controller.util.UpdateDialogState
-import dev.goodwy.rphone.controller.util.UpdateDialogs
-import dev.goodwy.rphone.controller.util.performUpdateCheck
 import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillAnimatedSection
 import dev.goodwy.rphone.view.components.RillExpressiveCard
 import dev.goodwy.rphone.view.components.RillListItem
-import dev.goodwy.rphone.view.components.RillSwitchListItem
 import dev.goodwy.rphone.view.theme.customColors
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
@@ -86,9 +82,7 @@ private const val EASTER_EGG_REQUIRED_CLICKS_NEXT = 10
 @Composable
 fun AboutAppScreen(navigator: DestinationsNavigator) {
     val context = LocalContext.current
-    val prefs = koinInject<PreferenceManager>()
     val appInfo = getAppVersion(context)
-    var updateDialogState by remember { mutableStateOf<UpdateDialogState>(UpdateDialogState.Idle) }
     val storeName = when (BuildConfig.FLAVOR) {
         "gplay" -> "GPlay"
         "rustore" -> "RuStore"
@@ -316,52 +310,6 @@ fun AboutAppScreen(navigator: DestinationsNavigator) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            RillAnimatedSection(delayMs = 250L) {
-                Column {
-                    Text(
-                        text = stringResource(R.string.updates),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 8.dp, bottom = 8.dp)
-                    )
-                    RillExpressiveCard {
-                        var autoUpdateCheck by remember {
-                            mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_AUTO_UPDATE_CHECK, true))
-                        }
-                        RillListItem(
-                            headline = stringResource(R.string.check_for_updates),
-                            supporting = stringResource(R.string.check_for_updates_subtitle),
-                            leadingIcon = Icons.Rounded.SystemUpdate,
-                            iconContainerColor = Color.Black,
-                            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
-                            trailingIcon = Icons.Default.ChevronRight,
-                            onClick = {
-                                scope.launch {
-                                    performUpdateCheck(appInfo.first) { updateDialogState = it }
-                                }
-                            }
-                        )
-                        RillSwitchListItem(
-                            headline = stringResource(R.string.auto_check_for_updates),
-                            supporting = stringResource(R.string.auto_check_for_updates_subtitle),
-                            leadingIcon = Icons.Rounded.Autorenew,
-                            iconContainerColor = Color.Black,
-                            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
-                            checked = autoUpdateCheck,
-                            onCheckedChange = { checked ->
-                                autoUpdateCheck = checked
-                                prefs.setBoolean(PreferenceManager.KEY_AUTO_UPDATE_CHECK, checked)
-                            }
-                        )
-                    }
-                }
-            }
-
             Spacer(modifier = Modifier.height(42.dp))
 
             RillAnimatedSection(delayMs = 300L) {
@@ -375,12 +323,6 @@ fun AboutAppScreen(navigator: DestinationsNavigator) {
 
             Spacer(modifier = Modifier.height(padding.calculateBottomPadding() + 24.dp))
         }
-
-        UpdateDialogs(
-            updateDialogState = updateDialogState,
-            onStateChange = { updateDialogState = it },
-            appVersion = appInfo.first
-        )
     }
 }
 

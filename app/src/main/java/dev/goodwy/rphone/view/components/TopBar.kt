@@ -147,18 +147,18 @@ fun TopBar(
         return
     }
     val prefs = koinInject<PreferenceManager>()
-    var animatedVisible by remember { mutableStateOf(false) }
-    val alpha by animateFloatAsState(
-        targetValue = if (animatedVisible) 1f else 0f,
-        animationSpec = spring(stiffness = Spring.StiffnessLow),
-        label = "topBarAlpha"
-    )
-    val offsetY by animateDpAsState(
-        targetValue = if (animatedVisible) 0.dp else (-16).dp,
-        animationSpec = spring(stiffness = Spring.StiffnessLow),
-        label = "topBarOffset"
-    )
-    LaunchedEffect(Unit) { animatedVisible = true }
+//    var animatedVisible by remember { mutableStateOf(false) }
+//    val alpha by animateFloatAsState(
+//        targetValue = if (animatedVisible) 1f else 0f,
+//        animationSpec = spring(stiffness = Spring.StiffnessLow),
+//        label = "topBarAlpha"
+//    )
+//    val offsetY by animateDpAsState(
+//        targetValue = if (animatedVisible) 0.dp else (-16).dp,
+//        animationSpec = spring(stiffness = Spring.StiffnessLow),
+//        label = "topBarOffset"
+//    )
+//    LaunchedEffect(Unit) { animatedVisible = true }
 
     // Settings button press animation
     val settingsSource = remember { MutableInteractionSource() }
@@ -178,9 +178,9 @@ fun TopBar(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .windowInsetsPadding(WindowInsets.statusBars)
-            .alpha(alpha)
-            .offset(y = offsetY),
+            .windowInsetsPadding(WindowInsets.statusBars),
+//            .alpha(alpha)
+//            .offset(y = offsetY),
         color = Color.Transparent
     ) {
         Row(
