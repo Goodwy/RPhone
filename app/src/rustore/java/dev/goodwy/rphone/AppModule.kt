@@ -32,6 +32,7 @@ val appModule = module {
             RillDatabase::class.java,
             "rill_database"
         ).addMigrations(RillDatabase.MIGRATION_1_2)
+            .addMigrations(RillDatabase.MIGRATION_2_3)
             .build()
     }
     single { get<RillDatabase>().privateContactDao() }
