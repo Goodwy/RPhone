@@ -10,6 +10,8 @@ import android.content.pm.PackageInstaller
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.os.Handler
+import android.os.Looper
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -163,11 +165,31 @@ fun installApkAndScheduleDelete(context: Context, file: File) {
 
             val installResultAction = "${context.packageName}.INSTALL_RESULT"
 
-            // Delete APK only on STATUS_SUCCESS
+            val handler = Handler(Looper.getMainLooper())
+            var receiverUnregistered = false
+
+            // Delete APK only on STATUS_SUCCESS and ensure receiver is always unregistered
             val resultReceiver = object : BroadcastReceiver() {
                 override fun onReceive(ctx: Context?, intent: Intent?) {
-                    try { context.unregisterReceiver(this) } catch (_: Exception) {}
                     val status = intent?.getIntExtra(PackageInstaller.EXTRA_STATUS, -1)
+                    if (status == PackageInstaller.STATUS_PENDING_USER_ACTION) {
+                        val confirmIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            intent.getParcelableExtra(Intent.EXTRA_INTENT, Intent::class.java)
+                        } else {
+                            @Suppress("DEPRECATION")
+                            intent.getParcelableExtra(Intent.EXTRA_INTENT)
+                        }
+                        if (confirmIntent != null) {
+                            confirmIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            try { context.startActivity(confirmIntent) } catch (_: Exception) {}
+                        }
+                        return
+                    }
+
+                    if (!receiverUnregistered) {
+                        receiverUnregistered = true
+                        try { context.unregisterReceiver(this) } catch (_: Exception) {}
+                    }
                     if (status == PackageInstaller.STATUS_SUCCESS) {
                         try { file.delete() } catch (_: Exception) {}
                     }
@@ -180,6 +202,14 @@ fun installApkAndScheduleDelete(context: Context, file: File) {
                 @Suppress("UnspecifiedRegisterReceiverFlag")
                 context.registerReceiver(resultReceiver, IntentFilter(installResultAction))
             }
+
+            // Fallback unregister timeout after 5 minutes to prevent memory leaks if user abandons installation
+            handler.postDelayed({
+                if (!receiverUnregistered) {
+                    receiverUnregistered = true
+                    try { context.unregisterReceiver(resultReceiver) } catch (_: Exception) {}
+                }
+            }, 5 * 60 * 1000L)
 
             val intent = Intent(installResultAction)
             val pi = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

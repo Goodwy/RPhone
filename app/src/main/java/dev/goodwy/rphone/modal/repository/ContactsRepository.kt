@@ -8,6 +8,7 @@ import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.ContactsContract
 import android.provider.ContactsContract.CommonDataKinds
@@ -639,11 +640,9 @@ class ContactsRepository(
     private fun getPhotoBytes(uriString: String): ByteArray? {
         return try {
             val uri = uriString.toUri()
-            val inputStream = context.contentResolver.openInputStream(uri) ?: return null
-            val bitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
-            inputStream.close()
-
-            if (bitmap == null) return null
+            val bitmap = context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                BitmapFactory.decodeStream(inputStream)
+            } ?: return null
 
             val maxSize = 720
             val width = bitmap.width

@@ -391,6 +391,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
     override fun onPause() {
         super.onPause()
         isInForeground.value = false
+        releaseProximityLock()
     }
 
     private fun setupProximitySensor() {
@@ -404,9 +405,10 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
     }
 
     override fun onDestroy() {
-        super.onDestroy()
-        callViewModel.setIsActivityVisible(false)
         releaseProximityLock()
+        proximityWakeLock = null
+        callViewModel.setIsActivityVisible(false)
+        super.onDestroy()
     }
 
     override fun onNewIntent(intent: Intent) {
