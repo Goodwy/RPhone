@@ -348,7 +348,7 @@ class FloatingCallService : Service() {
             }
         }
         menuView = cv
-        try { wm.addView(cv, menuParams) } catch (_: Exception) { dismissMenu(); return }
+        try { wm.addView(cv, menuParams) } catch (_: Exception) { removeMenuView(); return }
         menuDelayJob = scope.launch {
             delay(40)
             menuVisibleState.value = true
@@ -752,8 +752,9 @@ class FloatingCallService : Service() {
 
     override fun onDestroy() {
         try { unregisterReceiver(configReceiver) } catch (_: Exception) {}
-        scope.cancel()
+        menuDelayJob?.cancel()
         removeBubble()
+        scope.cancel()
         lifecycleOwner.onDestroy()
         super.onDestroy()
     }

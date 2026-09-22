@@ -108,7 +108,7 @@ class FloatingNotesService : Service() {
             }
         }
         overlayView = cv
-        try { windowManager.addView(cv, params) } catch (_: Exception) { stopSelf() }
+        try { windowManager.addView(cv, params) } catch (_: Exception) { removeOverlay(); stopSelf() }
     }
 
     private fun removeOverlay() {
