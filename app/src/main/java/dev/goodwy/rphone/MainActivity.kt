@@ -109,6 +109,7 @@ import dev.goodwy.rphone.controller.lock.AppLockManager
 import dev.goodwy.rphone.view.components.TabSpec
 import dev.goodwy.rphone.view.components.parseTabOrder
 import dev.goodwy.rphone.view.components.performAppHaptic
+import dev.goodwy.rphone.view.theme.color_call_button
 import dev.goodwy.rphone.view.theme.isLandscapeMode
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.context.GlobalContext
@@ -268,7 +269,7 @@ class MainActivity : FragmentActivity() {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .background(Color(0xFF1B5E20))
+                                        .background(color_call_button)
                                         .statusBarsPadding()
                                         .clickable {
                                             startActivity(

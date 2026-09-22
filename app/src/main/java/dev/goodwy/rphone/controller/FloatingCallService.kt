@@ -65,6 +65,7 @@ import dev.goodwy.rphone.modal.`interface`.ICallRepository
 import org.koin.android.ext.android.inject
 import kotlinx.coroutines.*
 import kotlin.text.ifEmpty
+import kotlin.time.Duration.Companion.milliseconds
 
 class FloatingCallService : Service() {
 
@@ -86,7 +87,7 @@ class FloatingCallService : Service() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action != Intent.ACTION_CONFIGURATION_CHANGED) return
             scope.launch {
-                delay(120) // let window system settle after rotation
+                delay(120.milliseconds) // let window system settle after rotation
                 val screenW: Int
                 val screenH: Int
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -200,7 +201,7 @@ class FloatingCallService : Service() {
         val isLocked = km.isKeyguardLocked
 
         var entered by remember { mutableStateOf(false) }
-        LaunchedEffect(Unit) { delay(50); entered = true }
+        LaunchedEffect(Unit) { delay(50.milliseconds); entered = true }
 
         val entryScale by animateFloatAsState(
             targetValue   = if (entered) 1f else 0.15f,
@@ -350,7 +351,7 @@ class FloatingCallService : Service() {
         menuView = cv
         try { wm.addView(cv, menuParams) } catch (_: Exception) { removeMenuView(); return }
         menuDelayJob = scope.launch {
-            delay(40)
+            delay(40.milliseconds)
             menuVisibleState.value = true
         }
     }
@@ -363,7 +364,7 @@ class FloatingCallService : Service() {
         // in the foreground, in which case observeAll() is already keeping it hidden).
         bubbleView?.visibility = View.GONE
         scope.launch {
-            delay(440)
+            delay(440.milliseconds)
             removeMenuView()
             if (!CallActivity.isInForeground.value && bubbleView != null) {
                 bubbleView?.visibility = View.VISIBLE
@@ -384,7 +385,7 @@ class FloatingCallService : Service() {
         menuDelayJob?.cancel()
         menuVisibleState.value = false
         scope.launch {
-            delay(280)
+            delay(280.milliseconds)
             when (action) {
                 is MenuAction.Speaker    -> callRepository.setAudioRoute(action.route)
                 is MenuAction.Mute       -> callRepository.mute(action.mute)
@@ -394,10 +395,10 @@ class FloatingCallService : Service() {
                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
                     }
                 )
-                MenuAction.Close -> { delay(150); removeBubble(); stopSelf() }
+                MenuAction.Close -> { delay(150.milliseconds); removeBubble(); stopSelf() }
                 MenuAction.Hangup -> callRepository.declineCall()
             }
-            delay(200)
+            delay(200.milliseconds)
             removeMenuView()
             if (action != MenuAction.Close && !CallActivity.isInForeground.value && bubbleView != null) {
                 bubbleView?.visibility = View.VISIBLE
@@ -619,7 +620,7 @@ class FloatingCallService : Service() {
         onClick: () -> Unit
     ) {
         var entered by remember { mutableStateOf(false) }
-        LaunchedEffect(Unit) { delay(100L + index * 55L); entered = true }
+        LaunchedEffect(Unit) { delay((100L + index * 55L).milliseconds); entered = true }
         val eScale by animateFloatAsState(
             targetValue   = if (entered) 1f else 0.2f,
             animationSpec = spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessLow),
@@ -672,7 +673,7 @@ class FloatingCallService : Service() {
     @Composable
     private fun HangupSheetAction(index: Int, onClick: () -> Unit) {
         var entered by remember { mutableStateOf(false) }
-        LaunchedEffect(Unit) { delay(100L + index * 55L); entered = true }
+        LaunchedEffect(Unit) { delay((100L + index * 55L).milliseconds); entered = true }
         val eScale by animateFloatAsState(
             targetValue   = if (entered) 1f else 0.2f,
             animationSpec = spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessLow),
@@ -732,7 +733,7 @@ class FloatingCallService : Service() {
                 bubbleView?.visibility = if (inForeground) View.GONE else View.VISIBLE
                 if (inForeground && menuView != null) {
                     menuVisibleState.value = false
-                    delay(440)
+                    delay(440.milliseconds)
                     removeMenuView()
                 }
             }

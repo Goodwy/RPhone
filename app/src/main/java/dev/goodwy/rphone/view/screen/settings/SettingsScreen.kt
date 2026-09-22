@@ -121,7 +121,6 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
     val prefs: PreferenceManager = koinInject()
     val scope = rememberCoroutineScope()
 
-    var proximityBg by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_PROXIMITY_BG, true)) }
     val cardCorner  = remember { prefs.getInt(PreferenceManager.KEY_CARD_ROUNDNESS, RillShapeDefaults.DefaultRoundness) }
     val purchaseHelper: PurchaseHelper = koinInject()
     val isPro by purchaseHelper.isPro.collectAsStateWithLifecycle()
@@ -225,23 +224,40 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
         else -> {}
     }
 
+    // Create backup file picker
     val failedToCreateBackup = stringResource(R.string.failed_to_create_backup)
-    fun createBackup() {
-        scope.launch {
-            val file = BackupManager.createBackup(context)
-            backupState = if (file != null) {
-                val uri = androidx.core.content.FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
-                val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                    type = "application/octet-stream"
-                    putExtra(Intent.EXTRA_STREAM, uri)
-                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    val createBackupLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/octet-stream")
+    ) { uri: Uri? ->
+        if (uri != null) {
+            scope.launch {
+                backupState = BackupDialogState.Restoring
+                try {
+                    // 1. Creating a backup in the app cache
+                    val backupFile = BackupManager.createBackup(context)
+
+                    if (backupFile != null) {
+                        // 2. Copy the created file to the user-selected location
+                        context.contentResolver.openOutputStream(uri)?.use { output ->
+                            backupFile.inputStream().use { input -> input.copyTo(output) }
+                        }
+                        backupState = BackupDialogState.BackupSuccess(uri.toString())
+                    } else {
+                        backupState = BackupDialogState.Error(failedToCreateBackup)
+                    }
+
+                    // 3. Delete a temporary file from the cache
+                    backupFile?.delete()
+                } catch (e: Exception) {
+                    backupState = BackupDialogState.Error(e.message ?: "Unknown error")
                 }
-                context.startActivity(Intent.createChooser(shareIntent, "Save Backup"))
-                BackupDialogState.BackupSuccess(file.absolutePath)
-            } else {
-                BackupDialogState.Error(failedToCreateBackup)
             }
         }
+    }
+    fun createBackup() {
+        val timestamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.getDefault()).format(java.util.Date())
+        val defaultFileName = "RPhone_Backup_$timestamp.rphone"
+        createBackupLauncher.launch(defaultFileName)
     }
 
     fun restoreBackup() {

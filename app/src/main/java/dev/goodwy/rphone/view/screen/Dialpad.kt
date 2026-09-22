@@ -1530,7 +1530,6 @@ fun DialPadContent(
                                         if (dialpadTab) Modifier
                                             .padding(horizontal = 16.dp, vertical = 4.dp)
                                         else Modifier
-                                            .navigationBarsPadding()
                                             .padding(horizontal = 16.dp, vertical = 16.dp)
                                     ),
                                 onClick = { isDialpadVisible = true },

@@ -210,7 +210,7 @@ fun installApkAndScheduleDelete(context: Context, file: File) {
                     try { context.unregisterReceiver(resultReceiver) } catch (_: Exception) {}
                 }
             }, 5 * 60 * 1000L)
-
+            
             val intent = Intent(installResultAction)
             val pi = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 PendingIntent.getBroadcast(context, sessionId, intent, PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)

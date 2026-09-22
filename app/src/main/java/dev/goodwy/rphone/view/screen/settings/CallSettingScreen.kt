@@ -53,7 +53,7 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
     val prefs = koinInject<PreferenceManager>()
     val context = LocalContext.current
 
-    var proximityBg by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_PROXIMITY_BG, true)) }
+    var proximityBg by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_PROXIMITY_SENSOR, true)) }
     var pocketModePrevention by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_POCKET_MODE, false)) }
     var floatingCall by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_FLOATING_CALL, false)) }
     var directCallOnTap by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_DIRECT_CALL_ON_TAP, false)) }
@@ -181,7 +181,7 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
                                 checked = proximityBg,
                                 onCheckedChange = {
                                     proximityBg = it
-                                    prefs.setBoolean(PreferenceManager.KEY_PROXIMITY_BG, it)
+                                    prefs.setBoolean(PreferenceManager.KEY_PROXIMITY_SENSOR, it)
                                 }
                             )
                             RillSwitchListItem(

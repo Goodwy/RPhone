@@ -50,6 +50,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
 import kotlin.getValue
+import kotlin.time.Duration.Companion.milliseconds
 
 private data class CallIdentity(
     val number: String,
@@ -157,11 +158,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
                     }
                     when (callState) {
                         Call.STATE_ACTIVE -> {
-                            if (preferenceManager.getBoolean(
-                                    PreferenceManager.KEY_VIBRATE_ON_ANSWER,
-                                    true
-                                )
-                            ) {
+                            if (preferenceManager.getBoolean(PreferenceManager.KEY_VIBRATE_ON_ANSWER, true)) {
                                 this@CallActivity.window?.decorView?.performHapticFeedback(
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                                         HapticFeedbackConstants.CONFIRM
@@ -170,11 +167,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
                                     }
                                 )
                             }
-                            if (preferenceManager.getBoolean(
-                                    PreferenceManager.KEY_PROXIMITY_SENSOR,
-                                    true
-                                )
-                            ) {
+                            if (preferenceManager.getBoolean(PreferenceManager.KEY_PROXIMITY_SENSOR, true)) {
                                 acquireProximityLock()
                             } else {
                                 releaseProximityLock()
@@ -182,11 +175,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
                         }
 
                         Call.STATE_DIALING -> {
-                            if (preferenceManager.getBoolean(
-                                    PreferenceManager.KEY_PROXIMITY_SENSOR,
-                                    true
-                                )
-                            ) {
+                            if (preferenceManager.getBoolean(PreferenceManager.KEY_PROXIMITY_SENSOR, true)) {
                                 acquireProximityLock()
                             } else {
                                 releaseProximityLock()
@@ -194,11 +183,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
                         }
 
                         Call.STATE_DISCONNECTED -> {
-                            if (preferenceManager.getBoolean(
-                                    PreferenceManager.KEY_VIBRATE_ON_HANGUP,
-                                    false
-                                )
-                            ) {
+                            if (preferenceManager.getBoolean(PreferenceManager.KEY_VIBRATE_ON_HANGUP, false)) {
                                 this@CallActivity.window?.decorView?.performHapticFeedback(
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                                         HapticFeedbackConstants.REJECT
@@ -208,7 +193,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
                                 )
                             }
                             releaseProximityLock()
-                            delay(400)
+                            delay(400.milliseconds)
                             dismissCallScreen()
                         }
 
@@ -216,7 +201,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
                     }
 
                     if (session == null) {
-                        delay(400)
+                        delay(400.milliseconds)
                         if (callViewModel.allCalls.value.none { it.state != Call.STATE_DISCONNECTED }) {
                             dismissCallScreen()
                         }
@@ -429,13 +414,8 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
 
         setShowWhenLocked(false)
         setTurnScreenOn(false)
-        @Suppress("DEPRECATION")
-        window.clearFlags(
-            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
-                    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
-                    WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
-        )
+        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
         finishAndRemoveTask()
     }
 
@@ -443,20 +423,13 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
         super.onAttachedToWindow()
         turnScreenOnAndShowWhileLocked()
     }
-
     private fun turnScreenOnAndShowWhileLocked() {
         setShowWhenLocked(true)
         setTurnScreenOn(true)
-        @Suppress("DEPRECATION")
-        window.addFlags(
-            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
-                    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
-                    WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
-                    WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON
-        )
-        val keyguardManager = getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
-        keyguardManager?.requestDismissKeyguard(this, null)
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+        // We do not call `keyguardManager.requestDismissKeyguard(this, null)`
+        // This causes the unlock screen to appear. The call screen should simply be displayed on top of the lock screen.
     }
 
     override fun onStart() {
