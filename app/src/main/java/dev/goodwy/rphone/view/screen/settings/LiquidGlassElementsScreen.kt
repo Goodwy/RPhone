@@ -174,7 +174,8 @@ fun LiquidGlassElementsScreen(navigator: DestinationsNavigator) {
                 RillAnimatedSection(delayMs = 40L) {
                     RillExpressiveCard {
                         lgElements.forEachIndexed { index, element ->
-                            val checked by states[element.key]!!
+                            val state = states[element.key] ?: return@forEachIndexed
+                            val checked by state
                             RillSwitchListItem(
                                 headline = element.headline,
                                 supporting = element.supporting,
@@ -183,7 +184,7 @@ fun LiquidGlassElementsScreen(navigator: DestinationsNavigator) {
                                 iconBgContainerColor = element.iconBgColor,
                                 checked = checked,
                                 onCheckedChange = { newValue ->
-                                    states[element.key]!!.value = newValue
+                                    state.value = newValue
                                     prefs.setBoolean(element.key, newValue)
                                 }
                             )

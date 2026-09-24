@@ -50,7 +50,7 @@ fun SimPickerDialog(
                             info.hasCapabilities(PhoneAccount.CAPABILITY_SIM_SUBSCRIPTION)
                     if (!isSimAccount) return@filter false
 
-                    val key = info!!.label?.toString().orEmpty() + "|" + info.address?.toString().orEmpty()
+                    val key = info.label?.toString().orEmpty() + "|" + info.address?.toString().orEmpty()
                     seen.add(key)
                 }
             } catch (e: SecurityException) {

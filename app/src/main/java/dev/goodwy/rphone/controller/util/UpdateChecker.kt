@@ -10,6 +10,8 @@ import android.content.pm.PackageInstaller
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.os.Handler
+import android.os.Looper
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -163,10 +165,14 @@ fun installApkAndScheduleDelete(context: Context, file: File) {
 
             val installResultAction = "${context.packageName}.INSTALL_RESULT"
 
-            // Delete APK only on STATUS_SUCCESS
+            // Delete APK on STATUS_SUCCESS; unregister receiver to prevent memory leaks
+            var isUnregistered = false
             val resultReceiver = object : BroadcastReceiver() {
                 override fun onReceive(ctx: Context?, intent: Intent?) {
-                    try { context.unregisterReceiver(this) } catch (_: Exception) {}
+                    if (!isUnregistered) {
+                        isUnregistered = true
+                        try { context.unregisterReceiver(this) } catch (_: Exception) {}
+                    }
                     val status = intent?.getIntExtra(PackageInstaller.EXTRA_STATUS, -1)
                     if (status == PackageInstaller.STATUS_SUCCESS) {
                         try { file.delete() } catch (_: Exception) {}
@@ -180,6 +186,14 @@ fun installApkAndScheduleDelete(context: Context, file: File) {
                 @Suppress("UnspecifiedRegisterReceiverFlag")
                 context.registerReceiver(resultReceiver, IntentFilter(installResultAction))
             }
+
+            // Safety timeout to unregister receiver if user cancels or leaves installation pending
+            Handler(Looper.getMainLooper()).postDelayed({
+                if (!isUnregistered) {
+                    isUnregistered = true
+                    try { context.unregisterReceiver(resultReceiver) } catch (_: Exception) {}
+                }
+            }, 5 * 60 * 1000L)
 
             val intent = Intent(installResultAction)
             val pi = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

@@ -158,7 +158,7 @@ fun rememberVideoLauncher(): VideoLauncher {
                         context.startActivity(fallbackIntent)
                     }
                 } else {
-                    launchApp(app.packageName!!, pendingNumber)
+                    app.packageName?.let { pkg -> launchApp(pkg, pendingNumber) }
                 }
                 showAppPicker = false
             },

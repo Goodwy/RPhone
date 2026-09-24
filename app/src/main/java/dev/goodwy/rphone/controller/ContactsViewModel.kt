@@ -136,7 +136,7 @@ class ContactsViewModel(
         val finalMap = linkedMapOf<Char, List<Contact>>()
 
         mainGroups.keys.filter { it.isLetter() }.sorted().forEach { char ->
-            finalMap[char] = mainGroups[char]!!
+            mainGroups[char]?.let { finalMap[char] = it }
         }
 
         val hashGroup = mainGroups['#']

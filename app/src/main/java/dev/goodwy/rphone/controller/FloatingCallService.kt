@@ -723,11 +723,17 @@ class FloatingCallService : Service() {
 
     // ── Observers ─────────────────────────────────────────────────────────────
 
+    private var sessionObserverJob: Job? = null
+    private var foregroundObserverJob: Job? = null
+
     private fun observeAll() {
-        scope.launch {
+        sessionObserverJob?.cancel()
+        foregroundObserverJob?.cancel()
+
+        sessionObserverJob = scope.launch {
             callRepository.currentCallSession.collect { if (it == null) { removeBubble(); stopSelf() } }
         }
-        scope.launch {
+        foregroundObserverJob = scope.launch {
             CallActivity.isInForeground.collect { inForeground ->
                 bubbleView?.visibility = if (inForeground) View.GONE else View.VISIBLE
                 if (inForeground && menuView != null) {

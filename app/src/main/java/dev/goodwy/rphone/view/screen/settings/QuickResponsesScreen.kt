@@ -288,8 +288,7 @@ fun QuickResponsesScreen(
 //        }
     }
 
-    if (editingIndex != null) {
-        val index = editingIndex!!
+    editingIndex?.let { index ->
         RillDialog(
             onDismissRequest = { editingIndex = null },
             title = stringResource(R.string.edit_response),

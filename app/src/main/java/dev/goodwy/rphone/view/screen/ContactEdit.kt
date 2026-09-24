@@ -467,14 +467,14 @@ fun ContactEditScreen(
                 contactsVM.saveContact(contactToSave)
             }
 
-            // Editing the Background
-            if (selectedBackgroundUri != null) {
+            val bgUri = selectedBackgroundUri
+            if (bgUri != null) {
                 // If a new background has been selected, save it
                 val saved = CallBackgroundStore.save(
                     context,
                     backgroundContactId,
                     backgroundNumbers,
-                    selectedBackgroundUri!!
+                    bgUri
                 )
                 if (saved) {
                     callBackground = CallBackgroundStore.peek(context, backgroundContactId, backgroundNumbers)
@@ -653,7 +653,7 @@ fun ContactEditScreen(
             availableAccounts = availableAccountsForMoving,
             currentAccountKey = if (isPrivate) private_only
                                 else if (selectedAccount == null || (selectedAccount?.name == null && selectedAccount?.type == null)) device_only
-                                else "${selectedAccount!!.name}|${selectedAccount!!.type}",
+                                else "${selectedAccount?.name}|${selectedAccount?.type}",
             onDismiss = { showPicker = false },
             onAccountSelected = { account, private ->
                 selectedAccount = account
@@ -1546,7 +1546,7 @@ fun ContactEditScreen(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                     Text(
-                                        text = if (selectedAccount != null) ContactUtils.getAccountName(selectedAccount!!)
+                                        text = if (selectedAccount != null) ContactUtils.getAccountName(selectedAccount)
                                                 else ContactUtils.getFriendlyAccountName(null, isPrivate),
                                         style = MaterialTheme.typography.bodyLarge,
                                         fontWeight = FontWeight.Bold
@@ -2264,7 +2264,7 @@ fun ContactEditScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Text(
-                                    text = if (selectedAccount != null) ContactUtils.getAccountName(selectedAccount!!)
+                                    text = if (selectedAccount != null) ContactUtils.getAccountName(selectedAccount)
                                             else ContactUtils.getFriendlyAccountName(null, isPrivate),
                                     style = MaterialTheme.typography.bodyLarge,
                                     fontWeight = FontWeight.Bold
