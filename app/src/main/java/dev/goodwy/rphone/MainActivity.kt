@@ -1,5 +1,7 @@
 package dev.goodwy.rphone
 
+import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -41,9 +43,11 @@ import com.ramcosta.composedestinations.generated.destinations.DialPadScreenDest
 import com.ramcosta.composedestinations.generated.destinations.ContactEditScreenDestination
 import android.content.res.Configuration
 import android.os.Build
+import android.telecom.Call
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import android.view.Surface
+import androidx.annotation.RequiresPermission
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -242,8 +246,10 @@ class MainActivity : FragmentActivity() {
 
                     // ── Ongoing Call Banner + Main nav host ───────────────────────
                     val callSession by callViewModel.currentCallSession.collectAsStateWithLifecycle()
-                    val hasOngoingCall =
-                        callSession != null && callSession?.state != android.telecom.Call.STATE_RINGING
+                    val hasOngoingCall = callSession != null &&
+                            callSession?.state != Call.STATE_RINGING &&
+                            callSession?.state != Call.STATE_DISCONNECTED &&
+                            callSession?.state != Call.STATE_DISCONNECTING
 
                     Box(modifier = Modifier.fillMaxSize()) {
                         // Main content — blurred when locked
@@ -659,19 +665,20 @@ class MainActivity : FragmentActivity() {
         purchaseHelper.handleNewIntent(intent, this)
     }
 
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     private fun handleIntent(intent: Intent?, navController: androidx.navigation.NavController) {
         intent ?: return
         val target = mainViewModel.getNavigationTarget(intent, this) ?: return
         intentState = null
 
         when (target) {
-//            is NavigationTarget.Recents -> {
-//                navController.navigate(RecentScreenDestination.route) {
-//                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-//                    launchSingleTop = true
-//                }
-//            }
             is NavigationTarget.Recents -> {
+                try {
+                    val telecomManager = getSystemService(Context.TELECOM_SERVICE) as? android.telecom.TelecomManager
+                    telecomManager?.cancelMissedCallsNotification()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
                 navController.navigate(RecentScreenDestination.route) {
                     popUpTo(navController.graph.findStartDestination().id) {
                         saveState = true

@@ -100,6 +100,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
 import com.ramcosta.composedestinations.generated.destinations.ContactEditScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.ContactSelectionScreenDestination
 import dev.goodwy.rphone.controller.UssdRepository
 import dev.goodwy.rphone.controller.util.SocialUtils
 import dev.goodwy.rphone.controller.util.SocialUtils.getInstalledMessenger
@@ -1142,16 +1143,22 @@ fun DialPadContent(
                                         Surface(
                                             onClick = {
                                                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                                val intent =
-                                                    Intent(Intent.ACTION_INSERT_OR_EDIT).apply {
-                                                        type =
-                                                            ContactsContract.Contacts.CONTENT_ITEM_TYPE
-                                                        putExtra(
-                                                            ContactsContract.Intents.Insert.PHONE,
-                                                            number
-                                                        )
-                                                    }
-                                                context.startActivity(intent)
+//                                                val intent =
+//                                                    Intent(Intent.ACTION_INSERT_OR_EDIT).apply {
+//                                                        type =
+//                                                            ContactsContract.Contacts.CONTENT_ITEM_TYPE
+//                                                        putExtra(
+//                                                            ContactsContract.Intents.Insert.PHONE,
+//                                                            number
+//                                                        )
+//                                                    }
+//                                                context.startActivity(intent)
+                                                navigator?.navigate(
+                                                    ContactSelectionScreenDestination(
+                                                        title = "Add to Existing Contact",
+                                                        initialPhoneToAssign = number
+                                                    )
+                                                )
                                             },
                                             shape = RoundedCornerShape(50.dp),
                                             color = MaterialTheme.colorScheme.secondaryContainer,

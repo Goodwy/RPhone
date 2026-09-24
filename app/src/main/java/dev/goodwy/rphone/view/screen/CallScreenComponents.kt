@@ -1759,6 +1759,7 @@ fun MoreItem(
     leadingIcon: ImageVector? = null,
     trailingIcon: ImageVector? = null,
     enabled: Boolean = true,
+    isSelected: Boolean = false,
     onClick: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -1797,7 +1798,11 @@ fun MoreItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (leadingIcon != null) {
-                RillIconBox(
+                if (isSelected) RillIconBox(
+                    icon = leadingIcon,
+                    iconContainerColor = MaterialTheme.colorScheme.surface,
+                    iconBgContainerColor = MaterialTheme.colorScheme.onSurface,
+                ) else RillIconBox(
                     icon = leadingIcon,
                     iconContainerColor = MaterialTheme.colorScheme.onSurface,
                     iconBgContainerColor = MaterialTheme.colorScheme.surface,

@@ -152,50 +152,6 @@ fun ExpressiveCallScreen(
         showKeypad = false
     }
 
-    if (showAudioPicker) {
-        val supported = audioState?.supportedRouteMask ?: 0
-        val handsetLabel = stringResource(R.string.audio_route_handset)
-        val speakerLabel = stringResource(R.string.audio_route_speaker)
-        val headsetLabel = stringResource(R.string.audio_route_headset)
-        val bluetoothLabel = stringResource(R.string.audio_route_bluetooth)
-        val options = remember(supported, handsetLabel, speakerLabel, headsetLabel, bluetoothLabel) {
-            mutableListOf<Pair<String, Int>>().apply {
-                if ((supported and CallAudioState.ROUTE_EARPIECE) != 0) add(handsetLabel to CallAudioState.ROUTE_EARPIECE)
-                if ((supported and CallAudioState.ROUTE_SPEAKER) != 0) add(speakerLabel to CallAudioState.ROUTE_SPEAKER)
-                if ((supported and CallAudioState.ROUTE_WIRED_HEADSET) != 0) add(headsetLabel to CallAudioState.ROUTE_WIRED_HEADSET)
-                if ((supported and CallAudioState.ROUTE_BLUETOOTH) != 0) {
-                    val deviceName = try {
-                        audioState?.activeBluetoothDevice?.name
-                    } catch (e: SecurityException) {
-                        null
-                    }
-                    add((deviceName ?: bluetoothLabel) to CallAudioState.ROUTE_BLUETOOTH)
-                }
-            }
-        }
-
-        RillSelectionDialog<Pair<String, Int>>(
-            onDismissRequest = { showAudioPicker = false },
-            title = stringResource(R.string.audio_output_title),
-            items = options,
-            itemLabel = { option -> option.first },
-            onItemSelected = { option ->
-                view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
-                callViewModel.setAudioRoute(option.second)
-            },
-            isSelected = { option -> option.second == audioState?.route },
-            icon = Icons.AutoMirrored.Rounded.VolumeUp,
-            itemIcon = { option ->
-                when (option.second) {
-                    CallAudioState.ROUTE_SPEAKER -> Icons.AutoMirrored.Rounded.VolumeUp
-                    CallAudioState.ROUTE_BLUETOOTH -> Icons.Rounded.Bluetooth
-                    CallAudioState.ROUTE_WIRED_HEADSET -> Icons.Rounded.Headset
-                    else -> Icons.AutoMirrored.Rounded.VolumeDown
-                }
-            }
-        )
-    }
-
     var showQuickResponsesSheet by remember { mutableStateOf(false) }
 
     val pocketModeEnabled = remember(settingsState) {
@@ -389,7 +345,7 @@ fun ExpressiveCallScreen(
                 modifier = Modifier
                     .statusBarsPadding()
                     .padding(horizontal = 24.dp)
-                    .weight(if (showKeypad || showNoteWindow || showMore) 0.7f else 1f)
+                    .weight(if (showKeypad || showNoteWindow || showMore || showAudioPicker) 0.7f else 1f)
             ) {
                 Spacer(modifier = Modifier.weight(0.4f))
                 AnimatedVisibility(
@@ -457,7 +413,7 @@ fun ExpressiveCallScreen(
                     }
                 }
 
-                if (!showKeypad && !showNoteWindow && !showMore) {
+                if (!showKeypad && !showNoteWindow && !showMore && !showAudioPicker) {
                     AnimatedVisibility(
                         visible = shouldShowAvatar && photoUri != null,
                         enter = fadeIn() + expandVertically(),
@@ -498,13 +454,13 @@ fun ExpressiveCallScreen(
                                 .padding(
                                     start = 20.dp,
                                     end = 20.dp,
-                                    top = if (showKeypad || showNoteWindow || showMore) 20.dp else 22.dp,
+                                    top = if (showKeypad || showNoteWindow || showMore || showAudioPicker) 20.dp else 22.dp,
                                     bottom = 20.dp
                                 ),
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
                             AnimatedContent(
-                                targetState = showKeypad || showNoteWindow || showMore,
+                                targetState = showKeypad || showNoteWindow || showMore || showAudioPicker,
                                 transitionSpec = {
                                     (fadeIn() + expandVertically(
                                         animationSpec = tween(300, easing = FastOutSlowInEasing)
@@ -526,6 +482,7 @@ fun ExpressiveCallScreen(
                                             Text(
                                                 if (showKeypad) stringResource(R.string.keypad)
                                                 else if (showNoteWindow) stringResource(R.string.add_note)
+                                                else if (showAudioPicker) stringResource(R.string.audio_output_title)
                                                 else stringResource(R.string.more),
                                                 style = MaterialTheme.typography.titleMedium,
                                                 color = controlBtnFg
@@ -534,9 +491,52 @@ fun ExpressiveCallScreen(
                                                 showKeypad = false
                                                 showNoteWindow = false
                                                 showMore = false
+                                                showAudioPicker = false
                                             }) { Icon(Icons.Rounded.Cancel, stringResource(R.string.cancel), tint = controlBtnFg) }
                                         }
                                         Spacer(modifier = Modifier.height(12.dp))
+
+                                        if (showAudioPicker) {
+                                            val supported = audioState?.supportedRouteMask ?: 0
+                                            val handsetLabel = stringResource(R.string.audio_route_handset)
+                                            val speakerLabel = stringResource(R.string.audio_route_speaker)
+                                            val headsetLabel = stringResource(R.string.audio_route_headset)
+                                            val bluetoothLabel = stringResource(R.string.audio_route_bluetooth)
+                                            val options = remember(supported, handsetLabel, speakerLabel, headsetLabel, bluetoothLabel) {
+                                                mutableListOf<Pair<String, Int>>().apply {
+                                                    if ((supported and CallAudioState.ROUTE_EARPIECE) != 0) add(handsetLabel to CallAudioState.ROUTE_EARPIECE)
+                                                    if ((supported and CallAudioState.ROUTE_SPEAKER) != 0) add(speakerLabel to CallAudioState.ROUTE_SPEAKER)
+                                                    if ((supported and CallAudioState.ROUTE_WIRED_HEADSET) != 0) add(headsetLabel to CallAudioState.ROUTE_WIRED_HEADSET)
+                                                    if ((supported and CallAudioState.ROUTE_BLUETOOTH) != 0) {
+                                                        val deviceName = try {
+                                                            audioState?.activeBluetoothDevice?.name
+                                                        } catch (e: SecurityException) {
+                                                            null
+                                                        }
+                                                        add((deviceName ?: bluetoothLabel) to CallAudioState.ROUTE_BLUETOOTH)
+                                                    }
+                                                }
+                                            }
+
+                                            RillExpressiveCard {
+                                                options.forEach { item ->
+                                                    MoreItem(
+                                                        headline = item.first,
+                                                        leadingIcon = when (item.second) {
+                                                            CallAudioState.ROUTE_SPEAKER -> Icons.AutoMirrored.Rounded.VolumeUp
+                                                            CallAudioState.ROUTE_BLUETOOTH -> Icons.Rounded.Bluetooth
+                                                            CallAudioState.ROUTE_WIRED_HEADSET -> Icons.Rounded.Headset
+                                                            else -> Icons.AutoMirrored.Rounded.VolumeDown
+                                                        },
+                                                        onClick = {
+                                                            view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                                            callViewModel.setAudioRoute(item.second)
+                                                        },
+                                                        isSelected = item.second == audioState?.route
+                                                    )
+                                                }
+                                            }
+                                        }
 
                                         if (showMore) {
                                             RillExpressiveCard {
@@ -548,6 +548,7 @@ fun ExpressiveCallScreen(
                                                         showNoteWindow = true
                                                         showMore = false
                                                         showKeypad = false
+                                                        showAudioPicker = false
                                                     }
                                                 )
                                                 MoreItem(
@@ -606,6 +607,7 @@ fun ExpressiveCallScreen(
                                                         showNoteWindow = false
                                                         showKeypad = false
                                                         showMore = true
+                                                        showAudioPicker = false
                                                     }
                                                 )
                                                 Surface(
@@ -664,6 +666,7 @@ fun ExpressiveCallScreen(
                                     showKeypad = !showKeypad
                                     showNoteWindow = false
                                     showMore = false
+                                    showAudioPicker = false
                                 }
 
                                 AnimatedCallButton(
@@ -699,6 +702,12 @@ fun ExpressiveCallScreen(
                                     CallAudioState.ROUTE_WIRED_HEADSET -> stringResource(R.string.audio_route_headset)
                                     else -> stringResource(R.string.audio_route_handset)
                                 }
+
+                                val hasExternalRoutes = remember(audioState) {
+                                    val supported = audioState?.supportedRouteMask ?: 0
+                                    (supported and CallAudioState.ROUTE_BLUETOOTH) != 0 ||
+                                            (supported and CallAudioState.ROUTE_WIRED_HEADSET) != 0
+                                }
                                 AnimatedCallButton(
                                     modifier = Modifier.weight(1f),
                                     icon = audioIcon,
@@ -710,7 +719,25 @@ fun ExpressiveCallScreen(
                                     activeFgColor = controlBtnActiveFg
                                 ) {
                                     view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                                    callViewModel.cycleAudioRoute()
+//                                    callViewModel.cycleAudioRoute()
+
+                                    if (hasExternalRoutes) {
+                                        showAudioPicker = !showAudioPicker
+                                        showMore = false
+                                        showNoteWindow = false
+                                        showKeypad = false
+                                    } else {
+                                        val supported = audioState?.supportedRouteMask ?: 0
+                                        if (audioRoute == CallAudioState.ROUTE_SPEAKER) {
+                                            if ((supported and CallAudioState.ROUTE_EARPIECE) != 0) {
+                                                callViewModel.setAudioRoute(CallAudioState.ROUTE_EARPIECE)
+                                            }
+                                        } else {
+                                            if ((supported and CallAudioState.ROUTE_SPEAKER) != 0) {
+                                                callViewModel.setAudioRoute(CallAudioState.ROUTE_SPEAKER)
+                                            }
+                                        }
+                                    }
                                 }
 
                                 AnimatedCallButton(
@@ -727,6 +754,7 @@ fun ExpressiveCallScreen(
                                     showMore = !showMore
                                     showNoteWindow = false
                                     showKeypad = false
+                                    showAudioPicker = false
                                 }
                             }
 

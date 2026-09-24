@@ -1274,7 +1274,12 @@ class ContactsRepository(
                     val accountType = cursor.getString(accountTypeIdx)
 
                     // We exclude null accounts (they will be processed separately as "Device only")
-                    if (accountName != null && accountType != null) {
+//                    if (accountName != null && accountType != null) {
+//                        sources.add(Account(accountName, accountType))
+//                    }
+                    if (accountName == null && accountType == null) {
+                        sources.add(Account(device_only, device_only))
+                    } else if (accountName != null && accountType != null) {
                         sources.add(Account(accountName, accountType))
                     }
                 }

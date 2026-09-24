@@ -143,6 +143,7 @@ fun PrivateContactsScreen(
                         imageVector = Icons.Default.FileUpload,
                         contentDescription = exportText
                     )
+                    Spacer(modifier = Modifier.size(6.dp))
                 }
             )
         }

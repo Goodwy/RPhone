@@ -735,7 +735,7 @@ fun ContactDetailsScreen(
                             }
                         }) { Icon(ImageVector.vectorResource(id = R.drawable.ic_settings_account_box), stringResource(R.string.contacts_settings)) }
                     }
-                    Spacer(modifier = Modifier.size(4.dp))
+                    Spacer(modifier = Modifier.size(6.dp))
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
@@ -1220,21 +1220,20 @@ fun ContactDetailsScreen(
                                 }
                             }
 
-                            if (contact?.notes?.isNotBlank() == true) {
+                            val notes = contact?.notes
+                            if (!notes.isNullOrBlank()) {
                                 item {
                                     RillExpressiveCard(title = stringResource(R.string.notes_contact)) {
                                         RillListItem(
-                                            supporting = contact!!.notes!!,
+                                            supporting = notes,
                                             leadingIcon = Icons.AutoMirrored.Rounded.StickyNote2,
                                             onClick = {},
                                             onLongClick = {
-                                                if (contact!!.notes!!.isNotBlank()) {
-                                                    val clipboard =
-                                                        context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                                    clipboard.setPrimaryClip(
-                                                        ClipData.newPlainText("Phone number", contact!!.notes!!)
-                                                    )
-                                                }
+                                                val clipboard =
+                                                    context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                                clipboard.setPrimaryClip(
+                                                    ClipData.newPlainText("Phone number", notes)
+                                                )
                                             }
                                         )
                                     }
@@ -2093,21 +2092,20 @@ fun ContactDetailsScreen(
                             }
                         }
 
-                        if (contact?.notes?.isNotBlank() == true) {
+                        val notes = contact?.notes
+                        if (!notes.isNullOrBlank()) {
                             item {
                                 RillExpressiveCard(title = stringResource(R.string.notes_contact)) {
                                     RillListItem(
-                                        supporting = contact!!.notes!!,
+                                        supporting = notes,
                                         leadingIcon = Icons.AutoMirrored.Rounded.StickyNote2,
                                         onClick = {},
                                         onLongClick = {
-                                            if (contact!!.notes!!.isNotBlank()) {
-                                                val clipboard =
-                                                    context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                                clipboard.setPrimaryClip(
-                                                    ClipData.newPlainText("Phone number", contact!!.notes!!)
-                                                )
-                                            }
+                                            val clipboard =
+                                                context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                            clipboard.setPrimaryClip(
+                                                ClipData.newPlainText("Phone number", notes)
+                                            )
                                         }
                                     )
                                 }

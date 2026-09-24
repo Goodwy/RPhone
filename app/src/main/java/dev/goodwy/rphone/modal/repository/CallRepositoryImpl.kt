@@ -97,13 +97,14 @@ class CallRepositoryImpl : ICallRepository {
 
         val nextRoute = when (current) {
             CallAudioState.ROUTE_EARPIECE -> {
-                if ((supported and CallAudioState.ROUTE_BLUETOOTH) != 0) CallAudioState.ROUTE_BLUETOOTH
-                else if ((supported and CallAudioState.ROUTE_SPEAKER) != 0) CallAudioState.ROUTE_SPEAKER
-                else current
-            }
-            CallAudioState.ROUTE_WIRED_HEADSET -> {
                 if ((supported and CallAudioState.ROUTE_SPEAKER) != 0) CallAudioState.ROUTE_SPEAKER
                 else if ((supported and CallAudioState.ROUTE_BLUETOOTH) != 0) CallAudioState.ROUTE_BLUETOOTH
+                else current
+            }
+            CallAudioState.ROUTE_SPEAKER -> {
+                if ((supported and CallAudioState.ROUTE_BLUETOOTH) != 0) CallAudioState.ROUTE_BLUETOOTH
+                else if ((supported and CallAudioState.ROUTE_WIRED_HEADSET) != 0) CallAudioState.ROUTE_WIRED_HEADSET
+                else if ((supported and CallAudioState.ROUTE_EARPIECE) != 0) CallAudioState.ROUTE_EARPIECE
                 else current
             }
             CallAudioState.ROUTE_BLUETOOTH -> {
@@ -111,17 +112,14 @@ class CallRepositoryImpl : ICallRepository {
                 else if ((supported and CallAudioState.ROUTE_EARPIECE) != 0) CallAudioState.ROUTE_EARPIECE
                 else current
             }
-            CallAudioState.ROUTE_SPEAKER -> {
-                if ((supported and CallAudioState.ROUTE_EARPIECE) != 0) CallAudioState.ROUTE_EARPIECE
-                else if ((supported and CallAudioState.ROUTE_WIRED_HEADSET) != 0) CallAudioState.ROUTE_WIRED_HEADSET
+            CallAudioState.ROUTE_WIRED_HEADSET -> {
+                if ((supported and CallAudioState.ROUTE_SPEAKER) != 0) CallAudioState.ROUTE_SPEAKER
                 else if ((supported and CallAudioState.ROUTE_BLUETOOTH) != 0) CallAudioState.ROUTE_BLUETOOTH
                 else current
             }
             else -> if ((supported and CallAudioState.ROUTE_SPEAKER) != 0) CallAudioState.ROUTE_SPEAKER else current
         }
 
-        if (nextRoute != current) {
-            setAudioRoute(nextRoute)
-        }
+        if (nextRoute != current) setAudioRoute(nextRoute)
     }
 }

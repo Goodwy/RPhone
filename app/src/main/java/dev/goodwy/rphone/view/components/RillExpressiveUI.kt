@@ -64,7 +64,6 @@ import dev.goodwy.rphone.cardSpacedBy
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import dev.goodwy.rphone.view.theme.MyColors.cardColorSelected
 import dev.goodwy.rphone.view.theme.customColors
-import kotlin.math.roundToInt
 
 // ─── App Haptics Helper ────────────────────────────────────────────────────────
 
@@ -1258,7 +1257,8 @@ fun RillFilterChip(
             selectedContainerColor = containerColor,
             selectedLabelColor = labelColor
         ),
-        elevation = FilterChipDefaults.filterChipElevation(elevation = 0.dp)
+        elevation = FilterChipDefaults.filterChipElevation(elevation = 0.dp),
+        leadingIcon = leadingIcon,
     )
 }
 

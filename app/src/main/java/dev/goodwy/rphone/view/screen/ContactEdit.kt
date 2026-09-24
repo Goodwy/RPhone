@@ -219,20 +219,46 @@ fun ContactEditScreen(
     }
 
     val phoneNumbers = remember(existingContact) {
-        mutableStateListOf<String>().apply { 
+        mutableStateListOf<String>().apply {
             if (existingContact != null && existingContact.phoneNumbers.isNotEmpty()) {
                 addAll(existingContact.phoneNumbers)
+
+                // Adding a New Phone Number for an Existing Contact
+                if (!initialPhone.isNullOrBlank()) {
+                    val cleanInitial = initialPhone.replace(Regex("[^0-9+]"), "")
+                    val alreadyPresent = any { it.replace(Regex("[^0-9+]"), "") == cleanInitial }
+                    if (!alreadyPresent) {
+                        if (size == 1 && this[0].isBlank()) {
+                            this[0] = initialPhone
+                        } else {
+                            add(initialPhone)
+                        }
+                    }
+                }
             } else if (!initialPhone.isNullOrBlank()) {
                 add(initialPhone)
             }
-            if (isEmpty()) add("") 
-        } 
+            if (isEmpty()) add("")
+        }
     }
 
     val phoneDetails = remember(existingContact) {
         mutableStateListOf<ContactPhoneDetail>().apply {
             if (existingContact != null && existingContact.phoneDetails.isNotEmpty()) {
                 addAll(existingContact.phoneDetails)
+
+                // Adding a New Number to the Details
+                if (!initialPhone.isNullOrBlank()) {
+                    val cleanInitial = initialPhone.replace(Regex("[^0-9+]"), "")
+                    val alreadyPresent = any { it.number.replace(Regex("[^0-9+]"), "") == cleanInitial }
+                    if (!alreadyPresent) {
+                        if (size == 1 && this[0].number.isBlank()) {
+                            this[0] = ContactPhoneDetail(Phone.TYPE_MOBILE, null, initialPhone)
+                        } else {
+                            add(ContactPhoneDetail(Phone.TYPE_MOBILE, null, initialPhone))
+                        }
+                    }
+                }
             } else if (!initialPhone.isNullOrBlank()) {
                 add(ContactPhoneDetail(Phone.TYPE_MOBILE, null, initialPhone))
             }

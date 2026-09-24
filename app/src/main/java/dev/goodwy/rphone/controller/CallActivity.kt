@@ -273,9 +273,13 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
         val number = remember(call) { call.details?.handle?.schemeSpecificPart.orEmpty() }
 
         val cnam = remember(call.details?.callerDisplayName, call.details?.callerDisplayNamePresentation) {
-            if (call.details?.callerDisplayNamePresentation == TelecomManager.PRESENTATION_ALLOWED) {
-                call.details?.callerDisplayName?.takeIf { it.isNotBlank() }
-            } else null
+            try {
+                if (call.details?.callerDisplayNamePresentation == TelecomManager.PRESENTATION_ALLOWED) {
+                    call.details?.callerDisplayName?.takeIf { it.isNotBlank() }
+                } else null
+            } catch (e: Exception) {
+                null
+            }
         }
 
         var identity by remember(number, cnam, unknownLabel) {
@@ -369,14 +373,18 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
 
     override fun onResume() {
         super.onResume()
-        turnScreenOnAndShowWhileLocked()
         isInForeground.value = true
+        val state = callViewModel.currentCallSession.value?.state
+        if (state == Call.STATE_ACTIVE || state == Call.STATE_DIALING) {
+            if (preferenceManager.getBoolean(PreferenceManager.KEY_PROXIMITY_SENSOR, true)) {
+                acquireProximityLock()
+            }
+        }
     }
 
     override fun onPause() {
         super.onPause()
         isInForeground.value = false
-        releaseProximityLock()
     }
 
     private fun setupProximitySensor() {
@@ -414,7 +422,10 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
 
         setShowWhenLocked(false)
         setTurnScreenOn(false)
-        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        window.clearFlags(
+            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
+            WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON
+        )
 
         finishAndRemoveTask()
     }
@@ -426,7 +437,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
     private fun turnScreenOnAndShowWhileLocked() {
         setShowWhenLocked(true)
         setTurnScreenOn(true)
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        window.addFlags(WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON)
 
         // We do not call `keyguardManager.requestDismissKeyguard(this, null)`
         // This causes the unlock screen to appear. The call screen should simply be displayed on top of the lock screen.
