@@ -65,4 +65,6 @@ class CallViewModel(
     fun setAudioRoute(route: Int) = callRepository.setAudioRoute(route)
     fun setPreferredCall(call: Call?) = callRepository.setPreferredCall(call)
     fun setIsActivityVisible(visible: Boolean) = callRepository.setIsActivityVisible(visible)
+    fun mergeCalls(call: Call? = null, otherCall: Call? = null) = callRepository.mergeCalls(call, otherCall)
+    fun swapCalls() = callRepository.swapCalls()
 }

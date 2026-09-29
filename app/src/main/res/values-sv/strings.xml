@@ -419,6 +419,7 @@
     <string name="audio_route_bluetooth_short">BT</string>
     <string name="audio_output_title">Ljudutgång</string>
     <string name="add_call">Lägg till samtal</string>
+    <string name="merge_calls">Sammanfoga samtal</string>
     <string name="resume">Återuppta</string>
     <string name="swap">Växla</string>
     <string name="more">Mer</string>

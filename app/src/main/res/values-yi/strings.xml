@@ -420,6 +420,7 @@
     <string name="audio_route_bluetooth_short">BT</string>
     <string name="audio_output_title">אַודיאָ אויסגאַנג</string>
     <string name="add_call">צולייגן רוף</string>
+    <string name="merge_calls">פֿאַראייניקן רופֿן</string>
     <string name="resume">אָנהײבן ווידער</string>
     <string name="swap">איבערבויען</string>
     <string name="more">נאָך</string>

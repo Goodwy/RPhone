@@ -419,6 +419,7 @@
     <string name="audio_route_bluetooth_short">BT</string>
     <string name="audio_output_title">Έξοδος ήχου</string>
     <string name="add_call">Προσθήκη κλήσης</string>
+    <string name="merge_calls">Συγχώνευση κλήσεων</string>
     <string name="resume">Συνέχιση</string>
     <string name="swap">Εναλλαγή</string>
     <string name="more">Περισσότερα</string>

@@ -420,6 +420,7 @@
     <string name="audio_route_bluetooth_short">BT</string>
     <string name="audio_output_title">مخرجات الصوت</string>
     <string name="add_call">إضافة مكالمة</string>
+    <string name="merge_calls">دمج المكالمات</string>
     <string name="resume">استئناف</string>
     <string name="swap">تبديل</string>
     <string name="more">المزيد</string>

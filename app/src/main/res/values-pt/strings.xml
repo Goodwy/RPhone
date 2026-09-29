@@ -419,6 +419,7 @@
     <string name="audio_route_bluetooth_short">BT</string>
     <string name="audio_output_title">Saída de áudio</string>
     <string name="add_call">Adicionar chamada</string>
+    <string name="merge_calls">Fundir chamadas</string>
     <string name="resume">Retomar</string>
     <string name="swap">Trocar</string>
     <string name="more">Mais</string>

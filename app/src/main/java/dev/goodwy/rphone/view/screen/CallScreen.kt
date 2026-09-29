@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.StickyNote2
+import androidx.compose.material.icons.automirrored.rounded.CallMerge
 import androidx.compose.material.icons.automirrored.rounded.VolumeDown
 import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.filled.Check
@@ -330,8 +331,20 @@ fun ExpressiveCallScreen(
                                     )
                                 }
                             }
-                            IconButton(onClick = { oc.disconnect() }) {
-                                Icon(Icons.Rounded.CallEnd, contentDescription = stringResource(R.string.end_call), tint = color_call_end)
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                IconButton(onClick = {
+                                    view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                                    callViewModel.mergeCalls(call, oc)
+                                }) {
+                                    Icon(
+                                        Icons.AutoMirrored.Rounded.CallMerge,
+                                        contentDescription = stringResource(R.string.merge_calls),
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                                IconButton(onClick = { oc.disconnect() }) {
+                                    Icon(Icons.Rounded.CallEnd, contentDescription = stringResource(R.string.end_call), tint = color_call_end)
+                                }
                             }
                         }
                     }
@@ -578,6 +591,27 @@ fun ExpressiveCallScreen(
                                                         context.startActivity(intent)
                                                     }
                                                 )
+                                                val canMergeCall = remember(call, otherCall, allCalls) {
+                                                    val hasCapability = try {
+                                                        ((call.details?.callCapabilities ?: 0) and Call.Details.CAPABILITY_MERGE_CONFERENCE) != 0
+                                                    } catch (_: Exception) { false }
+                                                    val isConf = try {
+                                                        call.details?.hasProperty(Call.Details.PROPERTY_CONFERENCE) == true
+                                                    } catch (_: Exception) { false }
+                                                    otherCall != null || hasCapability || isConf || allCalls.count { it.state != Call.STATE_DISCONNECTED } > 1
+                                                }
+                                                if (canMergeCall) {
+                                                    MoreItem(
+                                                        headline = stringResource(R.string.merge_calls),
+                                                        leadingIcon = Icons.AutoMirrored.Rounded.CallMerge,
+                                                        enabled = callState != Call.STATE_DIALING,
+                                                        onClick = {
+                                                            view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                                            callViewModel.mergeCalls(call, otherCall)
+                                                            showMore = false
+                                                        }
+                                                    )
+                                                }
                                                 MoreItem(
                                                     headline = if (otherCall != null) stringResource(R.string.swap)
                                                     else if (callState == Call.STATE_HOLDING) stringResource(R.string.resume)
@@ -588,7 +622,13 @@ fun ExpressiveCallScreen(
                                                     enabled = callState != Call.STATE_DIALING,
                                                     onClick = {
                                                         view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                                                        if (callState == Call.STATE_HOLDING) call.unhold() else call.hold()
+                                                        if (otherCall != null) {
+                                                            callViewModel.swapCalls()
+                                                        } else if (callState == Call.STATE_HOLDING) {
+                                                            call.unhold()
+                                                        } else {
+                                                            call.hold()
+                                                        }
                                                     }
                                                 )
                                             }

@@ -122,4 +122,63 @@ class CallRepositoryImpl : ICallRepository {
 
         if (nextRoute != current) setAudioRoute(nextRoute)
     }
+
+    override fun mergeCalls(call: Call?, otherCall: Call?) {
+        val activeCall = call ?: _currentCallSession.value?.call
+        val callsList = _allCalls.value
+        val secondCall = otherCall ?: callsList.find { it != activeCall && it.state != Call.STATE_DISCONNECTED }
+
+        if (activeCall != null) {
+            try {
+                val canMerge = (activeCall.details.callCapabilities and Call.Details.CAPABILITY_MERGE_CONFERENCE) != 0
+                if (canMerge || activeCall.details.hasProperty(Call.Details.PROPERTY_CONFERENCE)) {
+                    activeCall.mergeConference()
+                } else if (secondCall != null) {
+                    activeCall.conference(secondCall)
+                } else {
+                    activeCall.mergeConference()
+                }
+            } catch (_: Exception) {
+                try {
+                    secondCall?.conference(activeCall)
+                } catch (_: Exception) {
+                    try {
+                        activeCall.mergeConference()
+                    } catch (_: Exception) {}
+                }
+            }
+        }
+    }
+
+    override fun swapCalls() {
+        val sessionCall = _currentCallSession.value?.call
+        val callsList = _allCalls.value
+        val other = callsList.find { it != sessionCall && it.state != Call.STATE_DISCONNECTED }
+        if (sessionCall != null && other != null) {
+            try {
+                val canSwap = (sessionCall.details.callCapabilities and Call.Details.CAPABILITY_SWAP_CONFERENCE) != 0
+                if (canSwap) {
+                    sessionCall.swapConference()
+                } else {
+                    if (sessionCall.state == Call.STATE_HOLDING) {
+                        sessionCall.unhold()
+                        other.hold()
+                    } else {
+                        sessionCall.hold()
+                        other.unhold()
+                    }
+                }
+            } catch (_: Exception) {
+                try {
+                    if (sessionCall.state == Call.STATE_HOLDING) {
+                        sessionCall.unhold()
+                        other.hold()
+                    } else {
+                        sessionCall.hold()
+                        other.unhold()
+                    }
+                } catch (_: Exception) {}
+            }
+        }
+    }
 }
