@@ -15,6 +15,7 @@ import dev.goodwy.rphone.domain.usecase.GetCallerNameUseCase
 import dev.goodwy.rphone.data.repository.CallerRepositoryImpl
 import dev.goodwy.rphone.data.manager.CallStateManager
 import dev.goodwy.rphone.controller.CallViewModel
+import dev.goodwy.rphone.controller.FakeCallManager
 import dev.goodwy.rphone.controller.MainViewModel
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.modal.db.RillDatabase
@@ -51,6 +52,7 @@ val appModule = module {
     single { GetCallerNameUseCase(get()) }
     single { CallStateManager(get()) }
     single { CallNotificationManager(androidContext(), get()) }
+    single { FakeCallManager(androidContext(), get()) }
     single<ICallRepository> { CallRepositoryImpl() }
 
     viewModel { ContactsViewModel(androidApplication(), get(), get()) }

@@ -437,6 +437,12 @@ class PreferenceManager(context: Context) {
         const val KEY_HIDDEN_CONTACTS_VISIBLE = "hidden_contacts_visible"
 
         const val KEY_LOG_FAKE_CALLS = "log_fake_calls"
+        const val KEY_FAKE_CALL_NAME = "fake_call_name"
+        const val KEY_FAKE_CALL_NUMBER = "fake_call_number"
+        const val KEY_FAKE_CALL_DELAY = "fake_call_delay"
+        const val DEFAULT_FAKE_CALL_NAME = "John Doe"
+        const val DEFAULT_FAKE_CALL_NUMBER = "+1 555-019-2834"
+        const val DEFAULT_FAKE_CALL_DELAY = 5
         const val KEY_SHOW_RECENTS_STATS = "show_recents_stats"
 
         const val KEY_APP_USAGE_SECONDS = "app_usage_seconds"
@@ -640,6 +646,18 @@ class PreferenceManager(context: Context) {
 
     fun isDualSimDialpadButtonsEnabled(): Boolean = getBoolean(KEY_DUAL_SIM_DIALPAD_BUTTONS, false)
     fun setDualSimDialpadButtonsEnabled(enabled: Boolean) = setBoolean(KEY_DUAL_SIM_DIALPAD_BUTTONS, enabled)
+
+    fun getFakeCallName(): String = getString(KEY_FAKE_CALL_NAME, DEFAULT_FAKE_CALL_NAME) ?: DEFAULT_FAKE_CALL_NAME
+    fun setFakeCallName(name: String) = setString(KEY_FAKE_CALL_NAME, name)
+
+    fun getFakeCallNumber(): String = getString(KEY_FAKE_CALL_NUMBER, DEFAULT_FAKE_CALL_NUMBER) ?: DEFAULT_FAKE_CALL_NUMBER
+    fun setFakeCallNumber(number: String) = setString(KEY_FAKE_CALL_NUMBER, number)
+
+    fun getFakeCallDelay(): Int = getInt(KEY_FAKE_CALL_DELAY, DEFAULT_FAKE_CALL_DELAY)
+    fun setFakeCallDelay(seconds: Int) = setInt(KEY_FAKE_CALL_DELAY, seconds)
+
+    fun getLogFakeCalls(): Boolean = getBoolean(KEY_LOG_FAKE_CALLS, true)
+    fun setLogFakeCalls(enabled: Boolean) = setBoolean(KEY_LOG_FAKE_CALLS, enabled)
 
     fun resetSwipeActions() {
         setBoolean(KEY_SWIPE_ACTIONS_ENABLED, false)

@@ -663,4 +663,28 @@
     <string name="pocket_mode_active">Pocket Mode Active</string>
     <string name="pocket_mode_active_description">Screen touches are locked to prevent accidental touches in your pocket.</string>
     <string name="pocket_mode_dismiss">Dismiss Touch Guard</string>
+
+    <!-- Fake Call -->
+    <string name="fake_call" tools:ignore="MissingTranslation">Fake Call</string>
+    <string name="fake_call_subtitle" tools:ignore="MissingTranslation">Schedule or trigger simulated incoming calls</string>
+    <string name="fake_call_caller_name" tools:ignore="MissingTranslation">Caller Name</string>
+    <string name="fake_call_caller_number" tools:ignore="MissingTranslation">Phone Number</string>
+    <string name="fake_call_delay" tools:ignore="MissingTranslation">Call Delay</string>
+    <string name="fake_call_schedule" tools:ignore="MissingTranslation">Schedule Fake Call</string>
+    <string name="fake_call_trigger_now" tools:ignore="MissingTranslation">Trigger Now</string>
+    <string name="fake_call_cancel" tools:ignore="MissingTranslation">Cancel Scheduled Call</string>
+    <string name="fake_call_scheduled" tools:ignore="MissingTranslation">Fake call scheduled in %s</string>
+    <string name="fake_call_log_history" tools:ignore="MissingTranslation">Save to Call History</string>
+    <string name="fake_call_log_history_subtitle" tools:ignore="MissingTranslation">Add fake calls to recents after call ends</string>
+    <string name="fake_call_select_contact" tools:ignore="MissingTranslation">Select Contact</string>
+    <string name="fake_call_delay_immediately" tools:ignore="MissingTranslation">Immediately</string>
+    <string name="fake_call_delay_5s" tools:ignore="MissingTranslation">5 seconds</string>
+    <string name="fake_call_delay_10s" tools:ignore="MissingTranslation">10 seconds</string>
+    <string name="fake_call_delay_30s" tools:ignore="MissingTranslation">30 seconds</string>
+    <string name="fake_call_delay_1m" tools:ignore="MissingTranslation">1 minute</string>
+    <string name="fake_call_delay_5m" tools:ignore="MissingTranslation">5 minutes</string>
+    <string name="fake_call_delay_15m" tools:ignore="MissingTranslation">15 minutes</string>
+    <string name="fake_call_incoming" tools:ignore="MissingTranslation">Fake Incoming Call</string>
+    <string name="fake_call_answer" tools:ignore="MissingTranslation">Answer</string>
+    <string name="fake_call_decline" tools:ignore="MissingTranslation">Decline</string>
 </resources>

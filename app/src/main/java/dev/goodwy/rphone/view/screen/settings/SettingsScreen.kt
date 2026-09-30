@@ -830,6 +830,15 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                                     onClick = { navigator.navigate(CallSettingScreenDestination) }
                                 )
                                 RillListItem(
+                                    headline = stringResource(R.string.fake_call),
+                                    supporting = stringResource(R.string.fake_call_subtitle),
+                                    leadingIcon = Icons.Rounded.Call,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkCyan,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorCyan,
+                                    trailingIcon = Icons.Default.ChevronRight,
+                                    onClick = { navigator.navigate(FakeCallSettingScreenDestination) }
+                                )
+                                RillListItem(
                                     headline = stringResource(R.string.sound_and_vibration),
                                     supporting = stringResource(R.string.sound_and_vibration_subtitle),
                                     leadingIcon = Icons.AutoMirrored.Rounded.VolumeUp,
