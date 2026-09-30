@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.CropFree
 import androidx.compose.material.icons.rounded.PictureInPicture
 import androidx.compose.material.icons.rounded.ScreenLockPortrait
@@ -42,7 +43,7 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.compose.koinInject
 import androidx.core.net.toUri
-import com.ramcosta.composedestinations.generated.destinations.QuickResponsesScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.*
 import dev.goodwy.rphone.view.components.RillSelectListItem
 import dev.goodwy.rphone.view.components.Title
 
@@ -240,6 +241,15 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
                                     directCallOnTap = it
                                     prefs.setBoolean(PreferenceManager.KEY_DIRECT_CALL_ON_TAP, it)
                                 }
+                            )
+                            RillListItem(
+                                headline = stringResource(R.string.fake_call),
+                                supporting = stringResource(R.string.fake_call_subtitle),
+                                leadingIcon = Icons.Rounded.Call,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
+                                trailingIcon = Icons.Default.ChevronRight,
+                                onClick = { navigator.navigate(FakeCallSettingScreenDestination) }
                             )
 //                            RillSwitchListItem(
 //                                headline   = stringResource(R.string.auto_speaker),

@@ -50,6 +50,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import dev.goodwy.rphone.controller.ContactsViewModel
+import dev.goodwy.rphone.controller.FakeCallManager
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.util.makeCall
 import dev.goodwy.rphone.view.components.SimPickerDialog
@@ -117,6 +118,7 @@ import dev.goodwy.rphone.view.components.RillExpressiveButton
 import dev.goodwy.rphone.view.components.performAppHaptic
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import org.koin.core.context.GlobalContext
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
@@ -533,6 +535,15 @@ fun DialPadContent(
                         break
                     } catch (_: Exception) { /* try next action */ }
                 }
+                return true
+            }
+
+            // ── Pattern 0.5: *#3253# (*#FAKE#) or *#7777# (Fake Call) ─────────────────────────
+            if (code == "*#3253#" || code.lowercase() == "*#fake#" || code == "*#7777#") {
+                try {
+                    val fakeCallManager = GlobalContext.get().get<FakeCallManager>()
+                    fakeCallManager.scheduleFakeCall()
+                } catch (_: Exception) {}
                 return true
             }
 
