@@ -1,4 +1,4 @@
-package dev.goodwy.rphone.modal.repository
+package dev.goodwy.rphone.model.repository
 
 import android.content.ComponentName
 import android.content.ContentResolver
@@ -10,13 +10,13 @@ import android.telecom.PhoneAccountHandle
 import android.telecom.TelecomManager
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.util.normalizePhoneNumber
-import dev.goodwy.rphone.modal.`interface`.ICallLogRepository
-import dev.goodwy.rphone.modal.data.CallLogEntry
-import dev.goodwy.rphone.modal.data.Contact
-import dev.goodwy.rphone.modal.`interface`.IContactsRepository
+import dev.goodwy.rphone.model.`interface`.ICallLogRepository
+import dev.goodwy.rphone.model.data.CallLogEntry
+import dev.goodwy.rphone.model.data.Contact
+import dev.goodwy.rphone.model.`interface`.IContactsRepository
 import androidx.core.net.toUri
 import dev.goodwy.rphone.R
-import dev.goodwy.rphone.modal.data.getDisplayName
+import dev.goodwy.rphone.model.data.getDisplayName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock

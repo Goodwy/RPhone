@@ -61,7 +61,7 @@ import dev.goodwy.rphone.view.theme.MyColors.dialpadKeyColor
 import dev.goodwy.rphone.view.theme.Rill4Theme
 import dev.goodwy.rphone.view.theme.color_call_button
 import dev.goodwy.rphone.view.theme.color_call_end
-import dev.goodwy.rphone.modal.`interface`.ICallRepository
+import dev.goodwy.rphone.model.`interface`.ICallRepository
 import org.koin.android.ext.android.inject
 import kotlinx.coroutines.*
 import kotlin.text.ifEmpty

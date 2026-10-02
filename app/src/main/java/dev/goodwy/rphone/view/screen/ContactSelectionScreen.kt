@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.dp
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.ContactsViewModel
 import dev.goodwy.rphone.controller.util.formatPhoneNumber
-import dev.goodwy.rphone.modal.data.Contact
+import dev.goodwy.rphone.model.data.Contact
 import dev.goodwy.rphone.view.components.*
 import dev.goodwy.rphone.view.theme.*
 import com.ramcosta.composedestinations.annotation.Destination

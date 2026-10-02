@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import dev.goodwy.rphone.controller.util.*
-import dev.goodwy.rphone.modal.data.Contact
+import dev.goodwy.rphone.model.data.Contact
 import org.koin.compose.koinInject
 import androidx.core.net.toUri
 import dev.goodwy.rphone.R

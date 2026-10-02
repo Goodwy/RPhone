@@ -1,14 +1,14 @@
-package dev.goodwy.rphone.modal.db
+package dev.goodwy.rphone.model.db
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import dev.goodwy.rphone.modal.data.Contact
-import dev.goodwy.rphone.modal.data.ContactAddress
-import dev.goodwy.rphone.modal.data.ContactEmail
-import dev.goodwy.rphone.modal.data.ContactEvent
-import dev.goodwy.rphone.modal.data.ContactPhoneDetail
+import dev.goodwy.rphone.model.data.Contact
+import dev.goodwy.rphone.model.data.ContactAddress
+import dev.goodwy.rphone.model.data.ContactEmail
+import dev.goodwy.rphone.model.data.ContactEvent
+import dev.goodwy.rphone.model.data.ContactPhoneDetail
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 

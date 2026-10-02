@@ -37,7 +37,7 @@
 }
 
 # Keep all classes in the modal.db package
--keep class dev.goodwy.rphone.modal.db.** { *; }
+-keep class dev.goodwy.rphone.model.db.** { *; }
 
 # Keep Room's generated code
 -keepclassmembers class * extends androidx.room.RoomDatabase {

@@ -108,10 +108,10 @@ import dev.goodwy.rphone.controller.util.SocialUtils.messengerPackages
 import dev.goodwy.rphone.controller.util.forceLtr
 import dev.goodwy.rphone.liquidglass.backdrops.layerBackdrop
 import dev.goodwy.rphone.liquidglass.backdrops.rememberLayerBackdrop
-import dev.goodwy.rphone.modal.data.CallLogEntry
-import dev.goodwy.rphone.modal.data.Contact
-import dev.goodwy.rphone.modal.data.getDisplayContactInfo
-import dev.goodwy.rphone.modal.data.getDisplayName
+import dev.goodwy.rphone.model.data.CallLogEntry
+import dev.goodwy.rphone.model.data.Contact
+import dev.goodwy.rphone.model.data.getDisplayContactInfo
+import dev.goodwy.rphone.model.data.getDisplayName
 import dev.goodwy.rphone.view.components.RillDialog
 import dev.goodwy.rphone.view.components.RillExpressiveButton
 import dev.goodwy.rphone.view.components.performAppHaptic

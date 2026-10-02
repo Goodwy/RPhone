@@ -42,9 +42,9 @@ import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.util.isConference
 import dev.goodwy.rphone.liquidglass.LocalLiquidGlassBackdrop
 import dev.goodwy.rphone.liquidglass.backdrops.rememberLayerBackdrop
-import dev.goodwy.rphone.modal.data.getDisplayName
-import dev.goodwy.rphone.modal.`interface`.CallSession
-import dev.goodwy.rphone.modal.`interface`.IContactsRepository
+import dev.goodwy.rphone.model.data.getDisplayName
+import dev.goodwy.rphone.model.`interface`.CallSession
+import dev.goodwy.rphone.model.`interface`.IContactsRepository
 import dev.goodwy.rphone.view.screen.ExpressiveCallScreen
 import dev.goodwy.rphone.view.theme.Rill4Theme
 import kotlinx.coroutines.Dispatchers

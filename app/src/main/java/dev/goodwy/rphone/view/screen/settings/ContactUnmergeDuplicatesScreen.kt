@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.controller.ContactsViewModel
-import dev.goodwy.rphone.modal.data.Contact
+import dev.goodwy.rphone.model.data.Contact
 import dev.goodwy.rphone.view.components.RillExpressiveCard
 import dev.goodwy.rphone.view.components.RillLoadingIndicatorView
 import com.ramcosta.composedestinations.annotation.Destination
@@ -49,8 +49,8 @@ import dev.goodwy.rphone.R
 import dev.goodwy.rphone.cardCornerExtraSmall
 import dev.goodwy.rphone.controller.util.ContactUtils
 import dev.goodwy.rphone.controller.util.PreferenceManager
-import dev.goodwy.rphone.modal.data.getDisplayName
-import dev.goodwy.rphone.modal.repository.ContactsRepository.ContactSource
+import dev.goodwy.rphone.model.data.getDisplayName
+import dev.goodwy.rphone.model.repository.ContactsRepository.ContactSource
 import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillAvatar
 import dev.goodwy.rphone.view.components.ScrollHapticsEffect

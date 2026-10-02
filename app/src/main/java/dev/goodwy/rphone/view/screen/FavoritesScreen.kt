@@ -44,7 +44,7 @@ import dev.goodwy.rphone.controller.ContactsViewModel
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.util.makeCall
 import dev.goodwy.rphone.controller.util.placeCallWithSimPreference
-import dev.goodwy.rphone.modal.data.Contact
+import dev.goodwy.rphone.model.data.Contact
 import dev.goodwy.rphone.view.components.RillAvatar
 import dev.goodwy.rphone.view.components.RillScrollAnimatedItem
 import dev.goodwy.rphone.view.components.ScrollHapticsGridEffect

@@ -117,7 +117,7 @@ import dev.goodwy.rphone.controller.util.getPhoneTypeText
 import dev.goodwy.rphone.controller.util.isPackageInstalled
 import dev.goodwy.rphone.controller.util.normalizePhoneNumber
 import dev.goodwy.rphone.controller.util.toast
-import dev.goodwy.rphone.modal.data.Contact
+import dev.goodwy.rphone.model.data.Contact
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import dev.goodwy.rphone.view.theme.customColors
 import com.ramcosta.composedestinations.generated.destinations.CallLogFullScreenDestination
@@ -132,8 +132,8 @@ import dev.goodwy.rphone.controller.util.areNumbersEqual
 import dev.goodwy.rphone.controller.util.forceLtr
 import dev.goodwy.rphone.controller.util.hasDualSim
 import dev.goodwy.rphone.device_only
-import dev.goodwy.rphone.modal.data.getDisplayName
-import dev.goodwy.rphone.modal.repository.ContactsRepository
+import dev.goodwy.rphone.model.data.getDisplayName
+import dev.goodwy.rphone.model.repository.ContactsRepository
 import dev.goodwy.rphone.private_only
 import java.util.Calendar
 import kotlin.time.Duration.Companion.milliseconds

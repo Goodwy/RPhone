@@ -57,12 +57,12 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.CallViewModel
-import dev.goodwy.rphone.modal.`interface`.IContactsRepository
+import dev.goodwy.rphone.model.`interface`.IContactsRepository
 import dev.goodwy.rphone.cardCornerExtraSmall
 import dev.goodwy.rphone.controller.lock.AppLockManager
 import dev.goodwy.rphone.controller.sensor.PocketModeManager
 import dev.goodwy.rphone.controller.util.NoteManager
-import dev.goodwy.rphone.modal.data.getDisplayName
+import dev.goodwy.rphone.model.data.getDisplayName
 import dev.goodwy.rphone.view.components.RillExpressiveCard
 import dev.goodwy.rphone.view.theme.MyColors.bottomBarColor
 import dev.goodwy.rphone.view.theme.MyColors.cardColor

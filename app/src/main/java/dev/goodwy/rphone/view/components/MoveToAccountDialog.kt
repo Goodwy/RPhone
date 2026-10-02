@@ -19,7 +19,7 @@ import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.ContactsViewModel
 import dev.goodwy.rphone.controller.util.ContactUtils
 import dev.goodwy.rphone.device_only
-import dev.goodwy.rphone.modal.data.Contact
+import dev.goodwy.rphone.model.data.Contact
 import dev.goodwy.rphone.private_only
 
 @Composable

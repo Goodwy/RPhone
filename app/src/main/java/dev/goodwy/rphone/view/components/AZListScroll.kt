@@ -68,7 +68,7 @@ import dev.goodwy.rphone.cardCornerExtraSmall
 import dev.goodwy.rphone.cardSpacedBy
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.ContactsViewModel
-import dev.goodwy.rphone.modal.data.Contact
+import dev.goodwy.rphone.model.data.Contact
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import dev.goodwy.rphone.view.theme.MyColors.cardColorSelected
 import dev.goodwy.rphone.view.theme.customColors
@@ -76,8 +76,8 @@ import com.ramcosta.composedestinations.generated.destinations.ContactDetailsScr
 import com.ramcosta.composedestinations.generated.destinations.ContactEditScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.goodwy.rphone.controller.util.forceLtr
-import dev.goodwy.rphone.modal.data.getDisplayContactInfo
-import dev.goodwy.rphone.modal.data.getDisplayName
+import dev.goodwy.rphone.model.data.getDisplayContactInfo
+import dev.goodwy.rphone.model.data.getDisplayName
 import dev.goodwy.rphone.view.theme.RillShapeDefaults
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject

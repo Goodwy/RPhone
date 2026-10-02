@@ -1,6 +1,6 @@
 package dev.goodwy.rphone.controller
 
-import dev.goodwy.rphone.modal.data.CallerMetadata
+import dev.goodwy.rphone.model.data.CallerMetadata
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

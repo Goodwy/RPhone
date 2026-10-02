@@ -16,9 +16,9 @@ import android.widget.Toast
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.util.toast
-import dev.goodwy.rphone.modal.`interface`.CallSession
-import dev.goodwy.rphone.modal.`interface`.ICallRepository
-import dev.goodwy.rphone.modal.repository.CallRepositoryImpl
+import dev.goodwy.rphone.model.`interface`.CallSession
+import dev.goodwy.rphone.model.`interface`.ICallRepository
+import dev.goodwy.rphone.model.repository.CallRepositoryImpl
 import dev.goodwy.rphone.view.screen.BiometricCallActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

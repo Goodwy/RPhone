@@ -6,12 +6,12 @@ import android.database.ContentObserver
 import android.os.Handler
 import android.os.Looper
 import android.provider.CallLog
-import dev.goodwy.rphone.modal.`interface`.ICallLogRepository
+import dev.goodwy.rphone.model.`interface`.ICallLogRepository
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import dev.goodwy.rphone.controller.util.PreferenceManager
-import dev.goodwy.rphone.modal.data.CallLogEntry
-import dev.goodwy.rphone.modal.data.CallLogFilter
+import dev.goodwy.rphone.model.data.CallLogEntry
+import dev.goodwy.rphone.model.data.CallLogFilter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

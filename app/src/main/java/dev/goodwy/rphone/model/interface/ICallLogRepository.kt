@@ -1,6 +1,6 @@
-package dev.goodwy.rphone.modal.`interface`
+package dev.goodwy.rphone.model.`interface`
 
-import dev.goodwy.rphone.modal.data.CallLogEntry
+import dev.goodwy.rphone.model.data.CallLogEntry
 
 interface ICallLogRepository {
     suspend fun getCallLogs(): List<CallLogEntry>

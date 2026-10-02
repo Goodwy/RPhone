@@ -1,8 +1,8 @@
-package dev.goodwy.rphone.modal.repository
+package dev.goodwy.rphone.model.repository
 
-import dev.goodwy.rphone.modal.data.Contact
-import dev.goodwy.rphone.modal.`interface`.ICallerRepository
-import dev.goodwy.rphone.modal.`interface`.IContactsRepository
+import dev.goodwy.rphone.model.data.Contact
+import dev.goodwy.rphone.model.`interface`.ICallerRepository
+import dev.goodwy.rphone.model.`interface`.IContactsRepository
 
 class CallerRepositoryImpl(
     private val contactsRepository: IContactsRepository

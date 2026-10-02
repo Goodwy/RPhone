@@ -6,9 +6,9 @@ import android.telecom.TelecomManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.goodwy.rphone.R
-import dev.goodwy.rphone.modal.data.CallerMetadata
-import dev.goodwy.rphone.modal.`interface`.CallSession
-import dev.goodwy.rphone.modal.`interface`.ICallRepository
+import dev.goodwy.rphone.model.data.CallerMetadata
+import dev.goodwy.rphone.model.`interface`.CallSession
+import dev.goodwy.rphone.model.`interface`.ICallRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlin.time.Duration.Companion.milliseconds

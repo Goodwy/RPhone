@@ -47,7 +47,7 @@ import dev.goodwy.rphone.controller.util.formatSecondsToShortTimeString
 import dev.goodwy.rphone.controller.util.getPhoneTypeText
 import dev.goodwy.rphone.controller.util.launchInternetSearch
 import dev.goodwy.rphone.controller.util.toast
-import dev.goodwy.rphone.modal.data.CallLogEntry
+import dev.goodwy.rphone.model.data.CallLogEntry
 import dev.goodwy.rphone.view.theme.customColors
 
 @Composable

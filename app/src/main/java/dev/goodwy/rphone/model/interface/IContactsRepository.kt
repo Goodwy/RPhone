@@ -1,10 +1,10 @@
-package dev.goodwy.rphone.modal.`interface`
+package dev.goodwy.rphone.model.`interface`
 
 import android.accounts.Account
 import android.net.Uri
-import dev.goodwy.rphone.modal.data.Contact
-import dev.goodwy.rphone.modal.db.TrashedContactEntity
-import dev.goodwy.rphone.modal.repository.ContactsRepository.RawContactInfo
+import dev.goodwy.rphone.model.data.Contact
+import dev.goodwy.rphone.model.db.TrashedContactEntity
+import dev.goodwy.rphone.model.repository.ContactsRepository.RawContactInfo
 
 interface IContactsRepository {
     suspend fun getContacts(includePrivate: Boolean = true, includeHidden: Boolean = false): List<Contact>

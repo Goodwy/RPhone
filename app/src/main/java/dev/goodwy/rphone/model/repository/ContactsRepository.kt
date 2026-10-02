@@ -1,4 +1,4 @@
-package dev.goodwy.rphone.modal.repository
+package dev.goodwy.rphone.model.repository
 
 import android.Manifest
 import android.accounts.Account
@@ -14,13 +14,13 @@ import android.provider.ContactsContract
 import android.provider.ContactsContract.CommonDataKinds
 import android.telephony.SubscriptionManager
 import androidx.core.content.ContextCompat
-import dev.goodwy.rphone.modal.data.Contact
-import dev.goodwy.rphone.modal.data.ContactAddress
-import dev.goodwy.rphone.modal.data.ContactEmail
-import dev.goodwy.rphone.modal.data.ContactEvent
-import dev.goodwy.rphone.modal.data.ContactPhoneDetail
-import dev.goodwy.rphone.modal.db.PrivateContactDao
-import dev.goodwy.rphone.modal.`interface`.IContactsRepository
+import dev.goodwy.rphone.model.data.Contact
+import dev.goodwy.rphone.model.data.ContactAddress
+import dev.goodwy.rphone.model.data.ContactEmail
+import dev.goodwy.rphone.model.data.ContactEvent
+import dev.goodwy.rphone.model.data.ContactPhoneDetail
+import dev.goodwy.rphone.model.db.PrivateContactDao
+import dev.goodwy.rphone.model.`interface`.IContactsRepository
 import androidx.core.net.toUri
 import androidx.core.graphics.scale
 import dev.goodwy.rphone.controller.util.CallBackgroundStore
@@ -28,9 +28,9 @@ import dev.goodwy.rphone.controller.util.ContactDumpUtils
 import dev.goodwy.rphone.controller.util.areNumbersEqual
 import dev.goodwy.rphone.controller.util.deduplicateNumbers
 import dev.goodwy.rphone.device_only
-import dev.goodwy.rphone.modal.db.PrivateContactEntity
-import dev.goodwy.rphone.modal.db.TrashedContactDao
-import dev.goodwy.rphone.modal.db.TrashedContactEntity
+import dev.goodwy.rphone.model.db.PrivateContactEntity
+import dev.goodwy.rphone.model.db.TrashedContactDao
+import dev.goodwy.rphone.model.db.TrashedContactEntity
 import dev.goodwy.rphone.private_only
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

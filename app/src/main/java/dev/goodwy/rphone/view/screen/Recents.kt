@@ -40,7 +40,7 @@ import dev.goodwy.rphone.controller.util.formatDateHeader
 import dev.goodwy.rphone.controller.util.makeCall
 import dev.goodwy.rphone.controller.util.placeCallWithSimPreference
 import dev.goodwy.rphone.controller.util.PreferenceManager
-import dev.goodwy.rphone.modal.data.CallLogFilter
+import dev.goodwy.rphone.model.data.CallLogFilter
 import dev.goodwy.rphone.view.components.*
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
@@ -84,8 +84,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.ContactsViewModel
-import dev.goodwy.rphone.modal.data.CallLogEntry
-import dev.goodwy.rphone.modal.data.Contact
+import dev.goodwy.rphone.model.data.CallLogEntry
+import dev.goodwy.rphone.model.data.Contact
 import com.ramcosta.composedestinations.generated.destinations.CallLogFullScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.SettingsScreenDestination
 import dev.goodwy.rphone.controller.CallNotificationManager

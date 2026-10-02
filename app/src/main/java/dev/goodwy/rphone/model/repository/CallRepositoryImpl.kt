@@ -1,4 +1,4 @@
-package dev.goodwy.rphone.modal.repository
+package dev.goodwy.rphone.model.repository
 
 import android.os.Build
 import android.telecom.Call
@@ -6,8 +6,8 @@ import android.telecom.CallAudioState
 import android.telecom.InCallService
 import android.telecom.VideoProfile
 import android.util.Log
-import dev.goodwy.rphone.modal.`interface`.CallSession
-import dev.goodwy.rphone.modal.`interface`.ICallRepository
+import dev.goodwy.rphone.model.`interface`.CallSession
+import dev.goodwy.rphone.model.`interface`.ICallRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

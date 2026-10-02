@@ -34,8 +34,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import dev.goodwy.rphone.cardCornerExtraSmall
 import dev.goodwy.rphone.controller.util.PreferenceManager
-import dev.goodwy.rphone.modal.`interface`.ICallLogRepository
-import dev.goodwy.rphone.modal.`interface`.IContactsRepository
+import dev.goodwy.rphone.model.`interface`.ICallLogRepository
+import dev.goodwy.rphone.model.`interface`.IContactsRepository
 import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillAnimatedSection
 import dev.goodwy.rphone.view.components.RillAvatar

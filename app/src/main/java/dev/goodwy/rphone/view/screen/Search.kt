@@ -64,9 +64,9 @@ import dev.goodwy.rphone.controller.util.forceLtr
 import dev.goodwy.rphone.controller.util.makeCall
 import dev.goodwy.rphone.controller.util.normalizeNumberDigits
 import dev.goodwy.rphone.controller.util.placeCallWithSimPreference
-import dev.goodwy.rphone.modal.data.CallLogEntry
-import dev.goodwy.rphone.modal.data.getDisplayContactInfo
-import dev.goodwy.rphone.modal.data.getDisplayName
+import dev.goodwy.rphone.model.data.CallLogEntry
+import dev.goodwy.rphone.model.data.getDisplayContactInfo
+import dev.goodwy.rphone.model.data.getDisplayName
 import dev.goodwy.rphone.view.components.SingleTile
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

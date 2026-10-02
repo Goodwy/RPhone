@@ -1,4 +1,4 @@
-package dev.goodwy.rphone.modal.data
+package dev.goodwy.rphone.model.data
 
 import android.content.Context
 import dev.goodwy.rphone.R

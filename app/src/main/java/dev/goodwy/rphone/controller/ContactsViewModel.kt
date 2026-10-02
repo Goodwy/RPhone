@@ -3,15 +3,15 @@ package dev.goodwy.rphone.controller
 import android.accounts.Account
 import android.app.Application
 import android.net.Uri
-import dev.goodwy.rphone.modal.`interface`.IContactsRepository
+import dev.goodwy.rphone.model.`interface`.IContactsRepository
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.device_only
-import dev.goodwy.rphone.modal.data.Contact
-import dev.goodwy.rphone.modal.db.TrashedContactDao
-import dev.goodwy.rphone.modal.db.TrashedContactEntity
-import dev.goodwy.rphone.modal.repository.ContactsRepository
+import dev.goodwy.rphone.model.data.Contact
+import dev.goodwy.rphone.model.db.TrashedContactDao
+import dev.goodwy.rphone.model.db.TrashedContactEntity
+import dev.goodwy.rphone.model.repository.ContactsRepository
 import dev.goodwy.rphone.private_only
 import dev.goodwy.rphone.view.screen.settings.NumberChangeExample
 import dev.goodwy.rphone.view.screen.settings.StandardizeStats
@@ -87,20 +87,13 @@ class ContactsViewModel(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val filteredContacts = combine(
-        _allContacts,
-        _selectedAccount,
-        _showPrivateOnly,
-        _showLocalOnly,
-        _visibleAccounts,
-        _sortOrder
-    ) { args ->
-        val contacts = args[0] as List<Contact>
-        val account = args[1] as Account?
-        val privateOnly = args[2] as Boolean
-        val localOnly = args[3] as Boolean
-        val visibleAccounts = args[4] as Set<String>?
-        val sortOrder = args[5] as Int
-
+        combine(_allContacts, _selectedAccount, _showPrivateOnly) { contacts, account, privateOnly ->
+            Triple(contacts, account, privateOnly)
+        },
+        combine(_showLocalOnly, _visibleAccounts, _sortOrder) { localOnly, visibleAccounts, sortOrder ->
+            Triple(localOnly, visibleAccounts, sortOrder)
+        }
+    ) { (contacts, account, privateOnly), (localOnly, visibleAccounts, sortOrder) ->
         val baseFiltered = when {
             privateOnly -> contacts.filter { it.isPrivate }
             localOnly -> contacts.filter { it.accountName == null && it.accountType == null && !it.isPrivate }

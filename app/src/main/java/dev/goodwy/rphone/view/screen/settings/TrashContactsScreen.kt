@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.ContactsViewModel
-import dev.goodwy.rphone.modal.db.TrashedContactEntity
+import dev.goodwy.rphone.model.db.TrashedContactEntity
 import dev.goodwy.rphone.view.components.RillAvatar
 import dev.goodwy.rphone.view.components.RillConfirmationDialog
 import com.ramcosta.composedestinations.annotation.Destination

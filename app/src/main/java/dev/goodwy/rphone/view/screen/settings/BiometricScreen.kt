@@ -90,8 +90,8 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.cardCornerExtraSmall
 import dev.goodwy.rphone.controller.lock.AppLockManager
-import dev.goodwy.rphone.modal.data.Contact
-import dev.goodwy.rphone.modal.`interface`.IContactsRepository
+import dev.goodwy.rphone.model.data.Contact
+import dev.goodwy.rphone.model.`interface`.IContactsRepository
 import dev.goodwy.rphone.view.components.RillAvatar
 import dev.goodwy.rphone.view.components.RillSelectionDialog
 import dev.goodwy.rphone.view.components.Title

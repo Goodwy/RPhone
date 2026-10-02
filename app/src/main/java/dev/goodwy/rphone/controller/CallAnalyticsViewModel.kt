@@ -6,8 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.PreferenceManager
-import dev.goodwy.rphone.modal.`interface`.ICallLogRepository
-import dev.goodwy.rphone.modal.data.CallLogEntry
+import dev.goodwy.rphone.model.`interface`.ICallLogRepository
+import dev.goodwy.rphone.model.data.CallLogEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

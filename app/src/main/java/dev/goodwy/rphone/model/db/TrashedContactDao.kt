@@ -1,4 +1,4 @@
-package dev.goodwy.rphone.modal.db
+package dev.goodwy.rphone.model.db
 
 import androidx.room.*
 

@@ -1,4 +1,4 @@
-package dev.goodwy.rphone.modal.`interface`
+package dev.goodwy.rphone.model.`interface`
 
 import android.telecom.Call
 import android.telecom.CallAudioState

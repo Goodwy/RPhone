@@ -46,8 +46,8 @@ import dev.goodwy.rphone.controller.util.makeCall
 import dev.goodwy.rphone.controller.util.placeCallWithSimPreference
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.util.formatPhoneNumber
-import dev.goodwy.rphone.modal.data.CallLogEntry
-import dev.goodwy.rphone.modal.data.CallLogFilter
+import dev.goodwy.rphone.model.data.CallLogEntry
+import dev.goodwy.rphone.model.data.CallLogFilter
 import dev.goodwy.rphone.view.components.*
 import dev.goodwy.rphone.view.theme.MyColors.bottomBarColor
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
