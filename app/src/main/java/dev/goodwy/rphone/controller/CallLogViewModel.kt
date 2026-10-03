@@ -24,8 +24,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.json.JSONArray
-import org.json.JSONObject
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import java.io.File
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -193,74 +193,19 @@ class CallLogViewModel(
 
     // ── Disk cache helpers ────────────────────────────────────────────────────
 
+    private val json = Json { ignoreUnknownKeys = true }
+
     private suspend fun saveToDisk(logs: List<CallLogEntry>) = withContext(Dispatchers.IO) {
         try {
-            val arr = JSONArray()
-            logs.forEach { e ->
-                val obj = JSONObject()
-                obj.put("id", e.id)
-                obj.put("number", e.number)
-                obj.put("name", e.name ?: e.number)
-                obj.put("type", e.type)
-                obj.put("date", e.date)
-                obj.put("duration", e.duration)
-                obj.put("photoUri", e.photoUri ?: "")
-                obj.put("contactId", e.contactId ?: "")
-                obj.put("simLabel", e.simLabel ?: "")
-                obj.put("isBlocked", e.isBlocked)
-                val typesArr = JSONArray()
-                e.types.forEach { typesArr.put(it) }
-                obj.put("types", typesArr)
-                val idsArr = JSONArray()
-                e.ids.forEach { idsArr.put(it) }
-                obj.put("ids", idsArr)
-                obj.put("isCallerIdName", e.isCallerIdName)
-                obj.put("phoneType", e.phoneType ?: -1)
-                obj.put("phoneLabel", e.phoneLabel ?: "")
-                arr.put(obj)
-            }
-            cacheFile.writeText(arr.toString())
+            val jsonText = json.encodeToString(logs)
+            cacheFile.writeText(jsonText)
         } catch (_: Exception) {}
     }
 
     private suspend fun loadFromDisk(): List<CallLogEntry> = withContext(Dispatchers.IO) {
         try {
             if (!cacheFile.exists()) return@withContext emptyList()
-            val arr = JSONArray(cacheFile.readText())
-            val list = mutableListOf<CallLogEntry>()
-            for (i in 0 until arr.length()) {
-                val obj = arr.getJSONObject(i)
-                val typesArr = obj.optJSONArray("types")
-                val types = mutableListOf<Int>()
-                if (typesArr != null) {
-                    for (j in 0 until typesArr.length()) types.add(typesArr.getInt(j))
-                }
-                val idsArr = obj.optJSONArray("ids")
-                val ids = mutableListOf<Long>()
-                if (idsArr != null) {
-                    for (j in 0 until idsArr.length()) ids.add(idsArr.getLong(j))
-                }
-                list.add(
-                    CallLogEntry(
-                        id = obj.getLong("id"),
-                        number = obj.getString("number"),
-                        name = obj.getString("name").ifEmpty { null },
-                        type = obj.getInt("type"),
-                        date = obj.getLong("date"),
-                        duration = obj.getLong("duration"),
-                        photoUri = obj.getString("photoUri").ifEmpty { null },
-                        contactId = obj.getString("contactId").ifEmpty { null },
-                        simLabel = obj.getString("simLabel").ifEmpty { null },
-                        isBlocked = obj.getBoolean("isBlocked"),
-                        types = types,
-                        ids = ids,
-                        isCallerIdName = obj.optBoolean("isCallerIdName", false),
-                        phoneType = obj.getInt("phoneType"),
-                        phoneLabel = obj.getString("phoneLabel").ifEmpty { null }
-                    )
-                )
-            }
-            list
+            json.decodeFromString<List<CallLogEntry>>(cacheFile.readText())
         } catch (_: Exception) {
             emptyList()
         }
