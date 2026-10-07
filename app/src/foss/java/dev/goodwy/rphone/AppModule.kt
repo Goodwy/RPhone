@@ -44,7 +44,7 @@ val appModule = module {
         ContactsRepository(androidContext(), get(), get())
     }
     single<ICallLogRepository> {
-        CallLogRepository(androidContext(), androidContext().contentResolver,  get())
+        CallLogRepository(androidContext(), androidContext().contentResolver, get(), get())
     }
     single {
         PreferenceManager(androidContext())

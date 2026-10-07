@@ -2,9 +2,11 @@ package dev.goodwy.rphone.modal.data
 
 import android.provider.ContactsContract.CommonDataKinds.Email
 import android.provider.ContactsContract.CommonDataKinds.Phone
+import androidx.compose.runtime.Immutable
 import dev.goodwy.rphone.controller.util.forceLtr
 import kotlinx.serialization.Serializable
 
+@Immutable
 @Serializable
 data class Contact(
     val id: String,
