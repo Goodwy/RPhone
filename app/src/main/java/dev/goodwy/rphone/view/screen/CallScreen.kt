@@ -1182,17 +1182,20 @@ fun ExpressiveCallScreen(
         when (biometricType) {
             "system" -> {
                 val activity = callActivity ?: run { onBiometricFail(); return }
-                AppLockManager.authenticate(
-                    activity = activity,
-                    title = stringResource(R.string.verify_your_identity_to_access_call),
-                    onSuccess = {
-                        callBiometricUnlocked = true
-                        biometricGatesScreen = false
-                        showCallBiometricUnlock = false
-                        pendingAction?.invoke(); pendingAction = null
-                    },
-                    onError = { _, _ -> onBiometricFail()}
-                )
+                val titleText = stringResource(R.string.verify_your_identity_to_access_call)
+                LaunchedEffect(showCallBiometricUnlock) {
+                    AppLockManager.authenticate(
+                        activity = activity,
+                        title = titleText,
+                        onSuccess = {
+                            callBiometricUnlocked = true
+                            biometricGatesScreen = false
+                            showCallBiometricUnlock = false
+                            pendingAction?.invoke(); pendingAction = null
+                        },
+                        onError = { _, _ -> onBiometricFail() }
+                    )
+                }
             }
             "pin" -> {
                 PinSetupDialog(

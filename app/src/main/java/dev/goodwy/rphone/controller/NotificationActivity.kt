@@ -26,9 +26,16 @@ class NotificationActivity : Activity() {
         when (intent.action) {
             ACTION_CALL -> {
                 val callUri = Uri.fromParts("tel", number, null)
-                Intent(Intent.ACTION_CALL, callUri).apply {
+                val callIntent = Intent(Intent.ACTION_CALL, callUri).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    startActivity(this)
+                }
+                try {
+                    startActivity(callIntent)
+                } catch (_: Exception) {
+                    val dialIntent = Intent(Intent.ACTION_DIAL, callUri).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    startActivity(dialIntent)
                 }
             }
             ACTION_SMS -> {

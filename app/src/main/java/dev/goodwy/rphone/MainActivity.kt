@@ -170,19 +170,22 @@ class MainActivity : FragmentActivity() {
                         when (biometricType) {
                             "system" -> {
                                 val activity = this@MainActivity
-                                AppLockManager.authenticate(
-                                    activity = activity,
-                                    title = stringResource(R.string.verify_your_identity_to_continue),
-                                    onSuccess = {
-                                        isAppLocked = false
-                                    },
-                                    onError = { code, _ ->
-                                        // Code 5 = ERROR_CANCELED (the user clicked ‘Cancel’)
-                                        if (code != 5) {
-                                            activity.finish()
+                                val titleText = stringResource(R.string.verify_your_identity_to_continue)
+                                LaunchedEffect(Unit) {
+                                    AppLockManager.authenticate(
+                                        activity = activity,
+                                        title = titleText,
+                                        onSuccess = {
+                                            isAppLocked = false
+                                        },
+                                        onError = { code, _ ->
+                                            // Code 5 = ERROR_CANCELED (the user clicked ‘Cancel’)
+                                            if (code != 5) {
+                                                activity.finish()
+                                            }
                                         }
-                                    }
-                                )
+                                    )
+                                }
                             }
                             "pin" -> {
                                 dev.goodwy.rphone.view.screen.settings.PinSetupDialog(
@@ -702,7 +705,6 @@ class MainActivity : FragmentActivity() {
         purchaseHelper.handleNewIntent(intent, this)
     }
 
-    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     private fun handleIntent(intent: Intent?, navController: androidx.navigation.NavController) {
         intent ?: return
         val target = mainViewModel.getNavigationTarget(intent, this) ?: return
@@ -712,6 +714,7 @@ class MainActivity : FragmentActivity() {
             is NavigationTarget.Recents -> {
                 try {
                     val telecomManager = getSystemService(Context.TELECOM_SERVICE) as? android.telecom.TelecomManager
+                    @Suppress("MissingPermission")
                     telecomManager?.cancelMissedCallsNotification()
                 } catch (e: Exception) {
                     e.printStackTrace()

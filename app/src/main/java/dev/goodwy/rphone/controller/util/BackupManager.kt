@@ -63,9 +63,12 @@ object BackupManager {
                         entry.name.startsWith("notes/") -> {
                             val fileName = entry.name.removePrefix("notes/")
                             if (fileName.isNotEmpty()) {
-                                val noteFile = File(NoteManager.getNotesDir(context), fileName)
-                                noteFile.parentFile?.mkdirs()
-                                FileOutputStream(noteFile).use { zip.copyTo(it) }
+                                val notesDir = NoteManager.getNotesDir(context)
+                                val noteFile = File(notesDir, fileName)
+                                if (noteFile.canonicalPath.startsWith(notesDir.canonicalPath)) {
+                                    noteFile.parentFile?.mkdirs()
+                                    FileOutputStream(noteFile).use { zip.copyTo(it) }
+                                }
                             }
                         }
                     }
