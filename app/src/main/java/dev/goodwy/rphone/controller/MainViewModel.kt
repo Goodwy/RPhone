@@ -46,7 +46,9 @@ class MainViewModel(private val prefs: PreferenceManager) : ViewModel() {
             Intent.ACTION_DIAL -> {
                 if (data?.scheme == "tel") {
                     NavigationTarget.Dialpad(data.schemeSpecificPart)
-                } else null
+                } else {
+                    NavigationTarget.Dialpad("")
+                }
             }
             Intent.ACTION_CALL -> {
                 if (data?.scheme == "tel") {

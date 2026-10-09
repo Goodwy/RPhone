@@ -609,18 +609,21 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
     if (showVerification) {
         when (biometricsType) {
             "system" -> {
-                AppLockManager.authenticate(
-                    activity = context as FragmentActivity,
-                    title = stringResource(R.string.verify_your_identity_to_continue),
-                    onSuccess = {
-                        showVerification = false
-                        isVerified = true
-                    },
-                    onError = { _, _ ->
-                        showVerification = false
-                        navigateBack()
-                    }
-                )
+                val titleText = stringResource(R.string.verify_your_identity_to_continue)
+                LaunchedEffect(showVerification) {
+                    AppLockManager.authenticate(
+                        activity = context as FragmentActivity,
+                        title = titleText,
+                        onSuccess = {
+                            showVerification = false
+                            isVerified = true
+                        },
+                        onError = { _, _ ->
+                            showVerification = false
+                            navigateBack()
+                        }
+                    )
+                }
             }
             "pin" -> {
                 PinSetupDialog(

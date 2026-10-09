@@ -108,7 +108,7 @@ object AppLockManager {
             prompt.authenticate(promptInfo)
         } catch (e: Exception) {
             Log.e(TAG, "BiometricPrompt authentication failed to launch: ${e.message}", e)
-//            onError(e.message ?: "Authentication error")
+            onError(-1, e.message ?: "Authentication error")
         }
     }
 }
