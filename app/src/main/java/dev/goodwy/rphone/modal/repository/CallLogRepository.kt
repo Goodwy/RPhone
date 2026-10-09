@@ -25,10 +25,10 @@ import kotlinx.coroutines.withContext
 class CallLogRepository(
     private val context: Context,
     private val contentResolver: ContentResolver,
-    private val contactsRepo: IContactsRepository
+    private val contactsRepo: IContactsRepository,
+    private val preferenceManager: PreferenceManager
 ) : ICallLogRepository {
 
-    private val preferenceManager = PreferenceManager(context)
     private val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as? TelecomManager
 
     private var cachedContactMap: Map<String, Contact>? = null

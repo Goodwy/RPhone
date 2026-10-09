@@ -120,12 +120,13 @@ import dev.goodwy.rphone.view.components.parseTabOrder
 import dev.goodwy.rphone.view.components.performAppHaptic
 import dev.goodwy.rphone.view.theme.color_call_button
 import dev.goodwy.rphone.view.theme.isLandscapeMode
+import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.context.GlobalContext
 
 class MainActivity : FragmentActivity() {
     private var intentState by mutableStateOf<Intent?>(null)
-    private lateinit var prefs: PreferenceManager
+    private val prefs: PreferenceManager by inject()
     private val callViewModel: CallViewModel by viewModel()
     private val mainViewModel: MainViewModel by viewModel()
     private var isAppLocked by mutableStateOf(false)
@@ -137,8 +138,6 @@ class MainActivity : FragmentActivity() {
         // enableEdgeToEdge() triggers Adreno GPU driver SIGSEGV on first RenderThread draw.
         // Edge-to-edge is set via theme XML instead (windowDrawsSystemBarBackgrounds etc.).
         WindowCompat.setDecorFitsSystemWindows(window, false)
-
-        prefs = GlobalContext.get().get<PreferenceManager>()
 
         if (AppLockManager.isLocked(prefs)) {
             isAppLocked = true
