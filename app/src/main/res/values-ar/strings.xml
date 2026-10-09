@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" dir="rtl">
+    <string name="app_launcher_name">الهاتف</string>
+
     <string name="widget_description">المكالمات الأخيرة مع الاتصال السريع</string>
     <string name="copy" tools:ignore="PrivateResource">نسخ</string>
     <string name="copy_path">نسخ المسار</string>
@@ -44,6 +46,7 @@
     <string name="reset">إعادة تعيين</string>
     <string name="add">إضافة</string>
     <string name="use_number">استخدام الرقم: %s</string>
+    <string name="scroll_to_top">التمرير إلى الأعلى</string>
 
     <!-- Search -->
     <string name="search">بحث</string>
@@ -164,6 +167,9 @@
     <string name="custom_font_subtitle">اختر ملف .ttf لاستخدامه في جميع أنحاء التطبيق</string>
     <string name="font_size">حجم الخط</string>
     <string name="rounding_radius">نصف قطر الاستدارة</string>
+    <string name="app_icon">أيقونة التطبيق</string>
+    <string name="app_icon_subtitle">اختر أيقونة التطبيق المعروضة على شاشتك الرئيسية</string>
+    <string name="app_name_change">اسم التطبيق</string>
     <string name="visual_effects">تأثيرات بصرية</string>
     <string name="not_supported_on_this_device">غير مدعوم على هذا الجهاز</string>
     <string name="not_supported_on_this_device_subtitle">يتطلب تأثير التمويه والزجاج السائل Android 12 أو أحدث</string>
@@ -251,6 +257,15 @@
     <string name="auto_speaker_subtitle">التبديل تلقائيًا إلى مكبر الصوت عندما يكون الهاتف بعيدًا عن الأذن، والعودة إلى سماعة الأذن عندما يكون قريبًا</string>
     <string name="fullscreen_calls">مكالمات ملء الشاشة</string>
     <string name="fullscreen_calls_subtitle">يتم دائمًا عرض المكالمات الواردة في وضع ملء الشاشة</string>
+
+    <!-- Speed dial -->
+    <string name="settings_speed_dial_title">الاتصال السريع</string>
+    <string name="settings_speed_dial_enable">تمكين الاتصال السريع</string>
+    <string name="settings_speed_dial_enable_supporting">اضغط مطولًا على مفتاح للاتصال بالرقم المعيَّن</string>
+    <string name="settings_speed_dial_assignments_header">التعيينات</string>
+    <string name="settings_speed_dial_not_assigned">غير معيَّن</string>
+    <string name="settings_speed_dial_no_number">لا يوجد رقم</string>
+    <string name="settings_speed_dial_open">فتح إعدادات الاتصال السريع؟</string>
 
     <string name="quick_response">رد سريع</string>
     <string name="quick_responses">الردود السريعة</string>
@@ -657,6 +672,7 @@
     <!-- Dialpad -->
     <string name="add_pause">إضافة توقف لمدة ثانيتين</string>
     <string name="add_wait">إضافة انتظار</string>
+    <string name="suggested">مقترح</string>
 
     <!-- Onboarding -->
     <string name="skip">تخطي</string>

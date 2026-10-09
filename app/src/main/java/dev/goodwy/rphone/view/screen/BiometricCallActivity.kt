@@ -111,12 +111,15 @@ private fun BiometricFloatingUi(
     ) {
         when (biometricType) {
             "system" -> {
-                AppLockManager.authenticate(
-                    activity = activity,
-                    title = stringResource(R.string.verify_your_identity_to_access_call),
-                    onSuccess = { onSuccess() },
-                    onError = { _, _ -> onDismiss()}
-                )
+                val titleText = stringResource(R.string.verify_your_identity_to_access_call)
+                LaunchedEffect(Unit) {
+                    AppLockManager.authenticate(
+                        activity = activity,
+                        title = titleText,
+                        onSuccess = { onSuccess() },
+                        onError = { _, _ -> onDismiss() }
+                    )
+                }
             }
             "pin" -> {
                 Surface(

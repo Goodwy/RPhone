@@ -42,6 +42,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.OpenInNew
+import androidx.compose.material.icons.automirrored.rounded.Send
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.rounded.Add
@@ -2387,7 +2388,7 @@ fun EditField(
                 modifier = Modifier.padding(top = 8.dp)
             ) {
                 Icon(
-                    Icons.Default.ArrowDropDown,
+                    if (showLabelEditor) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
                     stringResource(R.string.change_label),
                     tint = MaterialTheme.colorScheme.primary
                 )
@@ -2403,7 +2404,10 @@ fun EditField(
                     ) {
                         Icon(icon, null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(currentLabel)
+                        Text(currentLabel,
+                            maxLines = 1,
+                            overflow = TextOverflow.MiddleEllipsis
+                        )
                     }
                 },
                 modifier = Modifier
@@ -2483,31 +2487,48 @@ fun EditField(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(start = 20.dp, end = 8.dp, top = 4.dp, bottom = 8.dp),
+                                .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            OutlinedTextField(
+                            TextField(
                                 value = customLabelText,
                                 onValueChange = { customLabelText = it },
                                 placeholder = { Text(stringResource(R.string.custom_label)) },
                                 modifier = Modifier.weight(1f),
                                 singleLine = true,
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            IconButton(
-                                onClick = {
-                                    if (customLabelText.isNotBlank()) {
-                                        currentLabel = customLabelText
-                                        onLabelChange?.invoke(customLabelText, null) // null means custom type
-                                        showLabelEditor = false
-                                        showCustomLabelInput = false
-                                        customLabelText = ""
+                                shape = CircleShape,
+                                colors = TextFieldDefaults.colors(
+                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                                    unfocusedIndicatorColor = Color.Transparent,
+                                    focusedIndicatorColor = Color.Transparent
+                                ),
+                                trailingIcon = {
+                                    IconButton(
+                                        modifier = Modifier.width(72.dp).padding(horizontal = 8.dp),
+                                        onClick = {
+                                            if (customLabelText.isNotBlank()) {
+                                                currentLabel = customLabelText
+                                                onLabelChange?.invoke(customLabelText, null) // null means custom type
+                                                showLabelEditor = false
+                                                showCustomLabelInput = false
+                                                customLabelText = ""
+                                            }
+                                        },
+                                        colors = IconButtonDefaults.iconButtonColors(
+                                            containerColor = if (customLabelText.isNotBlank()) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer
+                                        ),
+                                        shape = CircleShape,
+                                        enabled = customLabelText.isNotBlank()
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Add,
+                                            contentDescription = stringResource(R.string.save),
+                                        )
                                     }
                                 }
-                            ) {
-                                Icon(Icons.Default.Check, stringResource(R.string.save))
-                            }
+                            )
                         }
                     } else {
                         Row(
@@ -2677,7 +2698,7 @@ fun EditFieldDate(
                 modifier = Modifier.padding(top = 8.dp)
             ) {
                 Icon(
-                    Icons.Default.ArrowDropDown,
+                    if (showLabelEditor) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
                     stringResource(R.string.change_label),
                     tint = MaterialTheme.colorScheme.primary
                 )
@@ -2712,7 +2733,10 @@ fun EditFieldDate(
                     ) {
                         Icon(icon, null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(currentLabel)
+                        Text(currentLabel,
+                            maxLines = 1,
+                            overflow = TextOverflow.MiddleEllipsis
+                        )
                     }
                 },
                 modifier = Modifier
@@ -2806,31 +2830,48 @@ fun EditFieldDate(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(start = 20.dp, end = 8.dp, top = 4.dp, bottom = 8.dp),
+                                .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            OutlinedTextField(
+                            TextField(
                                 value = customLabelText,
                                 onValueChange = { customLabelText = it },
                                 placeholder = { Text(stringResource(R.string.custom_label)) },
                                 modifier = Modifier.weight(1f),
                                 singleLine = true,
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            IconButton(
-                                onClick = {
-                                    if (customLabelText.isNotBlank()) {
-                                        currentLabel = customLabelText
-                                        onLabelChange?.invoke(customLabelText, null)
-                                        showLabelEditor = false
-                                        showCustomLabelInput = false
-                                        customLabelText = ""
+                                shape = CircleShape,
+                                colors = TextFieldDefaults.colors(
+                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                                    unfocusedIndicatorColor = Color.Transparent,
+                                    focusedIndicatorColor = Color.Transparent
+                                ),
+                                trailingIcon = {
+                                    IconButton(
+                                        modifier = Modifier.width(72.dp).padding(horizontal = 8.dp),
+                                        onClick = {
+                                            if (customLabelText.isNotBlank()) {
+                                                currentLabel = customLabelText
+                                                onLabelChange?.invoke(customLabelText, null)
+                                                showLabelEditor = false
+                                                showCustomLabelInput = false
+                                                customLabelText = ""
+                                            }
+                                        },
+                                        colors = IconButtonDefaults.iconButtonColors(
+                                            containerColor = if (customLabelText.isNotBlank()) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer
+                                        ),
+                                        shape = CircleShape,
+                                        enabled = customLabelText.isNotBlank()
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Add,
+                                            contentDescription = stringResource(R.string.save),
+                                        )
                                     }
                                 }
-                            ) {
-                                Icon(Icons.Default.Check, stringResource(R.string.save))
-                            }
+                            )
                         }
                     } else {
                         Row(
@@ -2839,7 +2880,7 @@ fun EditFieldDate(
                                 .clickable {
                                     showCustomLabelInput = true
                                 }
-                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                                .padding(horizontal = 20.dp, vertical = 12.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {

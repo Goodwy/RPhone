@@ -28,6 +28,7 @@ import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.rounded.Autorenew
 import androidx.compose.material.icons.rounded.Downloading
 import androidx.compose.material.icons.rounded.ErrorOutline
+import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -557,7 +558,7 @@ private fun HeroStatusIcon(checkState: CheckState) {
 
     val (icon, iconBgColor, iconTintColor) = when {
         checkState is CheckState.Checking -> Triple(
-            Icons.Rounded.SystemUpdate,
+            Icons.Rounded.Refresh,
             MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
             MaterialTheme.colorScheme.primary
         )

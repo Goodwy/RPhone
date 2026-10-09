@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" dir="rtl">
+    <string name="app_launcher_name">تلفن</string>
+
     <string name="widget_description">تماس‌های اخیر با شماره‌گیری سریع</string>
     <string name="copy" tools:ignore="PrivateResource">کپی</string>
     <string name="copy_path">کپی مسیر</string>
@@ -44,6 +46,7 @@
     <string name="reset">بازنشانی</string>
     <string name="add">افزودن</string>
     <string name="use_number">استفاده از شماره: %s</string>
+    <string name="scroll_to_top">پیمایش به بالا</string>
 
     <!-- Search -->
     <string name="search">جستجو</string>
@@ -163,6 +166,9 @@
     <string name="custom_font_subtitle">یک فایل .ttf برای استفاده در سراسر برنامه انتخاب کنید</string>
     <string name="font_size">اندازه قلم</string>
     <string name="rounding_radius">شعاع گرد کردن</string>
+    <string name="app_icon">نماد برنامه</string>
+    <string name="app_icon_subtitle">نماد برنامه را که در صفحه اصلی نمایش داده می‌شود انتخاب کنید</string>
+    <string name="app_name_change">نام برنامه</string>
     <string name="visual_effects">جلوه‌های بصری</string>
     <string name="not_supported_on_this_device">در این دستگاه پشتیبانی نمی‌شود</string>
     <string name="not_supported_on_this_device_subtitle">محو و شیشه مایع نیاز به Android 12 یا بالاتر دارد</string>
@@ -250,6 +256,15 @@
     <string name="auto_speaker_subtitle">به طور خودکار به بلندگو تغییر دهید زمانی که گوشی از گوش دور است، و زمانی که نزدیک است به گوشی برگردید</string>
     <string name="fullscreen_calls">تماس‌های تمام صفحه</string>
     <string name="fullscreen_calls_subtitle">تماس‌های ورودی همیشه در حالت تمام صفحه نمایش داده می‌شوند</string>
+
+    <!-- Speed dial -->
+    <string name="settings_speed_dial_title">شماره‌گیری سریع</string>
+    <string name="settings_speed_dial_enable">فعال‌سازی شماره‌گیری سریع</string>
+    <string name="settings_speed_dial_enable_supporting">برای تماس با شماره تخصیص‌یافته، یک کلید را طولانی فشار دهید</string>
+    <string name="settings_speed_dial_assignments_header">تخصیص‌ها</string>
+    <string name="settings_speed_dial_not_assigned">تخصیص نیافته</string>
+    <string name="settings_speed_dial_no_number">بدون شماره</string>
+    <string name="settings_speed_dial_open">تنظیمات شماره‌گیری سریع باز شود؟</string>
 
     <string name="quick_response">پاسخ سریع</string>
     <string name="quick_responses">پاسخ‌های سریع</string>
@@ -644,6 +659,7 @@
     <!-- Dialpad -->
     <string name="add_pause">افزودن مکث 2 ثانیه‌ای</string>
     <string name="add_wait">افزودن انتظار</string>
+    <string name="suggested">پیشنهادی</string>
 
     <!-- Onboarding -->
     <string name="skip">رد شدن</string>

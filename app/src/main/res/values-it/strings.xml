@@ -1,7 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name" translatable="false">Rill Phone</string>
-    <string name="call_screen_sim_label" translatable="false">SIM %1$s</string>
-    <string name="label_unknown" translatable="false">Unknown</string>
+    <string name="app_launcher_name">Telefono</string>
 
     <string name="widget_description">Chiamate recenti con composizione rapida</string>
     <string name="copy" tools:ignore="PrivateResource">Copia</string>
@@ -47,6 +45,7 @@
     <string name="reset">Ripristina</string>
     <string name="add">Aggiungi</string>
     <string name="use_number">Usa numero: %s</string>
+    <string name="scroll_to_top">Scorri in alto</string>
 
     <!-- Search -->
     <string name="search">Cerca</string>
@@ -166,6 +165,9 @@
     <string name="custom_font_subtitle">Scegli un file .ttf da usare nell\'app</string>
     <string name="font_size">Dimensione carattere</string>
     <string name="rounding_radius">Raggio di arrotondamento</string>
+    <string name="app_icon">Icona dell\'app</string>
+    <string name="app_icon_subtitle">Scegli l\'icona dell\'app visualizzata nella schermata Home</string>
+    <string name="app_name_change">Nome dell\'app</string>
     <string name="visual_effects">Effetti visivi</string>
     <string name="not_supported_on_this_device">Non supportato su questo dispositivo</string>
     <string name="not_supported_on_this_device_subtitle">Sfocatura e Vetro Liquido richiedono Android 12 o superiore</string>
@@ -253,6 +255,15 @@
     <string name="auto_speaker_subtitle">Passa automaticamente all\'altoparlante quando il telefono è lontano dall\'orecchio e torna alla capsula quando è vicino</string>
     <string name="fullscreen_calls">Chiamate a schermo intero</string>
     <string name="fullscreen_calls_subtitle">Le chiamate in entrata vengono sempre visualizzate a schermo intero</string>
+
+    <!-- Speed dial -->
+    <string name="settings_speed_dial_title">Composizione rapida</string>
+    <string name="settings_speed_dial_enable">Attiva composizione rapida</string>
+    <string name="settings_speed_dial_enable_supporting">Tieni premuto un tasto per chiamare il numero assegnato</string>
+    <string name="settings_speed_dial_assignments_header">Assegnazioni</string>
+    <string name="settings_speed_dial_not_assigned">Non assegnato</string>
+    <string name="settings_speed_dial_no_number">Nessun numero</string>
+    <string name="settings_speed_dial_open">Aprire le impostazioni della composizione rapida?</string>
 
     <string name="quick_response">Risposta rapida</string>
     <string name="quick_responses">Risposte rapide</string>
@@ -649,6 +660,7 @@
     <!-- Dialpad -->
     <string name="add_pause">Aggiungi pausa di 2 sec</string>
     <string name="add_wait">Aggiungi attesa</string>
+    <string name="suggested">Suggeriti</string>
 
     <!-- Onboarding -->
     <string name="skip">Salta</string>

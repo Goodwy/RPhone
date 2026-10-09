@@ -356,13 +356,55 @@ class ContactsViewModel(
         }
     }
 
-    fun deleteContact(contactId: String) {
-        viewModelScope.launch {
-            if (preferenceManager.isContactsTrashEnabled()) {
+    private suspend fun trashContact(contactId: String) {
+        if (contactId.startsWith("p")) {
+            // Private contact—keep it as is
+            val fullContact = contactsRepo.getContactById(contactId)
+            if (fullContact != null) {
+                trashedContactDao.insert(TrashedContactEntity.fromContact(fullContact))
+            }
+            return
+        }
+
+        val rawContactInfos = contactsRepo.getRawContactsForContact(contactId)
+
+        if (rawContactInfos.size > 1) {
+            // Combined Contact: Saving Each Source Separately
+            var savedCount = 0
+
+            rawContactInfos.forEach { rawInfo ->
+                val rawContactData = contactsRepo.getRawContactData(rawInfo.rawContactId)
+                if (rawContactData != null) {
+                    // We're changing the account to the one that RawContact is actually linked to
+                    val contactWithAccount = rawContactData.copy(
+                        accountName = rawInfo.accountName,
+                        accountType = rawInfo.accountType
+                    )
+                    trashedContactDao.insert(TrashedContactEntity.fromContact(contactWithAccount))
+                    savedCount++
+                }
+            }
+
+            // If no RawContact could be read, fall back to the full contact
+            if (savedCount == 0) {
                 val fullContact = contactsRepo.getContactById(contactId)
                 if (fullContact != null) {
                     trashedContactDao.insert(TrashedContactEntity.fromContact(fullContact))
                 }
+            }
+        } else {
+            // Single contact
+            val fullContact = contactsRepo.getContactById(contactId)
+            if (fullContact != null) {
+                trashedContactDao.insert(TrashedContactEntity.fromContact(fullContact))
+            }
+        }
+    }
+
+    fun deleteContact(contactId: String) {
+        viewModelScope.launch {
+            if (preferenceManager.isContactsTrashEnabled()) {
+                trashContact(contactId)
             }
             contactsRepo.deleteContact(contactId)
 
@@ -380,9 +422,8 @@ class ContactsViewModel(
     fun deleteContacts(contactIds: List<String>) {
         viewModelScope.launch {
             if (preferenceManager.isContactsTrashEnabled()) {
-                val toTrash = contactIds.mapNotNull { contactsRepo.getContactById(it) }
-                if (toTrash.isNotEmpty()) {
-                    trashedContactDao.insertAll(toTrash.map { TrashedContactEntity.fromContact(it) })
+                contactIds.forEach { contactId ->
+                    trashContact(contactId)
                 }
             }
             contactsRepo.deleteContacts(contactIds)

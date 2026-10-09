@@ -1,4 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_launcher_name">Telefon</string>
+
     <string name="widget_description">Senaste samtal med snabbnummer</string>
     <string name="copy" tools:ignore="PrivateResource">Kopiera</string>
     <string name="copy_path">Kopiera sökväg</string>
@@ -43,6 +45,7 @@
     <string name="reset">Återställ</string>
     <string name="add">Lägg till</string>
     <string name="use_number">Använd nummer: %s</string>
+    <string name="scroll_to_top">Rulla till toppen</string>
 
     <!-- Search -->
     <string name="search">Sök</string>
@@ -163,6 +166,9 @@
     <string name="custom_font_subtitle">Välj en .ttf-fil för användning i appen</string>
     <string name="font_size">Teckenstorlek</string>
     <string name="rounding_radius">Avrundningsradie</string>
+    <string name="app_icon">Appikon</string>
+    <string name="app_icon_subtitle">Välj appikonen som visas på din startskärm</string>
+    <string name="app_name_change">Appnamn</string>
     <string name="visual_effects">Visuella effekter</string>
     <string name="not_supported_on_this_device">Stöds inte på den här enheten</string>
     <string name="not_supported_on_this_device_subtitle">Oskärpa och Liquid Glass kräver Android 12 eller senare</string>
@@ -250,6 +256,15 @@
     <string name="auto_speaker_subtitle">Växla automatiskt till högtalare när telefonen är borta från örat, och tillbaka till hörluren när den är nära</string>
     <string name="fullscreen_calls">Helskärmssamtal</string>
     <string name="fullscreen_calls_subtitle">Inkommande samtal visas alltid i helskärmsläge</string>
+
+    <!-- Speed dial -->
+    <string name="settings_speed_dial_title">Snabbuppringning</string>
+    <string name="settings_speed_dial_enable">Aktivera snabbuppringning</string>
+    <string name="settings_speed_dial_enable_supporting">Håll in en tangent för att ringa det tilldelade numret</string>
+    <string name="settings_speed_dial_assignments_header">Tilldelningar</string>
+    <string name="settings_speed_dial_not_assigned">Ej tilldelad</string>
+    <string name="settings_speed_dial_no_number">Inget nummer</string>
+    <string name="settings_speed_dial_open">Öppna inställningar för snabbuppringning?</string>
 
     <string name="quick_response">Snabbsvar</string>
     <string name="quick_responses">Snabbsvar</string>
@@ -644,6 +659,7 @@
     <!-- Dialpad -->
     <string name="add_pause">Lägg till 2-sekunders paus</string>
     <string name="add_wait">Lägg till väntan</string>
+    <string name="suggested">Föreslagen</string>
 
     <!-- Onboarding -->
     <string name="skip">Hoppa över</string>

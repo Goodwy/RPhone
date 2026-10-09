@@ -36,6 +36,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.repeatable
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.CircleShape
@@ -46,6 +47,8 @@ import androidx.compose.material.icons.rounded.Check
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.composed
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -63,7 +66,49 @@ import dev.goodwy.rphone.cardCornerExtraSmall
 import dev.goodwy.rphone.cardSpacedBy
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import dev.goodwy.rphone.view.theme.MyColors.cardColorSelected
+import dev.goodwy.rphone.view.theme.RillShapeDefaults
 import dev.goodwy.rphone.view.theme.customColors
+import dev.goodwy.rphone.view.theme.rillCornerDp
+
+/**
+ * Calculates continuous grouped card corner shapes for items in a section.
+ * First item: rounded top corners
+ * Middle items: subtle inner corners
+ * Last item: rounded bottom corners
+ * Single item: all corners rounded
+ */
+fun rillGroupedItemShape(
+    index: Int,
+    total: Int,
+    prefs: PreferenceManager,
+    cornerRadius: Dp? = null,
+    innerCorner: Dp = 4.dp
+): Shape {
+    val roundness = prefs.getInt(PreferenceManager.KEY_CARD_ROUNDNESS, RillShapeDefaults.DefaultRoundness)
+    val extraLargeCornerDp = cornerRadius ?: rillCornerDp(RillShapeDefaults.BaseExtraLarge, roundness)
+    return when {
+        total <= 1 -> RoundedCornerShape(extraLargeCornerDp)
+        index == 0 -> RoundedCornerShape(topStart = extraLargeCornerDp, topEnd = extraLargeCornerDp, bottomStart = innerCorner, bottomEnd = innerCorner)
+        index == total - 1 -> RoundedCornerShape(topStart = innerCorner, topEnd = innerCorner, bottomStart = extraLargeCornerDp, bottomEnd = extraLargeCornerDp)
+        else -> RoundedCornerShape(innerCorner)
+    }
+}
+
+@Composable
+fun RillGroupedCardContainer(
+    shape: Shape,
+    modifier: Modifier = Modifier,
+    containerColor: Color = cardColor,
+    content: @Composable BoxScope.() -> Unit
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(containerColor),
+        content = content
+    )
+}
 
 // ─── App Haptics Helper ────────────────────────────────────────────────────────
 
@@ -805,6 +850,7 @@ fun RillListItem(
     headline: String? = null,
     supporting: String? = null,
     leadingIcon: ImageVector? = null,
+    leadingImageBitmap: ImageBitmap? = null,
     iconContainerColor: Color? = null,
     iconBgContainerColor: Color? = null,
     trailingIcon: ImageVector? = null,
@@ -880,6 +926,15 @@ fun RillListItem(
                     iconContainerColor = iconContainerColor,
                     iconBgContainerColor = iconBgContainerColor,
                     modifier = modifierLeadingIcon
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+            } else if (leadingImageBitmap != null) {
+                Image(
+                    bitmap = leadingImageBitmap,
+                    contentDescription = null,
+                    modifier = modifierLeadingIcon
+                        .size(44.dp)
+                        .clip(CircleShape)
                 )
                 Spacer(modifier = Modifier.width(16.dp))
             } else {
@@ -1413,12 +1468,13 @@ fun SupportProjectItem(
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxHeight(),
+                    .wrapContentHeight(),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                val isGPlay = BuildConfig.FLAVOR == "gplay"
+                val isFoss = BuildConfig.FLAVOR == "foss"
                 Text(
-                    text = if (isGPlay) stringResource(R.string.project_support)
+                    modifier = Modifier.graphicsLayer { alpha = 0.999f }, // Forces Compose to render the text on a separate layer to which the MIUI 12 inversion does not apply
+                    text = if (!isFoss) stringResource(R.string.project_support)
                             else stringResource(R.string.support_development),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
@@ -1428,12 +1484,12 @@ fun SupportProjectItem(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = if (isGPlay) stringResource(R.string.project_support_summary)
+                    modifier = Modifier.graphicsLayer { alpha = 0.999f }, // Forces Compose to render the text on a separate layer to which the MIUI 12 inversion does not apply
+                    text = if (!isFoss) stringResource(R.string.project_support_summary)
                             else stringResource(R.string.support_development_description3),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.customColors.colorDarkPurple,
                     lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
-//                        maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             }

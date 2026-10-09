@@ -1,8 +1,11 @@
 package dev.goodwy.rphone.view.screen.settings
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.provider.Settings
+import android.telecom.PhoneAccount
 import android.telecom.TelecomManager
 import android.view.Surface
 import androidx.compose.animation.core.animateFloatAsState
@@ -11,6 +14,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Dialpad
 import androidx.compose.material.icons.rounded.CropFree
 import androidx.compose.material.icons.rounded.PictureInPicture
 import androidx.compose.material.icons.rounded.ScreenLockPortrait
@@ -29,6 +33,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.view.components.NavigationIcon
@@ -43,6 +48,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.compose.koinInject
 import androidx.core.net.toUri
 import com.ramcosta.composedestinations.generated.destinations.QuickResponsesScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.SpeedDialScreenDestination
 import dev.goodwy.rphone.view.components.RillSelectListItem
 import dev.goodwy.rphone.view.components.Title
 
@@ -53,13 +59,15 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
     val prefs = koinInject<PreferenceManager>()
     val context = LocalContext.current
 
-    var proximityBg by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_PROXIMITY_SENSOR, true)) }
-    var pocketModePrevention by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_POCKET_MODE, false)) }
-    var floatingCall by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_FLOATING_CALL, false)) }
-    var directCallOnTap by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_DIRECT_CALL_ON_TAP, false)) }
-    var autoSpeaker by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_AUTO_SPEAKER, false)) }
-    var defaultSim by remember { mutableStateOf(prefs.getInt(PreferenceManager.KEY_DEFAULT_SIM, prefs.getDefaultSimIndexDefault())) }
-    var fullscreenCalls by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_ALWAYS_FULLSCREEN_CALLS, false)) }
+    val settingsState by prefs.settingsChanged.collectAsState()
+    var proximityBg by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_PROXIMITY_SENSOR, true)) }
+    var pocketModePrevention by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_POCKET_MODE, false)) }
+    var floatingCall by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_FLOATING_CALL, false)) }
+    var directCallOnTap by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_DIRECT_CALL_ON_TAP, false)) }
+    var autoSpeaker by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_AUTO_SPEAKER, false)) }
+    var defaultSim by remember(settingsState) { mutableStateOf(prefs.getInt(PreferenceManager.KEY_DEFAULT_SIM, prefs.getDefaultSimIndexDefault())) }
+    var fullscreenCalls by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_ALWAYS_FULLSCREEN_CALLS, false)) }
+    var speedDial by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SPEED_DIAL, true)) }
 
     var visible by remember { mutableStateOf(false) }
     val screenAlpha by animateFloatAsState(
@@ -100,22 +108,38 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+
+            item {
+                RillAnimatedSection(delayMs = 30L) {
+                    RillExpressiveCard {
+                        RillListItem(
+                            headline = stringResource(R.string.settings_speed_dial_title),
+                            supporting = if (speedDial) stringResource(R.string.on) else stringResource(
+                                R.string.off
+                            ),
+                            leadingIcon = Icons.Default.Dialpad,
+                            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkIndigo,
+                            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorIndigo,
+                            trailingIcon = Icons.Default.ChevronRight,
+                            onClick = { navigator.navigate(SpeedDialScreenDestination) }
+                        )
+                    }
+                }
+            }
+
             // ── Caller Accounts ───────────────────────────────────────────────
             item {
                 RillAnimatedSection(delayMs = 0L) {
                     Column {
                         SettingsSectionLabel("SIM")
                         RillExpressiveCard {
+                            val simList = getSimSelectionList(R.string.ask_first)
                             RillSelectListItem(
                                 headline = stringResource(R.string.default_sim),
                                 leadingIcon = Icons.Rounded.SimCard,
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
-                                options = listOf(
-                                    stringResource(R.string.ask_first) to 0,
-                                    "SIM 1" to 1,
-                                    "SIM 2" to 2
-                                ),
+                                options = simList,
                                 selectedValue = defaultSim,
                                 onValueChange = { newValue: Int ->
                                     defaultSim = newValue
@@ -260,5 +284,71 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
 
             item { SettingsBottomPadding() }
         }
+    }
+}
+
+@Composable
+fun getSimSelectionList(askFirstResId: Int): List<Pair<String, Int>> {
+    val context = LocalContext.current
+    val askFirstLabel = stringResource(askFirstResId)
+
+    val finalList = mutableListOf<Pair<String, Int>>()
+    finalList.add(askFirstLabel to 0)
+
+    val hasReadPhoneState = ContextCompat.checkSelfPermission(
+        context, Manifest.permission.READ_PHONE_STATE
+    ) == PackageManager.PERMISSION_GRANTED
+
+    if (!hasReadPhoneState) {
+        return remember { finalList }
+    }
+
+    return remember {
+        val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as? TelecomManager
+        if (telecomManager != null) {
+            try {
+                val rawAccounts = telecomManager.callCapablePhoneAccounts
+                val seen = HashSet<String>()
+
+                val validAccounts = rawAccounts.filter { handle ->
+                    val info = try {
+                        telecomManager.getPhoneAccount(handle)
+                    } catch (e: Exception) {
+                        null
+                    }
+
+                    val isSimAccount = info != null &&
+                            info.isEnabled &&
+                            info.hasCapabilities(PhoneAccount.CAPABILITY_SIM_SUBSCRIPTION)
+
+                    if (!isSimAccount) return@filter false
+
+                    val key = info!!.label?.toString().orEmpty() + "|" + info.address?.toString().orEmpty()
+                    seen.add(key)
+                }
+
+                validAccounts.forEachIndexed { index, _ ->
+                    val info = try {
+                        telecomManager.getPhoneAccount(validAccounts[index])
+                    } catch (e: Exception) {
+                        null
+                    }
+
+                    val simNumber = index + 1
+                    val operatorName = info?.label?.toString()
+
+                    val label = if (!operatorName.isNullOrEmpty()) {
+                        "SIM $simNumber: $operatorName"
+                    } else {
+                        "SIM $simNumber"
+                    }
+
+                    finalList.add(label to simNumber)
+                }
+            } catch (e: SecurityException) {
+            }
+        }
+
+        finalList
     }
 }

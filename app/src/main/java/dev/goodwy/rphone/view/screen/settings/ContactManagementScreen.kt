@@ -16,17 +16,16 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.CallMerge
 import androidx.compose.material.icons.automirrored.rounded.CallSplit
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.rounded.AutoFixHigh
 import androidx.compose.material.icons.rounded.Badge
 import androidx.compose.material.icons.rounded.FormatListNumbered
 import androidx.compose.material.icons.rounded.Handyman
-import androidx.compose.material.icons.rounded.Merge
 import androidx.compose.material.icons.rounded.PeopleAlt
 import androidx.compose.material.icons.rounded.Recycling
 import androidx.compose.material.icons.rounded.SortByAlpha
-import androidx.compose.material.icons.rounded.TouchApp
 import androidx.compose.material3.*
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
@@ -320,7 +319,7 @@ fun ContactManagementScreen(
                                 RillListItem(
                                     headline = stringResource(R.string.merging_contacts),
                                     supporting = stringResource(R.string.merging_contacts_subtitle),
-                                    leadingIcon = Icons.Rounded.Merge,
+                                    leadingIcon = Icons.AutoMirrored.Rounded.CallMerge,
                                     iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
                                     iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
                                     trailingIcon = Icons.Default.ChevronRight,

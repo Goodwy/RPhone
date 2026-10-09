@@ -314,33 +314,6 @@ fun QuickResponsesScreen(
                 maxLines = 5
             )
         }
-//        RillDialog(
-//            onDismissRequest = { editingIndex = null },
-//            title = "Edit Quick Response",
-//            icon = Icons.Outlined.Edit,
-//            confirmAction = RillDialogAction(
-//                label = "Save",
-//                enabled = editingText.isNotBlank(),
-//                onClick = {
-//                    val trimmed = editingText.trim()
-//                    if (trimmed.isNotEmpty()) {
-//                        val updated = responses.toMutableList()
-//                        updated[index] = trimmed
-//                        save(updated)
-//                    }
-//                    editingIndex = null
-//                }
-//            )
-//        ) {
-//            OutlinedTextField(
-//                value = editingText,
-//                onValueChange = { editingText = it },
-//                label = { Text("Message text") },
-//                modifier = Modifier.fillMaxWidth(),
-//                shape = RoundedCornerShape(14.dp),
-//                maxLines = 3
-//            )
-//        }
     }
 
     if (showResetConfirm) {
@@ -368,18 +341,5 @@ fun QuickResponsesScreen(
         ) {
             Text(stringResource(R.string.reset_to_defaults_description))
         }
-//        RillConfirmationDialog(
-//            onDismissRequest = { showResetConfirm = false },
-//            onConfirm = {
-//                save(prefs.defaultQuickResponses())
-//                showResetConfirm = false
-//            },
-//            title = "Reset to Defaults",
-//            message = "Restore original preset quick responses?",
-//            confirmLabel = "Reset",
-//            dismissLabel = stringResource(R.string.cancel),
-//            icon = Icons.Outlined.RestartAlt,
-//            isDestructive = true
-//        )
     }
 }

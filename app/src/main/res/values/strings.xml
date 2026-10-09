@@ -1,4 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_launcher_name">Phone</string>
     <string name="app_name" translatable="false">Rill Phone</string>
     <string name="call_screen_sim_label" translatable="false">SIM %1$s</string>
     <string name="label_unknown" translatable="false">Unknown</string>
@@ -47,6 +48,7 @@
     <string name="reset">Reset</string>
     <string name="add">Add</string>
     <string name="use_number">Use number: %s</string>
+    <string name="scroll_to_top">Scroll to top</string>
 
     <!-- Search -->
     <string name="search">Search</string>
@@ -166,6 +168,9 @@
     <string name="custom_font_subtitle">Pick a .ttf file to use across the app</string>
     <string name="font_size">Font size</string>
     <string name="rounding_radius">Rounding radius</string>
+    <string name="app_icon">App icon</string>
+    <string name="app_icon_subtitle">Choose the app icon displayed on your home screen</string>
+    <string name="app_name_change">App name</string>
     <string name="visual_effects">Visual effects</string>
     <string name="not_supported_on_this_device">Not supported on this device</string>
     <string name="not_supported_on_this_device_subtitle">Blur and Liquid Glass require Android 12 or higher</string>
@@ -254,6 +259,15 @@
     <string name="fullscreen_calls">Full-screen calls</string>
     <string name="fullscreen_calls_subtitle">Incoming calls are always displayed in full-screen mode</string>
 
+    <!-- Speed dial -->
+    <string name="settings_speed_dial_title">Speed dial</string>
+    <string name="settings_speed_dial_enable">Enable speed dial</string>
+    <string name="settings_speed_dial_enable_supporting">Long press a key to call assigned</string>
+    <string name="settings_speed_dial_assignments_header">Assignments</string>
+    <string name="settings_speed_dial_not_assigned">Not assigned</string>
+    <string name="settings_speed_dial_no_number">No number</string>
+    <string name="settings_speed_dial_open">Open Speed Dial Settings?</string>
+
     <string name="quick_response">Quick Response</string>
     <string name="quick_responses">Quick Responses</string>
     <string name="quick_responses_subtitle">Manage canned SMS decline responses for incoming calls</string>
@@ -340,7 +354,7 @@
     <string name="whitelist">Whitelist</string>
     <string name="whitelist_count">Contacts for whom call-answering authentication is disabled: %s</string>
     <string name="whitelist_subtitle">Choose contacts to skip the biometric lock</string>
-    <string name="select_contacts">Select Contacts</string>
+    <string name="select_contacts">Select contacts</string>
     <string name="set_pin">Set PIN</string>
     <string name="set_pin_subtitle">Enter a 4-digit PIN</string>
     <string name="enter_pin">Enter PIN</string>
@@ -655,6 +669,7 @@
     <!-- Dialpad -->
     <string name="add_pause">Add 2-sec pause</string>
     <string name="add_wait">Add wait</string>
+    <string name="suggested">Suggested</string>
 
     <!-- Onboarding -->
     <string name="skip">Skip</string>

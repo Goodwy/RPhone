@@ -247,12 +247,13 @@ fun IPhoneFavoritesRow(
                             val displayName = getDisplayName(contact, displayOrder)
                             Text(
                                 text = displayName, //contact.displayName,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
-                                style = MaterialTheme.typography.labelMedium,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 6.dp),
+                                style = MaterialTheme.typography.bodySmall,
+                                lineHeight = MaterialTheme.typography.bodySmall.fontSize,
                                 fontSize = 11.sp,
-                                fontWeight = FontWeight.SemiBold,
+//                                fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onSurface,
-                                maxLines = 1,
+                                maxLines = 2,
                                 overflow = TextOverflow.Ellipsis,
                                 textAlign = TextAlign.Center
                             )

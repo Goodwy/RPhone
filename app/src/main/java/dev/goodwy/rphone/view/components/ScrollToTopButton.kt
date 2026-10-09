@@ -10,8 +10,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import dev.goodwy.rphone.R
 
 @Composable
 fun ScrollToTopButton(
@@ -48,10 +49,10 @@ fun ScrollToTopButton(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 shape = RoundedCornerShape(16.dp),
-                elevation = FloatingActionButtonDefaults.elevation(2.dp),
+                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 0.dp),
                 modifier = Modifier.offset(y = offsetY.dp)
             ) {
-                Icon(Icons.Default.KeyboardArrowUp, "Scroll to top")
+                Icon(Icons.Default.KeyboardArrowUp, stringResource(R.string.scroll_to_top))
             }
         }
     }

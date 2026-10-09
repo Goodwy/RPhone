@@ -155,6 +155,7 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
     }
 
     var showTypeSheet by remember { mutableStateOf(false) }
+    var showSystemSetup by remember { mutableStateOf(false) }
     var showPinSetup by remember { mutableStateOf(false) }
     var showPasswordSetup by remember { mutableStateOf(false) }
     var isClosing by remember { mutableStateOf(false) }
@@ -192,6 +193,11 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
         bm.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK) ==
                 BiometricManager.BIOMETRIC_SUCCESS
     }
+
+    // Block actions involving calls via BiometricPrompt on top of the lock screen
+    // Works only on Android 11+ (API 30+).
+    // On API ≤ 29, the system cancels the authentication session.
+    val callLockSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R || biometricsType != "system"
 
     val typeLabel = when (biometricsType) {
         "system"   -> stringResource(R.string.system_biometrics)
@@ -277,22 +283,6 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
                                     }
                                 )
                                 if (appLockEnabled) {
-//                                    RillSwitchListItem(
-//                                        headline = stringResource(R.string.lock_on_minimize),
-//                                        supporting = stringResource(R.string.lock_on_minimize_subtitle),
-//                                        leadingIcon = Icons.Rounded.UnfoldLess,
-//                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
-//                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
-//                                        checked = appLockOnMinimizeEnabled,
-//                                        onCheckedChange = {
-//                                            appLockOnMinimizeEnabled = it
-//                                            prefs.setBoolean(
-//                                                PreferenceManager.KEY_BIOMETRICS_APP_LOCK_ON_MINIMIZE,
-//                                                it
-//                                            )
-//                                        }
-//                                    )
-
                                     RillListItem(
                                         headline = stringResource(R.string.lock_timeout),
                                         supporting = currentTimeoutLabel,
@@ -305,18 +295,20 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
                                 }
                                 RillSwitchListItem(
                                     headline = stringResource(R.string.lock_call_actions),
-                                    supporting = stringResource(R.string.lock_call_actions_subtitle),
+                                    supporting = if (callLockSupported) {
+                                        stringResource(R.string.lock_call_actions_subtitle)
+                                    } else {
+                                        stringResource(R.string.system_biometrics_not_available)
+                                    },
                                     leadingIcon = Icons.Rounded.PhonePaused,
                                     iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
                                     iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
-                                    checked = callLockEnabled,
+                                    checked = callLockEnabled && callLockSupported,
+                                    modifier = Modifier.alpha(if (callLockSupported) 1f else 0.4f),
                                     onCheckedChange = {
+                                        if (!callLockSupported) return@RillSwitchListItem
                                         callLockEnabled = it
-                                        prefs.setBoolean(
-                                            PreferenceManager.KEY_BIOMETRICS_CALL_LOCK,
-                                            it
-                                        )
-
+                                        prefs.setBoolean(PreferenceManager.KEY_BIOMETRICS_CALL_LOCK, it)
                                     }
                                 )
                             }
@@ -541,6 +533,7 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
     }
 
     // ── Type Chooser Bottom Sheet ──────────────────────────────────────────
+    var biometricsTypeTemp by remember { mutableStateOf("") }
     if (showTypeSheet) {
         BiometricTypeSheet(
             systemAvailable = systemBiometricsAvailable,
@@ -549,12 +542,29 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
                 showTypeSheet = false
                 when (type) {
                     "system" -> {
-                        biometricsType = "system"
-                        prefs.setString(PreferenceManager.KEY_BIOMETRICS_TYPE, "system")
-                        
+                        if (systemBiometricsAvailable) {
+                            showSystemSetup = true
+                            biometricsTypeTemp = "system"
+                        }
+                        else {
+                            biometricsType = "system"
+                            prefs.setString(PreferenceManager.KEY_BIOMETRICS_TYPE, "system")
+                        }
                     }
-                    "pin"      -> showPinSetup = true
-                    "password" -> showPasswordSetup = true
+                    "pin"      -> {
+                        if (systemBiometricsAvailable) {
+                            showSystemSetup = true
+                            biometricsTypeTemp = "pin"
+                        }
+                        else showPinSetup = true
+                    }
+                    "password" -> {
+                        if (systemBiometricsAvailable) {
+                            showSystemSetup = true
+                            biometricsTypeTemp = "password"
+                        }
+                        else showPasswordSetup = true
+                    }
                     ""         -> {
                         showTypeSheet = false
                         disableBiometric()
@@ -563,6 +573,30 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
             },
             onDismiss = { showTypeSheet = false }
         )
+    }
+
+    if (showSystemSetup) {
+        val titleText = stringResource(R.string.verify_your_identity_to_continue)
+        LaunchedEffect(showSystemSetup) {
+            AppLockManager.authenticate(
+                activity = context as FragmentActivity,
+                title = titleText,
+                onSuccess = {
+                    showSystemSetup = false
+                    when (biometricsTypeTemp) {
+                        "system" -> {
+                            biometricsType = "system"
+                            prefs.setString(PreferenceManager.KEY_BIOMETRICS_TYPE, "system")
+                        }
+                        "pin"      -> showPinSetup = true
+                        "password" -> showPasswordSetup = true
+                    }
+                },
+                onError = { _, _ ->
+                    showSystemSetup = false
+                }
+            )
+        }
     }
 
     if (showPinSetup) {
@@ -755,10 +789,13 @@ private fun ContactPickerDialog(
                     }
                     TopAppBar(
                         colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
-                        title = { Text(stringResource(R.string.select_contacts), fontWeight = FontWeight.Bold) },
-//                            navigationIcon = {
-//                                NavigationIcon(onClick = onDismiss)
-//                            },
+                        title = {
+                            Text(
+                                stringResource(R.string.select_contacts),
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(start = 4.dp)
+                            )
+                        },
                         actions = {
                             IconButton(onClick = ::selectAll) {
                                 Icon(Icons.Rounded.SelectAll, stringResource(R.string.select_all))
@@ -842,7 +879,6 @@ private fun ContactPickerDialog(
                         shape = MaterialTheme.shapes.extraLarge,
                     ) {
                         LazyColumn(
-//                                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
                             contentPadding = PaddingValues(bottom = 96.dp),
                             verticalArrangement = Arrangement.spacedBy(2.dp)
                         ) {

@@ -1,4 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_launcher_name">Teléfono</string>
+
     <string name="widget_description">Llamadas recientes con marcación rápida</string>
     <string name="copy" tools:ignore="PrivateResource">Copiar</string>
     <string name="copy_path">Copiar ruta</string>
@@ -43,6 +45,7 @@
     <string name="reset">Restablecer</string>
     <string name="add">Añadir</string>
     <string name="use_number">Usar número: %s</string>
+    <string name="scroll_to_top">Desplazar al principio</string>
 
     <!-- Search -->
     <string name="search">Buscar</string>
@@ -163,6 +166,9 @@
     <string name="custom_font_subtitle">Elige un archivo .ttf para usar en toda la aplicación</string>
     <string name="font_size">Tamaño de fuente</string>
     <string name="rounding_radius">Radio de redondeo</string>
+    <string name="app_icon">Icono de la aplicación</string>
+    <string name="app_icon_subtitle">Elige el icono de la aplicación que se muestra en tu pantalla de inicio</string>
+    <string name="app_name_change">Nombre de la aplicación</string>
     <string name="visual_effects">Efectos visuales</string>
     <string name="not_supported_on_this_device">No compatible con este dispositivo</string>
     <string name="not_supported_on_this_device_subtitle">El desenfoque y el Vidrio Líquido requieren Android 12 o superior</string>
@@ -250,6 +256,15 @@
     <string name="auto_speaker_subtitle">Cambiar automáticamente al altavoz cuando el teléfono está lejos del oído, y de vuelta al auricular cuando está cerca</string>
     <string name="fullscreen_calls">Llamadas a pantalla completa</string>
     <string name="fullscreen_calls_subtitle">Las llamadas entrantes siempre se muestran en modo de pantalla completa</string>
+
+    <!-- Speed dial -->
+    <string name="settings_speed_dial_title">Marcación rápida</string>
+    <string name="settings_speed_dial_enable">Activar marcación rápida</string>
+    <string name="settings_speed_dial_enable_supporting">Mantén pulsada una tecla para llamar al número asignado</string>
+    <string name="settings_speed_dial_assignments_header">Asignaciones</string>
+    <string name="settings_speed_dial_not_assigned">Sin asignar</string>
+    <string name="settings_speed_dial_no_number">Sin número</string>
+    <string name="settings_speed_dial_open">¿Abrir ajustes de marcación rápida?</string>
 
     <string name="quick_response">Respuesta rápida</string>
     <string name="quick_responses">Respuestas rápidas</string>
@@ -647,6 +662,7 @@
     <!-- Dialpad -->
     <string name="add_pause">Añadir pausa de 2 seg.</string>
     <string name="add_wait">Añadir espera</string>
+    <string name="suggested">Sugerido</string>
 
     <!-- Onboarding -->
     <string name="skip">Omitir</string>

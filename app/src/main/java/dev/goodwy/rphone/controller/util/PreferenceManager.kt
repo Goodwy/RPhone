@@ -1,6 +1,7 @@
 package dev.goodwy.rphone.controller.util
 
 import android.content.Context
+import android.os.Build
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.SharedPreferencesMigration
@@ -153,7 +154,12 @@ class PreferenceManager(context: Context) {
     /** Returns true if an incoming call from [phoneNumber] should be gated behind biometric. */
     fun shouldGateCallWithBiometric(phoneNumber: String?): Boolean {
         if (!getBoolean(KEY_BIOMETRICS_CALL_LOCK, false)) return false
-        if ((getString(KEY_BIOMETRICS_TYPE, "") ?: "").isEmpty()) return false
+
+        val type = getString(KEY_BIOMETRICS_TYPE, "") ?: ""
+        if (type.isEmpty()) return false
+        // On Android 10 and earlier, the system BiometricPrompt does not work on top of the lock screen
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R && type == "system") return false
+
         val mode = getString(KEY_BIOMETRICS_CALL_LOCK_MODE, "all") ?: "all"
         if (mode == "all") return true
         if (phoneNumber.isNullOrBlank()) return mode == "skip_specified"
@@ -580,6 +586,8 @@ class PreferenceManager(context: Context) {
         const val KEY_SEARCH_FILTER_RECORDINGS      = "search_filter_recordings"
         const val KEY_SEARCH_FILTER_CONTACT_NOTES   = "search_filter_contact_notes"
         const val KEY_SEARCH_FILTER_RECORDING_NOTES = "search_filter_recording_notes"
+
+        const val KEY_APP_NAME_PRESET = "app_name_preset"
 
         // Goodwy
         const val KEY_DEFAULT_TAB              = "default_tab"

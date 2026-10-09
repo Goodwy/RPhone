@@ -1,4 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_launcher_name">फ़ोन</string>
+
     <string name="widget_description">त्वरित डायल के साथ हाल की कॉलें</string>
     <string name="copy" tools:ignore="PrivateResource">कॉपी करें</string>
     <string name="copy_path">पथ कॉपी करें</string>
@@ -43,6 +45,7 @@
     <string name="reset">रीसेट करें</string>
     <string name="add">जोड़ें</string>
     <string name="use_number">नंबर का उपयोग करें: %s</string>
+    <string name="scroll_to_top">ऊपर स्क्रॉल करें</string>
 
     <!-- Search -->
     <string name="search">खोजें</string>
@@ -163,6 +166,9 @@
     <string name="custom_font_subtitle">ऐप में उपयोग के लिए .ttf फ़ाइल चुनें</string>
     <string name="font_size">फ़ॉन्ट आकार</string>
     <string name="rounding_radius">गोलाई त्रिज्या</string>
+    <string name="app_icon">ऐप आइकन</string>
+    <string name="app_icon_subtitle">अपनी होम स्क्रीन पर दिखाई देने वाला ऐप आइकन चुनें</string>
+    <string name="app_name_change">ऐप का नाम</string>
     <string name="visual_effects">दृश्य प्रभाव</string>
     <string name="not_supported_on_this_device">इस डिवाइस पर समर्थित नहीं</string>
     <string name="not_supported_on_this_device_subtitle">ब्लर और लिक्विड ग्लास के लिए Android 12 या उच्चतर आवश्यक है</string>
@@ -250,6 +256,15 @@
     <string name="auto_speaker_subtitle">जब फोन कान से दूर हो तो स्वचालित रूप से लाउडस्पीकर पर स्विच करें, और पास होने पर ईयरपीस पर वापस जाएँ</string>
     <string name="fullscreen_calls">फुल-स्क्रीन कॉल</string>
     <string name="fullscreen_calls_subtitle">आने वाली कॉल हमेशा फुल-स्क्रीन मोड में दिखाई जाती हैं</string>
+
+    <!-- Speed dial -->
+    <string name="settings_speed_dial_title">स्पीड डायल</string>
+    <string name="settings_speed_dial_enable">स्पीड डायल सक्षम करें</string>
+    <string name="settings_speed_dial_enable_supporting">असाइन किए गए नंबर पर कॉल करने के लिए किसी कुंजी को देर तक दबाएँ</string>
+    <string name="settings_speed_dial_assignments_header">असाइनमेंट</string>
+    <string name="settings_speed_dial_not_assigned">असाइन नहीं किया गया</string>
+    <string name="settings_speed_dial_no_number">कोई नंबर नहीं</string>
+    <string name="settings_speed_dial_open">स्पीड डायल सेटिंग्स खोलें?</string>
 
     <string name="quick_response">त्वरित उत्तर</string>
     <string name="quick_responses">त्वरित उत्तर</string>
@@ -644,6 +659,7 @@
     <!-- Dialpad -->
     <string name="add_pause">2-सेकंड विराम जोड़ें</string>
     <string name="add_wait">प्रतीक्षा जोड़ें</string>
+    <string name="suggested">सुझाए गए</string>
 
     <!-- Onboarding -->
     <string name="skip">छोड़ें</string>

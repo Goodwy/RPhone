@@ -39,7 +39,7 @@ class RecentCallsFactory(
     private val items = mutableListOf<WidgetCallEntry>()
 
     companion object {
-        private const val PREFS_NAME = "ever_dialer_widget_cache"
+        private const val PREFS_NAME = "rill_dialer_widget_cache"
         private const val KEY_CACHED_CALLS = "cached_calls"
         private const val MAX_ITEMS = 30
 

@@ -590,6 +590,8 @@ fun CallLogFullContent(
     val hapticsIntensity = prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
     var pendingDeleteIds by remember { mutableStateOf<List<Long>>(emptyList()) }
 
+    var pullToRefreshActive by remember { mutableStateOf(false) }
+
     if (isGranted) {
         val viewModel: CallLogViewModel = koinActivityViewModel()
         val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
@@ -668,17 +670,19 @@ fun CallLogFullContent(
         val isDataLoading = (logs.isEmpty() && isLoading) || (!favouritesEnabled && isLoadingContacts && allContacts.isEmpty())
 
         PullToRefreshBox(
-            isRefreshing = isDataLoading,
+            isRefreshing = isDataLoading && pullToRefreshActive,
             onRefresh = {
+                pullToRefreshActive = true
                 viewModel.refreshLogs()
                 contactsVM.fetchContacts()
+                pullToRefreshActive = false
             },
             modifier = Modifier.fillMaxSize(),
             state = pullToRefreshState,
             indicator = {
                 RillPullToRefreshIndicator(
                     state = pullToRefreshState,
-                    isRefreshing = isDataLoading
+                    isRefreshing = isDataLoading && pullToRefreshActive
                 )
             }
         ) {

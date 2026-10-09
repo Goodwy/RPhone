@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" dir="rtl">
+    <string name="app_launcher_name">טלפון</string>
+
     <string name="widget_description">שיחות אחרונות עם חיוג מהיר</string>
     <string name="copy" tools:ignore="PrivateResource">העתק</string>
     <string name="copy_path">העתק נתיב</string>
@@ -44,6 +46,7 @@
     <string name="reset">איפוס</string>
     <string name="add">הוסף</string>
     <string name="use_number">השתמש במספר: %s</string>
+    <string name="scroll_to_top">גלול למעלה</string>
 
     <!-- Search -->
     <string name="search">חיפוש</string>
@@ -164,6 +167,9 @@
     <string name="custom_font_subtitle">בחר קובץ .ttf לשימוש באפליקציה</string>
     <string name="font_size">גודל גופן</string>
     <string name="rounding_radius">רדיוס עיגול</string>
+    <string name="app_icon">סמל האפליקציה</string>
+    <string name="app_icon_subtitle">בחר את סמל האפליקציה המוצג במסך הבית שלך</string>
+    <string name="app_name_change">שם האפליקציה</string>
     <string name="visual_effects">אפקטים ויזואליים</string>
     <string name="not_supported_on_this_device">לא נתמך במכשיר זה</string>
     <string name="not_supported_on_this_device_subtitle">טשטוש וזכוכית נוזלית דורשים Android 12 ומעלה</string>
@@ -251,6 +257,15 @@
     <string name="auto_speaker_subtitle">עבור אוטומטית לרמקול כאשר הטלפון רחוק מהאוזן, ובחזרה לאפרכסת כאשר הוא קרוב</string>
     <string name="fullscreen_calls">שיחות במסך מלא</string>
     <string name="fullscreen_calls_subtitle">שיחות נכנסות מוצגות תמיד במצב מסך מלא</string>
+
+    <!-- Speed dial -->
+    <string name="settings_speed_dial_title">חיוג מהיר</string>
+    <string name="settings_speed_dial_enable">הפעל חיוג מהיר</string>
+    <string name="settings_speed_dial_enable_supporting">לחץ לחיצה ארוכה על מקש כדי להתקשר למספר שהוקצה</string>
+    <string name="settings_speed_dial_assignments_header">הקצאות</string>
+    <string name="settings_speed_dial_not_assigned">לא הוקצה</string>
+    <string name="settings_speed_dial_no_number">אין מספר</string>
+    <string name="settings_speed_dial_open">לפתוח את הגדרות החיוג המהיר?</string>
 
     <string name="quick_response">תגובה מהירה</string>
     <string name="quick_responses">תגובות מהירות</string>
@@ -648,6 +663,7 @@
     <!-- Dialpad -->
     <string name="add_pause">הוסף הפסקה של 2 שניות</string>
     <string name="add_wait">הוסף המתנה</string>
+    <string name="suggested">מוצע</string>
 
     <!-- Onboarding -->
     <string name="skip">דלג</string>

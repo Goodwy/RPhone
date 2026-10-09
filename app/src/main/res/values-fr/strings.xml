@@ -1,4 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_launcher_name">Téléphone</string>
+
     <string name="widget_description">Appels récents avec numérotation rapide</string>
     <string name="copy" tools:ignore="PrivateResource">Copier</string>
     <string name="copy_path">Copier le chemin</string>
@@ -43,6 +45,7 @@
     <string name="reset">Réinitialiser</string>
     <string name="add">Ajouter</string>
     <string name="use_number">Utiliser le numéro : %s</string>
+    <string name="scroll_to_top">Faire défiler vers le haut</string>
 
     <!-- Search -->
     <string name="search">Rechercher</string>
@@ -163,6 +166,9 @@
     <string name="custom_font_subtitle">Choisissez un fichier .ttf à utiliser dans l\'application</string>
     <string name="font_size">Taille de police</string>
     <string name="rounding_radius">Rayon d\'arrondi</string>
+    <string name="app_icon">Icône de l\'application</string>
+    <string name="app_icon_subtitle">Choisissez l\'icône de l\'application affichée sur votre écran d\'accueil</string>
+    <string name="app_name_change">Nom de l\'application</string>
     <string name="visual_effects">Effets visuels</string>
     <string name="not_supported_on_this_device">Non pris en charge sur cet appareil</string>
     <string name="not_supported_on_this_device_subtitle">Le flou et le verre liquide nécessitent Android 12 ou supérieur</string>
@@ -250,6 +256,15 @@
     <string name="auto_speaker_subtitle">Passer automatiquement au haut-parleur lorsque le téléphone est éloigné de l\'oreille, et revenir à l\'écouteur lorsqu\'il est proche</string>
     <string name="fullscreen_calls">Appels en plein écran</string>
     <string name="fullscreen_calls_subtitle">Les appels entrants sont toujours affichés en mode plein écran</string>
+
+    <!-- Speed dial -->
+    <string name="settings_speed_dial_title">Numérotation rapide</string>
+    <string name="settings_speed_dial_enable">Activer la numérotation rapide</string>
+    <string name="settings_speed_dial_enable_supporting">Appuyez longuement sur une touche pour appeler le numéro assigné</string>
+    <string name="settings_speed_dial_assignments_header">Attributions</string>
+    <string name="settings_speed_dial_not_assigned">Non attribué</string>
+    <string name="settings_speed_dial_no_number">Aucun numéro</string>
+    <string name="settings_speed_dial_open">Ouvrir les paramètres de numérotation rapide ?</string>
 
     <string name="quick_response">Réponse rapide</string>
     <string name="quick_responses">Réponses rapides</string>
@@ -644,6 +659,7 @@
     <!-- Dialpad -->
     <string name="add_pause">Ajouter une pause de 2 sec.</string>
     <string name="add_wait">Ajouter une attente</string>
+    <string name="suggested">Suggéré</string>
 
     <!-- Onboarding -->
     <string name="skip">Ignorer</string>

@@ -8,7 +8,7 @@ import android.content.res.Configuration
 import android.media.AudioAttributes
 import android.media.SoundPool
 import android.os.Build
-import android.provider.ContactsContract
+import android.provider.CallLog
 import android.telecom.TelecomManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -81,10 +81,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.core.net.toUri
+import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.bottomBarHeight
@@ -101,6 +103,7 @@ import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
 import com.ramcosta.composedestinations.generated.destinations.ContactEditScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactSelectionScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.SpeedDialScreenDestination
 import dev.goodwy.rphone.controller.UssdRepository
 import dev.goodwy.rphone.controller.util.SocialUtils
 import dev.goodwy.rphone.controller.util.SocialUtils.getInstalledMessenger
@@ -263,6 +266,9 @@ fun DialPadContent(
         val enableAnimations by remember(settingsState) {
             mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_DIALPAD_ANIMATION, true))
         }
+        val speedDialEnabled by remember(settingsState) {
+            mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SPEED_DIAL, true))
+        }
 
         val allContacts by contactsVM.allContacts.collectAsStateWithLifecycle()
         val logs by logsViewModel.allCallLogs.collectAsStateWithLifecycle()
@@ -382,6 +388,40 @@ fun DialPadContent(
 
         var openDialpadDefault by remember {
             mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_OPEN_DIALPAD_DEFAULT, true))
+        }
+
+        val topLogs by remember(logs) {
+            derivedStateOf {
+                logs.asSequence().take(200)
+                    .filter { !it.isBlocked }
+                    .filter { !it.contactId.isNullOrBlank() }
+                    .groupBy { it.contactId!! }
+//                    .map { (_, entries) ->
+//                        val count = entries.size
+//                        val lastDate = entries.maxOfOrNull { it.date } ?: 0L
+//                        val latest = entries.maxByOrNull { it.date }!!
+//                        Triple(latest, count, lastDate)
+//                    }
+                    .map { (_, entries) ->
+                        val weight = entries.sumOf { entry ->
+                            when (entry.type) {
+                                CallLog.Calls.OUTGOING_TYPE -> 3
+                                CallLog.Calls.INCOMING_TYPE -> 2
+                                CallLog.Calls.MISSED_TYPE -> 1
+                                else -> 1
+                            }
+                        }
+                        val lastDate = entries.maxOfOrNull { it.date } ?: 0L
+                        val latest = entries.maxByOrNull { it.date }!!
+                        Triple(latest, weight, lastDate)
+                    }
+                    .sortedWith(
+                        compareByDescending<Triple<CallLogEntry, Int, Long>> { it.second }
+                            .thenByDescending { it.third }
+                    )
+                    .map { it.first }
+                    .take(4)
+            }
         }
 
         val take = 30
@@ -704,6 +744,36 @@ fun DialPadContent(
             }
         }
 
+        var showSpeedDialDialog by remember { mutableStateOf(false) }
+        if (showSpeedDialDialog) {
+            RillDialog(
+                onDismissRequest = { showSpeedDialDialog = false },
+                title = stringResource(R.string.settings_speed_dial_not_assigned),
+                icon = Icons.Default.Dialpad,
+                confirmButton = {
+                    TextButton(onClick = {
+                        navigator?.navigate(SpeedDialScreenDestination)
+                        showSpeedDialDialog = false
+                    }) {
+                        Text(
+                            stringResource(R.string.open),
+                            textAlign = TextAlign.End,
+                        )
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showSpeedDialDialog = false }) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                }
+            ) {
+                Text(
+                    stringResource(R.string.settings_speed_dial_open),
+                    modifier = Modifier.padding(vertical = 12.dp)
+                )
+            }
+        }
+
         val configuration = LocalConfiguration.current
         val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
@@ -732,6 +802,71 @@ fun DialPadContent(
                             .background(if (isBottomSheet) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surface),
                         verticalArrangement = Arrangement.spacedBy(2.dp),
                     ) {
+
+                        // Top 3 Contacts When the Input Is Empty
+                        AnimatedVisibility(
+                            visible = number.isEmpty() && topLogs.isNotEmpty(),
+                            enter = fadeIn(tween(380, easing = FastOutSlowInEasing)) +
+                                    expandVertically(tween(420, easing = FastOutSlowInEasing)),
+                            exit = fadeOut(tween(280, easing = FastOutLinearInEasing)) +
+                                    shrinkVertically(tween(320, easing = FastOutLinearInEasing))
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.suggested),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                                )
+                                Surface(
+                                    shape = MaterialTheme.shapes.extraLarge,
+                                    color = if (isBottomSheet) MaterialTheme.colorScheme.surfaceContainerLow
+                                    else MaterialTheme.colorScheme.surface,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Column(
+                                        modifier = Modifier
+                                            .background(
+                                                if (isBottomSheet) MaterialTheme.colorScheme.surfaceContainerLow
+                                                else MaterialTheme.colorScheme.surface
+                                            ),
+                                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                                    ) {
+                                        topLogs.forEach { entry ->
+                                            val displayName = entry.name?.takeIf { it.isNotBlank() } ?: entry.number
+                                            SingleTile(
+                                                title = displayName,
+                                                subtitle = if (entry.name == entry.number) null else entry.number,
+                                                photoUri = entry.photoUri,
+                                                phoneNumber = entry.number,
+                                                trailingContent = {
+                                                    IconButton(onClick = { initiateCall(entry.number) }) {
+                                                        Icon(
+                                                            Icons.Outlined.Call,
+                                                            contentDescription = stringResource(R.string.call),
+                                                            tint = MaterialTheme.colorScheme.primary
+                                                        )
+                                                    }
+                                                },
+                                                onCall = { initiateCall(entry.number) },
+                                                onClick = {
+                                                    navigator?.navigate(
+                                                        ContactDetailsScreenDestination(contactId = entry.contactId!!)
+                                                    )
+                                                },
+                                                menuOffset = DpOffset(56.dp, 64.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
                         val searchLogsNotEmpty = filteredSearchLogsResults.isNotEmpty()
                         val searchResultsNotEmpty = searchResults.isNotEmpty()
                         val searchResultsPadding = if (searchLogsNotEmpty) 16.dp else 4.dp
@@ -954,7 +1089,19 @@ fun DialPadContent(
                                             soundPool = soundPool,
                                             context = context,
                                             onClick = { digit -> insertAtCursor(digit) },
-                                            onLongClick = { digit -> insertAtCursor(digit) },
+                                            onLongClick = { digit ->
+                                                if (!digit.isDigitsOnly()) {
+                                                    insertAtCursor(digit)
+                                                } else if (speedDialEnabled && number.isEmpty()) {
+                                                    val mapping = prefs.getString("speed_dial_$digit", null)
+                                                    val speedNumber = mapping?.split("|")?.getOrNull(1)
+                                                    if (speedNumber != null) {
+                                                        initiateCall(speedNumber)
+                                                    } else {
+                                                        showSpeedDialDialog = true
+                                                    }
+                                                } else insertAtCursor(digit)
+                                            },
                                             compact = true,
                                             modifier = Modifier
                                                 .fillMaxWidth()
@@ -1090,6 +1237,69 @@ fun DialPadContent(
                                     .verticalScroll(listScrollState),
                                 verticalArrangement = Arrangement.Top
                             ) {
+                                // Top 3 Contacts When the Input Is Empty
+                                AnimatedVisibility(
+                                    visible = number.isEmpty() && topLogs.isNotEmpty(),
+                                    enter = fadeIn(tween(380, easing = FastOutSlowInEasing)) +
+                                            expandVertically(tween(420, easing = FastOutSlowInEasing)),
+                                    exit = fadeOut(tween(280, easing = FastOutLinearInEasing)) +
+                                            shrinkVertically(tween(320, easing = FastOutLinearInEasing))
+                                ) {
+                                    Column(
+                                        modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.suggested),
+                                            style = MaterialTheme.typography.labelLarge,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            fontWeight = FontWeight.Bold,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 16.dp, vertical = 4.dp)
+                                        )
+                                        Surface(
+                                            shape = MaterialTheme.shapes.extraLarge,
+                                            color = if (isBottomSheet) MaterialTheme.colorScheme.surfaceContainerLow
+                                            else MaterialTheme.colorScheme.surface,
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            Column(
+                                                modifier = Modifier
+                                                    .background(
+                                                        if (isBottomSheet) MaterialTheme.colorScheme.surfaceContainerLow
+                                                        else MaterialTheme.colorScheme.surface
+                                                    ),
+                                                verticalArrangement = Arrangement.spacedBy(2.dp)
+                                            ) {
+                                                topLogs.forEach { entry ->
+                                                    val displayName = entry.name?.takeIf { it.isNotBlank() } ?: entry.number
+                                                    SingleTile(
+                                                        title = displayName,
+                                                        subtitle = if (entry.name == entry.number) null else entry.number,
+                                                        photoUri = entry.photoUri,
+                                                        phoneNumber = entry.number,
+                                                        trailingContent = {
+                                                            IconButton(onClick = { initiateCall(entry.number) }) {
+                                                                Icon(
+                                                                    Icons.Outlined.Call,
+                                                                    contentDescription = stringResource(R.string.call),
+                                                                    tint = MaterialTheme.colorScheme.primary
+                                                                )
+                                                            }
+                                                        },
+                                                        onCall = { initiateCall(entry.number) },
+                                                        onClick = {
+                                                            navigator?.navigate(
+                                                                ContactDetailsScreenDestination(contactId = entry.contactId!!)
+                                                            )
+                                                        },
+                                                        menuOffset = DpOffset(56.dp, 64.dp)
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
 
                                 AnimatedVisibility(
                                     visible = number.isNotEmpty(),// && searchResults.isEmpty() && searchQuery.isEmpty(),
@@ -1842,15 +2052,19 @@ fun DialPadContent(
                                                             letters = subKeys[key] ?: "",
                                                             soundPool = soundPool,
                                                             context = context,
-                                                            onClick = { digit ->
-                                                                insertAtCursor(
-                                                                    digit
-                                                                )
-                                                            },
+                                                            onClick = { digit -> insertAtCursor(digit) },
                                                             onLongClick = { digit ->
-                                                                insertAtCursor(
-                                                                    digit
-                                                                )
+                                                                if (!digit.isDigitsOnly()) {
+                                                                    insertAtCursor(digit)
+                                                                } else if (speedDialEnabled && number.isEmpty()) {
+                                                                    val mapping = prefs.getString("speed_dial_$digit", null)
+                                                                    val speedNumber = mapping?.split("|")?.getOrNull(1)
+                                                                    if (speedNumber != null) {
+                                                                        initiateCall(speedNumber)
+                                                                    } else {
+                                                                        showSpeedDialDialog = true
+                                                                    }
+                                                                } else insertAtCursor(digit)
                                                             },
                                                             overrideWidth = keyWidth,
                                                             overrideHeight = keyHeight,

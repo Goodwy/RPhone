@@ -1,4 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_launcher_name">Τηλέφωνο</string>
+
     <string name="widget_description">Πρόσφατες κλήσεις με γρήγορη κλήση</string>
     <string name="copy" tools:ignore="PrivateResource">Αντιγραφή</string>
     <string name="copy_path">Αντιγραφή διαδρομής</string>
@@ -43,6 +45,7 @@
     <string name="reset">Επαναφορά</string>
     <string name="add">Προσθήκη</string>
     <string name="use_number">Χρήση αριθμού: %s</string>
+    <string name="scroll_to_top">Κύλιση στην κορυφή</string>
 
     <!-- Search -->
     <string name="search">Αναζήτηση</string>
@@ -163,6 +166,9 @@
     <string name="custom_font_subtitle">Επιλέξτε ένα αρχείο .ttf για χρήση σε όλη την εφαρμογή</string>
     <string name="font_size">Μέγεθος γραμματοσειράς</string>
     <string name="rounding_radius">Ακτίνα στρογγυλοποίησης</string>
+    <string name="app_icon">Εικονίδιο εφαρμογής</string>
+    <string name="app_icon_subtitle">Επιλέξτε το εικονίδιο της εφαρμογής που εμφανίζεται στην αρχική οθόνη</string>
+    <string name="app_name_change">Όνομα εφαρμογής</string>
     <string name="visual_effects">Οπτικά εφέ</string>
     <string name="not_supported_on_this_device">Δεν υποστηρίζεται σε αυτήν τη συσκευή</string>
     <string name="not_supported_on_this_device_subtitle">Το θόλωμα και το Υγρό Γυαλί απαιτούν Android 12 ή νεότερο</string>
@@ -250,6 +256,15 @@
     <string name="auto_speaker_subtitle">Αυτόματη εναλλαγή σε μεγάφωνο όταν το τηλέφωνο είναι μακριά από το αυτί και πίσω στο ακουστικό όταν είναι κοντά</string>
     <string name="fullscreen_calls">Κλήσεις πλήρους οθόνης</string>
     <string name="fullscreen_calls_subtitle">Οι εισερχόμενες κλήσεις εμφανίζονται πάντα σε λειτουργία πλήρους οθόνης</string>
+
+    <!-- Speed dial -->
+    <string name="settings_speed_dial_title">Ταχεία κλήση</string>
+    <string name="settings_speed_dial_enable">Ενεργοποίηση ταχείας κλήσης</string>
+    <string name="settings_speed_dial_enable_supporting">Πατήστε παρατεταμένα ένα πλήκτρο για κλήση του αντιστοιχισμένου αριθμού</string>
+    <string name="settings_speed_dial_assignments_header">Αντιστοιχίσεις</string>
+    <string name="settings_speed_dial_not_assigned">Δεν έχει αντιστοιχιστεί</string>
+    <string name="settings_speed_dial_no_number">Χωρίς αριθμό</string>
+    <string name="settings_speed_dial_open">Άνοιγμα ρυθμίσεων ταχείας κλήσης;</string>
 
     <string name="quick_response">Γρήγορη απάντηση</string>
     <string name="quick_responses">Γρήγορες απαντήσεις</string>
@@ -644,6 +659,7 @@
     <!-- Dialpad -->
     <string name="add_pause">Προσθήκη παύσης 2 δευτ.</string>
     <string name="add_wait">Προσθήκη αναμονής</string>
+    <string name="suggested">Προτεινόμενα</string>
 
     <!-- Onboarding -->
     <string name="skip">Παράλειψη</string>

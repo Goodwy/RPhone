@@ -5,26 +5,48 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.cardCornerExtraSmall
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
 
+data class NumberPickerItem(
+    val number: String,
+    val primary: Boolean = false
+)
+
 @Composable
 fun NumberPickerDialog(
     numbers: List<String>,
     onDismissRequest: () -> Unit,
     onNumberSelected: (String) -> Unit,
-    icon: ImageVector = Icons.Rounded.Call
+    icon: ImageVector = Icons.Rounded.Phone
+) {
+    NumberPickerDialog(
+        items = numbers.map { NumberPickerItem(it) },
+        onDismissRequest = onDismissRequest,
+        onNumberSelected = onNumberSelected,
+        icon = icon
+    )
+}
+
+@Composable
+@JvmName("NumberPickerDialogItems")
+fun NumberPickerDialog(
+    items: List<NumberPickerItem>,
+    onDismissRequest: () -> Unit,
+    onNumberSelected: (String) -> Unit,
+    icon: ImageVector = Icons.Rounded.Phone
 ) {
     RillDialog(
         onDismissRequest = onDismissRequest,
@@ -47,11 +69,11 @@ fun NumberPickerDialog(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 itemsIndexed(
-                    items = numbers,
+                    items = items,
                     contentType = { _, _ -> "number" }
-                ) { _, number ->
+                ) { _, item ->
                     Surface(
-                        onClick = { onNumberSelected(number) },
+                        onClick = { onNumberSelected(item.number) },
                         shape = RoundedCornerShape(cardCornerExtraSmall),
                         color = cardColor,
                         modifier = Modifier.fillMaxWidth()
@@ -63,13 +85,15 @@ fun NumberPickerDialog(
                             Surface(
                                 modifier = Modifier.size(42.dp),
                                 shape = RoundedCornerShape(50),
-                                color = MaterialTheme.colorScheme.secondaryContainer
+                                color = if (item.primary) MaterialTheme.colorScheme.primaryContainer
+                                    else MaterialTheme.colorScheme.secondaryContainer
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
-                                        icon,
+                                        if (item.primary) ImageVector.vectorResource(id = R.drawable.ic_phone_star) else icon,
                                         contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onSecondaryContainer
+                                        tint = if (item.primary) MaterialTheme.colorScheme.onPrimaryContainer
+                                            else MaterialTheme.colorScheme.onSecondaryContainer
                                     )
                                 }
                             }
@@ -77,7 +101,7 @@ fun NumberPickerDialog(
                             Spacer(modifier = Modifier.width(16.dp))
 
                             Text(
-                                text = number,
+                                text = item.number,
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold
                             )

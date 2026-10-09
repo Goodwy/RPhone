@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.CallMerge
 import androidx.compose.material.icons.automirrored.rounded.CallSplit
 import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.filled.*
@@ -38,13 +39,11 @@ import androidx.compose.material.icons.rounded.Fingerprint
 import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.LogoDev
-import androidx.compose.material.icons.rounded.Merge
 import androidx.compose.material.icons.rounded.MoveUp
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.PeopleAlt
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.PrivacyTip
-import androidx.compose.material.icons.rounded.Recycling
 import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material.icons.rounded.StarRate
 import androidx.compose.material.icons.rounded.SystemUpdate
@@ -97,6 +96,7 @@ import dev.goodwy.rphone.view.components.shake
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import dev.goodwy.rphone.view.theme.RillShapeDefaults
 import dev.goodwy.rphone.view.theme.TabTransitionStyle
+import dev.goodwy.rphone.view.theme.color_primary
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -303,6 +303,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.custom_font_subtitle),
                 stringResource(R.string.font_size),
                 stringResource(R.string.rounding_radius),
+                stringResource(R.string.app_name_change),
                 stringResource(R.string.visual_effects),
                 stringResource(R.string.not_supported_on_this_device),
                 stringResource(R.string.not_supported_on_this_device_subtitle),
@@ -333,6 +334,13 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.swipe_actions_subtitle),
             )
         ) { navigator.navigate(InterfaceScreenDestination) },
+        SettingsSearchEntry(
+            headline = stringResource(R.string.app_icon),
+            supporting = stringResource(R.string.app_icon_subtitle),
+            leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_phone),
+            iconContainerColor = color_primary,
+            iconBgContainerColor = Color.White,
+        ) { navigator.navigate(AppIconScreenDestination) },
         SettingsSearchEntry(
             headline = stringResource(R.string.liquid_glass_elements),
             supporting = stringResource(R.string.liquid_glass_elements_subtitle),
@@ -433,6 +441,18 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.fullscreen_calls_subtitle),
             )
         ) { navigator.navigate(CallSettingScreenDestination) },
+        SettingsSearchEntry(
+            headline = stringResource(R.string.settings_speed_dial_title),
+            supporting = stringResource(R.string.settings_speed_dial_enable_supporting),
+            leadingIcon = Icons.Default.Dialpad,
+            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkIndigo,
+            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorIndigo,
+            options = listOf(
+                stringResource(R.string.settings_speed_dial_enable),
+                stringResource(R.string.settings_speed_dial_assignments_header),
+                stringResource(R.string.settings_speed_dial_not_assigned),
+            )
+        ) { navigator.navigate(SpeedDialScreenDestination) },
         SettingsSearchEntry(
             headline = stringResource(R.string.quick_responses),
             supporting = stringResource(R.string.quick_responses_subtitle),
@@ -589,7 +609,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
         SettingsSearchEntry(
             headline = stringResource(R.string.merging_contacts),
             supporting = stringResource(R.string.merging_contacts_subtitle),
-            leadingIcon = Icons.Rounded.Merge,
+            leadingIcon = Icons.AutoMirrored.Rounded.CallMerge,
             iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
         ) { navigator.navigate(ContactMergeDuplicatesScreenDestination) },
@@ -1137,11 +1157,14 @@ private sealed class BackupDialogState {
 }
 
 @Composable
-fun SettingsSectionLabel(text: String) {
+fun SettingsSectionLabel(
+    text: String,
+    modifier: Modifier = Modifier.padding(start = 20.dp, bottom = 8.dp)
+) {
     Text(
         text,
         style = MaterialTheme.typography.labelLarge,
-        modifier = Modifier.padding(start = 20.dp, bottom = 8.dp),
+        modifier = modifier,
         color = MaterialTheme.colorScheme.primary
     )
 }

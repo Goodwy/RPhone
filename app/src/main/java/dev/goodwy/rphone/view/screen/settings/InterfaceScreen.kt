@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -47,6 +46,8 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Label
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.BlurLinear
 import androidx.compose.material.icons.rounded.BlurOff
@@ -57,7 +58,6 @@ import androidx.compose.material.icons.rounded.FormatSize
 import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material.icons.rounded.MicNone
 import androidx.compose.material.icons.rounded.Palette
-import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.PhoneInTalk
 import androidx.compose.material.icons.rounded.RoundedCorner
 import androidx.compose.material.icons.rounded.Swipe
@@ -67,6 +67,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -85,6 +86,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ramcosta.composedestinations.generated.destinations.AppIconScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.AvatarsPreferenceScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.BlurEffectsElementsScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.CallerUIScreenDestination
@@ -102,6 +104,7 @@ import com.ramcosta.composedestinations.generated.destinations.DonateScreenDesti
 import com.ramcosta.composedestinations.generated.destinations.LiquidGlassElementsScreenDestination
 import dev.goodwy.rphone.bottomBarHeight
 import dev.goodwy.rphone.controller.PurchaseHelper
+import dev.goodwy.rphone.view.components.RillSelectionDialog
 import dev.goodwy.rphone.view.components.RillSliderListItem
 import dev.goodwy.rphone.view.components.Title
 import dev.goodwy.rphone.view.theme.RillShapeDefaults
@@ -134,13 +137,13 @@ private fun triggerRestartPrompt(
 @Composable
 fun InterfaceScreen(navigator: DestinationsNavigator) {
     val prefs = koinInject<PreferenceManager>()
+    val settingsState by prefs.settingsChanged.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    val settingsState by prefs.settingsChanged.collectAsStateWithLifecycle()
     var themeMode           by remember(settingsState) { mutableStateOf(prefs.getString(PreferenceManager.KEY_THEME_MODE, "auto") ?: "auto") }
     var dynamicColors       by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_DYNAMIC_COLORS, true)) }
     var customPrimaryColor  by remember(settingsState) { mutableStateOf(prefs.getInt("custom_primary_color", color_default_primary.toArgb())) }
@@ -161,6 +164,13 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
     val searchEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SEARCH, false)
     val settingsEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SETTINGS, true)
     val showBottomBar = favoritesEnabled || contactsEnabled || dialpadEnabled ||notesEnabled || searchEnabled || settingsEnabled
+
+    // App Name preset picker
+    var showAppNameDialog by remember { mutableStateOf(false) }
+    val appNamePresets = remember { buildAppNamePresets(context) }
+    var selectedAppNameKey by remember {
+        mutableStateOf(prefs.getString(PreferenceManager.KEY_APP_NAME_PRESET, "default") ?: "default")
+    }
 
     // Call UI section checkboxes dialog
     var showCallUIDialog   by remember(settingsState) { mutableStateOf(false) }
@@ -705,6 +715,32 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                         prefs.setInt(PreferenceManager.KEY_CARD_ROUNDNESS, cardRoundness)
                                     }
                                 )
+
+                                val icons = remember { buildIcons(context) }
+
+                                var selectedKey by remember {
+                                    mutableStateOf(prefs.getString(KEY_SELECTED_APP_ICON, "default") ?: "default")
+                                }
+                                val iconBitmaps = remember {
+                                    val entry = icons.firstOrNull { it.key == selectedKey }
+                                    if (entry != null) loadBitmapFromRes(context, entry.previewRes)?.asImageBitmap() else null
+                                }
+                                RillListItem(
+                                    headline = stringResource(R.string.app_icon),
+                                    supporting = stringResource(R.string.app_icon_subtitle),
+                                    leadingImageBitmap = iconBitmaps,
+                                    onClick = {
+                                        navigator.navigate(AppIconScreenDestination)
+                                    }
+                                )
+                                RillListItem(
+                                    headline = stringResource(R.string.app_name_change),
+                                    supporting = appNamePresets.firstOrNull { it.key == selectedAppNameKey }?.label ?: stringResource(R.string.app_launcher_name),
+                                    leadingIcon = Icons.AutoMirrored.Rounded.Label,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+                                    onClick = { showAppNameDialog = true }
+                                )
                             }
                         }
                     }
@@ -930,26 +966,26 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                     }
                 }
 
-                // ── App Icon ─────────────────────────────────────────
-//                item {
-//                    Column {
-//                        SettingsSectionLabel("App Icon")
-//                        RillExpressiveCard {
-//                            RillListItem(
-//                                headline = "App Icon",
-//                                supporting = "Choose the app icon displayed on your home screen",
-//                                leadingIcon = Icons.Rounded.AppRegistration,
-//                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
-//                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
-//                                onClick = {
-//                                    navigator.navigate(com.ramcosta.composedestinations.generated.destinations.AppIconScreenDestination)
-//                                }
-//                            )
-//                        }
-//                    }
-//                }
-
                 item { SettingsBottomPadding(120.dp) }
+            }
+
+            if (showAppNameDialog) {
+                RillSelectionDialog(
+                    onDismissRequest = { showAppNameDialog = false },
+                    title = stringResource(R.string.app_name_change),
+                    icon = Icons.AutoMirrored.Rounded.Label,
+                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+                    items = appNamePresets,
+                    itemLabel = { it.label },
+                    onItemSelected = { entry ->
+                        selectedAppNameKey = entry.key
+                        prefs.setString(PreferenceManager.KEY_APP_NAME_PRESET, entry.key)
+                        applyAppNamePreset(context, prefs, entry)
+                        showAppNameDialog = false
+                    },
+                    isSelected = { it.key == selectedAppNameKey }
+                )
             }
 
             AnimatedVisibility(

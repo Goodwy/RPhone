@@ -48,7 +48,6 @@ class ContactsRepository(
 ) : IContactsRepository {
 
     private val contentResolver: ContentResolver = context.contentResolver
-//    private val preferenceManager = PreferenceManager(context)
 
     override suspend fun getContacts(includePrivate: Boolean, includeHidden: Boolean): List<Contact> = withContext(Dispatchers.IO) {
         val contactsMap = mutableMapOf<String, Contact>()
@@ -2295,7 +2294,7 @@ class ContactsRepository(
                     val accountName: String?
                     val accountType: String?
                     if (contact == null) {
-                        val (accName, accType) = getAccountInfo(rawContactId)
+                        val (accName, accType) = getAccountInfoByRawId(rawContactId)
                         accountName = accName
                         accountType = accType
                     } else {
@@ -2400,6 +2399,32 @@ class ContactsRepository(
         }
 
         return@withContext contact?.copy(photoUri = getPhotoUriForRawContact(rawContactId) ?: photoUri)
+    }
+
+    private fun getAccountInfoByRawId(rawContactId: String): Pair<String?, String?> {
+        try {
+            contentResolver.query(
+                ContactsContract.RawContacts.CONTENT_URI,
+                arrayOf(
+                    ContactsContract.RawContacts.ACCOUNT_NAME,
+                    ContactsContract.RawContacts.ACCOUNT_TYPE
+                ),
+                "${ContactsContract.RawContacts._ID} = ?",
+                arrayOf(rawContactId),
+                null
+            )?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val nameIdx = cursor.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_NAME)
+                    val typeIdx = cursor.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_TYPE)
+                    val name = if (nameIdx != -1) cursor.getString(nameIdx) else null
+                    val type = if (typeIdx != -1) cursor.getString(typeIdx) else null
+                    return Pair(name, type)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return Pair(null, null)
     }
 
     // A method for retrieving a photo associated with a specific RawContact

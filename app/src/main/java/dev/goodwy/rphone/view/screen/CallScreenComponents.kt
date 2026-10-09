@@ -96,7 +96,7 @@ fun KeypadButton(
             2 -> 0.dp  // Minimal
             else -> if (isPressed) 16.dp else 32.dp // Modern
         },
-        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
         label = "ButtonShape"
     )
 
@@ -335,7 +335,7 @@ fun QuickResponsesBottomSheet(
                         ) {
                             Icon(
                                 Icons.AutoMirrored.Rounded.Send,
-                                modifier = Modifier.padding(start = 2.dp),
+                                modifier = Modifier.padding(start = 4.dp),
                                 contentDescription = stringResource(R.string.send),
                             )
                         }
@@ -518,7 +518,7 @@ fun AnimatedCallButton(
 ) {
     val interaction = remember { MutableInteractionSource() }
     val isPressed by interaction.collectIsPressedAsState()
-    val radius by animateDpAsState(if (isActive || isPressed) 20.dp else 42.dp, spring(stiffness = Spring.StiffnessMedium), label = "btnRadius")
+    val radius by animateDpAsState(if (isActive || isPressed) 20.dp else 42.dp, spring(stiffness = Spring.StiffnessMediumLow), label = "btnRadius")
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -723,7 +723,7 @@ fun HorizontalSwipeToAnswer(
                                             0f,
                                             spring(
                                                 dampingRatio = 0.75f,
-                                                stiffness = Spring.StiffnessMedium
+                                                stiffness = Spring.StiffnessMediumLow
                                             )
                                         )
                                     }
@@ -940,7 +940,7 @@ fun VerticalSwipeToAnswer(
                                             0f,
                                             spring(
                                                 dampingRatio = 0.7f,
-                                                stiffness = Spring.StiffnessMedium
+                                                stiffness = Spring.StiffnessMediumLow
                                             )
                                         )
                                     }
@@ -1309,7 +1309,7 @@ fun IncomingCallButtons(
                 val isPressed by interaction.collectIsPressedAsState()
                 val radius by animateDpAsState(
                     if (isPressed) 24.dp else 42.dp,
-                    spring(stiffness = Spring.StiffnessMedium),
+                    spring(stiffness = Spring.StiffnessMediumLow),
                     label = "btnDeclineRadius"
                 )
                 Box(
@@ -1375,7 +1375,7 @@ fun IncomingCallButtons(
                 val isPressed by interaction.collectIsPressedAsState()
                 val radius by animateDpAsState(
                     if (isPressed) 24.dp else 42.dp,
-                    spring(stiffness = Spring.StiffnessMedium),
+                    spring(stiffness = Spring.StiffnessMediumLow),
                     label = "btnRadius"
                 )
                 Box(
@@ -1441,7 +1441,7 @@ fun IncomingCallButtons(
                 val isPressed by interaction.collectIsPressedAsState()
                 val radius by animateDpAsState(
                     if (isPressed) 24.dp else 42.dp,
-                    spring(stiffness = Spring.StiffnessMedium),
+                    spring(stiffness = Spring.StiffnessMediumLow),
                     label = "btnAnswerRadius"
                 )
                 Box(

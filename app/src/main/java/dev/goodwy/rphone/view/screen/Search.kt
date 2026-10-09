@@ -204,7 +204,7 @@ fun ContactSearchContent(
         else {
             val seen = LinkedHashMap<String, CallLogEntry>()
             callLogs.asSequence()
-                .filter { it.contactId.isNullOrBlank() }
+//                .filter { it.contactId.isNullOrBlank() } // Because of this, the condition does not find records for which the contact no longer exists.
                 .forEach { entry ->
                     val key = normalizeNumberDigits(entry.number).filter { it.isDigit() }.takeLast(9)
                         .ifBlank { entry.number }

@@ -14,9 +14,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Merge
+import androidx.compose.material.icons.automirrored.rounded.CallMerge
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
@@ -250,7 +249,7 @@ fun DuplicateGroupCard(
                 Spacer(Modifier.width(8.dp))
                 Text("Unmerging...")
             } else {
-                Icon(Icons.Rounded.Merge, null)
+                Icon(Icons.AutoMirrored.Rounded.CallMerge, null)
                 Spacer(Modifier.width(8.dp))
                 Text(stringResource(R.string.merge_duplicates, group.size))
             }

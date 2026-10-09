@@ -1,4 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_launcher_name">Телефон</string>
+
     <string name="widget_description">Последние звонки с быстрым набором</string>
     <string name="copy" tools:ignore="PrivateResource">Копировать</string>
     <string name="copy_path">Скопировать путь</string>
@@ -43,6 +45,7 @@
     <string name="reset">Сбросить</string>
     <string name="add">Добавить</string>
     <string name="use_number">Использовать номер: %s</string>
+    <string name="scroll_to_top">Прокрутить вверх</string>
 
     <!-- Search -->
     <string name="search">Поиск</string>
@@ -162,6 +165,9 @@
     <string name="custom_font_subtitle">Выберите файл .ttf для использования шрифта в приложении</string>
     <string name="font_size">Размер шрифта</string>
     <string name="rounding_radius">Радиус скругления</string>
+    <string name="app_icon">Значок приложения</string>
+    <string name="app_icon_subtitle">Выберите значок приложения, отображаемый на главном экране</string>
+    <string name="app_name_change">Название приложения</string>
     <string name="visual_effects">Визуальные эффекты</string>
     <string name="not_supported_on_this_device">Не поддерживается на этом устройстве</string>
     <string name="not_supported_on_this_device_subtitle">Для работы эффектов Размытия и Жидкого Стекла требуется Android 12 или более поздней версии</string>
@@ -249,6 +255,15 @@
     <string name="auto_speaker_subtitle">Автоматически переключаться на громкую связь, когда телефон находится вдали от уха, и обратно на наушник, когда он находится рядом</string>
     <string name="fullscreen_calls">Полноэкранные звонки</string>
     <string name="fullscreen_calls_subtitle">Входящие звонки всегда отображаются в полноэкранном режиме</string>
+
+    <!-- Speed dial -->
+    <string name="settings_speed_dial_title">Быстрый набор</string>
+    <string name="settings_speed_dial_enable">Включить быстрый набор</string>
+    <string name="settings_speed_dial_enable_supporting">Долгое нажатие кнопки для вызова</string>
+    <string name="settings_speed_dial_assignments_header">Назначение кнопок быстрого набора</string>
+    <string name="settings_speed_dial_not_assigned">Не назначено</string>
+    <string name="settings_speed_dial_no_number">Нет номеров</string>
+    <string name="settings_speed_dial_open">Открыть настройки Быстрого набора?</string>
 
     <string name="quick_response">Быстрый ответ</string>
     <string name="quick_responses">Быстрые ответы</string>
@@ -652,6 +667,7 @@
     <!-- Dialpad -->
     <string name="add_pause">Добавить двухсекундную паузу</string>
     <string name="add_wait">Добавить ожидание</string>
+    <string name="suggested">Рекомендуемые</string>
 
     <!-- Onboarding -->
     <string name="skip">Пропустить</string>

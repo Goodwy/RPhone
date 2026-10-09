@@ -5,15 +5,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
-
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
-
-// Goodwy
 val color_default_primary = Color(0xFF7FA5F7) //Color(0xFF74A6FF)
 val color_call_button = Color(0xFF34A853)
 val color_call_end = Color(0xFFEE675C)
@@ -50,33 +41,7 @@ object MyColors {
 val color_white = Color.White
 val color_black = Color.Black
 
-val color_primary = Color(0xFF5589F1) //new Color(0xFF027BFE)
-val color_on_primary = color_white
-val color_primary_dark = Color(0xFF2960F5)
-val color_accent = Color(0xFF09F4A1)
-
-val color_background_light = color_white
-val color_text_light = Color(0xFF424242)
-val color_background_dark = color_black
-val color_text_dark = Color(0xFFEEEEEE)
-
-val pressed_item_foreground = Color(0x08000000)
-val activated_item_foreground = Color(0x44888888)
-val divider_grey = Color(0x55808080)
-val gradient_grey_start = Color(0xCC000000)
-val dark_grey = Color(0xFF333333)
-val bottom_tabs_light_background = Color(0xFFF1F1F1)
-val bottom_tabs_gray_background = Color(0xFFFDFDFD)
-val bottom_tabs_dark_background = Color(0xFF323236)
-val bottom_tabs_black_background = Color(0xFF1B1B1B)
-val disabled_text_color_highlight = Color(0x00FFFFFF)
-
-val hint_white = Color(0x99FFFFFF)
-val hint_black = Color(0x66000000)
-val light_grey_stroke = Color(0x40FFFFFF)
-
-val thumb_deactivated = Color(0xFFECECEC)
-val track_deactivated = Color(0xFFB2B2B2)
+val color_primary = Color(0xFF2196F3)
 
 val radiobutton_disabled = Color(0xFF757575)
 

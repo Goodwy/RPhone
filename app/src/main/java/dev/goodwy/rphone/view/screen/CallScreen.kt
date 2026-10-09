@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.StickyNote2
+import androidx.compose.material.icons.automirrored.rounded.CallMerge
 import androidx.compose.material.icons.automirrored.rounded.CallSplit
 import androidx.compose.material.icons.automirrored.rounded.VolumeDown
 import androidx.compose.material.icons.automirrored.rounded.VolumeUp
@@ -293,13 +294,9 @@ fun ExpressiveCallScreen(
                         onClick = {
                             view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
                             try {
-                                callViewModel.setPreferredCall(oc)
-                                if (call.state != Call.STATE_HOLDING) {
-                                    call.hold()
-                                }
-                                oc.unhold()
+                                if (callState == Call.STATE_HOLDING) call.unhold() else call.hold()
                             } catch (_: Exception) {
-                                try { oc.unhold() } catch (_: Exception) {}
+                                try { call.unhold() } catch (_: Exception) {}
                             }
                         },
                         modifier = Modifier
@@ -338,8 +335,25 @@ fun ExpressiveCallScreen(
                                     )
                                 }
                             }
-                            IconButton(onClick = { oc.disconnect() }) {
-                                Icon(Icons.Rounded.CallEnd, contentDescription = stringResource(R.string.end_call), tint = color_call_end)
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                if (otherCall.state == Call.STATE_HOLDING) {
+                                    IconButton(onClick = {
+                                        view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                                        callViewModel.mergeCalls()
+                                    }) {
+                                        Icon(
+                                            Icons.AutoMirrored.Rounded.CallMerge,
+                                            contentDescription = stringResource(R.string.merge),
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                }
+                                IconButton(onClick = {
+                                    view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                                    oc.disconnect()
+                                }) {
+                                    Icon(Icons.Rounded.CallEnd, contentDescription = stringResource(R.string.end_call), tint = color_call_end)
+                                }
                             }
                         }
                     }
@@ -583,7 +597,7 @@ fun ExpressiveCallScreen(
                                         if (showMore) {
                                             RillExpressiveCard {
                                                 MoreItem(
-                                                    headline = stringResource(R.string.add_note),
+                                                    headline = noteText.ifBlank { stringResource(R.string.add_note) },
                                                     leadingIcon = Icons.AutoMirrored.Outlined.StickyNote2,
                                                     onClick = {
                                                         view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
@@ -608,7 +622,7 @@ fun ExpressiveCallScreen(
                                                 val canMerge = otherCall != null || (try { call.details.can(Call.Details.CAPABILITY_MERGE_CONFERENCE) } catch (_: Exception) { false })
                                                 if (!isConference && canMerge) MoreItem(
                                                     headline = stringResource(R.string.merge),
-                                                    leadingIcon = Icons.Rounded.Merge,
+                                                    leadingIcon = Icons.AutoMirrored.Rounded.CallMerge,
                                                     enabled = canMerge,
                                                     onClick = {
                                                         view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
@@ -642,11 +656,11 @@ fun ExpressiveCallScreen(
 
                                                 MoreItem(
                                                     headline = if (otherCall != null && !isConference) stringResource(R.string.swap)
-                                                    else if (callState == Call.STATE_HOLDING) stringResource(R.string.resume)
-                                                    else stringResource(R.string.hold),
+                                                            else if (callState == Call.STATE_HOLDING) stringResource(R.string.resume)
+                                                            else stringResource(R.string.hold),
                                                     leadingIcon = if (otherCall != null && !isConference) Icons.Rounded.SwapCalls
-                                                    else if (callState == Call.STATE_HOLDING) Icons.Rounded.PlayArrow
-                                                    else Icons.Default.Pause,
+                                                                else if (callState == Call.STATE_HOLDING) Icons.Rounded.PlayArrow
+                                                                else Icons.Default.Pause,
                                                     enabled = callState != Call.STATE_DIALING,
                                                     onClick = {
                                                         view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
@@ -826,7 +840,7 @@ fun ExpressiveCallScreen(
                             val endPressed by endInteraction.collectIsPressedAsState()
                             val endRadius by animateDpAsState(
                                 if (endPressed) 20.dp else 42.dp,
-                                spring(stiffness = Spring.StiffnessMedium),
+                                spring(stiffness = Spring.StiffnessMediumLow),
                                 label = "endRadius"
                             )
 
@@ -949,17 +963,12 @@ fun ExpressiveCallScreen(
                         val isPressed by interaction.collectIsPressedAsState()
                         val radius by animateDpAsState(
                             if (isPressed) 16.dp else 40.dp,
-                            spring(stiffness = Spring.StiffnessMedium),
+                            spring(stiffness = Spring.StiffnessMediumLow),
                             label = "btnMessageRadius"
                         )
                         Surface(
                             onClick = {
                                 view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-//                                callDisconnect(true)
-//                                val intent = Intent(Intent.ACTION_SENDTO).apply {
-//                                    data = "smsto:$phoneNumber".toUri()
-//                                }
-//                                context.startActivity(intent)
                                 showQuickResponsesSheet = true
                             },
                             shape = RoundedCornerShape(radius),

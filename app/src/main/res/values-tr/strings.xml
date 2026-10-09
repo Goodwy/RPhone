@@ -1,4 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_launcher_name">Telefon</string>
+
     <string name="widget_description">Hızlı arama ile son aramalar</string>
     <string name="copy" tools:ignore="PrivateResource">Kopyala</string>
     <string name="copy_path">Yolu Kopyala</string>
@@ -43,6 +45,7 @@
     <string name="reset">Sıfırla</string>
     <string name="add">Ekle</string>
     <string name="use_number">Numarayı kullan: %s</string>
+    <string name="scroll_to_top">Yukarı kaydır</string>
 
     <!-- Search -->
     <string name="search">Ara</string>
@@ -163,6 +166,9 @@
     <string name="custom_font_subtitle">Uygulamada kullanmak için bir .ttf dosyası seçin</string>
     <string name="font_size">Yazı tipi boyutu</string>
     <string name="rounding_radius">Yuvarlatma yarıçapı</string>
+    <string name="app_icon">Uygulama simgesi</string>
+    <string name="app_icon_subtitle">Ana ekranınızda görüntülenen uygulama simgesini seçin</string>
+    <string name="app_name_change">Uygulama adı</string>
     <string name="visual_effects">Görsel Efektler</string>
     <string name="not_supported_on_this_device">Bu cihazda desteklenmiyor</string>
     <string name="not_supported_on_this_device_subtitle">Bulanıklık ve Sıvı Cam Android 12 veya üstü gerektirir</string>
@@ -250,6 +256,15 @@
     <string name="auto_speaker_subtitle">Telefon kulaktan uzakta olduğunda otomatik olarak hoparlöre geçin ve yakın olduğunda ahizeye geri dönün</string>
     <string name="fullscreen_calls">Tam ekran aramalar</string>
     <string name="fullscreen_calls_subtitle">Gelen aramalar her zaman tam ekran modunda gösterilir</string>
+
+    <!-- Speed dial -->
+    <string name="settings_speed_dial_title">Hızlı arama</string>
+    <string name="settings_speed_dial_enable">Hızlı aramayı etkinleştir</string>
+    <string name="settings_speed_dial_enable_supporting">Atanan numarayı aramak için bir tuşa uzun basın</string>
+    <string name="settings_speed_dial_assignments_header">Atamalar</string>
+    <string name="settings_speed_dial_not_assigned">Atanmadı</string>
+    <string name="settings_speed_dial_no_number">Numara yok</string>
+    <string name="settings_speed_dial_open">Hızlı arama ayarları açılsın mı?</string>
 
     <string name="quick_response">Hızlı yanıt</string>
     <string name="quick_responses">Hızlı yanıtlar</string>
@@ -644,6 +659,7 @@
     <!-- Dialpad -->
     <string name="add_pause">2 saniye duraklama ekle</string>
     <string name="add_wait">Bekleme ekle</string>
+    <string name="suggested">Önerilen</string>
 
     <!-- Onboarding -->
     <string name="skip">Atla</string>

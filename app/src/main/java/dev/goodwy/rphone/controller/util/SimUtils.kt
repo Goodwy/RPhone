@@ -6,8 +6,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.net.Uri
-import android.os.Build
 import android.telecom.TelecomManager
 import android.telephony.PhoneNumberUtils
 import android.telephony.TelephonyManager
@@ -57,42 +55,45 @@ fun isVoicemailNumber(context: Context, number: String?): Boolean {
     if (!configuredVm.isNullOrBlank() && areNumbersEqual(clean, configuredVm)) {
         return true
     }
-    val sysVm = getSystemVoicemailNumber(context)
-    if (!sysVm.isNullOrBlank() && areNumbersEqual(clean, sysVm)) {
+    val systemVmNumbers = getSystemVoicemailNumbers(context)
+    if (systemVmNumbers.any { areNumbersEqual(clean, it) }) {
         return true
     }
     return try {
         @Suppress("DEPRECATION")
         PhoneNumberUtils.isVoiceMailNumber(clean)
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         false
     }
 }
 
-fun getSystemVoicemailNumber(context: Context): String? {
+fun getSystemVoicemailNumbers(context: Context): Set<String> {
+    val result = mutableSetOf<String>()
+
     val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
     if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
         try {
             val accounts = telecomManager.callCapablePhoneAccounts
-            val defaultHandle =
-                telecomManager.getDefaultOutgoingPhoneAccount(Uri.fromParts("tel", "123", null).scheme)
 
-            val handle = defaultHandle ?: accounts.firstOrNull()
-            if (handle != null) {
-                val num = telecomManager.getVoiceMailNumber(handle)
-                if (!num.isNullOrEmpty()) return num
+            for (handle in accounts) {
+                try {
+                    val num = telecomManager.getVoiceMailNumber(handle)
+                    if (!num.isNullOrBlank()) result.add(num.trim())
+                } catch (_: SecurityException) {
+                } catch (_: Exception) {
+                }
             }
         } catch (e: SecurityException) {
         } catch (e: Exception) {}
 
-        try {
+        if (result.isEmpty()) try {
             val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
             val num = tm.voiceMailNumber
-            if (!num.isNullOrEmpty()) return num
+            if (!num.isNullOrEmpty()) result.add(num.trim())
         } catch (e: SecurityException) {
         } catch (e: Exception) {}
     }
-    return null
+    return result
 }
 
 data class DeviceImeiInfo(

@@ -3,6 +3,7 @@
     <!-- Light theme: surface is white/near-white -->
     <style name="Theme.RillPhone" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:windowBackground">@color/splash_bg</item>
+        <!-- System bars: transparent -->
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <!-- Edge-to-edge via theme to avoid Adreno RenderThread SIGSEGV on first draw -->
@@ -10,12 +11,13 @@
         <item name="android:windowTranslucentStatus">false</item>
         <item name="android:windowTranslucentNavigation">false</item>
         <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
-    </style>
 
-    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/white</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/splash</item>
-        <item name="postSplashScreenTheme">@style/Theme.RillPhone</item>
+        <!-- Android 10 (API 29) - Critical for MIUI 12: Prevents the system from drawing a contrasting background behind the bars -->
+        <item name="android:enforceStatusBarContrast">false</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
+        <!-- Do not let the system automatically select the color of the bars -->
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
     </style>
 
     <style name="Theme.BiometricCallFloat" parent="Theme.RillPhone">

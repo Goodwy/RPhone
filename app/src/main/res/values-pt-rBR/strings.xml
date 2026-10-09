@@ -1,4 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_launcher_name">Telefone</string>
+
     <string name="widget_description">Chamadas recentes com discagem rápida</string>
     <string name="copy" tools:ignore="PrivateResource">Copiar</string>
     <string name="copy_path">Copiar caminho</string>
@@ -43,6 +45,7 @@
     <string name="reset">Redefinir</string>
     <string name="add">Adicionar</string>
     <string name="use_number">Usar número: %s</string>
+    <string name="scroll_to_top">Rolar para o topo</string>
 
     <!-- Search -->
     <string name="search">Pesquisar</string>
@@ -163,6 +166,9 @@
     <string name="custom_font_subtitle">Escolha um arquivo .ttf para usar no aplicativo</string>
     <string name="font_size">Tamanho da fonte</string>
     <string name="rounding_radius">Raio de arredondamento</string>
+    <string name="app_icon">Ícone do aplicativo</string>
+    <string name="app_icon_subtitle">Escolha o ícone do aplicativo exibido na tela inicial</string>
+    <string name="app_name_change">Nome do aplicativo</string>
     <string name="visual_effects">Efeitos visuais</string>
     <string name="not_supported_on_this_device">Não suportado neste dispositivo</string>
     <string name="not_supported_on_this_device_subtitle">Desfoque e Vidro Líquido requerem Android 12 ou superior</string>
@@ -250,6 +256,15 @@
     <string name="auto_speaker_subtitle">Alternar automaticamente para o alto-falante quando o telefone está longe do ouvido, e de volta para o fone quando está perto</string>
     <string name="fullscreen_calls">Chamadas em tela cheia</string>
     <string name="fullscreen_calls_subtitle">As chamadas recebidas são sempre exibidas no modo de tela cheia</string>
+
+    <!-- Speed dial -->
+    <string name="settings_speed_dial_title">Discagem rápida</string>
+    <string name="settings_speed_dial_enable">Ativar discagem rápida</string>
+    <string name="settings_speed_dial_enable_supporting">Pressione e segure uma tecla para ligar para o número atribuído</string>
+    <string name="settings_speed_dial_assignments_header">Atribuições</string>
+    <string name="settings_speed_dial_not_assigned">Não atribuído</string>
+    <string name="settings_speed_dial_no_number">Sem número</string>
+    <string name="settings_speed_dial_open">Abrir as configurações de discagem rápida?</string>
 
     <string name="quick_response">Resposta rápida</string>
     <string name="quick_responses">Respostas rápidas</string>
@@ -647,6 +662,7 @@
     <!-- Dialpad -->
     <string name="add_pause">Adicionar pausa de 2 seg.</string>
     <string name="add_wait">Adicionar espera</string>
+    <string name="suggested">Sugerido</string>
 
     <!-- Onboarding -->
     <string name="skip">Pular</string>

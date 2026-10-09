@@ -1,4 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_launcher_name">Telefon</string>
+
     <string name="widget_description">Ostatnie połączenia z szybkim wybieraniem</string>
     <string name="copy" tools:ignore="PrivateResource">Kopiuj</string>
     <string name="copy_path">Kopiuj ścieżkę</string>
@@ -43,6 +45,7 @@
     <string name="reset">Resetuj</string>
     <string name="add">Dodaj</string>
     <string name="use_number">Użyj numeru: %s</string>
+    <string name="scroll_to_top">Przewiń do góry</string>
 
     <!-- Search -->
     <string name="search">Szukaj</string>
@@ -163,6 +166,9 @@
     <string name="custom_font_subtitle">Wybierz plik .ttf do użycia w aplikacji</string>
     <string name="font_size">Rozmiar czcionki</string>
     <string name="rounding_radius">Promień zaokrąglenia</string>
+    <string name="app_icon">Ikona aplikacji</string>
+    <string name="app_icon_subtitle">Wybierz ikonę aplikacji wyświetlaną na ekranie głównym</string>
+    <string name="app_name_change">Nazwa aplikacji</string>
     <string name="visual_effects">Efekty wizualne</string>
     <string name="not_supported_on_this_device">Nieobsługiwane na tym urządzeniu</string>
     <string name="not_supported_on_this_device_subtitle">Rozmycie i Liquid Glass wymagają Androida 12 lub nowszego</string>
@@ -250,6 +256,15 @@
     <string name="auto_speaker_subtitle">Automatycznie przełączaj na głośnomówiący, gdy telefon jest oddalony od ucha, i z powrotem na słuchawkę, gdy jest blisko</string>
     <string name="fullscreen_calls">Połączenia na pełnym ekranie</string>
     <string name="fullscreen_calls_subtitle">Połączenia przychodzące są zawsze wyświetlane w trybie pełnoekranowym</string>
+
+    <!-- Speed dial -->
+    <string name="settings_speed_dial_title">Szybkie wybieranie</string>
+    <string name="settings_speed_dial_enable">Włącz szybkie wybieranie</string>
+    <string name="settings_speed_dial_enable_supporting">Przytrzymaj klawisz, aby zadzwonić pod przypisany numer</string>
+    <string name="settings_speed_dial_assignments_header">Przypisania</string>
+    <string name="settings_speed_dial_not_assigned">Nie przypisano</string>
+    <string name="settings_speed_dial_no_number">Brak numeru</string>
+    <string name="settings_speed_dial_open">Otworzyć ustawienia szybkiego wybierania?</string>
 
     <string name="quick_response">Szybka odpowiedź</string>
     <string name="quick_responses">Szybkie odpowiedzi</string>
@@ -650,6 +665,7 @@
     <!-- Dialpad -->
     <string name="add_pause">Dodaj 2-sekundową pauzę</string>
     <string name="add_wait">Dodaj oczekiwanie</string>
+    <string name="suggested">Sugerowane</string>
 
     <!-- Onboarding -->
     <string name="skip">Pomiń</string>

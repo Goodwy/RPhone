@@ -204,7 +204,6 @@ class CallLogViewModel(
 
     private suspend fun loadFromDisk(): List<CallLogEntry> = withContext(Dispatchers.IO) {
         try {
-            if (!cacheFile.exists()) return@withContext emptyList()
             json.decodeFromString<List<CallLogEntry>>(cacheFile.readText())
         } catch (_: Exception) {
             emptyList()

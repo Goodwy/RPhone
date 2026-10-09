@@ -1,7 +1,5 @@
 package dev.goodwy.rphone
 
-import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -47,7 +45,6 @@ import android.telecom.Call
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import android.view.Surface
-import androidx.annotation.RequiresPermission
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -84,7 +81,6 @@ import com.ramcosta.composedestinations.generated.destinations.AvatarsPreference
 import com.ramcosta.composedestinations.generated.destinations.BiometricScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.BlockedNumbersScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.BlurEffectsElementsScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.CallAccountsScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.CallSettingScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.CallerUIScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactManagementScreenDestination
@@ -120,12 +116,15 @@ import dev.goodwy.rphone.view.components.parseTabOrder
 import dev.goodwy.rphone.view.components.performAppHaptic
 import dev.goodwy.rphone.view.theme.color_call_button
 import dev.goodwy.rphone.view.theme.isLandscapeMode
+import kotlinx.coroutines.delay
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.context.GlobalContext
+import kotlin.time.Duration.Companion.milliseconds
 
 class MainActivity : FragmentActivity() {
     private var intentState by mutableStateOf<Intent?>(null)
+//    private lateinit var prefs: PreferenceManager
     private val prefs: PreferenceManager by inject()
     private val callViewModel: CallViewModel by viewModel()
     private val mainViewModel: MainViewModel by viewModel()
@@ -138,6 +137,8 @@ class MainActivity : FragmentActivity() {
         // enableEdgeToEdge() triggers Adreno GPU driver SIGSEGV on first RenderThread draw.
         // Edge-to-edge is set via theme XML instead (windowDrawsSystemBarBackgrounds etc.).
         WindowCompat.setDecorFitsSystemWindows(window, false)
+
+//        prefs = GlobalContext.get().get<PreferenceManager>()
 
         if (AppLockManager.isLocked(prefs)) {
             isAppLocked = true
@@ -292,6 +293,18 @@ class MainActivity : FragmentActivity() {
                             callSession?.state != Call.STATE_DISCONNECTED &&
                             callSession?.state != Call.STATE_DISCONNECTING
 
+                    var showCallBanner by remember { mutableStateOf(false) }
+
+                    LaunchedEffect(hasOngoingCall) {
+                        if (hasOngoingCall) {
+                            // A delay to ensure no banner appears before the call screen opens
+                            delay(2000.milliseconds)
+                            showCallBanner = true
+                        } else {
+                            showCallBanner = false
+                        }
+                    }
+
                     Box(modifier = Modifier.fillMaxSize()) {
                         // Main content — blurred when locked
                         Column(
@@ -306,7 +319,7 @@ class MainActivity : FragmentActivity() {
                         ) {
                             // ── Ongoing Call Banner (above all content) ────────────
                             AnimatedVisibility(
-                                visible = hasOngoingCall,
+                                visible = showCallBanner,
                                 enter = slideInVertically { -it } + fadeIn(),
                                 exit = slideOutVertically { -it } + fadeOut()
                             ) {
@@ -580,7 +593,7 @@ class MainActivity : FragmentActivity() {
                                                                     it.route == SettingsScreenDestination.route || it.route == DonateScreenDestination.route ||
                                                                     it.route == AboutAppScreenDestination.route || it.route == AppIconScreenDestination.route ||
                                                                     it.route == BiometricScreenDestination.route || it.route == BlockedNumbersScreenDestination.route ||
-                                                                    it.route == BlurEffectsElementsScreenDestination.route || it.route == CallAccountsScreenDestination.route ||
+                                                                    it.route == BlurEffectsElementsScreenDestination.route ||
                                                                     it.route == CallerUIScreenDestination.route || it.route == CallSettingScreenDestination.route ||
                                                                     it.route == ContributorsScreenDestination.route || it.route == InterfaceScreenDestination.route ||
                                                                     it.route == LiquidGlassElementsScreenDestination.route || it.route == NavigationScreenDestination.route ||
@@ -639,7 +652,7 @@ class MainActivity : FragmentActivity() {
                                                 .padding(scaffoldPadding)
                                                 .layerBackdrop(liquidGlassBackdrop)
                                                 .then(
-                                                    if (hasOngoingCall)
+                                                    if (showCallBanner)
                                                         Modifier.consumeWindowInsets(WindowInsets.statusBars)
                                                     else
                                                         Modifier
@@ -713,7 +726,7 @@ class MainActivity : FragmentActivity() {
         when (target) {
             is NavigationTarget.Recents -> {
                 try {
-                    val telecomManager = getSystemService(Context.TELECOM_SERVICE) as? android.telecom.TelecomManager
+                    val telecomManager = getSystemService(TELECOM_SERVICE) as? android.telecom.TelecomManager
                     @Suppress("MissingPermission")
                     telecomManager?.cancelMissedCallsNotification()
                 } catch (e: Exception) {

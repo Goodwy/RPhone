@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" dir="rtl">
+    <string name="app_launcher_name">טעלעפֿאָן</string>
+
     <string name="widget_description">לעצטע רופן מיט גיך-ווייל</string>
     <string name="copy" tools:ignore="PrivateResource">קאָפּירן</string>
     <string name="copy_path">קאָפּירן וועג</string>
@@ -44,6 +46,7 @@
     <string name="reset">צוריקשטעלן</string>
     <string name="add">צולייגן</string>
     <string name="use_number">נוץ נומער: %s</string>
+    <string name="scroll_to_top">גליט צום שפּיץ</string>
 
     <!-- Search -->
     <string name="search">זוכן</string>
@@ -163,6 +166,9 @@
     <string name="custom_font_subtitle">קלויב אַ .ttf טעקע פֿאַר נוץ אין דער אַפּ</string>
     <string name="font_size">שריפֿט גרייס</string>
     <string name="rounding_radius">ראַונדינג ראַדיוס</string>
+    <string name="app_icon">אַפּ סימבאָל</string>
+    <string name="app_icon_subtitle">קלויב דעם אַפּ סימבאָל וואָס ווערט געוויזן אויף דײַן היים פאַרשטעל</string>
+    <string name="app_name_change">אַפּ נאָמען</string>
     <string name="visual_effects">וויזועלע עפעקטן</string>
     <string name="not_supported_on_this_device">נישט געשטיצט אויף דעם גערעט</string>
     <string name="not_supported_on_this_device_subtitle">בלער און פֿליסיק גלאָז פֿאַרלאַנגען Android 12 אָדער העכער</string>
@@ -250,6 +256,15 @@
     <string name="auto_speaker_subtitle">אויטאָמאַטיש אומשטעלן צו הויך-רעדער ווען טעלעפֿון איז ווײַט פֿון אויער, און צוריק צו אויער-רעדער ווען נאָענט</string>
     <string name="fullscreen_calls">פֿול-סקרין רופן</string>
     <string name="fullscreen_calls_subtitle">איינקומענדיקע רופן ווערן שטענדיק געוויזן אין פֿול-סקרין מאָדע</string>
+
+    <!-- Speed dial -->
+    <string name="settings_speed_dial_title">גיך ווייל</string>
+    <string name="settings_speed_dial_enable">אַקטיוויזיר גיך ווייל</string>
+    <string name="settings_speed_dial_enable_supporting">דריק לאַנג אַ קלאַוויש צו רופן דעם צוגעטיילטן נומער</string>
+    <string name="settings_speed_dial_assignments_header">צוטיילונגען</string>
+    <string name="settings_speed_dial_not_assigned">נישט צוגעטיילט</string>
+    <string name="settings_speed_dial_no_number">קיין נומער</string>
+    <string name="settings_speed_dial_open">עפֿענען גיך ווייל איינשטעלונגען?</string>
 
     <string name="quick_response">גיך ענטפֿער</string>
     <string name="quick_responses">גיך ענטפֿערס</string>
@@ -650,6 +665,7 @@
     <!-- Dialpad -->
     <string name="add_pause">צולייגן 2-סעקונדע פּויזע</string>
     <string name="add_wait">צולייגן וואַרטן</string>
+    <string name="suggested">פֿאָרגעשלאָגן</string>
 
     <!-- Onboarding -->
     <string name="skip">איבערשפּרינגען</string>

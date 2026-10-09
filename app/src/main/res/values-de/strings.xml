@@ -1,4 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_launcher_name">Telefon</string>
+
     <string name="widget_description">Letzte Anrufe mit Kurzwahl</string>
     <string name="copy" tools:ignore="PrivateResource">Kopieren</string>
     <string name="copy_path">Pfad kopieren</string>
@@ -43,6 +45,7 @@
     <string name="reset">Zurücksetzen</string>
     <string name="add">Hinzufügen</string>
     <string name="use_number">Nummer verwenden: %s</string>
+    <string name="scroll_to_top">Nach oben scrollen</string>
 
     <!-- Search -->
     <string name="search">Suche</string>
@@ -163,6 +166,9 @@
     <string name="custom_font_subtitle">Wählen Sie eine .ttf-Datei für die App</string>
     <string name="font_size">Schriftgröße</string>
     <string name="rounding_radius">Eckenradius</string>
+    <string name="app_icon">App-Symbol</string>
+    <string name="app_icon_subtitle">Wählen Sie das auf Ihrem Startbildschirm angezeigte App-Symbol</string>
+    <string name="app_name_change">App-Name</string>
     <string name="visual_effects">Visuelle Effekte</string>
     <string name="not_supported_on_this_device">Auf diesem Gerät nicht unterstützt</string>
     <string name="not_supported_on_this_device_subtitle">Unschärfe und Liquid Glass erfordern Android 12 oder höher</string>
@@ -250,6 +256,15 @@
     <string name="auto_speaker_subtitle">Automatisch auf Lautsprecher umschalten, wenn das Telefon vom Ohr entfernt ist, und zurück zum Hörer, wenn es nah ist</string>
     <string name="fullscreen_calls">Vollbild-Anrufe</string>
     <string name="fullscreen_calls_subtitle">Eingehende Anrufe werden immer im Vollbildmodus angezeigt</string>
+
+    <!-- Speed dial -->
+    <string name="settings_speed_dial_title">Kurzwahl</string>
+    <string name="settings_speed_dial_enable">Kurzwahl aktivieren</string>
+    <string name="settings_speed_dial_enable_supporting">Taste lange drücken, um die zugewiesene Nummer anzurufen</string>
+    <string name="settings_speed_dial_assignments_header">Zuweisungen</string>
+    <string name="settings_speed_dial_not_assigned">Nicht zugewiesen</string>
+    <string name="settings_speed_dial_no_number">Keine Nummer</string>
+    <string name="settings_speed_dial_open">Kurzwahl-Einstellungen öffnen?</string>
 
     <string name="quick_response">Schnellantwort</string>
     <string name="quick_responses">Schnellantworten</string>
@@ -644,6 +659,7 @@
     <!-- Dialpad -->
     <string name="add_pause">2-sek. Pause hinzufügen</string>
     <string name="add_wait">Warten hinzufügen</string>
+    <string name="suggested">Vorgeschlagen</string>
 
     <!-- Onboarding -->
     <string name="skip">Überspringen</string>

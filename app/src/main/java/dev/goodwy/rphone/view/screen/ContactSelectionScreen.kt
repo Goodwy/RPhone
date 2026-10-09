@@ -72,6 +72,7 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.ContactEditScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.result.ResultBackNavigator
+import dev.goodwy.rphone.controller.util.ContactUtils.getPhoneNumber
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.util.VoiceSearchContract
 import dev.goodwy.rphone.modal.data.getDisplayName
@@ -559,7 +560,7 @@ fun ContactSelectionScreen(
                                     containerColor = MaterialTheme.colorScheme.surfaceContainerLow
                                 ) {
                                     contactsInGroup.forEachIndexed { index, contact ->
-                                        val primaryNumber = contact.phoneNumbers.firstOrNull() ?: ""
+                                        val primaryNumber = getPhoneNumber(contact) ?: ""
                                         val isSelected = if (isMultiSelect) {
                                             selectedContactIds.contains(contact.id) || selectedPhoneNumbers.contains(primaryNumber)
                                         } else false
@@ -570,16 +571,13 @@ fun ContactSelectionScreen(
                                                 headline = getDisplayName(contact, displayOrder),
                                                 supporting = if (contact.phoneNumbers.isNotEmpty()) {
                                                     if (contact.phoneNumbers.size > 1) {
-                                                        stringResource(R.string.plus_more, formatPhoneNumber(primaryNumber), contact.phoneNumbers.size)
+                                                        stringResource(R.string.plus_more, formatPhoneNumber(primaryNumber), contact.phoneNumbers.size - 1)
                                                     } else {
                                                         formatPhoneNumber(primaryNumber)
                                                     }
                                                 } else null,
                                                 avatarName = contact.displayName,
                                                 photoUri = contact.photoUri,
-//                                        badgeIcon = if (contact.isFavorite) Icons.Outlined.Star else if (contact.isPrivate) Icons.Outlined.Lock else null,
-//                                        badgeColor = if (contact.isFavorite) MaterialTheme.colorScheme.primary else null,
-//                                        selected = isSelected,
                                                 onClick = {
                                                     view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                                                     if (isMultiSelect) {
