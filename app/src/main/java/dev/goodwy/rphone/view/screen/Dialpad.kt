@@ -109,6 +109,7 @@ import dev.goodwy.rphone.controller.util.SocialUtils
 import dev.goodwy.rphone.controller.util.SocialUtils.getInstalledMessenger
 import dev.goodwy.rphone.controller.util.SocialUtils.messengerPackages
 import dev.goodwy.rphone.controller.util.forceLtr
+import dev.goodwy.rphone.controller.util.normalizeNumberDigits
 import dev.goodwy.rphone.liquidglass.backdrops.layerBackdrop
 import dev.goodwy.rphone.liquidglass.backdrops.rememberLayerBackdrop
 import dev.goodwy.rphone.modal.data.CallLogEntry
@@ -270,7 +271,9 @@ fun DialPadContent(
             mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SPEED_DIAL, true))
         }
 
-        val allContacts by contactsVM.allContacts.collectAsStateWithLifecycle()
+        // Only contacts from sources the user has enabled, so the dialer never shows a contact
+        // twice because it exists in an enabled and in a disabled source.
+        val allContacts by contactsVM.visibleContacts.collectAsStateWithLifecycle()
         val logs by logsViewModel.allCallLogs.collectAsStateWithLifecycle()
         var number by remember { mutableStateOf(initialNumber ?: DialpadDraftHolder.pendingNumber) }
         // Where new digits get inserted / backspace deletes from. Defaults to the end of the number
@@ -446,6 +449,7 @@ fun DialPadContent(
                                 val matchesNickname = t9 && contact.nickname.let { T9Matcher.isMatch(it, cleanQuery) } ?: false
                                 matchesNumber || matchesName || matchesNickname
                             }
+                            .dedupeForDialpad()
                             .take(take)
                             .toList()
                     }
@@ -2645,6 +2649,36 @@ private fun DialpadNumberDisplay(
                 }
             }
         }
+    }
+}
+
+/**
+ * Removes entries that would be shown twice in the dialer search list.
+ *
+ * Two contacts are treated as the same entry when they carry the same display name and share at
+ * least one phone number. That happens for contacts which live in more than one source (e.g. a
+ * device contact and an app-private copy of it) or which exist twice because of a sync, and it is
+ * what made contacts show up doubled while typing on the dialpad.
+ */
+private fun Sequence<Contact>.dedupeForDialpad(): Sequence<Contact> {
+    val seenIds = mutableSetOf<String>()
+    val numbersByName = mutableMapOf<String, MutableSet<String>>()
+    return filter { contact ->
+        val nameKey = contact.displayName.trim().lowercase()
+        val numbers = contact.phoneNumbers
+            .map { normalizeNumberDigits(it).filter { c -> c.isDigit() }.takeLast(9) }
+            .filter { it.isNotEmpty() }
+            .toSet()
+        val knownNumbers = numbersByName[nameKey]
+
+        val isDuplicate = contact.id in seenIds ||
+                (knownNumbers != null && numbers.any { it in knownNumbers })
+
+        if (!isDuplicate) {
+            seenIds.add(contact.id)
+            numbersByName.getOrPut(nameKey) { mutableSetOf() }.addAll(numbers)
+        }
+        !isDuplicate
     }
 }
 
