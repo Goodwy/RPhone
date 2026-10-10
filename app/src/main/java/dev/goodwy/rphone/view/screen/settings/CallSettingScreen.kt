@@ -8,13 +8,18 @@ import android.provider.Settings
 import android.telecom.PhoneAccount
 import android.telecom.TelecomManager
 import android.view.Surface
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Dialpad
+import androidx.compose.material.icons.outlined.DoNotDisturbOn
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.rounded.CropFree
 import androidx.compose.material.icons.rounded.PictureInPicture
 import androidx.compose.material.icons.rounded.ScreenLockPortrait
@@ -31,6 +36,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -38,6 +44,7 @@ import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillAnimatedSection
+import dev.goodwy.rphone.view.components.RillDialog
 import dev.goodwy.rphone.view.components.RillExpressiveCard
 import dev.goodwy.rphone.view.components.RillListItem
 import dev.goodwy.rphone.view.components.RillSwitchListItem
@@ -47,8 +54,9 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.compose.koinInject
 import androidx.core.net.toUri
-import com.ramcosta.composedestinations.generated.destinations.QuickResponsesScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.*
 import com.ramcosta.composedestinations.generated.destinations.SpeedDialScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.QuickResponsesScreenDestination
 import dev.goodwy.rphone.view.components.RillSelectListItem
 import dev.goodwy.rphone.view.components.Title
 
@@ -68,6 +76,24 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
     var defaultSim by remember(settingsState) { mutableStateOf(prefs.getInt(PreferenceManager.KEY_DEFAULT_SIM, prefs.getDefaultSimIndexDefault())) }
     var fullscreenCalls by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_ALWAYS_FULLSCREEN_CALLS, false)) }
     var speedDial by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SPEED_DIAL, true)) }
+
+    val defaultBusyMsg = stringResource(R.string.busy_mode_default_message)
+    var busyMode by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_BUSY_MODE_ENABLED, false)) }
+    var busyMessage by remember(settingsState) { mutableStateOf(prefs.getString(PreferenceManager.KEY_BUSY_MODE_MESSAGE, defaultBusyMsg) ?: defaultBusyMsg) }
+    var showBusyMessageDialog by remember { mutableStateOf(false) }
+    var editingBusyMsgText by remember { mutableStateOf("") }
+
+    val smsPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            busyMode = true
+            prefs.setBoolean(PreferenceManager.KEY_BUSY_MODE_ENABLED, true)
+        } else {
+            busyMode = false
+            prefs.setBoolean(PreferenceManager.KEY_BUSY_MODE_ENABLED, false)
+        }
+    }
 
     var visible by remember { mutableStateOf(false) }
     val screenAlpha by animateFloatAsState(
@@ -197,6 +223,41 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
                                 onClick = { navigator.navigate(QuickResponsesScreenDestination) }
                             )
                             RillSwitchListItem(
+                                headline   = stringResource(R.string.busy_mode),
+                                supporting = stringResource(R.string.busy_mode_subtitle),
+                                leadingIcon = Icons.Outlined.DoNotDisturbOn,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
+                                checked = busyMode,
+                                onCheckedChange = { enable ->
+                                    if (enable) {
+                                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+                                            smsPermissionLauncher.launch(Manifest.permission.SEND_SMS)
+                                        } else {
+                                            busyMode = true
+                                            prefs.setBoolean(PreferenceManager.KEY_BUSY_MODE_ENABLED, true)
+                                        }
+                                    } else {
+                                        busyMode = false
+                                        prefs.setBoolean(PreferenceManager.KEY_BUSY_MODE_ENABLED, false)
+                                    }
+                                }
+                            )
+                            if (busyMode) {
+                                RillListItem(
+                                    headline = stringResource(R.string.busy_mode_message),
+                                    supporting = busyMessage.ifEmpty { defaultBusyMsg },
+                                    leadingIcon = Icons.Outlined.Edit,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+                                    trailingIcon = Icons.Default.ChevronRight,
+                                    onClick = {
+                                        editingBusyMsgText = busyMessage
+                                        showBusyMessageDialog = true
+                                    }
+                                )
+                            }
+                            RillSwitchListItem(
                                 headline   = stringResource(R.string.proximity_sensor),
                                 supporting = stringResource(R.string.proximity_sensor_subtitle),
                                 leadingIcon = Icons.Rounded.SpatialTracking,
@@ -283,6 +344,42 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
             }
 
             item { SettingsBottomPadding() }
+        }
+
+        if (showBusyMessageDialog) {
+            RillDialog(
+                onDismissRequest = { showBusyMessageDialog = false },
+                title = stringResource(R.string.edit_busy_message),
+                icon = Icons.Outlined.Edit,
+                confirmButton = {
+                    TextButton(onClick = {
+                        val trimmed = editingBusyMsgText.trim()
+                        val finalMsg = if (trimmed.isNotEmpty()) trimmed else defaultBusyMsg
+                        busyMessage = finalMsg
+                        prefs.setString(PreferenceManager.KEY_BUSY_MODE_MESSAGE, finalMsg)
+                        showBusyMessageDialog = false
+                    }) {
+                        Text(
+                            stringResource(R.string.save),
+                            textAlign = TextAlign.End,
+                        )
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showBusyMessageDialog = false }) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                }
+            ) {
+                OutlinedTextField(
+                    value = editingBusyMsgText,
+                    onValueChange = { editingBusyMsgText = it },
+                    label = { Text(stringResource(R.string.busy_mode_message)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                    maxLines = 5
+                )
+            }
         }
     }
 }

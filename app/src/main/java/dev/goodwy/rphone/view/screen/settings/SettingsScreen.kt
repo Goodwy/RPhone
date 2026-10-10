@@ -429,6 +429,8 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.ask_first),
                 stringResource(R.string.calling_accounts),
                 stringResource(R.string.call_behavior),
+                stringResource(R.string.busy_mode),
+                stringResource(R.string.busy_mode_subtitle),
                 stringResource(R.string.proximity_sensor),
                 stringResource(R.string.proximity_sensor_subtitle),
                 stringResource(R.string.pocket_mode_prevention),
