@@ -139,9 +139,6 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
 
 //    LaunchedEffect(Unit) {
 //        fabVisible = true
-//        if (prefs.getBoolean(PreferenceManager.KEY_OPEN_DIALPAD_DEFAULT, false)) {
-//            showDialpad = true
-//        }
 //
 //        CallService.clearAllMissedCallNotifications(context)
 //    }
@@ -153,10 +150,6 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
                 // It triggers when the window is first opened, when it is restored from minimised state,
                 // and when it is restored from another screen
                 fabVisible = true
-                if (prefs.getBoolean(PreferenceManager.KEY_OPEN_DIALPAD_DEFAULT, false)) {
-                    showDialpad = true
-                }
-
                 notificationManager.clearAllMissedCallNotifications(context)
             }
         }

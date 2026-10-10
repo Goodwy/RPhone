@@ -83,7 +83,6 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
     var tabShowSearch       by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SEARCH, false)) }
     var tabShowSettings     by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SETTINGS, true)) }
     var iconOnlyNav         by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_ICON_ONLY_NAV, false)) }
-    var openDialpadDefault  by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_OPEN_DIALPAD_DEFAULT, false)) }
 
     // Default Tab dialog
     var showDefaultTabDialog by remember { mutableStateOf(false) }
@@ -142,12 +141,12 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
                                 )
                             }
                         }
-                        Text("Default Tab Section", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                        Text(stringResource(R.string.startup_tab_dialog_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                     }
                     Spacer(Modifier.height(16.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(
-                            "Choose which tab opens when the app starts.",
+                            stringResource(R.string.startup_tab_dialog_subtitle),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -212,7 +211,7 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
 
                     Spacer(Modifier.height(8.dp))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                        TextButton(onClick = { showDefaultTabDialog = false }) { Text("Done") }
+                        TextButton(onClick = { showDefaultTabDialog = false }) { Text(stringResource(R.string.done)) }
                     }
                 }
             }
@@ -481,37 +480,26 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
                 }
             }
 
-            // ── Navigation ───────────────────────────────────────
-//            item {
-//                RillAnimatedSection(delayMs = 120L) {
-//                    Column {
-//                        NavigationSectionLabel("Home Screen")
-//                        RillExpressiveCard {
-//                            RillListItem(
-//                                headline = "Default Tab Section",
-//                                supporting = "Choose which tab opens when the app starts (currently: ${tabOptions.firstOrNull { it.key == defaultTab }?.label ?: "Calls"})",
-//                                leadingIcon = Icons.Rounded.Home,
-//                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
-//                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
-//                                trailingIcon = Icons.Default.ChevronRight,
-//                                onClick = { showDefaultTabDialog = true }
-//                            )
-//                            RillSwitchListItem(
-//                                headline = "Open Dialpad by Default",
-//                                supporting = "Show dialpad automatically when app starts",
-//                                leadingIcon = Icons.Outlined.Dialpad,
-//                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
-//                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
-//                                checked = openDialpadDefault,
-//                                onCheckedChange = {
-//                                    openDialpadDefault = it
-//                                    prefs.setBoolean(PreferenceManager.KEY_OPEN_DIALPAD_DEFAULT, it)
-//                                }
-//                            )
-//                        }
-//                    }
-//                }
-//            }
+            // ── Startup ─────────────────────────────────────────
+            item {
+                RillAnimatedSection(delayMs = 120L) {
+                    Column {
+                        SettingsSectionLabel(stringResource(R.string.startup_section))
+                        RillExpressiveCard {
+                            RillListItem(
+                                headline = stringResource(R.string.startup_tab),
+                                supporting = tabOptions.firstOrNull { it.key == defaultTab && it.enabled }?.label
+                                    ?: stringResource(R.string.startup_tab_subtitle),
+                                leadingIcon = Icons.Rounded.Home,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
+                                trailingIcon = Icons.Default.ChevronRight,
+                                onClick = { showDefaultTabDialog = true }
+                            )
+                        }
+                    }
+                }
+            }
 
             item { SettingsBottomPadding(120.dp) }
         }

@@ -415,6 +415,8 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.pill_style_navigation_subtitle),
                 stringResource(R.string.icon_only_bottom_bar),
                 stringResource(R.string.icon_only_bottom_bar_subtitle),
+                stringResource(R.string.startup_tab),
+                stringResource(R.string.startup_tab_subtitle),
             )
         ) { navigator.navigate(NavigationScreenDestination) },
         SettingsSearchEntry(

@@ -237,6 +237,11 @@
     <string name="pill_style_navigation_subtitle">Show a floating pill-style nav bar instead of the standard bottom bar</string>
     <string name="icon_only_bottom_bar">Icon-Only Bottom Bar</string>
     <string name="icon_only_bottom_bar_subtitle">Removes text labels from navigation</string>
+    <string name="startup_section">Startup</string>
+    <string name="startup_tab">Startup Tab</string>
+    <string name="startup_tab_subtitle">Tab that opens automatically when the app is launched</string>
+    <string name="startup_tab_dialog_title">Startup Tab</string>
+    <string name="startup_tab_dialog_subtitle">Choose which tab opens when the app starts.</string>
 
     <string name="calls_and_system">Calls &amp; System</string>
     <string name="call_settings">Call Settings</string>
