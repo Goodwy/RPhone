@@ -134,7 +134,7 @@ class CallService : InCallService() {
             super.onDetailsChanged(call, details)
             val number = details.handle?.schemeSpecificPart?.let { android.net.Uri.decode(it) } ?: ""
             val cnam = if (details.callerDisplayNamePresentation == TelecomManager.PRESENTATION_ALLOWED) {
-                details.callerDisplayName
+                details.callerDisplayName?.takeIf { it.isNotBlank() }
             } else null
             callStateManager.onNewCallReceived(number, cnam)
             updateCallState()
@@ -196,8 +196,12 @@ class CallService : InCallService() {
 //                    val photoUri = getContactPhotoFromCache(number)
 //                    notificationManager.showMissedCallNotification(call, contactName, photoUri)
 
+                    val cnam = if (call.details.callerDisplayNamePresentation == TelecomManager.PRESENTATION_ALLOWED) {
+                        call.details.callerDisplayName?.takeIf { it.isNotBlank() }
+                    } else null
+
                     val metadata = withTimeoutOrNull(2000L.milliseconds) {
-                        callStateManager.onNewCallReceived(number, null)
+                        callStateManager.onNewCallReceived(number, cnam)
                         callStateManager.callerMetadataMap.first { map ->
                             map.containsKey(number)
                         }[number]
@@ -354,7 +358,7 @@ class CallService : InCallService() {
 
         val number = call.details.handle?.schemeSpecificPart?.let { Uri.decode(it) } ?: ""
         val cnam = if (call.details.callerDisplayNamePresentation == TelecomManager.PRESENTATION_ALLOWED) {
-            call.details.callerDisplayName
+            call.details.callerDisplayName?.takeIf { it.isNotBlank() }
         } else null
 
         callStateManager.onNewCallReceived(number, cnam)

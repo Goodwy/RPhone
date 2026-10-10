@@ -393,19 +393,26 @@ fun DialPadContent(
             mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_OPEN_DIALPAD_DEFAULT, true))
         }
 
-        val topLogs by remember(logs) {
+        val topLogs by remember(logs, allContacts) {
             derivedStateOf {
                 logs.asSequence().take(200)
                     .filter { !it.isBlocked }
-                    .filter { !it.contactId.isNullOrBlank() }
-                    .groupBy { it.contactId!! }
-//                    .map { (_, entries) ->
-//                        val count = entries.size
-//                        val lastDate = entries.maxOfOrNull { it.date } ?: 0L
-//                        val latest = entries.maxByOrNull { it.date }!!
-//                        Triple(latest, count, lastDate)
-//                    }
-                    .map { (_, entries) ->
+                    .mapNotNull { entry ->
+                        val cid = entry.contactId?.takeIf { it.isNotBlank() }
+                            ?: allContacts.firstOrNull { c ->
+                                val cleanNum = entry.number.replace(" ", "").replace("-", "")
+                                cleanNum.isNotBlank() && c.phoneNumbers.any { n ->
+                                    val cleanN = n.replace(" ", "").replace("-", "")
+                                    cleanN.isNotBlank() && (cleanN.endsWith(cleanNum) || cleanNum.endsWith(cleanN))
+                                }
+                            }?.id
+                        if (cid != null) {
+                            Pair(cid, entry)
+                        } else null
+                    }
+                    .groupBy { it.first }
+                    .map { (cid, pairs) ->
+                        val entries = pairs.map { it.second }
                         val weight = entries.sumOf { entry ->
                             when (entry.type) {
                                 CallLog.Calls.OUTGOING_TYPE -> 3
@@ -842,11 +849,38 @@ fun DialPadContent(
                                         verticalArrangement = Arrangement.spacedBy(2.dp)
                                     ) {
                                         topLogs.forEach { entry ->
-                                            val displayName = entry.name?.takeIf { it.isNotBlank() } ?: entry.number
+                                            val matchingContact = if (!entry.contactId.isNullOrBlank()) {
+                                                allContacts.firstOrNull { it.id == entry.contactId }
+                                            } else {
+                                                val cleanEntryNumber = entry.number.replace(" ", "").replace("-", "")
+                                                if (cleanEntryNumber.isNotBlank()) {
+                                                    allContacts.firstOrNull { c ->
+                                                        c.phoneNumbers.any { n ->
+                                                            val cleanN = n.replace(" ", "").replace("-", "")
+                                                            cleanN.isNotBlank() && (cleanN.endsWith(cleanEntryNumber) || cleanEntryNumber.endsWith(cleanN))
+                                                        }
+                                                    }
+                                                } else null
+                                            }
+
+                                            val displayName = matchingContact?.let { getDisplayName(it, displayOrder) }
+                                                ?: entry.name?.takeIf { it.isNotBlank() && it != entry.number }
+                                                ?: entry.number.forceLtr()
+
+                                            val subtitle = if (matchingContact != null) {
+                                                val contactSub = getDisplayContactInfo(matchingContact)
+                                                if (!contactSub.isNullOrBlank()) contactSub else entry.number.forceLtr()
+                                            } else {
+                                                if (entry.name.isNullOrBlank() || entry.name == entry.number) null else entry.number.forceLtr()
+                                            }
+
+                                            val photoUri = matchingContact?.photoUri ?: entry.photoUri
+                                            val targetContactId = matchingContact?.id ?: entry.contactId?.takeIf { it.isNotBlank() }
+
                                             SingleTile(
                                                 title = displayName,
-                                                subtitle = if (entry.name == entry.number) null else entry.number,
-                                                photoUri = entry.photoUri,
+                                                subtitle = subtitle,
+                                                photoUri = photoUri,
                                                 phoneNumber = entry.number,
                                                 trailingContent = {
                                                     IconButton(onClick = { initiateCall(entry.number) }) {
@@ -859,9 +893,15 @@ fun DialPadContent(
                                                 },
                                                 onCall = { initiateCall(entry.number) },
                                                 onClick = {
-                                                    navigator?.navigate(
-                                                        ContactDetailsScreenDestination(contactId = entry.contactId!!)
-                                                    )
+                                                    if (targetContactId != null) {
+                                                        navigator?.navigate(
+                                                            ContactDetailsScreenDestination(contactId = targetContactId)
+                                                        )
+                                                    } else {
+                                                        navigator?.navigate(
+                                                            ContactDetailsScreenDestination(phoneNumber = entry.number)
+                                                        )
+                                                    }
                                                 },
                                                 menuOffset = DpOffset(56.dp, 64.dp)
                                             )
@@ -1276,11 +1316,38 @@ fun DialPadContent(
                                                 verticalArrangement = Arrangement.spacedBy(2.dp)
                                             ) {
                                                 topLogs.forEach { entry ->
-                                                    val displayName = entry.name?.takeIf { it.isNotBlank() } ?: entry.number
+                                                    val matchingContact = if (!entry.contactId.isNullOrBlank()) {
+                                                        allContacts.firstOrNull { it.id == entry.contactId }
+                                                    } else {
+                                                        val cleanEntryNumber = entry.number.replace(" ", "").replace("-", "")
+                                                        if (cleanEntryNumber.isNotBlank()) {
+                                                            allContacts.firstOrNull { c ->
+                                                                c.phoneNumbers.any { n ->
+                                                                    val cleanN = n.replace(" ", "").replace("-", "")
+                                                                    cleanN.isNotBlank() && (cleanN.endsWith(cleanEntryNumber) || cleanEntryNumber.endsWith(cleanN))
+                                                                }
+                                                            }
+                                                        } else null
+                                                    }
+
+                                                    val displayName = matchingContact?.let { getDisplayName(it, displayOrder) }
+                                                        ?: entry.name?.takeIf { it.isNotBlank() && it != entry.number }
+                                                        ?: entry.number.forceLtr()
+
+                                                    val subtitle = if (matchingContact != null) {
+                                                        val contactSub = getDisplayContactInfo(matchingContact)
+                                                        if (!contactSub.isNullOrBlank()) contactSub else entry.number.forceLtr()
+                                                    } else {
+                                                        if (entry.name.isNullOrBlank() || entry.name == entry.number) null else entry.number.forceLtr()
+                                                    }
+
+                                                    val photoUri = matchingContact?.photoUri ?: entry.photoUri
+                                                    val targetContactId = matchingContact?.id ?: entry.contactId?.takeIf { it.isNotBlank() }
+
                                                     SingleTile(
                                                         title = displayName,
-                                                        subtitle = if (entry.name == entry.number) null else entry.number,
-                                                        photoUri = entry.photoUri,
+                                                        subtitle = subtitle,
+                                                        photoUri = photoUri,
                                                         phoneNumber = entry.number,
                                                         trailingContent = {
                                                             IconButton(onClick = { initiateCall(entry.number) }) {
@@ -1293,9 +1360,15 @@ fun DialPadContent(
                                                         },
                                                         onCall = { initiateCall(entry.number) },
                                                         onClick = {
-                                                            navigator?.navigate(
-                                                                ContactDetailsScreenDestination(contactId = entry.contactId!!)
-                                                            )
+                                                            if (targetContactId != null) {
+                                                                navigator?.navigate(
+                                                                    ContactDetailsScreenDestination(contactId = targetContactId)
+                                                                )
+                                                            } else {
+                                                                navigator?.navigate(
+                                                                    ContactDetailsScreenDestination(phoneNumber = entry.number)
+                                                                )
+                                                            }
                                                         },
                                                         menuOffset = DpOffset(56.dp, 64.dp)
                                                     )

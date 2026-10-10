@@ -285,8 +285,9 @@ fun ExpressiveCallScreen(
                         val number = oc.details?.handle?.schemeSpecificPart ?: ""
                         if (number.isNotEmpty() && number.isNotBlank()) {
                             val contact = try { contactsRepo.getContactByNumber(number) } catch (_: Exception) { null }
-                            if (contact != null) ocName = getDisplayName(contact, displayOrder)
+                            if (contact != null && contact.hasLocalName()) ocName = getDisplayName(contact, displayOrder)
                             else if (!cnam.isNullOrEmpty()) ocName = cnam
+                            else if (contact != null) ocName = getDisplayName(contact, displayOrder)
                         }
                     }
 
@@ -1288,10 +1289,10 @@ fun ExpressiveCallScreen(
 
                         LaunchedEffect(childCall) {
                             val cnam = if (childDetails?.callerDisplayNamePresentation == TelecomManager.PRESENTATION_ALLOWED) {
-                                childDetails.callerDisplayName
+                                childDetails.callerDisplayName?.takeIf { it.isNotBlank() }
                             } else null
                             val contact = if (childNumber.isNotEmpty()) try { contactsRepo.getContactByNumber(childNumber) } catch (_: Exception) { null } else null
-                            childName = contact?.let { getDisplayName(it, 0) } ?: cnam ?: childNumber.forceLtr()
+                            childName = if (contact != null && contact.hasLocalName()) getDisplayName(contact, 0) else cnam ?: contact?.let { getDisplayName(it, 0) } ?: childNumber.forceLtr()
                             childPhotoUri = contact?.photoUri ?: ""
                         }
 

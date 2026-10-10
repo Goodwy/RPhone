@@ -348,13 +348,17 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
                 ?: identity.backgroundUri.takeIf { resolveFailed }
                 ?: defaultBackground
 
+            val resolvedName = if (contact != null && contact.hasLocalName()) {
+                getDisplayName(contact, displayOrder).takeIf { it.isNotBlank() } ?: cnam
+            } else {
+                cnam
+            } ?: contact?.let { getDisplayName(it, displayOrder) }?.takeIf { it.isNotBlank() }
+              ?: identity.name.takeIf { contactFailed && it.isNotBlank() }
+              ?: number.ifEmpty { unknownLabel }
+
             val resolved = CallIdentity(
                 number = number,
-                name = contact?.let { getDisplayName(it, displayOrder) }
-                    ?.takeIf { it.isNotBlank() }
-                    ?: cnam
-                    ?: identity.name.takeIf { contactFailed && it.isNotBlank() }
-                    ?: number.ifEmpty { unknownLabel },
+                name = resolvedName,
                 photoUri = contact?.photoUri ?: identity.photoUri.takeIf { contactFailed },
                 backgroundUri = background
             )
