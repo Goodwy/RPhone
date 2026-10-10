@@ -1288,9 +1288,17 @@ class ContactsRepository(
                 val accountTypeIdx = cursor.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_TYPE)
 
                 while (cursor.moveToNext()) {
-                    val accountName = cursor.getString(accountNameIdx)
-                    val accountType = cursor.getString(accountTypeIdx)
-                    sources.add(Account(accountName ?: device_only, accountType ?: device_only))
+                    val accountName = cursor.getString(accountNameIdx)?.takeIf { it.isNotBlank() }
+                    val accountType = cursor.getString(accountTypeIdx)?.takeIf { it.isNotBlank() }
+
+                    // Device-only raw contacts (ACCOUNT_NAME/ACCOUNT_TYPE == null) are not a real
+                    // account: they are already represented by the built-in "Local (Device Only)"
+                    // source. Adding a pseudo account here would show a second, always empty
+                    // "local" source in the UI.
+                    if (accountName == null || accountType == null) continue
+                    if (accountName == device_only && accountType == device_only) continue
+
+                    sources.add(Account(accountName, accountType))
                 }
             }
         } catch (e: SecurityException) {
