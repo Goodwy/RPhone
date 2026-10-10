@@ -38,6 +38,15 @@ data class Contact(
         get() = getDisplayName(this)
     val isCompany: Boolean
         get() = isCompany(this)
+    fun hasLocalName(): Boolean =
+        namePrefix.isNotBlank() ||
+                givenName.isNotBlank() ||
+                middleName.isNotBlank() ||
+                familyName.isNotBlank() ||
+                nameSuffix.isNotBlank() ||
+                nickname.isNotBlank() ||
+                company.isNotBlank() ||
+                jobTitle.isNotBlank()
 
     // For backward compatibility
     @Deprecated("Use displayName instead", ReplaceWith("displayName"))

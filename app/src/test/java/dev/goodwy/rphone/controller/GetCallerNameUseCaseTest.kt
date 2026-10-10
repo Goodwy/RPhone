@@ -63,4 +63,54 @@ class GetCallerNameUseCaseTest {
             assertFalse(metadata.isLocalContact)
         }
     }
+
+    @Test
+    fun testReturnsLocalContactNameWhenContactHasOnlyMiddleNameOrJobTitle() {
+        runBlocking {
+            val testContact = Contact(
+                id = "2",
+                middleName = "Edward",
+                jobTitle = "Manager"
+            )
+            val fakeRepo = FakeCallerRepository(mapOf("+15550004444" to testContact))
+            val useCase = GetCallerNameUseCase(fakeRepo)
+
+            val metadata = useCase("+15550004444", cnamName = "Network CNAP Name")
+
+            assertEquals("Edward", metadata.name)
+            assertTrue(metadata.isLocalContact)
+        }
+    }
+
+    @Test
+    fun testReturnsCnamNameWhenLocalContactHasNoNameFields() {
+        runBlocking {
+            val namelessContact = Contact(
+                id = "3",
+                phoneNumbers = listOf("+15550005555"),
+                photoUri = "content://photo/3"
+            )
+            val fakeRepo = FakeCallerRepository(mapOf("+15550005555" to namelessContact))
+            val useCase = GetCallerNameUseCase(fakeRepo)
+
+            val metadata = useCase("+15550005555", cnamName = "Delivery Service")
+
+            assertEquals("Delivery Service", metadata.name)
+            assertFalse(metadata.isLocalContact)
+            assertEquals("content://photo/3", metadata.photoUri)
+        }
+    }
+
+    @Test
+    fun testIgnoresBlankOrWhitespaceCnamName() {
+        runBlocking {
+            val fakeRepo = FakeCallerRepository()
+            val useCase = GetCallerNameUseCase(fakeRepo)
+
+            val metadata = useCase("+15550006666", cnamName = "   ")
+
+            assertEquals("+15550006666", metadata.name)
+            assertFalse(metadata.isLocalContact)
+        }
+    }
 }
