@@ -415,6 +415,8 @@ class PreferenceManager(context: Context) {
         const val RECORD_FILTER_CONTACTS_ONLY = 4
 
         const val KEY_POCKET_MODE = "pocket_mode"
+        const val KEY_BUSY_MODE_ENABLED = "busy_mode_enabled"
+        const val KEY_BUSY_MODE_MESSAGE = "busy_mode_message"
         const val KEY_VOLUME_SQUEEZE_DND = "volume_squeeze_dnd"
         const val KEY_QUICK_RESPONSES = "custom_quick_responses"
         val DEFAULT_QUICK_RESPONSES = listOf(
