@@ -389,9 +389,7 @@ fun DialPadContent(
 
         var showOverflowMenu by remember { mutableStateOf(false) }
 
-        var openDialpadDefault by remember {
-            mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_OPEN_DIALPAD_DEFAULT, true))
-        }
+        
 
         val topLogs by remember(logs) {
             derivedStateOf {

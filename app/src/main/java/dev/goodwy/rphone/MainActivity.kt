@@ -99,6 +99,7 @@ import com.ramcosta.composedestinations.generated.destinations.NavigationScreenD
 import com.ramcosta.composedestinations.generated.destinations.NotesScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.PrivateContactsScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.RecentScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.SearchScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.SettingsScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.SoundVibrationScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.SpamScreenDestination
@@ -216,28 +217,22 @@ class MainActivity : FragmentActivity() {
                         }
                     )
                 } else {
-                    val lastOpenedTab = remember {
-                        prefs.getString(PreferenceManager.KEY_LAST_OPENED_TAB, null)
-                    }
-                    // Compute start destination from prefs — done once so no flash
+                    // Resolve the configured startup tab. Done once so no flash.
                     val startDestination = remember {
                         val isDefaultDialer = isAlreadyDefaultDialer(this@MainActivity)
                         val isMainLauncher = intentState?.action == null || intentState?.action == Intent.ACTION_MAIN
-                        when {
-                            !isDefaultDialer && isMainLauncher -> DefaultDialerScreenDestination
-                            lastOpenedTab != null -> {
-                                when {
-                                    lastOpenedTab.contains(FavoritesScreenDestination.route) && favouritesEnabled -> FavoritesScreenDestination
-                                    lastOpenedTab.contains(ContactScreenDestination.route) && contactsEnabled -> ContactScreenDestination
-                                    lastOpenedTab.contains(NotesScreenDestination.route) && notesEnabled -> NotesScreenDestination()
-//                                    lastOpenedTab.contains(DialPadScreenDestination.route) && dialpadEnabled -> DialPadScreenDestination
-                                    else -> RecentScreenDestination
-                                }
+                        if (!isDefaultDialer && isMainLauncher) {
+                            DefaultDialerScreenDestination
+                        } else {
+                            when (defaultTab) {
+                                "favorites" -> if (favouritesEnabled) FavoritesScreenDestination else RecentScreenDestination
+                                "contacts" -> if (contactsEnabled) ContactScreenDestination else RecentScreenDestination
+                                "notes" -> if (notesEnabled) NotesScreenDestination() else RecentScreenDestination
+                                "dialpad" -> DialPadScreenDestination(initialNumber = "")
+                                "search" -> SearchScreenDestination()
+                                "settings" -> SettingsScreenDestination
+                                else -> RecentScreenDestination
                             }
-                            defaultTab == "favorites" && favouritesEnabled -> FavoritesScreenDestination
-                            defaultTab == "contacts" && contactsEnabled -> ContactScreenDestination
-                            defaultTab == "notes" && notesEnabled -> NotesScreenDestination()
-                            else -> RecentScreenDestination
                         }
                     }
 
@@ -585,7 +580,7 @@ class MainActivity : FragmentActivity() {
                                                                 modifier = Modifier.size(24.dp)
                                                             )
                                                         },
-                                                        onClick = { navTo(com.ramcosta.composedestinations.generated.destinations.SearchScreenDestination.route) }
+                                                        onClick = { navTo(SearchScreenDestination.route) }
                                                     )
                                                     RailItem(
                                                         selected = currentDest?.hierarchy?.any {
