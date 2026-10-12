@@ -671,6 +671,13 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
         ) { restoreBackup() },
         SettingsSearchEntry(
+            headline = stringResource(R.string.app_logs),
+            supporting = stringResource(R.string.app_logs_subtitle),
+            leadingIcon = Icons.Outlined.BugReport,
+            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPink,
+            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPink,
+        ) { navigator.navigate(com.ramcosta.composedestinations.generated.destinations.AppLogsScreenDestination) },
+        SettingsSearchEntry(
             headline = stringResource(R.string.about),
             supporting = "Version $appVersion ($storeName)",
             leadingIcon = Icons.Outlined.Info,
@@ -1051,7 +1058,17 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                                         iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPink,
                                         iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPink,
                                         trailingIcon = Icons.Default.ChevronRight,
-                                        onClick = { restoreBackup() })
+                                        onClick = { restoreBackup() }
+                                    )
+                                    RillListItem(
+                                        headline = stringResource(R.string.app_logs),
+                                        supporting = stringResource(R.string.app_logs_subtitle),
+                                        leadingIcon = Icons.Outlined.BugReport,
+                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPink,
+                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPink,
+                                        trailingIcon = Icons.Default.ChevronRight,
+                                        onClick = { navigator.navigate(com.ramcosta.composedestinations.generated.destinations.AppLogsScreenDestination) }
+                                    )
                                 }
                             }
                         }

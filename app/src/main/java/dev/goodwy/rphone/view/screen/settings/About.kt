@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
@@ -308,6 +309,15 @@ fun AboutAppScreen(navigator: DestinationsNavigator) {
                         iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOliva,
                         trailingIcon = Icons.Default.ChevronRight,
                         onClick = { navigator.navigate(ContributorsScreenDestination) }
+                    )
+                    RillListItem(
+                        headline = stringResource(R.string.app_logs),
+                        supporting = stringResource(R.string.app_logs_subtitle),
+                        leadingIcon = Icons.Outlined.BugReport,
+                        iconContainerColor = Color.Black,
+                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOliva,
+                        trailingIcon = Icons.Default.ChevronRight,
+                        onClick = { navigator.navigate(com.ramcosta.composedestinations.generated.destinations.AppLogsScreenDestination) }
                     )
                 }
             }

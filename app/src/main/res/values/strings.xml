@@ -741,4 +741,19 @@
     <string name="busy_mode_default_message" tools:ignore="MissingTranslation">I am busy now call me later</string>
     <string name="busy_mode_call_rejected_toast" tools:ignore="MissingTranslation">Call declined (Busy Mode). SMS sent.</string>
     <string name="edit_busy_message" tools:ignore="MissingTranslation">Edit Busy Mode Message</string>
+
+    <!-- App Logs & Logger -->
+    <string name="app_logs" tools:ignore="MissingTranslation">App Logs</string>
+    <string name="app_logs_subtitle" tools:ignore="MissingTranslation">View, search, copy and share in-app diagnostic logs</string>
+    <string name="app_logs_clear" tools:ignore="MissingTranslation">Clear Logs</string>
+    <string name="app_logs_share" tools:ignore="MissingTranslation">Share Logs</string>
+    <string name="app_logs_copy" tools:ignore="MissingTranslation">Copy Logs</string>
+    <string name="app_logs_cleared" tools:ignore="MissingTranslation">Logs cleared</string>
+    <string name="app_logs_copied" tools:ignore="MissingTranslation">Logs copied to clipboard</string>
+    <string name="app_logs_empty" tools:ignore="MissingTranslation">No logs recorded</string>
+    <string name="app_logs_search_hint" tools:ignore="MissingTranslation">Search logs by tag or text…</string>
+    <string name="app_logs_filter_all" tools:ignore="MissingTranslation">All</string>
+    <string name="app_logs_tab_app_logs" tools:ignore="MissingTranslation">App Logs</string>
+    <string name="app_logs_tab_system_logcat" tools:ignore="MissingTranslation">System Logcat</string>
+    <string name="app_logs_clear_confirm" tools:ignore="MissingTranslation">Are you sure you want to clear all stored logs?</string>
 </resources>

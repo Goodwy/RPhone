@@ -61,6 +61,7 @@ val appModule = module {
     viewModel { CallViewModel(androidContext(), get(), get()) }
     viewModel { MainViewModel(get()) }
     viewModel { CallAnalyticsViewModel(get(), get()) }
+    viewModel { dev.goodwy.rphone.controller.AppLogsViewModel() }
     single<PurchaseHelper> {
         RuStoreViewModel(androidApplication(), get())
     }

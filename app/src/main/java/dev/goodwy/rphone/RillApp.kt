@@ -11,6 +11,7 @@ import org.koin.core.context.startKoin
 class RillApp : Application() {
     override fun onCreate() {
         super.onCreate()
+        dev.goodwy.rphone.controller.util.AppLogger.init(this)
         startKoin {
             androidContext(this@RillApp)
             modules(appModule)
