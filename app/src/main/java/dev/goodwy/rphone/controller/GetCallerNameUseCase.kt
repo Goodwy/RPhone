@@ -39,7 +39,7 @@ class GetCallerNameUseCase(private val repository: ICallerRepository) {
             else -> {
                 CallerMetadata(
                     number = incomingNumber,
-                    name = incomingNumber.ifBlank { "Unknown Number" },
+                    name = incomingNumber,
                     isLocalContact = false
                 )
             }

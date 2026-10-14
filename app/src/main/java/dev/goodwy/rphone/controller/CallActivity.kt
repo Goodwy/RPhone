@@ -475,9 +475,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
 
     override fun onStop() {
         super.onStop()
-        if (proximityWakeLock?.isHeld != true) {
-            callViewModel.setIsActivityVisible(false)
-        }
+        callViewModel.setIsActivityVisible(false)
     }
 
     private fun acquireProximityLock() {

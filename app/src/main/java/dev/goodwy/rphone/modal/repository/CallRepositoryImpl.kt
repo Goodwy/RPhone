@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+import java.lang.ref.WeakReference
+
 class CallRepositoryImpl : ICallRepository {
 
     private val _currentCallSession = MutableStateFlow<CallSession?>(null)
@@ -28,14 +30,18 @@ class CallRepositoryImpl : ICallRepository {
 
     private val _preferredCall = MutableStateFlow<Call?>(null)
 
-    private var inCallService: InCallService? = null
+    private var inCallServiceRef: WeakReference<InCallService>? = null
+
+    private val inCallService: InCallService?
+        get() = inCallServiceRef?.get()
 
     fun bindService(service: InCallService) {
-        this.inCallService = service
+        this.inCallServiceRef = WeakReference(service)
     }
 
     fun unbindService() {
-        this.inCallService = null
+        this.inCallServiceRef?.clear()
+        this.inCallServiceRef = null
     }
 
     override fun updateCurrentCallSession(session: CallSession?) {
@@ -43,7 +49,7 @@ class CallRepositoryImpl : ICallRepository {
     }
 
     override fun updateAllCalls(calls: List<Call>) {
-        _allCalls.value = ArrayList(calls)
+        _allCalls.value = calls.toList()
     }
 
     override fun updateAudioState(state: CallAudioState?) {
