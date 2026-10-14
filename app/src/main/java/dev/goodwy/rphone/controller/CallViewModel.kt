@@ -13,6 +13,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlin.time.Duration.Companion.milliseconds
 
+import kotlinx.coroutines.Dispatchers
+
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class CallViewModel(
     private val context: Context,
@@ -56,7 +58,7 @@ class CallViewModel(
             null
         }
         account?.label?.toString() ?: context.getString(R.string.call_screen_sim_label, accountHandle.id)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+    }.flowOn(Dispatchers.IO).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     fun answerCall() = callRepository.answerCall()
     fun declineCall() = callRepository.declineCall()

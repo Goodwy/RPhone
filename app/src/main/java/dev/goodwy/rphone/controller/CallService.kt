@@ -77,7 +77,12 @@ class CallService : InCallService() {
             addAction(Intent.ACTION_SCREEN_ON)
             addAction(Intent.ACTION_USER_PRESENT) // Screen Unlocked
         }
-        registerReceiver(screenStateReceiver, filter)
+        ContextCompat.registerReceiver(
+            this,
+            screenStateReceiver,
+            filter,
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
 
         serviceScope.launch {
             callRepository.isActivityVisible.collect {
@@ -114,7 +119,7 @@ class CallService : InCallService() {
             updateCallState()
 
             if (state == Call.STATE_RINGING) {
-                val number = call.details.handle?.schemeSpecificPart?.let { Uri.decode(it) } ?: ""
+                val number = call.details?.handle?.schemeSpecificPart?.let { Uri.decode(it) } ?: ""
                 if (preferenceManager.getBoolean(PreferenceManager.KEY_BUSY_MODE_ENABLED, false)) {
                     handleBusyModeCall(call, number)
                     return
@@ -126,7 +131,7 @@ class CallService : InCallService() {
             }
 
             if (state == Call.STATE_DISCONNECTED) {
-                val cause = call.details.disconnectCause
+                val cause = call.details?.disconnectCause
                 handleDisconnect(call, cause)
 
                 val remaining = calls?.filter { it.state != Call.STATE_DISCONNECTED } ?: emptyList()
@@ -155,7 +160,8 @@ class CallService : InCallService() {
     }
 
     private fun handleDisconnect(call: Call, cause: DisconnectCause?) {
-        val number = call.details.handle?.schemeSpecificPart ?: ""
+        val details = call.details
+        val number = details?.handle?.schemeSpecificPart ?: ""
 
         // Auto Redial on Busy
         if (cause?.code == DisconnectCause.BUSY &&
@@ -177,10 +183,9 @@ class CallService : InCallService() {
             }
         }
 
-        // Need to create a Receiver (android.telecom.action.SHOW_MISSED_CALLS_NOTIFICATION) to prevent the system notification from being duplicated
-        val wasNeverConnected = call.details.connectTimeMillis == 0L
-        val isIncoming = call.details.callDirection == Call.Details.DIRECTION_INCOMING
-        val isOutgoing = call.details.callDirection == Call.Details.DIRECTION_OUTGOING
+        val wasNeverConnected = details?.connectTimeMillis == 0L
+        val isIncoming = details?.callDirection == Call.Details.DIRECTION_INCOMING
+        val isOutgoing = details?.callDirection == Call.Details.DIRECTION_OUTGOING
 
         if (isOutgoing && wasNeverConnected) {
             val failMessage = when {
@@ -204,12 +209,8 @@ class CallService : InCallService() {
                 val isBlocked = isNumberBlocked(number)
                 val showBlocked = preferenceManager.getInt(PreferenceManager.KEY_BLOCK_LOG_VISIBILITY, 0) == 1
                 if (!isBlocked || showBlocked) {
-//                    val contactName = getContactNameFromCache(number)
-//                    val photoUri = getContactPhotoFromCache(number)
-//                    notificationManager.showMissedCallNotification(call, contactName, photoUri)
-
-                    val cnam = if (call.details.callerDisplayNamePresentation == TelecomManager.PRESENTATION_ALLOWED) {
-                        call.details.callerDisplayName?.takeIf { it.isNotBlank() }
+                    val cnam = if (details.callerDisplayNamePresentation == TelecomManager.PRESENTATION_ALLOWED) {
+                        details.callerDisplayName?.takeIf { it.isNotBlank() }
                     } else null
 
                     val metadata = withTimeoutOrNull(2000L.milliseconds) {
@@ -316,7 +317,7 @@ class CallService : InCallService() {
 
         callsList.forEach { c ->
             if (c.state == Call.STATE_ACTIVE) {
-                val detailsTime = c.details.connectTimeMillis
+                val detailsTime = c.details?.connectTimeMillis ?: 0L
                 if (detailsTime > 0) {
                     callStartTimes[c] = detailsTime
                 } else if (!callStartTimes.containsKey(c)) {
@@ -336,7 +337,7 @@ class CallService : InCallService() {
 
         val priorityCall = callsList.find { it.state == Call.STATE_RINGING }
             ?: activePreferred
-            ?: callsList.find { it.details.hasProperty(Call.Details.PROPERTY_CONFERENCE) && it.state != Call.STATE_DISCONNECTED }
+            ?: callsList.find { it.details?.hasProperty(Call.Details.PROPERTY_CONFERENCE) == true && it.state != Call.STATE_DISCONNECTED }
             ?: callsList.find { it.state == Call.STATE_DIALING || it.state == Call.STATE_CONNECTING }
             ?: callsList.find { it.state == Call.STATE_ACTIVE }
             ?: callsList.find { it == preferred }
@@ -364,13 +365,14 @@ class CallService : InCallService() {
     private fun updateNotification(call: Call, forcedHigh: Boolean? = null) {
         notificationUpdateJob?.cancel()
         notificationUpdateJob = serviceScope.launch {
-            val handle = call.details.handle
+            val details = call.details ?: return@launch
+            val handle = details.handle
             val number = handle?.schemeSpecificPart ?: ""
             val contactName = getContactNameFromCache(number)
             val photoUri = getContactPhotoFromCache(number)
             val contactPhoto = notificationManager.getContactBitmap(photoUri)
 
-            if (!isActive) return@launch
+            if (!isActive || call.state == Call.STATE_DISCONNECTED) return@launch
 
             val isHigh = forcedHigh ?: isDeviceLocked()
 
@@ -381,11 +383,13 @@ class CallService : InCallService() {
                 callRepository.audioState.value,
                 isHigh
             )
-            startForeground(
-                CallNotificationManager.NOTIFICATION_ID,
-                notification,
-                android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
-            )
+            if (isActive && call.state != Call.STATE_DISCONNECTED) {
+                startForeground(
+                    CallNotificationManager.NOTIFICATION_ID,
+                    notification,
+                    android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
+                )
+            }
 
             // Start/stop floating bubble based on preference
             if (call.state != Call.STATE_DISCONNECTED && call.state != Call.STATE_DISCONNECTING) {
@@ -416,9 +420,10 @@ class CallService : InCallService() {
         redialCount = 0
         call.registerCallback(callCallback)
 
-        val number = call.details.handle?.schemeSpecificPart?.let { Uri.decode(it) } ?: ""
-        val cnam = if (call.details.callerDisplayNamePresentation == TelecomManager.PRESENTATION_ALLOWED) {
-            call.details.callerDisplayName?.takeIf { it.isNotBlank() }
+        val details = call.details
+        val number = details?.handle?.schemeSpecificPart?.let { Uri.decode(it) } ?: ""
+        val cnam = if (details?.callerDisplayNamePresentation == TelecomManager.PRESENTATION_ALLOWED) {
+            details.callerDisplayName?.takeIf { it.isNotBlank() }
         } else null
 
         callStateManager.onNewCallReceived(number, cnam)
@@ -437,7 +442,7 @@ class CallService : InCallService() {
                 return@launch
             }
 
-            val isIncoming = call.details.callDirection == Call.Details.DIRECTION_INCOMING || call.state == Call.STATE_RINGING
+            val isIncoming = details?.callDirection == Call.Details.DIRECTION_INCOMING || call.state == Call.STATE_RINGING
             if (isIncoming && preferenceManager.getBoolean(PreferenceManager.KEY_BUSY_MODE_ENABLED, false)) {
                 handleBusyModeCall(call, number)
                 return@launch
