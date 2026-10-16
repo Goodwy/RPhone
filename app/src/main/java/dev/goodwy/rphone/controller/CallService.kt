@@ -44,6 +44,7 @@ class CallService : InCallService() {
     private val preferenceManager: PreferenceManager by inject()
     private val callStateManager: CallStateManager by inject()
     private val notificationManager: CallNotificationManager by inject()
+    private val flashNotificationManager: dev.goodwy.rphone.controller.sensor.FlashNotificationManager by inject()
     private val callRepository: ICallRepository by inject()
 
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
@@ -90,8 +91,21 @@ class CallService : InCallService() {
             callStateManager.callerMetadataMap.collect {
                 callRepository.currentCallSession.value?.call?.let { currentCall ->
                     updateNotification(currentCall)
+                    updateRingingAlerts()
                 }
             }
+        }
+    }
+
+    private fun updateRingingAlerts() {
+        val ringingCall = calls?.find { it.state == Call.STATE_RINGING }
+        if (ringingCall != null) {
+            val number = ringingCall.details?.handle?.schemeSpecificPart?.let { Uri.decode(it) } ?: ""
+            if (!preferenceManager.getBoolean(PreferenceManager.KEY_BUSY_MODE_ENABLED, false)) {
+                flashNotificationManager.startFlashing()
+            }
+        } else {
+            flashNotificationManager.stopFlashing()
         }
     }
 
@@ -120,6 +134,8 @@ class CallService : InCallService() {
                     return
                 }
             }
+
+            updateRingingAlerts()
 
             if (state == Call.STATE_ACTIVE) {
                 redialCount = 0
@@ -150,6 +166,7 @@ class CallService : InCallService() {
             } else null
             callStateManager.onNewCallReceived(number, cnam)
             updateCallState()
+            updateRingingAlerts()
             updateNotification(call)
         }
     }
@@ -443,6 +460,7 @@ class CallService : InCallService() {
                 return@launch
             }
 
+            updateRingingAlerts()
             updateNotification(call)
 
             val fullscreenCalls = preferenceManager.getBoolean(PreferenceManager.KEY_ALWAYS_FULLSCREEN_CALLS, false)
@@ -473,6 +491,7 @@ class CallService : InCallService() {
 
         callStateManager.onCallEnded(number)
         updateCallState()
+        updateRingingAlerts()
 
         val callsList = callRepository.allCalls.value
         if (callsList.isEmpty()) {
@@ -536,6 +555,8 @@ class CallService : InCallService() {
 
     override fun onDestroy() {
         super.onDestroy()
+
+        flashNotificationManager.stopFlashing()
 
         try {
             unregisterReceiver(screenStateReceiver)

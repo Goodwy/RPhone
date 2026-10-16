@@ -56,6 +56,7 @@ val commonModule = module {
     single { GetCallerNameUseCase(get()) }
     single { CallStateManager(get()) }
     single { CallNotificationManager(androidContext(), get()) }
+    single { dev.goodwy.rphone.controller.sensor.FlashNotificationManager(androidContext(), get()) }
     single<ICallRepository> { CallRepositoryImpl() }
 
     viewModel { ContactsViewModel(androidApplication(), get(), get(), get()) }
