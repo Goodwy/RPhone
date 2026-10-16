@@ -746,4 +746,11 @@
     <string name="busy_mode_call_rejected_sent_sms_toast">Call declined (Busy Mode). SMS sent.</string>
     <string name="edit_busy_message">Edit the Busy Mode message</string>
     <string name="busy_mode_permission_required">Grant permission to send SMS messages in the app settings</string>
+
+    <!-- Flash Notification on Call -->
+    <string name="flash_on_call" tools:ignore="MissingTranslation">Flash on call</string>
+    <string name="flash_on_call_subtitle" tools:ignore="MissingTranslation">Blink camera flashlight on incoming calls</string>
+    <string name="flash_on_call_mode" tools:ignore="MissingTranslation">Flash mode</string>
+    <string name="flash_mode_always" tools:ignore="MissingTranslation">Always</string>
+    <string name="flash_mode_silent_vibrate" tools:ignore="MissingTranslation">Silent / Vibrate only</string>
 </resources>

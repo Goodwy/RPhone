@@ -499,6 +499,10 @@ class PreferenceManager(context: Context) {
 
         const val KEY_APP_NAME_PRESET = "app_name_preset"
 
+        // Flash on Call
+        const val KEY_FLASH_ON_CALL_ENABLED    = "flash_on_call_enabled"
+        const val KEY_FLASH_ON_CALL_MODE       = "flash_on_call_mode" // 0 = Always, 1 = Silent/Vibrate Only
+
         // Goodwy
         const val KEY_DEFAULT_TAB              = "default_tab"
         const val KEY_LAST_OPENED_TAB          = "last_opened_tab"
