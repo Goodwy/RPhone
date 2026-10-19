@@ -25,6 +25,7 @@ import androidx.compose.material.icons.automirrored.rounded.CallReceived
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.rounded.Audiotrack
 import androidx.compose.material.icons.rounded.CallEnd
+import androidx.compose.material.icons.rounded.FlashOn
 import androidx.compose.material.icons.rounded.RingVolume
 import androidx.compose.material.icons.rounded.SwipeVertical
 import androidx.compose.material.icons.rounded.Vibration
@@ -79,6 +80,85 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
     // Haptics popup state
     var showHapticsDialog by remember { mutableStateOf(false) }
     var hapticsStrength by remember { mutableStateOf(prefs.getString(PreferenceManager.KEY_HAPTICS_STRENGTH, "light") ?: "light") }
+
+    // Flash on Call state
+    var flashOnCallEnabled by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_FLASH_ON_CALL_ENABLED, false)) }
+    var flashOnCallMode by remember { mutableIntStateOf(prefs.getInt(PreferenceManager.KEY_FLASH_ON_CALL_MODE, 0)) }
+    var showFlashDialog by remember { mutableStateOf(false) }
+
+    // ── Flash Dialog ─────────────────────────────────────────────────────────
+    if (showFlashDialog) {
+        RillDialog(
+            onDismissRequest = { showFlashDialog = false },
+            title = stringResource(R.string.flash_on_call),
+            icon = Icons.Rounded.FlashOn,
+            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+            confirmButton = {
+                TextButton(onClick = { showFlashDialog = false }) { Text(stringResource(R.string.done)) }
+            }
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(stringResource(R.string.flash_on_call), style = MaterialTheme.typography.bodyLarge)
+                    Switch(
+                        checked = flashOnCallEnabled,
+                        onCheckedChange = {
+                            flashOnCallEnabled = it
+                            prefs.setBoolean(PreferenceManager.KEY_FLASH_ON_CALL_ENABLED, it)
+                        }
+                    )
+                }
+
+                if (flashOnCallEnabled) {
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(0.4f))
+
+                    Text(stringResource(R.string.flash_on_call_mode), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(50))
+                            .background(cardColor),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        listOf(
+                            0 to stringResource(R.string.flash_mode_always),
+                            1 to stringResource(R.string.flash_mode_silent_vibrate)
+                        ).forEach { (modeKey, label) ->
+                            val selected = flashOnCallMode == modeKey
+                            Surface(
+                                onClick = {
+                                    flashOnCallMode = modeKey
+                                    prefs.setInt(PreferenceManager.KEY_FLASH_ON_CALL_MODE, modeKey)
+                                },
+                                shape = RoundedCornerShape(50),
+                                color = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(42.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text(
+                                        label,
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                                        color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     // ── Haptics Dialog ────────────────────────────────────────────────────────
     if (showHapticsDialog) {
@@ -395,6 +475,19 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
                                     vibrateOnHangup = it
                                     prefs.setBoolean(PreferenceManager.KEY_VIBRATE_ON_HANGUP, it)
                                 }
+                            )
+
+                            val flashSubtitle = if (flashOnCallEnabled) {
+                                stringResource(R.string.on) + " · " + if (flashOnCallMode == 0) stringResource(R.string.flash_mode_always) else stringResource(R.string.flash_mode_silent_vibrate)
+                            } else stringResource(R.string.off)
+                            RillListItem(
+                                headline = stringResource(R.string.flash_on_call),
+                                supporting = flashSubtitle,
+                                leadingIcon = Icons.Rounded.FlashOn,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+                                trailingIcon = Icons.Default.ChevronRight,
+                                onClick = { showFlashDialog = true }
                             )
                         }
                     }
