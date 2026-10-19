@@ -10,13 +10,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+import kotlinx.coroutines.Job
+import java.util.concurrent.ConcurrentHashMap
+
 /**
  * Singleton manager that holds the state of the current call.
  * This acts as the "Source of Truth" for the presentation layer.
  */
 class CallStateManager(private val getCallerNameUseCase: GetCallerNameUseCase) {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    
+    private val activeJobs = ConcurrentHashMap<String, Job>()
+
     private val _callerMetadataMap = MutableStateFlow<Map<String, CallerMetadata>>(emptyMap())
     val callerMetadataMap: StateFlow<Map<String, CallerMetadata>> = _callerMetadataMap.asStateFlow()
 
@@ -25,7 +29,9 @@ class CallStateManager(private val getCallerNameUseCase: GetCallerNameUseCase) {
     }
 
     fun onNewCallReceived(number: String, cnam: String?) {
-        scope.launch {
+        if (number.isBlank()) return
+        activeJobs[number]?.cancel()
+        val job = scope.launch {
             val metadata = getCallerNameUseCase(number, cnam)
             _callerMetadataMap.update { current ->
                 val next = current + (number to metadata)
@@ -37,12 +43,16 @@ class CallStateManager(private val getCallerNameUseCase: GetCallerNameUseCase) {
                 }
             }
         }
+        activeJobs[number] = job
     }
     
     fun onCallEnded(number: String? = null) {
         if (number == null) {
+            activeJobs.values.forEach { it.cancel() }
+            activeJobs.clear()
             _callerMetadataMap.value = emptyMap()
         } else {
+            activeJobs.remove(number)?.cancel()
             _callerMetadataMap.update { current -> current - number }
         }
     }

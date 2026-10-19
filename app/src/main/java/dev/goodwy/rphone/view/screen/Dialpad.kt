@@ -407,7 +407,7 @@ fun DialPadContent(
                         } else null
                     }
                     .groupBy { it.first }
-                    .map { (cid, pairs) ->
+                    .mapNotNull { (cid, pairs) ->
                         val entries = pairs.map { it.second }
                         val weight = entries.sumOf { entry ->
                             when (entry.type) {
@@ -418,7 +418,7 @@ fun DialPadContent(
                             }
                         }
                         val lastDate = entries.maxOfOrNull { it.date } ?: 0L
-                        val latest = entries.maxByOrNull { it.date }!!
+                        val latest = entries.maxByOrNull { it.date } ?: return@mapNotNull null
                         Triple(latest, weight, lastDate)
                     }
                     .sortedWith(

@@ -41,8 +41,10 @@ import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.NoteManager
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import dev.goodwy.rphone.view.theme.Rill4Theme
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class FloatingNotesService : Service() {
 
@@ -142,7 +144,14 @@ private fun FloatingNoteOverlay(
 ) {
     val context      = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    var text         by remember { mutableStateOf(NoteManager.readNote(context, contactName, phoneNumber)) }
+    var text         by remember { mutableStateOf("") }
+
+    LaunchedEffect(contactName, phoneNumber) {
+        val loadedNote = withContext(Dispatchers.IO) {
+            NoteManager.readNote(context, contactName, phoneNumber)
+        }
+        text = loadedNote
+    }
 
     // ── Animation state ───────────────────────────────────────────────────────
     // `showing` drives both enter and exit. Flip to false to play exit then call onDismiss.
@@ -151,7 +160,9 @@ private fun FloatingNoteOverlay(
 
     fun saveAndDismiss() {
         coroutineScope.launch {
-            NoteManager.writeNote(context, contactName, phoneNumber, text)
+            withContext(Dispatchers.IO) {
+                NoteManager.writeNote(context, contactName, phoneNumber, text)
+            }
             showing = false                    // trigger exit animation
             delay(420)                         // wait for it to finish
             onDismiss()
