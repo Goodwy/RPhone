@@ -77,16 +77,19 @@ import androidx.compose.material.icons.outlined.Directions
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Block
+import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.Email
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.LockOpen
 import androidx.compose.material.icons.rounded.MusicNote
+import androidx.compose.material.icons.rounded.Nfc
 import androidx.compose.material.icons.rounded.People
 import androidx.compose.material.icons.rounded.PeopleAlt
 import androidx.compose.material.icons.rounded.PersonAdd
 import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material.icons.rounded.QrCode2
 import androidx.compose.material.icons.rounded.Share
+import dev.goodwy.rphone.controller.util.ContactNfcHelper
 import androidx.compose.material.icons.rounded.Wallpaper
 import androidx.compose.material.icons.rounded.Widgets
 import androidx.compose.runtime.getValue
@@ -527,7 +530,7 @@ fun ContactDetailsScreen(
         SimPickerDialog(onDismissRequest = { showSimPicker = false }, onSimSelected = { handle -> pendingNumber?.let { makeCall(context, it, handle) }; showSimPicker = false })
     }
     if (showQrDialog) {
-        QrCodeDialog(name = displayName, phone = pendingQrNumber ?: displayPhone, email = contact?.emails?.firstOrNull()?.value, onDismiss = { showQrDialog = false })
+        QrCodeDialog(name = displayName, phone = pendingQrNumber ?: displayPhone, email = contact?.emails?.firstOrNull()?.value, contact = contact, onDismiss = { showQrDialog = false })
     }
     if (showQrDialogPicker && dialogContact != null) {
         NumberPickerDialog(
@@ -2515,27 +2518,168 @@ fun ContactDetailsScreen(
 }
 
 @Composable
-fun QrCodeDialog(name: String, phone: String?, email: String?, onDismiss: () -> Unit) {
-    val vCard = remember(name, phone, email) { QrCodeUtils.generateVCard(name, phone, email) }
+fun QrCodeDialog(
+    name: String,
+    phone: String?,
+    email: String?,
+    contact: dev.goodwy.rphone.modal.data.Contact? = null,
+    onDismiss: () -> Unit
+) {
+    val context = LocalContext.current
+    val activity = context as? Activity
+
+    val vCard = remember(contact, name, phone, email) {
+        if (contact != null) {
+            QrCodeUtils.generateVCard(contact)
+        } else {
+            QrCodeUtils.generateVCard(name, phone, email)
+        }
+    }
     val qrBitmap = remember(vCard) { QrCodeUtils.generateQrCode(vCard, 600) }
+    val isNfcAvailable = remember(context) { ContactNfcHelper.isNfcAvailable(context) }
+    val isNfcEnabled = remember(context) { ContactNfcHelper.isNfcEnabled(context) }
+
+    DisposableEffect(activity, vCard) {
+        if (activity != null && isNfcEnabled) {
+            ContactNfcHelper.pushNdefMessage(activity, vCard)
+        }
+        onDispose {
+            if (activity != null && isNfcEnabled) {
+                ContactNfcHelper.clearNdefMessage(activity)
+            }
+        }
+    }
+
     Dialog(onDismissRequest = onDismiss) {
-        Card(shape = MaterialTheme.shapes.extraLarge, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
-            Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(stringResource(R.string.contact_qr), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        Card(
+            shape = MaterialTheme.shapes.extraLarge,
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(24.dp)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    stringResource(R.string.contact_qr),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
                 Spacer(Modifier.height(16.dp))
                 qrBitmap?.let {
-                    Image(bitmap = it.asImageBitmap(), contentDescription = "QR Code", modifier = Modifier
-                        .size(240.dp)
-                        .background(Color.White, MaterialTheme.shapes.medium)
-                        .padding(12.dp))
+                    Image(
+                        bitmap = it.asImageBitmap(),
+                        contentDescription = "QR Code",
+                        modifier = Modifier
+                            .size(240.dp)
+                            .background(Color.White, MaterialTheme.shapes.medium)
+                            .padding(12.dp)
+                    )
                 }
                 Spacer(Modifier.height(16.dp))
-                Text(name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, textAlign = TextAlign.Center)
-                Text(phone ?: "", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Spacer(Modifier.height(24.dp))
-                Button(onClick = onDismiss, modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 2.dp), shape = MaterialTheme.shapes.medium) { Text(stringResource(R.string.close)) }
+                Text(
+                    name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium,
+                    textAlign = TextAlign.Center
+                )
+                if (!phone.isNullOrBlank()) {
+                    Text(
+                        phone,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                if (isNfcAvailable) {
+                    Spacer(Modifier.height(12.dp))
+                    Surface(
+                        shape = CircleShape,
+                        color = if (isNfcEnabled) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh,
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Nfc,
+                                contentDescription = "NFC",
+                                modifier = Modifier.size(16.dp),
+                                tint = if (isNfcEnabled) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                text = if (isNfcEnabled) "Tap phone to share via NFC" else "NFC is turned off",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = if (isNfcEnabled) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(20.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilledTonalButton(
+                        onClick = {
+                            if (contact != null) {
+                                QrCodeUtils.shareVCardFile(context, contact)
+                            } else {
+                                val tempContact = dev.goodwy.rphone.modal.data.Contact(
+                                    id = "",
+                                    givenName = name,
+                                    phoneNumbers = listOfNotNull(phone),
+                                    emails = listOfNotNull(email?.let { dev.goodwy.rphone.modal.data.ContactEmail(value = it) })
+                                )
+                                QrCodeUtils.shareVCardFile(context, tempContact)
+                            }
+                        },
+                        modifier = Modifier.weight(1f),
+                        shape = MaterialTheme.shapes.medium
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Share,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(Modifier.width(6.dp))
+                        Text(stringResource(R.string.share))
+                    }
+
+                    val copySuccessText = stringResource(R.string.copy)
+                    OutlinedButton(
+                        onClick = {
+                            QrCodeUtils.copyToClipboard(context, vCard, name)
+                            android.widget.Toast.makeText(context, copySuccessText, android.widget.Toast.LENGTH_SHORT).show()
+                        },
+                        modifier = Modifier.weight(1f),
+                        shape = MaterialTheme.shapes.medium
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.ContentCopy,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(Modifier.width(6.dp))
+                        Text(stringResource(R.string.copy))
+                    }
+                }
+
+                Spacer(Modifier.height(12.dp))
+
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.medium
+                ) {
+                    Text(stringResource(R.string.close))
+                }
             }
         }
     }
