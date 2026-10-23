@@ -169,6 +169,7 @@
     <string name="app_icon">Appikon</string>
     <string name="app_icon_subtitle">Välj appikonen som visas på din startskärm</string>
     <string name="app_name_change">Appnamn</string>
+    <string name="language">Språk</string>
     <string name="visual_effects">Visuella effekter</string>
     <string name="not_supported_on_this_device">Stöds inte på den här enheten</string>
     <string name="not_supported_on_this_device_subtitle">Oskärpa och Liquid Glass kräver Android 12 eller senare</string>
@@ -203,8 +204,6 @@
     <string name="dialpad_animations_subtitle">Visa animationer vid inmatning av siffror</string>
     <string name="hide_voice_search">Dölj röstsökning</string>
     <string name="hide_voice_search_subtitle">Döljer knappen för röstsökning</string>
-    <string name="swipe_actions">Svepåtgärder</string>
-    <string name="swipe_actions_subtitle">Svep på en senaste samtalsloggpost för att ta bort den, skicka ett SMS eller ringa</string>
 
     <string name="avatars_settings">Avatar-inställningar</string>
     <string name="avatars_settings_subtitle">Anpassa färger, ramar och mer</string>
@@ -311,6 +310,13 @@
     <string name="haptic_interval">Haptik-intervall</string>
     <string name="haptic_interval_value">1 per %.1f cm</string>
     <string name="haptic_strength">Haptik-styrka</string>
+
+    <!-- Flash Notification on Call -->
+    <string name="flash_on_call">Blixt vid samtal</string>
+    <string name="flash_on_call_subtitle">Blinka kamerablixten vid inkommande samtal</string>
+    <string name="flash_on_call_mode">Blixtläge</string>
+    <string name="flash_mode_always">Alltid</string>
+    <string name="flash_mode_silent_vibrate">Endast tyst / vibration</string>
 
     <string name="manage_blocked">Hantera blockerade</string>
     <string name="manage_blocked_subtitle">Hantera blockerade samtal och skräppost</string>
@@ -451,6 +457,9 @@
     <string name="call_failed_no_network">Samtal misslyckades: mobilnätet är inte tillgängligt</string>
     <string name="call_failed_restricted">Samtal misslyckades: samtalet är begränsat</string>
     <string name="call_failed_generic">Samtalet kunde inte slutföras</string>
+    <string name="no_valid_app_found">Ingen giltig app hittades</string>
+    <string name="video_call">Videosamtal</string>
+    <string name="voice_call">Röstsamtal</string>
     <string name="call">Samtal</string>
     <string name="incoming">Inkommande</string>
     <string name="outgoing">Utgående</string>
@@ -562,6 +571,8 @@
     <string name="save_to_account">Spara i konto</string>
     <string name="show_full_history">Visa full historik</string>
     <string name="contact_qr">Kontakt-QR</string>
+    <string name="tap_phone_to_share_NFC">Tryck på telefonen för att dela via NFC</string>
+    <string name="nfc_is_turned_off">NFC är avstängt</string>
     <string name="phone_number">Telefonnummer</string>
     <string name="name">Namn</string>
     <string name="prefix">Prefix</string>
@@ -736,4 +747,22 @@
     <string name="busy_mode_call_rejected_sent_sms_toast">Samtal avvisat (Upptagen-läge). SMS skickat.</string>
     <string name="edit_busy_message">Redigera meddelandet för Upptagen-läget</string>
     <string name="busy_mode_permission_required">Bevilja behörighet att skicka SMS i appens inställningar</string>
+
+    <!-- Avatar Cropping -->
+    <string name="crop_avatar_title">Beskär och rotera</string>
+    <string name="action_crop">Beskär</string>
+    <string name="action_rotate">Rotera</string>
+
+    <!-- Swipe Actions and Tap -->
+    <string name="settings_swipe_and_taps_title">Svep och tryck</string>
+    <string name="settings_swipe_and_taps_supporting">Ange vad som händer när du sveper eller trycker</string>
+    <string name="settings_swipe_actions_enable">Aktivera svepgester</string>
+    <string name="settings_swipe_actions_enable_supporting">Svep åt vänster eller höger på posterna i listan för att utlösa åtgärder</string>
+    <string name="settings_swipe_right_action">Åtgärder vid svep åt höger</string>
+    <string name="settings_swipe_right_action_second">Sekundär åtgärd vid svep åt höger</string>
+    <string name="settings_swipe_left_action">Åtgärder vid svep åt vänster</string>
+    <string name="settings_swipe_left_action_second">Sekundär åtgärd vid svep åt vänster</string>
+    <string name="settings_swipe_actions_reset">Återställ svepåtgärder</string>
+    <string name="swipe_action_none">Ingen</string>
+    <string name="swipe_action_copy_number">Kopiera nummer</string>
 </resources>

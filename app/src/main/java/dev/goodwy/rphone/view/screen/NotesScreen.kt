@@ -73,10 +73,22 @@ import dev.goodwy.rphone.view.components.RillTextButton
 import dev.goodwy.rphone.view.components.Title
 import dev.goodwy.rphone.view.components.TopBar
 import dev.goodwy.rphone.view.theme.RillShapeDefaults
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinActivityViewModel
 import java.text.SimpleDateFormat
 import java.util.*
+
+object NotesHolder {
+    private val _scrollToTop = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val scrollToTop: SharedFlow<Unit> = _scrollToTop.asSharedFlow()
+
+    fun requestScrollToTop() {
+        _scrollToTop.tryEmit(Unit)
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Destination<RootGraph>(style = TabTransitionStyle::class)
@@ -88,7 +100,16 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator, 
     val contactsVM: ContactsViewModel = koinActivityViewModel()
     val allContacts by contactsVM.allContacts.collectAsStateWithLifecycle()
 
-    // Build phone→photoUri lookup map
+    val listState = rememberLazyListState()
+    LaunchedEffect(Unit) {
+        NotesHolder.scrollToTop.collect {
+            if (listState.firstVisibleItemIndex != 0 || listState.firstVisibleItemScrollOffset != 0) {
+                listState.animateScrollToItem(0)
+            }
+        }
+    }
+
+    // Build phone → photoUri lookup map
     val phoneToPhotoUri = remember(allContacts) {
         buildMap {
             allContacts.forEach { c ->
@@ -396,7 +417,6 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator, 
                         description = stringResource(R.string.no_notes_yet_subtitle)
                     )
                 } else {
-                    val listState = rememberLazyListState()
                     val selectionMode = selectedNotes.isNotEmpty()
                     ScrollHapticsEffect(listState = listState)
                     LazyColumn(

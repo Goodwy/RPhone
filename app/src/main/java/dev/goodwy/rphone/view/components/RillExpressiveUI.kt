@@ -49,7 +49,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -60,6 +62,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.BuildConfig
 import dev.goodwy.rphone.R
@@ -424,7 +427,8 @@ fun RillExpressiveButton(
             onClick = if (enabled) onClick else ({}),
             modifier = Modifier
                 .height(size)
-                .fillMaxWidth(), //.scale(scale),
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(cornerRadius)), //.scale(scale),
             shape = RoundedCornerShape(cornerRadius),
             color = if (enabled) containerColor else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
             contentColor = if (enabled) contentColor else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
@@ -436,12 +440,23 @@ fun RillExpressiveButton(
             }
         }
         if (label != null) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelMedium,
-                color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                fontWeight = FontWeight.Medium
+                style = MaterialTheme.typography.labelMedium.copy(
+                    shadow = Shadow(
+                        color = MaterialTheme.colorScheme.surface,
+                        offset = Offset(0f, 1.5f),
+                        blurRadius = 4f
+                    )
+                ),
+                color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.68f),
+                fontWeight = FontWeight.Medium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+//                modifier = Modifier
+//                    .background(MaterialTheme.colorScheme.surface, CircleShape)
+//                    .padding(horizontal = 6.dp, vertical = 2.dp)
             )
         }
     }
@@ -506,6 +521,7 @@ internal fun RillIconBox(
     icon: ImageVector,
     iconContainerColor: Color?,
     iconBgContainerColor: Color? = null,
+    shape: Shape = CircleShape,
     modifier: Modifier = Modifier
 ) {
     var appeared by remember { mutableStateOf(false) }
@@ -531,7 +547,7 @@ internal fun RillIconBox(
             .size(44.dp)
             .scale(iconScale)
             .alpha(iconAlpha),
-        shape = CircleShape, //RoundedCornerShape(14.dp),
+        shape = shape,
         color = bgColor,
         shadowElevation = 0.dp
     ) {
@@ -850,7 +866,9 @@ fun CallLogListItemSimple(
 fun RillListItem(
     headline: String? = null,
     supporting: String? = null,
+    annotated: AnnotatedString? = null,
     leadingIcon: ImageVector? = null,
+    shape: Shape = CircleShape,
     leadingImageBitmap: ImageBitmap? = null,
     iconContainerColor: Color? = null,
     iconBgContainerColor: Color? = null,
@@ -926,6 +944,7 @@ fun RillListItem(
                     icon = leadingIcon,
                     iconContainerColor = iconContainerColor,
                     iconBgContainerColor = iconBgContainerColor,
+                    shape = shape,
                     modifier = modifierLeadingIcon
                 )
                 Spacer(modifier = Modifier.width(16.dp))
@@ -961,6 +980,16 @@ fun RillListItem(
                 if (supporting != null) {
                     Text(
                         text = supporting,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.8f),
+                        lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
+//                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                if (annotated != null) {
+                    Text(
+                        text = annotated,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.8f),
                         lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
@@ -1198,6 +1227,7 @@ fun RillSelectListItem(
     leadingIcon: ImageVector? = null,
     iconContainerColor: Color? = null,
     iconBgContainerColor: Color? = null,
+    trailingIcon: ImageVector? = null,
     options: List<Pair<String, Int>>,
     selectedValue: Int,
     onValueChange: (Int) -> Unit,
@@ -1272,12 +1302,14 @@ fun RillSelectListItem(
                 }
             }
 
-//            Icon(
-//                imageVector = Icons.Default.ChevronRight,
-//                contentDescription = "Select option",
-//                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-//                modifier = Modifier.size(20.dp)
-//            )
+            if (trailingIcon != null) {
+                Spacer(modifier = Modifier.width(12.dp))
+                Icon(
+                    trailingIcon, null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    modifier = Modifier.size(24.dp)
+                )
+            }
         }
     }
 

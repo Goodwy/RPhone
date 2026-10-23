@@ -91,6 +91,18 @@ import dev.goodwy.rphone.controller.util.ContactUtils.getPhoneNumber
 import dev.goodwy.rphone.view.components.PlaceholderView
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+
+object FavoritesHolder {
+    private val _scrollToTop = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val scrollToTop: SharedFlow<Unit> = _scrollToTop.asSharedFlow()
+
+    fun requestScrollToTop() {
+        _scrollToTop.tryEmit(Unit)
+    }
+}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Destination<RootGraph>(style = TabTransitionStyle::class)
@@ -99,13 +111,22 @@ fun FavoritesScreen(navController: NavController, navigator: DestinationsNavigat
     val contactsVM: ContactsViewModel = koinActivityViewModel()
     val allContacts by contactsVM.allContacts.collectAsStateWithLifecycle()
     val favorites = remember(allContacts) { allContacts.filter { it.isFavorite } }
-    val scope = rememberCoroutineScope()
+//    val scope = rememberCoroutineScope()
     val prefs = koinInject<PreferenceManager>()
     val settingsVersion by prefs.settingsChanged.collectAsStateWithLifecycle()
     val searchEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_SEARCH, false)
 
     LaunchedEffect(settingsVersion) {
         contactsVM.fetchContacts()
+    }
+
+    val gridState = rememberLazyGridState()
+    LaunchedEffect(Unit) {
+        FavoritesHolder.scrollToTop.collect {
+            if (gridState.firstVisibleItemIndex != 0 || gridState.firstVisibleItemScrollOffset != 0) {
+                gridState.animateScrollToItem(0)
+            }
+        }
     }
 
     // Drag-to-reorder state — declared first so LaunchedEffect can reference draggedContactId
@@ -330,7 +351,6 @@ fun FavoritesScreen(navController: NavController, navigator: DestinationsNavigat
                 val configuration = LocalConfiguration.current
                 val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
                 val columns = if (isLandscape) 6 else 4
-                val gridState = rememberLazyGridState()
                 val selectionMode = selectedIds.isNotEmpty()
                 ScrollHapticsGridEffect(gridState = gridState)
                 LazyVerticalGrid(

@@ -4,8 +4,6 @@ import android.Manifest
 import android.accounts.Account
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -41,7 +39,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import dev.goodwy.rphone.controller.CallLogViewModel
@@ -49,7 +46,6 @@ import dev.goodwy.rphone.controller.ContactsViewModel
 import dev.goodwy.rphone.controller.util.NoteManager
 import dev.goodwy.rphone.controller.util.QrCodeUtils
 import dev.goodwy.rphone.controller.util.makeCall
-import dev.goodwy.rphone.controller.util.placeCallWithSimPreference
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.view.components.*
 import com.ramcosta.composedestinations.annotation.Destination
@@ -66,6 +62,7 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.CallSplit
 import androidx.compose.material.icons.automirrored.rounded.DriveFileMove
 import androidx.compose.material.icons.automirrored.rounded.Help
@@ -77,7 +74,6 @@ import androidx.compose.material.icons.outlined.Directions
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Block
-import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.Email
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.LockOpen
@@ -89,12 +85,13 @@ import androidx.compose.material.icons.rounded.PersonAdd
 import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material.icons.rounded.QrCode2
 import androidx.compose.material.icons.rounded.Share
-import dev.goodwy.rphone.controller.util.ContactNfcHelper
 import androidx.compose.material.icons.rounded.Wallpaper
 import androidx.compose.material.icons.rounded.Widgets
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -102,9 +99,13 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.util.lerp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import dev.goodwy.rphone.R
@@ -115,7 +116,9 @@ import org.koin.compose.koinInject
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import dev.goodwy.rphone.cardCornerExtraSmall
+import dev.goodwy.rphone.controller.util.ContactNfcHelper
 import dev.goodwy.rphone.controller.util.ContactUtils
 import dev.goodwy.rphone.controller.util.copyToClipboard
 import dev.goodwy.rphone.controller.util.getAddressTypeText
@@ -134,16 +137,19 @@ import dev.goodwy.rphone.cardSpacedBy
 import dev.goodwy.rphone.controller.util.BlockedNumbersManager
 import dev.goodwy.rphone.controller.util.CallBackgroundStore
 import dev.goodwy.rphone.controller.util.ContactShortcutUtils
-import dev.goodwy.rphone.controller.util.SocialUtils
-import dev.goodwy.rphone.controller.util.SocialUtils.launchSendWhatsAppIntent
+import dev.goodwy.rphone.controller.util.SocialUtils.openWhatsAppChat
 import dev.goodwy.rphone.controller.util.areNumbersEqual
 import dev.goodwy.rphone.controller.util.forceLtr
 import dev.goodwy.rphone.controller.util.hasDualSim
 import dev.goodwy.rphone.device_only
+import dev.goodwy.rphone.modal.data.ContactEmail
 import dev.goodwy.rphone.modal.data.getDisplayName
 import dev.goodwy.rphone.modal.repository.ContactsRepository
 import dev.goodwy.rphone.private_only
+import dev.goodwy.rphone.view.theme.RillDurations
+import dev.goodwy.rphone.view.theme.color_primary
 import java.util.Calendar
+import kotlin.math.pow
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
@@ -195,6 +201,7 @@ private fun CallBackgroundRow(
 fun ContactDetailsScreen(
     contactId: String? = null,
     phoneNumber: String? = null,
+    initialName: String? = null, // If we have the subscriber's name in the call history
     isExternalView: Boolean = false,
     navController: NavController,
     navigator: DestinationsNavigator
@@ -203,16 +210,10 @@ fun ContactDetailsScreen(
     val contactsViewModel: ContactsViewModel = koinActivityViewModel()
     val callLogViewModel: CallLogViewModel = koinActivityViewModel()
 
-//    val contacts by contactsViewModel.allContacts.collectAsStateWithLifecycle()
     val allLogs by callLogViewModel.allCallLogs.collectAsStateWithLifecycle()
     val availableAccounts = contactsViewModel.availableAccounts.collectAsStateWithLifecycle().value
     val availableAccountsForMoving = contactsViewModel.availableAccountsForMoving.collectAsStateWithLifecycle().value
 
-//    val contact = remember(contactId, phoneNumber, contacts) {
-//        if (contactId != null && contactId != "null") contacts.find { it.id == contactId }
-//        else if (phoneNumber != null) contacts.find { c -> c.phoneNumbers.any { n -> n.replace(" ", "").contains(phoneNumber.replace(" ", "")) } }
-//        else null
-//    }
     var contact by remember { mutableStateOf<Contact?>(null) }
     var contactAccount by remember { mutableStateOf<Account?>(null) }
     var isFullLoading by remember { mutableStateOf(true) }
@@ -311,6 +312,8 @@ fun ContactDetailsScreen(
 
     val defaultPhone = remember(contact) { derivedStateOf { contact?.phoneDetails?.firstOrNull { it.isPrimary } } }.value
     val videoLauncher = rememberVideoLauncher()
+    val messageLauncher = rememberMessageLauncher()
+    val callLauncher = rememberCallLauncher()
 
     fun updateDefaultPhone(phoneNumber: String, isPrimary: Boolean) {
         val c = contact ?: return
@@ -332,17 +335,18 @@ fun ContactDetailsScreen(
 
 //    val telecomManager = remember { context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager }
     val prefs = koinInject<PreferenceManager>()
-    val simPref = remember { prefs.getInt(PreferenceManager.KEY_DEFAULT_SIM, prefs.getDefaultSimIndexDefault()) }
     val displayOrder by remember {
         mutableIntStateOf(prefs.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0))
     }
     val displayName = contact?.let { getDisplayName(it, displayOrder) }
+        ?: initialName
         ?: phoneNumber?.forceLtr()
         ?: unknownLabel
 
     var showSimPicker by remember { mutableStateOf(false) }
     var showNumberPicker by remember { mutableStateOf(false) }
     var showMessagePicker by remember { mutableStateOf(false) }
+    var showVideoPicker by remember { mutableStateOf(false) }
     var showEmailPicker by remember { mutableStateOf(false) }
     var showAddCallNotePicker by remember { mutableStateOf(false) }
     var pendingNumber by remember { mutableStateOf<String?>(null) }
@@ -350,6 +354,7 @@ fun ContactDetailsScreen(
     var showQrDialogPicker by remember { mutableStateOf(false) }
     var pendingQrNumber by remember { mutableStateOf<String?>(null) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showFullScreenPhoto by remember { mutableStateOf(false) }
     var showShortcutNumberPicker by remember { mutableStateOf(false) }
     var showShortcutActionPicker by remember { mutableStateOf(false) }
     var pendingShortcutNumber by remember { mutableStateOf<String?>(null) }
@@ -463,9 +468,10 @@ fun ContactDetailsScreen(
     BackHandler(enabled = !isClosing) { navigateBack() }
 
     val initiateCall = { number: String ->
-        placeCallWithSimPreference(context, number, simPref) {
-            pendingNumber = number; showSimPicker = true
-        }
+//        placeCallWithSimPreference(context, number, simPref) {
+//            pendingNumber = number; showSimPicker = true
+//        }
+        callLauncher.dial(number, contact)
     }
 
     val initiateMessage = { number: String ->
@@ -485,7 +491,7 @@ fun ContactDetailsScreen(
     val ringtonePickerLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        if (result.resultCode == android.app.Activity.RESULT_OK) {
+        if (result.resultCode == Activity.RESULT_OK) {
             val uri = result.data?.getParcelableExtra<Uri>(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
             val currentContact = contact
             if (currentContact != null) {
@@ -496,10 +502,6 @@ fun ContactDetailsScreen(
     }
 
     val showSimLabel = hasDualSim(context)
-
-    val openWhatsApp = { num: String -> SocialUtils.openWhatsApp(context, num) }
-    val openTelegram = { num: String -> SocialUtils.openTelegram(context, num) }
-    val openSignal = { num: String -> SocialUtils.openSignal(context, num) }
 
     val shareText = stringResource(R.string.share)
     val nameText = stringResource(R.string.name)
@@ -521,7 +523,10 @@ fun ContactDetailsScreen(
         NumberPickerDialog(numbers = dialogContact.phoneNumbers, onDismissRequest = { showNumberPicker = false }, onNumberSelected = { showNumberPicker = false; initiateCall(it) })
     }
     if (showMessagePicker && dialogContact != null) {
-        NumberPickerDialog(numbers = dialogContact.phoneNumbers, onDismissRequest = { showMessagePicker = false }, onNumberSelected = { showMessagePicker = false; initiateMessage(it) })
+        NumberPickerDialog(numbers = dialogContact.phoneNumbers, onDismissRequest = { showMessagePicker = false }, onNumberSelected = { showMessagePicker = false; messageLauncher.sendMessage(it) })
+    }
+    if (showVideoPicker && dialogContact != null) {
+        NumberPickerDialog(numbers = dialogContact.phoneNumbers, onDismissRequest = { showVideoPicker = false }, onNumberSelected = { showVideoPicker = false; videoLauncher.startVideoCall(it) })
     }
     if (showEmailPicker && dialogContact != null) {
         NumberPickerDialog(numbers = dialogContact.emails.map {it.value}, onDismissRequest = { showEmailPicker = false }, onNumberSelected = { showEmailPicker = false; initiateEmail(it) }, icon = Icons.Rounded.Email)
@@ -692,150 +697,1024 @@ fun ContactDetailsScreen(
         (context.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager).defaultDisplay.rotation
     val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
     val isRotation90 = rotation == if (isLtr) Surface.ROTATION_90 else Surface.ROTATION_270
-    Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            TopAppBar(
-                windowInsets = WindowInsets.systemBars.only(
-                    if (isRotation90) WindowInsetsSides.Top + WindowInsetsSides.Horizontal
-                    else WindowInsetsSides.Top
-                ),
-                title = {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .graphicsLayer { alpha = titleAlpha }
-                    ) {
-                        Title(displayName, false)
-                    }
-                },
-                navigationIcon = { NavigationIcon(onClick = { navigateBack() }) },
-                actions = {
-                    if (contact != null) {
-//                        IconButton(onClick = {
-//                            if (contact != null) {
-//                                val dump = contactsViewModel.dumpContact(contact!!.id)
-//                                context.copyToClipboard(dump)
-//                            }
-//                        }) {
-//                            Icon(Icons.Default.BugReport, "Dump Contact")
-//                        }
-                        val interactionSource = remember { MutableInteractionSource() }
-                        val isPressed by interactionSource.collectIsPressedAsState()
-                        val cornerRadius by animateDpAsState(
-                            if (isPressed) 8.dp else 40.dp,
-                            spring(stiffness = Spring.StiffnessMediumLow),
-                            label = "ButtonShapeAnimation"
-                        )
-                        IconButton(
-                            onClick = {
-                                contact?.let { thisContact ->
-                                    val newFavorite = !thisContact.isFavorite
-                                    contact = thisContact.copy(isFavorite = newFavorite)
-                                    contactsViewModel.toggleFavorite(thisContact)
-                                }
-                            },
-                            interactionSource = interactionSource,
-                            modifier = Modifier.width(32.dp),
-                            shape = RoundedCornerShape(cornerRadius),
-                            colors = if (isFavorite) IconButtonDefaults.iconButtonColors(
-                                    contentColor = MaterialTheme.colorScheme.primary,
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                                ) else IconButtonDefaults.iconButtonColors()
-                        ) {
-                            Icon(
-                                if (isFavorite) Icons.Default.Star else Icons.Default.StarOutline,
-                                stringResource(if (isFavorite) R.string.remove_from_favorites else R.string.add_to_favorites))
-                        }
-                        Spacer(modifier = Modifier.size(8.dp))
-                        IconButton(onClick = {
-//                            navController.navigate(ContactEditScreenDestination(contactId = contact!!.id).route) {
-//                                launchSingleTop = true
-//                                restoreState = true
-//                            }
-                            if (contactSources.size > 1) {
-                                showSourcesDialog = true
-                            } else {
-                                navController.navigate(ContactEditScreenDestination(contactId = contact!!.id).route) {
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            }
-                        }) { Icon(Icons.Outlined.Edit, stringResource(R.string.edit)) }
-                    } else if (phoneNumber != null && phoneNumber != unknownLabel) {
-                        IconButton(onClick = {
-                            navigator.navigate(ContactEditScreenDestination(initialPhone = phoneNumber))
-                        }) { Icon(Icons.Rounded.PersonAdd, stringResource(R.string.add_contact)) }
-                    }
-                    if (contact != null) {
-                        IconButton(onClick = {
-                            scope.launch {
-                                val lastIndex = listState.layoutInfo.totalItemsCount - 2
-                                listState.animateScrollToItem(lastIndex)
-                            }
-                        }) { Icon(ImageVector.vectorResource(id = R.drawable.ic_settings_account_box), stringResource(R.string.contacts_settings)) }
-                    }
-                    Spacer(modifier = Modifier.size(6.dp))
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
+
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+    val request = remember(callBackground, context) {
+        if (callBackground.isNullOrEmpty()) {
+            null
+        } else {
+            ImageRequest.Builder(context)
+                .data(callBackground)
+                .crossfade(RillDurations.Long1)
+                .build()
         }
-    ) { innerPadding ->
-        Box(modifier = Modifier
-//            .padding(innerPadding)
-            .padding(
-                top = innerPadding.calculateTopPadding(),
-                start = 0.dp,
-                end = 0.dp,
-                bottom = 0.dp
+    }
+    val showCallBackground = request != null && !isLandscape
+
+    val scrollProgress by remember {
+        derivedStateOf {
+            val total = listState.layoutInfo.totalItemsCount
+            if (total <= 1) 0f
+            else listState.firstVisibleItemIndex.toFloat() / (total - 1)
+        }
+    }
+    val animatedProgress by animateFloatAsState(
+        targetValue = scrollProgress,
+        animationSpec = tween(300),
+        label = "gradient"
+    )
+    Box(modifier = Modifier.fillMaxSize()) {
+        if (showCallBackground) {
+            AsyncImage(
+                model = request,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
             )
-            .fillMaxSize()
-            .alpha(screenAlpha)
-            .offset(y = screenOffsetY)
-        ) {
-            if (!hasContactsPermission) {
-                PermissionDeniedView(
-                    icon = Icons.Rounded.People,
-                    title = stringResource(R.string.contacts_permission),
-                    description = stringResource(R.string.contacts_permission_description),
-                    onGrantClick = { permissionLauncher.launch(Manifest.permission.READ_CONTACTS) }
+
+            val alphaFraction = (animatedProgress / 0.3f).pow(0.7f).coerceIn(0f, 1f)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                0f to MaterialTheme.colorScheme.surface.copy(
+                                    alpha = lerp(0f, 1f, alphaFraction)
+                                ),
+                                0.6f to MaterialTheme.colorScheme.surface,
+                                1f to MaterialTheme.colorScheme.surface
+                            )
+                        )
                 )
-            } else if (isFullLoading) {
-                RillLoadingIndicatorView()
-            } else {
-                val configuration = LocalConfiguration.current
-                val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-                if (isLandscape) {
-                    Row(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalAlignment = Alignment.Top
-                    ) {
-                        // Left column - avatar
+            }
+        }
+
+        Scaffold(
+            containerColor = Color.Transparent,
+            snackbarHost = { SnackbarHost(snackbarHostState) },
+            topBar = {
+                TopAppBar(
+                    windowInsets = WindowInsets.systemBars.only(
+                        if (isRotation90) WindowInsetsSides.Top + WindowInsetsSides.Horizontal
+                        else WindowInsetsSides.Top
+                    ),
+                    title = {
                         Box(
                             modifier = Modifier
-                                .weight(1f)
-                                .then(
-                                    if (isRotation90) Modifier.navigationBarsPadding()
-                                    else Modifier
-                                )
-                                .padding(bottom = 24.dp)
-                                .fillMaxSize(),
-                            contentAlignment = Alignment.Center
+                                .fillMaxWidth()
+                                .graphicsLayer { alpha = titleAlpha }
                         ) {
-                            RillAvatar(
-                                name = displayName,
-                                photoUri = contact?.photoUri,
-                                modifier = Modifier.size(180.dp),
-                                shape = CircleShape
-                            )
+                            Title(displayName, false)
                         }
+                    },
+                    navigationIcon = {
+                        NavigationIcon(
+                            modifier = Modifier
+                                .padding(start = 16.dp, end = 14.dp)
+                                .background(
+                                    MaterialTheme.colorScheme.surface.copy(0.68f),
+                                    CircleShape
+                                ),
+                            onClick = { navigateBack() })
+                    },
+                    actions = {
+                        if (contact != null) {
+                            val interactionSource = remember { MutableInteractionSource() }
+                            val isPressed by interactionSource.collectIsPressedAsState()
+                            val cornerRadius by animateDpAsState(
+                                if (isPressed) 8.dp else 40.dp,
+                                spring(stiffness = Spring.StiffnessMediumLow),
+                                label = "ButtonShapeAnimation"
+                            )
+                            IconButton(
+                                onClick = {
+                                    contact?.let { thisContact ->
+                                        val newFavorite = !thisContact.isFavorite
+                                        contact = thisContact.copy(isFavorite = newFavorite)
+                                        contactsViewModel.toggleFavorite(thisContact)
+                                    }
+                                },
+                                interactionSource = interactionSource,
+                                modifier = Modifier.width(32.dp),
+                                shape = RoundedCornerShape(cornerRadius),
+                                colors = if (isFavorite) IconButtonDefaults.iconButtonColors(
+                                    contentColor = MaterialTheme.colorScheme.primary,
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                                ) else IconButtonDefaults.iconButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.surface.copy(0.68f)
+                                )
+                            ) {
+                                Icon(
+                                    if (isFavorite) Icons.Default.Star else Icons.Default.StarOutline,
+                                    stringResource(if (isFavorite) R.string.remove_from_favorites else R.string.add_to_favorites))
+                            }
+                            Spacer(modifier = Modifier.size(8.dp))
+                            IconButton(
+                                onClick = {
+                                    if (contactSources.size > 1) {
+                                        showSourcesDialog = true
+                                    } else {
+                                        navController.navigate(ContactEditScreenDestination(contactId = contact!!.id).route) {
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
+                                    }
+                                },
+                                colors = IconButtonDefaults.iconButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.surface.copy(0.68f)
+                                )
+                            ) { Icon(Icons.Outlined.Edit, stringResource(R.string.edit)) }
+                        } else if (phoneNumber != null && phoneNumber != unknownLabel) {
+                            IconButton(
+                                onClick = {
+                                    navigator.navigate(ContactEditScreenDestination(initialPhone = phoneNumber, initialName = initialName))
+                                },
+                                colors = IconButtonDefaults.iconButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.surface.copy(0.68f)
+                                )
+                            ) { Icon(Icons.Rounded.PersonAdd, stringResource(R.string.add_contact)) }
+                        }
+                        if (contact != null) {
+                            IconButton(
+                                onClick = {
+                                    scope.launch {
+                                        val lastIndex = listState.layoutInfo.totalItemsCount - 2
+                                        listState.animateScrollToItem(lastIndex)
+                                    }
+                                },
+                                colors = IconButtonDefaults.iconButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.surface.copy(0.68f)
+                                )
+                            ) { Icon(ImageVector.vectorResource(id = R.drawable.ic_settings_account_box), stringResource(R.string.contacts_settings)) }
+                        }
+                        Spacer(modifier = Modifier.size(6.dp))
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                )
+            }
+        ) { innerPadding ->
+            Box(modifier = Modifier
+//            .padding(innerPadding)
+                .padding(
+                    top = innerPadding.calculateTopPadding(),
+                    start = 0.dp,
+                    end = 0.dp,
+                    bottom = 0.dp
+                )
+                .fillMaxSize()
+                .alpha(screenAlpha)
+                .offset(y = screenOffsetY)
+            ) {
+                if (!hasContactsPermission) {
+                    PermissionDeniedView(
+                        icon = Icons.Rounded.People,
+                        title = stringResource(R.string.contacts_permission),
+                        description = stringResource(R.string.contacts_permission_description),
+                        onGrantClick = { permissionLauncher.launch(Manifest.permission.READ_CONTACTS) }
+                    )
+                } else if (isFullLoading) {
+                    RillLoadingIndicatorView()
+                } else {
+                    if (isLandscape) {
+                        Row(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            // Left column - avatar
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .then(
+                                        if (isRotation90) Modifier.navigationBarsPadding()
+                                        else Modifier
+                                    )
+                                    .padding(bottom = 24.dp)
+                                    .fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                RillAvatar(
+                                    name = displayName,
+                                    photoUri = contact?.photoUri,
+                                    modifier = Modifier
+                                        .size(180.dp)
+                                        .clickable { showFullScreenPhoto = true },
+                                    shape = CircleShape
+                                )
+                            }
 
-                        // Right column contains all other content
+                            // Right column contains all other content
+                            LazyColumn(
+                                state = listState,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .weight(1.7f),
+                                contentPadding = PaddingValues(16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                item {
+                                    Column(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Text(
+                                            text = displayName,
+                                            style = MaterialTheme.typography.headlineLarge,
+                                            fontWeight = FontWeight.Bold,
+                                            textAlign = TextAlign.Center
+                                        )
+                                        if (contact?.nickname != "") {
+                                            contact?.nickname?.let {
+                                                Spacer(modifier = Modifier.height(12.dp))
+                                                Text(
+                                                    text = it,
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    textAlign = TextAlign.Center,
+                                                )
+                                            }
+                                        }
+                                        if (companyAndJob != "") {
+                                            Spacer(modifier = Modifier.height(12.dp))
+                                            Text(
+                                                text = companyAndJob,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                textAlign = TextAlign.Center
+                                            )
+                                        }
+                                    }
+                                }
+
+                                item {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .background(MaterialTheme.colorScheme.surface)
+                                            .padding(vertical = 8.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                    ) {
+                                        RillExpressiveButton(
+                                            modifier = Modifier.weight(1f),
+                                            icon = Icons.Rounded.Phone,
+                                            label = stringResource(R.string.call),
+                                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                            enabled = (contact != null && contact?.phoneNumbers?.isNotEmpty() == true) || displayPhone != unknownLabel,
+                                            onClick = {
+                                                val c = contact
+                                                if (c != null && defaultPhone != null) initiateCall(defaultPhone.number)
+                                                else if (c != null && c.phoneNumbers.size > 1) showNumberPicker = true
+                                                else if (displayPhone != unknownLabel) initiateCall(displayPhone)
+                                            })
+                                        val messageImageVector: ImageVector =
+                                            ImageVector.vectorResource(id = R.drawable.ic_message_filled)
+                                        RillExpressiveButton(
+                                            modifier = Modifier.weight(1f),
+                                            icon = messageImageVector,
+                                            label = stringResource(R.string.message),
+                                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                            enabled = (contact != null && contact?.phoneNumbers?.isNotEmpty() == true) || displayPhone != unknownLabel,
+                                            onClick = {
+                                                val c = contact
+                                                if (c != null && defaultPhone != null) messageLauncher.sendMessage(defaultPhone.number, c)
+                                                else if (c != null && c.phoneNumbers.size > 1) showMessagePicker = true
+                                                else if (displayPhone != unknownLabel) messageLauncher.sendMessage(displayPhone)
+                                            })
+                                        val videoImageVector: ImageVector =
+                                            ImageVector.vectorResource(id = R.drawable.ic_video_camera)
+                                        RillExpressiveButton(
+                                            modifier = Modifier.weight(1f),
+                                            icon = videoImageVector,
+                                            label = stringResource(R.string.video),
+                                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                            enabled = (contact != null && contact?.phoneNumbers?.isNotEmpty() == true) || displayPhone != unknownLabel,
+                                            onClick = {
+                                                val c = contact
+                                                if (c != null && defaultPhone != null) videoLauncher.startVideoCall(defaultPhone.number, c)
+                                                else if (c != null && c.phoneNumbers.size > 1) showVideoPicker = true
+                                                else if (displayPhone != unknownLabel) videoLauncher.startVideoCall(displayPhone)
+                                            })
+                                        RillExpressiveButton(
+                                            modifier = Modifier.weight(1f),
+                                            icon = Icons.Rounded.Email,
+                                            label = stringResource(R.string.email),
+                                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                            enabled = contact?.emails?.isNotEmpty() == true,
+                                            onClick = {
+                                                val c = contact
+                                                if (c != null && c.emails.size > 1) showEmailPicker =
+                                                    true
+                                                else if (c != null && c.emails.isNotEmpty()) initiateEmail(
+                                                    c.emails.first().value
+                                                )
+                                            })
+                                    }
+                                }
+
+                                // Contact Info
+                                item {
+                                    RillExpressiveCard(title = stringResource(R.string.contact_info)) {
+                                        val screenWidth = configuration.screenWidthDp.dp
+                                        val middleOfScreen = screenWidth / 3
+                                        val offsetMenu = DpOffset(middleOfScreen, (-24).dp)
+                                        if (contact != null) {
+                                            val messageImageVector: ImageVector =
+                                                ImageVector.vectorResource(id = R.drawable.ic_message_outline)
+                                            val numberSize = contact!!.phoneDetails.size
+                                            contact!!.phoneDetails.forEachIndexed { index, phoneDetail ->
+                                                val recentText = stringResource(R.string.recent_number)
+                                                val recent = if (normalizePhoneNumber(phoneDetail.number) == phoneNumber && numberSize > 1) " • $recentText" else ""
+                                                val isDefault = defaultPhone != null && phoneDetail.number == defaultPhone.number && numberSize > 1
+                                                val default = stringResource(R.string.default_number)
+                                                val label =
+                                                    if (isDefault) getPhoneTypeText(context, phoneDetail.type, phoneDetail.label) + " • $default" + recent
+                                                    else getPhoneTypeText(context, phoneDetail.type, phoneDetail.label) + recent
+                                                val interactionSource = remember { MutableInteractionSource() }
+                                                Box {
+                                                    var showOverflowMenu by remember { mutableStateOf(false) }
+                                                    RillListItem(
+                                                        headline = phoneDetail.number.forceLtr(),
+                                                        supporting = label,
+                                                        leadingIcon = if (isDefault) ImageVector.vectorResource(id = R.drawable.ic_phone_star) else Icons.Rounded.Phone,
+                                                        iconContainerColor =
+                                                            if (isDefault) MaterialTheme.colorScheme.onSecondaryContainer else null,
+                                                        iconBgContainerColor =
+                                                            if (isDefault) MaterialTheme.colorScheme.primaryContainer else null,
+                                                        trailingIcon = messageImageVector,
+                                                        modifierTrailingIcon = Modifier
+                                                            .padding(end = 8.dp)
+                                                            .size(24.dp)
+                                                            .combinedClickable(
+                                                                interactionSource = interactionSource,
+                                                                indication = ripple(
+                                                                    bounded = false,
+                                                                    radius = 24.dp
+                                                                ),
+                                                                onClick = {
+                                                                    initiateMessage(phoneDetail.number)
+                                                                }),
+                                                        onClick = { initiateCall(phoneDetail.number) },
+                                                        onLongClick = { showOverflowMenu = true }
+                                                    )
+                                                    // Dropdown menu
+                                                    DropdownMenu(
+                                                        shape = MaterialTheme.shapes.large,
+                                                        expanded = showOverflowMenu,
+                                                        onDismissRequest = { showOverflowMenu = false },
+                                                        offset = offsetMenu,
+                                                    ) {
+                                                        DropdownMenuItem(
+                                                            contentPadding = PaddingValues(horizontal = 24.dp),
+                                                            text = {
+                                                                Text(
+                                                                    phoneDetail.number.forceLtr(),
+                                                                    style = MaterialTheme.typography.bodyLarge,
+                                                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                                                )
+                                                            },
+                                                            onClick = { },
+                                                            enabled = false
+                                                        )
+                                                        val numberBlocked = isNumberBlocked(phoneDetail.number)
+                                                        DropdownMenuItem(
+                                                            contentPadding = PaddingValues(horizontal = 24.dp),
+                                                            text = { Text(if (numberBlocked) stringResource(R.string.action_unblock_number) else stringResource(R.string.action_block_number)) },
+                                                            onClick = {
+                                                                showOverflowMenu = false
+                                                                if (numberBlocked) {
+                                                                    BlockedNumbersManager.unblock(context, phoneDetail.number)
+                                                                } else {
+                                                                    BlockedNumbersManager.block(context, phoneDetail.number)
+                                                                }
+                                                                blockedVersion++
+                                                            }
+                                                        )
+                                                        DropdownMenuItem(
+                                                            contentPadding = PaddingValues(horizontal = 24.dp),
+                                                            text = { Text(stringResource(R.string.add_note)) },
+                                                            onClick = {
+                                                                showOverflowMenu = false
+                                                                editingNoteNumber = phoneDetail.number
+                                                                showNoteEditor = true
+                                                            }
+                                                        )
+                                                        DropdownMenuItem(
+                                                            contentPadding = PaddingValues(horizontal = 24.dp),
+                                                            text = { Text(stringResource(R.string.copy)) },
+                                                            onClick = {
+                                                                showOverflowMenu = false
+                                                                context.copyToClipboard(phoneDetail.number)
+                                                            }
+                                                        )
+                                                        if (numberSize > 1) {
+                                                            if (phoneDetail.number == defaultPhone?.number) {
+                                                                val textToast = stringResource(R.string.default_phone_number_cleared)
+                                                                DropdownMenuItem(
+                                                                    contentPadding = PaddingValues(horizontal = 24.dp),
+                                                                    text = { Text(stringResource(R.string.clear_default)) },
+                                                                    onClick = {
+                                                                        showOverflowMenu = false
+                                                                        updateDefaultPhone(phoneDetail.number, false)
+                                                                        context.toast(textToast)
+                                                                    }
+                                                                )
+                                                            } else {
+                                                                val message = stringResource(
+                                                                    R.string.default_phone_set,
+                                                                    phoneDetail.number.forceLtr()
+                                                                )
+                                                                DropdownMenuItem(
+                                                                    contentPadding = PaddingValues(horizontal = 24.dp),
+                                                                    text = { Text(stringResource(R.string.set_as_default)) },
+                                                                    onClick = {
+                                                                        showOverflowMenu = false
+                                                                        updateDefaultPhone(phoneDetail.number, true)
+                                                                        context.toast(message)
+                                                                    }
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            contact!!.emails.forEachIndexed { index, email ->
+                                                val label = getEmailTypeText(context, email.type, email.label)
+                                                RillListItem(
+                                                    headline = email.value,
+                                                    supporting = label,
+                                                    leadingIcon = Icons.Rounded.Email,
+                                                    onClick = { initiateEmail(email.value) },
+                                                    onLongClick = { context.copyToClipboard(email.value) }
+                                                )
+                                            }
+
+                                            if (contact!!.phoneDetails.isEmpty() && contact!!.emails.isEmpty()) {
+                                                RillListItem(
+                                                    headline = stringResource(R.string.add_phone),
+                                                    leadingIcon = Icons.Rounded.Add,
+                                                    onClick = {
+                                                        if (contactSources.size > 1) {
+                                                            showSourcesDialog = true
+                                                        } else {
+                                                            navController.navigate(ContactEditScreenDestination(contactId = contact!!.id).route) {
+                                                                launchSingleTop = true
+                                                                restoreState = true
+                                                            }
+                                                        }
+                                                    }
+                                                )
+                                            }
+                                        } else if (phoneNumber != null && phoneNumber != unknownLabel) {
+                                            Box {
+                                                var showOverflowMenu by remember { mutableStateOf(false) }
+                                                RillListItem(
+                                                    headline = phoneNumber.forceLtr(),
+                                                    leadingIcon = Icons.Rounded.Phone,
+                                                    onClick = { initiateCall(phoneNumber) },
+                                                    onLongClick = { showOverflowMenu = true }
+                                                )
+                                                // Dropdown menu
+                                                DropdownMenu(
+                                                    shape = MaterialTheme.shapes.large,
+                                                    expanded = showOverflowMenu,
+                                                    onDismissRequest = { showOverflowMenu = false },
+                                                    offset = offsetMenu,
+                                                ) {
+                                                    DropdownMenuItem(
+                                                        contentPadding = PaddingValues(horizontal = 24.dp),
+                                                        text = {
+                                                            Text(
+                                                                phoneNumber.forceLtr(),
+                                                                style = MaterialTheme.typography.bodyLarge,
+                                                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                                            )
+                                                        },
+                                                        onClick = { },
+                                                        enabled = false
+                                                    )
+                                                    val numberBlocked = isNumberBlocked(phoneNumber)
+                                                    DropdownMenuItem(
+                                                        contentPadding = PaddingValues(horizontal = 24.dp),
+                                                        text = { Text(if (numberBlocked) stringResource(R.string.action_unblock_number) else stringResource(R.string.action_block_number)) },
+                                                        onClick = {
+                                                            showOverflowMenu = false
+                                                            if (numberBlocked) {
+                                                                BlockedNumbersManager.unblock(context, phoneNumber)
+                                                            } else {
+                                                                BlockedNumbersManager.block(context, phoneNumber)
+                                                            }
+                                                            blockedVersion++
+                                                        }
+                                                    )
+                                                    DropdownMenuItem(
+                                                        contentPadding = PaddingValues(horizontal = 24.dp),
+                                                        text = { Text(stringResource(R.string.copy)) },
+                                                        onClick = {
+                                                            showOverflowMenu = false
+                                                            context.copyToClipboard(phoneNumber)
+                                                        }
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // Call Notes section (between Contact Info and Recent Activity)
+                                item {
+                                    var refreshTrigger by remember { mutableIntStateOf(0) }
+
+                                    // Get a list of all the contact's phone numbers
+                                    val phoneNumbersList = remember(contact) {
+                                        contact?.phoneDetails?.map { it.number }
+                                            ?: if (phoneNumber != null && phoneNumber != unknownLabel) {
+                                                listOf(phoneNumber)
+                                            } else {
+                                                emptyList()
+                                            }
+                                    }
+
+                                    // Get all the notes for all issues
+                                    val allNotes = remember(contact, refreshTrigger) {
+                                        if (phoneNumbersList.isNotEmpty()) {
+                                            NoteManager.getAllNotesForNumbers(context, phoneNumbersList)
+                                        } else {
+                                            emptyMap()
+                                        }
+                                    }
+                                    // Refresh after closing the editor
+                                    LaunchedEffect(showNoteEditor) {
+                                        if (!showNoteEditor) {
+                                            refreshTrigger++
+                                        }
+                                    }
+
+                                    var showAboutNotesDialog by remember { mutableStateOf(false) }
+                                    if (showAboutNotesDialog) {
+                                        RillDialog(
+                                            onDismissRequest = { showAboutNotesDialog = false },
+                                            title = stringResource(R.string.about_call_notes),
+                                            icon = Icons.AutoMirrored.Rounded.Help,
+                                            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+                                            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+                                            confirmButton = {
+                                                TextButton(onClick = {
+                                                    showAboutNotesDialog = false
+                                                }) {
+                                                    Text(
+                                                        stringResource(R.string.close),
+                                                        textAlign = TextAlign.End,
+                                                    )
+                                                }
+                                            },
+                                            dismissButton = {
+                                                val notesDir = NoteManager.getNotesDir(context).absolutePath
+                                                TextButton(onClick = {
+                                                    showAboutNotesDialog = false
+                                                    context.copyToClipboard(notesDir)
+                                                }) {
+                                                    Text(stringResource(R.string.copy_path))
+                                                }
+                                            }
+                                        ) {
+                                            Text(stringResource(R.string.about_call_notes_subtitle))
+                                        }
+                                    }
+                                    RillExpressiveCard(
+                                        title = stringResource(R.string.call_notes),
+                                        trailingIcon = Icons.AutoMirrored.Outlined.HelpOutline,
+                                        onTrailingIconClick = { showAboutNotesDialog = true }
+                                    ) {
+                                        if (allNotes.isEmpty()) {
+                                            // No notes—display the "Add" button
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .background(
+                                                        color = cardColor,
+                                                        shape = MaterialTheme.shapes.extraLarge.copy(
+                                                            topStart = CornerSize(cardCornerExtraSmall),
+                                                            topEnd = CornerSize(cardCornerExtraSmall)
+                                                        )
+                                                    )
+                                                    .combinedClickable(
+                                                        onClick = {
+                                                            if (contact != null && contact!!.phoneNumbers.size > 1) showAddCallNotePicker = true
+                                                            else if (displayPhone != unknownLabel) initiateAddCallNote(displayPhone)
+                                                        }
+                                                    )
+                                                    .padding(vertical = 16.dp, horizontal = 24.dp)
+                                            ) {
+                                                Text(
+                                                    text = "+ " + stringResource(R.string.add_note),
+                                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                                        color = MaterialTheme.colorScheme.primary
+                                                    )
+                                                )
+                                            }
+                                        } else {
+                                            // Here is a list of all notes
+                                            allNotes.forEach { (number, noteContent) ->
+                                                val annotated = buildClickableAnnotatedString(noteContent)
+                                                RillListItem(
+                                                    headline = number,
+                                                    annotated = annotated,
+                                                    leadingIcon = Icons.AutoMirrored.Outlined.StickyNote2,
+                                                    onClick = {
+                                                        editingNoteNumber = number
+                                                        showNoteEditor = true
+                                                    },
+                                                    onLongClick = {
+                                                        if (noteContent.isNotBlank()) {
+                                                            context.copyToClipboard(noteContent)
+                                                        }
+                                                    }
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+
+                                val notes = contact?.notes
+                                if (!notes.isNullOrBlank()) {
+                                    item {
+                                        RillExpressiveCard(title = stringResource(R.string.notes_contact)) {
+                                            val annotated = buildClickableAnnotatedString(notes)
+                                            RillListItem(
+                                                annotated = annotated,
+                                                leadingIcon = Icons.AutoMirrored.Rounded.StickyNote2,
+                                                onClick = {},
+                                                onLongClick = {
+                                                    context.copyToClipboard(notes)
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+
+                                // Events & Addresses
+                                if (contact != null && (contact!!.events.isNotEmpty() || contact!!.addresses.isNotEmpty())) {
+                                    item {
+                                        RillExpressiveCard(
+                                            title = stringResource(R.string.other_information),
+                                        ) {
+                                            contact!!.events.forEachIndexed { index, event ->
+                                                val isBirthday =
+                                                    event.type == ContactsContract.CommonDataKinds.Event.TYPE_BIRTHDAY
+                                                val label = getEventTypeText(context, event.type, event.label)
+                                                RillListItem(
+                                                    headline = event.date,
+                                                    supporting = label,
+                                                    leadingIcon = if (isBirthday) Icons.Outlined.Cake else Icons.Outlined.Event,
+                                                    onClick = {
+                                                        val dateParts = event.date.split("-")
+                                                        if (dateParts.size == 3) {
+//                                            val year = dateParts[0].toInt()
+                                                            val month = dateParts[1].toInt()
+                                                            val day = dateParts[2].toInt()
+
+                                                            val currentYear =
+                                                                Calendar.getInstance().get(Calendar.YEAR)
+                                                            val calendar = Calendar.getInstance().apply {
+                                                                set(Calendar.YEAR, currentYear)
+                                                                set(
+                                                                    Calendar.MONTH,
+                                                                    month - 1
+                                                                ) // Month in Calendar: 0 = January
+                                                                set(Calendar.DAY_OF_MONTH, day)
+                                                                set(Calendar.HOUR_OF_DAY, 12)
+                                                                set(Calendar.MINUTE, 0)
+                                                                set(Calendar.SECOND, 0)
+                                                                set(Calendar.MILLISECOND, 0)
+                                                            }
+                                                            val uri =
+                                                                "content://com.android.calendar/time/${calendar.timeInMillis}".toUri()
+                                                            context.startActivity(
+                                                                Intent(
+                                                                    Intent.ACTION_VIEW,
+                                                                    uri
+                                                                )
+                                                            )
+                                                        }
+                                                    },
+                                                    onLongClick = { context.copyToClipboard(event.date) }
+                                                )
+                                            }
+                                            contact!!.addresses.forEachIndexed { index, address ->
+                                                val interactionSource = remember { MutableInteractionSource() }
+                                                val label =
+                                                    getAddressTypeText(context, address.type, address.label)
+                                                RillListItem(
+                                                    headline = address.formattedAddress,
+                                                    supporting = label,
+                                                    leadingIcon = Icons.Rounded.LocationOn,
+                                                    trailingIcon = Icons.Outlined.Directions,
+                                                    modifierTrailingIcon = Modifier
+                                                        .padding(end = 8.dp)
+                                                        .size(24.dp)
+                                                        .combinedClickable(
+                                                            interactionSource = interactionSource,
+                                                            indication = ripple(
+                                                                bounded = false,
+                                                                radius = 24.dp
+                                                            ),
+                                                            onClick = {
+                                                                context.startActivity(
+                                                                    Intent(
+                                                                        Intent.ACTION_VIEW,
+                                                                        "google.navigation:q=$address".toUri()
+                                                                    )
+                                                                )
+                                                            }),
+                                                    onClick = {
+                                                        context.startActivity(
+                                                            Intent(
+                                                                Intent.ACTION_VIEW,
+                                                                "geo:0,0?q=$address".toUri()
+                                                            )
+                                                        )
+                                                    },
+                                                    onLongClick = { context.copyToClipboard(address.formattedAddress) }
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // Recent Activity
+                                if (contactLogs.isNotEmpty()) {
+                                    val hasMultipleNumbers = contactLogs.distinctBy { it.number }.size > 1 || (contact?.phoneNumbers != null && contact?.phoneNumbers?.size!! > 1)
+                                    item {
+                                        RillExpressiveCard(
+                                            title = stringResource(R.string.recent_activity),
+                                        ) {
+                                            Column(modifier = Modifier.animateContentSize()) {
+                                                contactLogs.take(3).forEachIndexed { index, log ->
+                                                    CallLogTileSimple(log, showNumber = hasMultipleNumbers, showSimLabel = showSimLabel)
+                                                    if (index < 2 && index < contactLogs.size - 1) {
+                                                        Spacer(modifier = Modifier.height(2.dp))
+                                                    }
+                                                }
+                                                if (contactLogs.size > 3) {
+                                                    val finalContactId = if (contact?.id != null) contact!!.id else if (contactId != "null") contactId else null
+                                                    val finalPhoneNumber = phoneNumber ?: contact?.phoneNumbers?.firstOrNull() ?: contactLogs.firstOrNull()?.number
+                                                    TextButton(
+                                                        onClick = {
+//                                                        navController.navigate("call_log_detail_screen?contactId=${finalContactId ?: "null"}&phoneNumber=${finalPhoneNumber ?: "null"}")
+                                                            navigator.navigate(CallLogFullScreenDestination(
+                                                                contactId = finalContactId,
+                                                                phoneNumber = finalPhoneNumber,
+                                                                numbersList = contact?.phoneNumbers?.toTypedArray()
+                                                            ))
+                                                        },
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .offset(
+                                                                x = 0.dp,
+                                                                y = (-2).dp
+                                                            ), // We'll make up for the indentation
+                                                        colors = ButtonDefaults.textButtonColors()
+                                                            .copy(containerColor = cardColor),
+                                                        shape = MaterialTheme.shapes.extraLarge.copy(
+                                                            topStart = CornerSize(cardCornerExtraSmall),
+                                                            topEnd = CornerSize(cardCornerExtraSmall)
+                                                        ),
+                                                    ) {
+                                                        Text(stringResource(R.string.show_full_history))
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // Contact Settings
+                                item {
+                                    RillExpressiveCard(title = stringResource(R.string.contacts_settings)) {
+                                        if (contact != null) {
+                                            val customRingtoneLabel = stringResource(R.string.ringtone_custom)
+                                            val currentRingtone = contact!!.customRingtone?.let { uriStr ->
+                                                runCatching { RingtoneManager.getRingtone(context,
+                                                    uriStr.toUri())?.getTitle(context) }.getOrNull() ?: customRingtoneLabel
+                                            } ?: stringResource(R.string.default_number)
+                                            val contactRingtone = stringResource(R.string.contact_ringtone)
+                                            RillListItem(
+                                                headline = contactRingtone,
+                                                supporting = currentRingtone,
+                                                leadingIcon = Icons.Rounded.MusicNote,
+                                                onClick = {
+                                                    val intent =
+                                                        Intent(RingtoneManager.ACTION_RINGTONE_PICKER).apply {
+                                                            putExtra(
+                                                                RingtoneManager.EXTRA_RINGTONE_TYPE,
+                                                                RingtoneManager.TYPE_RINGTONE
+                                                            )
+                                                            putExtra(
+                                                                RingtoneManager.EXTRA_RINGTONE_TITLE,
+                                                                contactRingtone
+                                                            )
+                                                            putExtra(
+                                                                RingtoneManager.EXTRA_RINGTONE_EXISTING_URI,
+                                                                contact!!.customRingtone?.toUri()
+                                                            )
+                                                        }
+                                                    ringtonePickerLauncher.launch(intent)
+                                                }
+                                            )
+                                            CallBackgroundRow(
+                                                background = callBackground,
+                                                saving = backgroundSaving,
+                                                onClick = onBackgroundClick
+                                            )
+                                        }
+                                        val interactionSource = remember { MutableInteractionSource() }
+                                        RillListItem(
+                                            headline = stringResource(R.string.share),
+                                            supporting = stringResource(R.string.share_subtitle),
+                                            leadingIcon = Icons.Rounded.Share,
+                                            trailingIcon = Icons.Rounded.QrCode2,
+                                            modifierTrailingIcon = Modifier
+                                                .padding(end = 8.dp)
+                                                .size(24.dp)
+                                                .combinedClickable(
+                                                    interactionSource = interactionSource,
+                                                    indication = ripple(
+                                                        bounded = false,
+                                                        radius = 24.dp
+                                                    ),
+                                                    onClick = {
+//                                                        if (contact != null && contact!!.phoneNumbers.size > 1) showQrDialogPicker = true
+//                                                        else {
+                                                            pendingQrNumber = null; showQrDialog = true
+//                                                        }
+                                                    }
+                                                ),
+                                            onClick = {
+                                                if (contact != null && contact!!.phoneNumbers.size > 1) showSharePicker = true
+                                                else shareContact(displayPhone) }
+                                        )
+                                        if (contact != null || shortcutNumbers.isNotEmpty()) {
+                                            RillListItem(
+                                                headline = stringResource(R.string.add_to_home_screen),
+                                                leadingIcon = Icons.Rounded.Widgets,
+                                                onClick = {
+                                                    if (contact != null) {
+                                                        if (shortcutNumbers.size > 1) {
+                                                            showShortcutNumberPicker = true
+                                                        } else if (shortcutNumbers.isEmpty()) {
+                                                            ContactShortcutUtils.pinOpenContactShortcut(
+                                                                context,
+                                                                contact!!.id,
+                                                                displayName,
+                                                                contact!!.photoUri
+                                                            )
+                                                        } else {
+                                                            pendingShortcutNumber = shortcutNumbers.first()
+                                                            showShortcutActionPicker = true
+                                                        }
+                                                    } else if (shortcutNumbers.isNotEmpty()) {
+                                                        val shortcutNumber = shortcutNumbers.first()
+                                                        ContactShortcutUtils.pinCallShortcut(
+                                                            context,
+                                                            shortcutNumber,
+                                                            displayName,
+                                                            shortcutNumber,
+                                                            null
+                                                        )
+                                                    }
+                                                }
+                                            )
+                                        }
+                                        if (contact != null && contactSources.size < 2) {
+                                            RillListItem(
+                                                headline = stringResource(R.string.move_contact),
+                                                supporting = stringResource(R.string.move_to_another_account),
+                                                leadingIcon = Icons.AutoMirrored.Rounded.DriveFileMove,
+                                                onClick = { showMoveDialog = true }
+                                            )
+                                        }
+                                        val contactNumbers = if (contact != null) contact!!.phoneNumbers else listOf(displayPhone)
+                                        val contactBlocked = contactNumbers.isNotEmpty() && contactNumbers.all { isNumberBlocked(it) }
+                                        RillListItem(
+                                            headline = if (contactBlocked) stringResource(R.string.contact_unblock) else stringResource(R.string.contact_block),
+                                            supporting = if (contactBlocked) stringResource(R.string.contact_unblock_supporting) else stringResource(R.string.contact_block_supporting),
+                                            leadingIcon = if (contactBlocked) Icons.Rounded.LockOpen else Icons.Rounded.Block,
+                                            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+                                            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
+                                            onClick = {
+                                                contactNumbers.forEach { number ->
+                                                    if (contactBlocked) {
+                                                        BlockedNumbersManager.unblock(context, number)
+                                                    } else {
+                                                        BlockedNumbersManager.block(context, number)
+                                                    }
+                                                }
+                                                blockedVersion++
+                                            }
+                                        )
+                                        if (contact != null) {
+                                            RillListItem(
+                                                headline = stringResource(R.string.delete),
+                                                leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_delete),
+                                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+                                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
+                                                onClick = { showDeleteDialog = true }
+                                            )
+                                        }
+
+                                        if (showMoveDialog) {
+                                            val textToast = stringResource(R.string.contact_moved_successfully)
+                                            MoveSingleContactDialog(
+                                                contact = contact!!,
+                                                availableAccounts = availableAccountsForMoving,
+                                                currentAccountKey = if (contact!!.accountName == null && contact!!.accountType == null && contact!!.isPrivate) private_only
+                                                else if (contact!!.accountName == null && contact!!.accountType == null) device_only
+                                                else "${contact!!.accountName}|${contact!!.accountType}",
+                                                contactsViewModel = contactsViewModel,
+                                                onDismiss = { showMoveDialog = false },
+                                                onSuccess = { selectedAccount, isPrivate, newContactId ->
+                                                    context.toast(textToast)
+                                                    // Updating local data
+                                                    contact = contact!!.copy(
+                                                        id = newContactId,
+                                                        accountName = selectedAccount?.name,
+                                                        accountType = selectedAccount?.type,
+                                                        isPrivate = isPrivate
+                                                    )
+                                                    contactAccount = selectedAccount
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+
+                                // Contact Sources
+                                if (contact != null && contactSources.size > 1) {
+                                    item {
+                                        RillExpressiveCard(title = stringResource(R.string.contact_sources)) {
+                                            contactSources.forEachIndexed { index, source ->
+                                                val account = if (!source.accountName.isNullOrEmpty()) {
+                                                    Account(source.accountName, source.accountType ?: "")
+                                                } else {
+                                                    null // We do not create accounts with blank names
+                                                }
+                                                SourceItem(
+                                                    modifier = Modifier.combinedClickable(
+                                                        onClick = { showSourcesDialog = true },
+                                                    ),
+                                                    leadingIcon = ContactUtils.getAccountIcon(account, contact!!.isPrivate),
+                                                    headline = ContactUtils.getAccountName(account),
+                                                    supporting = ContactUtils.getFriendlyAccountName(account),
+                                                )
+                                            }
+                                        }
+                                    }
+                                } else if (contact != null) {
+                                    item {
+                                        RillExpressiveCard(title = stringResource(R.string.contact_sources)) {
+                                            SourceItem(
+                                                modifier = Modifier,
+                                                leadingIcon = ContactUtils.getAccountIcon(contactAccount, contact!!.isPrivate),
+                                                headline = if (contactAccount != null) ContactUtils.getAccountName(contactAccount!!)
+                                                else ContactUtils.getFriendlyAccountName(null, contact!!.isPrivate),
+                                                supporting = if (contactAccount != null) ContactUtils.getFriendlyAccountName(contactAccount) else null,
+                                            )
+                                        }
+                                    }
+                                }
+
+                                item { Spacer(modifier = Modifier.height(100.dp)) }
+                            }
+                        }
+                    } else {
+//                        Box(
+//                            modifier = Modifier
+//                                .fillMaxWidth()
+////                                .height(340.dp)
+//                        ) {
+//                            Box(
+//                                modifier = Modifier
+//                                    .fillMaxSize()
+//                                    .background(
+//                                        Brush.verticalGradient(
+//                                            startY = 100.0f,
+//                                            colors = listOf(
+//                                                Color.Transparent,
+//                                                MaterialTheme.colorScheme.surface
+//                                            )
+//                                        )
+//                                    )
+//                            )
+//                        }
+
                         LazyColumn(
                             state = listState,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .weight(1.7f),
+                            modifier = Modifier.fillMaxSize(),
                             contentPadding = PaddingValues(16.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -845,9 +1724,29 @@ fun ContactDetailsScreen(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
+                                    Box(
+                                        modifier = Modifier.wrapContentSize(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        RillAvatar(
+                                            name = displayName,
+                                            photoUri = contact?.photoUri,
+                                            modifier = Modifier
+                                                .size(180.dp)
+                                                .clickable { showFullScreenPhoto = true },
+                                            shape = CircleShape
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(20.dp))
                                     Text(
                                         text = displayName,
-                                        style = MaterialTheme.typography.headlineLarge,
+                                        style = MaterialTheme.typography.headlineLarge.copy(
+                                            shadow = Shadow(
+                                                color = MaterialTheme.colorScheme.surface,
+                                                offset = Offset(0f, 1.5f),
+                                                blurRadius = 4f
+                                            )
+                                        ),
                                         fontWeight = FontWeight.Bold,
                                         textAlign = TextAlign.Center
                                     )
@@ -856,7 +1755,13 @@ fun ContactDetailsScreen(
                                             Spacer(modifier = Modifier.height(12.dp))
                                             Text(
                                                 text = it,
-                                                style = MaterialTheme.typography.bodyMedium,
+                                                style = MaterialTheme.typography.bodyMedium.copy(
+                                                    shadow = Shadow(
+                                                        color = MaterialTheme.colorScheme.surface,
+                                                        offset = Offset(0f, 1.5f),
+                                                        blurRadius = 4f
+                                                    )
+                                                ),
                                                 textAlign = TextAlign.Center,
                                             )
                                         }
@@ -865,18 +1770,27 @@ fun ContactDetailsScreen(
                                         Spacer(modifier = Modifier.height(12.dp))
                                         Text(
                                             text = companyAndJob,
-                                            style = MaterialTheme.typography.bodyMedium,
+                                            style = MaterialTheme.typography.bodyMedium.copy(
+                                                shadow = Shadow(
+                                                    color = MaterialTheme.colorScheme.surface,
+                                                    offset = Offset(0f, 1.5f),
+                                                    blurRadius = 4f
+                                                )
+                                            ),
                                             textAlign = TextAlign.Center
                                         )
                                     }
                                 }
                             }
 
+//                            stickyHeader {
                             item {
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .background(MaterialTheme.colorScheme.surface)
+                                        .background(
+                                            if (showCallBackground) Color.Transparent else MaterialTheme.colorScheme.surface,
+                                        )
                                         .padding(vertical = 8.dp),
                                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                                 ) {
@@ -888,11 +1802,8 @@ fun ContactDetailsScreen(
                                         enabled = (contact != null && contact?.phoneNumbers?.isNotEmpty() == true) || displayPhone != unknownLabel,
                                         onClick = {
                                             val c = contact
-                                            if (c != null && defaultPhone != null) initiateCall(
-                                                defaultPhone.number
-                                            )
-                                            else if (c != null && c.phoneNumbers.size > 1) showNumberPicker =
-                                                true
+                                            if (c != null && defaultPhone != null) initiateCall(defaultPhone.number)
+                                            else if (c != null && c.phoneNumbers.size > 1) showNumberPicker = true
                                             else if (displayPhone != unknownLabel) initiateCall(displayPhone)
                                         })
                                     val messageImageVector: ImageVector =
@@ -905,12 +1816,9 @@ fun ContactDetailsScreen(
                                         enabled = (contact != null && contact?.phoneNumbers?.isNotEmpty() == true) || displayPhone != unknownLabel,
                                         onClick = {
                                             val c = contact
-                                            if (c != null && defaultPhone != null) initiateMessage(
-                                                defaultPhone.number
-                                            )
-                                            else if (c != null && c.phoneNumbers.size > 1) showMessagePicker =
-                                                true
-                                            else if (displayPhone != unknownLabel) initiateMessage(displayPhone)
+                                            if (c != null && defaultPhone != null) messageLauncher.sendMessage(defaultPhone.number, c)
+                                            else if (c != null && c.phoneNumbers.size > 1) showMessagePicker = true
+                                            else if (displayPhone != unknownLabel) messageLauncher.sendMessage(displayPhone)
                                         })
                                     val videoImageVector: ImageVector =
                                         ImageVector.vectorResource(id = R.drawable.ic_video_camera)
@@ -921,7 +1829,10 @@ fun ContactDetailsScreen(
                                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
                                         enabled = (contact != null && contact?.phoneNumbers?.isNotEmpty() == true) || displayPhone != unknownLabel,
                                         onClick = {
-                                            videoLauncher.startVideoCall(displayPhone, contact)
+                                            val c = contact
+                                            if (c != null && defaultPhone != null) videoLauncher.startVideoCall(defaultPhone.number, c)
+                                            else if (c != null && c.phoneNumbers.size > 1) showVideoPicker = true
+                                            else if (displayPhone != unknownLabel) videoLauncher.startVideoCall(displayPhone)
                                         })
                                     RillExpressiveButton(
                                         modifier = Modifier.weight(1f),
@@ -942,24 +1853,30 @@ fun ContactDetailsScreen(
 
                             // Contact Info
                             item {
-                                RillExpressiveCard(title = stringResource(R.string.contact_info)) {
-                                    val configuration = LocalConfiguration.current
+                                RillExpressiveCard(
+                                    title = stringResource(R.string.contact_info),
+                                ) {
                                     val screenWidth = configuration.screenWidthDp.dp
                                     val middleOfScreen = screenWidth / 3
                                     val offsetMenu = DpOffset(middleOfScreen, (-24).dp)
                                     if (contact != null) {
                                         val messageImageVector: ImageVector =
                                             ImageVector.vectorResource(id = R.drawable.ic_message_outline)
+                                        val whatsappImageVector: ImageVector =
+                                            ImageVector.vectorResource(id = R.drawable.ic_whatsapp)
                                         val numberSize = contact!!.phoneDetails.size
+                                        val whatsappInstall =
+                                            context.isPackageInstalled("com.whatsapp") || context.isPackageInstalled(
+                                                "com.whatsapp.w4b"
+                                            )
                                         contact!!.phoneDetails.forEachIndexed { index, phoneDetail ->
                                             val recentText = stringResource(R.string.recent_number)
                                             val recent = if (normalizePhoneNumber(phoneDetail.number) == phoneNumber && numberSize > 1) " • $recentText" else ""
-                                            val isDefault = defaultPhone != null && phoneDetail.number == defaultPhone.number
+                                            val isDefault = defaultPhone != null && phoneDetail.number == defaultPhone.number && numberSize > 1
                                             val default = stringResource(R.string.default_number)
                                             val label =
                                                 if (isDefault) getPhoneTypeText(context, phoneDetail.type, phoneDetail.label) + " • $default" + recent
                                                 else getPhoneTypeText(context, phoneDetail.type, phoneDetail.label) + recent
-                                            val interactionSource = remember { MutableInteractionSource() }
                                             Box {
                                                 var showOverflowMenu by remember { mutableStateOf(false) }
                                                 RillListItem(
@@ -970,17 +1887,32 @@ fun ContactDetailsScreen(
                                                         if (isDefault) MaterialTheme.colorScheme.onSecondaryContainer else null,
                                                     iconBgContainerColor =
                                                         if (isDefault) MaterialTheme.colorScheme.primaryContainer else null,
+                                                    preTrailingIcon = if (whatsappInstall) whatsappImageVector else null,
+                                                    modifierPreTrailingIcon = Modifier
+                                                        .padding(end = 8.dp)
+                                                        .size(24.dp)
+                                                        .combinedClickable(
+                                                            interactionSource = null,
+                                                            indication = ripple(
+                                                                bounded = false,
+                                                                radius = 24.dp
+                                                            ),
+                                                            onClick = {
+                                                                openWhatsAppChat(context, phoneDetail.number)
+                                                            }),
                                                     trailingIcon = messageImageVector,
                                                     modifierTrailingIcon = Modifier
                                                         .padding(end = 8.dp)
                                                         .size(24.dp)
                                                         .combinedClickable(
-                                                            interactionSource = interactionSource,
+                                                            interactionSource = null,
                                                             indication = ripple(
                                                                 bounded = false,
                                                                 radius = 24.dp
                                                             ),
-                                                            onClick = { initiateMessage(phoneDetail.number) }),
+                                                            onClick = {
+                                                                initiateMessage(phoneDetail.number)
+                                                            }),
                                                     onClick = { initiateCall(phoneDetail.number) },
                                                     onLongClick = { showOverflowMenu = true }
                                                 )
@@ -988,7 +1920,9 @@ fun ContactDetailsScreen(
                                                 DropdownMenu(
                                                     shape = MaterialTheme.shapes.large,
                                                     expanded = showOverflowMenu,
-                                                    onDismissRequest = { showOverflowMenu = false },
+                                                    onDismissRequest = {
+                                                        showOverflowMenu = false
+                                                    },
                                                     offset = offsetMenu,
                                                 ) {
                                                     DropdownMenuItem(
@@ -1018,7 +1952,9 @@ fun ContactDetailsScreen(
                                                         }
                                                     )
                                                     DropdownMenuItem(
-                                                        contentPadding = PaddingValues(horizontal = 24.dp),
+                                                        contentPadding = PaddingValues(
+                                                            horizontal = 24.dp
+                                                        ),
                                                         text = { Text(stringResource(R.string.add_note)) },
                                                         onClick = {
                                                             showOverflowMenu = false
@@ -1027,7 +1963,9 @@ fun ContactDetailsScreen(
                                                         }
                                                     )
                                                     DropdownMenuItem(
-                                                        contentPadding = PaddingValues(horizontal = 24.dp),
+                                                        contentPadding = PaddingValues(
+                                                            horizontal = 24.dp
+                                                        ),
                                                         text = { Text(stringResource(R.string.copy)) },
                                                         onClick = {
                                                             showOverflowMenu = false
@@ -1038,11 +1976,16 @@ fun ContactDetailsScreen(
                                                         if (phoneDetail.number == defaultPhone?.number) {
                                                             val textToast = stringResource(R.string.default_phone_number_cleared)
                                                             DropdownMenuItem(
-                                                                contentPadding = PaddingValues(horizontal = 24.dp),
+                                                                contentPadding = PaddingValues(
+                                                                    horizontal = 24.dp
+                                                                ),
                                                                 text = { Text(stringResource(R.string.clear_default)) },
                                                                 onClick = {
                                                                     showOverflowMenu = false
-                                                                    updateDefaultPhone(phoneDetail.number, false)
+                                                                    updateDefaultPhone(
+                                                                        phoneDetail.number,
+                                                                        false
+                                                                    )
                                                                     context.toast(textToast)
                                                                 }
                                                             )
@@ -1052,11 +1995,16 @@ fun ContactDetailsScreen(
                                                                 phoneDetail.number.forceLtr()
                                                             )
                                                             DropdownMenuItem(
-                                                                contentPadding = PaddingValues(horizontal = 24.dp),
+                                                                contentPadding = PaddingValues(
+                                                                    horizontal = 24.dp
+                                                                ),
                                                                 text = { Text(stringResource(R.string.set_as_default)) },
                                                                 onClick = {
                                                                     showOverflowMenu = false
-                                                                    updateDefaultPhone(phoneDetail.number, true)
+                                                                    updateDefaultPhone(
+                                                                        phoneDetail.number,
+                                                                        true
+                                                                    )
                                                                     context.toast(message)
                                                                 }
                                                             )
@@ -1067,7 +2015,8 @@ fun ContactDetailsScreen(
                                         }
 
                                         contact!!.emails.forEachIndexed { index, email ->
-                                            val label = getEmailTypeText(context, email.type, email.label)
+                                            val label =
+                                                getEmailTypeText(context, email.type, email.label)
                                             RillListItem(
                                                 headline = email.value,
                                                 supporting = label,
@@ -1211,6 +2160,7 @@ fun ContactDetailsScreen(
                                 }
                                 RillExpressiveCard(
                                     title = stringResource(R.string.call_notes),
+//                        icon = Icons.AutoMirrored.Outlined.StickyNote2,
                                     trailingIcon = Icons.AutoMirrored.Outlined.HelpOutline,
                                     onTrailingIconClick = { showAboutNotesDialog = true }
                                 ) {
@@ -1228,11 +2178,8 @@ fun ContactDetailsScreen(
                                                 )
                                                 .combinedClickable(
                                                     onClick = {
-                                                        if (contact != null && contact!!.phoneNumbers.size > 1) showAddCallNotePicker =
-                                                            true
-                                                        else if (displayPhone != unknownLabel) initiateAddCallNote(
-                                                            displayPhone
-                                                        )
+                                                        if (contact != null && contact!!.phoneNumbers.size > 1) showAddCallNotePicker = true
+                                                        else if (displayPhone != unknownLabel) initiateAddCallNote(displayPhone)
                                                     }
                                                 )
                                                 .padding(vertical = 16.dp, horizontal = 24.dp)
@@ -1247,9 +2194,10 @@ fun ContactDetailsScreen(
                                     } else {
                                         // Here is a list of all notes
                                         allNotes.forEach { (number, noteContent) ->
+                                            val annotated = buildClickableAnnotatedString(noteContent)
                                             RillListItem(
                                                 headline = number,
-                                                supporting = noteContent,
+                                                annotated = annotated,
                                                 leadingIcon = Icons.AutoMirrored.Outlined.StickyNote2,
                                                 onClick = {
                                                     editingNoteNumber = number
@@ -1257,11 +2205,7 @@ fun ContactDetailsScreen(
                                                 },
                                                 onLongClick = {
                                                     if (noteContent.isNotBlank()) {
-                                                        val clipboard =
-                                                            context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                                        clipboard.setPrimaryClip(
-                                                            ClipData.newPlainText("Phone number", noteContent)
-                                                        )
+                                                        context.copyToClipboard(noteContent)
                                                     }
                                                 }
                                             )
@@ -1274,16 +2218,13 @@ fun ContactDetailsScreen(
                             if (!notes.isNullOrBlank()) {
                                 item {
                                     RillExpressiveCard(title = stringResource(R.string.notes_contact)) {
+                                        val annotated = buildClickableAnnotatedString(notes)
                                         RillListItem(
-                                            supporting = notes,
+                                            annotated = annotated,
                                             leadingIcon = Icons.AutoMirrored.Rounded.StickyNote2,
                                             onClick = {},
                                             onLongClick = {
-                                                val clipboard =
-                                                    context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                                clipboard.setPrimaryClip(
-                                                    ClipData.newPlainText("Phone number", notes)
-                                                )
+                                                context.copyToClipboard(notes)
                                             }
                                         )
                                     }
@@ -1295,6 +2236,7 @@ fun ContactDetailsScreen(
                                 item {
                                     RillExpressiveCard(
                                         title = stringResource(R.string.other_information),
+//                            icon = Icons.Default.Event
                                     ) {
                                         contact!!.events.forEachIndexed { index, event ->
                                             val isBirthday =
@@ -1398,7 +2340,7 @@ fun ContactDetailsScreen(
                                                 val finalPhoneNumber = phoneNumber ?: contact?.phoneNumbers?.firstOrNull() ?: contactLogs.firstOrNull()?.number
                                                 TextButton(
                                                     onClick = {
-//                                                        navController.navigate("call_log_detail_screen?contactId=${finalContactId ?: "null"}&phoneNumber=${finalPhoneNumber ?: "null"}")
+//                                                    navController.navigate("call_log_detail_screen?contactId=${finalContactId ?: "null"}&phoneNumber=${finalPhoneNumber ?: "null"}")
                                                         navigator.navigate(CallLogFullScreenDestination(
                                                             contactId = finalContactId,
                                                             phoneNumber = finalPhoneNumber,
@@ -1481,16 +2423,16 @@ fun ContactDetailsScreen(
                                                     radius = 24.dp
                                                 ),
                                                 onClick = {
-                                                    if (contact != null && contact!!.phoneNumbers.size > 1) showQrDialogPicker =
-                                                        true
-                                                    else {
+//                                                    if (contact != null && contact!!.phoneNumbers.size > 1) showQrDialogPicker = true
+//                                                    else {
                                                         pendingQrNumber = null; showQrDialog = true
-                                                    }
+//                                                    }
                                                 }
                                             ),
                                         onClick = {
                                             if (contact != null && contact!!.phoneNumbers.size > 1) showSharePicker = true
-                                            else shareContact(displayPhone) }
+                                            else shareContact(displayPhone)
+                                        }
                                     )
                                     if (contact != null || shortcutNumbers.isNotEmpty()) {
                                         RillListItem(
@@ -1535,7 +2477,12 @@ fun ContactDetailsScreen(
                                     val contactNumbers = if (contact != null) contact!!.phoneNumbers else listOf(displayPhone)
                                     val contactBlocked = contactNumbers.isNotEmpty() && contactNumbers.all { isNumberBlocked(it) }
                                     RillListItem(
-                                        headline = if (contactBlocked) stringResource(R.string.contact_unblock) else stringResource(R.string.contact_block),
+                                        headline =
+                                            if (contactBlocked) {
+                                                if (contact != null) stringResource(R.string.contact_unblock) else stringResource(R.string.action_unblock_number)
+                                            } else {
+                                                if (contact != null) stringResource(R.string.contact_block) else stringResource(R.string.action_block_number)
+                                            },
                                         supporting = if (contactBlocked) stringResource(R.string.contact_unblock_supporting) else stringResource(R.string.contact_block_supporting),
                                         leadingIcon = if (contactBlocked) Icons.Rounded.LockOpen else Icons.Rounded.Block,
                                         iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
@@ -1567,8 +2514,8 @@ fun ContactDetailsScreen(
                                             contact = contact!!,
                                             availableAccounts = availableAccountsForMoving,
                                             currentAccountKey = if (contact!!.accountName == null && contact!!.accountType == null && contact!!.isPrivate) private_only
-                                                                else if (contact!!.accountName == null && contact!!.accountType == null) device_only
-                                                                else "${contact!!.accountName}|${contact!!.accountType}",
+                                            else if (contact!!.accountName == null && contact!!.accountType == null) device_only
+                                            else "${contact!!.accountName}|${contact!!.accountType}",
                                             contactsViewModel = contactsViewModel,
                                             onDismiss = { showMoveDialog = false },
                                             onSuccess = { selectedAccount, isPrivate, newContactId ->
@@ -1592,11 +2539,7 @@ fun ContactDetailsScreen(
                                 item {
                                     RillExpressiveCard(title = stringResource(R.string.contact_sources)) {
                                         contactSources.forEachIndexed { index, source ->
-                                            val account = if (!source.accountName.isNullOrEmpty()) {
-                                                Account(source.accountName, source.accountType ?: "")
-                                            } else {
-                                                null // We do not create accounts with blank names
-                                            }
+                                            val account = Account(source.accountName ?: "", source.accountType ?: "")
                                             SourceItem(
                                                 modifier = Modifier.combinedClickable(
                                                     onClick = { showSourcesDialog = true },
@@ -1624,894 +2567,84 @@ fun ContactDetailsScreen(
 
                             item { Spacer(modifier = Modifier.height(100.dp)) }
                         }
+
                     }
-                } else {
+
+                    ScrollToTopButton(
+                        modifier = Modifier
+                            .navigationBarsPadding()
+                            .padding(bottom = 24.dp, end = 24.dp),
+                        visible = showButton,
+                        onClick = { scope.launch { listState.animateScrollToItem(0) } }
+                    )
+                }
+            }
+
+            if (showFullScreenPhoto) {
+                Dialog(
+                    onDismissRequest = { showFullScreenPhoto = false },
+                    properties = androidx.compose.ui.window.DialogProperties(
+                        usePlatformDefaultWidth = false,
+                        decorFitsSystemWindows = false
+                    )
+                ) {
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(340.dp)
+                            .fillMaxSize()
+                            .background(Color.Black)
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(
-                                    Brush.verticalGradient(
-                                        colors = listOf(
-                                            Color.Transparent,
-                                            MaterialTheme.colorScheme.surface
-                                        )
-                                    )
-                                )
-                        )
-                    }
-
-                    LazyColumn(
-                        state = listState,
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        item {
-                            Column(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Box(
-                                    modifier = Modifier.wrapContentSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    RillAvatar(
-                                        name = displayName,
-                                        photoUri = contact?.photoUri,
-                                        modifier = Modifier.size(180.dp),
-                                        shape = CircleShape
-                                    )
-                                }
-                                Spacer(modifier = Modifier.height(20.dp))
-                                Text(
-                                    text = displayName,
-                                    style = MaterialTheme.typography.headlineLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.Center
-                                )
-                                if (contact?.nickname != "") {
-                                    contact?.nickname?.let {
-                                        Spacer(modifier = Modifier.height(12.dp))
-                                        Text(
-                                            text = it,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            textAlign = TextAlign.Center,
-                                        )
-                                    }
-                                }
-                                if (companyAndJob != "") {
-                                    Spacer(modifier = Modifier.height(12.dp))
-                                    Text(
-                                        text = companyAndJob,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        textAlign = TextAlign.Center
-                                    )
-                                }
-                            }
-                        }
-
-                        stickyHeader {
-                            Row(
+                        if (contact?.photoUri != null) {
+                            AsyncImage(
+                                model = contact?.photoUri,
+                                contentDescription = displayName,
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(MaterialTheme.colorScheme.surface)
-                                    .padding(vertical = 8.dp),
-                                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                    .fillMaxSize()
+                                    .clickable { showFullScreenPhoto = false },
+                                contentScale = ContentScale.Fit
+                            )
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clickable { showFullScreenPhoto = false },
+                                contentAlignment = Alignment.Center
                             ) {
-                                RillExpressiveButton(
-                                    modifier = Modifier.weight(1f),
-                                    icon = Icons.Rounded.Phone,
-                                    label = stringResource(R.string.call),
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                    enabled = (contact != null && contact?.phoneNumbers?.isNotEmpty() == true) || displayPhone != unknownLabel,
-                                    onClick = {
-                                        val c = contact
-                                        if (c != null && defaultPhone != null) initiateCall(
-                                            defaultPhone.number
-                                        )
-                                        else if (c != null && c.phoneNumbers.size > 1) showNumberPicker =
-                                            true
-                                        else if (displayPhone != unknownLabel) initiateCall(displayPhone)
-                                    })
-                                val messageImageVector: ImageVector =
-                                    ImageVector.vectorResource(id = R.drawable.ic_message_filled)
-                                RillExpressiveButton(
-                                    modifier = Modifier.weight(1f),
-                                    icon = messageImageVector,
-                                    label = stringResource(R.string.message),
-                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                    enabled = (contact != null && contact?.phoneNumbers?.isNotEmpty() == true) || displayPhone != unknownLabel,
-                                    onClick = {
-                                        val c = contact
-                                        if (c != null && defaultPhone != null) initiateMessage(
-                                            defaultPhone.number
-                                        )
-                                        else if (c != null && c.phoneNumbers.size > 1) showMessagePicker =
-                                            true
-                                        else if (displayPhone != unknownLabel) initiateMessage(displayPhone)
-                                    })
-                                val videoImageVector: ImageVector =
-                                    ImageVector.vectorResource(id = R.drawable.ic_video_camera)
-                                RillExpressiveButton(
-                                    modifier = Modifier.weight(1f),
-                                    icon = videoImageVector,
-                                    label = stringResource(R.string.video),
-                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                    enabled = (contact != null && contact?.phoneNumbers?.isNotEmpty() == true) || displayPhone != unknownLabel,
-                                    onClick = {
-                                        videoLauncher.startVideoCall(displayPhone, contact)
-                                    })
-                                RillExpressiveButton(
-                                    modifier = Modifier.weight(1f),
-                                    icon = Icons.Rounded.Email,
-                                    label = stringResource(R.string.email),
-                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                    enabled = contact?.emails?.isNotEmpty() == true,
-                                    onClick = {
-                                        val c = contact
-                                        if (c != null && c.emails.size > 1) showEmailPicker =
-                                            true
-                                        else if (c != null && c.emails.isNotEmpty()) initiateEmail(
-                                            c.emails.first().value
-                                        )
-                                    })
-                            }
-                        }
-
-                        // Contact Info
-                        item {
-                            RillExpressiveCard(
-                                title = stringResource(R.string.contact_info),
-                            ) {
-                                val configuration = LocalConfiguration.current
-                                val screenWidth = configuration.screenWidthDp.dp
-                                val middleOfScreen = screenWidth / 3
-                                val offsetMenu = DpOffset(middleOfScreen, (-24).dp)
-                                if (contact != null) {
-                                    val messageImageVector: ImageVector =
-                                        ImageVector.vectorResource(id = R.drawable.ic_message_outline)
-                                    val whatsappImageVector: ImageVector =
-                                        ImageVector.vectorResource(id = R.drawable.ic_whatsapp)
-                                    val numberSize = contact!!.phoneDetails.size
-                                    val whatsappInstall =
-                                        context.isPackageInstalled("com.whatsapp") || context.isPackageInstalled(
-                                            "com.whatsapp.w4b"
-                                        )
-                                    contact!!.phoneDetails.forEachIndexed { index, phoneDetail ->
-                                        val recentText = stringResource(R.string.recent_number)
-                                        val recent = if (normalizePhoneNumber(phoneDetail.number) == phoneNumber && numberSize > 1) " • $recentText" else ""
-                                        val isDefault = defaultPhone != null && phoneDetail.number == defaultPhone.number
-                                        val default = stringResource(R.string.default_number)
-                                        val label =
-                                            if (isDefault) getPhoneTypeText(context, phoneDetail.type, phoneDetail.label) + " • $default" + recent
-                                            else getPhoneTypeText(context, phoneDetail.type, phoneDetail.label) + recent
-                                        Box {
-                                            var showOverflowMenu by remember {
-                                                mutableStateOf(
-                                                    false
-                                                )
-                                            }
-                                            RillListItem(
-                                                headline = phoneDetail.number.forceLtr(),
-                                                supporting = label,
-                                                leadingIcon = if (isDefault) ImageVector.vectorResource(id = R.drawable.ic_phone_star) else Icons.Rounded.Phone,
-                                                iconContainerColor =
-                                                    if (isDefault) MaterialTheme.colorScheme.onSecondaryContainer else null,
-                                                iconBgContainerColor =
-                                                    if (isDefault) MaterialTheme.colorScheme.primaryContainer else null,
-                                                preTrailingIcon = if (whatsappInstall) whatsappImageVector else null,
-                                                modifierPreTrailingIcon = Modifier
-                                                    .padding(end = 8.dp)
-                                                    .size(24.dp)
-                                                    .combinedClickable(
-                                                        interactionSource = null,
-                                                        indication = ripple(
-                                                            bounded = false,
-                                                            radius = 24.dp
-                                                        ),
-                                                        onClick = {
-                                                            context.launchSendWhatsAppIntent(
-                                                                phoneDetail.number
-                                                            )
-                                                        }),
-                                                trailingIcon = messageImageVector,
-                                                modifierTrailingIcon = Modifier
-                                                    .padding(end = 8.dp)
-                                                    .size(24.dp)
-                                                    .combinedClickable(
-                                                        interactionSource = null,
-                                                        indication = ripple(
-                                                            bounded = false,
-                                                            radius = 24.dp
-                                                        ),
-                                                        onClick = {
-                                                            initiateMessage(
-                                                                phoneDetail.number
-                                                            )
-                                                        }),
-                                                onClick = { initiateCall(phoneDetail.number) },
-                                                onLongClick = { showOverflowMenu = true }
-                                            )
-                                            // Dropdown menu
-                                            DropdownMenu(
-                                                shape = MaterialTheme.shapes.large,
-                                                expanded = showOverflowMenu,
-                                                onDismissRequest = {
-                                                    showOverflowMenu = false
-                                                },
-                                                offset = offsetMenu,
-                                            ) {
-                                                DropdownMenuItem(
-                                                    contentPadding = PaddingValues(horizontal = 24.dp),
-                                                    text = {
-                                                        Text(
-                                                            phoneDetail.number.forceLtr(),
-                                                            style = MaterialTheme.typography.bodyLarge,
-                                                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                                        )
-                                                    },
-                                                    onClick = { },
-                                                    enabled = false
-                                                )
-                                                val numberBlocked = isNumberBlocked(phoneDetail.number)
-                                                DropdownMenuItem(
-                                                    contentPadding = PaddingValues(horizontal = 24.dp),
-                                                    text = { Text(if (numberBlocked) stringResource(R.string.action_unblock_number) else stringResource(R.string.action_block_number)) },
-                                                    onClick = {
-                                                        showOverflowMenu = false
-                                                        if (numberBlocked) {
-                                                            BlockedNumbersManager.unblock(context, phoneDetail.number)
-                                                        } else {
-                                                            BlockedNumbersManager.block(context, phoneDetail.number)
-                                                        }
-                                                        blockedVersion++
-                                                    }
-                                                )
-                                                DropdownMenuItem(
-                                                    contentPadding = PaddingValues(
-                                                        horizontal = 24.dp
-                                                    ),
-                                                    text = { Text(stringResource(R.string.add_note)) },
-                                                    onClick = {
-                                                        showOverflowMenu = false
-                                                        editingNoteNumber = phoneDetail.number
-                                                        showNoteEditor = true
-                                                    }
-                                                )
-                                                DropdownMenuItem(
-                                                    contentPadding = PaddingValues(
-                                                        horizontal = 24.dp
-                                                    ),
-                                                    text = { Text(stringResource(R.string.copy)) },
-                                                    onClick = {
-                                                        showOverflowMenu = false
-                                                        context.copyToClipboard(phoneDetail.number)
-                                                    }
-                                                )
-                                                if (numberSize > 1) {
-                                                    if (phoneDetail.number == defaultPhone?.number) {
-                                                        val textToast = stringResource(R.string.default_phone_number_cleared)
-                                                        DropdownMenuItem(
-                                                            contentPadding = PaddingValues(
-                                                                horizontal = 24.dp
-                                                            ),
-                                                            text = { Text(stringResource(R.string.clear_default)) },
-                                                            onClick = {
-                                                                showOverflowMenu = false
-                                                                updateDefaultPhone(
-                                                                    phoneDetail.number,
-                                                                    false
-                                                                )
-                                                                context.toast(textToast)
-                                                            }
-                                                        )
-                                                    } else {
-                                                        val message = stringResource(
-                                                            R.string.default_phone_set,
-                                                            phoneDetail.number.forceLtr()
-                                                        )
-                                                        DropdownMenuItem(
-                                                            contentPadding = PaddingValues(
-                                                                horizontal = 24.dp
-                                                            ),
-                                                            text = { Text(stringResource(R.string.set_as_default)) },
-                                                            onClick = {
-                                                                showOverflowMenu = false
-                                                                updateDefaultPhone(
-                                                                    phoneDetail.number,
-                                                                    true
-                                                                )
-                                                                context.toast(message)
-                                                            }
-                                                        )
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    contact!!.emails.forEachIndexed { index, email ->
-                                        val label =
-                                            getEmailTypeText(context, email.type, email.label)
-                                        RillListItem(
-                                            headline = email.value,
-                                            supporting = label,
-                                            leadingIcon = Icons.Rounded.Email,
-                                            onClick = { initiateEmail(email.value) },
-                                            onLongClick = { context.copyToClipboard(email.value) }
-                                        )
-                                    }
-
-                                    if (contact!!.phoneDetails.isEmpty() && contact!!.emails.isEmpty()) {
-                                        RillListItem(
-                                            headline = stringResource(R.string.add_phone),
-                                            leadingIcon = Icons.Rounded.Add,
-                                            onClick = {
-                                                if (contactSources.size > 1) {
-                                                    showSourcesDialog = true
-                                                } else {
-                                                    navController.navigate(ContactEditScreenDestination(contactId = contact!!.id).route) {
-                                                        launchSingleTop = true
-                                                        restoreState = true
-                                                    }
-                                                }
-                                            }
-                                        )
-                                    }
-                                } else if (phoneNumber != null && phoneNumber != unknownLabel) {
-                                    Box {
-                                        var showOverflowMenu by remember { mutableStateOf(false) }
-                                        RillListItem(
-                                            headline = phoneNumber.forceLtr(),
-                                            leadingIcon = Icons.Rounded.Phone,
-                                            onClick = { initiateCall(phoneNumber) },
-                                            onLongClick = { showOverflowMenu = true }
-                                        )
-                                        // Dropdown menu
-                                        DropdownMenu(
-                                            shape = MaterialTheme.shapes.large,
-                                            expanded = showOverflowMenu,
-                                            onDismissRequest = { showOverflowMenu = false },
-                                            offset = offsetMenu,
-                                        ) {
-                                            DropdownMenuItem(
-                                                contentPadding = PaddingValues(horizontal = 24.dp),
-                                                text = {
-                                                    Text(
-                                                        phoneNumber.forceLtr(),
-                                                        style = MaterialTheme.typography.bodyLarge,
-                                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                                    )
-                                                },
-                                                onClick = { },
-                                                enabled = false
-                                            )
-                                            val numberBlocked = isNumberBlocked(phoneNumber)
-                                            DropdownMenuItem(
-                                                contentPadding = PaddingValues(horizontal = 24.dp),
-                                                text = { Text(if (numberBlocked) stringResource(R.string.action_unblock_number) else stringResource(R.string.action_block_number)) },
-                                                onClick = {
-                                                    showOverflowMenu = false
-                                                    if (numberBlocked) {
-                                                        BlockedNumbersManager.unblock(context, phoneNumber)
-                                                    } else {
-                                                        BlockedNumbersManager.block(context, phoneNumber)
-                                                    }
-                                                    blockedVersion++
-                                                }
-                                            )
-                                            DropdownMenuItem(
-                                                contentPadding = PaddingValues(horizontal = 24.dp),
-                                                text = { Text(stringResource(R.string.copy)) },
-                                                onClick = {
-                                                    showOverflowMenu = false
-                                                    context.copyToClipboard(phoneNumber)
-                                                }
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        // Call Notes section (between Contact Info and Recent Activity)
-                        item {
-                            var refreshTrigger by remember { mutableIntStateOf(0) }
-
-                            // Get a list of all the contact's phone numbers
-                            val phoneNumbersList = remember(contact) {
-                                contact?.phoneDetails?.map { it.number }
-                                    ?: if (phoneNumber != null && phoneNumber != unknownLabel) {
-                                        listOf(phoneNumber)
-                                    } else {
-                                        emptyList()
-                                    }
-                            }
-
-                            // Get all the notes for all issues
-                            val allNotes = remember(contact, refreshTrigger) {
-                                if (phoneNumbersList.isNotEmpty()) {
-                                    NoteManager.getAllNotesForNumbers(context, phoneNumbersList)
-                                } else {
-                                    emptyMap()
-                                }
-                            }
-                            // Refresh after closing the editor
-                            LaunchedEffect(showNoteEditor) {
-                                if (!showNoteEditor) {
-                                    refreshTrigger++
-                                }
-                            }
-
-                            var showAboutNotesDialog by remember { mutableStateOf(false) }
-                            if (showAboutNotesDialog) {
-                                RillDialog(
-                                    onDismissRequest = { showAboutNotesDialog = false },
-                                    title = stringResource(R.string.about_call_notes),
-                                    icon = Icons.AutoMirrored.Rounded.Help,
-                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
-                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
-                                    confirmButton = {
-                                        TextButton(onClick = {
-                                            showAboutNotesDialog = false
-                                        }) {
-                                            Text(
-                                                stringResource(R.string.close),
-                                                textAlign = TextAlign.End,
-                                            )
-                                        }
-                                    },
-                                    dismissButton = {
-                                        val notesDir = NoteManager.getNotesDir(context).absolutePath
-                                        TextButton(onClick = {
-                                            showAboutNotesDialog = false
-                                            context.copyToClipboard(notesDir)
-                                        }) {
-                                            Text(stringResource(R.string.copy_path))
-                                        }
-                                    }
-                                ) {
-                                    Text(stringResource(R.string.about_call_notes_subtitle))
-                                }
-                            }
-                            RillExpressiveCard(
-                                title = stringResource(R.string.call_notes),
-//                        icon = Icons.AutoMirrored.Outlined.StickyNote2,
-                                trailingIcon = Icons.AutoMirrored.Outlined.HelpOutline,
-                                onTrailingIconClick = { showAboutNotesDialog = true }
-                            ) {
-                                if (allNotes.isEmpty()) {
-                                    // No notes—display the "Add" button
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .background(
-                                                color = cardColor,
-                                                shape = MaterialTheme.shapes.extraLarge.copy(
-                                                    topStart = CornerSize(cardCornerExtraSmall),
-                                                    topEnd = CornerSize(cardCornerExtraSmall)
-                                                )
-                                            )
-                                            .combinedClickable(
-                                                onClick = {
-                                                    if (contact != null && contact!!.phoneNumbers.size > 1) showAddCallNotePicker =
-                                                        true
-                                                    else if (displayPhone != unknownLabel) initiateAddCallNote(
-                                                        displayPhone
-                                                    )
-                                                }
-                                            )
-                                            .padding(vertical = 16.dp, horizontal = 24.dp)
-                                    ) {
-                                        Text(
-                                            text = "+ " + stringResource(R.string.add_note),
-                                            style = MaterialTheme.typography.bodyMedium.copy(
-                                                color = MaterialTheme.colorScheme.primary
-                                            )
-                                        )
-                                    }
-                                } else {
-                                    // Here is a list of all notes
-                                    allNotes.forEach { (number, noteContent) ->
-                                        RillListItem(
-                                            headline = number,
-                                            supporting = noteContent,
-                                            leadingIcon = Icons.AutoMirrored.Outlined.StickyNote2,
-                                            onClick = {
-                                                editingNoteNumber = number
-                                                showNoteEditor = true
-                                            },
-                                            onLongClick = {
-                                                if (noteContent.isNotBlank()) {
-                                                    val clipboard =
-                                                        context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                                    clipboard.setPrimaryClip(
-                                                        ClipData.newPlainText(
-                                                            "Phone number",
-                                                            noteContent
-                                                        )
-                                                    )
-                                                }
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
-                        val notes = contact?.notes
-                        if (!notes.isNullOrBlank()) {
-                            item {
-                                RillExpressiveCard(title = stringResource(R.string.notes_contact)) {
-                                    RillListItem(
-                                        supporting = notes,
-                                        leadingIcon = Icons.AutoMirrored.Rounded.StickyNote2,
-                                        onClick = {},
-                                        onLongClick = {
-                                            val clipboard =
-                                                context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                            clipboard.setPrimaryClip(
-                                                ClipData.newPlainText("Phone number", notes)
-                                            )
-                                        }
-                                    )
-                                }
-                            }
-                        }
-
-                        // Events & Addresses
-                        if (contact != null && (contact!!.events.isNotEmpty() || contact!!.addresses.isNotEmpty())) {
-                            item {
-                                RillExpressiveCard(
-                                    title = stringResource(R.string.other_information),
-//                            icon = Icons.Default.Event
-                                ) {
-                                    contact!!.events.forEachIndexed { index, event ->
-                                        val isBirthday =
-                                            event.type == ContactsContract.CommonDataKinds.Event.TYPE_BIRTHDAY
-                                        val label = getEventTypeText(context, event.type, event.label)
-                                        RillListItem(
-                                            headline = event.date,
-                                            supporting = label,
-                                            leadingIcon = if (isBirthday) Icons.Outlined.Cake else Icons.Outlined.Event,
-                                            onClick = {
-                                                val dateParts = event.date.split("-")
-                                                if (dateParts.size == 3) {
-//                                            val year = dateParts[0].toInt()
-                                                    val month = dateParts[1].toInt()
-                                                    val day = dateParts[2].toInt()
-
-                                                    val currentYear =
-                                                        Calendar.getInstance().get(Calendar.YEAR)
-                                                    val calendar = Calendar.getInstance().apply {
-                                                        set(Calendar.YEAR, currentYear)
-                                                        set(
-                                                            Calendar.MONTH,
-                                                            month - 1
-                                                        ) // Month in Calendar: 0 = January
-                                                        set(Calendar.DAY_OF_MONTH, day)
-                                                        set(Calendar.HOUR_OF_DAY, 12)
-                                                        set(Calendar.MINUTE, 0)
-                                                        set(Calendar.SECOND, 0)
-                                                        set(Calendar.MILLISECOND, 0)
-                                                    }
-                                                    val uri =
-                                                        "content://com.android.calendar/time/${calendar.timeInMillis}".toUri()
-                                                    context.startActivity(
-                                                        Intent(
-                                                            Intent.ACTION_VIEW,
-                                                            uri
-                                                        )
-                                                    )
-                                                }
-                                            },
-                                            onLongClick = { context.copyToClipboard(event.date) }
-                                        )
-                                    }
-                                    contact!!.addresses.forEachIndexed { index, address ->
-                                        val interactionSource = remember { MutableInteractionSource() }
-                                        val label =
-                                            getAddressTypeText(context, address.type, address.label)
-                                        RillListItem(
-                                            headline = address.formattedAddress,
-                                            supporting = label,
-                                            leadingIcon = Icons.Rounded.LocationOn,
-                                            trailingIcon = Icons.Outlined.Directions,
-                                            modifierTrailingIcon = Modifier
-                                                .padding(end = 8.dp)
-                                                .size(24.dp)
-                                                .combinedClickable(
-                                                    interactionSource = interactionSource,
-                                                    indication = ripple(
-                                                        bounded = false,
-                                                        radius = 24.dp
-                                                    ),
-                                                    onClick = {
-                                                        context.startActivity(
-                                                            Intent(
-                                                                Intent.ACTION_VIEW,
-                                                                "google.navigation:q=$address".toUri()
-                                                            )
-                                                        )
-                                                    }),
-                                            onClick = {
-                                                context.startActivity(
-                                                    Intent(
-                                                        Intent.ACTION_VIEW,
-                                                        "geo:0,0?q=$address".toUri()
-                                                    )
-                                                )
-                                            },
-                                            onLongClick = { context.copyToClipboard(address.formattedAddress) }
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
-                        // Recent Activity
-                        if (contactLogs.isNotEmpty()) {
-                            val hasMultipleNumbers = contactLogs.distinctBy { it.number }.size > 1 || (contact?.phoneNumbers != null && contact?.phoneNumbers?.size!! > 1)
-                            item {
-                                RillExpressiveCard(
-                                    title = stringResource(R.string.recent_activity),
-                                ) {
-                                    Column(modifier = Modifier.animateContentSize()) {
-                                        contactLogs.take(3).forEachIndexed { index, log ->
-                                            CallLogTileSimple(log, showNumber = hasMultipleNumbers, showSimLabel = showSimLabel)
-                                            if (index < 2 && index < contactLogs.size - 1) {
-                                                Spacer(modifier = Modifier.height(2.dp))
-                                            }
-                                        }
-                                        if (contactLogs.size > 3) {
-                                            val finalContactId = if (contact?.id != null) contact!!.id else if (contactId != "null") contactId else null
-                                            val finalPhoneNumber = phoneNumber ?: contact?.phoneNumbers?.firstOrNull() ?: contactLogs.firstOrNull()?.number
-                                            TextButton(
-                                                onClick = {
-//                                                    navController.navigate("call_log_detail_screen?contactId=${finalContactId ?: "null"}&phoneNumber=${finalPhoneNumber ?: "null"}")
-                                                    navigator.navigate(CallLogFullScreenDestination(
-                                                        contactId = finalContactId,
-                                                        phoneNumber = finalPhoneNumber,
-                                                        numbersList = contact?.phoneNumbers?.toTypedArray()
-                                                    ))
-                                                },
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .offset(
-                                                        x = 0.dp,
-                                                        y = (-2).dp
-                                                    ), // We'll make up for the indentation
-                                                colors = ButtonDefaults.textButtonColors()
-                                                    .copy(containerColor = cardColor),
-                                                shape = MaterialTheme.shapes.extraLarge.copy(
-                                                    topStart = CornerSize(cardCornerExtraSmall),
-                                                    topEnd = CornerSize(cardCornerExtraSmall)
-                                                ),
-                                            ) {
-                                                Text(stringResource(R.string.show_full_history))
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        // Contact Settings
-                        item {
-                            RillExpressiveCard(title = stringResource(R.string.contacts_settings)) {
-                                if (contact != null) {
-                                    val customRingtoneLabel = stringResource(R.string.ringtone_custom)
-                                    val currentRingtone = contact!!.customRingtone?.let { uriStr ->
-                                        runCatching { RingtoneManager.getRingtone(context,
-                                            uriStr.toUri())?.getTitle(context) }.getOrNull() ?: customRingtoneLabel
-                                    } ?: stringResource(R.string.default_number)
-                                    val contactRingtone = stringResource(R.string.contact_ringtone)
-                                    RillListItem(
-                                        headline = contactRingtone,
-                                        supporting = currentRingtone,
-                                        leadingIcon = Icons.Rounded.MusicNote,
-                                        onClick = {
-                                            val intent =
-                                                Intent(RingtoneManager.ACTION_RINGTONE_PICKER).apply {
-                                                    putExtra(
-                                                        RingtoneManager.EXTRA_RINGTONE_TYPE,
-                                                        RingtoneManager.TYPE_RINGTONE
-                                                    )
-                                                    putExtra(
-                                                        RingtoneManager.EXTRA_RINGTONE_TITLE,
-                                                        contactRingtone
-                                                    )
-                                                    putExtra(
-                                                        RingtoneManager.EXTRA_RINGTONE_EXISTING_URI,
-                                                        contact!!.customRingtone?.toUri()
-                                                    )
-                                                }
-                                            ringtonePickerLauncher.launch(intent)
-                                        }
-                                    )
-                                    CallBackgroundRow(
-                                        background = callBackground,
-                                        saving = backgroundSaving,
-                                        onClick = onBackgroundClick
-                                    )
-                                }
-                                val interactionSource = remember { MutableInteractionSource() }
-                                RillListItem(
-                                    headline = stringResource(R.string.share),
-                                    supporting = stringResource(R.string.share_subtitle),
-                                    leadingIcon = Icons.Rounded.Share,
-                                    trailingIcon = Icons.Rounded.QrCode2,
-                                    modifierTrailingIcon = Modifier
-                                        .padding(end = 8.dp)
-                                        .size(24.dp)
-                                        .combinedClickable(
-                                            interactionSource = interactionSource,
-                                            indication = ripple(
-                                                bounded = false,
-                                                radius = 24.dp
-                                            ),
-                                            onClick = {
-                                                if (contact != null && contact!!.phoneNumbers.size > 1) showQrDialogPicker =
-                                                    true
-                                                else {
-                                                    pendingQrNumber = null; showQrDialog = true
-                                                }
-                                            }
-                                        ),
-                                    onClick = {
-                                        if (contact != null && contact!!.phoneNumbers.size > 1) showSharePicker = true
-                                        else shareContact(displayPhone)
-                                    }
+                                RillAvatar(
+                                    name = displayName,
+                                    photoUri = null,
+                                    modifier = Modifier.size(200.dp),
                                 )
-                                if (contact != null || shortcutNumbers.isNotEmpty()) {
-                                    RillListItem(
-                                        headline = stringResource(R.string.add_to_home_screen),
-                                        leadingIcon = Icons.Rounded.Widgets,
-                                        onClick = {
-                                            if (contact != null) {
-                                                if (shortcutNumbers.size > 1) {
-                                                    showShortcutNumberPicker = true
-                                                } else if (shortcutNumbers.isEmpty()) {
-                                                    ContactShortcutUtils.pinOpenContactShortcut(
-                                                        context,
-                                                        contact!!.id,
-                                                        displayName,
-                                                        contact!!.photoUri
-                                                    )
-                                                } else {
-                                                    pendingShortcutNumber = shortcutNumbers.first()
-                                                    showShortcutActionPicker = true
-                                                }
-                                            } else if (shortcutNumbers.isNotEmpty()) {
-                                                val shortcutNumber = shortcutNumbers.first()
-                                                ContactShortcutUtils.pinCallShortcut(
-                                                    context,
-                                                    shortcutNumber,
-                                                    displayName,
-                                                    shortcutNumber,
-                                                    null
-                                                )
-                                            }
-                                        }
-                                    )
-                                }
-                                if (contact != null && contactSources.size < 2) {
-                                    RillListItem(
-                                        headline = stringResource(R.string.move_contact),
-                                        supporting = stringResource(R.string.move_to_another_account),
-                                        leadingIcon = Icons.AutoMirrored.Rounded.DriveFileMove,
-                                        onClick = { showMoveDialog = true }
-                                    )
-                                }
-                                val contactNumbers = if (contact != null) contact!!.phoneNumbers else listOf(displayPhone)
-                                val contactBlocked = contactNumbers.isNotEmpty() && contactNumbers.all { isNumberBlocked(it) }
-                                RillListItem(
-                                    headline =
-                                        if (contactBlocked) {
-                                            if (contact != null) stringResource(R.string.contact_unblock) else stringResource(R.string.action_unblock_number)
-                                        } else {
-                                            if (contact != null) stringResource(R.string.contact_block) else stringResource(R.string.action_block_number)
-                                        },
-                                    supporting = if (contactBlocked) stringResource(R.string.contact_unblock_supporting) else stringResource(R.string.contact_block_supporting),
-                                    leadingIcon = if (contactBlocked) Icons.Rounded.LockOpen else Icons.Rounded.Block,
-                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
-                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
-                                    onClick = {
-                                        contactNumbers.forEach { number ->
-                                            if (contactBlocked) {
-                                                BlockedNumbersManager.unblock(context, number)
-                                            } else {
-                                                BlockedNumbersManager.block(context, number)
-                                            }
-                                        }
-                                        blockedVersion++
-                                    }
+                            }
+                        }
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .statusBarsPadding()
+                                .padding(horizontal = 8.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            SpringIconButton(
+                                onClick = { showFullScreenPhoto = false }
+                            ) {
+                                Icon(
+                                    Icons.AutoMirrored.Rounded.ArrowBack,
+                                    stringResource(R.string.back),
+                                    tint = Color.White
                                 )
-                                if (contact != null) {
-                                    RillListItem(
-                                        headline = stringResource(R.string.delete),
-                                        leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_delete),
-                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
-                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
-                                        onClick = { showDeleteDialog = true }
-                                    )
-                                }
-
-                                if (showMoveDialog) {
-                                    val textToast = stringResource(R.string.contact_moved_successfully)
-                                    MoveSingleContactDialog(
-                                        contact = contact!!,
-                                        availableAccounts = availableAccountsForMoving,
-                                        currentAccountKey = if (contact!!.accountName == null && contact!!.accountType == null && contact!!.isPrivate) private_only
-                                                            else if (contact!!.accountName == null && contact!!.accountType == null) device_only
-                                                            else "${contact!!.accountName}|${contact!!.accountType}",
-                                        contactsViewModel = contactsViewModel,
-                                        onDismiss = { showMoveDialog = false },
-                                        onSuccess = { selectedAccount, isPrivate, newContactId ->
-                                            context.toast(textToast)
-                                            // Updating local data
-                                            contact = contact!!.copy(
-                                                id = newContactId,
-                                                accountName = selectedAccount?.name,
-                                                accountType = selectedAccount?.type,
-                                                isPrivate = isPrivate
-                                            )
-                                            contactAccount = selectedAccount
-                                        }
-                                    )
-                                }
                             }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = displayName,
+                                style = MaterialTheme.typography.titleLarge,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
                         }
-
-                        // Contact Sources
-                        if (contact != null && contactSources.size > 1) {
-                            item {
-                                RillExpressiveCard(title = stringResource(R.string.contact_sources)) {
-                                    contactSources.forEachIndexed { index, source ->
-                                        val account = Account(source.accountName ?: "", source.accountType ?: "")
-                                        SourceItem(
-                                            modifier = Modifier.combinedClickable(
-                                                onClick = { showSourcesDialog = true },
-                                            ),
-                                            leadingIcon = ContactUtils.getAccountIcon(account, contact!!.isPrivate),
-                                            headline = ContactUtils.getAccountName(account),
-                                            supporting = ContactUtils.getFriendlyAccountName(account),
-                                        )
-                                    }
-                                }
-                            }
-                        } else if (contact != null) {
-                            item {
-                                RillExpressiveCard(title = stringResource(R.string.contact_sources)) {
-                                    SourceItem(
-                                        modifier = Modifier,
-                                        leadingIcon = ContactUtils.getAccountIcon(contactAccount, contact!!.isPrivate),
-                                        headline = if (contactAccount != null) ContactUtils.getAccountName(contactAccount!!)
-                                                    else ContactUtils.getFriendlyAccountName(null, contact!!.isPrivate),
-                                        supporting = if (contactAccount != null) ContactUtils.getFriendlyAccountName(contactAccount) else null,
-                                    )
-                                }
-                            }
-                        }
-
-                        item { Spacer(modifier = Modifier.height(100.dp)) }
                     }
-
                 }
-
-                ScrollToTopButton(
-                    modifier = Modifier
-                        .navigationBarsPadding()
-                        .padding(bottom = 24.dp, end = 24.dp),
-                    visible = showButton,
-                    onClick = { scope.launch { listState.animateScrollToItem(0) } }
-                )
             }
         }
     }
@@ -2522,7 +2655,7 @@ fun QrCodeDialog(
     name: String,
     phone: String?,
     email: String?,
-    contact: dev.goodwy.rphone.modal.data.Contact? = null,
+    contact: Contact? = null,
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
@@ -2612,7 +2745,7 @@ fun QrCodeDialog(
                             )
                             Spacer(Modifier.width(6.dp))
                             Text(
-                                text = if (isNfcEnabled) "Tap phone to share via NFC" else "NFC is turned off",
+                                text = if (isNfcEnabled) stringResource(R.string.tap_phone_to_share_NFC) else stringResource(R.string.nfc_is_turned_off),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = if (isNfcEnabled) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -2631,11 +2764,11 @@ fun QrCodeDialog(
                             if (contact != null) {
                                 QrCodeUtils.shareVCardFile(context, contact)
                             } else {
-                                val tempContact = dev.goodwy.rphone.modal.data.Contact(
+                                val tempContact = Contact(
                                     id = "",
                                     givenName = name,
                                     phoneNumbers = listOfNotNull(phone),
-                                    emails = listOfNotNull(email?.let { dev.goodwy.rphone.modal.data.ContactEmail(value = it) })
+                                    emails = listOfNotNull(email?.let { ContactEmail(value = it) })
                                 )
                                 QrCodeUtils.shareVCardFile(context, tempContact)
                             }
@@ -2643,42 +2776,38 @@ fun QrCodeDialog(
                         modifier = Modifier.weight(1f),
                         shape = MaterialTheme.shapes.medium
                     ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Share,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
+                        Text(
+                            stringResource(R.string.share),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
-                        Spacer(Modifier.width(6.dp))
-                        Text(stringResource(R.string.share))
                     }
 
-                    val copySuccessText = stringResource(R.string.copy)
                     OutlinedButton(
-                        onClick = {
-                            QrCodeUtils.copyToClipboard(context, vCard, name)
-                            android.widget.Toast.makeText(context, copySuccessText, android.widget.Toast.LENGTH_SHORT).show()
-                        },
+                        onClick = { QrCodeUtils.copyToClipboard(context, vCard, name) },
                         modifier = Modifier.weight(1f),
                         shape = MaterialTheme.shapes.medium
                     ) {
-                        Icon(
-                            imageVector = Icons.Rounded.ContentCopy,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
+                        Text(
+                            stringResource(R.string.copy),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
-                        Spacer(Modifier.width(6.dp))
-                        Text(stringResource(R.string.copy))
                     }
                 }
 
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(4.dp))
 
                 Button(
                     onClick = onDismiss,
                     modifier = Modifier.fillMaxWidth(),
                     shape = MaterialTheme.shapes.medium
                 ) {
-                    Text(stringResource(R.string.close))
+                    Text(
+                        stringResource(R.string.close),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                 }
             }
         }
@@ -2694,11 +2823,20 @@ private fun buildClickableAnnotatedString(text: String): AnnotatedString {
             val start = matcher.start()
             val end = matcher.end()
             append(text.substring(lastIdx, start))
-            pushStringAnnotation("URL", matcher.group())
-            withStyle(SpanStyle(color = Color(0xFF1E88E5), textDecoration = TextDecoration.Underline)) {
-                append(text.substring(start, end))
+            val rawUrl = matcher.group()
+            val fullUrl = if (rawUrl.startsWith("http://") || rawUrl.startsWith("https://")) rawUrl else "https://$rawUrl"
+            val link = LinkAnnotation.Url(
+                url = fullUrl,
+                styles = TextLinkStyles(
+                    style = SpanStyle(
+                        color = color_primary,
+                        textDecoration = TextDecoration.Underline
+                    )
+                )
+            )
+            withLink(link) {
+                append(rawUrl)
             }
-            pop()
             lastIdx = end
         }
         append(text.substring(lastIdx))
@@ -3032,7 +3170,9 @@ fun CallBackgroundBottomSheet(
 
             // Title
             Row(
-                modifier = Modifier.fillMaxWidth().padding(start = 16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -3041,7 +3181,9 @@ fun CallBackgroundBottomSheet(
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
-                IconButton(onClick = onDismiss) {
+                SpringIconButton(
+                    onClick = onDismiss
+                ) {
                     Icon(Icons.Default.Close, stringResource(R.string.close))
                 }
             }

@@ -168,6 +168,7 @@
     <string name="app_icon">Icona dell\'app</string>
     <string name="app_icon_subtitle">Scegli l\'icona dell\'app visualizzata nella schermata Home</string>
     <string name="app_name_change">Nome dell\'app</string>
+    <string name="language">Lingua</string>
     <string name="visual_effects">Effetti visivi</string>
     <string name="not_supported_on_this_device">Non supportato su questo dispositivo</string>
     <string name="not_supported_on_this_device_subtitle">Sfocatura e Vetro Liquido richiedono Android 12 o superiore</string>
@@ -202,8 +203,6 @@
     <string name="dialpad_animations_subtitle">Mostra animazioni durante la digitazione dei numeri</string>
     <string name="hide_voice_search">Nascondi ricerca vocale</string>
     <string name="hide_voice_search_subtitle">Nasconde il pulsante di ricerca vocale</string>
-    <string name="swipe_actions">Azioni di scorrimento</string>
-    <string name="swipe_actions_subtitle">Scorri su una voce del registro chiamate recenti per eliminarla, inviare un SMS o effettuare una chiamata</string>
 
     <string name="сaller_ui">Interfaccia chiamante</string>
     <string name="сaller_ui_subtitle">Personalizza il layout e i controlli della schermata di chiamata</string>
@@ -310,6 +309,13 @@
     <string name="haptic_interval">Intervallo feedback aptico</string>
     <string name="haptic_interval_value">1 ogni %.1f cm</string>
     <string name="haptic_strength">Intensità feedback aptico</string>
+
+    <!-- Flash Notification on Call -->
+    <string name="flash_on_call">Flash alla chiamata</string>
+    <string name="flash_on_call_subtitle">Lampeggia il flash della fotocamera sulle chiamate in entrata</string>
+    <string name="flash_on_call_mode">Modalità flash</string>
+    <string name="flash_mode_always">Sempre</string>
+    <string name="flash_mode_silent_vibrate">Solo silenzioso / vibrazione</string>
 
     <string name="manage_blocked">Gestisci bloccati</string>
     <string name="manage_blocked_subtitle">Gestisci chiamate bloccate e spam</string>
@@ -450,6 +456,9 @@
     <string name="call_failed_no_network">Chiamata non riuscita: rete cellulare non disponibile</string>
     <string name="call_failed_restricted">Chiamata non riuscita: chiamata limitata</string>
     <string name="call_failed_generic">Impossibile completare la chiamata</string>
+    <string name="no_valid_app_found">Nessuna app valida trovata</string>
+    <string name="video_call">Chiamata video</string>
+    <string name="voice_call">Chiamata vocale</string>
     <string name="call">Chiamata</string>
     <string name="incoming">In entrata</string>
     <string name="outgoing">In uscita</string>
@@ -563,6 +572,8 @@
     <string name="save_to_account">Salva nell\'account</string>
     <string name="show_full_history">Mostra cronologia completa</string>
     <string name="contact_qr">QR del contatto</string>
+    <string name="tap_phone_to_share_NFC">Tocca il telefono per condividere tramite NFC</string>
+    <string name="nfc_is_turned_off">L\'NFC è disattivato</string>
     <string name="phone_number">Numero di telefono</string>
     <string name="name">Nome</string>
     <string name="prefix">Prefisso</string>
@@ -737,4 +748,22 @@
     <string name="busy_mode_call_rejected_sent_sms_toast">Chiamata rifiutata (modalità occupato). SMS inviato.</string>
     <string name="edit_busy_message">Modifica il messaggio della modalità occupato</string>
     <string name="busy_mode_permission_required">Concedi l\'autorizzazione per inviare SMS nelle impostazioni dell\'app</string>
+
+    <!-- Avatar Cropping -->
+    <string name="crop_avatar_title">Ritaglia e ruota</string>
+    <string name="action_crop">Ritaglia</string>
+    <string name="action_rotate">Ruota</string>
+
+    <!-- Swipe Actions and Tap -->
+    <string name="settings_swipe_and_taps_title">Scorri e tocca</string>
+    <string name="settings_swipe_and_taps_supporting">Imposta cosa succede quando scorri o tocchi</string>
+    <string name="settings_swipe_actions_enable">Attiva gesti di scorrimento</string>
+    <string name="settings_swipe_actions_enable_supporting">Scorri a sinistra o a destra sulle voci dell\'elenco per attivare azioni</string>
+    <string name="settings_swipe_right_action">Azioni di scorrimento a destra</string>
+    <string name="settings_swipe_right_action_second">Azione secondaria per lo scorrimento a destra</string>
+    <string name="settings_swipe_left_action">Azioni di scorrimento a sinistra</string>
+    <string name="settings_swipe_left_action_second">Azione secondaria per lo scorrimento a sinistra</string>
+    <string name="settings_swipe_actions_reset">Ripristina azioni di scorrimento</string>
+    <string name="swipe_action_none">Nessuna</string>
+    <string name="swipe_action_copy_number">Copia numero</string>
 </resources>

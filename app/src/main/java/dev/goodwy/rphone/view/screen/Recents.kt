@@ -26,7 +26,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -51,12 +50,13 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import android.os.Build
+import android.widget.Toast
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.rounded.Call
-import androidx.compose.material.icons.rounded.People
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.runtime.saveable.rememberSaveable
 import dev.goodwy.rphone.bottomBarHeight
 import dev.goodwy.rphone.cardCornerExtraSmall
 import dev.goodwy.rphone.cardSpacedBy
@@ -67,13 +67,11 @@ import dev.goodwy.rphone.liquidglass.highlight.Highlight
 import dev.goodwy.rphone.liquidglass.LocalLiquidGlassBackdrop
 import org.koin.compose.viewmodel.koinActivityViewModel
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -91,7 +89,10 @@ import com.ramcosta.composedestinations.generated.destinations.SettingsScreenDes
 import dev.goodwy.rphone.controller.CallNotificationManager
 import dev.goodwy.rphone.controller.util.BlockedNumbersManager
 import dev.goodwy.rphone.controller.util.ContactUtils.getPhoneNumber
+import dev.goodwy.rphone.controller.util.SocialUtils
+import dev.goodwy.rphone.controller.util.copyToClipboard
 import dev.goodwy.rphone.controller.util.hasDualSim
+import dev.goodwy.rphone.modal.data.SwipeActionType
 import dev.goodwy.rphone.view.theme.RillShapeDefaults
 import dev.goodwy.rphone.view.theme.customColors
 import kotlin.collections.component1
@@ -110,6 +111,14 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
     val showButton by remember {
         derivedStateOf {
             listState.firstVisibleItemIndex > 2
+        }
+    }
+    val viewModel: CallLogViewModel = koinActivityViewModel()
+    LaunchedEffect(Unit) {
+        viewModel.scrollToTop.collect {
+            if (listState.firstVisibleItemIndex != 0 || listState.firstVisibleItemScrollOffset != 0) {
+                listState.animateScrollToItem(0)
+            }
         }
     }
 
@@ -301,7 +310,6 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
                 label = "TopBarTransition"
             ) { isSelecting ->
                 if (isGranted) {
-                    val viewModel: CallLogViewModel = koinActivityViewModel()
                     val selectedFilter by viewModel.selectedFilter.collectAsStateWithLifecycle()
 
                     if (!isSelecting) {
@@ -309,7 +317,8 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
                             if (!searchEnabled) TopBar(navController, navigator)
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier
+                                    .fillMaxWidth()
                                     .then(
                                         if (searchEnabled) Modifier.windowInsetsPadding(WindowInsets.statusBars)
                                         else Modifier
@@ -337,8 +346,22 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
                                             .padding(horizontal = 16.dp)
                                             .combinedClickable(
                                                 onClick = {
-                                                    if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                                                        performAppHaptic(context, prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light", prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f))
+                                                    if (prefs.getBoolean(
+                                                            PreferenceManager.KEY_APP_HAPTICS,
+                                                            true
+                                                        )
+                                                    ) {
+                                                        performAppHaptic(
+                                                            context,
+                                                            prefs.getString(
+                                                                PreferenceManager.KEY_APP_HAPTICS_STRENGTH,
+                                                                "light"
+                                                            ) ?: "light",
+                                                            prefs.getFloat(
+                                                                PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY,
+                                                                0.5f
+                                                            )
+                                                        )
                                                     }
                                                     navigator.navigate(SettingsScreenDestination)
                                                 },
@@ -450,7 +473,7 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
                             .padding(bottom = if (showBottomBar) 90.dp else 0.dp)
                         else Modifier
                             .padding(bottom = if (showBottomBar) bottomBarHeight + 24.dp else 0.dp)
-                            .then( if (showBottomBar) Modifier else Modifier.navigationBarsPadding())
+                            .then(if (showBottomBar) Modifier else Modifier.navigationBarsPadding())
                     )
                 if (useLiquidGlass) {
                     Box(
@@ -491,7 +514,9 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
         containerColor = MaterialTheme.colorScheme.surface,
         contentWindowInsets = WindowInsets(0)
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
+        Box(modifier = Modifier
+            .padding(innerPadding)
+            .fillMaxSize()) {
             CallLogFullContent(
                 navController = navController,
                 navigator = navigator,
@@ -535,26 +560,6 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
     }
 }
 
-//private fun formatDuration(totalSeconds: Long): String {
-//    val hours = totalSeconds / 3600
-//    val minutes = (totalSeconds % 3600) / 60
-//    val seconds = totalSeconds % 60
-//    return when {
-//        hours > 0 -> "${hours}h ${minutes}m"
-//        minutes > 0 -> "${minutes}m ${seconds}s"
-//        else -> "${seconds}s"
-//    }
-//}
-
-//private fun todayStartMillis(): Long {
-//    val cal = Calendar.getInstance()
-//    cal.set(Calendar.HOUR_OF_DAY, 0)
-//    cal.set(Calendar.MINUTE, 0)
-//    cal.set(Calendar.SECOND, 0)
-//    cal.set(Calendar.MILLISECOND, 0)
-//    return cal.timeInMillis
-//}
-
 @SuppressLint("UnusedContentLambdaTargetStateParameter")
 @Composable
 fun CallLogFullContent(
@@ -576,6 +581,8 @@ fun CallLogFullContent(
     val hapticsStrength = prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light"
     val hapticsIntensity = prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
     var pendingDeleteIds by remember { mutableStateOf<List<Long>>(emptyList()) }
+
+    val videoLauncher = rememberVideoLauncher()
 
     var pullToRefreshActive by remember { mutableStateOf(false) }
 
@@ -616,27 +623,13 @@ fun CallLogFullContent(
             mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_RECENTS_FAVORITES_COLLAPSED, false))
         }
 
-        var lazyRowLayoutCoords by remember { mutableStateOf<LayoutCoordinates?>(null) }
-        val density = LocalDensity.current
-        val lazyRowBounds by remember(lazyRowLayoutCoords) {
-            derivedStateOf {
-                lazyRowLayoutCoords?.let { coords ->
-                    with(density) {
-                        Rect(
-                            left = coords.localToWindow(Offset.Zero).x,
-                            top = coords.localToWindow(Offset.Zero).y,
-                            right = coords.localToWindow(Offset(coords.size.width.toFloat(), coords.size.height.toFloat())).x,
-                            bottom = coords.localToWindow(Offset(coords.size.width.toFloat(), coords.size.height.toFloat())).y
-                        )
-                    }
-                }
-            }
-        }
-
         var showSimPicker by remember { mutableStateOf(false) }
         var pendingNumber by remember { mutableStateOf<String?>(null) }
         val simPref = remember(settingsState) { prefs.getInt(PreferenceManager.KEY_DEFAULT_SIM, prefs.getDefaultSimIndexDefault()) }
-        val swipeToCallEnabled by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SWIPE_TO_CALL, true)) }
+        var swipeEnabled by remember(settingsState) { mutableStateOf(prefs.isSwipeActionsEnabled()) }
+        var swipeRightAction by remember(settingsState) { mutableStateOf(SwipeActionType.fromId(prefs.getSwipeRightAction())) }
+        var swipeLeftAction by remember(settingsState) { mutableStateOf(SwipeActionType.fromId(prefs.getSwipeLeftAction())) }
+        var swipeLeftSecondAction by remember(settingsState) { mutableStateOf(SwipeActionType.fromId(prefs.getSwipeLeftSecondAction())) }
 
         // Track previous filter index for slide direction
         val filterEntries = CallLogFilter.entries
@@ -651,6 +644,31 @@ fun CallLogFullContent(
                     showSimPicker = false
                 }
             )
+        }
+
+        fun swipeAction(lg: CallLogEntry, action: SwipeActionType) {
+            when (action) {
+                SwipeActionType.CALL -> {
+                    placeCallWithSimPreference(context, lg.number, simPref) {
+                        pendingNumber = lg.number
+                        showSimPicker = true
+                    }
+                }
+                SwipeActionType.MESSAGE -> {
+                    val intent = Intent(Intent.ACTION_VIEW).apply {
+                            data = "sms:${lg.number}".toUri()
+                        }
+                    context.startActivity(intent)
+                }
+                SwipeActionType.VIDEO_CALL -> videoLauncher.startVideoCall(lg.number)
+                SwipeActionType.WHATSAPP -> SocialUtils.openWhatsAppChat(context, lg.number)
+                SwipeActionType.TELEGRAM -> SocialUtils.openTelegramChat(context, lg.number)
+                SwipeActionType.COPY_NUMBER -> {
+                    context.copyToClipboard(lg.number)
+                }
+                SwipeActionType.DELETE -> { pendingDeleteIds = lg.ids }
+                else -> {}
+            }
         }
 
         val pullToRefreshState = rememberPullToRefreshState()
@@ -696,46 +714,7 @@ fun CallLogFullContent(
                     title = stringResource(R.string.no_calls_found),
                 )
             } else {
-                // Use start-of-day (midnight) for "today" so all four stat cards
-                // consistently reflect the current calendar day.
-//            val todayStart = remember { todayStartMillis() }
-//            val todayLogs  = remember(logs) { logs.filter { it.date >= todayStart } }
-//
-//            val totalToday        = remember(todayLogs) { todayLogs.size }
-//            val missedToday       = remember(todayLogs) { todayLogs.count { it.type == CallLog.Calls.MISSED_TYPE } }
-//            val outgoingToday     = remember(todayLogs) { todayLogs.count { it.type == CallLog.Calls.OUTGOING_TYPE } }
-//            val totalDurationToday = remember(todayLogs) {
-//                todayLogs.filter { it.duration > 0 }.sumOf { it.duration }
-//            }
-
                 Column(modifier = Modifier.fillMaxSize()) {
-
-                    // Stat cards – visibility controlled by Call UI settings
-//                val showToday    = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_CALL_UI_SHOW_TODAY, true) }
-//                val showMissed   = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_CALL_UI_SHOW_MISSED, true) }
-//                val showOutgoing = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_CALL_UI_SHOW_OUTGOING, true) }
-//                val showCallTime = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_CALL_UI_SHOW_CALL_TIME, true) }
-
-                    // In portrait, render stat cards and pills above the list (sticky)
-                    // In landscape, they go inside the LazyColumn so they scroll with content
-//                if (!isLandscape) {
-//                    if (showToday || showMissed || showOutgoing || showCallTime) {
-//                        LazyRow(
-//                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-//                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-//                        ) {
-//                            if (showToday) item { AnimatedStatCard(0L, "Today", totalToday.toString(), Icons.AutoMirrored.Filled.CallReceived, ColorBlue, Modifier.width(110.dp)) { viewModel.setFilter(CallLogFilter.All) } }
-//                            if (showMissed) item { AnimatedStatCard(60L, "Missed", missedToday.toString(), Icons.AutoMirrored.Filled.CallMissed, ColorRed, Modifier.width(110.dp),
-//                                if (missedToday > 0) MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.6f) else MaterialTheme.colorScheme.surfaceContainerLow
-//                            ) { viewModel.setFilter(CallLogFilter.Missed) } }
-//                            if (showOutgoing) item { AnimatedStatCard(120L, "Outgoing", outgoingToday.toString(), Icons.AutoMirrored.Filled.CallMade, ColorGreen, Modifier.width(110.dp)) { viewModel.setFilter(CallLogFilter.Outgoing) } }
-//                            if (showCallTime) {
-//                                item { AnimatedStatCard(180L, "Call Time", if (totalDurationToday > 0) formatDuration(totalDurationToday) else "0s", Icons.Default.Timer, ColorOrange, Modifier.width(110.dp)) { viewModel.setFilter(CallLogFilter.Incoming) } }
-//                            }
-//                        }
-//                    }
-//                }
-
                     // ── Animated content: slides left/right on filter change ──────
                     // On the very first data load (startup) we use a slow fade-in so the
                     // list appears gracefully instead of jumping. Once the user starts
@@ -743,9 +722,13 @@ fun CallLogFullContent(
                     var hasLoadedOnce by remember { mutableStateOf(false) }
                     // IMPORTANT: Scroll the list OUTSIDE AnimatedContent.
                     // This prevents the exit animation from conflicting with the scrolling.
+                    var lastFilter by rememberSaveable { mutableStateOf(selectedFilter) }
                     LaunchedEffect(selectedFilter) {
                         // Scroll to the top whenever the filter changes
-                        listState.scrollToItem(0)
+                        if (lastFilter != selectedFilter) {
+                            listState.scrollToItem(0)
+                            lastFilter = selectedFilter
+                        }
                     }
                     // Remove `groupedLogs` from `AnimatedContent`’s `targetState`!
                     // The animation now depends ONLY on the selected filter.
@@ -799,7 +782,8 @@ fun CallLogFullContent(
                                 item {
                                     Row(
                                         modifier = Modifier
-                                            .fillMaxWidth().padding(end = 16.dp),
+                                            .fillMaxWidth()
+                                            .padding(end = 16.dp),
                                         verticalAlignment = Alignment.CenterVertically,
 //                                    horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
@@ -1002,31 +986,17 @@ fun CallLogFullContent(
                                         val selectionMode = selectedEntries.isNotEmpty()
                                         RillScrollAnimatedItem(delayMs = (index.coerceAtMost(5) * 30).toLong()) {
                                             Box(modifier = Modifier.padding(horizontal = 16.dp)) {
-                                                SwipeableCallLogContainer(
-                                                    enabled = swipeToCallEnabled && !selectionMode,
+                                                SwipeableContainer(
+                                                    enabled = swipeEnabled && !selectionMode,
                                                     haptics = haptics,
                                                     hapticsStrength = hapticsStrength,
                                                     hapticsIntensity = hapticsIntensity,
-                                                    onSwipeRight = {
-                                                        placeCallWithSimPreference(
-                                                            context,
-                                                            lg.number,
-                                                            simPref
-                                                        ) {
-                                                            pendingNumber =
-                                                                lg.number; showSimPicker = true
-                                                        }
-                                                    },
-                                                    onSwipeLeft = {
-                                                        val intent =
-                                                            Intent(Intent.ACTION_VIEW).apply {
-                                                                data = "sms:${lg.number}".toUri()
-                                                            }
-                                                        context.startActivity(intent)
-                                                    },
-                                                    onDelete = {
-                                                        pendingDeleteIds = lg.ids
-                                                    },
+                                                    swipeRightAction = swipeRightAction,
+                                                    swipeLeftAction = swipeLeftAction,
+                                                    swipeLeftSecondAction = swipeLeftSecondAction,
+                                                    onSwipeRight = { swipeAction(lg, swipeRightAction) },
+                                                    onSwipeLeft = { swipeAction(lg, swipeLeftAction) },
+                                                    onSwipeLeftSecond = { swipeAction(lg, swipeLeftSecondAction) },
                                                     modifier = Modifier.padding(bottom = bottomPadding)
                                                 ) {
                                                     Surface(
@@ -1052,7 +1022,8 @@ fun CallLogFullContent(
                                                                         ContactDetailsScreenDestination(
                                                                             contactId = log.contactId
                                                                                 ?: "null",
-                                                                            phoneNumber = log.number
+                                                                            phoneNumber = log.number,
+                                                                            initialName = if (log.number != log.name) log.name else null
                                                                         )
                                                                     )
                                                                 }
@@ -1071,7 +1042,8 @@ fun CallLogFullContent(
                                                                 } else {
                                                                     navigator.navigate(
                                                                         ContactEditScreenDestination(
-                                                                            initialPhone = log.number
+                                                                            initialPhone = log.number,
+                                                                            initialName = if (log.number != log.name) log.name else null
                                                                         )
                                                                     )
                                                                 }
@@ -1085,9 +1057,8 @@ fun CallLogFullContent(
                                                                         log.number,
                                                                         simPref
                                                                     ) {
-                                                                        pendingNumber =
-                                                                            log.number; showSimPicker =
-                                                                        true
+                                                                        pendingNumber = log.number
+                                                                        showSimPicker = true
                                                                     }
                                                                 }
                                                             },

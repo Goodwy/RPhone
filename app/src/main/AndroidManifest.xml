@@ -39,6 +39,17 @@
     <uses-feature android:name="android.hardware.nfc" android:required="false" />
 
     <queries>
+        <package android:name="com.whatsapp" />
+        <package android:name="com.whatsapp.w4b" />
+        <package android:name="org.telegram.messenger" />
+        <package android:name="org.thunderdog.challegram" />
+        <package android:name="org.telegram.plus" />
+        <package android:name="com.ghost.telegram" />
+        <package android:name="nekox.messenger" />
+        <package android:name="it.feed.android" />
+        <package android:name="org.thoughtcrime.securesms" />
+        <package android:name="com.viber.voip" />
+        <package android:name="com.google.android.apps.tachyon" />
         <intent>
             <action android:name="android.intent.action.DIAL" />
             <data android:scheme="tel" />
@@ -59,35 +70,6 @@
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="content" />
         </intent>
-        <package android:name="com.whatsapp" />
-        <package android:name="com.whatsapp.w4b" />
-        <package android:name="org.telegram.messenger" />
-        <package android:name="org.telegram.messenger.web" />
-        <package android:name="org.thunderdog.challegram" />
-        <package android:name="org.telegram.plus" />
-        <package android:name="com.ghost.telegram" />
-        <package android:name="org.thoughtcrime.securesms" />
-        <package android:name="com.viber.voip" />
-        <package android:name="com.skype.raider" />
-        <package android:name="com.tencent.mm" />
-        <package android:name="jp.naver.line.android" />
-        <package android:name="com.google.android.apps.messaging" />
-        <package android:name="com.google.android.apps.tachyon" />
-        <package android:name="com.truecaller" />
-        <package android:name="nekox.messenger" />
-        <package android:name="it.feed.android" />
-        <package android:name="com.microsoft.teams" />
-        <package android:name="com.discord" />
-        <package android:name="com.slack" />
-        <package android:name="com.facebook.orca" />
-        <package android:name="com.snapchat.android" />
-        <package android:name="com.kakao.talk" />
-        <package android:name="ch.threema.app" />
-        <package android:name="com.wire" />
-        <package android:name="im.tox.tox" />
-        <package android:name="im.vector.app" />
-        <package android:name="us.zoom.videomeetings" />
-        <package android:name="com.google.android.apps.meetings" />
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="https" />
@@ -107,14 +89,6 @@
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="viber" />
-        </intent>
-        <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="skype" />
-        </intent>
-        <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="line" />
         </intent>
     </queries>
 
@@ -215,8 +189,13 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="vnd.android.cursor.dir/contact" />
                 <data android:mimeType="vnd.android.cursor.dir/person" />
+                <data android:mimeType="vnd.android.cursor.dir/raw_contact" />
                 <data android:mimeType="vnd.android.cursor.dir/phone_v2" />
+                <data android:mimeType="vnd.android.cursor.dir/phone" />
                 <data android:mimeType="vnd.android.cursor.dir/email_v2" />
+                <data android:mimeType="vnd.android.cursor.dir/email" />
+                <data android:mimeType="vnd.android.cursor.dir/postal-address_v2" />
+                <data android:mimeType="vnd.android.cursor.dir/postal-address" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />

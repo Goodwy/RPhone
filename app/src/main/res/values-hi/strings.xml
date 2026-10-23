@@ -169,6 +169,7 @@
     <string name="app_icon">ऐप आइकन</string>
     <string name="app_icon_subtitle">अपनी होम स्क्रीन पर दिखाई देने वाला ऐप आइकन चुनें</string>
     <string name="app_name_change">ऐप का नाम</string>
+    <string name="language">भाषा</string>
     <string name="visual_effects">दृश्य प्रभाव</string>
     <string name="not_supported_on_this_device">इस डिवाइस पर समर्थित नहीं</string>
     <string name="not_supported_on_this_device_subtitle">ब्लर और लिक्विड ग्लास के लिए Android 12 या उच्चतर आवश्यक है</string>
@@ -203,8 +204,6 @@
     <string name="dialpad_animations_subtitle">अंक टाइप करते समय एनिमेशन दिखाएँ</string>
     <string name="hide_voice_search">वॉइस खोज छुपाएं</string>
     <string name="hide_voice_search_subtitle">वॉइस खोज बटन छुपाता है</string>
-    <string name="swipe_actions">स्वाइप क्रियाएँ</string>
-    <string name="swipe_actions_subtitle">हाल की कॉल लॉग प्रविष्टि पर स्वाइप करें इसे हटाने, एसएमएस भेजने या कॉल करने के लिए</string>
 
     <string name="avatars_settings">अवतार सेटिंग्स</string>
     <string name="avatars_settings_subtitle">रंग, फ्रेम और अधिक कस्टमाइज़ करना</string>
@@ -311,6 +310,13 @@
     <string name="haptic_interval">हैप्टिक अंतराल</string>
     <string name="haptic_interval_value">%.1f सेमी पर 1</string>
     <string name="haptic_strength">हैप्टिक ताकत</string>
+
+    <!-- Flash Notification on Call -->
+    <string name="flash_on_call">कॉल पर फ़्लैश</string>
+    <string name="flash_on_call_subtitle">इनकमिंग कॉल पर कैमरा फ़्लैश ब्लिंक करें</string>
+    <string name="flash_on_call_mode">फ़्लैश मोड</string>
+    <string name="flash_mode_always">हमेशा</string>
+    <string name="flash_mode_silent_vibrate">केवल साइलेंट / वाइब्रेट</string>
 
     <string name="manage_blocked">अवरुद्ध प्रबंधित करें</string>
     <string name="manage_blocked_subtitle">अवरुद्ध कॉल और स्पैम प्रबंधित करें</string>
@@ -451,6 +457,9 @@
     <string name="call_failed_no_network">कॉल विफल: सेलुलर नेटवर्क अनुपलब्ध</string>
     <string name="call_failed_restricted">कॉल विफल: कॉल प्रतिबंधित है</string>
     <string name="call_failed_generic">कॉल पूरी नहीं हो सकी</string>
+    <string name="no_valid_app_found">कोई मान्य ऐप नहीं मिला</string>
+    <string name="video_call">वीडियो कॉल</string>
+    <string name="voice_call">वॉइस कॉल</string>
     <string name="call">कॉल</string>
     <string name="incoming">आने वाली</string>
     <string name="outgoing">जाने वाली</string>
@@ -562,6 +571,8 @@
     <string name="save_to_account">खाते में सहेजें</string>
     <string name="show_full_history">पूरा इतिहास दिखाएँ</string>
     <string name="contact_qr">संपर्क QR</string>
+    <string name="tap_phone_to_share_NFC">NFC के माध्यम से साझा करने के लिए फ़ोन को टैप करें</string>
+    <string name="nfc_is_turned_off">NFC बंद है</string>
     <string name="phone_number">फ़ोन नंबर</string>
     <string name="name">नाम</string>
     <string name="prefix">उपसर्ग</string>
@@ -736,4 +747,22 @@
     <string name="busy_mode_call_rejected_sent_sms_toast">कॉल अस्वीकृत (व्यस्त मोड)। SMS भेजा गया।</string>
     <string name="edit_busy_message">व्यस्त मोड संदेश संपादित करें</string>
     <string name="busy_mode_permission_required">ऐप सेटिंग्स में SMS भेजने की अनुमति दें</string>
+
+    <!-- Avatar Cropping -->
+    <string name="crop_avatar_title">क्रॉप करें और घुमाएँ</string>
+    <string name="action_crop">क्रॉप करें</string>
+    <string name="action_rotate">घुमाएँ</string>
+
+    <!-- Swipe Actions and Tap -->
+    <string name="settings_swipe_and_taps_title">स्वाइप और टैप</string>
+    <string name="settings_swipe_and_taps_supporting">सेट करें कि स्वाइप या टैप करने पर क्या होता है</string>
+    <string name="settings_swipe_actions_enable">स्वाइप जेस्चर सक्षम करें</string>
+    <string name="settings_swipe_actions_enable_supporting">क्रियाएँ ट्रिगर करने के लिए सूची में प्रविष्टियों पर बाएँ या दाएँ स्वाइप करें</string>
+    <string name="settings_swipe_right_action">दाएँ स्वाइप क्रियाएँ</string>
+    <string name="settings_swipe_right_action_second">दाएँ स्वाइप के लिए द्वितीयक क्रिया</string>
+    <string name="settings_swipe_left_action">बाएँ स्वाइप क्रियाएँ</string>
+    <string name="settings_swipe_left_action_second">बाएँ स्वाइप के लिए द्वितीयक क्रिया</string>
+    <string name="settings_swipe_actions_reset">स्वाइप क्रियाएँ रीसेट करें</string>
+    <string name="swipe_action_none">कोई नहीं</string>
+    <string name="swipe_action_copy_number">नंबर कॉपी करें</string>
 </resources>

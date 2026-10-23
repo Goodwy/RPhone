@@ -237,6 +237,26 @@ fun Rill4Theme(
     }
 
     colorScheme = when (themeMode) {
+        "gray_dark" -> colorScheme.copy(
+            background = Color(0xFF41484A), surface = Color(0xFF41484A),
+            surfaceContainerLowest = Color.Black, // Dialpad Key
+            surfaceContainerLow = Color(0xFF0A0A0A),
+            surfaceContainer = Color(0xFF2C2C2D),
+            surfaceContainerHigh = Color(0xFF676B6B),
+            surfaceContainerHighest = Color(0xFF222222), // Dialpad
+            surfaceVariant = Color(0xFF1C1C1E),
+            surfaceBright = Color(0xFF1C1C1E), // Card, Search
+        )
+        "gray_light" -> colorScheme.copy(
+            background = Color(0xFFCACDCD), surface = Color(0xFFCACDCD),
+            surfaceContainerLowest = Color.White, // Dialpad Key
+            surfaceContainerLow = Color(0xFFFAFAFA),
+            surfaceContainer = Color(0xFFF0F0F0),
+            surfaceContainerHigh = Color(0xFFBFC1C1),
+            surfaceContainerHighest = Color(0xFFE8E8E8), // Dialpad
+            surfaceVariant = Color(0xFFE0E0E0),
+            surfaceBright = Color(0xFFFFFEFE), // Card, Search
+        )
         "black" -> colorScheme.copy(
             background = Color.Black, surface = Color.Black,
             surfaceContainerLowest = Color.Black, // Dialpad Key

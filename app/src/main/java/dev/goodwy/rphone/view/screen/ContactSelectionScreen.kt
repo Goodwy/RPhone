@@ -2,6 +2,7 @@ package dev.goodwy.rphone.view.screen
 
 import android.Manifest
 import android.app.Activity
+import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -34,9 +35,12 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.rounded.Email
+import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.MicNone
 import androidx.compose.material.icons.rounded.People
 import androidx.compose.material.icons.rounded.PersonAdd
+import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
@@ -77,8 +81,10 @@ import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.util.VoiceSearchContract
 import dev.goodwy.rphone.modal.data.getDisplayName
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinActivityViewModel
 import kotlin.time.Duration.Companion.milliseconds
@@ -94,17 +100,62 @@ fun ContactSelectionScreen(
     actionButtonText: String = "",
     returnContactId: Boolean = false,
     initialPhoneToAssign: String? = null,
-    isExternalPick: Boolean = false
+    isExternalPick: Boolean = false,
+    pickMimeType: String? = null
 ) {
     val context = LocalContext.current
     val view = LocalView.current
     val viewModel: ContactsViewModel = koinActivityViewModel()
-    val allContacts by viewModel.allContacts.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
+    val allContacts by viewModel.allContactsFull.collectAsState()
+    val isLoading by viewModel.isLoadingFull.collectAsState()
 
     val listState = rememberLazyListState()
     val prefs = koinInject<PreferenceManager>()
     val scope = rememberCoroutineScope()
+
+    val resolvedPickType = when (pickMimeType) {
+        "vnd.android.cursor.dir/phone_v2", "vnd.android.cursor.dir/phone", ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE -> "phone"
+        "vnd.android.cursor.dir/email_v2", "vnd.android.cursor.dir/email", ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE -> "email"
+        "vnd.android.cursor.dir/postal-address_v2", "vnd.android.cursor.dir/postal-address", "vnd.android.cursor.dir/postals", ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_ITEM_TYPE -> "address"
+        else -> "contact"
+    }
+
+    // Function to retrieve the URI of a specific field
+    suspend fun getDataUriForContact(contactId: String, mimeType: String, specificValue: String? = null): Uri? = withContext(Dispatchers.IO) {
+        val dataUri = ContactsContract.Data.CONTENT_URI
+        val projection = arrayOf(ContactsContract.Data._ID)
+        var selection = "${ContactsContract.Data.CONTACT_ID} = ? AND ${ContactsContract.Data.MIMETYPE} = ?"
+        val selectionArgs = mutableListOf(contactId, mimeType)
+
+        if (specificValue != null) {
+            when (mimeType) {
+                ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE -> {
+                    selection += " AND ${ContactsContract.CommonDataKinds.Phone.NUMBER} = ?"
+                    selectionArgs.add(specificValue)
+                }
+                ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE -> {
+                    selection += " AND ${ContactsContract.CommonDataKinds.Email.ADDRESS} = ?"
+                    selectionArgs.add(specificValue)
+                }
+                ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_ITEM_TYPE -> {
+                    selection += " AND ${ContactsContract.CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS} = ?"
+                    selectionArgs.add(specificValue)
+                }
+            }
+        }
+
+        try {
+            context.contentResolver.query(dataUri, projection, selection, selectionArgs.toTypedArray(), null)?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val dataId = cursor.getLong(0)
+                    return@withContext ContentUris.withAppendedId(ContactsContract.Data.CONTENT_URI, dataId)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        null
+    }
 
     var queryFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(""))
@@ -113,7 +164,12 @@ fun ContactSelectionScreen(
     var selectedFilterTab by remember { mutableIntStateOf(0) }
     var selectedContactIds by remember { mutableStateOf(setOf<String>()) }
     var selectedPhoneNumbers by remember { mutableStateOf(setOf<String>()) }
+
     var pendingMultiNumberContact by remember { mutableStateOf<Contact?>(null) }
+    var pickerDialogContact by remember { mutableStateOf<Contact?>(null) }
+    var pickerDialogItems by remember { mutableStateOf<List<NumberPickerItem>>(emptyList()) }
+    var pickerDialogIcon by remember { mutableStateOf(Icons.Rounded.Phone) }
+    var pickerDialogMimeType by remember { mutableStateOf(ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE) }
 
     val hideVoiceSearch = remember { prefs.getBoolean(PreferenceManager.KEY_HIDE_VOICE_SEARCH, false) }
     val displayOrder = remember { prefs.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0) }
@@ -151,41 +207,57 @@ fun ContactSelectionScreen(
     ) { permissions ->
         hasContactsPermission = permissions
         if (permissions) {
-            viewModel.fetchContacts()
+            viewModel.fetchContactsFull()
         }
     }
 
     LaunchedEffect(Unit) {
         if (hasContactsPermission) {
-            viewModel.fetchContacts()
+            viewModel.fetchContactsFull()
         } else {
             permissionLauncher.launch(Manifest.permission.READ_CONTACTS)
         }
     }
     // ────────────────────────────────────────────────────────────
 
-    val filteredContacts = remember(allContacts, searchQuery, selectedFilterTab) {
-        var list = when (selectedFilterTab) {
-            1 -> allContacts.filter { it.isFavorite }
-            2 -> allContacts.filter { it.isPrivate }
-            else -> allContacts
-        }
-        if (searchQuery.isNotBlank()) {
-            val cleanSearch = searchQuery.trim()
-            list = list.filter {
-                it.displayName.contains(cleanSearch, ignoreCase = true) ||
-                it.phoneNumbers.any { num -> num.contains(cleanSearch) }
+    val baseContacts = remember(allContacts, isExternalPick, pickMimeType) {
+        if (!isExternalPick || pickMimeType.isNullOrEmpty()) {
+            allContacts
+        } else {
+            when (pickMimeType) {
+                "vnd.android.cursor.dir/phone_v2", "vnd.android.cursor.dir/phone" -> allContacts.filter { it.phoneNumbers.isNotEmpty() }
+                "vnd.android.cursor.dir/email_v2", "vnd.android.cursor.dir/email" -> allContacts.filter { it.emails.isNotEmpty() }
+                "vnd.android.cursor.dir/postal-address_v2", "vnd.android.cursor.dir/postal-address", "vnd.android.cursor.dir/postals" -> allContacts.filter { it.addresses.isNotEmpty() }
+                else -> allContacts
             }
         }
-        list.sortedBy { it.displayName.lowercase() }
     }
 
-//    val groupedContacts = remember(filteredContacts) {
-//        filteredContacts.groupBy { contact ->
-//            val first = contact.name.trim().firstOrNull()?.uppercaseChar() ?: '#'
-//            if (first in 'A'..'Z') first.toString() else "#"
-//        }
-//    }
+    val searchedBase = remember(baseContacts, searchQuery) {
+        if (searchQuery.isBlank()) baseContacts
+        else {
+            val cleanSearch = searchQuery.trim()
+            baseContacts.filter {
+                it.displayName.contains(cleanSearch, ignoreCase = true) ||
+                        it.phoneNumbers.any { num -> num.contains(cleanSearch) } ||
+                        it.emails.any { email -> email.value.contains(cleanSearch) } ||
+                        it.addresses.any { address -> address.formattedAddress.contains(cleanSearch) }
+            }
+        }
+    }
+
+    val allCount   = searchedBase.size
+    val favCount   = remember(searchedBase) { searchedBase.count { it.isFavorite } }
+    val privCount  = remember(searchedBase) { searchedBase.count { it.isPrivate } }
+
+    val filteredContacts = remember(searchedBase, selectedFilterTab) {
+        when (selectedFilterTab) {
+            1 -> searchedBase.filter { it.isFavorite }
+            2 -> searchedBase.filter { it.isPrivate }
+            else -> searchedBase
+        }.sortedBy { it.displayName.lowercase() }
+    }
+
     val groupedContacts = remember(filteredContacts) {
         val mainGroups = filteredContacts.groupBy {
             val firstChar =
@@ -199,15 +271,12 @@ fun ContactSelectionScreen(
         mainGroups.keys.filter { it.isLetter() }.sorted().forEach { char ->
             finalMap[char] = mainGroups[char]!!
         }
-
         val hashGroup = mainGroups['#']
         if (hashGroup != null) finalMap['#'] = hashGroup
-
         finalMap
     }
 
     val totalSelectedCount = maxOf(selectedContactIds.size, selectedPhoneNumbers.size)
-
 
     var visible by remember { mutableStateOf(false) }
     var isClosing by remember { mutableStateOf(false) }
@@ -217,7 +286,6 @@ fun ContactSelectionScreen(
         isClosing = true
         scope.launch {
             delay(280.milliseconds)
-
             if (isExternalPick) {
                 val activity = context as? Activity
                 activity?.setResult(Activity.RESULT_CANCELED)
@@ -332,7 +400,7 @@ fun ContactSelectionScreen(
                         )
                         .alpha(alpha)
                         .offset(y = offsetY),
-                    contentPadding = PaddingValues(/*start = 16.dp, end = 16.dp,*/ top = 8.dp, bottom = 96.dp),
+                    contentPadding = PaddingValues(top = 8.dp, bottom = 96.dp),
                     verticalArrangement = Arrangement.spacedBy(0.dp)
                 ) {
                     // Search Bar
@@ -418,19 +486,17 @@ fun ContactSelectionScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             RillFilterChip(
-                                label = stringResource(R.string.filter_all) + " (${allContacts.size})",
+                                label = stringResource(R.string.filter_all) + " ($allCount)",
                                 selected = selectedFilterTab == 0,
                                 onClick = { selectedFilterTab = 0 },
 //                            leadingIcon = { Icon(Icons.Rounded.People, contentDescription = null, modifier = Modifier.size(16.dp)) }
                             )
-                            val favCount = remember(allContacts) { allContacts.count { it.isFavorite } }
                             RillFilterChip(
                                 label = stringResource(R.string.favorites) + " ($favCount)",
                                 selected = selectedFilterTab == 1,
                                 onClick = { selectedFilterTab = 1 },
 //                            leadingIcon = { Icon(Icons.Outlined.Star, contentDescription = null, modifier = Modifier.size(16.dp)) }
                             )
-                            val privCount = remember(allContacts) { allContacts.count { it.isPrivate } }
                             if (privCount > 0) {
                                 RillFilterChip(
                                     label = "Private ($privCount)",
@@ -569,47 +635,99 @@ fun ContactSelectionScreen(
                                             RillListItem(
                                                 paddingVertical = 8.dp,
                                                 headline = getDisplayName(contact, displayOrder),
-                                                supporting = if (contact.phoneNumbers.isNotEmpty()) {
-                                                    if (contact.phoneNumbers.size > 1) {
-                                                        stringResource(R.string.plus_more, formatPhoneNumber(primaryNumber), contact.phoneNumbers.size - 1)
-                                                    } else {
-                                                        formatPhoneNumber(primaryNumber)
+                                                supporting = when (resolvedPickType) {
+                                                    "email" -> {
+                                                        if (contact.emails.isNotEmpty()) {
+                                                            if (contact.emails.size > 1) stringResource(R.string.plus_more, contact.emails.first().value, contact.emails.size - 1)
+                                                            else contact.emails.first().value
+                                                        } else null
                                                     }
-                                                } else null,
+                                                    "address" -> {
+                                                        if (contact.addresses.isNotEmpty()) {
+                                                            if (contact.addresses.size > 1) stringResource(R.string.plus_more, contact.addresses.first().formattedAddress, contact.addresses.size - 1)
+                                                            else contact.addresses.first().formattedAddress
+                                                        } else null
+                                                    }
+                                                    else -> {
+                                                        if (contact.phoneNumbers.isNotEmpty()) {
+                                                            if (contact.phoneNumbers.size > 1) stringResource(R.string.plus_more, formatPhoneNumber(primaryNumber), contact.phoneNumbers.size - 1)
+                                                            else formatPhoneNumber(primaryNumber)
+                                                        } else null
+                                                    }
+                                                },
                                                 avatarName = contact.displayName,
                                                 photoUri = contact.photoUri,
                                                 onClick = {
                                                     view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                                                     if (isMultiSelect) {
                                                         if (isSelected) {
-                                                            selectedContactIds =
-                                                                selectedContactIds - contact.id
-                                                            selectedPhoneNumbers =
-                                                                selectedPhoneNumbers - contact.phoneNumbers.toSet()
+                                                            selectedContactIds = selectedContactIds - contact.id
+                                                            selectedPhoneNumbers = selectedPhoneNumbers - contact.phoneNumbers.toSet()
                                                         } else {
-                                                            selectedContactIds =
-                                                                selectedContactIds + contact.id
+                                                            selectedContactIds = selectedContactIds + contact.id
                                                             if (primaryNumber.isNotBlank()) {
-                                                                selectedPhoneNumbers =
-                                                                    selectedPhoneNumbers + primaryNumber
+                                                                selectedPhoneNumbers = selectedPhoneNumbers + primaryNumber
                                                             }
                                                         }
                                                     } else {
                                                         if (initialPhoneToAssign != null) {
-                                                            navigator.navigate(
-                                                                ContactEditScreenDestination(
-                                                                    contactId = contact.id,
-                                                                    initialPhone = initialPhoneToAssign
-                                                                )
-                                                            )
+                                                            navigator.navigate(ContactEditScreenDestination(contactId = contact.id, initialPhone = initialPhoneToAssign))
                                                         } else if (isExternalPick) {
-                                                            val resultIntent = Intent().apply {
-                                                                data = Uri.withAppendedPath(
-                                                                    ContactsContract.Contacts.CONTENT_URI, contact.id)
-                                                            }
                                                             val activity = context as? Activity
-                                                            activity?.setResult(Activity.RESULT_OK, resultIntent)
-                                                            activity?.finish()
+                                                            val contactUri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, contact.id)
+
+                                                            val itemMimeType = when (resolvedPickType) {
+                                                                "phone" -> ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE
+                                                                "email" -> ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE
+                                                                "address" -> ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_ITEM_TYPE
+                                                                else -> null
+                                                            }
+
+                                                            if (itemMimeType != null) {
+                                                                val dataList: List<String> = when (itemMimeType) {
+                                                                    ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE -> contact.phoneNumbers
+                                                                    ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE -> contact.emails.map { it.value }
+                                                                    ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_ITEM_TYPE -> contact.addresses.map { it.formattedAddress }
+                                                                    else -> emptyList()
+                                                                }
+
+                                                                if (dataList.size > 1) {
+                                                                    pickerDialogContact = contact
+                                                                    pickerDialogItems = dataList.map { NumberPickerItem(it) }
+                                                                    pickerDialogIcon = when (itemMimeType) {
+                                                                        ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE -> Icons.Rounded.Phone
+                                                                        ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE -> Icons.Rounded.Email
+                                                                        ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_ITEM_TYPE -> Icons.Rounded.LocationOn
+                                                                        else -> Icons.Rounded.Phone
+                                                                    }
+                                                                    pickerDialogMimeType = itemMimeType
+                                                                } else if (dataList.size == 1) {
+                                                                    val specificValue = dataList.first()
+                                                                    scope.launch {
+                                                                        val dataUri = getDataUriForContact(contact.id, itemMimeType, specificValue)
+                                                                        if (dataUri == null) {
+                                                                            activity?.setResult(Activity.RESULT_CANCELED)
+                                                                            activity?.finish()
+                                                                            return@launch
+                                                                        }
+                                                                        val resultIntent = Intent().apply {
+                                                                            data = dataUri
+                                                                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                                                            clipData = android.content.ClipData.newRawUri(null, dataUri)
+                                                                        }
+                                                                        activity?.setResult(Activity.RESULT_OK, resultIntent)
+                                                                        activity?.finish()
+                                                                    }
+                                                                } else {
+                                                                    activity?.setResult(Activity.RESULT_CANCELED)
+                                                                    activity?.finish()
+                                                                }
+                                                            } else {
+                                                                // If you were just asking for contact information
+                                                                val resultIntent = Intent().apply { data = contactUri }
+                                                                activity?.setResult(Activity.RESULT_OK, resultIntent)
+                                                                activity?.finish()
+                                                            }
                                                         } else if (returnContactId) {
                                                             resultNavigator.navigateBack(result = contact.id)
                                                         } else {
@@ -627,17 +745,13 @@ fun ContactSelectionScreen(
                                                             checked = isSelected,
                                                             onCheckedChange = { checked ->
                                                                 if (checked) {
-                                                                    selectedContactIds =
-                                                                        selectedContactIds + contact.id
+                                                                    selectedContactIds = selectedContactIds + contact.id
                                                                     if (primaryNumber.isNotBlank()) {
-                                                                        selectedPhoneNumbers =
-                                                                            selectedPhoneNumbers + primaryNumber
+                                                                        selectedPhoneNumbers = selectedPhoneNumbers + primaryNumber
                                                                     }
                                                                 } else {
-                                                                    selectedContactIds =
-                                                                        selectedContactIds - contact.id
-                                                                    selectedPhoneNumbers =
-                                                                        selectedPhoneNumbers - contact.phoneNumbers.toSet()
+                                                                    selectedContactIds = selectedContactIds - contact.id
+                                                                    selectedPhoneNumbers = selectedPhoneNumbers - contact.phoneNumbers.toSet()
                                                                 }
                                                             }
                                                         )
@@ -671,9 +785,7 @@ fun ContactSelectionScreen(
                                                         Icon(
                                                             Icons.AutoMirrored.Filled.KeyboardArrowRight,
                                                             contentDescription = null,
-                                                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                                                alpha = 0.6f
-                                                            ),
+                                                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                                                             modifier = Modifier.size(20.dp)
                                                         )
                                                     }
@@ -696,7 +808,57 @@ fun ContactSelectionScreen(
             onDismissRequest = { pendingMultiNumberContact = null },
             onNumberSelected = { selectedNumber ->
                 pendingMultiNumberContact = null
-                resultNavigator.navigateBack(result = selectedNumber)
+                if (isExternalPick) {
+                    scope.launch {
+                        val dataUri = getDataUriForContact(
+                            contact.id,
+                            ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE,
+                            selectedNumber
+                        )
+                        val activity = context as? Activity
+                        if (dataUri == null) {
+                            activity?.setResult(Activity.RESULT_CANCELED)
+                            activity?.finish()
+                            return@launch
+                        }
+                        val resultIntent = Intent().apply {
+                            data = dataUri
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            clipData = android.content.ClipData.newRawUri(null, dataUri)
+                        }
+                        activity?.setResult(Activity.RESULT_OK, resultIntent)
+                        activity?.finish()
+                    }
+                } else {
+                    resultNavigator.navigateBack(result = selectedNumber)
+                }
+            }
+        )
+    }
+
+    pickerDialogContact?.let { contact ->
+        NumberPickerDialog(
+            items = pickerDialogItems,
+            icon = pickerDialogIcon,
+            onDismissRequest = { pickerDialogContact = null },
+            onNumberSelected = { selectedValue ->
+                pickerDialogContact = null
+                val activity = context as? Activity
+                scope.launch {
+                    val dataUri = getDataUriForContact(contact.id, pickerDialogMimeType, selectedValue)
+                    if (dataUri == null) {
+                        activity?.setResult(Activity.RESULT_CANCELED)
+                        activity?.finish()
+                        return@launch
+                    }
+                    val resultIntent = Intent().apply {
+                        data = dataUri
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        clipData = android.content.ClipData.newRawUri(null, dataUri)
+                    }
+                    activity?.setResult(Activity.RESULT_OK, resultIntent)
+                    activity?.finish()
+                }
             }
         )
     }

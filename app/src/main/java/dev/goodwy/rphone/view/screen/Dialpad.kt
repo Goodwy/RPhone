@@ -79,13 +79,11 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.core.net.toUri
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.R
@@ -105,9 +103,7 @@ import com.ramcosta.composedestinations.generated.destinations.ContactEditScreen
 import com.ramcosta.composedestinations.generated.destinations.ContactSelectionScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.SpeedDialScreenDestination
 import dev.goodwy.rphone.controller.UssdRepository
-import dev.goodwy.rphone.controller.util.SocialUtils
-import dev.goodwy.rphone.controller.util.SocialUtils.getInstalledMessenger
-import dev.goodwy.rphone.controller.util.SocialUtils.messengerPackages
+import dev.goodwy.rphone.controller.util.DialpadT9
 import dev.goodwy.rphone.controller.util.forceLtr
 import dev.goodwy.rphone.controller.util.normalizeNumberDigits
 import dev.goodwy.rphone.liquidglass.backdrops.layerBackdrop
@@ -117,8 +113,11 @@ import dev.goodwy.rphone.modal.data.Contact
 import dev.goodwy.rphone.modal.data.getDisplayContactInfo
 import dev.goodwy.rphone.modal.data.getDisplayName
 import dev.goodwy.rphone.view.components.RillDialog
-import dev.goodwy.rphone.view.components.RillExpressiveButton
 import dev.goodwy.rphone.view.components.performAppHaptic
+import dev.goodwy.rphone.view.components.rememberMessageLauncher
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlin.time.Duration.Companion.milliseconds
@@ -129,8 +128,15 @@ import kotlin.time.Duration.Companion.milliseconds
  * down on dismiss, so a plain `remember` loses the typed number; this small in-memory holder
  * survives that as long as the process is alive, matching what users expect from a dialer.
  */
-private object DialpadDraftHolder {
+object DialpadDraftHolder {
     var pendingNumber: String = ""
+
+    private val _toggleVisibility = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val toggleVisibility: SharedFlow<Unit> = _toggleVisibility.asSharedFlow()
+
+    fun requestToggleVisibility() {
+        _toggleVisibility.tryEmit(Unit)
+    }
 }
 
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -141,12 +147,6 @@ fun DialPadScreen(
     navigator: DestinationsNavigator,
     initialNumber: String? = null
 ) {
-//    val sheetState = rememberModalBottomSheetState(
-//        skipPartiallyExpanded = true,
-//        confirmValueChange = { true }
-//    )
-//    val prefs = koinInject<PreferenceManager>()
-
     // Lock the window so the keyboard never pushes the bottom sheet up.
     // WindowCompat.setDecorFitsSystemWindows(false) in MainActivity normally causes
     // the sheet to resize with the IME; overriding softInputMode here prevents that.
@@ -328,22 +328,13 @@ fun DialPadContent(
             )
         }
 
-        val soundPool = remember { buildDtmfSoundPool(context) }
+        val soundPool = remember { buildDtmfSoundPool() }
 
-        var showSocialDialog by remember { mutableStateOf(false) }
-        val installedWhatsApp = messengerPackages["WhatsApp"]?.let { context.getInstalledMessenger(it) }
-        val installedTelegram = messengerPackages["Telegram"]?.let { context.getInstalledMessenger(it) }
-        val installedSignal = messengerPackages["Signal"]?.let { context.getInstalledMessenger(it) }
-        val initiateMessage = { number: String ->
-            context.startActivity(
-                Intent(
-                    Intent.ACTION_VIEW,
-                    "sms:$number".toUri()
-                )
-            )
-        }
+
+        val messageLauncher = rememberMessageLauncher()
 
         val t9Enabled = prefs.getBoolean(PreferenceManager.KEY_T9_DIALING, true)
+        val hasSecondaryLang = remember { DialpadT9.getCurrentLanguage() != DialpadT9.LOCALE_EN }
         var showSimPicker by remember { mutableStateOf(false) }
         val telecomManager =
             remember { context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager }
@@ -679,76 +670,6 @@ fun DialPadContent(
                     showSimPicker = false
                 }
             )
-        }
-
-        if (showSocialDialog) {
-            RillDialog(
-                onDismissRequest = { showSocialDialog = false },
-                title = stringResource(R.string.connect_via_social),
-                icon = ImageVector.vectorResource(id = R.drawable.ic_message_outline),
-                confirmButton = {
-                    TextButton(onClick = { showSocialDialog = false }) {
-                        Text(stringResource(R.string.cancel))
-                    }
-                }
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    if (installedWhatsApp != null) {
-                        RillExpressiveButton(
-                            modifier = Modifier.weight(1f),
-                            icon = ImageVector.vectorResource(id = R.drawable.ic_whatsapp),
-                            label = "WhatsApp",
-                            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                            iconSize = 32.dp,
-                            onClick = {
-                                SocialUtils.openWhatsApp(context, number)
-                                showSocialDialog = false
-                            }
-                        )
-                    }
-                    if (installedTelegram != null) {
-                        RillExpressiveButton(
-                            modifier = Modifier.weight(1f),
-                            icon = ImageVector.vectorResource(id = R.drawable.ic_telegram),
-                            label = "Telegram",
-                            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                            iconSize = 32.dp,
-                            onClick = {
-                                SocialUtils.openTelegram(context, number)
-                                showSocialDialog = false
-                            }
-                        )
-                    }
-                    if (installedSignal != null) {
-                        RillExpressiveButton(
-                            modifier = Modifier.weight(1f),
-                            icon = ImageVector.vectorResource(id = R.drawable.ic_signal),
-                            label = "Signal",
-                            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                            iconSize = 32.dp,
-                            onClick = {
-                                SocialUtils.openSignal(context, number)
-                                showSocialDialog = false
-                            }
-                        )
-                    }
-                    RillExpressiveButton(
-                        modifier = Modifier.weight(1f),
-                        icon = ImageVector.vectorResource(id = R.drawable.ic_message_outline),
-                        label = "SMS",
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                        iconSize = 32.dp,
-                        onClick = {
-                            initiateMessage(number)
-                            showSocialDialog = false
-                        }
-                    )
-                }
-            }
         }
 
         var showSpeedDialDialog by remember { mutableStateOf(false) }
@@ -1125,7 +1046,9 @@ fun DialPadContent(
                                     row.forEach { key ->
                                         DialPadKey(
                                             number = key,
-                                            letters = getT9SubKey(key),
+                                            letters = subKeys[key] ?: "",
+                                            subLetters = getT9SubKey(key),
+                                            hasSecondaryLanguage = hasSecondaryLang,
                                             soundPool = soundPool,
                                             context = context,
                                             onClick = { digit -> insertAtCursor(digit) },
@@ -1252,7 +1175,6 @@ fun DialPadContent(
                         // ── Middle section: results / pills / clipboard (scrollable, fills space) ──
                         var isDialpadVisible by remember { mutableStateOf(true) }
                         val listScrollState = rememberScrollState()
-                        var lastScrollPosition by remember { mutableStateOf(0) }
 
                         LaunchedEffect(listScrollState.isScrollInProgress) {
                             snapshotFlow { listScrollState.isScrollInProgress }
@@ -1262,6 +1184,12 @@ fun DialPadContent(
                                     }
                                 }
                         }
+                        LaunchedEffect(Unit) {
+                            DialpadDraftHolder.toggleVisibility.collect {
+                                isDialpadVisible = !isDialpadVisible
+                            }
+                        }
+
                         Surface(
                             modifier = Modifier
                                 .padding(horizontal = 16.dp)
@@ -1271,9 +1199,7 @@ fun DialPadContent(
                         ) {
                             Column(
                                 modifier = Modifier
-//                        .weight(1f)
                                     .fillMaxSize()
-//                                .navigationBarsPadding()
                                     .verticalScroll(listScrollState),
                                 verticalArrangement = Arrangement.Top
                             ) {
@@ -1476,12 +1402,7 @@ fun DialPadContent(
                                         Surface(
                                             onClick = {
                                                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                                if (
-                                                    installedWhatsApp != null ||
-                                                    installedTelegram != null ||
-                                                    installedSignal != null
-                                                ) showSocialDialog = true
-                                                else initiateMessage(number)
+                                                messageLauncher.sendMessage(number)
                                             },
                                             shape = RoundedCornerShape(50.dp),
                                             color = MaterialTheme.colorScheme.primaryContainer,
@@ -1517,7 +1438,7 @@ fun DialPadContent(
 
                                 val configuration = LocalConfiguration.current
                                 val screenHeightDp = configuration.screenHeightDp.dp
-                                val searchResultsBottomPadding = screenHeightDp * 0.50f
+                                val searchResultsBottomPadding = screenHeightDp * 0.60f
                                 val searchResultsPadding =
                                     if (filteredSearchLogsResults.isNotEmpty()) 16.dp else searchResultsBottomPadding
                                 // Search contacts results
@@ -1719,17 +1640,14 @@ fun DialPadContent(
 
                                 // Clipboard banner
                                 AnimatedVisibility(
-                                    visible = showClipboardBanner && number.isEmpty(),
+                                    visible = showClipboardBanner && number.isEmpty() && clipText.isNotBlank(),
                                     enter = fadeIn() + expandVertically(),
                                     exit = fadeOut() + shrinkVertically()
                                 ) {
                                     Surface(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(
-//                                        horizontal = 16.dp,
-                                                vertical = 4.dp
-                                            ),
+                                            .padding(vertical = 4.dp),
                                         shape = MaterialTheme.shapes.extraLarge,
                                         color = MaterialTheme.colorScheme.secondaryContainer
                                     ) {
@@ -1764,8 +1682,7 @@ fun DialPadContent(
                                                 )
                                             }
                                             IconButton(
-                                                onClick = { showClipboardBanner = false },
-//                                        modifier = Modifier.size(cardCornerBig)
+                                                onClick = { showClipboardBanner = false }
                                             ) {
                                                 Icon(
                                                     Icons.Default.Close,
@@ -1832,7 +1749,7 @@ fun DialPadContent(
 
                         // ── Dialpad card — hides with animation when search is active ──
                         AnimatedVisibility(
-                            visible = isDialpadVisible || number.isEmpty(),
+                            visible = isDialpadVisible,// || number.isEmpty(),
                             enter = slideInVertically(
                                 initialOffsetY = { it },
                                 animationSpec = tween(
@@ -2122,7 +2039,9 @@ fun DialPadContent(
                                                     row.forEach { key ->
                                                         DialPadKey(
                                                             number = key,
-                                                            letters = getT9SubKey(key),
+                                                            letters = subKeys[key] ?: "",
+                                                            subLetters = getT9SubKey(key),
+                                                            hasSecondaryLanguage = hasSecondaryLang,
                                                             soundPool = soundPool,
                                                             context = context,
                                                             onClick = { digit -> insertAtCursor(digit) },
@@ -2410,6 +2329,8 @@ fun DialerActionExpressive(
 fun DialPadKey(
     number: String,
     letters: String,
+    subLetters: String? = null,
+    hasSecondaryLanguage: Boolean = false,
     soundPool: SoundPool,
     context: Context,
     onClick: (String) -> Unit,
@@ -2431,7 +2352,7 @@ fun DialPadKey(
     )
 
     val scale by animateFloatAsState(
-        if (isPressed) 1.04f else 1f,
+        if (isPressed) 1.08f else 1f,
         spring(stiffness = Spring.StiffnessMediumLow),
         label = "DialKeyScale"
     )
@@ -2443,31 +2364,18 @@ fun DialPadKey(
 
     val keyWidth = overrideWidth ?: if (compact) 82.dp else 108.dp
     val keyHeight = overrideHeight ?: if (compact) 52.dp else 58.dp
+    val showSubLetters = !subLetters.isNullOrBlank()
     val mainFontSize = (if (compact) 18f else 28f) * scaleFactor.coerceIn(0.6f, 1.4f)
-    val subFontSize = (10f * scaleFactor.coerceIn(0.6f, 1.4f))
+    val subFontSize =
+        if (showSubLetters || hasSecondaryLanguage) (10f * scaleFactor.coerceIn(0.6f, 1.4f) * 0.8f) else (10f * scaleFactor.coerceIn(0.6f, 1.4f))
     Surface(
-//        onClick = {
-//            if (prefs.getBoolean(
-//                    PreferenceManager.KEY_APP_HAPTICS,
-//                    true
-//                )
-//            ) haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-//            if (prefs.getBoolean(PreferenceManager.KEY_DTMF_TONE, false)) playDtmf(
-//                context,
-//                number,
-//                soundPool
-//            )
-//            onClick(number)
-//        },
         shape = RoundedCornerShape(cornerRadius),
         color = bgColor,
         modifier = Modifier
             .then(
                 modifier ?: Modifier.size(width = keyWidth, height = keyHeight)
             )
-//            .size(width = keyWidth, height = keyHeight)
             .scale(scale)
-//        interactionSource = interactionSource
     ) {
         Column(
             verticalArrangement = Arrangement.Center,
@@ -2481,11 +2389,9 @@ fun DialPadKey(
                                 true
                             )
                         ) haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        if (prefs.getBoolean(PreferenceManager.KEY_DTMF_TONE, false)) playDtmf(
-                            context,
-                            number,
-                            soundPool
-                        )
+                        if (prefs.getBoolean(PreferenceManager.KEY_DTMF_TONE, false)) {
+                            playDtmf(context, number, soundPool)
+                        }
                         onClick(number)
                     },
                     onLongClick = {
@@ -2516,12 +2422,31 @@ fun DialPadKey(
                 style = MaterialTheme.typography.headlineMedium.copy(fontSize = mainFontSize.sp),
                 fontWeight = FontWeight.Medium
             )
+            if (showSubLetters) {
+                Text(
+                    text = subLetters,
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = subFontSize.sp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    letterSpacing = 1.sp
+                )
+            } else if (hasSecondaryLanguage) {
+                Text(
+                    text = " ",
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = subFontSize.sp)
+                )
+            }
+
             if (letters.isNotBlank()) {
                 Text(
                     text = letters,
                     style = MaterialTheme.typography.labelSmall.copy(fontSize = subFontSize.sp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     letterSpacing = 1.sp
+                )
+            } else if (hasSecondaryLanguage) {
+                Text(
+                    text =  " ",
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = subFontSize.sp)
                 )
             }
         }
@@ -2755,6 +2680,8 @@ object T9Matcher {
     fun isMatch(contactName: String, query: String): Boolean {
         if (query.isEmpty()) return false
 
+        val lang = DialpadT9.getCurrentLanguage()
+
         val startIndices = mutableListOf(0)
         for (i in 0 until contactName.length - 1) {
             val c = contactName[i]
@@ -2774,7 +2701,8 @@ object T9Matcher {
                     continue
                 }
 
-                if (charToT9(nC) != query[qIdx]) {
+                val t9Digit = DialpadT9.charToT9(nC, lang) ?: ' '
+                if (t9Digit != query[qIdx]) {
                     break
                 }
                 qIdx++
@@ -2786,173 +2714,21 @@ object T9Matcher {
 
         return false
     }
-
-    fun charToT9(c: Char): Char = when (c.uppercaseChar()) {
-        '0' -> '0'
-        '1' -> '1'
-        '2' -> '2'
-        '3' -> '3'
-        '4' -> '4'
-        '5' -> '5'
-        '6' -> '6'
-        '7' -> '7'
-        '8' -> '8'
-        '9' -> '9'
-
-        // ── 2: ABC ──────────────────────────────────────────────────
-        'A', 'B', 'C',
-        'À', 'Á', 'Â', 'Ã', 'Ä', 'Å', 'Æ', 'Ç', 'Ą', 'Ć', 'Ā', 'Ă', 'Ả', 'Ạ', 'Ầ', 'Ấ', 'Ậ', 'Ẩ', 'Ẫ', 'Ằ', 'Ắ', 'Ặ', 'Ẳ', 'Ẵ',
-        'А', 'Б', 'В', 'Г', // Cyrillic
-        'Α', 'Β', 'Γ', 'Ά', // Greek
-        'א', 'ב', 'ג', 'ד', // Hebrew
-        'ا', 'أ', 'إ', 'آ', 'ء', 'ب', 'ت', 'ث', 'پ', // Arabic / Persian
-        'अ', 'आ', 'इ', 'ई', 'उ', 'ऊ', 'ऋ', 'ए', 'ऐ', 'ओ', 'औ', 'क', 'ख', 'ग', 'घ', 'ङ' // Hindi
-        -> '2'
-
-        // ── 3: DEF ──────────────────────────────────────────────────
-        'D', 'E', 'F',
-        'È', 'É', 'Ê', 'Ë', 'Ę', 'Ė', 'Ē', 'Đ', 'Ď', 'Ẽ', 'Ẻ', 'Ẹ', 'Ề', 'Ế', 'Ệ', 'Ể', 'Ễ',
-        'Д', 'Е', 'Ё', 'Ж', 'З', 'Є', // Cyrillic
-        'Δ', 'Ε', 'Ζ', 'Έ', // Greek
-        'ה', 'ו', 'ז', 'ח', // Hebrew
-        'ج', 'ح', 'خ', 'چ', // Arabic / Persian
-        'च', 'छ', 'ज', 'झ', 'ञ' // Hindi
-        -> '3'
-
-        // ── 4: GHI ──────────────────────────────────────────────────
-        'G', 'H', 'I',
-        'Ì', 'Í', 'Î', 'Ï', 'Į', 'Ī', 'Ğ', 'Ħ', 'Ĩ', 'Ỉ', 'Ị',
-        'И', 'Й', 'К', 'Л', 'І', 'Ї', // Cyrillic
-        'Η', 'Θ', 'Ι', 'Ή', 'Ί', 'Ϊ', // Greek
-        'ט', 'י', 'כ', 'ך', // Hebrew
-        'د', 'ذ', 'ر', 'ز', 'ژ', // Arabic / Persian
-        'ट', 'ठ', 'ड', 'ढ', 'ण' // Hindi
-        -> '4'
-
-        // ── 5: JKL ──────────────────────────────────────────────────
-        'J', 'K', 'L', 'Ł', 'Ĺ', 'Ľ', 'Ŀ',
-        'М', 'Н', 'О', 'П', // Cyrillic
-        'Κ', 'Λ', 'Μ', // Greek
-        'ל', 'מ', 'ם', 'נ', 'ן', 'ס', // Hebrew
-        'س', 'ش', 'ص', 'ض', // Arabic / Persian
-        'त', 'थ', 'द', 'ध', 'न' // Hindi
-        -> '5'
-
-        // ── 6: MNO ──────────────────────────────────────────────────
-        'M', 'N', 'O',
-        'Ñ', 'Ò', 'Ó', 'Ô', 'Õ', 'Ö', 'Ø', 'Ń', 'Ň', 'Ō', 'Ỏ', 'Ọ', 'Ồ', 'Ố', 'Ộ', 'Ổ', 'Ỗ', 'Ờ', 'Ớ', 'Ợ', 'Ở', 'Ỡ',
-        'Р', 'С', 'Т', 'У', 'Ў', // Cyrillic
-        'Ν', 'Ξ', 'Ο', 'Ό', // Greek
-        'ع', 'غ', 'ط', 'ظ', // Hebrew/Arabic
-        'प', 'फ', 'ब', 'भ', 'म' // Hindi
-        -> '6'
-
-        // ── 7: PQRS ─────────────────────────────────────────────────
-        'P', 'Q', 'R', 'S',
-        'Ś', 'Š', 'Ş', 'ß', 'Ř', 'Ṣ', 'Ș',
-        'Ф', 'Х', 'Ц', 'Ч', 'Ґ', // Cyrillic
-        'Π', 'Ρ', 'Σ', 'ς', // Greek
-        'פ', 'ף', 'צ', 'ץ', 'ק', 'ר', // Hebrew
-        'ف', 'ق', 'ك', 'ک', 'گ', 'ل', // Arabic / Persian
-        'य', 'र', 'ल', 'व' // Hindi
-        -> '7'
-
-        // ── 8: TUV ──────────────────────────────────────────────────
-        'T', 'U', 'V',
-        'Ù', 'Ú', 'Û', 'Ü', 'Ū', 'Ț', 'Ť', 'Ţ', 'Ũ', 'Ủ', 'Ụ', 'Ừ', 'Ứ', 'Ự', 'Ử', 'Ữ',
-        'Ш', 'Щ', 'Ъ', 'Ы', // Cyrillic
-        'Τ', 'Υ', 'Φ', 'Ύ', 'Ϋ', // Greek
-        'ש', // Hebrew
-        'م', 'ن', // Arabic
-        'श', 'ष', 'स', 'ह' // Hindi
-        -> '8'
-
-        // ── 9: WXYZ ─────────────────────────────────────────────────
-        'W', 'X', 'Y', 'Z',
-        'Ź', 'Ż', 'Ž', 'Ý', 'Ÿ', 'Ŷ', 'Ỹ', 'Ỷ', 'Ỵ',
-        'Ь', 'Э', 'Ю', 'Я', // Cyrillic
-        'Χ', 'Ψ', 'Ω', 'Ώ', // Greek
-        'ת', // Hebrew
-        'ه', 'و', 'ي', 'ى', 'ئ', 'ة', 'ی', // Arabic / Persian
-        'ळ' // Hindi
-        -> '9'
-
-        else -> ' '
-    }
 }
 
-private fun getT9SubKey(digit: String, locale: java.util.Locale = java.util.Locale.getDefault()): String {
-    val lang = locale.language
-    return when (lang) {
-        "ru", "uk", "be", "bg" -> when (digit) {
-            "1" -> "   "
-            "2" -> "АБВГ"
-            "3" -> "ДЕЖЗ"
-            "4" -> "ИЙКЛ"
-            "5" -> "МНОП"
-            "6" -> "РСТУ"
-            "7" -> "ФХЦЧ"
-            "8" -> "ШЩЪЫ"
-            "9" -> "ЬЭЮЯ"
-            "0" -> "+"
-            else -> ""
-        }
-        "el" -> when (digit) {
-            "1" -> "   "
-            "2" -> "ΑΒΓ"
-            "3" -> "ΔΕΖ"
-            "4" -> "ΗΘΙ"
-            "5" -> "ΚΛΜ"
-            "6" -> "ΝΞΟ"
-            "7" -> "ΠΡΣ"
-            "8" -> "ΤΥΦ"
-            "9" -> "ΧΨΩ"
-            "0" -> "+"
-            else -> ""
-        }
-        "he", "iw" -> when (digit) {
-            "1" -> "   "
-            "2" -> "דהגבא"
-            "3" -> "חזוה"
-            "4" -> "כךיט"
-            "5" -> "סןנםמל"
-            "6" -> "פףع"
-            "7" -> "רקץצ"
-            "8" -> "ש"
-            "9" -> "ת"
-            "0" -> "+"
-            else -> ""
-        }
-        "ar", "fa" -> when (digit) {
-            "1" -> "   "
-            "2" -> "ابتث"
-            "3" -> "جحخ"
-            "4" -> "درزژ"
-            "5" -> "سشصض"
-            "6" -> "طظعغ"
-            "7" -> "فقكلم"
-            "8" -> "نهوي"
-            "9" -> "ءئؤة"
-            "0" -> "+"
-            else -> ""
-        }
-        else -> when (digit) {
-            "1" -> "   "
-            "2" -> "ABC"
-            "3" -> "DEF"
-            "4" -> "GHI"
-            "5" -> "JKL"
-            "6" -> "MNO"
-            "7" -> "PQRS"
-            "8" -> "TUV"
-            "9" -> "WXYZ"
-            "0" -> "+"
-            else -> ""
-        }
-    }
+private fun getT9SubKey(
+    digit: String,
+    locale: java.util.Locale = java.util.Locale.getDefault()
+): String? {
+    val lang = DialpadT9.getCurrentLanguage(locale)
+    if (lang == DialpadT9.LOCALE_EN) return null
+
+    val number = digit.toIntOrNull() ?: return null
+    val letters = DialpadT9.getLettersForNumber(number, lang)
+    return letters.ifBlank { null }
 }
 
-private fun buildDtmfSoundPool(context: Context): SoundPool {
+private fun buildDtmfSoundPool(): SoundPool {
     val attributes = AudioAttributes.Builder()
         .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
         .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)

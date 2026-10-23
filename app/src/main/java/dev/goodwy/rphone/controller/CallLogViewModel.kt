@@ -18,8 +18,11 @@ import dev.goodwy.rphone.modal.data.CallLogFilter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -48,6 +51,13 @@ class CallLogViewModel(
     private val _filteredLogs = MutableStateFlow<List<CallLogEntry>>(emptyList())
     val filteredLogs: StateFlow<List<CallLogEntry>> = _filteredLogs.asStateFlow()
     private var filterJob: Job? = null
+
+    private val _scrollToTop = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val scrollToTop: SharedFlow<Unit> = _scrollToTop.asSharedFlow()
+
+    fun requestScrollToTop() {
+        _scrollToTop.tryEmit(Unit)
+    }
 
     // In-memory cache
     @Volatile private var cachedLogs: List<CallLogEntry> = emptyList()

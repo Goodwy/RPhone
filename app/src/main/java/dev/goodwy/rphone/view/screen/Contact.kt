@@ -94,6 +94,15 @@ fun ContactScreen(navController: NavController, navigator: DestinationsNavigator
     val scope = rememberCoroutineScope()
     val showButton by remember { derivedStateOf { listState.firstVisibleItemIndex > 2 } }
 
+    val viewModel: ContactsViewModel = koinActivityViewModel()
+    LaunchedEffect(Unit) {
+        viewModel.scrollToTop.collect {
+            if (listState.firstVisibleItemIndex != 0 || listState.firstVisibleItemScrollOffset != 0) {
+                listState.animateScrollToItem(0)
+            }
+        }
+    }
+
     val prefs = koinInject<PreferenceManager>()
     val pillNav = remember { prefs.getBoolean(PreferenceManager.KEY_PILL_NAV, false) }
     val favoritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, false)

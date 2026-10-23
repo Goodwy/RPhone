@@ -2,6 +2,7 @@ package dev.goodwy.rphone.view.screen.settings
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -28,6 +29,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import android.os.Build
+import android.provider.Settings
 import android.view.Surface
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -35,8 +37,11 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
@@ -53,14 +58,12 @@ import androidx.compose.material.icons.rounded.BlurLinear
 import androidx.compose.material.icons.rounded.BlurOff
 import androidx.compose.material.icons.rounded.CallEnd
 import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.FontDownload
 import androidx.compose.material.icons.rounded.FormatSize
 import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material.icons.rounded.MicNone
-import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.PhoneInTalk
 import androidx.compose.material.icons.rounded.RoundedCorner
-import androidx.compose.material.icons.rounded.Swipe
+import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material.icons.rounded._123
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -68,6 +71,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -112,6 +116,9 @@ import kotlinx.coroutines.delay
 import java.io.File
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
+import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.res.vectorResource
+import androidx.core.net.toUri
 
 data class ThemeOption(val key: String, val label: String)
 
@@ -150,7 +157,6 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
     var incomingCallUI      by remember(settingsState) { mutableStateOf(prefs.getInt(PreferenceManager.KEY_INCOMING_CALL_UI_MODE, 10)) }
     var scrollAnimation     by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SCROLL_ANIMATION, false)) }
     var dialpadAnimation    by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_DIALPAD_ANIMATION, true)) }
-    var swipeToCall         by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SWIPE_TO_CALL, true)) }
     var hideVoiceSearch     by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_HIDE_VOICE_SEARCH, false)) }
     var liquidGlass         by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_LIQUID_GLASS, false)) }
     var blurEffects         by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_BLUR_EFFECTS, false)) }
@@ -344,7 +350,16 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                 }
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .navigationBarsPadding()
+                    .padding(
+                        bottom = if (showBottomBar) bottomBarHeight else 0.dp
+                    )
+            )
+        },
         containerColor = MaterialTheme.colorScheme.surface
     ) { padding ->
         Box(modifier = Modifier
@@ -492,7 +507,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                 RillSwitchListItem(
                                     headline = stringResource(R.string.custom_color),
                                     supporting = stringResource(R.string.custom_color_subtitle),
-                                    leadingIcon = Icons.Rounded.Palette,
+                                    leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_colors),
                                     iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkCyan,
                                     iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorCyan,
                                     checked = !dynamicColors,
@@ -510,9 +525,13 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                             }
                                         }
                                     },
-                                    modifier = Modifier.alpha(if (isPro) 1f else 0.4f)
+                                    modifier = Modifier.alpha(if (isPro) 1f else 0.6f)
                                 )
-                                if (!dynamicColors) {
+                                AnimatedVisibility(
+                                    visible = !dynamicColors,
+                                    enter = fadeIn(tween(250)) + expandVertically(tween(250)),
+                                    exit = fadeOut(tween(200)) + shrinkVertically(tween(200))
+                                ) {
                                     Column(modifier = Modifier
                                         .background(
                                             color = cardColor,
@@ -526,32 +545,32 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                         ) {
                                             items(presetColors) { color ->
                                                 val currentColor = customPrimaryColor == color.toArgb()
+                                                val interactionSource = remember { MutableInteractionSource() }
+                                                val isPressed by interactionSource.collectIsPressedAsState()
+
+                                                val cornerRadius by animateDpAsState(
+                                                    targetValue = if (isPressed || currentColor) 12.dp else 50.dp,
+                                                    animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                                                    label = "ButtonShape"
+                                                )
                                                 Box(
                                                     modifier = Modifier
                                                         .size(40.dp)
-                                                        .clip(CircleShape)
+                                                        .clip(RoundedCornerShape(cornerRadius))
                                                         .background(color)
                                                         .border(
                                                             width = if (currentColor) 3.dp else 2.dp,
                                                             color = if (currentColor) MaterialTheme.colorScheme.onSurface else color.darken(),
-                                                            shape = CircleShape
+                                                            shape = RoundedCornerShape(cornerRadius)
                                                         )
-                                                        .clickable {
+                                                        .clickable(
+                                                            interactionSource = interactionSource
+                                                        ) {
                                                             customPrimaryColor = color.toArgb()
-                                                            prefs.setInt(
-                                                                "custom_primary_color",
-                                                                color.toArgb()
-                                                            )
-                                                            hexInput = String.format(
-                                                                "%06X",
-                                                                0xFFFFFF and color.toArgb()
-                                                            )
+                                                            prefs.setInt("custom_primary_color", color.toArgb())
+                                                            hexInput = String.format("%06X", 0xFFFFFF and color.toArgb())
                                                             hexError = false
-                                                            triggerRestartPrompt(
-                                                                scope,
-                                                                snackbarHostState,
-                                                                context
-                                                            )
+                                                            triggerRestartPrompt(scope, snackbarHostState, context)
                                                         }
                                                 )
                                             }
@@ -559,7 +578,9 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                         Spacer(Modifier.height(16.dp))
                                         Row(verticalAlignment = Alignment.CenterVertically,
                                             horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 16.dp)
                                         ) {
                                             OutlinedTextField(
                                                 value = hexInput,
@@ -625,7 +646,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                             }
                                         }
                                     }
-                                    .alpha(if (isPro) 1f else 0.4f)
+                                    .alpha(if (isPro) 1f else 0.6f)
                                     .background(
                                         color = cardColor,
                                         shape = RoundedCornerShape(cardCornerExtraSmall)
@@ -634,7 +655,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                 ) {
                                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                                         RillIconBox(
-                                            icon = Icons.Rounded.FontDownload,
+                                            icon = ImageVector.vectorResource(id = R.drawable.ic_brand_family),
                                             iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkCyan,
                                             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorCyan
                                         )
@@ -697,12 +718,34 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                         prefs.setFloat(PreferenceManager.KEY_CUSTOM_FONT_SIZE, fontSizeScale)
                                     }
                                 )
+
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    RillListItem(
+                                        headline = stringResource(R.string.language),
+                                        supporting = LocalLocale.current.platformLocale.displayLanguage,
+                                        leadingIcon = Icons.Rounded.Translate,
+                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkCyan,
+                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorCyan,
+                                        trailingIcon = Icons.Default.ChevronRight,
+                                        onClick = {
+                                            try {
+                                                context.startActivity(
+                                                    Intent(
+                                                        Settings.ACTION_APP_LOCALE_SETTINGS,
+                                                        "package:${context.packageName}".toUri()
+                                                    ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                                )
+                                            } catch (_: Exception) {}
+                                        }
+                                    )
+                                }
+
                                 RillSliderListItem(
                                     headline = stringResource(R.string.rounding_radius),
                                     supporting = "$cardRoundness",
                                     leadingIcon = Icons.Rounded.RoundedCorner,
-                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkCyan,
-                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorCyan,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
                                     value = cardRoundness.toFloat().coerceAtLeast(4f),
                                     valueRange = 4f..32f,
                                     steps = 6,
@@ -714,6 +757,15 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                         cardRoundness = RillShapeDefaults.DefaultRoundness
                                         prefs.setInt(PreferenceManager.KEY_CARD_ROUNDNESS, cardRoundness)
                                     }
+                                )
+
+                                RillListItem(
+                                    headline = stringResource(R.string.app_name_change),
+                                    supporting = appNamePresets.firstOrNull { it.key == selectedAppNameKey }?.label ?: stringResource(R.string.app_launcher_name),
+                                    leadingIcon = Icons.AutoMirrored.Rounded.Label,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+                                    onClick = { showAppNameDialog = true }
                                 )
 
                                 val icons = remember { buildIcons(context) }
@@ -732,14 +784,6 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                     onClick = {
                                         navigator.navigate(AppIconScreenDestination)
                                     }
-                                )
-                                RillListItem(
-                                    headline = stringResource(R.string.app_name_change),
-                                    supporting = appNamePresets.firstOrNull { it.key == selectedAppNameKey }?.label ?: stringResource(R.string.app_launcher_name),
-                                    leadingIcon = Icons.AutoMirrored.Rounded.Label,
-                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
-                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
-                                    onClick = { showAppNameDialog = true }
                                 )
                             }
                         }
@@ -777,7 +821,11 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                             )
                                         }
                                     )
-                                    if (liquidGlass) {
+                                    AnimatedVisibility(
+                                        visible = liquidGlass,
+                                        enter = fadeIn(tween(250)) + expandVertically(tween(250)),
+                                        exit = fadeOut(tween(200)) + shrinkVertically(tween(200))
+                                    ) {
                                         RillListItem(
                                             headline = stringResource(R.string.liquid_glass_elements),
                                             supporting = stringResource(R.string.liquid_glass_elements_subtitle),
@@ -789,7 +837,11 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                         )
                                     }
 
-                                    if (!liquidGlass) {
+                                    AnimatedVisibility(
+                                        visible = !liquidGlass,
+                                        enter = fadeIn(tween(250)) + expandVertically(tween(250)),
+                                        exit = fadeOut(tween(200)) + shrinkVertically(tween(200))
+                                    ) {
                                         RillSwitchListItem(
                                             headline = stringResource(R.string.material_blur_effects),
                                             supporting = stringResource(R.string.material_blur_effects_subtitle),
@@ -805,19 +857,27 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                                 )
                                             }
                                         )
-                                        if (blurEffects && !liquidGlass) {
-                                            RillListItem(
-                                                headline = stringResource(R.string.blur_effect_elements),
-                                                supporting = stringResource(R.string.blur_effect_elements_subtitle),
-                                                leadingIcon = Icons.Rounded.Layers,
-                                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
-                                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
-                                                trailingIcon = Icons.Default.ChevronRight,
-                                                onClick = { navigator.navigate(BlurEffectsElementsScreenDestination) }
-                                            )
-                                        }
                                     }
-                                    if (liquidGlass || blurEffects) {
+                                    AnimatedVisibility(
+                                        visible = blurEffects && !liquidGlass,
+                                        enter = fadeIn(tween(250)) + expandVertically(tween(250)),
+                                        exit = fadeOut(tween(200)) + shrinkVertically(tween(200))
+                                    ) {
+                                        RillListItem(
+                                            headline = stringResource(R.string.blur_effect_elements),
+                                            supporting = stringResource(R.string.blur_effect_elements_subtitle),
+                                            leadingIcon = Icons.Rounded.Layers,
+                                            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
+                                            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
+                                            trailingIcon = Icons.Default.ChevronRight,
+                                            onClick = { navigator.navigate(BlurEffectsElementsScreenDestination) }
+                                        )
+                                    }
+                                    AnimatedVisibility(
+                                        visible = liquidGlass || blurEffects,
+                                        enter = fadeIn(tween(250)) + expandVertically(tween(250)),
+                                        exit = fadeOut(tween(200)) + shrinkVertically(tween(200))
+                                    ) {
                                         RillSliderListItem(
                                             headline = stringResource(R.string.blur_intensity),
                                             supporting = "${(blurIntensity * 5)}%",
@@ -908,27 +968,6 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                     trailingIcon = Icons.Default.ChevronRight,
                                     onClick = { navigator.navigate(CallerUIScreenDestination) }
                                 )
-                                RillSwitchListItem(
-                                    headline = stringResource(R.string.swipe_actions),
-                                    supporting = stringResource(R.string.swipe_actions_subtitle),
-                                    leadingIcon = Icons.Rounded.Swipe,
-                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
-                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
-                                    checked = swipeToCall,
-                                    onCheckedChange = {
-                                        swipeToCall = it
-                                        prefs.setBoolean(PreferenceManager.KEY_SWIPE_TO_CALL, it)
-                                    }
-                                )
-//                                RillListItem(
-//                                    headline = "Calls Section Elements",
-//                                    supporting = "Toggle Today, Missed, Outgoing, Call Time cards",
-//                                    leadingIcon = Icons.Default.Dashboard,
-//                                    iconContainerColor = ColorDarkGreen,
-//                                    iconBgContainerColor = ColorGreen,
-//                                    trailingIcon = Icons.Default.ChevronRight,
-//                                    onClick = { showCallUIDialog = true }
-//                                )
                             }
                         }
                     }
@@ -996,7 +1035,10 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                 exit = slideOutVertically { it } + fadeOut()
             ) {
                 Snackbar(
-                    modifier = Modifier.navigationBarsPadding().padding(24.dp).padding(bottom = if (showBottomBar) bottomBarHeight else 0.dp),
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .padding(24.dp)
+                        .padding(bottom = if (showBottomBar) bottomBarHeight else 0.dp),
                     shape = MaterialTheme.shapes.large,
                     containerColor = MaterialTheme.colorScheme.surfaceVariant,
                     action = {

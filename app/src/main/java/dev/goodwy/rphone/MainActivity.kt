@@ -712,6 +712,13 @@ class MainActivity : FragmentActivity() {
         val target = mainViewModel.getNavigationTarget(intent, this) ?: return
         intentState = null
 
+        val requestedType = intent.type ?: when {
+            intent.data?.toString()?.contains("postals") == true -> "vnd.android.cursor.dir/postal-address_v2"
+            intent.data?.toString()?.contains("phones") == true -> "vnd.android.cursor.dir/phone_v2"
+            intent.data?.toString()?.contains("emails") == true -> "vnd.android.cursor.dir/email_v2"
+            else -> "vnd.android.cursor.dir/contact"
+        }
+
         when (target) {
             is NavigationTarget.Recents -> {
                 try {
@@ -767,7 +774,8 @@ class MainActivity : FragmentActivity() {
             is NavigationTarget.ContactSelection -> {
                 navController.navigate(ContactSelectionScreenDestination(
                     returnContactId = true,
-                    isExternalPick = true
+                    isExternalPick = true,
+                    pickMimeType = requestedType
                 ).route)
             }
             is NavigationTarget.CallSetting -> {

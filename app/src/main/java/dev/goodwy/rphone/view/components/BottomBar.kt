@@ -86,7 +86,14 @@ import com.ramcosta.composedestinations.generated.destinations.InterfaceScreenDe
 import com.ramcosta.composedestinations.generated.destinations.NavigationScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.SearchScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.SettingsScreenDestination
+import dev.goodwy.rphone.controller.CallLogViewModel
+import dev.goodwy.rphone.controller.ContactsViewModel
+import dev.goodwy.rphone.view.screen.DialpadDraftHolder
+import dev.goodwy.rphone.view.screen.FavoritesHolder
+import dev.goodwy.rphone.view.screen.NotesHolder
+import dev.goodwy.rphone.view.screen.settings.SettingsHolder
 import dev.goodwy.rphone.view.theme.RillShapeDefaults
+import org.koin.compose.viewmodel.koinActivityViewModel
 import kotlin.time.Duration.Companion.milliseconds
 
 // Tab routes — only show the bar when one of these is active
@@ -150,6 +157,9 @@ fun BottomBar(navController: NavController) {
     val tabOrder            = remember(settingsState) { parseTabOrder(prefs.getString(PreferenceManager.KEY_TAB_ORDER, null)) }
     val cardCorner          = remember(settingsState) { prefs.getInt(PreferenceManager.KEY_CARD_ROUNDNESS, RillShapeDefaults.DefaultRoundness) }
     val labelStyle: TextStyle = MaterialTheme.typography.labelMedium
+
+    val callLogViewModel: CallLogViewModel = koinActivityViewModel()
+    val contactsVM: ContactsViewModel = koinActivityViewModel()
 
     val navBackStackEntry  by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
@@ -256,8 +266,58 @@ fun BottomBar(navController: NavController) {
     }
 
     fun navigate(route: String) {
+        if (isSettingsSelected && route == SettingsScreenDestination.route) {
+            // We're trying to go back to the root of the settings, like "back"
+            val popped = navController.popBackStack(
+                route = SettingsScreenDestination.route,
+                inclusive = false
+            )
+            if (popped) return
+
+            if (route == SettingsScreenDestination.route) {
+                SettingsHolder.requestScrollToTop()
+                return
+            }
+
+            // We're already in the settings root directory - we're not doing anything (protection against recreating)
+            if (currentDestination.route == SettingsScreenDestination.route) return
+
+            // SettingsScreen is not in the active stack - navigate to it without restoring
+            navController.navigate(SettingsScreenDestination.route) {
+                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                launchSingleTop = true
+                restoreState = true
+            }
+            return
+        }
+
+        // Actions when the Tab is clicked again =>
+        if (isRecentsSelected && route == RecentScreenDestination.route) {
+            callLogViewModel.requestScrollToTop()
+            return
+        }
+        if (isContactsSelected && route == ContactScreenDestination.route) {
+            contactsVM.requestScrollToTop()
+            return
+        }
+        if (isFavoritesSelected && route == FavoritesScreenDestination().route) {
+            FavoritesHolder.requestScrollToTop()
+            return
+        }
+        if (isDialpadSelected && route == DialPadScreenDestination(initialNumber = "").route) {
+            DialpadDraftHolder.requestToggleVisibility()
+            return
+        }
+        if (isNotesSelected && route == NotesScreenDestination().route) {
+            NotesHolder.requestScrollToTop()
+            return
+        }
+        // <=
+
         // If already on this route, do nothing (prevents double-tap freeze)
-        if (currentDestination?.hierarchy?.any { it.route == route } == true) return
+//        if (currentDestination?.hierarchy?.any { it.route == route } == true) return
+        if (currentDestination?.route == route) return
+
         navController.navigate(route) {
             popUpTo(navController.graph.findStartDestination().id) { saveState = true }
             launchSingleTop = true

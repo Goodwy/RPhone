@@ -28,7 +28,7 @@ import androidx.graphics.shapes.RoundedPolygon
 
 object RillShapeDefaults {
     const val DefaultRoundness: Int = 28
-    val RoundnessOptions: List<Int> = listOf(32, 28, 20, 16, 12, 8)
+    val RoundnessOptions: List<Int> = listOf(32, 28, 24, 20, 16, 12, 8, 4)
 
     const val BaseExtraSmall: Int = 4
     const val BaseSmall: Int = 8

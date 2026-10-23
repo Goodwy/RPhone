@@ -36,6 +36,7 @@ object MyColors {
         get() = MaterialTheme.colorScheme.surfaceContainerLowest
 }
 
+val surfaceDark = Color(0xFF17191F)
 
 // Not use
 val color_white = Color.White

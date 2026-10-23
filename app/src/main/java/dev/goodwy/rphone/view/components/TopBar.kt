@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -263,20 +264,43 @@ fun TopBar(
     }
 }
 
+/** Icon button with a satisfying spring press scale. */
+@Composable
+fun SpringIconButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    content: @Composable () -> Unit) {
+    val src     = remember { MutableInteractionSource() }
+    val pressed by src.collectIsPressedAsState()
+    val scale   by animateFloatAsState(
+        targetValue   = if (pressed) 0.88f else 1f,
+        animationSpec = spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMedium),
+        label         = "sibScale"
+    )
+    IconButton(
+        onClick           = onClick,
+        interactionSource = src,
+        colors = IconButtonDefaults.iconButtonColors(
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.96f),
+            containerColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.08f)
+        ),
+        modifier          = modifier.graphicsLayer(scaleX = scale, scaleY = scale)
+    ) { content() }
+}
+
 @Composable
 fun NavigationIcon(
     onClick: () -> Unit,
     modifier: Modifier = Modifier.padding(start = 16.dp, end = 14.dp)
 ) {
-    IconButton(
+    SpringIconButton(
         modifier = modifier,
-        onClick = onClick,
-        colors = IconButtonDefaults.iconButtonColors(
-            contentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.96f),
-            containerColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.08f)
-        )
+        onClick = { onClick() }
     ) {
-        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.back))
+        Icon(
+            Icons.AutoMirrored.Rounded.ArrowBack, stringResource(R.string.back),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 

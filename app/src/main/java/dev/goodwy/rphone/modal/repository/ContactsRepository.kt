@@ -63,7 +63,43 @@ class ContactsRepository(
             }
         }
 
-        // 1. We retrieve RawContacts and immediately build the accountMap (1 pass through the database)
+        // 1. ALL contacts from Contacts table — one row per contact, basic info only.
+        //    This guarantees no contact is missed, even if it has no
+        //    Phone / StructuredName / Email data rows.
+        try {
+            contentResolver.query(
+                ContactsContract.Contacts.CONTENT_URI,
+                arrayOf(
+                    ContactsContract.Contacts._ID,
+                    ContactsContract.Contacts.DISPLAY_NAME,
+                    ContactsContract.Contacts.PHOTO_URI,
+                    ContactsContract.Contacts.STARRED
+                ),
+                null, null,
+                "${ContactsContract.Contacts.DISPLAY_NAME} ASC"
+            )?.use { cursor ->
+                val idIdx = cursor.getColumnIndex(ContactsContract.Contacts._ID)
+                val nameIdx = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)
+                val photoIdx = cursor.getColumnIndex(ContactsContract.Contacts.PHOTO_URI)
+                val starredIdx = cursor.getColumnIndex(ContactsContract.Contacts.STARRED)
+
+                while (cursor.moveToNext()) {
+                    val id = cursor.getString(idIdx) ?: continue
+                    // Don't overwrite private contacts (different ID format: "p1" vs "123")
+                    if (contactsMap.containsKey(id)) continue
+                    contactsMap[id] = Contact(
+                        id = id,
+                        givenName = cursor.getString(nameIdx) ?: "",
+                        photoUri = cursor.getString(photoIdx),
+                        isFavorite = cursor.getInt(starredIdx) == 1
+                    )
+                }
+            }
+        } catch (e: SecurityException) {
+            e.printStackTrace()
+        }
+
+        // 2. RawContacts — build accountMap and rawContactsMap in one pass
         val rawProjection = arrayOf(
             ContactsContract.RawContacts.CONTACT_ID,
             ContactsContract.RawContacts._ID,
@@ -98,7 +134,21 @@ class ContactsRepository(
             e.printStackTrace()
         }
 
-        // 2. We request Data.CONTENT_URI, but filter only the MIMETYPE values we need
+        // Enrich existing contacts (from step 1) with account info and rawContactIds
+        contactsMap.keys.toList().forEach { id ->
+            if (id.startsWith("p")) return@forEach  // Skip private contacts
+            val acc = accountMap[id]
+            val rawIds = rawContactsMap[id] ?: emptyList()
+            val existing = contactsMap[id] ?: return@forEach
+            contactsMap[id] = existing.copy(
+                accountName = acc?.first,
+                accountType = acc?.second,
+                rawContactIds = rawIds,
+                hasMultipleSources = rawIds.size > 1
+            )
+        }
+
+        // 3. Data — enrich with Phone, StructuredName, Email only (filtered for speed)
         val selection = "${ContactsContract.Data.MIMETYPE} IN (?, ?, ?)"
         val selectionArgs = arrayOf(
             CommonDataKinds.Phone.CONTENT_ITEM_TYPE,
@@ -153,7 +203,9 @@ class ContactsRepository(
                     val currentName = cursor.getString(nameIdx) ?: ""
                     val currentPhoto = cursor.getString(photoIdx)
 
-                    // We take an existing contact from Map or create a default one
+                    // Get existing contact or create fallback.
+                    // Fallback should rarely trigger — only in race conditions
+                    // when a contact is added between the Contacts query and this Data query.
                     val current = contactsMap[id] ?: run {
                         val accInfo = accountMap[id]
                         Contact(
@@ -170,11 +222,9 @@ class ContactsRepository(
 
                     fun getStringSafely(idx: Int): String = if (idx != -1) cursor.getString(idx) ?: "" else ""
 
-                    // 3. Creating an immutable copy
                     val updatedContact = when (mimeType) {
                         CommonDataKinds.Phone.CONTENT_ITEM_TYPE -> {
                             if (current.phoneNumbers.none { areNumbersEqual(it, data1) }) {
-                                // We consider it primary if at least one of the flags is set (typically, IS_SUPER_PRIMARY == 1 implies IS_PRIMARY == 1)
                                 val isPrimary = cursor.getInt(isPrimaryIdx) == 1 || cursor.getInt(isSuperPrimaryIdx) == 1
 
                                 current.copy(
@@ -214,7 +264,6 @@ class ContactsRepository(
                         else -> current
                     }
 
-                    // 4. Put the updated copy back into the Map
                     contactsMap[id] = updatedContact
                 }
             }

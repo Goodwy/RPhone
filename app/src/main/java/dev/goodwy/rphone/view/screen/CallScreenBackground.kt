@@ -55,26 +55,6 @@ fun ExpressiveBackground(
     val customVisible = hasCustomBackground && !customFailed
     val photoVisible = !photoUri.isNullOrEmpty() && !customVisible
 
-    val infiniteTransition = rememberInfiniteTransition(label = "ambientBg")
-    val blob1Offset by infiniteTransition.animateFloat(
-        initialValue = -28f,
-        targetValue = 28f,
-        animationSpec = infiniteRepeatable(tween(11000, easing = FastOutSlowInEasing), RepeatMode.Reverse),
-        label = "b1"
-    )
-    val blob2Offset by infiniteTransition.animateFloat(
-        initialValue = 28f,
-        targetValue = -28f,
-        animationSpec = infiniteRepeatable(tween(13000, easing = FastOutSlowInEasing), RepeatMode.Reverse),
-        label = "b2"
-    )
-    val blobAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.18f,
-        targetValue = 0.34f,
-        animationSpec = infiniteRepeatable(tween(6000, easing = LinearEasing), RepeatMode.Reverse),
-        label = "ba"
-    )
-
     val request = remember(backgroundUri, context) {
         if (backgroundUri.isNullOrEmpty()) {
             null

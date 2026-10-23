@@ -42,7 +42,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.OpenInNew
-import androidx.compose.material.icons.automirrored.rounded.Send
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.rounded.Add
@@ -74,9 +73,9 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import dev.goodwy.rphone.R
@@ -106,12 +105,17 @@ import dev.goodwy.rphone.controller.util.CallBackgroundStore
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.device_only
 import dev.goodwy.rphone.private_only
+import dev.goodwy.rphone.view.components.AvatarCropDialog
 import dev.goodwy.rphone.view.components.RillDialog
 import dev.goodwy.rphone.view.components.Title
 import dev.goodwy.rphone.view.theme.RillShapeDefaults
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinActivityViewModel
+import androidx.core.net.toUri
+import dev.goodwy.rphone.cardCornerExtraSmall
+import dev.goodwy.rphone.cardSpacedBy
+import dev.goodwy.rphone.view.theme.rillCornerDp
 
 private val blankPhoneDetail = ContactPhoneDetail(Phone.TYPE_MOBILE, null, "")
 private val blankEvent = ContactEvent(Event.TYPE_BIRTHDAY, null, "")
@@ -136,6 +140,10 @@ fun ContactEditScreen(
     val contactsVM: ContactsViewModel = koinActivityViewModel()
     val availableAccounts by contactsVM.availableAccounts.collectAsStateWithLifecycle()
     val availableAccountsForMoving by contactsVM.availableAccountsForMoving.collectAsStateWithLifecycle()
+
+    val roundness = prefs.getInt(PreferenceManager.KEY_CARD_ROUNDNESS, RillShapeDefaults.DefaultRoundness)
+    val cornerLargeDp = rillCornerDp(RillShapeDefaults.BaseLarge, roundness)
+    val cornerLargeIncreasedDp = rillCornerDp(RillShapeDefaults.BaseLargeIncreased, roundness)
 
     val listState = rememberLazyListState()
     val showButton by remember { derivedStateOf { listState.firstVisibleItemIndex > 2 } }
@@ -182,6 +190,7 @@ fun ContactEditScreen(
     var selectedBackgroundUri by remember { mutableStateOf<Uri?>(null) }
     var tempCallBackground by remember { mutableStateOf<String?>(null) }
     var tempPhotoUri by remember { mutableStateOf<String?>(null) }
+    var cropTargetUriString by remember { mutableStateOf<String?>(null) }
     var tempBackgroundDeleted by remember { mutableStateOf(false) }
 
     var isPrivate by remember(existingContact) { mutableStateOf(existingContact?.isPrivate ?: false) }
@@ -363,7 +372,7 @@ fun ContactEditScreen(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri ->
             if (uri != null) {
-                tempPhotoUri = uri.toString()
+                cropTargetUriString = uri.toString()
             }
         }
     )
@@ -578,6 +587,25 @@ fun ContactEditScreen(
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary
                 )
+            }
+        )
+    }
+
+    if (cropTargetUriString != null) {
+        val targetUri = remember(cropTargetUriString) {
+            val str = cropTargetUriString!!
+            if (str.startsWith("/")) {
+                Uri.fromFile(java.io.File(str))
+            } else {
+                str.toUri()
+            }
+        }
+        AvatarCropDialog(
+            imageUri = targetUri,
+            onDismiss = { cropTargetUriString = null },
+            onCropSuccess = { croppedUri ->
+                tempPhotoUri = croppedUri.toString()
+                cropTargetUriString = null
             }
         )
     }
@@ -903,7 +931,7 @@ fun ContactEditScreen(
                                     .padding(start = 24.dp, top = 16.dp)
                                     .background(
                                         color = MaterialTheme.colorScheme.surfaceContainerLowest,
-                                        shape = RoundedCornerShape(24.dp)
+                                        shape = RoundedCornerShape(cornerLargeIncreasedDp)
                                     )
                                     .padding(vertical = 24.dp),
                                 horizontalArrangement = Arrangement.Center,
@@ -943,6 +971,28 @@ fun ContactEditScreen(
                                                 modifier = Modifier.size(20.dp)
                                             )
                                         }
+
+                                        SmallFloatingActionButton(
+                                            onClick = { cropTargetUriString = displayPhotoUri },
+                                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                            shape = CircleShape,
+                                            elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
+                                            modifier = Modifier
+                                                .size(40.dp)
+                                                .align(Alignment.TopEnd)
+                                                .offset(x = 8.dp, y = 0.dp)
+                                                .border(
+                                                    border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
+                                                    shape = CircleShape
+                                                )
+                                        ) {
+                                            Icon(
+                                                ImageVector.vectorResource(id = R.drawable.ic_page_info),
+                                                stringResource(R.string.action_crop),
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
                                     }
 
                                     SmallFloatingActionButton(
@@ -965,8 +1015,8 @@ fun ContactEditScreen(
                                             )
                                     ) {
                                         Icon(
-                                            if (photoUri != null) Icons.Outlined.Edit else Icons.Rounded.Add,
-                                            if (photoUri != null) stringResource(R.string.edit) else stringResource(R.string.add_photo),
+                                            if (displayPhotoUri != null) Icons.Outlined.Edit else Icons.Rounded.Add,
+                                            if (displayPhotoUri != null) stringResource(R.string.edit) else stringResource(R.string.add_photo),
                                             modifier = Modifier.size(20.dp)
                                         )
                                     }
@@ -1110,17 +1160,19 @@ fun ContactEditScreen(
                                             verticalAlignment = Alignment.CenterVertically,
                                             modifier = Modifier.fillMaxWidth()
                                         ) {
-                                            OutlinedTextField(
+                                            TextField(
                                                 value = namePrefix,
                                                 onValueChange = { namePrefix = it },
-                                                label = { Text(stringResource(R.string.prefix)) },
+                                                label = { Text(stringResource(R.string.prefix), modifier = Modifier.padding(vertical = 2.dp)) },
                                                 modifier = Modifier.weight(1f)
                                                     .fillMaxWidth()
                                                     .padding(start = paddingHorizontal),
-                                                shape = RoundedCornerShape(12.dp),
-                                                colors = OutlinedTextFieldDefaults.colors(
-                                                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                                                shape = RoundedCornerShape(cornerLargeDp),
+                                                colors = TextFieldDefaults.colors(
+                                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                    focusedIndicatorColor = Color.Transparent,
+                                                    unfocusedIndicatorColor = Color.Transparent
                                                 )
                                             )
                                             IconButton(
@@ -1138,17 +1190,19 @@ fun ContactEditScreen(
                                             }
                                         }
                                     }
-                                    OutlinedTextField(
+                                    TextField(
                                         value = givenName,
                                         onValueChange = { givenName = it },
-                                        label = { Text(stringResource(R.string.first_name)) },
+                                        label = { Text(stringResource(R.string.first_name), modifier = Modifier.padding(vertical = 2.dp)) },
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(horizontal = paddingHorizontal),
-                                        shape = RoundedCornerShape(12.dp),
-                                        colors = OutlinedTextFieldDefaults.colors(
-                                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                            focusedBorderColor = MaterialTheme.colorScheme.primary
+                                        shape = RoundedCornerShape(cornerLargeDp),
+                                        colors = TextFieldDefaults.colors(
+                                            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                            focusedIndicatorColor = Color.Transparent,
+                                            unfocusedIndicatorColor = Color.Transparent
                                         )
                                     )
                                     AnimatedVisibility(
@@ -1160,17 +1214,19 @@ fun ContactEditScreen(
                                             verticalAlignment = Alignment.CenterVertically,
                                             modifier = Modifier.fillMaxWidth()
                                         ) {
-                                            OutlinedTextField(
+                                            TextField(
                                                 value = middleName,
                                                 onValueChange = { middleName = it },
-                                                label = { Text(stringResource(R.string.middle_name)) },
+                                                label = { Text(stringResource(R.string.middle_name), modifier = Modifier.padding(vertical = 2.dp)) },
                                                 modifier = Modifier.weight(1f)
                                                     .fillMaxWidth()
                                                     .padding(start = paddingHorizontal),
-                                                shape = RoundedCornerShape(12.dp),
-                                                colors = OutlinedTextFieldDefaults.colors(
-                                                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                                                shape = RoundedCornerShape(cornerLargeDp),
+                                                colors = TextFieldDefaults.colors(
+                                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                    focusedIndicatorColor = Color.Transparent,
+                                                    unfocusedIndicatorColor = Color.Transparent
                                                 )
                                             )
                                             IconButton(
@@ -1188,17 +1244,19 @@ fun ContactEditScreen(
                                             }
                                         }
                                     }
-                                    OutlinedTextField(
+                                    TextField(
                                         value = familyName,
                                         onValueChange = { familyName = it },
-                                        label = { Text(stringResource(R.string.last_name)) },
+                                        label = { Text(stringResource(R.string.last_name), modifier = Modifier.padding(vertical = 2.dp)) },
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(horizontal = paddingHorizontal),
-                                        shape = RoundedCornerShape(12.dp),
-                                        colors = OutlinedTextFieldDefaults.colors(
-                                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                            focusedBorderColor = MaterialTheme.colorScheme.primary
+                                        shape = RoundedCornerShape(cornerLargeDp),
+                                        colors = TextFieldDefaults.colors(
+                                            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                            focusedIndicatorColor = Color.Transparent,
+                                            unfocusedIndicatorColor = Color.Transparent
                                         )
                                     )
                                     AnimatedVisibility(
@@ -1210,17 +1268,19 @@ fun ContactEditScreen(
                                             verticalAlignment = Alignment.CenterVertically,
                                             modifier = Modifier.fillMaxWidth()
                                         ) {
-                                            OutlinedTextField(
+                                            TextField(
                                                 value = nameSuffix,
                                                 onValueChange = { nameSuffix = it },
-                                                label = { Text(stringResource(R.string.suffix)) },
+                                                label = { Text(stringResource(R.string.suffix), modifier = Modifier.padding(vertical = 2.dp)) },
                                                 modifier = Modifier.weight(1f)
                                                     .fillMaxWidth()
                                                     .padding(start = paddingHorizontal),
-                                                shape = RoundedCornerShape(12.dp),
-                                                colors = OutlinedTextFieldDefaults.colors(
-                                                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                                                shape = RoundedCornerShape(cornerLargeDp),
+                                                colors = TextFieldDefaults.colors(
+                                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                    focusedIndicatorColor = Color.Transparent,
+                                                    unfocusedIndicatorColor = Color.Transparent
                                                 )
                                             )
                                             IconButton(
@@ -1247,17 +1307,19 @@ fun ContactEditScreen(
                                             verticalAlignment = Alignment.CenterVertically,
                                             modifier = Modifier.fillMaxWidth()
                                         ) {
-                                            OutlinedTextField(
+                                            TextField(
                                                 value = nickname,
                                                 onValueChange = { nickname = it },
-                                                label = { Text(stringResource(R.string.nickname)) },
+                                                label = { Text(stringResource(R.string.nickname), modifier = Modifier.padding(vertical = 2.dp)) },
                                                 modifier = Modifier.weight(1f)
                                                     .fillMaxWidth()
                                                     .padding(start = paddingHorizontal),
-                                                shape = RoundedCornerShape(12.dp),
-                                                colors = OutlinedTextFieldDefaults.colors(
-                                                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                                                shape = RoundedCornerShape(cornerLargeDp),
+                                                colors = TextFieldDefaults.colors(
+                                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                    focusedIndicatorColor = Color.Transparent,
+                                                    unfocusedIndicatorColor = Color.Transparent
                                                 )
                                             )
                                             IconButton(
@@ -1304,17 +1366,19 @@ fun ContactEditScreen(
                                         .alpha(rowAlpha),
                                     verticalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    OutlinedTextField(
+                                    TextField(
                                         value = company,
                                         onValueChange = { company = it },
-                                        label = { Text(stringResource(R.string.company)) },
+                                        label = { Text(stringResource(R.string.company), modifier = Modifier.padding(vertical = 2.dp)) },
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(horizontal = paddingHorizontal),
-                                        shape = RoundedCornerShape(12.dp),
-                                        colors = OutlinedTextFieldDefaults.colors(
-                                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                            focusedBorderColor = MaterialTheme.colorScheme.primary
+                                        shape = RoundedCornerShape(cornerLargeDp),
+                                        colors = TextFieldDefaults.colors(
+                                            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                            focusedIndicatorColor = Color.Transparent,
+                                            unfocusedIndicatorColor = Color.Transparent
                                         )
                                     )
                                     AnimatedVisibility(
@@ -1326,17 +1390,19 @@ fun ContactEditScreen(
                                             verticalAlignment = Alignment.CenterVertically,
                                             modifier = Modifier.fillMaxWidth()
                                         ) {
-                                            OutlinedTextField(
+                                            TextField(
                                                 value = jobTitle,
                                                 onValueChange = { jobTitle = it },
-                                                label = { Text(stringResource(R.string.job_title)) },
+                                                label = { Text(stringResource(R.string.job_title), modifier = Modifier.padding(vertical = 2.dp)) },
                                                 modifier = Modifier.weight(1f)
                                                     .fillMaxWidth()
                                                     .padding(start = paddingHorizontal),
-                                                shape = RoundedCornerShape(12.dp),
-                                                colors = OutlinedTextFieldDefaults.colors(
-                                                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                                                shape = RoundedCornerShape(cornerLargeDp),
+                                                colors = TextFieldDefaults.colors(
+                                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                    focusedIndicatorColor = Color.Transparent,
+                                                    unfocusedIndicatorColor = Color.Transparent
                                                 )
                                             )
                                             IconButton(
@@ -1393,7 +1459,8 @@ fun ContactEditScreen(
                                                     number = phoneDetail.number
                                                 )
                                                 phoneNumbers[index] = phoneDetail.number
-                                            }
+                                            },
+                                            cornerDp = cornerLargeDp,
                                         )
                                     }
                                     AddButton(
@@ -1430,7 +1497,8 @@ fun ContactEditScreen(
                                                     label = if (newType == null) newLabel else null,
                                                     value = email.value
                                                 )
-                                            }
+                                            },
+                                            cornerDp = cornerLargeDp,
                                         )
                                     }
                                     AddButton(
@@ -1463,7 +1531,8 @@ fun ContactEditScreen(
                                                     label = if (newType == null) newLabel else null,
                                                     date = event.date
                                                 )
-                                            }
+                                            },
+                                            cornerDp = cornerLargeDp
                                         )
                                     }
                                     AddButton(
@@ -1496,7 +1565,8 @@ fun ContactEditScreen(
                                                     label = if (newType == null) newLabel else null,
                                                     formattedAddress = address.formattedAddress
                                                 )
-                                            }
+                                            },
+                                            cornerDp = cornerLargeDp,
                                         )
                                     }
                                     AddButton(
@@ -1520,10 +1590,10 @@ fun ContactEditScreen(
                                     animationSpec = tween(150),
                                     label = "rowAlpha"
                                 )
-                                OutlinedTextField(
+                                TextField(
                                     value = notes ?: "",
                                     onValueChange = { notes = it },
-                                    label = { Text(stringResource(R.string.notes_contact)) },
+                                    label = { Text(stringResource(R.string.notes_contact), modifier = Modifier.padding(vertical = 2.dp)) },
                                     modifier = Modifier
                                         .animateContentSize(
                                             animationSpec = spring(
@@ -1535,10 +1605,12 @@ fun ContactEditScreen(
                                         .alpha(rowAlpha)
                                         .fillMaxWidth()
                                         .padding(horizontal = paddingHorizontal),
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = OutlinedTextFieldDefaults.colors(
-                                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                        focusedBorderColor = MaterialTheme.colorScheme.primary
+                                    shape = RoundedCornerShape(cornerLargeDp),
+                                    colors = TextFieldDefaults.colors(
+                                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        focusedIndicatorColor = Color.Transparent,
+                                        unfocusedIndicatorColor = Color.Transparent
                                     )
                                 )
                             }
@@ -1634,7 +1706,7 @@ fun ContactEditScreen(
                                     .padding(horizontal = paddingHorizontal)
                                     .background(
                                         color = MaterialTheme.colorScheme.surfaceContainerLowest,
-                                        shape = RoundedCornerShape(24.dp)
+                                        shape = RoundedCornerShape(cornerLargeIncreasedDp)
                                     )
                                     .padding(vertical = 24.dp),
                                 horizontalArrangement = Arrangement.Center,
@@ -1674,6 +1746,28 @@ fun ContactEditScreen(
                                                 modifier = Modifier.size(20.dp)
                                             )
                                         }
+
+                                        SmallFloatingActionButton(
+                                            onClick = { cropTargetUriString = displayPhotoUri },
+                                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                            shape = CircleShape,
+                                            elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
+                                            modifier = Modifier
+                                                .size(40.dp)
+                                                .align(Alignment.TopEnd)
+                                                .offset(x = 8.dp, y = 0.dp)
+                                                .border(
+                                                    border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
+                                                    shape = CircleShape
+                                                )
+                                        ) {
+                                            Icon(
+                                                ImageVector.vectorResource(id = R.drawable.ic_page_info),
+                                                stringResource(R.string.action_crop),
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
                                     }
 
                                     SmallFloatingActionButton(
@@ -1696,8 +1790,8 @@ fun ContactEditScreen(
                                             )
                                     ) {
                                         Icon(
-                                            if (photoUri != null) Icons.Outlined.Edit else Icons.Rounded.Add,
-                                            if (photoUri != null) stringResource(R.string.edit) else stringResource(R.string.add_photo),
+                                            if (displayPhotoUri != null) Icons.Outlined.Edit else Icons.Rounded.Add,
+                                            if (displayPhotoUri != null) stringResource(R.string.edit) else stringResource(R.string.add_photo),
                                             modifier = Modifier.size(20.dp)
                                         )
                                     }
@@ -1826,17 +1920,19 @@ fun ContactEditScreen(
                                         verticalAlignment = Alignment.CenterVertically,
                                         modifier = Modifier.fillMaxWidth()
                                     ) {
-                                        OutlinedTextField(
+                                        TextField(
                                             value = namePrefix,
                                             onValueChange = { namePrefix = it },
-                                            label = { Text(stringResource(R.string.prefix)) },
+                                            label = { Text(stringResource(R.string.prefix), modifier = Modifier.padding(vertical = 2.dp)) },
                                             modifier = Modifier.weight(1f)
                                                 .fillMaxWidth()
                                                 .padding(start = paddingHorizontal),
-                                            shape = RoundedCornerShape(12.dp),
-                                            colors = OutlinedTextFieldDefaults.colors(
-                                                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                                focusedBorderColor = MaterialTheme.colorScheme.primary
+                                            shape = RoundedCornerShape(cornerLargeDp),
+                                            colors = TextFieldDefaults.colors(
+                                                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                focusedIndicatorColor = Color.Transparent,
+                                                unfocusedIndicatorColor = Color.Transparent
                                             )
                                         )
                                         IconButton(
@@ -1854,17 +1950,19 @@ fun ContactEditScreen(
                                         }
                                     }
                                 }
-                                OutlinedTextField(
+                                TextField(
                                     value = givenName,
                                     onValueChange = { givenName = it },
-                                    label = { Text(stringResource(R.string.first_name)) },
+                                    label = { Text(stringResource(R.string.first_name), modifier = Modifier.padding(vertical = 2.dp)) },
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(horizontal = paddingHorizontal),
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = OutlinedTextFieldDefaults.colors(
-                                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                        focusedBorderColor = MaterialTheme.colorScheme.primary
+                                    shape = RoundedCornerShape(cornerLargeDp),
+                                    colors = TextFieldDefaults.colors(
+                                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        focusedIndicatorColor = Color.Transparent,
+                                        unfocusedIndicatorColor = Color.Transparent
                                     )
                                 )
                                 AnimatedVisibility(
@@ -1876,17 +1974,19 @@ fun ContactEditScreen(
                                         verticalAlignment = Alignment.CenterVertically,
                                         modifier = Modifier.fillMaxWidth()
                                     ) {
-                                        OutlinedTextField(
+                                        TextField(
                                             value = middleName,
                                             onValueChange = { middleName = it },
-                                            label = { Text(stringResource(R.string.middle_name)) },
+                                            label = { Text(stringResource(R.string.middle_name), modifier = Modifier.padding(vertical = 2.dp)) },
                                             modifier = Modifier.weight(1f)
                                                 .fillMaxWidth()
                                                 .padding(start = paddingHorizontal),
-                                            shape = RoundedCornerShape(12.dp),
-                                            colors = OutlinedTextFieldDefaults.colors(
-                                                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                                focusedBorderColor = MaterialTheme.colorScheme.primary
+                                            shape = RoundedCornerShape(cornerLargeDp),
+                                            colors = TextFieldDefaults.colors(
+                                                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                focusedIndicatorColor = Color.Transparent,
+                                                unfocusedIndicatorColor = Color.Transparent
                                             )
                                         )
                                         IconButton(
@@ -1904,17 +2004,19 @@ fun ContactEditScreen(
                                         }
                                     }
                                 }
-                                OutlinedTextField(
+                                TextField(
                                     value = familyName,
                                     onValueChange = { familyName = it },
-                                    label = { Text(stringResource(R.string.last_name)) },
+                                    label = { Text(stringResource(R.string.last_name), modifier = Modifier.padding(vertical = 2.dp)) },
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(horizontal = paddingHorizontal),
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = OutlinedTextFieldDefaults.colors(
-                                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                        focusedBorderColor = MaterialTheme.colorScheme.primary
+                                    shape = RoundedCornerShape(cornerLargeDp),
+                                    colors = TextFieldDefaults.colors(
+                                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        focusedIndicatorColor = Color.Transparent,
+                                        unfocusedIndicatorColor = Color.Transparent
                                     )
                                 )
                                 AnimatedVisibility(
@@ -1926,17 +2028,19 @@ fun ContactEditScreen(
                                         verticalAlignment = Alignment.CenterVertically,
                                         modifier = Modifier.fillMaxWidth()
                                     ) {
-                                        OutlinedTextField(
+                                        TextField(
                                             value = nameSuffix,
                                             onValueChange = { nameSuffix = it },
-                                            label = { Text(stringResource(R.string.suffix)) },
+                                            label = { Text(stringResource(R.string.suffix), modifier = Modifier.padding(vertical = 2.dp)) },
                                             modifier = Modifier.weight(1f)
                                                 .fillMaxWidth()
                                                 .padding(start = paddingHorizontal),
-                                            shape = RoundedCornerShape(12.dp),
-                                            colors = OutlinedTextFieldDefaults.colors(
-                                                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                                focusedBorderColor = MaterialTheme.colorScheme.primary
+                                            shape = RoundedCornerShape(cornerLargeDp),
+                                            colors = TextFieldDefaults.colors(
+                                                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                focusedIndicatorColor = Color.Transparent,
+                                                unfocusedIndicatorColor = Color.Transparent
                                             )
                                         )
                                         IconButton(
@@ -1963,17 +2067,19 @@ fun ContactEditScreen(
                                         verticalAlignment = Alignment.CenterVertically,
                                         modifier = Modifier.fillMaxWidth()
                                     ) {
-                                        OutlinedTextField(
+                                        TextField(
                                             value = nickname,
                                             onValueChange = { nickname = it },
-                                            label = { Text(stringResource(R.string.nickname)) },
+                                            label = { Text(stringResource(R.string.nickname), modifier = Modifier.padding(vertical = 2.dp)) },
                                             modifier = Modifier.weight(1f)
                                                 .fillMaxWidth()
                                                 .padding(start = paddingHorizontal),
-                                            shape = RoundedCornerShape(12.dp),
-                                            colors = OutlinedTextFieldDefaults.colors(
-                                                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                                focusedBorderColor = MaterialTheme.colorScheme.primary
+                                            shape = RoundedCornerShape(cornerLargeDp),
+                                            colors = TextFieldDefaults.colors(
+                                                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                focusedIndicatorColor = Color.Transparent,
+                                                unfocusedIndicatorColor = Color.Transparent
                                             )
                                         )
                                         IconButton(
@@ -2020,17 +2126,19 @@ fun ContactEditScreen(
                                     .alpha(rowAlpha),
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                OutlinedTextField(
+                                TextField(
                                     value = company,
                                     onValueChange = { company = it },
-                                    label = { Text(stringResource(R.string.company)) },
+                                    label = { Text(stringResource(R.string.company), modifier = Modifier.padding(vertical = 2.dp)) },
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(horizontal = paddingHorizontal),
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = OutlinedTextFieldDefaults.colors(
-                                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                        focusedBorderColor = MaterialTheme.colorScheme.primary
+                                    shape = RoundedCornerShape(cornerLargeDp),
+                                    colors = TextFieldDefaults.colors(
+                                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        focusedIndicatorColor = Color.Transparent,
+                                        unfocusedIndicatorColor = Color.Transparent
                                     )
                                 )
                                 AnimatedVisibility(
@@ -2042,17 +2150,19 @@ fun ContactEditScreen(
                                         verticalAlignment = Alignment.CenterVertically,
                                         modifier = Modifier.fillMaxWidth()
                                     ) {
-                                        OutlinedTextField(
+                                        TextField(
                                             value = jobTitle,
                                             onValueChange = { jobTitle = it },
-                                            label = { Text(stringResource(R.string.job_title)) },
+                                            label = { Text(stringResource(R.string.job_title), modifier = Modifier.padding(vertical = 2.dp)) },
                                             modifier = Modifier.weight(1f)
                                                 .fillMaxWidth()
                                                 .padding(start = paddingHorizontal),
-                                            shape = RoundedCornerShape(12.dp),
-                                            colors = OutlinedTextFieldDefaults.colors(
-                                                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                                focusedBorderColor = MaterialTheme.colorScheme.primary
+                                            shape = RoundedCornerShape(cornerLargeDp),
+                                            colors = TextFieldDefaults.colors(
+                                                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                focusedIndicatorColor = Color.Transparent,
+                                                unfocusedIndicatorColor = Color.Transparent
                                             )
                                         )
                                         IconButton(
@@ -2110,7 +2220,8 @@ fun ContactEditScreen(
                                                 number = phoneDetail.number
                                             )
                                             phoneNumbers[index] = phoneDetail.number
-                                        }
+                                        },
+                                        cornerDp = cornerLargeDp,
                                     )
                                 }
                                 AddButton(
@@ -2147,7 +2258,8 @@ fun ContactEditScreen(
                                                 label = if (newType == null) newLabel else null,
                                                 value = email.value
                                             )
-                                        }
+                                        },
+                                        cornerDp = cornerLargeDp,
                                     )
                                 }
                                 AddButton(
@@ -2180,7 +2292,8 @@ fun ContactEditScreen(
                                                 label = if (newType == null) newLabel else null,
                                                 date = event.date
                                             )
-                                        }
+                                        },
+                                        cornerDp = cornerLargeDp
                                     )
                                 }
                                 AddButton(
@@ -2213,7 +2326,8 @@ fun ContactEditScreen(
                                                 label = if (newType == null) newLabel else null,
                                                 formattedAddress = address.formattedAddress
                                             )
-                                        }
+                                        },
+                                        cornerDp = cornerLargeDp,
                                     )
                                 }
                                 AddButton(
@@ -2237,10 +2351,10 @@ fun ContactEditScreen(
                                 animationSpec = tween(150),
                                 label = "rowAlpha"
                             )
-                            OutlinedTextField(
+                            TextField(
                                 value = notes ?: "",
                                 onValueChange = { notes = it },
-                                label = { Text(stringResource(R.string.notes_contact)) },
+                                label = { Text(stringResource(R.string.notes_contact), modifier = Modifier.padding(vertical = 2.dp)) },
                                 modifier = Modifier
                                     .animateContentSize(
                                         animationSpec = spring(
@@ -2252,10 +2366,12 @@ fun ContactEditScreen(
                                     .alpha(rowAlpha)
                                     .fillMaxWidth()
                                     .padding(horizontal = paddingHorizontal),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                                shape = RoundedCornerShape(cornerLargeDp),
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    focusedIndicatorColor = Color.Transparent,
+                                    unfocusedIndicatorColor = Color.Transparent
                                 )
                             )
                         }
@@ -2350,7 +2466,8 @@ fun EditField(
     icon: ImageVector,
     onDelete: (() -> Unit)? = null,
     onLabelChange: ((String, Int?) -> Unit)? = null, // label, type
-    availableLabels: List<Pair<Int, String>> = emptyList() // (type, displayName)
+    availableLabels: List<Pair<Int, String>> = emptyList(), // (type, displayName)
+    cornerDp: Dp,
 ) {
     var appeared by remember { mutableStateOf(false) }
     var showLabelEditor by remember { mutableStateOf(false) }
@@ -2394,28 +2511,31 @@ fun EditField(
                 )
             }
 
-            OutlinedTextField(
+            TextField(
                 value = value,
                 onValueChange = onValueChange,
                 label = {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.padding(vertical = 2.dp)
                     ) {
                         Icon(icon, null, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
                         Text(currentLabel,
                             maxLines = 1,
                             overflow = TextOverflow.MiddleEllipsis
                         )
                     }
                 },
-                modifier = Modifier
-                    .weight(1f),
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                modifier = Modifier.weight(1f),
+                singleLine = true,
+                shape = if (showLabelEditor) RoundedCornerShape(cornerDp, cornerDp, cornerDp, cardCornerExtraSmall)
+                    else RoundedCornerShape(cornerDp),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
                 )
             )
 
@@ -2440,10 +2560,10 @@ fun EditField(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = paddingHorizontal, end = paddingHorizontal, top = 6.dp),
-                shape = RoundedCornerShape(16.dp),
+                    .padding(start = paddingHorizontal, end = paddingHorizontal, top = cardSpacedBy),
+                shape = RoundedCornerShape(4.dp, cornerDp, cornerDp, cornerDp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                 )
             ) {
                 Column(
@@ -2566,7 +2686,8 @@ fun EditPhoneField(
     onValueChange: (String) -> Unit,
     label: String,
     onDelete: (() -> Unit)? = null,
-    onLabelChange: ((String, Int?) -> Unit)? = null
+    onLabelChange: ((String, Int?) -> Unit)? = null,
+    cornerDp: Dp
 ) {
     val phoneTypes = listOf(
         Phone.TYPE_MOBILE to stringResource(R.string.mobile),
@@ -2586,7 +2707,8 @@ fun EditPhoneField(
         icon = Icons.Rounded.Phone,
         onDelete = onDelete,
         onLabelChange = onLabelChange,
-        availableLabels = phoneTypes
+        availableLabels = phoneTypes,
+        cornerDp = cornerDp
     )
 }
 
@@ -2596,7 +2718,8 @@ fun EditEmailField(
     onValueChange: (String) -> Unit,
     label: String,
     onDelete: (() -> Unit)? = null,
-    onLabelChange: ((String, Int?) -> Unit)? = null
+    onLabelChange: ((String, Int?) -> Unit)? = null,
+    cornerDp: Dp
 ) {
     val emailTypes = listOf(
         Email.TYPE_HOME to stringResource(R.string.home),
@@ -2612,7 +2735,8 @@ fun EditEmailField(
         icon = Icons.Default.Email,
         onDelete = onDelete,
         onLabelChange = onLabelChange,
-        availableLabels = emailTypes
+        availableLabels = emailTypes,
+        cornerDp = cornerDp
     )
 }
 
@@ -2622,7 +2746,8 @@ fun EditAddressField(
     onValueChange: (String) -> Unit,
     label: String,
     onDelete: (() -> Unit)? = null,
-    onLabelChange: ((String, Int?) -> Unit)? = null
+    onLabelChange: ((String, Int?) -> Unit)? = null,
+    cornerDp: Dp
 ) {
     val addressTypes = listOf(
         StructuredPostal.TYPE_HOME to stringResource(R.string.home),
@@ -2637,7 +2762,8 @@ fun EditAddressField(
         icon = Icons.Default.LocationOn,
         onDelete = onDelete,
         onLabelChange = onLabelChange,
-        availableLabels = addressTypes
+        availableLabels = addressTypes,
+        cornerDp = cornerDp
     )
 }
 
@@ -2649,7 +2775,8 @@ fun EditFieldDate(
     icon: ImageVector,
     onDelete: (() -> Unit)? = null,
     onLabelChange: ((String, Int?) -> Unit)? = null,
-    availableLabels: List<Pair<Int, String>> = emptyList()
+    availableLabels: List<Pair<Int, String>> = emptyList(),
+    cornerDp: Dp,
 ) {
     var appeared by remember { mutableStateOf(false) }
     var showLabelEditor by remember { mutableStateOf(false) }
@@ -2704,7 +2831,7 @@ fun EditFieldDate(
                 )
             }
 
-            OutlinedTextField(
+            TextField(
 //                leadingIcon = {
 //                    Icon(
 //                        icon,
@@ -2729,10 +2856,10 @@ fun EditFieldDate(
                 label = {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.padding(vertical = 2.dp)
                     ) {
                         Icon(icon, null, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
                         Text(currentLabel,
                             maxLines = 1,
                             overflow = TextOverflow.MiddleEllipsis
@@ -2745,14 +2872,21 @@ fun EditFieldDate(
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() }
                     ) { showDatePicker = true },
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
+                shape = if (showLabelEditor) RoundedCornerShape(cornerDp, cornerDp, cornerDp, cardCornerExtraSmall)
+                    else RoundedCornerShape(cornerDp),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent,
                     // Active status
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+//                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+//                    focusedBorderColor = MaterialTheme.colorScheme.primary,
                     // We're overriding the disabled colors so the field looks like a regular one
                     disabledTextColor = MaterialTheme.colorScheme.onSurface,
-                    disabledBorderColor = MaterialTheme.colorScheme.outlineVariant,
+//                    disabledBorderColor = MaterialTheme.colorScheme.outlineVariant,
                     disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -2783,8 +2917,8 @@ fun EditFieldDate(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = paddingHorizontal, end = paddingHorizontal, top = 6.dp),
-                shape = RoundedCornerShape(16.dp),
+                    .padding(start = paddingHorizontal, end = paddingHorizontal, top = cardSpacedBy),
+                shape = RoundedCornerShape(4.dp, cornerDp, cornerDp, cornerDp),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
                 )
@@ -2939,7 +3073,8 @@ fun EditEventField(
     onValueChange: (String) -> Unit,
     label: String,
     onDelete: (() -> Unit)? = null,
-    onLabelChange: ((String, Int?) -> Unit)? = null
+    onLabelChange: ((String, Int?) -> Unit)? = null,
+    cornerDp: Dp
 ) {
     val eventTypes = listOf(
         Event.TYPE_BIRTHDAY to stringResource(R.string.birthday),
@@ -2954,7 +3089,8 @@ fun EditEventField(
         icon = Icons.Default.Event,
         onDelete = onDelete,
         onLabelChange = onLabelChange,
-        availableLabels = eventTypes
+        availableLabels = eventTypes,
+        cornerDp = cornerDp
     )
 }
 

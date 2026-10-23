@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -93,6 +94,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.R
+import dev.goodwy.rphone.cardCornerExtraSmall
 import dev.goodwy.rphone.cardSpacedBy
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.liquidglass.LocalLiquidGlassBackdrop
@@ -721,12 +723,13 @@ fun <T> RillSelectionDialog(
     items: List<T>,
     itemLabel: (T) -> String,
     onItemSelected: (T) -> Unit,
-    itemSupporting: ((T) -> String)? = null,
+    itemSupporting: ((T) -> String?)? = null,
     icon: ImageVector? = null,
     iconContainerColor: Color? = null,
     iconBgContainerColor: Color? = null,
     itemIcon: @Composable ((T) -> ImageVector)? = null,
     isSelected: (T) -> Boolean = { false },
+    isSettings: Boolean = true,
 ) {
     RillDialog(
         onDismissRequest = onDismissRequest,
@@ -740,75 +743,85 @@ fun <T> RillSelectionDialog(
             }
         }
     ) {
-        items.forEach { item ->
-            val selected = isSelected(item)
-            val interactionSource = remember { MutableInteractionSource() }
-            val isPressed by interactionSource.collectIsPressedAsState()
-            val cornerRadius by animateDpAsState(
-                if (selected || isPressed) 40.dp else 10.dp,
-                spring(stiffness = Spring.StiffnessMediumLow),
-                label = "ButtonShapeAnimation"
-            )
-            Surface(
-                onClick = {
-                    onItemSelected(item)
-                    onDismissRequest()
-                },
-                shape = RoundedCornerShape(cornerRadius),
-                color = if (selected) MaterialTheme.colorScheme.primaryContainer else cardColor,
-                modifier = Modifier.fillMaxWidth(),
-                interactionSource = interactionSource
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = if (itemIcon != null) 8.dp else 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+        RillExpressiveCard(
+            modifier = Modifier
+                .fillMaxWidth(),
+            shape = if (isSettings) RoundedCornerShape(0.dp) else MaterialTheme.shapes.large
+        ) {
+            val inner = if (isSettings) 10.dp else cardCornerExtraSmall
+            items.forEach { item ->
+                val selected = isSelected(item)
+                val interactionSource = remember { MutableInteractionSource() }
+                val isPressed by interactionSource.collectIsPressedAsState()
+                val cornerRadius by animateDpAsState(
+                    if (selected || isPressed) 40.dp else inner,
+                    spring(stiffness = Spring.StiffnessMediumLow),
+                    label = "ButtonShapeAnimation"
+                )
+                Surface(
+                    onClick = {
+                        onItemSelected(item)
+                        onDismissRequest()
+                    },
+                    shape = RoundedCornerShape(cornerRadius),
+                    color = if (selected) MaterialTheme.colorScheme.primaryContainer else cardColor,
+                    modifier = Modifier.fillMaxWidth(),
+                    interactionSource = interactionSource
                 ) {
-                    if (itemIcon != null) {
-                        Surface(
-                            modifier = Modifier.size(44.dp),
-                            shape = CircleShape, //RoundedCornerShape(12.dp),
-                            color = if (selected) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    itemIcon(item),
-                                    null,
-                                    tint = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
-                                    else MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.size(20.dp)
-                                )
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = if (itemIcon != null) 8.dp else 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (itemIcon != null) {
+                            Surface(
+                                modifier = Modifier.size(44.dp),
+                                shape = CircleShape, //RoundedCornerShape(12.dp),
+                                color = if (selected) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.secondaryContainer
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        itemIcon(item),
+                                        null,
+                                        tint = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
+                                        else MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+                            Spacer(Modifier.width(16.dp))
+                        } else {
+                            Spacer(modifier = Modifier.width(4.dp))
+                        }
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                itemLabel(item),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold,
+                                color = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
+                                else MaterialTheme.colorScheme.onSurface
+                            )
+                            if (itemSupporting != null) {
+                                val supporting = itemSupporting(item)
+                                if (!supporting.isNullOrBlank()) {
+                                    Text(
+                                        supporting,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = if (selected) MaterialTheme.colorScheme.onPrimaryContainer.copy(
+                                            alpha = 0.8f
+                                        ) else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
                         }
-                        Spacer(Modifier.width(16.dp))
-                    } else {
-                        Spacer(modifier = Modifier.width(4.dp))
-                    }
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            itemLabel(item),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold,
-                            color = if (selected) MaterialTheme.colorScheme.onPrimaryContainer
-                            else MaterialTheme.colorScheme.onSurface
-                        )
-                        if (itemSupporting != null) {
-                            Text(
-                                itemSupporting(item),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = if (selected) MaterialTheme.colorScheme.onPrimaryContainer.copy(
-                                    alpha = 0.8f
-                                ) else MaterialTheme.colorScheme.onSurfaceVariant
+                        if (selected) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Selected",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(24.dp)
                             )
                         }
-                    }
-                    if (selected) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = "Selected",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp)
-                        )
                     }
                 }
             }

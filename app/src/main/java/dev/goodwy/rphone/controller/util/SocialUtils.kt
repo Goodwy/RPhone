@@ -1,22 +1,42 @@
 package dev.goodwy.rphone.controller.util
 
-
+import android.content.ContentResolver
+import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.provider.ContactsContract
 import androidx.core.net.toUri
 import android.telephony.PhoneNumberUtils
 import android.telephony.TelephonyManager
+import dev.goodwy.rphone.R
 import java.util.Locale
+
+// ── WhatsApp ─────────────────────────────────────────────────────────────
+private const val MIME_WA_VOICE_CALL          = "vnd.android.cursor.item/vnd.com.whatsapp.voip.call"
+private const val MIME_WA_VIDEO_CALL          = "vnd.android.cursor.item/vnd.com.whatsapp.video.call"
+private const val MIME_WA_BIZ_VOICE_CALL      = "vnd.android.cursor.item/vnd.com.whatsapp.w4b.voip.call"
+private const val MIME_WA_BIZ_VIDEO_CALL      = "vnd.android.cursor.item/vnd.com.whatsapp.w4b.video.call"
+
+// ── Google Meet / Duo (Tachyon) ──────────────────────────────────────────
+private const val TACHYON_PKG                 = "com.google.android.apps.tachyon"
+private const val TACHYON_CALL_ACTION         = "com.google.android.apps.tachyon.action.CALL"
+private const val TACHYON_VIDEO_ACTIVITY      = "com.google.android.apps.tachyon.ContactsVideoActionActivity"
+private const val TACHYON_AUDIO_ACTIVITY      = "com.google.android.apps.tachyon.ContactsAudioActionActivity"
+private const val MIME_MEET_VIDEO_CALL        = "vnd.android.cursor.item/com.google.android.apps.tachyon.phone"
+private const val MIME_MEET_AUDIO_CALL        = "vnd.android.cursor.item/com.google.android.apps.tachyon.phone.audio"
 
 data class SocialAppInfo(
     val id: String,
     val name: String,
-    val packageName: String,
+    val packageName: String?,
+    val iconRes: Int,
     val iconDrawable: Drawable? = null,
     val assetIcon: String? = null,
-    val action: (Context, String) -> Unit
+    val action: (Context, String) -> Unit,
+    val videoCallAction: ((Context, String) -> Boolean)? = null,
+    val voiceCallAction: ((Context, String) -> Boolean)? = null
 )
 
 object SocialUtils {
@@ -60,9 +80,12 @@ object SocialUtils {
         return intl.replace(Regex("[^0-9]"), "")
     }
 
-    fun openWhatsApp(context: Context, number: String) {
+    fun openWhatsAppChat(context: Context, number: String) {
         val digits = cleanDigitsOnly(context, number)
-        if (digits.isBlank()) return
+        if (digits.isBlank()) {
+            context.toast(context.getString(R.string.no_valid_app_found))
+            return
+        }
         val url = "https://api.whatsapp.com/send?phone=$digits"
         val intent = Intent(Intent.ACTION_VIEW, url.toUri()).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -77,13 +100,18 @@ object SocialUtils {
             try {
                 intent.setPackage(null)
                 context.startActivity(intent)
-            } catch (_: Exception) {}
+            } catch (_: Exception) {
+                context.toast(context.getString(R.string.no_valid_app_found))
+            }
         }
     }
 
-    fun openTelegram(context: Context, number: String) {
+    fun openTelegramChat(context: Context, number: String) {
         val digits = cleanDigitsOnly(context, number)
-        if (digits.isBlank()) return
+        if (digits.isBlank()) {
+            context.toast(context.getString(R.string.no_valid_app_found))
+            return
+        }
         val url = "https://t.me/+$digits"
         val intent = Intent(Intent.ACTION_VIEW, url.toUri()).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -99,13 +127,18 @@ object SocialUtils {
             try {
                 intent.setPackage(null)
                 context.startActivity(intent)
-            } catch (_: Exception) {}
+            } catch (_: Exception) {
+                context.toast(context.getString(R.string.no_valid_app_found))
+            }
         }
     }
 
-    fun openSignal(context: Context, number: String) {
+    fun openSignalChat(context: Context, number: String) {
         val digits = cleanDigitsOnly(context, number)
-        if (digits.isBlank()) return
+        if (digits.isBlank()) {
+            context.toast(context.getString(R.string.no_valid_app_found))
+            return
+        }
         val url = "sgnl://signal.me/#p/+$digits"
         val intent = Intent(Intent.ACTION_VIEW, url.toUri()).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -122,13 +155,18 @@ object SocialUtils {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 }
                 context.startActivity(fallbackIntent)
-            } catch (_: Exception) {}
+            } catch (_: Exception) {
+                context.toast(context.getString(R.string.no_valid_app_found))
+            }
         }
     }
 
-    fun openViber(context: Context, number: String) {
+    fun openViberChat(context: Context, number: String) {
         val digits = cleanDigitsOnly(context, number)
-        if (digits.isBlank()) return
+        if (digits.isBlank()) {
+            context.toast(context.getString(R.string.no_valid_app_found))
+            return
+        }
         val url = "viber://chat?number=%2B$digits"
         val intent = Intent(Intent.ACTION_VIEW, url.toUri()).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -142,47 +180,9 @@ object SocialUtils {
             try {
                 intent.setPackage(null)
                 context.startActivity(intent)
-            } catch (_: Exception) {}
-        }
-    }
-
-    fun openSkype(context: Context, number: String) {
-        val digits = cleanDigitsOnly(context, number)
-        if (digits.isBlank()) return
-        val url = "skype:+$digits?chat"
-        val intent = Intent(Intent.ACTION_VIEW, url.toUri()).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            if (context.isPackageInstalled("com.skype.raider")) {
-                setPackage("com.skype.raider")
+            } catch (_: Exception) {
+                context.toast(context.getString(R.string.no_valid_app_found))
             }
-        }
-        try {
-            context.startActivity(intent)
-        } catch (_: Exception) {
-            try {
-                intent.setPackage(null)
-                context.startActivity(intent)
-            } catch (_: Exception) {}
-        }
-    }
-
-    fun openWeChat(context: Context, number: String) {
-        val launchIntent = context.packageManager.getLaunchIntentForPackage("com.tencent.mm")
-        if (launchIntent != null) {
-            launchIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            try {
-                context.startActivity(launchIntent)
-            } catch (_: Exception) {}
-        }
-    }
-
-    fun openLine(context: Context, number: String) {
-        val launchIntent = context.packageManager.getLaunchIntentForPackage("jp.naver.line.android")
-        if (launchIntent != null) {
-            launchIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            try {
-                context.startActivity(launchIntent)
-            } catch (_: Exception) {}
         }
     }
 
@@ -192,35 +192,10 @@ object SocialUtils {
             launchIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             try {
                 context.startActivity(launchIntent)
-            } catch (_: Exception) {}
-        }
-    }
-
-    fun openTruecaller(context: Context, number: String) {
-        val digits = cleanDigitsOnly(context, number)
-        val intent = Intent(Intent.ACTION_VIEW, "truecaller://search?q=$digits".toUri()).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            if (context.isPackageInstalled("com.truecaller")) {
-                setPackage("com.truecaller")
+            } catch (_: Exception) {
+                context.toast(context.getString(R.string.no_valid_app_found))
             }
         }
-        try {
-            context.startActivity(intent)
-        } catch (_: Exception) {
-            val launchIntent = context.packageManager.getLaunchIntentForPackage("com.truecaller")
-            launchIntent?.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            launchIntent?.let { runCatching { context.startActivity(it) } }
-        }
-    }
-
-    fun openSms(context: Context, number: String) {
-        val intl = formatInternationalNumber(context, number)
-        val intent = Intent(Intent.ACTION_SENDTO, "smsto:$intl".toUri()).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        }
-        try {
-            context.startActivity(intent)
-        } catch (_: Exception) {}
     }
 
     /**
@@ -246,9 +221,12 @@ object SocialUtils {
                     id = "whatsapp",
                     name = label,
                     packageName = waPkg,
+                    iconRes = R.drawable.ic_whatsapp,
                     iconDrawable = icon,
                     assetIcon = "file:///android_asset/icons/whatsapp.png",
-                    action = { ctx, num -> openWhatsApp(ctx, num) }
+                    action = { ctx, num -> openWhatsAppChat(ctx, num) },
+                    videoCallAction = { ctx, num -> startWhatsAppVideoCall(ctx, num) },
+                    voiceCallAction = { ctx, num -> startWhatsAppVoiceCall(ctx, num) }
                 )
             )
         }
@@ -269,9 +247,12 @@ object SocialUtils {
                     id = "telegram",
                     name = label,
                     packageName = tgPkg,
+                    iconRes = R.drawable.ic_telegram,
                     iconDrawable = icon,
                     assetIcon = "file:///android_asset/icons/telegram.png",
-                    action = { ctx, num -> openTelegram(ctx, num) }
+                    action = { ctx, num -> openTelegramChat(ctx, num) },
+                    videoCallAction = { ctx, num -> startTelegramVideoCall(ctx, num) },
+                    voiceCallAction = { ctx, num -> startTelegramVoiceCall(ctx, num) }
                 )
             )
         }
@@ -286,9 +267,10 @@ object SocialUtils {
                     id = "signal",
                     name = label,
                     packageName = "org.thoughtcrime.securesms",
+                    iconRes = R.drawable.ic_signal,
                     iconDrawable = icon,
                     assetIcon = "file:///android_asset/icons/signal.png",
-                    action = { ctx, num -> openSignal(ctx, num) }
+                    action = { ctx, num -> openSignalChat(ctx, num) }
                 )
             )
         }
@@ -303,61 +285,14 @@ object SocialUtils {
                     id = "viber",
                     name = label,
                     packageName = "com.viber.voip",
+                    iconRes = R.drawable.ic_viber,
                     iconDrawable = icon,
-                    action = { ctx, num -> openViber(ctx, num) }
+                    action = { ctx, num -> openViberChat(ctx, num) }
                 )
             )
         }
 
-        // 5. Skype
-        if (context.isPackageInstalled("com.skype.raider")) {
-            val appInfo = runCatching { pm.getApplicationInfo("com.skype.raider", 0) }.getOrNull()
-            val label = appInfo?.let { pm.getApplicationLabel(it).toString() } ?: "Skype"
-            val icon = appInfo?.let { pm.getApplicationIcon(it) }
-            list.add(
-                SocialAppInfo(
-                    id = "skype",
-                    name = label,
-                    packageName = "com.skype.raider",
-                    iconDrawable = icon,
-                    action = { ctx, num -> openSkype(ctx, num) }
-                )
-            )
-        }
-
-        // 6. WeChat
-        if (context.isPackageInstalled("com.tencent.mm")) {
-            val appInfo = runCatching { pm.getApplicationInfo("com.tencent.mm", 0) }.getOrNull()
-            val label = appInfo?.let { pm.getApplicationLabel(it).toString() } ?: "WeChat"
-            val icon = appInfo?.let { pm.getApplicationIcon(it) }
-            list.add(
-                SocialAppInfo(
-                    id = "wechat",
-                    name = label,
-                    packageName = "com.tencent.mm",
-                    iconDrawable = icon,
-                    action = { ctx, num -> openWeChat(ctx, num) }
-                )
-            )
-        }
-
-        // 7. LINE
-        if (context.isPackageInstalled("jp.naver.line.android")) {
-            val appInfo = runCatching { pm.getApplicationInfo("jp.naver.line.android", 0) }.getOrNull()
-            val label = appInfo?.let { pm.getApplicationLabel(it).toString() } ?: "LINE"
-            val icon = appInfo?.let { pm.getApplicationIcon(it) }
-            list.add(
-                SocialAppInfo(
-                    id = "line",
-                    name = label,
-                    packageName = "jp.naver.line.android",
-                    iconDrawable = icon,
-                    action = { ctx, num -> openLine(ctx, num) }
-                )
-            )
-        }
-
-        // 8. Meet
+        // 5. Meet
         if (context.isPackageInstalled("com.google.android.apps.tachyon")) {
             val appInfo = runCatching { pm.getApplicationInfo("com.google.android.apps.tachyon", 0) }.getOrNull()
             val label = appInfo?.let { pm.getApplicationLabel(it).toString() } ?: "Meet"
@@ -367,45 +302,16 @@ object SocialUtils {
                     id = "meet",
                     name = label,
                     packageName = "com.google.android.apps.tachyon",
+                    iconRes = R.drawable.ic_messenger,
                     iconDrawable = icon,
-                    action = { ctx, num -> openMeet(ctx, num) }
-                )
-            )
-        }
-
-        // 9. Truecaller
-        if (context.isPackageInstalled("com.truecaller")) {
-            val appInfo = runCatching { pm.getApplicationInfo("com.truecaller", 0) }.getOrNull()
-            val label = appInfo?.let { pm.getApplicationLabel(it).toString() } ?: "Truecaller"
-            val icon = appInfo?.let { pm.getApplicationIcon(it) }
-            list.add(
-                SocialAppInfo(
-                    id = "truecaller",
-                    name = label,
-                    packageName = "com.truecaller",
-                    iconDrawable = icon,
-                    action = { ctx, num -> openTruecaller(ctx, num) }
+                    action = { ctx, num -> openMeet(ctx, num) },
+                    videoCallAction = { ctx, num -> startMeetVideoCall(ctx, num) },
+                    voiceCallAction = { ctx, num -> startMeetVoiceCall(ctx, num) }
                 )
             )
         }
 
         return list
-    }
-
-    fun Context.launchSendWhatsAppIntent(phoneNumber: String) {
-        val digits = phoneNumber.filter { it.isDigit() }
-        if (digits.isEmpty()) {
-            toast("No valid app found")
-            return
-        }
-        val pkg = messengerPackages["WhatsApp"]?.let { getInstalledMessenger(it) }
-        val intent = Intent(Intent.ACTION_VIEW, "https://wa.me/$digits".toUri())
-        if (pkg != null) intent.setPackage(pkg)
-        try {
-            startActivity(intent)
-        } catch (_: android.content.ActivityNotFoundException) {
-            toast("No valid app found")
-        }
     }
 
     fun Context.getInstalledMessenger(packageNames: List<String>): String? {
@@ -424,17 +330,236 @@ object SocialUtils {
         ),
         "Signal" to listOf("org.thoughtcrime.securesms"),
         "Viber" to listOf("com.viber.voip"),
-        "WeChat" to listOf("com.tencent.mm"),
-        "Line" to listOf("jp.naver.line.android"),
-        "Teams" to listOf("com.microsoft.teams"),
-        "Discord" to listOf("com.discord"),
-        "Slack" to listOf("com.slack"),
-        "Messenger" to listOf("com.facebook.orca"),
-        "Snapchat" to listOf("com.snapchat.android"),
-        "KakaoTalk" to listOf("com.kakao.talk"),
-        "Threema" to listOf("ch.threema.app"),
-        "Wire" to listOf("com.wire"),
-        "Tox" to listOf("im.tox.tox"),
-        "Element" to listOf("im.vector.app")
+        "Meet" to listOf("com.google.android.apps.tachyon"),
+
     )
+
+    private fun contactHasMatchingNumber(cr: ContentResolver, contactId: Long, digits: String): Boolean {
+        if (digits.isEmpty()) return false
+        return try {
+            cr.query(
+                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                arrayOf(ContactsContract.CommonDataKinds.Phone.NUMBER),
+                "${ContactsContract.CommonDataKinds.Phone.CONTACT_ID} = ?",
+                arrayOf(contactId.toString()),
+                null
+            )?.use { c ->
+                while (c.moveToNext()) {
+                    val num = c.getString(0) ?: continue
+                    val norm = num.filter { it.isDigit() }
+                    if (norm.endsWith(digits) || digits.endsWith(norm)) return true
+                }
+                false
+            } ?: false
+        } catch (_: Exception) { false }
+    }
+
+    private fun findWhatsAppCallDataUri(ctx: Context, number: String, mime: String): Uri? {
+        if (!hasReadContacts(ctx)) return null
+        val digits = cleanDigitsOnly(ctx, number)
+        if (digits.isEmpty()) return null
+        return try {
+            val cr = ctx.contentResolver
+            cr.query(
+                ContactsContract.Data.CONTENT_URI,
+                arrayOf(ContactsContract.Data._ID, ContactsContract.Data.CONTACT_ID),
+                "${ContactsContract.Data.MIMETYPE} = ?",
+                arrayOf(mime),
+                null
+            )?.use { cursor ->
+                while (cursor.moveToNext()) {
+                    val dataId = cursor.getLong(0)
+                    val contactId = cursor.getLong(1)
+                    if (contactHasMatchingNumber(cr, contactId, digits)) {
+                        return ContentUris.withAppendedId(ContactsContract.Data.CONTENT_URI, dataId)
+                    }
+                }
+                null
+            }
+        } catch (_: Exception) { null }
+    }
+
+    private fun findTelegramCallDataUri(ctx: Context, number: String, wantVideo: Boolean): Uri? {
+        if (!hasReadContacts(ctx)) return null
+        val digits = cleanDigitsOnly(ctx, number)
+        if (digits.isEmpty()) return null
+        return try {
+            val cr = ctx.contentResolver
+            cr.query(
+                ContactsContract.Data.CONTENT_URI,
+                arrayOf(
+                    ContactsContract.Data._ID,
+                    ContactsContract.Data.CONTACT_ID,
+                    ContactsContract.Data.MIMETYPE
+                ),
+                null, null, null
+            )?.use { cursor ->
+                val idIdx = cursor.getColumnIndexOrThrow(ContactsContract.Data._ID)
+                val cidIdx = cursor.getColumnIndexOrThrow(ContactsContract.Data.CONTACT_ID)
+                val mimeIdx = cursor.getColumnIndexOrThrow(ContactsContract.Data.MIMETYPE)
+                var fallback: Uri? = null
+                while (cursor.moveToNext()) {
+                    val mime = cursor.getString(mimeIdx)?.lowercase() ?: continue
+                    if (!mime.contains("telegram") || !mime.contains("call")) continue
+                    val contactId = cursor.getLong(cidIdx)
+                    if (!contactHasMatchingNumber(cr, contactId, digits)) continue
+                    val uri = ContentUris.withAppendedId(
+                        ContactsContract.Data.CONTENT_URI, cursor.getLong(idIdx)
+                    )
+                    if (mime.contains("video") == wantVideo) return uri
+                    if (fallback == null) fallback = uri
+                }
+                fallback
+            }
+        } catch (_: Exception) { null }
+    }
+
+    private fun findMeetCallDataUri(ctx: Context, number: String, mime: String): Uri? {
+        if (!hasReadContacts(ctx)) return null
+        val digits = cleanDigitsOnly(ctx, number)
+        if (digits.isEmpty()) return null
+        return try {
+            val cr = ctx.contentResolver
+            cr.query(
+                ContactsContract.Data.CONTENT_URI,
+                arrayOf(ContactsContract.Data._ID, ContactsContract.Data.CONTACT_ID),
+                "${ContactsContract.Data.MIMETYPE} = ?",
+                arrayOf(mime),
+                null
+            )?.use { cursor ->
+                while (cursor.moveToNext()) {
+                    val dataId = cursor.getLong(0)
+                    val contactId = cursor.getLong(1)
+                    if (contactHasMatchingNumber(cr, contactId, digits)) {
+                        return ContentUris.withAppendedId(ContactsContract.Data.CONTENT_URI, dataId)
+                    }
+                }
+                null
+            }
+        } catch (_: Exception) { null }
+    }
+
+    private fun startTachyonCallActivity(ctx: Context, number: String, activityClass: String): Boolean {
+        if (!ctx.isPackageInstalled(TACHYON_PKG)) return false
+        if (!hasCallPhone(ctx)) return false
+        val clean = cleanDigitsOnly(ctx, number)
+        if (clean.isEmpty()) return false
+        return try {
+            val intent = Intent(TACHYON_CALL_ACTION, "tel:$clean".toUri()).apply {
+                setClassName(TACHYON_PKG, activityClass)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            ctx.startActivity(intent)
+            true
+        } catch (_: Exception) { false }
+    }
+
+    // ── WhatsApp ─────────────────────────────────────────────────────────────
+    fun startWhatsAppVoiceCall(ctx: Context, number: String): Boolean {
+        val wa = when {
+            ctx.isPackageInstalled("com.whatsapp") -> "com.whatsapp"
+            ctx.isPackageInstalled("com.whatsapp.w4b") -> "com.whatsapp.w4b"
+            else -> return false
+        }
+        val uri = findWhatsAppCallDataUri(ctx, number, MIME_WA_VOICE_CALL)
+            ?: findWhatsAppCallDataUri(ctx, number, MIME_WA_BIZ_VOICE_CALL)
+        if (uri != null) {
+            return try {
+                ctx.startActivity(
+                    Intent(Intent.ACTION_VIEW, uri)
+                        .setPackage(wa)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                )
+                true
+            } catch (_: Exception) { openWhatsAppChat(ctx, number); true }
+        }
+        openWhatsAppChat(ctx, number)
+        return true
+    }
+
+    fun startWhatsAppVideoCall(ctx: Context, number: String): Boolean {
+        val wa = when {
+            ctx.isPackageInstalled("com.whatsapp") -> "com.whatsapp"
+            ctx.isPackageInstalled("com.whatsapp.w4b") -> "com.whatsapp.w4b"
+            else -> return false
+        }
+        val uri = findWhatsAppCallDataUri(ctx, number, MIME_WA_VIDEO_CALL)
+            ?: findWhatsAppCallDataUri(ctx, number, MIME_WA_BIZ_VIDEO_CALL)
+        if (uri != null) {
+            return try {
+                ctx.startActivity(
+                    Intent(Intent.ACTION_VIEW, uri)
+                        .setPackage(wa)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                )
+                true
+            } catch (_: Exception) { openWhatsAppChat(ctx, number); true }
+        }
+        openWhatsAppChat(ctx, number)
+        return true
+    }
+
+    // ── Telegram ─────────────────────────────────────────────────────────────
+    fun startTelegramVoiceCall(ctx: Context, number: String): Boolean {
+        val pkg = ctx.getInstalledMessenger(messengerPackages["Telegram"]!!) ?: return false
+        val uri = findTelegramCallDataUri(ctx, number, wantVideo = false)
+        if (uri != null) {
+            return try {
+                ctx.startActivity(
+                    Intent(Intent.ACTION_VIEW, uri).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                )
+                true
+            } catch (_: Exception) { openTelegramChat(ctx, number); true }
+        }
+        openTelegramChat(ctx, number)
+        return true
+    }
+
+    fun startTelegramVideoCall(ctx: Context, number: String): Boolean {
+        val pkg = ctx.getInstalledMessenger(messengerPackages["Telegram"]!!) ?: return false
+        val uri = findTelegramCallDataUri(ctx, number, wantVideo = true)
+        if (uri != null) {
+            return try {
+                ctx.startActivity(
+                    Intent(Intent.ACTION_VIEW, uri).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                )
+                true
+            } catch (_: Exception) { openTelegramChat(ctx, number); true }
+        }
+        openTelegramChat(ctx, number)
+        return true
+    }
+
+    // ── Google Meet ──────────────────────────────────────────────────────────
+    fun startMeetVideoCall(ctx: Context, number: String): Boolean {
+        if (!ctx.isPackageInstalled(TACHYON_PKG)) return false
+        if (startTachyonCallActivity(ctx, number, TACHYON_VIDEO_ACTIVITY)) return true
+        val uri = findMeetCallDataUri(ctx, number, MIME_MEET_VIDEO_CALL)
+        if (uri != null) {
+            return try {
+                ctx.startActivity(
+                    Intent(Intent.ACTION_VIEW, uri).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                )
+                true
+            } catch (_: Exception) { false }
+        }
+        openMeet(ctx, number)
+        return true
+    }
+
+    fun startMeetVoiceCall(ctx: Context, number: String): Boolean {
+        if (!ctx.isPackageInstalled(TACHYON_PKG)) return false
+        if (startTachyonCallActivity(ctx, number, TACHYON_AUDIO_ACTIVITY)) return true
+        val uri = findMeetCallDataUri(ctx, number, MIME_MEET_AUDIO_CALL)
+        if (uri != null) {
+            return try {
+                ctx.startActivity(
+                    Intent(Intent.ACTION_VIEW, uri).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                )
+                true
+            } catch (_: Exception) { false }
+        }
+        openMeet(ctx, number)
+        return true
+    }
 }

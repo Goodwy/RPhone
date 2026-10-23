@@ -1,6 +1,7 @@
 package dev.goodwy.rphone
 
 import android.app.Application
+import dev.goodwy.rphone.controller.util.DialpadT9
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.view.screen.settings.KEY_SELECTED_APP_ICON
 import dev.goodwy.rphone.view.screen.settings.applyIcon
@@ -16,6 +17,7 @@ class RillApp : Application() {
             modules(appModule)
         }
         restoreSavedAppIcon()
+        DialpadT9.init(this)
     }
 
     private fun restoreSavedAppIcon() {

@@ -12,13 +12,10 @@ import android.view.WindowManager
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.rounded.Cancel
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -39,6 +36,7 @@ import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.NoteManager
+import dev.goodwy.rphone.view.components.SpringIconButton
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import dev.goodwy.rphone.view.theme.Rill4Theme
 import kotlinx.coroutines.Dispatchers
@@ -259,7 +257,7 @@ private fun FloatingNoteOverlay(
                             // Only Close button – Save icon removed
                             SpringIconButton(onClick = { saveAndDismiss() }) {
                                 Icon(
-                                    Icons.Rounded.Cancel, stringResource(R.string.close),
+                                    Icons.Default.Close, stringResource(R.string.close),
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
@@ -338,21 +336,4 @@ private fun CardElement(index: Int, content: @Composable BoxScope.() -> Unit) {
             .graphicsLayer(alpha = alpha, translationY = transY),
         content = content
     )
-}
-
-/** Icon button with a satisfying spring press scale. */
-@Composable
-private fun SpringIconButton(onClick: () -> Unit, content: @Composable () -> Unit) {
-    val src     = remember { MutableInteractionSource() }
-    val pressed by src.collectIsPressedAsState()
-    val scale   by animateFloatAsState(
-        targetValue   = if (pressed) 0.85f else 1f,
-        animationSpec = spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMedium),
-        label         = "sibScale"
-    )
-    IconButton(
-        onClick           = onClick,
-        interactionSource = src,
-        modifier          = Modifier.graphicsLayer(scaleX = scale, scaleY = scale)
-    ) { content() }
 }

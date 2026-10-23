@@ -15,33 +15,35 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.goodwy.rphone.R
+import dev.goodwy.rphone.modal.data.SwipeActionType
 import dev.goodwy.rphone.view.theme.customColors
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 @Composable
-fun SwipeableCallLogContainer(
+fun SwipeableContainer(
     enabled: Boolean,
     haptics: Boolean,
     hapticsStrength: String,
     hapticsIntensity: Float,
+    swipeRightAction: SwipeActionType = SwipeActionType.CALL,
+    swipeLeftAction: SwipeActionType = SwipeActionType.MESSAGE,
+    swipeLeftSecondAction: SwipeActionType = SwipeActionType.DELETE,
     onSwipeRight: () -> Unit, // Call
     onSwipeLeft: () -> Unit,  // Message
-    onDelete: () -> Unit,
+    onSwipeLeftSecond: () -> Unit, // Delete
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
-    if (!enabled) {
+    if (!enabled || (swipeRightAction == SwipeActionType.NONE && swipeLeftAction == SwipeActionType.NONE)) {
         Box(modifier = modifier) {
             content()
         }
@@ -51,12 +53,20 @@ fun SwipeableCallLogContainer(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val offsetX = remember { Animatable(0f) }
-    val haptic = LocalHapticFeedback.current
     val layoutDirection = LocalLayoutDirection.current
     val isRtl = layoutDirection == LayoutDirection.Rtl
 
     val singleThreshold = with(LocalDensity.current) { 100.dp.toPx() }
-    val threshold = with(LocalDensity.current) { 150.dp.toPx() }
+    val effectiveLeftSecond = if (swipeLeftAction == SwipeActionType.NONE) {
+        SwipeActionType.NONE
+    } else {
+        swipeLeftSecondAction
+    }
+    val threshold = if (effectiveLeftSecond != SwipeActionType.NONE) {
+        with(LocalDensity.current) { 150.dp.toPx() }
+    } else {
+        singleThreshold
+    }
 
     val width = 48.dp
     val widthFloat = with(LocalDensity.current) { width.toPx() }
@@ -65,17 +75,17 @@ fun SwipeableCallLogContainer(
     val iconSpacingFloat = with(LocalDensity.current) { iconSpacing.toPx() }
 
     var triggeredRight by remember { mutableStateOf(false) }
-    var triggeredMessage by remember { mutableStateOf(false) }
-    var triggeredDelete by remember { mutableStateOf(false) }
+    var triggeredLeft by remember { mutableStateOf(false) }
+    var triggeredLeftSecond by remember { mutableStateOf(false) }
 
     // For RTL, we invert the offset for display and triggers
     val displayOffset = if (isRtl) -offsetX.value else offsetX.value
 
-    val startFractionMsg = widthFloat / singleThreshold
-    val leftProgressMsg = ((-displayOffset / singleThreshold - startFractionMsg) / (1f - startFractionMsg)).coerceIn(0f, 1f)
+    val startFractionLeft = widthFloat / singleThreshold
+    val leftProgress = ((-displayOffset / singleThreshold - startFractionLeft) / (1f - startFractionLeft)).coerceIn(0f, 1f)
 
-    val startFractionDel = (widthFloat * 2 + iconSpacingFloat) / threshold
-    val leftProgressDel = (((-displayOffset / threshold) - startFractionDel) / (1f - startFractionDel)).coerceIn(0f, 1f)
+    val startFractionLeftSecond = (widthFloat * 2 + iconSpacingFloat) / threshold
+    val leftSecondProgress = (((-displayOffset / threshold) - startFractionLeftSecond) / (1f - startFractionLeftSecond)).coerceIn(0f, 1f)
 
     val startFractionCall = widthFloat / singleThreshold
     val rightProgress = ((displayOffset / singleThreshold - startFractionCall) / (1f - startFractionCall)).coerceIn(0f, 1f)
@@ -85,15 +95,15 @@ fun SwipeableCallLogContainer(
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium),
         label = "rightTriggerScale"
     )
-    val msgTriggerScale by animateFloatAsState(
-        targetValue = if (triggeredMessage) 1.2f else 1f,
+    val leftTriggerScale by animateFloatAsState(
+        targetValue = if (triggeredLeft) 1.2f else 1f,
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium),
-        label = "msgTriggerScale"
+        label = "leftTriggerScale"
     )
-    val delTriggerScale by animateFloatAsState(
-        targetValue = if (triggeredDelete) 1.2f else 1f,
+    val leftSecondTriggerScale by animateFloatAsState(
+        targetValue = if (triggeredLeftSecond) 1.2f else 1f,
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium),
-        label = "delTriggerScale"
+        label = "leftSecondTriggerScale"
     )
 
     Box(
@@ -102,41 +112,55 @@ fun SwipeableCallLogContainer(
                 orientation = Orientation.Horizontal,
                 state = rememberDraggableState { delta ->
                     coroutineScope.launch {
-                        val maxRight = if (isRtl) threshold * 1.2f else singleThreshold * 1.2f
-                        val maxLeft = if (isRtl) singleThreshold * 1.2f else threshold * 1.2f
+                        val maxRight = when {
+                            swipeRightAction == SwipeActionType.NONE -> 0f
+                            isRtl -> threshold * 1.2f
+                            else -> singleThreshold * 1.2f
+                        }
+                        val maxLeft = when {
+                            swipeLeftAction == SwipeActionType.NONE -> 0f
+                            isRtl -> singleThreshold * 1.2f
+                            else -> threshold * 1.2f
+                        }
                         val newOffset = (offsetX.value + delta * 0.6f).coerceIn(-maxLeft, maxRight)
                         offsetX.snapTo(newOffset)
 
                         val checkOffset = if (isRtl) -newOffset else newOffset
 
                         // To the right (Call)
-                        if (checkOffset >= singleThreshold && !triggeredRight) {
-                            triggeredRight = true
-                            if (haptics) {
-                                performAppHaptic(context, hapticsStrength, hapticsIntensity)
+                        if (swipeRightAction != SwipeActionType.NONE) {
+                            if (checkOffset >= singleThreshold && !triggeredRight) {
+                                triggeredRight = true
+                                if (haptics) {
+                                    performAppHaptic(context, hapticsStrength, hapticsIntensity)
+                                }
+                            } else if (checkOffset < singleThreshold && triggeredRight) {
+                                triggeredRight = false
                             }
-                        } else if (checkOffset < singleThreshold && triggeredRight) {
-                            triggeredRight = false
                         }
 
                         // Left 1 (Message)
-                        if (checkOffset <= -singleThreshold && !triggeredMessage) {
-                            triggeredMessage = true
-                            if (haptics) {
-                                performAppHaptic(context, hapticsStrength, hapticsIntensity)
+                        if (swipeLeftAction != SwipeActionType.NONE) {
+                            if (checkOffset <= -singleThreshold && !triggeredLeft) {
+                                triggeredLeft = true
+                                if (haptics) {
+                                    performAppHaptic(context, hapticsStrength, hapticsIntensity)
+                                }
+                            } else if (checkOffset > -singleThreshold && triggeredLeft) {
+                                triggeredLeft = false
                             }
-                        } else if (checkOffset > -singleThreshold && triggeredMessage) {
-                            triggeredMessage = false
                         }
 
                         // Left 2 (Delete)
-                        if (checkOffset <= -threshold && !triggeredDelete) {
-                            triggeredDelete = true
-                            if (haptics) {
-                                performAppHaptic(context, hapticsStrength, hapticsIntensity)
+                        if (effectiveLeftSecond != SwipeActionType.NONE) {
+                            if (checkOffset <= -threshold && !triggeredLeftSecond) {
+                                triggeredLeftSecond = true
+                                if (haptics) {
+                                    performAppHaptic(context, hapticsStrength, hapticsIntensity)
+                                }
+                            } else if (checkOffset > -threshold && triggeredLeftSecond) {
+                                triggeredLeftSecond = false
                             }
-                        } else if (checkOffset > -threshold && triggeredDelete) {
-                            triggeredDelete = false
                         }
                     }
                 },
@@ -144,18 +168,18 @@ fun SwipeableCallLogContainer(
                     coroutineScope.launch {
                         val finalDisplayOffset = if (isRtl) -offsetX.value else offsetX.value
 
-                        if (finalDisplayOffset >= singleThreshold) {
+                        if (swipeRightAction != SwipeActionType.NONE && finalDisplayOffset >= singleThreshold) {
                             onSwipeRight()
-                        } else if (finalDisplayOffset <= -threshold) {
-                            onDelete()
-                        } else if (finalDisplayOffset <= -singleThreshold) {
+                        } else if (effectiveLeftSecond != SwipeActionType.NONE && finalDisplayOffset <= -threshold) {
+                            onSwipeLeftSecond()
+                        } else if (swipeLeftAction != SwipeActionType.NONE && finalDisplayOffset <= -singleThreshold) {
                             onSwipeLeft()
                         }
 
                         offsetX.animateTo(0f, spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMediumLow))
                         triggeredRight = false
-                        triggeredMessage = false
-                        triggeredDelete = false
+                        triggeredLeft = false
+                        triggeredLeftSecond = false
                     }
                 }
             )
@@ -178,13 +202,13 @@ fun SwipeableCallLogContainer(
                             alpha = rightProgress
                         },
                     shape = RoundedCornerShape(50),
-                    color = MaterialTheme.colorScheme.customColors.colorGreen
+                    color = swipeRightAction.containerColor()
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
-                            imageVector = Icons.Outlined.Call,
+                            imageVector = swipeRightAction.icon(),
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.customColors.colorDarkGreen,
+                            tint = swipeRightAction.contentColor(),
                             modifier = Modifier.size(24.dp)
                         )
                     }
@@ -192,26 +216,28 @@ fun SwipeableCallLogContainer(
             }
             Spacer(modifier = Modifier.weight(1f))
             if (displayOffset < 0) {
-                Surface(
-                    modifier = Modifier
-                        .padding(end = iconSpacing)
-                        .size(width, height)
-                        .graphicsLayer {
-                            val scale = 0.4f + leftProgressDel * 0.6f * delTriggerScale
-                            scaleX = scale
-                            scaleY = scale
-                            alpha = leftProgressDel
-                        },
-                    shape = RoundedCornerShape(50),
-                    color = MaterialTheme.colorScheme.customColors.colorRed
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_delete),
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.customColors.colorDarkRed,
-                            modifier = Modifier.size(22.dp)
-                        )
+                if (effectiveLeftSecond != SwipeActionType.NONE) {
+                    Surface(
+                        modifier = Modifier
+                            .padding(end = iconSpacing)
+                            .size(width, height)
+                            .graphicsLayer {
+                                val scale = 0.4f + leftSecondProgress * 0.6f * leftSecondTriggerScale
+                                scaleX = scale
+                                scaleY = scale
+                                alpha = leftSecondProgress
+                            },
+                        shape = RoundedCornerShape(50),
+                        color = effectiveLeftSecond.containerColor()
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = effectiveLeftSecond.icon(),
+                                contentDescription = null,
+                                tint = effectiveLeftSecond.contentColor(),
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
                     }
                 }
 
@@ -220,19 +246,19 @@ fun SwipeableCallLogContainer(
                         .padding(end = 16.dp)
                         .size(width, height)
                         .graphicsLayer {
-                            val scale = 0.4f + leftProgressMsg * 0.6f * msgTriggerScale
+                            val scale = 0.4f + leftProgress * 0.6f * leftTriggerScale
                             scaleX = scale
                             scaleY = scale
-                            alpha = leftProgressMsg
+                            alpha = leftProgress
                         },
                     shape = RoundedCornerShape(50),
-                    color = MaterialTheme.colorScheme.customColors.colorBlue
+                    color = swipeLeftAction.containerColor()
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_message_outline),
+                            imageVector = swipeLeftAction.icon(),
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.customColors.colorDarkBlue,
+                            tint = swipeLeftAction.contentColor(),
                             modifier = Modifier.size(22.dp)
                         )
                     }

@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
 import kotlinx.coroutines.Job
 import java.util.concurrent.ConcurrentHashMap
 
@@ -19,8 +18,9 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class CallStateManager(private val getCallerNameUseCase: GetCallerNameUseCase) {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    private val activeJobs = ConcurrentHashMap<String, Job>()
 
+    private val activeJobs = ConcurrentHashMap<String, Job>()
+    
     private val _callerMetadataMap = MutableStateFlow<Map<String, CallerMetadata>>(emptyMap())
     val callerMetadataMap: StateFlow<Map<String, CallerMetadata>> = _callerMetadataMap.asStateFlow()
 

@@ -1,0 +1,780 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_launcher_name">Telefon</string>
+    <string name="app_name" translatable="false">Rill Phone</string>
+    <string name="call_screen_sim_label" translatable="false">SIM %1$s</string>
+    <string name="label_unknown" translatable="false">Unknown</string>
+    <string name="whatsapp" translatable="false">WhatsApp</string>
+    <string name="telegram" translatable="false">Telegram</string>
+
+    <string name="widget_description">Nedávné hovory s rychlým vytáčením</string>
+    <string name="copy" tools:ignore="PrivateResource">Kopírovat</string>
+    <string name="copy_path">Kopírovat cestu</string>
+    <string name="paste">Vložit</string>
+    <string name="delete">Smazat</string>
+    <string name="delete_contact">Smazat kontakt</string>
+    <string name="delete_contact_subtitle">Opravdu chcete smazat tento kontakt? Tuto akci nelze vrátit zpět.</string>
+    <string name="delete_contacts">Smazat kontakty</string>
+    <string name="delete_contacts_subtitle">Opravdu chcete smazat %s vybraných kontaktů? Tuto akci nelze vrátit zpět.</string>
+    <string name="selected_items">Vybráno %s</string>
+    <string name="select">Vybrat</string>
+    <string name="select_all">Vybrat vše</string>
+    <string name="deselect_all">Zrušit výběr</string>
+    <string name="plus_more">%1$s (+%2$s dalších)</string>
+    <string name="backspace">Smazat</string>
+    <string name="back">Zpět</string>
+    <string name="edit">Upravit</string>
+    <string name="done">Hotovo</string>
+    <string name="ok">OK</string>
+    <string name="on">Zapnuto</string>
+    <string name="off">Vypnuto</string>
+    <string name="cancel">Zrušit</string>
+    <string name="open">Otevřít</string>
+    <string name="save">Uložit</string>
+    <string name="confirm">Potvrdit</string>
+    <string name="close">Zavřít</string>
+    <string name="clear">Vymazat</string>
+    <string name="share">Sdílet</string>
+    <string name="share_subtitle">Odeslat kontaktní údaje ostatním</string>
+    <string name="use">Použít</string>
+    <string name="connect_via_social">Připojit přes sociální sítě</string>
+    <string name="import_text">Importovat</string>
+    <string name="export_text">Exportovat</string>
+    <string name="call_is_ongoing">Hovor probíhá — Klepnutím se vrátíte</string>
+    <string name="filter_all">Vše</string>
+    <string name="filter_missed">Zmeškané</string>
+    <string name="filter_incoming">Příchozí</string>
+    <string name="filter_outgoing">Odchozí</string>
+    <string name="filter_rejected">Odmítnuté</string>
+    <string name="sim_picker_title">Vybrat SIM kartu</string>
+    <string name="label_unknown_number">Neznámé číslo</string>
+    <string name="reset">Obnovit</string>
+    <string name="add">Přidat</string>
+    <string name="use_number">Použít číslo: %s</string>
+    <string name="scroll_to_top">Přejít nahoru</string>
+
+    <!-- Search -->
+    <string name="search">Hledat</string>
+    <string name="search_contacts">Hledat kontakty</string>
+    <string name="no_results">Žádné výsledky</string>
+    <string name="no_contacts_found">Nebyly nalezeny žádné kontakty</string>
+    <string name="no_calls_found">Nebyly nalezeny žádné hovory</string>
+    <string name="call_query">Zavolat %s</string>
+    <string name="voice_input">Hlasový vstup</string>
+    <string name="filter_results">Filtrovat výsledky</string>
+    <string name="lookup">Vyhledat</string>
+
+    <!-- Billing -->
+    <string name="no_connection">Žádné připojení</string>
+    <string name="loading_price">Načítání…</string>
+
+    <!-- Project support -->
+    <string name="project_support">Podpora projektu</string>
+    <string name="project_support_summary">Získejte placenou aplikaci a podpořte budoucí vývoj a další funkce</string>
+    <string name="project_support_description">
+        <![CDATA[
+        Věříme, že soukromí by mělo být zdarma. Proto jsou všechny základní funkce zcela vaše, aniž byste utratili jediný cent.<br>
+        Pokud se vám líbí, co tvoříme, zvažte, zda nám nekoupíte kávu. Jako poděkování získáte:<br> <b>všechna témata, vlastní barvy, písma a nastavení pozadí obrazovky hovoru.</b><br>
+        Nejedná se o prémiovou úroveň. Je to gesto poděkování. Vaše podpora udržuje Rill nezávislý, soukromý a bez reklam.
+        ]]>
+    </string>
+    <string name="support_project_to_unlock">Podpořte projekt a odemkněte</string>
+    <string name="restore_purchase">Obnovit nákup</string>
+    <string name="continue_support">Pokračovat</string>
+    <string name="monthly">Měsíčně</string>
+    <string name="monthly_description">Flexibilita pro ty, kteří chtějí přispívat měsíčně</string>
+    <string name="yearly">Ročně</string>
+    <string name="yearly_description">Roční podpora nejlepší telefonní aplikace na světě</string>
+    <string name="lifetime">Doživotně</string>
+    <string name="lifetime_description">Zaplaťte jednou a užívejte si maximální pohodlí při všech hovorech navždy</string>
+    <string name="most_flexible">Nejflexibilnější</string>
+    <string name="bast_value">Nejlepší hodnota</string>
+    <string name="pay_once">Jednorázová platba</string>
+    <string name="support_development">Podpořit vývoj</string>
+    <string name="support_all_options">Podpořit všechny možnosti</string>
+    <string name="support_development_description1">Rill Phone je hrdě open-source a zcela zdarma. Vaše podpora nám pomáhá, abychom to tak udrželi.</string>
+    <string name="support_development_description2">Darováním nejen odemykáte funkce — investujete do soukromí, transparentnosti a budoucnosti skutečně nezávislého vývoje.</string>
+    <string name="support_development_description3">Každý příspěvek, bez ohledu na velikost, má smysl.</string>
+    <string name="unlock_all_features">Odemknout všechny funkce</string>
+    <string name="all_features_unlocked">✨ Všechny funkce odemčeny! Děkujeme za vaši podporu!</string>
+    <string name="thank_you_for_your_support">Děkujeme za vaši podporu! ❤️</string>
+    <string name="features_locked">Funkce uzamčeny</string>
+    <string name="your_donation_ensures">Váš dar zajišťuje:</string>
+    <string name="your_donation_ensures_1">✅ Pravidelné aktualizace a bezpečnostní záplaty</string>
+    <string name="your_donation_ensures_2">✅ Nové funkce a vylepšení</string>
+    <string name="your_donation_ensures_3">✅ Bezplatný přístup pro všechny</string>
+    <string name="your_donation_ensures_4">✅ Open-source vývoj</string>
+
+    <!-- About -->
+    <string name="about">O aplikaci</string>
+    <string name="rate_app">Ohodnotit aplikaci</string>
+    <string name="other_apps">Naše další aplikace</string>
+    <string name="source_code">Zdrojový kód</string>
+    <string name="privacy_policy">Zásady ochrany osobních údajů</string>
+
+    <!-- Updates -->
+    <string name="updates">Aktualizace</string>
+    <string name="check_for_updates">Zkontrolovat aktualizace</string>
+    <string name="check_for_updates_subtitle">Zkontrolovat, zda je k dispozici nová verze</string>
+    <string name="auto_check_for_updates">Automatická kontrola aktualizací</string>
+    <string name="auto_check_for_updates_subtitle">Automaticky kontrolovat nové verze při spuštění aplikace</string>
+    <string name="checking_for_updates">Kontrola aktualizací…</string>
+    <string name="up_to_date">Aktuální</string>
+    <string name="up_to_date_subtitle">Aplikace používá nejnovější verzi %1$s.</string>
+    <string name="update_available">K dispozici aktualizace</string>
+    <string name="update_available_subtitle">Verze %1$s je k dispozici.</string>
+    <string name="update_available_subtitle_dialog">Novější sestavení Rill Phone je připraveno ke stažení a prozkoumání.</string>
+    <string name="download_update">Stáhnout aktualizaci?</string>
+    <string name="download_update_subtitle">Rill Phone v%1$s je k dispozici (máte v%2$s). Soubor APK bude stažen do složky Stažené.</string>
+    <string name="install_update">Nainstalovat aktualizaci?</string>
+    <string name="install_update_subtitle">Aktualizace v%1$s již byla stažena. Chcete ji nyní nainstalovat?</string>
+    <string name="download">Stáhnout</string>
+    <string name="not_now">Teď ne</string>
+    <string name="downloading_update">Stahování aktualizace</string>
+    <string name="please_wait">Čekejte prosím…</string>
+    <string name="check_failed">Kontrola selhala</string>
+    <string name="check_failed_subtitle">Aktualizace se nepodařilo zkontrolovat. Zkuste to prosím později.</string>
+    <string name="download_complete">Stahování dokončeno</string>
+    <string name="download_complete_subtitle">Aktualizace na verzi %1$s byla úspěšně stažena.</string>
+    <string name="open_downloads_folder_manually">Otevřít složku Stažené ručně</string>
+    <string name="try_again">Zkusit znovu</string>
+    <string name="couldnt_check_for_updates">Aktualizace se nepodařilo zkontrolovat</string>
+    <string name="couldnt_check_for_updates_subtitle">Nelze se připojit k úložišti vydání GitHub. Zkontrolujte připojení.</string>
+    <string name="no_release_notes">Pro tuto verzi nebyly poskytnuty poznámky k vydání.</string>
+    <string name="installed">Nainstalováno</string>
+    <string name="latest">Nejnovější</string>
+    <string name="later">Později</string>
+    <string name="view_update">Zobrazit aktualizaci</string>
+
+    <!-- Contributors -->
+    <string name="contributors">Přispěvatelé</string>
+    <string name="development_team">Vývojový tým</string>
+    <string name="apps_that_inspired_us">Aplikace, které nás inspirovaly</string>
+
+    <!-- Settings -->
+    <string name="settings">Nastavení</string>
+    <string name="appearance">Vzhled</string>
+    <string name="interface_settings">Rozhraní</string>
+    <string name="interface_settings_subtitle">Témata, barvy a rozvržení</string>
+    <string name="app_theme">Téma aplikace</string>
+    <string name="theme_auto">Automaticky</string>
+    <string name="theme_light">Světlé</string>
+    <string name="theme_dark">Tmavé</string>
+    <string name="theme_auto_black_white">Auto Č/B</string>
+    <string name="theme_white">Bílé</string>
+    <string name="theme_black">Černé</string>
+    <string name="custom_color">Vlastní barvy</string>
+    <string name="custom_color_subtitle">Barevné schéma založené na vlastní barvě</string>
+    <string name="hex_color">Hex barva</string>
+    <string name="hex_color_subtitle">Zadejte platný šestimístný hex kód</string>
+    <string name="custom_font">Vlastní písmo</string>
+    <string name="custom_font_subtitle">Vyberte soubor .ttf pro použití v aplikaci</string>
+    <string name="font_size">Velikost písma</string>
+    <string name="rounding_radius">Poloměr zaoblení</string>
+    <string name="app_icon">Ikona aplikace</string>
+    <string name="app_icon_subtitle">Vyberte ikonu aplikace zobrazenou na domovské obrazovce</string>
+    <string name="app_name_change">Název aplikace</string>
+    <string name="language">Jazyk</string>
+    <string name="visual_effects">Vizuální efekty</string>
+    <string name="not_supported_on_this_device">Na tomto zařízení není podporováno</string>
+    <string name="not_supported_on_this_device_subtitle">Rozmazání a tekuté sklo vyžadují Android 12 nebo novější</string>
+    <string name="material_liquid_you_glass">Tekuté sklo Material You</string>
+    <string name="material_liquid_you_glass_subtitle">Použít efekt tekutého skla</string>
+    <string name="material_blur_effects">Efekty rozmazání Material</string>
+    <string name="material_blur_effects_subtitle">Použít efekt rozmazání pozadí</string>
+    <string name="blur_intensity">Intenzita rozmazání</string>
+    <string name="liquid_glass_elements">Prvky tekutého skla</string>
+    <string name="liquid_glass_elements_subtitle">Vyberte, které prvky rozhraní používají efekt tekutého skla</string>
+    <string name="blur_effect_elements">Prvky s efektem rozmazání</string>
+    <string name="blur_effect_elements_subtitle">Vyberte, které prvky rozhraní používají efekt rozmazání</string>
+    <string name="bottom_navigation_bar">Spodní navigační lišta</string>
+    <string name="liquid_glass_bottom_navigation_bar">Použít efekt tekutého skla na spodní navigační lištu</string>
+    <string name="blur_effect_bottom_navigation_bar">Použít efekt rozmazání na spodní navigační lištu</string>
+    <string name="call_screen">Obrazovka hovoru</string>
+    <string name="liquid_glass_call_screen">Použít efekt tekutého skla na obrazovku hovoru</string>
+    <string name="blur_effect_call_screen">Použít efekt rozmazání na obrazovku hovoru</string>
+    <string name="liquid_glass_dialpad">Použít efekt tekutého skla na klávesnici</string>
+    <string name="blur_effect_dialpad">Použít efekt rozmazání na klávesnici</string>
+    <string name="scroll_animation">Animace posouvání</string>
+    <string name="scroll_animation_device">Animace postupného zobrazování položek seznamu při posouvání</string>
+    <string name="call_ui">Rozhraní hovoru</string>
+    <string name="incoming_call_ui">Rozhraní příchozího hovoru</string>
+    <string name="incoming_call_ui_subtitle">Vyberte, jak přijímat příchozí hovory</string>
+    <string name="incoming_call_ui_default_swipe">Výchozí přejetí</string>
+    <string name="incoming_call_ui_horizontal_swipe">Vodorovné přejetí (Google)</string>
+    <string name="incoming_call_ui_buttons">Tlačítka</string>
+    <string name="incoming_call_ui_slide_to_answer">Přejetím přijmout (iOS)</string>
+    <string name="incoming_call_ui_vertical_swipe">Svislé přejetí</string>
+    <string name="dialpad_animations">Animace klávesnice</string>
+    <string name="dialpad_animations_subtitle">Zobrazovat animace při zadávání číslic</string>
+    <string name="hide_voice_search">Skrýt hlasové vyhledávání</string>
+    <string name="hide_voice_search_subtitle">Skryje tlačítko hlasového vyhledávání</string>
+
+    <string name="сaller_ui">Rozhraní volajícího</string>
+    <string name="сaller_ui_subtitle">Přizpůsobení rozvržení a ovládacích prvků obrazovky hovoru</string>
+    <string name="end_call_button">Tlačítko ukončení hovoru</string>
+    <string name="customize_width">Přizpůsobit šířku</string>
+    <string name="customize_width_subtitle">Upravte šířku tlačítka ukončení hovoru</string>
+
+    <string name="avatars_settings">Nastavení avatarů</string>
+    <string name="avatars_settings_subtitle">Přizpůsobení barev, rámečků a dalšího</string>
+    <string name="avatar_colors">Barvy avatarů</string>
+    <string name="colorful">Barevné</string>
+    <string name="primary_color">Primární barva</string>
+    <string name="secondary_color">Sekundární barva</string>
+    <string name="google_contacts_color">Barva Kontaktů Google</string>
+    <string name="show_first_letter_in_avatar">Zobrazit první písmeno v avataru</string>
+    <string name="show_first_letter_in_avatar_subtitle">Zobrazí písmeno, pokud chybí obrázek</string>
+    <string name="avatar_frame">Rámeček avataru</string>
+    <string name="avatar_frame_subtitle">Zobrazit ohraničení kolem avataru</string>
+    <string name="show_picture_in_avatar">Zobrazit obrázek v avataru</string>
+    <string name="show_picture_in_avatar_subtitle">Zobrazí fotografii kontaktu, pokud je k dispozici</string>
+
+    <string name="navigations">Navigace</string>
+    <string name="navigations_subtitle">Viditelnost a styl karet</string>
+    <string name="tab_sections">Sekce karet</string>
+    <string name="tab_sections_subtitle">Vyberte, které karty jsou viditelné, a přetažením úchytu je přeřaďte v navigační liště</string>
+    <string name="navigation_style">Styl navigace</string>
+    <string name="pill_style_navigation">Navigace ve stylu pilulky</string>
+    <string name="pill_style_navigation_subtitle">Zobrazit plovoucí navigační lištu ve stylu pilulky místo standardní spodní lišty</string>
+    <string name="icon_only_bottom_bar">Spodní lišta pouze s ikonami</string>
+    <string name="icon_only_bottom_bar_subtitle">Odstraní textové popisky z navigace</string>
+    <string name="startup_tab">Počáteční karta</string>
+    <string name="startup_tab_subtitle">Vyberte, která karta se otevře při spuštění aplikace</string>
+    <string name="last_used">Naposledy použité</string>
+
+    <string name="calls_and_system">Hovory a systém</string>
+    <string name="call_settings">Nastavení hovorů</string>
+    <string name="call_settings_subtitle">Účty, senzor a kapesní režim</string>
+    <string name="default_sim">Výchozí SIM</string>
+    <string name="ask_first">Nejprve se zeptat</string>
+    <string name="calling_accounts">Účty pro volání</string>
+    <string name="system_settings">Systémová nastavení</string>
+    <string name="call_behavior">Chování hovorů</string>
+    <string name="proximity_sensor">Senzor přiblížení na pozadí</string>
+    <string name="proximity_sensor_subtitle">Vypnout obrazovku, když je telefon během hovoru u ucha</string>
+    <string name="pocket_mode_prevention">Kapesní režim</string>
+    <string name="pocket_mode_prevention_subtitle">Zablokovat náhodné přijetí/odmítnutí, když je telefon v kapse</string>
+    <string name="floating_ongoing_call">Plovoucí probíhající hovor</string>
+    <string name="floating_ongoing_call_subtitle">Zobrazit přetahovatelnou plovoucí bublinu během hovorů. Vyžaduje oprávnění \"Zobrazovat nad ostatními aplikacemi\"</string>
+    <string name="direct_call_on_tap">Přímé volání klepnutím</string>
+    <string name="direct_call_on_tap_subtitle">Klepnutím na záznam v protokolu hovorů přímo zavoláte</string>
+    <string name="auto_speaker">Automatický reproduktor</string>
+    <string name="auto_speaker_subtitle">Automaticky přepnout na hlasitý reproduktor, když je telefon daleko od ucha, a zpět na sluchátko, když je blízko</string>
+    <string name="fullscreen_calls">Hovory na celou obrazovku</string>
+    <string name="fullscreen_calls_subtitle">Příchozí hovory se vždy zobrazují na celou obrazovku</string>
+
+    <!-- Speed dial -->
+    <string name="settings_speed_dial_title">Rychlé vytáčení</string>
+    <string name="settings_speed_dial_enable">Zapnout rychlé vytáčení</string>
+    <string name="settings_speed_dial_enable_supporting">Dlouhým stisknutím klávesy zavoláte přiřazené číslo</string>
+    <string name="settings_speed_dial_assignments_header">Přiřazení</string>
+    <string name="settings_speed_dial_not_assigned">Nepřiřazeno</string>
+    <string name="settings_speed_dial_no_number">Žádné číslo</string>
+    <string name="settings_speed_dial_open">Otevřít nastavení rychlého vytáčení?</string>
+
+    <string name="quick_response">Rychlá odpověď</string>
+    <string name="quick_responses">Rychlé odpovědi</string>
+    <string name="quick_responses_subtitle">Správa připravených SMS odpovědí pro odmítnutí příchozích hovorů</string>
+    <string name="quick_responses_description">Během příchozího hovoru klepněte na tlačítko zprávy, abyste hovor odmítli a odeslali jednu z těchto připravených odpovědí prostřednictvím SMS.</string>
+    <string name="add_response">Přidat rychlou odpověď</string>
+    <string name="edit_response">Upravit rychlou odpověď</string>
+    <string name="default_quick_responses_1">Teď nemůžu mluvit. Co se děje?</string>
+    <string name="default_quick_responses_2">Hned ti zavolám zpět.</string>
+    <string name="default_quick_responses_3">Zavolám ti později.</string>
+    <string name="default_quick_responses_4">Teď nemůžu mluvit. Zavoláš mi později?</string>
+    <string name="write_your_own">Napište vlastní…</string>
+    <string name="type_message">Napište zprávu</string>
+    <string name="canned_responses">Připravené odpovědi (%s)</string>
+    <string name="no_quick_responses_configured">Nejsou nastaveny žádné rychlé odpovědi</string>
+    <string name="reset_to_defaults">Obnovit výchozí</string>
+    <string name="reset_to_defaults_description">Obnovit původní přednastavené rychlé odpovědi?</string>
+    <string name="decline_call_and_reply_to">Odmítnout hovor a odpovědět %s</string>
+    <string name="send">Odeslat</string>
+
+    <string name="sound_and_vibration">Zvuk a vibrace</string>
+    <string name="sound_and_vibration_subtitle">Vyzváněcí tóny, tóny klávesnice a haptika v celé aplikaci</string>
+    <string name="tap_haptics">Haptika klepnutí</string>
+    <string name="enable_tap_haptics">Zapnout haptiku klepnutí</string>
+    <string name="haptics_intensity">Intenzita</string>
+    <string name="haptics_soft">Jemná</string>
+    <string name="haptics_strong">Silná</string>
+    <string name="haptics_custom">Vlastní</string>
+    <string name="preview_haptic">Náhled haptiky</string>
+    <string name="ringtone_settings">Nastavení vyzvánění</string>
+    <string name="dialpad_tones">Tóny klávesnice</string>
+    <string name="dialpad_tones_subtitle">Tón klávesnice přehrávaný při stisku kláves</string>
+    <string name="calls">Hovory</string>
+    <string name="vibrate_on_answer">Vibrace při přijetí</string>
+    <string name="vibrate_on_answer_subtitle">Vibrovat, když druhá strana zvedne</string>
+    <string name="vibrate_on_hang_up">Vibrace při zavěšení</string>
+    <string name="vibrate_on_hang_up_subtitle">Vibrovat, když hovor skončí</string>
+    <string name="haptics_across_app">Haptika v celé aplikaci</string>
+    <string name="scroll_haptics">Haptika posouvání</string>
+    <string name="scroll_haptics_subtitle">Vibrovat při gestech posouvání v aplikaci</string>
+    <string name="haptic_interval">Interval haptiky</string>
+    <string name="haptic_interval_value">1 na %.1f cm</string>
+    <string name="haptic_strength">Síla haptiky</string>
+
+    <!-- Flash Notification on Call -->
+    <string name="flash_on_call">Blesk při hovoru</string>
+    <string name="flash_on_call_subtitle">Blikat bleskem fotoaparátu při příchozích hovorech</string>
+    <string name="flash_on_call_mode">Režim blesku</string>
+    <string name="flash_mode_always">Vždy</string>
+    <string name="flash_mode_silent_vibrate">Pouze ticho / vibrace</string>
+
+    <string name="manage_blocked">Správa blokovaných</string>
+    <string name="manage_blocked_subtitle">Správa blokovaných hovorů a spamu</string>
+    <string name="blocked_numbers">Blokovaná čísla</string>
+    <string name="blocked_numbers_system_info">Hovory z čísel v systémovém seznamu blokovaných jsou filtrovány systémem Android dříve, než je naše aplikace obdrží. Toto chování nemůžeme ovlivnit.</string>
+    <string name="blocking_notifications">Upozornění na blokování</string>
+    <string name="blocking_notifications_subtitle">Zobrazit upozornění s nízkou prioritou na blokované hovory</string>
+    <string name="block_method">Metoda blokování</string>
+    <string name="block_method_subtitle">Jak se s blokovanými hovory zachází</string>
+    <string name="decline_automatically">Automaticky odmítnout</string>
+    <string name="ring_silently">Zvonit tiše</string>
+    <string name="log_visibility">Viditelnost v protokolu</string>
+    <string name="log_visibility_subtitle">Zobrazit nebo skrýt blokované hovory v nedávných</string>
+    <string name="hide_from_logs">Skrýt z protokolů</string>
+    <string name="show_in_logs">Zobrazit v protokolech</string>
+    <string name="blocked_size">Blokováno: %s</string>
+
+    <string name="authentication">Ověřování</string>
+    <string name="authentication_method">Metoda ověřování</string>
+    <string name="system_biometrics">Systémová biometrie</string>
+    <string name="system_biometrics_subtitle">Otisk prstu, odemknutí obličejem nebo přihlašovací údaje zařízení</string>
+    <string name="system_biometrics_not_available">Na tomto zařízení není k dispozici</string>
+    <string name="custom_biometrics">Vlastní biometrie</string>
+    <string name="custom_pin">Vlastní PIN</string>
+    <string name="custom_password">Vlastní heslo</string>
+    <string name="pin">PIN</string>
+    <string name="pin_subtitle">Nastavit číselný PIN</string>
+    <string name="password">Heslo</string>
+    <string name="password_subtitle">Nastavit vlastní alfanumerické heslo</string>
+    <string name="remove_biometric">Odstranit biometrický zámek</string>
+    <string name="not_configured">Nenastaveno</string>
+    <string name="lock_app_on_open">Zamknout aplikaci při otevření</string>
+    <string name="lock_app_on_open_subtitle">Vyžadovat ověření při otevření aplikace</string>
+    <string name="lock_call_actions">Zamknout akce hovoru</string>
+    <string name="lock_call_actions_subtitle">Vyžadovat ověření pro přijetí nebo odmítnutí příchozích hovorů</string>
+    <string name="lock_scope">Rozsah zámku hovorů</string>
+    <string name="all_calls">Všechny hovory</string>
+    <string name="all_calls_subtitle">Biometrie vyžadována pro každý příchozí hovor</string>
+    <string name="blacklist">Černá listina</string>
+    <string name="blacklist_count">Kontakty, pro které je povoleno ověřování při přijetí hovoru: %s</string>
+    <string name="blacklist_subtitle">Vyberte kontakty, které vyžadují biometrii pro přijetí</string>
+    <string name="whitelist">Bílá listina</string>
+    <string name="whitelist_count">Kontakty, pro které je zakázáno ověřování při přijetí hovoru: %s</string>
+    <string name="whitelist_subtitle">Vyberte kontakty, které přeskočí biometrický zámek</string>
+    <string name="select_contacts">Vybrat kontakty</string>
+    <string name="set_pin">Nastavit PIN</string>
+    <string name="set_pin_subtitle">Zadejte čtyřmístný PIN</string>
+    <string name="enter_pin">Zadejte PIN</string>
+    <string name="confirm_pin">Potvrdit PIN</string>
+    <string name="confirm_pin_subtitle">Znovu zadejte PIN pro potvrzení</string>
+    <string name="incorrect_pin">Nesprávný PIN. Zkuste to prosím znovu.</string>
+    <string name="pin_dont_match">PINy se neshodují. Začněte prosím znovu.</string>
+    <string name="set_password">Nastavit heslo</string>
+    <string name="set_password_subtitle">Zadejte libovolné heslo. Podporována jsou písmena, číslice a speciální znaky.</string>
+    <string name="enter_password">Zadejte heslo</string>
+    <string name="confirm_password">Potvrdit heslo</string>
+    <string name="incorrect_password">Nesprávné heslo</string>
+    <string name="incorrect_password_subtitle">Heslo musí mít alespoň 4 znaky</string>
+    <string name="password_dont_match">Hesla se neshodují</string>
+    <string name="lock_on_minimize">Zamknout při minimalizaci</string>
+    <string name="lock_on_minimize_subtitle">Pokud je toto vypnuto, aplikace bude ukončena pouze tehdy, když bude zcela uvolněna z paměti</string>
+    <string name="verify_your_identity_to_continue">Ověřte svou totožnost pro pokračování</string>
+    <string name="verify_your_identity_to_access_call">Ověřte svou totožnost pro přístup k tomuto hovoru</string>
+    <string name="lock_timeout">Časový limit zámku</string>
+    <string name="immediately_on_exit">Okamžitě při ukončení</string>
+    <string name="after_1_minute">Po 1 minutě</string>
+    <string name="after_5_minutes">Po 5 minutách</string>
+    <string name="after_15_minutes">Po 15 minutách</string>
+    <string name="after_30_minutes">Po 30 minutách</string>
+
+    <string name="manage_contacts">Správa kontaktů</string>
+    <string name="manage_contacts_subtitle">Soukromé kontakty, účty k zobrazení a vyčištění seznamu</string>
+    <string name="display">Zobrazení</string>
+    <string name="sort_by">Seřadit podle</string>
+    <string name="name_format">Formát jména</string>
+    <string name="first_name_first">Nejprve jméno</string>
+    <string name="last_name_first">Nejprve příjmení</string>
+    <string name="merge_and_fix">Sloučit a opravit</string>
+    <string name="standardize">Standardizovat</string>
+    <string name="standardize_phone_numbers">Standardizovat telefonní čísla</string>
+    <string name="standardize_phone_numbers_subtitle">Odstranit mezery a speciální znaky z telefonních čísel</string>
+    <string name="total_contacts">Celkem kontaktů</string>
+    <string name="contacts_with_changes">Kontakty se změnami</string>
+    <string name="numbers_to_standardize">Čísla ke standardizaci</string>
+    <string name="all_numbers_are_already_standardized">✅ Všechna čísla jsou již standardizována!</string>
+    <string name="examples_of_changes">Příklady změn:</string>
+    <string name="and_more">A dalších %s…</string>
+
+    <string name="contacts_trash_title">Koš</string>
+    <string name="contacts_trash_empty_title">Koš je prázdný</string>
+    <string name="contacts_trash_empty_desc">Kontakty smazané při zapnutém koši se zde zobrazí po dobu 30 dnů, než budou trvale odstraněny.</string>
+    <string name="contacts_trash_header_hint">Položky v koši jsou trvale smazány po 30 dnech</string>
+    <string name="contacts_trash_restore_action">Obnovit</string>
+    <string name="contacts_trash_delete_action">Smazat trvale</string>
+    <string name="contacts_trash_delete_action_subtitle">Trvale smazat „%1$s“? Tuto akci nelze vrátit zpět.</string>
+    <string name="contacts_trash_empty_all">Vyprázdnit koš</string>
+    <string name="contacts_trash_empty_all_confirm_title">Vyprázdnit koš?</string>
+    <string name="contacts_trash_empty_all_confirm_msg">Všech %1$d kontaktů v koši bude trvale smazáno. Tuto akci nelze vrátit zpět.</string>
+    <string name="contacts_trash_restored_toast">%1$s obnoveno</string>
+    <string name="contacts_trash_days_left">Zbývá %1$s dnů</string>
+    <string name="settings_contacts_trash_title">Koš pro smazané kontakty</string>
+    <string name="settings_contacts_trash_supporting">Uchovávat smazané kontakty v koši 30 dnů před trvalým odstraněním</string>
+    <string name="settings_contacts_trash_view_supporting">Zobrazit a obnovit smazané kontakty (%1$d v koši)</string>
+    <string name="trash_contact">Přesunout do koše</string>
+    <string name="trash_contact_subtitle">Opravdu chcete tento kontakt přesunout do koše? Lze jej obnovit do 30 dnů.</string>
+    <string name="trash_contacts_subtitle">Opravdu chcete přesunout %s vybraných kontaktů do koše? Lze je obnovit do 30 dnů.</string>
+
+    <string name="merging_contacts">Sloučení kontaktů</string>
+    <string name="merging_contacts_subtitle">Hledání a slučování duplicitních kontaktů</string>
+    <string name="merging_contacts_description">Sloučené kontakty jsou více záznamů z různých účtů propojených do jednoho. Každý zdroj můžete upravit zvlášť nebo je odpojit.</string>
+    <string name="no_duplicates_found">Nebyly nalezeny žádné duplikáty</string>
+    <string name="duplicates_in">Duplikáty v: %s</string>
+    <string name="merge_duplicates">Sloučit duplikáty (%s kontaktů)</string>
+
+    <string name="unmerging_contacts">Odpojit kontakty</string>
+    <string name="unmerging_contacts_subtitle">Hledání a odpojení sloučených kontaktů</string>
+    <string name="unmerging_contacts_description">Informace o kontaktu pocházejí z více zdrojů. Vyberte jeden k úpravě, nebo odpojte všechny a mějte je jako samostatné kontakty.</string>
+    <string name="no_merged_contacts_found">Nebyly nalezeny žádné sloučené kontakty</string>
+    <string name="merged_from_sources">Sloučeno z %s zdrojů</string>
+    <string name="unlink">Odpojit</string>
+    <string name="warning_cannot_be_undone">⚠️ Tuto akci nelze vrátit zpět.</string>
+
+    <string name="managing_contact_sources">Správa zdrojů kontaktů</string>
+    <string name="managing_contact_sources_subtitle">Vyberte, které účty se mají zobrazovat v seznamu</string>
+    <string name="managing_contact_sources_description">Vyberte, které účty mají být viditelné ve vašem seznamu kontaktů. Zrušením výběru účtu se jeho kontakty skryjí, ale nesmažou.</string>
+    <string name="contact_sources">Zdroje kontaktů</string>
+    <string name="contacts_stored_on_app">Kontakty uložené v aplikaci</string>
+    <string name="contacts_stored_on_device">Kontakty uložené v zařízení</string>
+
+    <string name="private_contacts">Soukromé kontakty</string>
+    <string name="private_contacts_subtitle">Správa šifrovaných místních kontaktů</string>
+
+    <!-- Voicemail -->
+    <string name="settings_voicemail_title">Hlasová schránka</string>
+
+    <!-- Call -->
+    <string name="call_failed_airplane_mode">Hovor nelze uskutečnit, když je zapnutý režim Letadlo</string>
+    <string name="call_failed_no_network">Hovor selhal: mobilní síť není dostupná</string>
+    <string name="call_failed_restricted">Hovor selhal: hovor je omezen</string>
+    <string name="call_failed_generic">Hovor se nepodařilo dokončit</string>
+    <string name="no_valid_app_found">Nebyla nalezena žádná vhodná aplikace</string>
+    <string name="video_call">Videohovor</string>
+    <string name="voice_call">Hlasový hovor</string>
+    <string name="call">Hovor</string>
+    <string name="incoming">Příchozí</string>
+    <string name="outgoing">Odchozí</string>
+    <string name="missed">Zmeškaný</string>
+    <string name="rejected">Odmítnutý</string>
+    <string name="blocked">Blokovaný</string>
+    <string name="answer">Přijmout</string>
+    <string name="decline">Odmítnout</string>
+    <string name="answer_and_decline">Přijmout a ukončit druhý hovor</string>
+    <string name="end_call">Ukončit hovor</string>
+    <string name="back_to_call">Zpět k hovoru</string>
+    <string name="keypad">Klávesnice</string>
+    <string name="mute">Ztlumit</string>
+    <string name="unmute">Zrušit ztlumení</string>
+    <string name="audio_route_speaker">Reproduktor</string>
+    <string name="audio_route_handset">Sluchátko</string>
+    <string name="audio_route_headset">Headset</string>
+    <string name="audio_route_bluetooth">Bluetooth</string>
+    <string name="audio_route_bluetooth_short">BT</string>
+    <string name="audio_output_title">Zvukový výstup</string>
+    <string name="add_call">Přidat hovor</string>
+    <string name="resume">Pokračovat</string>
+    <string name="swap">Přepnout</string>
+    <string name="merge">Sloučit</string>
+    <string name="manage">Spravovat</string>
+    <string name="conference">Konferenční hovor</string>
+    <string name="more">Více</string>
+    <string name="hold">Podržet</string>
+    <string name="call_status_on_hold">Pozastaveno</string>
+    <string name="call_status_ended">Hovor ukončen</string>
+    <string name="call_status_calling">Volání…</string>
+    <string name="call_status_incoming">Příchozí hovor</string>
+    <string name="call_status_connecting">Připojování…</string>
+    <string name="slide_to_answer">přejetím přijmout</string>
+    <string name="swipe_up_to_answer">Přejetím nahoru přijmete</string>
+    <string name="swipe_down_to_reject">Přejetím dolů odmítnete</string>
+
+    <!-- Recents -->
+    <string name="recents">Nedávné</string>
+    <string name="home_tab">Domů</string>
+    <string name="call_history">Historie hovorů</string>
+    <string name="history_with">Historie s %s</string>
+    <string name="no_call_history_found">Nebyla nalezena žádná historie hovorů</string>
+    <string name="delete_call_logs">Smazat protokoly hovorů</string>
+    <string name="delete_call_logs_selected">Opravdu chcete smazat %s vybraných protokolů hovorů?</string>
+    <string name="deleted_from_call_log">Smazáno z protokolu hovorů</string>
+    <string name="could_not_delete">Nepodařilo se smazat</string>
+    <string name="clear_all_filtered_logs">Vymazat všechny filtrované protokoly</string>
+    <string name="clear_all_filtered_logs_selected">Tímto smažete veškerou zobrazenou historii hovorů. Tuto akci nelze vrátit zpět.</string>
+
+    <!-- Blocking -->
+    <string name="action_block">Blokovat</string>
+    <string name="action_unblock">Odblokovat</string>
+    <string name="action_block_number">Blokovat číslo</string>
+    <string name="action_unblock_number">Odblokovat číslo</string>
+    <string name="contact_block">Blokovat kontakt</string>
+    <string name="contact_block_supporting">Blokovat příchozí hovory a zprávy od tohoto kontaktu</string>
+    <string name="contact_unblock">Odblokovat kontakt</string>
+    <string name="contact_unblock_supporting">Znovu povolit hovory a zprávy od tohoto kontaktu</string>
+    <string name="call_log_block_title">Blokovat čísla?</string>
+    <string name="call_log_block_message">Hovory z %1$d vybraných záznamů budou zablokovány.</string>
+
+    <!-- Contact call screen background -->
+    <string name="contact_call_background">Pozadí obrazovky hovoru</string>
+    <string name="contact_call_background_set">Vybrán vlastní obrázek</string>
+    <string name="contact_call_background_none">Použít výchozí pozadí</string>
+    <string name="contact_call_background_choose">Vybrat obrázek</string>
+    <string name="contact_call_background_change">Změnit obrázek</string>
+    <string name="contact_call_background_remove">Odstranit pozadí</string>
+    <string name="contact_call_background_saving">Ukládání obrázku…</string>
+    <string name="contact_call_background_error">Obrázek se nepodařilo uložit</string>
+    <string name="contact_call_background_no_target">Nejprve uložte číslo jako kontakt</string>
+    <string name="contact_call_background_preview">Náhled pozadí obrazovky hovoru</string>
+    <string name="settings_call_default_background">Výchozí pozadí hovoru</string>
+    <string name="settings_call_default_background_set">Při každém hovoru se zobrazí vlastní obrázek</string>
+    <string name="settings_call_default_background_none">Nenastaveno — hovory používají téma aplikace</string>
+    <string name="settings_interface_hide_avatar_with_bg">Skrýt profilový obrázek, když je k dispozici pozadí</string>
+    <string name="settings_interface_hide_avatar_with_bg_supporting">Skrýt avatar volajícího na obrazovce hovoru, když je aktivní obrázek pozadí hovoru</string>
+
+    <!-- Shortcuts -->
+    <string name="add_to_home_screen">Přidat na domovskou obrazovku</string>
+    <string name="shortcut_view_contact_subtitle">Zástupce otevře informační stránku tohoto kontaktu</string>
+    <string name="shortcut_call_subtitle">Zástupce okamžitě zavolá tomuto kontaktu</string>
+    <string name="shortcut_save_number">Nejprve uložte toto číslo do kontaktů</string>
+
+    <!-- Contacts -->
+    <string name="contacts">Kontakty</string>
+    <string name="view_contact">Zobrazit kontakt</string>
+    <string name="view_contacts">Zobrazit kontakty</string>
+    <string name="contacts_settings">Nastavení kontaktů</string>
+    <string name="create_contact">Vytvořit kontakt</string>
+    <string name="add_contact">Přidat kontakt</string>
+    <string name="add_to_contact">Přidat ke kontaktu</string>
+    <string name="edit_contact">Upravit kontakt</string>
+    <string name="contact_info">Informace o kontaktu</string>
+    <string name="favorites">Oblíbené</string>
+    <string name="message">Zpráva</string>
+    <string name="video">Video</string>
+    <string name="email">E-mail</string>
+    <string name="default_number">Výchozí</string>
+    <string name="recent_number">Nedávné</string>
+    <string name="recent_activity">Nedávná aktivita</string>
+    <string name="add_to_favorites">Přidat do oblíbených</string>
+    <string name="remove_from_favorites">Odebrat z oblíbených</string>
+    <string name="no_favorites_yet">Zatím žádné oblíbené</string>
+    <string name="no_favorites_yet_subtitle">Označte kontakt hvězdičkou a přidejte jej sem</string>
+    <string name="move_contact">Přesunout kontakt</string>
+    <string name="move_to_another_account">Přesunout na jiný účet</string>
+    <string name="move_to_device_storage">Přesunout do úložiště zařízení</string>
+    <string name="contact_moved_successfully">Kontakt byl úspěšně přesunut</string>
+    <string name="save_to_account">Uložit do účtu</string>
+    <string name="show_full_history">Zobrazit celou historii</string>
+    <string name="contact_qr">QR kontakt</string>
+    <string name="tap_phone_to_share_NFC">Klepněte telefonem pro sdílení přes NFC</string>
+    <string name="nfc_is_turned_off">NFC je vypnuto</string>
+    <string name="phone_number">Telefonní číslo</string>
+    <string name="name">Jméno</string>
+    <string name="prefix">Předpona</string>
+    <string name="prefix_description">Pan, paní, Dr., atd.</string>
+    <string name="first_name">Jméno</string>
+    <string name="middle_name">Prostřední jméno</string>
+    <string name="middle_name_description">Prostřední jméno nebo iniciála</string>
+    <string name="last_name">Příjmení</string>
+    <string name="suffix">Přípona</string>
+    <string name="suffix_description">Jr., Sr., III, atd.</string>
+    <string name="nickname">Přezdívka</string>
+    <string name="nickname_description">Krátké jméno nebo alias</string>
+    <string name="company">Společnost</string>
+    <string name="job_title">Pozice</string>
+    <string name="job_title_description">Pozice ve společnosti</string>
+    <string name="add_field">Přidat pole</string>
+    <string name="add_phone">Přidat telefon</string>
+    <string name="add_email">Přidat e-mail</string>
+    <string name="add_event">Přidat událost</string>
+    <string name="add_address">Přidat adresu</string>
+    <string name="add_note">Přidat poznámku</string>
+    <string name="add_photo">Přidat fotografii</string>
+    <string name="contact_ringtone">Vyzvánění kontaktu</string>
+    <string name="unsaved_changes">Neuložené změny</string>
+    <string name="unsaved_changes_subtitle">Chcete před odchodem uložit změny?</string>
+    <string name="ringtone_custom">Vlastní</string>
+    <plurals name="contacts_count">
+        <item quantity="one">%d kontakt</item>
+        <item quantity="few">%d kontakty</item>
+        <item quantity="many">%d kontaktu</item>
+        <item quantity="other">%d kontaktů</item>
+    </plurals>
+    <plurals name="add_to_favorites_confirmation">
+        <item quantity="one">Přidat %d kontakt do oblíbených?</item>
+        <item quantity="few">Přidat %d kontakty do oblíbených?</item>
+        <item quantity="many">Přidat %d kontaktu do oblíbených?</item>
+        <item quantity="other">Přidat %d kontaktů do oblíbených?</item>
+    </plurals>
+    <plurals name="remove_from_favorites_confirmation">
+        <item quantity="one">Odebrat %d kontakt z oblíbených?</item>
+        <item quantity="few">Odebrat %d kontakty z oblíbených?</item>
+        <item quantity="many">Odebrat %d kontaktu z oblíbených?</item>
+        <item quantity="other">Odebrat %d kontaktů z oblíbených?</item>
+    </plurals>
+
+    <!-- Permission -->
+    <string name="allow">Povolit</string>
+    <string name="call_history_permission">Rill Phone potřebuje přístup k vašim protokolům hovorů, aby mohl zobrazovat vaši nedávnou aktivitu a zmeškané hovory.</string>
+    <string name="contacts_permission">Vyžadováno oprávnění ke kontaktům</string>
+    <string name="contacts_permission_description">Chcete-li zobrazit své kontakty, povolte oprávnění ke kontaktům.</string>
+    <string name="search_contacts_permission_description">Chcete-li vyhledávat ve svých kontaktech a identifikovat příchozí hovory, povolte oprávnění ke kontaktům.</string>
+
+    <!-- Default Dialer -->
+    <string name="default_phone_number_cleared">Výchozí telefonní číslo vymazáno</string>
+    <string name="set_as_default">Nastavit jako výchozí</string>
+    <string name="clear_default">Vymazat výchozí</string>
+    <string name="default_phone_set">%s nastaveno jako výchozí</string>
+    <string name="default_dialer_title">Nastavit Rill Phone jako výchozí</string>
+    <string name="default_dialer_subtitle">Rill Phone může zahajovat a přijímat hovory pouze v případě, že je vaší výchozí telefonní aplikací</string>
+    <string name="default_dialer_warning">Aplikace nemůže bez tohoto oprávnění fungovat. Zkuste to prosím znovu.</string>
+
+    <!-- Call notes -->
+    <string name="notes">Poznámky</string>
+    <string name="notes_contact">Poznámky</string>
+    <string name="call_notes">Poznámky k hovoru</string>
+    <string name="about_call_notes">O poznámkách k hovoru</string>
+    <string name="about_call_notes_subtitle">Rychlé poznámky, které si děláte během hovoru. Ukládají se lokálně v souborech aplikace a jsou propojeny s telefonním číslem (nesynchronizují se s Kontakty Google a dalšími). Každé číslo má svou vlastní soukromou poznámku, ke které lze přistupovat pouze z protokolu hovorů v podrobnostech kontaktu v aplikaci nebo z karty „Poznámky k hovoru“.</string>
+    <string name="type_your_note">Napište svou poznámku…</string>
+    <string name="no_notes_yet">Zatím žádné poznámky</string>
+    <string name="no_notes_yet_subtitle">Poznámky pořízené během hovorů se zobrazí zde</string>
+    <string name="delete_notes">Smazat poznámky</string>
+    <string name="delete_notes_subtitle">Opravdu chcete smazat %s vybraných poznámek?</string>
+    <string name="delete_note">Smazat poznámku</string>
+    <string name="delete_note_subtitle">Smazat poznámku pro %s?"</string>
+
+    <!-- Times -->
+    <string name="just_now">Právě teď</string>
+    <string name="yesterday">Včera</string>
+    <string name="today">Dnes</string>
+    <string name="seconds_letter">%ds</string>
+    <string name="minutes_letter">%dm</string>
+    <string name="hours_letter">%dh</string>
+    <string name="days_letter">%dd</string>
+
+    <!-- Phone numbers -->
+    <string name="no_label">Bez označení</string>
+    <string name="custom_label">Vlastní označení</string>
+    <string name="change_label">Změnit označení</string>
+    <string name="mobile">Mobil</string>
+    <string name="main_number">Hlavní</string>
+    <string name="home">Domov</string>
+    <string name="work">Práce</string>
+    <string name="work_fax">Pracovní fax</string>
+    <string name="home_fax">Domácí fax</string>
+    <string name="pager">Pager</string>
+    <string name="other">Jiné</string>
+    <string name="send_whatsapp">Odeslat přes WhatsApp</string>
+
+    <!-- Events -->
+    <string name="other_information">Další informace</string>
+    <string name="birthday">Narozeniny</string>
+    <string name="anniversary">Výročí</string>
+
+    <!-- Dialpad -->
+    <string name="add_pause">Přidat 2sekundovou pauzu</string>
+    <string name="add_wait">Přidat čekání</string>
+    <string name="suggested">Doporučené</string>
+
+    <!-- Onboarding -->
+    <string name="skip">Přeskočit</string>
+    <string name="page_title_one">Soukromí již od návrhu</string>
+    <string name="page_subtitle_one">Vaše kontakty zůstávají ve vašem zařízení. Nikdy nenahráváme, nesledujeme ani nesdílíme vaše data s nikým. Nikdy.</string>
+    <string name="page_title_two">Open source a transparentnost</string>
+    <string name="page_subtitle_two">Žádná telemetrie. Žádné reklamy. Žádné sledování. Plná kontrola nad vaší komunikací.</string>
+    <string name="page_title_three">Rychlé a spolehlivé</string>
+    <string name="page_subtitle_three">Okamžité vyhledávání T9, plynulé animace a bleskurychlé volání. Prostě telefonní aplikace, která funguje.</string>
+    <string name="page_title_warning">Ve vývoji</string>
+    <string name="page_subtitle_warning">Tato aplikace je stále ve vývoji. Některé funkce nemusí fungovat podle očekávání. Používejte ji prosím opatrně a nahlaste jakékoli problémy, se kterými se setkáte.</string>
+
+    <!-- Call notifications (CallService) -->
+    <string name="notif_channel_outgoing_calls">Odchozí hovory</string>
+    <string name="notif_channel_incoming_calls">Příchozí hovory</string>
+    <string name="notif_channel_fullscreen_incoming_calls">Příchozí hovory na celou obrazovku</string>
+    <string name="notif_channel_missed_calls">Zmeškané hovory</string>
+    <string name="notif_blocked_call_title">Blokovaný hovor</string>
+    <string name="notif_blocked_call_text">Blokovaný hovor od %1$s</string>
+    <string name="notif_missed_call_title">Zmeškaný hovor</string>
+    <string name="notif_missed_call_text">Zmeškaný hovor od %1$s v %2$s</string>
+    <string name="notif_via_sim">přes %1$s</string>
+    <string name="notif_active_call">Aktivní hovor</string>
+    <string name="notif_call_back">Zavolat zpět</string>
+
+    <!-- Backup & Restore -->
+    <string name="backup_and_restore">Zálohování a obnovení</string>
+    <string name="restoring_backup">Obnovování zálohy…</string>
+    <string name="backup_created">Záloha vytvořena</string>
+    <string name="backup_created_description">Záloha uložena do: %s</string>
+    <string name="restore_complete">Obnovení dokončeno</string>
+    <string name="restore_complete_description">Vaše data byla úspěšně obnovena. Restartujte prosím aplikaci.</string>
+    <string name="operation_failed">Operace selhala</string>
+    <string name="create_backup">Vytvořit zálohu</string>
+    <string name="create_backup_subtitle">Uložit konfiguraci aplikace a poznámky k hovorům</string>
+    <string name="failed_to_create_backup">Zálohu se nepodařilo vytvořit</string>
+    <string name="restore_backup">Obnovit zálohu</string>
+    <string name="restore_backup_subtitle">Obnovit konfiguraci aplikace a poznámky k hovorům</string>
+
+    <!-- Pocket Mode -->
+    <string name="pocket_mode_active">Kapesní režim aktivní</string>
+    <string name="pocket_mode_active_description">Dotyky na obrazovce jsou uzamčeny, aby se zabránilo náhodným dotykům v kapse.</string>
+    <string name="pocket_mode_dismiss">Vypnout ochranu dotyků</string>
+
+    <!-- Call Analytics -->
+    <string name="settings_call_analytics_title">Analytika hovorů</string>
+    <string name="settings_call_analytics_supporting">Sledujte metriky hovorů, statistiky doby hovoru, špičkové hodiny a přehledy o častých kontaktech</string>
+    <string name="call_analytics_disabled_title">Analytika hovorů vypnuta</string>
+    <string name="call_analytics_disabled_desc">Analytika hovorů a sledování doby hovoru jsou momentálně vypnuté. Zapněte tuto možnost pro výpočet doby hovoru, špičkových hodin a přehledů o kontaktech.</string>
+    <string name="call_analytics_enable_action">Zapnout analytiku</string>
+    <string name="this_week">Tento týden</string>
+    <string name="this_month">Tento měsíc</string>
+    <string name="all_time">Celkově</string>
+    <string name="total_talk_time">Celková doba hovorů</string>
+    <string name="total_calls">Celkem hovorů</string>
+    <string name="avg_duration">Průměrná doba</string>
+    <string name="call_volume">Objem hovorů</string>
+    <string name="call_breakdown">Rozpis hovorů</string>
+    <string name="sim_usage_breakdown">Využití SIM</string>
+    <string name="most_talked_persons">Nejčastější kontakty</string>
+    <string name="no_call_records_this_period">Pro toto období nebyly nalezeny žádné záznamy o hovorech</string>
+    <string name="total_calls_in_number">%1$s hovorů (přích: %2$s, odch: %3$s, zmešk: %4$s)</string>
+
+    <!-- Busy Mode -->
+    <string name="busy_mode">Režim Zaneprázdněn</string>
+    <string name="busy_mode_subtitle">Automaticky odmítat hovory a odesílat automatickou SMS odpověď. Lze přepínat přes Rychlá nastavení</string>
+    <string name="busy_mode_message">Zpráva automatické odpovědi</string>
+    <string name="busy_mode_message_subtitle">Zpráva odeslaná automaticky, když režim Zaneprázdněn odmítne hovor</string>
+    <string name="busy_mode_default_message">Teď jsem zaneprázdněn, zavolej mi později</string>
+    <string name="busy_mode_call_rejected_toast">Hovor odmítnut (režim Zaneprázdněn).</string>
+    <string name="busy_mode_call_rejected_sent_sms_toast">Hovor odmítnut (režim Zaneprázdněn). SMS odeslána.</string>
+    <string name="edit_busy_message">Upravit zprávu režimu Zaneprázdněn</string>
+    <string name="busy_mode_permission_required">Udělte oprávnění k odesílání SMS v nastavení aplikace</string>
+
+    <!-- Avatar Cropping -->
+    <string name="crop_avatar_title">Oříznout a otočit</string>
+    <string name="action_crop">Oříznout</string>
+    <string name="action_rotate">Otočit</string>
+
+    <!-- Swipe Actions and Tap -->
+    <string name="settings_swipe_and_taps_title">Přejetí a klepnutí</string>
+    <string name="settings_swipe_and_taps_supporting">Nastavte, co se stane při přejetí nebo klepnutí</string>
+    <string name="settings_swipe_actions_enable">Zapnout gesta přejetí</string>
+    <string name="settings_swipe_actions_enable_supporting">Přejetím doleva nebo doprava po položkách seznamu spustíte akce</string>
+    <string name="settings_swipe_right_action">Akce přejetí doprava</string>
+    <string name="settings_swipe_right_action_second">Sekundární akce pro přejetí doprava</string>
+    <string name="settings_swipe_left_action">Akce přejetí doleva</string>
+    <string name="settings_swipe_left_action_second">Sekundární akce pro přejetí doleva</string>
+    <string name="settings_swipe_actions_reset">Obnovit akce přejetí</string>
+    <string name="swipe_action_none">Žádná</string>
+    <string name="swipe_action_copy_number">Kopírovat číslo</string>
+</resources>

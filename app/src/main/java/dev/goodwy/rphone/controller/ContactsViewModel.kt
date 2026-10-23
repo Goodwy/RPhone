@@ -16,9 +16,12 @@ import dev.goodwy.rphone.private_only
 import dev.goodwy.rphone.view.screen.settings.NumberChangeExample
 import dev.goodwy.rphone.view.screen.settings.StandardizeStats
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
@@ -35,6 +38,9 @@ class ContactsViewModel(
     private val _allContacts = MutableStateFlow<List<Contact>>(emptyList())
     val allContacts: StateFlow<List<Contact>> = _allContacts.asStateFlow()
 
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
     private val _trashedContacts = MutableStateFlow<List<TrashedContactEntity>>(emptyList())
     val trashedContacts: StateFlow<List<TrashedContactEntity>> = _trashedContacts.asStateFlow()
 
@@ -42,8 +48,8 @@ class ContactsViewModel(
     val allContactsFull: StateFlow<List<Contact>> = _allContactsFull.asStateFlow()
     private var isFullContactsLoaded = false
 
-    private val _isLoading = MutableStateFlow(true)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+    private val _isLoadingFull = MutableStateFlow(true)
+    val isLoadingFull: StateFlow<Boolean> = _isLoadingFull.asStateFlow()
 
     private val _standardizeProgress = MutableStateFlow<Float?>(null)
     val standardizeProgress: StateFlow<Float?> = _standardizeProgress.asStateFlow()
@@ -71,6 +77,13 @@ class ContactsViewModel(
 
     private val _displayOrder = MutableStateFlow(preferenceManager.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0))
     val displayOrder = _displayOrder.asStateFlow()
+
+    private val _scrollToTop = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val scrollToTop: SharedFlow<Unit> = _scrollToTop.asSharedFlow()
+
+    fun requestScrollToTop() {
+        _scrollToTop.tryEmit(Unit)
+    }
 
     /**
      * Key used by the "contact sources" setting to decide whether a contact may be shown.
@@ -189,8 +202,12 @@ class ContactsViewModel(
         if (!isFullContactsLoaded) {
             isFullContactsLoaded = true
             viewModelScope.launch {
+                if (_allContacts.value.isEmpty()) {
+                    _isLoadingFull.value = true
+                }
                 val fullContacts = contactsRepo.getContactsFull()
                 _allContactsFull.value = fullContacts
+                _isLoading.value = false
             }
         }
     }

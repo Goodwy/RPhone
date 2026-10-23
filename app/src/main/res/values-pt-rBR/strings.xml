@@ -169,6 +169,7 @@
     <string name="app_icon">Ícone do aplicativo</string>
     <string name="app_icon_subtitle">Escolha o ícone do aplicativo exibido na tela inicial</string>
     <string name="app_name_change">Nome do aplicativo</string>
+    <string name="language">Idioma</string>
     <string name="visual_effects">Efeitos visuais</string>
     <string name="not_supported_on_this_device">Não suportado neste dispositivo</string>
     <string name="not_supported_on_this_device_subtitle">Desfoque e Vidro Líquido requerem Android 12 ou superior</string>
@@ -203,8 +204,6 @@
     <string name="dialpad_animations_subtitle">Mostrar animações ao digitar dígitos</string>
     <string name="hide_voice_search">Ocultar pesquisa por voz</string>
     <string name="hide_voice_search_subtitle">Oculta o botão de pesquisa por voz</string>
-    <string name="swipe_actions">Ações de deslize</string>
-    <string name="swipe_actions_subtitle">Deslize sobre uma entrada do registro de chamadas recentes para excluir, enviar um SMS ou fazer uma chamada</string>
 
     <string name="avatars_settings">Configurações de avatares</string>
     <string name="avatars_settings_subtitle">Personalizar cores, molduras e mais</string>
@@ -311,6 +310,13 @@
     <string name="haptic_interval">Intervalo háptico</string>
     <string name="haptic_interval_value">1 a cada %.1f cm</string>
     <string name="haptic_strength">Intensidade háptica</string>
+
+    <!-- Flash Notification on Call -->
+    <string name="flash_on_call">Flash na chamada</string>
+    <string name="flash_on_call_subtitle">Piscar o flash da câmera em chamadas recebidas</string>
+    <string name="flash_on_call_mode">Modo flash</string>
+    <string name="flash_mode_always">Sempre</string>
+    <string name="flash_mode_silent_vibrate">Apenas silencioso / vibração</string>
 
     <string name="manage_blocked">Gerenciar bloqueados</string>
     <string name="manage_blocked_subtitle">Gerenciar chamadas bloqueadas e spam</string>
@@ -451,6 +457,9 @@
     <string name="call_failed_no_network">Falha na chamada: rede celular indisponível</string>
     <string name="call_failed_restricted">Falha na chamada: chamada restrita</string>
     <string name="call_failed_generic">Não foi possível completar a chamada</string>
+    <string name="no_valid_app_found">Nenhum aplicativo válido encontrado</string>
+    <string name="video_call">Chamada de vídeo</string>
+    <string name="voice_call">Chamada de voz</string>
     <string name="call">Chamada</string>
     <string name="incoming">Recebida</string>
     <string name="outgoing">Feita</string>
@@ -562,6 +571,8 @@
     <string name="save_to_account">Salvar na conta</string>
     <string name="show_full_history">Mostrar histórico completo</string>
     <string name="contact_qr">QR do contato</string>
+    <string name="tap_phone_to_share_NFC">Toque no telefone para compartilhar via NFC</string>
+    <string name="nfc_is_turned_off">O NFC está desativado</string>
     <string name="phone_number">Número de telefone</string>
     <string name="name">Nome</string>
     <string name="prefix">Prefixo</string>
@@ -739,4 +750,22 @@
     <string name="busy_mode_call_rejected_sent_sms_toast">Chamada recusada (modo ocupado). SMS enviado.</string>
     <string name="edit_busy_message">Editar a mensagem do modo ocupado</string>
     <string name="busy_mode_permission_required">Conceda permissão para enviar SMS nas configurações do aplicativo</string>
+
+    <!-- Avatar Cropping -->
+    <string name="crop_avatar_title">Recortar e girar</string>
+    <string name="action_crop">Recortar</string>
+    <string name="action_rotate">Girar</string>
+
+    <!-- Swipe Actions and Tap -->
+    <string name="settings_swipe_and_taps_title">Deslizes e toques</string>
+    <string name="settings_swipe_and_taps_supporting">Defina o que acontece ao deslizar ou tocar</string>
+    <string name="settings_swipe_actions_enable">Ativar gestos de deslize</string>
+    <string name="settings_swipe_actions_enable_supporting">Deslize para a esquerda ou direita sobre os itens da lista para acionar ações</string>
+    <string name="settings_swipe_right_action">Ações ao deslizar para a direita</string>
+    <string name="settings_swipe_right_action_second">Ação secundária ao deslizar para a direita</string>
+    <string name="settings_swipe_left_action">Ações ao deslizar para a esquerda</string>
+    <string name="settings_swipe_left_action_second">Ação secundária ao deslizar para a esquerda</string>
+    <string name="settings_swipe_actions_reset">Redefinir ações de deslize</string>
+    <string name="swipe_action_none">Nenhuma</string>
+    <string name="swipe_action_copy_number">Copiar número</string>
 </resources>

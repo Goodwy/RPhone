@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.provider.Settings
-import android.telecom.PhoneAccount
 import android.telecom.TelecomManager
 import android.view.Surface
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -68,7 +67,6 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
     var proximityBg by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_PROXIMITY_SENSOR, true)) }
     var pocketModePrevention by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_POCKET_MODE, false)) }
     var floatingCall by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_FLOATING_CALL, false)) }
-    var directCallOnTap by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_DIRECT_CALL_ON_TAP, false)) }
     var autoSpeaker by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_AUTO_SPEAKER, false)) }
     var defaultSim by remember(settingsState) { mutableStateOf(prefs.getInt(PreferenceManager.KEY_DEFAULT_SIM, prefs.getDefaultSimIndexDefault())) }
     var fullscreenCalls by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_ALWAYS_FULLSCREEN_CALLS, false)) }
@@ -337,18 +335,6 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
                                     }
                                 }
                             )
-                            RillSwitchListItem(
-                                headline   = stringResource(R.string.direct_call_on_tap),
-                                supporting = stringResource(R.string.direct_call_on_tap_subtitle),
-                                leadingIcon = Icons.Rounded.TouchApp,
-                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
-                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
-                                checked = directCallOnTap,
-                                onCheckedChange = {
-                                    directCallOnTap = it
-                                    prefs.setBoolean(PreferenceManager.KEY_DIRECT_CALL_ON_TAP, it)
-                                }
-                            )
 //                            RillSwitchListItem(
 //                                headline   = stringResource(R.string.auto_speaker),
 //                                supporting = stringResource(R.string.auto_speaker_subtitle),
@@ -430,6 +416,7 @@ fun getSimSelectionList(askFirstResId: Int): List<Pair<String, Int>> {
         if (telecomManager != null) {
             try {
                 val rawAccounts = telecomManager.callCapablePhoneAccounts
+
                 val validAccounts = rawAccounts.filter { handle ->
                     try {
                         telecomManager.getPhoneAccount(handle) != null

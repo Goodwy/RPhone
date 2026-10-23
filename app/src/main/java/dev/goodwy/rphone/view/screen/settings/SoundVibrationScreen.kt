@@ -9,7 +9,10 @@ import android.os.VibratorManager
 import android.provider.Settings
 import android.view.Surface
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -17,6 +20,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,6 +36,7 @@ import androidx.compose.material.icons.rounded.SwipeVertical
 import androidx.compose.material.icons.rounded.Vibration
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -81,6 +87,7 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
     var showHapticsDialog by remember { mutableStateOf(false) }
     var hapticsStrength by remember { mutableStateOf(prefs.getString(PreferenceManager.KEY_HAPTICS_STRENGTH, "light") ?: "light") }
 
+
     // Flash on Call state
     var flashOnCallEnabled by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_FLASH_ON_CALL_ENABLED, false)) }
     var flashOnCallMode by remember { mutableIntStateOf(prefs.getInt(PreferenceManager.KEY_FLASH_ON_CALL_MODE, 0)) }
@@ -121,26 +128,56 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
 
                     Row(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(50))
-                            .background(cardColor),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
                         listOf(
                             0 to stringResource(R.string.flash_mode_always),
                             1 to stringResource(R.string.flash_mode_silent_vibrate)
                         ).forEach { (modeKey, label) ->
                             val selected = flashOnCallMode == modeKey
+                            val interactionSource =
+                                remember { MutableInteractionSource() }
+                            val isPressed by interactionSource.collectIsPressedAsState()
+                            val cornerRadius by animateDpAsState(
+                                targetValue = if (isPressed || selected) 20.dp else 8.dp,
+                                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                                label = "ButtonShape"
+                            )
+                            val outsideCornerRadius by animateDpAsState(
+                                targetValue = 20.dp,
+                                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                                label = "ButtonShape"
+                            )
+                            val shape = remember(cornerRadius, modeKey) {
+                                when (modeKey) {
+                                    0 -> RoundedCornerShape(
+                                        topStart = outsideCornerRadius,
+                                        topEnd = cornerRadius,
+                                        bottomEnd = cornerRadius,
+                                        bottomStart = outsideCornerRadius
+                                    )
+
+                                    else -> RoundedCornerShape(
+                                        topStart = cornerRadius,
+                                        topEnd = outsideCornerRadius,
+                                        bottomEnd = outsideCornerRadius,
+                                        bottomStart = cornerRadius
+                                    )
+                                }
+                            }
+
                             Surface(
                                 onClick = {
                                     flashOnCallMode = modeKey
                                     prefs.setInt(PreferenceManager.KEY_FLASH_ON_CALL_MODE, modeKey)
                                 },
-                                shape = RoundedCornerShape(50),
-                                color = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                shape = shape,
+                                color = if (selected) MaterialTheme.colorScheme.primary else cardColor,
                                 modifier = Modifier
                                     .weight(1f)
-                                    .height(42.dp)
+                                    .height(42.dp),
+                                interactionSource = interactionSource,
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Text(
@@ -149,7 +186,8 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
                                         fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
                                         color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
                                         maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.padding(horizontal = 8.dp)
                                     )
                                 }
                             }
@@ -216,10 +254,8 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
                     // Three-way segmented control: Light / Strong / Custom
                     Row(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(50))
-                            .background(cardColor),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
                         listOf(
                             "light" to stringResource(R.string.haptics_soft),
@@ -227,6 +263,39 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
                             "custom" to stringResource(R.string.haptics_custom)
                         ).forEach { (key, label) ->
                             val selected = hapticsStrength == key
+                            val interactionSource =
+                                remember { MutableInteractionSource() }
+                            val isPressed by interactionSource.collectIsPressedAsState()
+                            val cornerRadius by animateDpAsState(
+                                targetValue = if (isPressed || selected) 20.dp else 8.dp,
+                                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                                label = "ButtonShape"
+                            )
+                            val outsideCornerRadius by animateDpAsState(
+                                targetValue = 20.dp,
+                                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                                label = "ButtonShape"
+                            )
+                            val shape = remember(cornerRadius, key) {
+                                when (key) {
+                                    "light" -> RoundedCornerShape(
+                                        topStart = outsideCornerRadius,
+                                        topEnd = cornerRadius,
+                                        bottomEnd = cornerRadius,
+                                        bottomStart = outsideCornerRadius
+                                    )
+
+                                    "custom" -> RoundedCornerShape(
+                                        topStart = cornerRadius,
+                                        topEnd = outsideCornerRadius,
+                                        bottomEnd = outsideCornerRadius,
+                                        bottomStart = cornerRadius
+                                    )
+
+                                    else -> RoundedCornerShape(cornerRadius)
+                                }
+                            }
+
                             Surface(
                                 onClick = {
                                     hapticsStrength = key
@@ -248,11 +317,12 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
                                         } catch (_: Exception) {}
                                     }
                                 },
-                                shape = RoundedCornerShape(50),
-                                color = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                shape = shape,
+                                color = if (selected) MaterialTheme.colorScheme.primary else cardColor,
                                 modifier = Modifier
                                     .weight(1f)
-                                    .height(42.dp)
+                                    .height(42.dp),
+                                interactionSource = interactionSource,
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Text(

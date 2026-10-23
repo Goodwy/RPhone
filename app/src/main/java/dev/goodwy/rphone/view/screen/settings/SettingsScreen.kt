@@ -46,6 +46,7 @@ import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.PrivacyTip
 import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material.icons.rounded.StarRate
+import androidx.compose.material.icons.rounded.Swipe
 import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material.icons.rounded.VolunteerActivism
 import androidx.compose.material3.*
@@ -94,15 +95,29 @@ import dev.goodwy.rphone.controller.util.openLink
 import dev.goodwy.rphone.view.components.Title
 import dev.goodwy.rphone.view.components.shake
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
+import dev.goodwy.rphone.view.theme.RillMaterialShapes
 import dev.goodwy.rphone.view.theme.RillShapeDefaults
 import dev.goodwy.rphone.view.theme.TabTransitionStyle
 import dev.goodwy.rphone.view.theme.color_primary
+import dev.goodwy.rphone.view.theme.rillPolygonShape
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinActivityViewModel
 import java.io.File
 import kotlin.time.Duration.Companion.milliseconds
+
+object SettingsHolder {
+    private val _scrollToTop = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val scrollToTop: SharedFlow<Unit> = _scrollToTop.asSharedFlow()
+
+    fun requestScrollToTop() {
+        _scrollToTop.tryEmit(Unit)
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Destination<RootGraph>(style = TabTransitionStyle::class)
@@ -118,6 +133,14 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
     }
 
     val listState = rememberLazyListState()
+    LaunchedEffect(Unit) {
+        SettingsHolder.scrollToTop.collect {
+            if (listState.firstVisibleItemIndex != 0 || listState.firstVisibleItemScrollOffset != 0) {
+                listState.animateScrollToItem(0)
+            }
+        }
+    }
+
     val prefs: PreferenceManager = koinInject()
     val settingsState by prefs.settingsChanged.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
@@ -284,8 +307,8 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
             headline = stringResource(R.string.interface_settings),
             supporting = stringResource(R.string.interface_settings_subtitle),
             leadingIcon = Icons.Rounded.Palette,
-            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkCyan,
-            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorCyan,
+            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkIndigo,
+            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorIndigo,
             options = listOf(
                 stringResource(R.string.appearance),
                 stringResource(R.string.app_theme),
@@ -304,6 +327,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.font_size),
                 stringResource(R.string.rounding_radius),
                 stringResource(R.string.app_name_change),
+                stringResource(R.string.language),
                 stringResource(R.string.visual_effects),
                 stringResource(R.string.not_supported_on_this_device),
                 stringResource(R.string.not_supported_on_this_device_subtitle),
@@ -330,8 +354,6 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.incoming_call_ui_vertical_swipe),
                 stringResource(R.string.hide_voice_search),
                 stringResource(R.string.hide_voice_search_subtitle),
-                stringResource(R.string.swipe_actions),
-                stringResource(R.string.swipe_actions_subtitle),
             )
         ) { navigator.navigate(InterfaceScreenDestination) },
         SettingsSearchEntry(
@@ -420,6 +442,22 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
             )
         ) { navigator.navigate(NavigationScreenDestination) },
         SettingsSearchEntry(
+            headline = stringResource(R.string.settings_swipe_and_taps_title),
+            supporting = stringResource(R.string.settings_swipe_and_taps_supporting),
+            leadingIcon = Icons.Rounded.Swipe,
+            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkCyan,
+            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorCyan,
+            options = listOf(
+                stringResource(R.string.settings_swipe_actions_enable),
+                stringResource(R.string.settings_swipe_actions_enable_supporting),
+                stringResource(R.string.settings_swipe_right_action),
+                stringResource(R.string.settings_swipe_right_action_second),
+                stringResource(R.string.settings_swipe_left_action),
+                stringResource(R.string.settings_swipe_left_action_second),
+                stringResource(R.string.settings_swipe_actions_reset),
+            )
+        ) { navigator.navigate(SwipeActionsScreenDestination) },
+        SettingsSearchEntry(
             headline = stringResource(R.string.call_settings),
             supporting = stringResource(R.string.call_settings_subtitle),
             leadingIcon = Icons.Rounded.Call,
@@ -439,8 +477,6 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.pocket_mode_prevention_subtitle),
                 stringResource(R.string.floating_ongoing_call),
                 stringResource(R.string.floating_ongoing_call_subtitle),
-                stringResource(R.string.direct_call_on_tap),
-                stringResource(R.string.direct_call_on_tap_subtitle),
                 stringResource(R.string.fullscreen_calls),
                 stringResource(R.string.fullscreen_calls_subtitle),
             )
@@ -500,6 +536,11 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.haptic_interval),
                 stringResource(R.string.haptic_interval_value),
                 stringResource(R.string.haptic_strength),
+                stringResource(R.string.flash_on_call),
+                stringResource(R.string.flash_on_call_subtitle),
+                stringResource(R.string.flash_on_call_mode),
+                stringResource(R.string.flash_mode_always),
+                stringResource(R.string.flash_mode_silent_vibrate),
             )
         ) { navigator.navigate(SoundVibrationScreenDestination) },
         SettingsSearchEntry(
@@ -878,7 +919,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 } else {
                     if (!isPro && proCheckDone) {
                         item {
-                            RillAnimatedSection(delayMs = 30L) {
+                            RillAnimatedSection(delayMs = 40L) {
                                 RillExpressiveCard {
                                     SupportProjectItem(
                                         modifier = Modifier.shake(enabledShake) { enabledShake = false },
@@ -891,7 +932,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
 
                     // ── Appearance ───────────────────────────────────────────────────
                     item {
-                        RillAnimatedSection(delayMs = 60L) {
+                        RillAnimatedSection(delayMs = 80L) {
                             Column {
                                 SettingsSectionLabel(stringResource(R.string.appearance))
                                 RillExpressiveCard {
@@ -899,8 +940,8 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                                         headline = stringResource(R.string.interface_settings),
                                         supporting = stringResource(R.string.interface_settings_subtitle),
                                         leadingIcon = Icons.Rounded.Palette,
-                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkCyan,
-                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorCyan,
+                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkIndigo,
+                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorIndigo,
                                         trailingIcon = Icons.Default.ChevronRight,
                                         onClick = { navigator.navigate(InterfaceScreenDestination) })
                                     RillListItem(
@@ -912,6 +953,14 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                                         iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorCyan,
                                         trailingIcon = Icons.Default.ChevronRight,
                                         onClick = { navigator.navigate(NavigationScreenDestination) })
+                                    RillListItem(
+                                        headline = stringResource(R.string.settings_swipe_and_taps_title),
+                                        supporting = stringResource(R.string.settings_swipe_and_taps_supporting),
+                                        leadingIcon = Icons.Rounded.Swipe,
+                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkCyan,
+                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorCyan,
+                                        trailingIcon = Icons.Default.ChevronRight,
+                                        onClick = { navigator.navigate(SwipeActionsScreenDestination) })
                                 }
                             }
                         }
@@ -919,7 +968,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
 
                     // ── Calls & System ───────────────────────────────────────────────
                     item {
-                        RillAnimatedSection(delayMs = 140L) {
+                        RillAnimatedSection(delayMs = 120L) {
                             Column {
                                 SettingsSectionLabel(stringResource(R.string.calls_and_system))
                                 RillExpressiveCard {
@@ -1010,7 +1059,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
 
                     // ── Contacts ────────────────────────────────────────────────────────
                     item {
-                        RillAnimatedSection(delayMs = 300L) {
+                        RillAnimatedSection(delayMs = 160L) {
                             Column {
                                 SettingsSectionLabel(stringResource(R.string.contacts))
                                 RillExpressiveCard {
@@ -1033,7 +1082,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
 
                     // ── Backup & Restore ─────────────────────────────────────────────
                     item {
-                        RillAnimatedSection(delayMs = 260L) {
+                        RillAnimatedSection(delayMs = 200L) {
                             Column {
                                 SettingsSectionLabel(stringResource(R.string.backup_and_restore))
                                 RillExpressiveCard {
@@ -1061,7 +1110,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
 
                     // ── Other ────────────────────────────────────────────────────────
                     item {
-                        RillAnimatedSection(delayMs = 300L) {
+                        RillAnimatedSection(delayMs = 240L) {
                             Column {
                                 SettingsSectionLabel(stringResource(R.string.other))
                                 RillExpressiveCard {
@@ -1070,6 +1119,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                                             headline = stringResource(R.string.support_development),
                                             supporting = stringResource(R.string.support_development_description3),
                                             leadingIcon = Icons.Rounded.VolunteerActivism,
+                                            shape = rillPolygonShape(RillMaterialShapes.Cookie9Sided),
                                             iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
                                             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
                                             trailingIcon = Icons.Default.ChevronRight,

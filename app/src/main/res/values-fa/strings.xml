@@ -169,6 +169,7 @@
     <string name="app_icon">نماد برنامه</string>
     <string name="app_icon_subtitle">نماد برنامه را که در صفحه اصلی نمایش داده می‌شود انتخاب کنید</string>
     <string name="app_name_change">نام برنامه</string>
+    <string name="language">زبان</string>
     <string name="visual_effects">جلوه‌های بصری</string>
     <string name="not_supported_on_this_device">در این دستگاه پشتیبانی نمی‌شود</string>
     <string name="not_supported_on_this_device_subtitle">محو و شیشه مایع نیاز به Android 12 یا بالاتر دارد</string>
@@ -203,8 +204,6 @@
     <string name="dialpad_animations_subtitle">نمایش انیمیشن‌ها هنگام تایپ اعداد</string>
     <string name="hide_voice_search">پنهان کردن جستجوی صوتی</string>
     <string name="hide_voice_search_subtitle">دکمه جستجوی صوتی را پنهان می‌کند</string>
-    <string name="swipe_actions">اقدامات کشیدن</string>
-    <string name="swipe_actions_subtitle">برای حذف، ارسال پیامک یا برقراری تماس، روی یک ورودی لاگ تماس اخیر بکشید</string>
 
     <string name="avatars_settings">تنظیمات آواتار</string>
     <string name="avatars_settings_subtitle">سفارشی‌سازی رنگ‌ها، قاب‌ها و موارد بیشتر</string>
@@ -311,6 +310,13 @@
     <string name="haptic_interval">فاصله بازخورد لمسی</string>
     <string name="haptic_interval_value">1 در هر %.1f سانتی‌متر</string>
     <string name="haptic_strength">قدرت بازخورد لمسی</string>
+
+    <!-- Flash Notification on Call -->
+    <string name="flash_on_call">فلاش هنگام تماس</string>
+    <string name="flash_on_call_subtitle">چشمک زدن فلاش دوربین در تماس‌های ورودی</string>
+    <string name="flash_on_call_mode">حالت فلاش</string>
+    <string name="flash_mode_always">همیشه</string>
+    <string name="flash_mode_silent_vibrate">فقط بی‌صدا / لرزش</string>
 
     <string name="manage_blocked">مدیریت مسدود شده‌ها</string>
     <string name="manage_blocked_subtitle">مدیریت تماس‌های مسدود شده و هرزنامه</string>
@@ -451,6 +457,9 @@
     <string name="call_failed_no_network">تماس ناموفق: شبکه تلفن همراه در دسترس نیست</string>
     <string name="call_failed_restricted">تماس ناموفق: تماس محدود شده است</string>
     <string name="call_failed_generic">تماس تکمیل نشد</string>
+    <string name="no_valid_app_found">هیچ برنامه معتبری یافت نشد</string>
+    <string name="video_call">تماس تصویری</string>
+    <string name="voice_call">تماس صوتی</string>
     <string name="call">تماس</string>
     <string name="incoming">ورودی</string>
     <string name="outgoing">خروجی</string>
@@ -562,6 +571,8 @@
     <string name="save_to_account">ذخیره در حساب</string>
     <string name="show_full_history">نمایش تاریخچه کامل</string>
     <string name="contact_qr">کیوآر مخاطب</string>
+    <string name="tap_phone_to_share_NFC">برای اشتراک‌گذاری از طریق NFC روی گوشی ضربه بزنید</string>
+    <string name="nfc_is_turned_off">NFC خاموش است</string>
     <string name="phone_number">شماره تلفن</string>
     <string name="name">نام</string>
     <string name="prefix">پیشوند</string>
@@ -736,4 +747,22 @@
     <string name="busy_mode_call_rejected_sent_sms_toast">تماس رد شد (حالت مشغول). SMS ارسال شد.</string>
     <string name="edit_busy_message">ویرایش پیام حالت مشغول</string>
     <string name="busy_mode_permission_required">در تنظیمات برنامه اجازه ارسال SMS را اعطا کنید</string>
+
+    <!-- Avatar Cropping -->
+    <string name="crop_avatar_title">برش و چرخش</string>
+    <string name="action_crop">برش</string>
+    <string name="action_rotate">چرخش</string>
+
+    <!-- Swipe Actions and Tap -->
+    <string name="settings_swipe_and_taps_title">کشیدن و ضربه</string>
+    <string name="settings_swipe_and_taps_supporting">تعیین کنید هنگام کشیدن یا ضربه زدن چه اتفاقی می‌افتد</string>
+    <string name="settings_swipe_actions_enable">فعال‌سازی حرکات کشیدن</string>
+    <string name="settings_swipe_actions_enable_supporting">برای فعال‌سازی اقدامات، روی موارد فهرست به چپ یا راست بکشید</string>
+    <string name="settings_swipe_right_action">اقدامات کشیدن به راست</string>
+    <string name="settings_swipe_right_action_second">اقدام ثانویه برای کشیدن به راست</string>
+    <string name="settings_swipe_left_action">اقدامات کشیدن به چپ</string>
+    <string name="settings_swipe_left_action_second">اقدام ثانویه برای کشیدن به چپ</string>
+    <string name="settings_swipe_actions_reset">بازنشانی اقدامات کشیدن</string>
+    <string name="swipe_action_none">هیچ‌کدام</string>
+    <string name="swipe_action_copy_number">کپی شماره</string>
 </resources>

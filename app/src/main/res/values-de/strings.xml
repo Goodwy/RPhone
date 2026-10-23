@@ -169,6 +169,7 @@
     <string name="app_icon">App-Symbol</string>
     <string name="app_icon_subtitle">Wählen Sie das auf Ihrem Startbildschirm angezeigte App-Symbol</string>
     <string name="app_name_change">App-Name</string>
+    <string name="language">Sprache</string>
     <string name="visual_effects">Visuelle Effekte</string>
     <string name="not_supported_on_this_device">Auf diesem Gerät nicht unterstützt</string>
     <string name="not_supported_on_this_device_subtitle">Unschärfe und Liquid Glass erfordern Android 12 oder höher</string>
@@ -203,8 +204,6 @@
     <string name="dialpad_animations_subtitle">Animationen bei der Eingabe von Ziffern anzeigen</string>
     <string name="hide_voice_search">Sprachsuche ausblenden</string>
     <string name="hide_voice_search_subtitle">Blendet die Schaltfläche für die Sprachsuche aus</string>
-    <string name="swipe_actions">Wischaktionen</string>
-    <string name="swipe_actions_subtitle">Auf einen letzten Anrufprotokolleintrag wischen, um ihn zu löschen, eine SMS zu senden oder anzurufen</string>
 
     <string name="avatars_settings">Avatar-Einstellungen</string>
     <string name="avatars_settings_subtitle">Farben, Rahmen und mehr anpassen</string>
@@ -311,6 +310,13 @@
     <string name="haptic_interval">Haptik-Intervall</string>
     <string name="haptic_interval_value">1 pro %.1f cm</string>
     <string name="haptic_strength">Haptik-Stärke</string>
+
+    <!-- Flash Notification on Call -->
+    <string name="flash_on_call">Blitz bei Anruf</string>
+    <string name="flash_on_call_subtitle">Kamera-Blitz bei eingehenden Anrufen aufblinken lassen</string>
+    <string name="flash_on_call_mode">Blitzmodus</string>
+    <string name="flash_mode_always">Immer</string>
+    <string name="flash_mode_silent_vibrate">Nur lautlos / Vibrieren</string>
 
     <string name="manage_blocked">Gesperrte verwalten</string>
     <string name="manage_blocked_subtitle">Gesperrte Anrufe und Spam verwalten</string>
@@ -451,6 +457,9 @@
     <string name="call_failed_no_network">Anruf fehlgeschlagen: Mobilfunknetz nicht verfügbar</string>
     <string name="call_failed_restricted">Anruf fehlgeschlagen: Anruf ist eingeschränkt</string>
     <string name="call_failed_generic">Anruf konnte nicht abgeschlossen werden</string>
+    <string name="no_valid_app_found">Keine geeignete App gefunden</string>
+    <string name="video_call">Videoanruf</string>
+    <string name="voice_call">Sprachanruf</string>
     <string name="call">Anruf</string>
     <string name="incoming">Eingehend</string>
     <string name="outgoing">Ausgehend</string>
@@ -562,6 +571,8 @@
     <string name="save_to_account">In Konto speichern</string>
     <string name="show_full_history">Vollen Verlauf anzeigen</string>
     <string name="contact_qr">Kontakt-QR</string>
+    <string name="tap_phone_to_share_NFC">Telefon antippen, um per NFC zu teilen</string>
+    <string name="nfc_is_turned_off">NFC ist ausgeschaltet</string>
     <string name="phone_number">Telefonnummer</string>
     <string name="name">Name</string>
     <string name="prefix">Präfix</string>
@@ -736,4 +747,22 @@
     <string name="busy_mode_call_rejected_sent_sms_toast">Anruf abgelehnt (Beschäftigt-Modus). SMS gesendet.</string>
     <string name="edit_busy_message">Nachricht für den Beschäftigt-Modus bearbeiten</string>
     <string name="busy_mode_permission_required">Erteilen Sie die Berechtigung zum Senden von SMS in den App-Einstellungen</string>
+
+    <!-- Avatar Cropping -->
+    <string name="crop_avatar_title">Zuschneiden &amp; drehen</string>
+    <string name="action_crop">Zuschneiden</string>
+    <string name="action_rotate">Drehen</string>
+
+    <!-- Swipe Actions and Tap -->
+    <string name="settings_swipe_and_taps_title">Wischen &amp; Tippen</string>
+    <string name="settings_swipe_and_taps_supporting">Festlegen, was beim Wischen oder Tippen passiert</string>
+    <string name="settings_swipe_actions_enable">Wischgesten aktivieren</string>
+    <string name="settings_swipe_actions_enable_supporting">Nach links oder rechts über Einträge in der Liste wischen, um Aktionen auszulösen</string>
+    <string name="settings_swipe_right_action">Aktionen beim Wischen nach rechts</string>
+    <string name="settings_swipe_right_action_second">Sekundäre Aktion beim Wischen nach rechts</string>
+    <string name="settings_swipe_left_action">Aktionen beim Wischen nach links</string>
+    <string name="settings_swipe_left_action_second">Sekundäre Aktion beim Wischen nach links</string>
+    <string name="settings_swipe_actions_reset">Wischaktionen zurücksetzen</string>
+    <string name="swipe_action_none">Keine</string>
+    <string name="swipe_action_copy_number">Nummer kopieren</string>
 </resources>

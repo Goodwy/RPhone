@@ -169,6 +169,7 @@
     <string name="app_icon">Εικονίδιο εφαρμογής</string>
     <string name="app_icon_subtitle">Επιλέξτε το εικονίδιο της εφαρμογής που εμφανίζεται στην αρχική οθόνη</string>
     <string name="app_name_change">Όνομα εφαρμογής</string>
+    <string name="language">Γλώσσα</string>
     <string name="visual_effects">Οπτικά εφέ</string>
     <string name="not_supported_on_this_device">Δεν υποστηρίζεται σε αυτήν τη συσκευή</string>
     <string name="not_supported_on_this_device_subtitle">Το θόλωμα και το Υγρό Γυαλί απαιτούν Android 12 ή νεότερο</string>
@@ -203,8 +204,6 @@
     <string name="dialpad_animations_subtitle">Εμφάνιση κινήσεων κατά την πληκτρολόγηση ψηφίων</string>
     <string name="hide_voice_search">Απόκρυψη φωνητικής αναζήτησης</string>
     <string name="hide_voice_search_subtitle">Αποκρύπτει το κουμπί φωνητικής αναζήτησης</string>
-    <string name="swipe_actions">Ενέργειες σβησίματος</string>
-    <string name="swipe_actions_subtitle">Σύρετε σε μια καταχώρηση πρόσφατης κλήσης για διαγραφή, αποστολή SMS ή πραγματοποίηση κλήσης</string>
 
     <string name="avatars_settings">Ρυθμίσεις avatar</string>
     <string name="avatars_settings_subtitle">Προσαρμογή χρωμάτων, πλαισίων και άλλων</string>
@@ -311,6 +310,13 @@
     <string name="haptic_interval">Διάστημα απτικής</string>
     <string name="haptic_interval_value">1 ανά %.1f cm</string>
     <string name="haptic_strength">Ένταση απτικής</string>
+
+    <!-- Flash Notification on Call -->
+    <string name="flash_on_call">Φλας κατά την κλήση</string>
+    <string name="flash_on_call_subtitle">Αναβόσβημα φλας κάμερας σε εισερχόμενες κλήσεις</string>
+    <string name="flash_on_call_mode">Λειτουργία φλας</string>
+    <string name="flash_mode_always">Πάντα</string>
+    <string name="flash_mode_silent_vibrate">Μόνο σίγαση / δόνηση</string>
 
     <string name="manage_blocked">Διαχείριση αποκλεισμένων</string>
     <string name="manage_blocked_subtitle">Διαχείριση αποκλεισμένων κλήσεων και ανεπιθύμητων</string>
@@ -451,6 +457,9 @@
     <string name="call_failed_no_network">Αποτυχία κλήσης: το δίκτυο κινητής τηλεφωνίας δεν είναι διαθέσιμο</string>
     <string name="call_failed_restricted">Αποτυχία κλήσης: η κλήση είναι περιορισμένη</string>
     <string name="call_failed_generic">Η κλήση δεν μπόρεσε να ολοκληρωθεί</string>
+    <string name="no_valid_app_found">Δεν βρέθηκε κατάλληλη εφαρμογή</string>
+    <string name="video_call">Βιντεοκλήση</string>
+    <string name="voice_call">Φωνητική κλήση</string>
     <string name="call">Κλήση</string>
     <string name="incoming">Εισερχόμενη</string>
     <string name="outgoing">Εξερχόμενη</string>
@@ -562,6 +571,8 @@
     <string name="save_to_account">Αποθήκευση σε λογαριασμό</string>
     <string name="show_full_history">Εμφάνιση πλήρους ιστορικού</string>
     <string name="contact_qr">QR επαφής</string>
+    <string name="tap_phone_to_share_NFC">Πατήστε το τηλέφωνο για κοινή χρήση μέσω NFC</string>
+    <string name="nfc_is_turned_off">Το NFC είναι απενεργοποιημένο</string>
     <string name="phone_number">Αριθμός τηλεφώνου</string>
     <string name="name">Όνομα</string>
     <string name="prefix">Πρόθεμα</string>
@@ -736,4 +747,22 @@
     <string name="busy_mode_call_rejected_sent_sms_toast">Η κλήση απορρίφθηκε (λειτουργία απασχόλησης). Το SMS στάλθηκε.</string>
     <string name="edit_busy_message">Επεξεργασία μηνύματος λειτουργίας απασχόλησης</string>
     <string name="busy_mode_permission_required">Παραχωρήστε άδεια αποστολής SMS στις ρυθμίσεις της εφαρμογής</string>
+
+    <!-- Avatar Cropping -->
+    <string name="crop_avatar_title">Περικοπή &amp; περιστροφή</string>
+    <string name="action_crop">Περικοπή</string>
+    <string name="action_rotate">Περιστροφή</string>
+
+    <!-- Swipe Actions and Tap -->
+    <string name="settings_swipe_and_taps_title">Σαρώσεις &amp; πατήματα</string>
+    <string name="settings_swipe_and_taps_supporting">Ορίστε τι συμβαίνει όταν σαρώνετε ή πατάτε</string>
+    <string name="settings_swipe_actions_enable">Ενεργοποίηση χειρονομιών σάρωσης</string>
+    <string name="settings_swipe_actions_enable_supporting">Σαρώστε αριστερά ή δεξιά στις καταχωρήσεις της λίστας για να ενεργοποιήσετε ενέργειες</string>
+    <string name="settings_swipe_right_action">Ενέργειες σάρωσης δεξιά</string>
+    <string name="settings_swipe_right_action_second">Δευτερεύουσα ενέργεια σάρωσης δεξιά</string>
+    <string name="settings_swipe_left_action">Ενέργειες σάρωσης αριστερά</string>
+    <string name="settings_swipe_left_action_second">Δευτερεύουσα ενέργεια σάρωσης αριστερά</string>
+    <string name="settings_swipe_actions_reset">Επαναφορά ενεργειών σάρωσης</string>
+    <string name="swipe_action_none">Καμία</string>
+    <string name="swipe_action_copy_number">Αντιγραφή αριθμού</string>
 </resources>

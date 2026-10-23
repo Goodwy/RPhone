@@ -358,7 +358,6 @@ class PreferenceManager(context: Context) {
         const val KEY_KEEP_SCREEN_ON = "keep_screen_on"
         const val KEY_SILENCE_UNKNOWN = "silence_unknown_calls"
         const val KEY_AVATAR_SHAPE = "avatar_shape"
-        const val KEY_SWIPE_TO_CALL = "swipe_to_call"
         const val KEY_INCOMING_CALL_UI_MODE = "incoming_call_ui_mode"
         const val KEY_SHOW_CALL_SCREEN_AVATAR = "show_call_screen_avatar"
         const val KEY_HIDE_AVATAR_WITH_BACKGROUND = "hide_avatar_with_background"
@@ -402,6 +401,7 @@ class PreferenceManager(context: Context) {
         const val KEY_SWIPE_ACTIONS_ENABLED = "swipe_actions_enabled"
         const val KEY_SWIPE_RIGHT_ACTION = "swipe_right_action"
         const val KEY_SWIPE_LEFT_ACTION = "swipe_left_action"
+        const val KEY_SWIPE_LEFT_SECOND_ACTION = "swipe_left_second_action"
 
         const val SWIPE_ACTION_NONE = 0
         const val SWIPE_ACTION_CALL = 1
@@ -410,6 +410,7 @@ class PreferenceManager(context: Context) {
         const val SWIPE_ACTION_WHATSAPP = 4
         const val SWIPE_ACTION_COPY_NUMBER = 5
         const val SWIPE_ACTION_DELETE = 6
+        const val SWIPE_ACTION_TELEGRAM = 7
 
         const val KEY_MISSED_CALL_CARD = "missed_call_card"
         const val KEY_AUTO_DECLINE_UNKNOWN = "auto_decline_unknown"
@@ -503,7 +504,6 @@ class PreferenceManager(context: Context) {
         const val KEY_FLASH_ON_CALL_ENABLED    = "flash_on_call_enabled"
         const val KEY_FLASH_ON_CALL_MODE       = "flash_on_call_mode" // 0 = Always, 1 = Silent/Vibrate Only
 
-        // Goodwy
         const val KEY_DEFAULT_TAB              = "default_tab"
         const val KEY_LAST_OPENED_TAB          = "last_opened_tab"
         const val KEY_IS_PRO_IAP               = "is_pro_iap"
@@ -543,7 +543,7 @@ class PreferenceManager(context: Context) {
         setBoolean(KEY_FLOATING_BAR_BLUR, enabled)
     }
 
-    fun isSwipeActionsEnabled(): Boolean = getBoolean(KEY_SWIPE_ACTIONS_ENABLED, false)
+    fun isSwipeActionsEnabled(): Boolean = getBoolean(KEY_SWIPE_ACTIONS_ENABLED, true)
     fun setSwipeActionsEnabled(enabled: Boolean) = setBoolean(KEY_SWIPE_ACTIONS_ENABLED, enabled)
 
     fun getSwipeRightAction(): Int = getInt(KEY_SWIPE_RIGHT_ACTION, SWIPE_ACTION_CALL)
@@ -551,6 +551,9 @@ class PreferenceManager(context: Context) {
 
     fun getSwipeLeftAction(): Int = getInt(KEY_SWIPE_LEFT_ACTION, SWIPE_ACTION_MESSAGE)
     fun setSwipeLeftAction(action: Int) = setInt(KEY_SWIPE_LEFT_ACTION, action)
+
+    fun getSwipeLeftSecondAction(): Int = getInt(KEY_SWIPE_LEFT_SECOND_ACTION, SWIPE_ACTION_DELETE)
+    fun setSwipeLeftSecondAction(action: Int) = setInt(KEY_SWIPE_LEFT_SECOND_ACTION, action)
 
     fun isSupporter(): Boolean = getBoolean(KEY_IS_SUPPORTER, false)
     fun setSupporter(isSupporter: Boolean) = setBoolean(KEY_IS_SUPPORTER, isSupporter)
@@ -577,8 +580,8 @@ class PreferenceManager(context: Context) {
     fun setContactsTrashEnabled(enabled: Boolean) = setBoolean(KEY_CONTACTS_TRASH_ENABLED, enabled)
 
     fun resetSwipeActions() {
-        setBoolean(KEY_SWIPE_ACTIONS_ENABLED, false)
         setInt(KEY_SWIPE_RIGHT_ACTION, SWIPE_ACTION_CALL)
         setInt(KEY_SWIPE_LEFT_ACTION, SWIPE_ACTION_MESSAGE)
+        setInt(KEY_SWIPE_LEFT_SECOND_ACTION, SWIPE_ACTION_DELETE)
     }
 }

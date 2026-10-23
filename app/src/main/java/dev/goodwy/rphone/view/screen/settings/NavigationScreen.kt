@@ -387,7 +387,6 @@ fun NavigationScreen(navigator: DestinationsNavigator) {
             item {
                 RillAnimatedSection(delayMs = 0L) {
                     Column {
-//                        NavigationSectionLabel("Bottom Navigation Sections")
                         RillExpressiveCard {
                             RillListItem(
                                 headline = stringResource(R.string.tab_sections),
