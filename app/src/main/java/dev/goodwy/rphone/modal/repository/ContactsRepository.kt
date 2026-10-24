@@ -198,7 +198,7 @@ class ContactsRepository(
                 while (cursor.moveToNext()) {
                     val id = cursor.getString(idIdx) ?: continue
                     val mimeType = cursor.getString(mimeIdx)
-                    val data1 = cursor.getString(data1Idx) ?: continue
+                    val data1 = cursor.getString(data1Idx) ?: ""
                     val isStarred = cursor.getInt(starredIdx) == 1
                     val currentName = cursor.getString(nameIdx) ?: ""
                     val currentPhoto = cursor.getString(photoIdx)
@@ -224,7 +224,7 @@ class ContactsRepository(
 
                     val updatedContact = when (mimeType) {
                         CommonDataKinds.Phone.CONTENT_ITEM_TYPE -> {
-                            if (current.phoneNumbers.none { areNumbersEqual(it, data1) }) {
+                            if (data1.isNotBlank() && current.phoneNumbers.none { areNumbersEqual(it, data1) }) {
                                 val isPrimary = cursor.getInt(isPrimaryIdx) == 1 || cursor.getInt(isSuperPrimaryIdx) == 1
 
                                 current.copy(
@@ -238,7 +238,7 @@ class ContactsRepository(
                         }
                         CommonDataKinds.Email.CONTENT_ITEM_TYPE -> {
                             val email = ContactEmail(value = data1)
-                            if (current.emails.none { it == email }) {
+                            if (data1.isNotBlank() && current.emails.none { it == email }) {
                                 current.copy(emails = current.emails + email)
                             } else current
                         }
@@ -363,7 +363,7 @@ class ContactsRepository(
                 while (cursor.moveToNext()) {
                     val id = cursor.getString(idIdx) ?: continue
                     val mimeType = cursor.getString(mimeIdx)
-                    val data1 = cursor.getString(data1Idx) ?: continue
+                    val data1 = cursor.getString(data1Idx) ?: ""
                     val isStarred = cursor.getInt(starredIdx) == 1
 
                     val contact = contactsMap.getOrPut(id) {
