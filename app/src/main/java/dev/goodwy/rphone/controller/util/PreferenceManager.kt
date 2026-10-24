@@ -43,7 +43,14 @@ class PreferenceManager(context: Context) {
     private val dataStore = getSharedDataStore(appContext)
 
     // Internal cache for asynchronous access (populated on initial DataStore collect)
-    private val _prefsCache = MutableStateFlow<Preferences>(emptyPreferences())
+//    This code does not work in some cases, such as when the app icon is changed
+//    private val _prefsCache = MutableStateFlow<Preferences>(emptyPreferences())
+    // Internal cache for synchronous access
+    private val _prefsCache = MutableStateFlow<Preferences>(
+        // We perform a blocking read when creating an object,
+        // so that the cache isn't empty during a cold start in onCreate()
+        runBlocking { dataStore.data.first() }
+    )
 
     private val _settingsChanged = MutableStateFlow(0)
     val settingsChanged: StateFlow<Int> = _settingsChanged.asStateFlow()
