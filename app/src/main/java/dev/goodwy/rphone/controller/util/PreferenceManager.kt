@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStoreFile
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import kotlin.time.Duration.Companion.milliseconds
 import dev.goodwy.rphone.R
 
 private val dataStoreScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -45,11 +46,15 @@ class PreferenceManager(context: Context) {
     // Internal cache for asynchronous access (populated on initial DataStore collect)
 //    This code does not work in some cases, such as when the app icon is changed
 //    private val _prefsCache = MutableStateFlow<Preferences>(emptyPreferences())
-    // Internal cache for synchronous access
+    // Internal cache for synchronous access with safe timeout on IO dispatcher
     private val _prefsCache = MutableStateFlow<Preferences>(
-        // We perform a blocking read when creating an object,
-        // so that the cache isn't empty during a cold start in onCreate()
-        runBlocking { dataStore.data.first() }
+        runCatching {
+            runBlocking(Dispatchers.IO) {
+                withTimeoutOrNull(200.milliseconds) {
+                    dataStore.data.first()
+                }
+            }
+        }.getOrNull() ?: emptyPreferences()
     )
 
     private val _settingsChanged = MutableStateFlow(0)

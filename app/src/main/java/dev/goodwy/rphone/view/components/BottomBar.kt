@@ -528,57 +528,83 @@ fun BottomBar(navController: NavController) {
                 .height(0.dp)
                 .wrapContentHeight(align = Alignment.Bottom, unbounded = true)
                 .offset { IntOffset(0, pillOffsetY.toInt()) }
-                .then(
-                    if (useLgBottomNav) Modifier.drawBackdrop(
-                        backdrop = globalBackdrop,
-                        shape = { RoundedCornerShape(16.dp) },
-                        effects = {
-                            val d = density
-                            colorControls(saturation = 1.4f)
-                            blur(blurIntensity * d)
-                            lens(
-                                refractionHeight = 23f * d,
-                                refractionAmount = 64f * d
-                            )
-                        },
-                        highlight = { Highlight.Default })
-                    else if (useBlurBottomNav) Modifier.drawPlainBackdrop(
-                        backdrop = globalBackdrop,
-                        shape = { navBarShape },
-                        effects = { blur(blurIntensity * density) }
-                    )
-                    else Modifier.background(bottomBarColor)
-                ),
-//                .graphicsLayer { alpha = navBarAlpha },
-            contentAlignment = Alignment.Center
+                .graphicsLayer { alpha = navBarAlpha },
+            contentAlignment = Alignment.BottomCenter
         ) {
-            Column {
-                if (!useLgBottomNav) HorizontalDivider(thickness = 0.4.dp, color = MaterialTheme.colorScheme.surface)
-                NavigationBar(
-                    containerColor = Color.Transparent,
-                    tonalElevation = 0.dp,
-                    windowInsets = WindowInsets.navigationBars,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .navigationBarsPadding()
-//                        .wrapContentHeight()
-                        .height(bottomBarHeight)
-                        .graphicsLayer { alpha = navBarAlpha }
-                ) {
-                    Spacer(Modifier.width(12.dp))
-                    orderedTabs.forEach { tab ->
-                        AnimatedNavBarItem(
-                            selected       = tab.selected,
-                            selectedIcon   = tab.selectedIcon,
-                            unselectedIcon = tab.unselectedIcon,
-                            label          = tab.label,
-                            iconOnly       = iconOnly,
-                            labelStyle     = labelStyle,
-                            onClick        = tab.onClick
-                        )
+            val navBarContent: @Composable () -> Unit = {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    if (!useLgBottomNav) HorizontalDivider(thickness = 0.4.dp, color = MaterialTheme.colorScheme.surface)
+                    NavigationBar(
+                        containerColor = Color.Transparent,
+                        tonalElevation = 0.dp,
+                        windowInsets = WindowInsets.navigationBars,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .navigationBarsPadding()
+                            .height(bottomBarHeight)
+                    ) {
+                        Spacer(Modifier.width(12.dp))
+                        orderedTabs.forEach { tab ->
+                            AnimatedNavBarItem(
+                                selected       = tab.selected,
+                                selectedIcon   = tab.selectedIcon,
+                                unselectedIcon = tab.unselectedIcon,
+                                label          = tab.label,
+                                iconOnly       = iconOnly,
+                                labelStyle     = labelStyle,
+                                onClick        = tab.onClick
+                            )
+                        }
+                        Spacer(Modifier.width(12.dp))
                     }
-                    Spacer(Modifier.width(12.dp))
                 }
+            }
+
+            if (useLgBottomNav) {
+                Surface(
+                    shape           = navBarShape,
+                    color           = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.35f),
+                    shadowElevation = 0.dp,
+                    tonalElevation  = 0.dp,
+                    modifier        = Modifier
+                        .fillMaxWidth()
+                        .drawBackdrop(
+                            backdrop = globalBackdrop,
+                            shape = { navBarShape },
+                            effects = {
+                                val d = density
+                                colorControls(saturation = 1.4f)
+                                blur(blurIntensity * d)
+                                lens(
+                                    refractionHeight = 23f * d,
+                                    refractionAmount = 64f * d
+                                )
+                            },
+                            highlight = { Highlight.Default }
+                        )
+                ) { navBarContent() }
+            } else if (useBlurBottomNav) {
+                Surface(
+                    shape           = navBarShape,
+                    color           = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.72f),
+                    shadowElevation = 0.dp,
+                    tonalElevation  = 0.dp,
+                    modifier        = Modifier
+                        .fillMaxWidth()
+                        .drawPlainBackdrop(
+                            backdrop = globalBackdrop,
+                            shape    = { navBarShape },
+                            effects  = { blur(blurIntensity * density) }
+                        )
+                ) { navBarContent() }
+            } else {
+                Surface(
+                    shape           = navBarShape,
+                    color           = bottomBarColor,
+                    shadowElevation = 0.dp,
+                    tonalElevation  = 0.dp,
+                    modifier        = Modifier.fillMaxWidth()
+                ) { navBarContent() }
             }
         }
     }

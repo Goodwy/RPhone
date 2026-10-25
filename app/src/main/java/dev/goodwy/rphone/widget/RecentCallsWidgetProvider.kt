@@ -44,19 +44,12 @@ class RecentCallsWidgetProvider : AppWidgetProvider() {
         if (intent.action == ACTION_DIAL) {
             val number = intent.getStringExtra(EXTRA_PHONE_NUMBER) ?: return
             val callUri = Uri.fromParts("tel", number, null)
-            try {
-                context.startActivity(
-                    Intent(Intent.ACTION_CALL, callUri).apply {
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    }
-                )
-            } catch (_: Exception) {
-                context.startActivity(
-                    Intent(Intent.ACTION_DIAL, callUri).apply {
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    }
-                )
+            val dialIntent = Intent(Intent.ACTION_DIAL, callUri).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
+            try {
+                context.startActivity(dialIntent)
+            } catch (_: Exception) {}
         }
     }
 
@@ -93,6 +86,7 @@ class RecentCallsWidgetProvider : AppWidgetProvider() {
             widgetId * 10 + 1,
             Intent(context, RecentCallsWidgetProvider::class.java).apply {
                 action = ACTION_DIAL
+                setPackage(context.packageName)
                 // Unique URI per widget so PendingIntent extras are not shared
                 data = Uri.fromParts("dial", widgetId.toString(), null)
             },
