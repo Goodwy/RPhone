@@ -71,6 +71,7 @@ import dev.goodwy.rphone.view.theme.MyColors.dialpadKeyColor
 import dev.goodwy.rphone.view.theme.color_call_end
 import dev.goodwy.rphone.controller.util.formatDuration
 import dev.goodwy.rphone.controller.util.PreferenceManager
+import dev.goodwy.rphone.controller.util.CallBackgroundStore
 import dev.goodwy.rphone.controller.util.forceLtr
 import dev.goodwy.rphone.controller.util.hasCapability
 import dev.goodwy.rphone.controller.util.isHD
@@ -141,7 +142,9 @@ fun ExpressiveCallScreen(
         preferenceManager.getBoolean(PreferenceManager.KEY_HIDE_AVATAR_WITH_BACKGROUND, false)
     }
     val hasBackground = !backgroundUri.isNullOrEmpty()
-    val shouldShowAvatar = showCallScreenAvatar && !(hideAvatarWithBg && hasBackground)
+    val defaultBg = remember(settingsState) { CallBackgroundStore.defaultModel(context) }
+    val customVisible = hasBackground && (backgroundUri != defaultBg)
+    val shouldShowAvatar = showCallScreenAvatar && !(hideAvatarWithBg && hasBackground) && !customVisible
 
     val globalBackdrop = LocalLiquidGlassBackdrop.current
     val liquidGlass = remember(settingsState) { preferenceManager.getBoolean(PreferenceManager.KEY_LIQUID_GLASS, false) }
