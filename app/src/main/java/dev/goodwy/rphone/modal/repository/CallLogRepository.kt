@@ -36,31 +36,35 @@ class CallLogRepository(
     private val CONTACT_MAP_TTL = 60_000L // 1 minute
     private val contactMapMutex = Mutex()
 
-    override suspend fun getCallLogs(): List<CallLogEntry> = withContext(Dispatchers.IO) {
-        val callLogs = mutableListOf<CallLogEntry>()
-
-
-        val contactMap = contactMapMutex.withLock {
-            val now = System.currentTimeMillis()
-            if (cachedContactMap != null && now - lastContactMapUpdate < CONTACT_MAP_TTL) {
-                cachedContactMap!!
-            } else {
-                // Optimization: Fetch all contacts once for quick lookup
-                val allContacts = try { contactsRepo.getContacts() } catch (e: Exception) { emptyList() }
-                val map = mutableMapOf<String, Contact>()
-                allContacts.forEach { contact ->
-                    contact.phoneNumbers.forEach { number ->
-                        val normalized = normalizePhoneNumber(number)
-                        // Use last 10 digits as key for flexible matching (local vs international)
-                        val key = if (normalized.length >= 10) normalized.takeLast(10) else normalized
-                        map[key] = contact
-                    }
-                }
-                cachedContactMap = map
-                lastContactMapUpdate = now
-                map
+    private suspend fun getOrFetchContactMap(): Map<String, Contact> {
+        val now = System.currentTimeMillis()
+        contactMapMutex.withLock {
+            val existing = cachedContactMap
+            if (existing != null && now - lastContactMapUpdate < CONTACT_MAP_TTL) {
+                return existing
             }
         }
+
+        val allContacts = try { contactsRepo.getContacts() } catch (e: Exception) { emptyList() }
+        val map = mutableMapOf<String, Contact>()
+        allContacts.forEach { contact ->
+            contact.phoneNumbers.forEach { number ->
+                val normalized = normalizePhoneNumber(number)
+                val key = if (normalized.length >= 10) normalized.takeLast(10) else normalized
+                map[key] = contact
+            }
+        }
+
+        return contactMapMutex.withLock {
+            cachedContactMap = map
+            lastContactMapUpdate = System.currentTimeMillis()
+            map
+        }
+    }
+
+    override suspend fun getCallLogs(): List<CallLogEntry> = withContext(Dispatchers.IO) {
+        val callLogs = mutableListOf<CallLogEntry>()
+        val contactMap = getOrFetchContactMap()
 
         val baseProjection = mutableListOf(
             CallLog.Calls._ID,

@@ -61,7 +61,7 @@ val commonModule = module {
 
     viewModel { ContactsViewModel(androidApplication(), get(), get(), get()) }
     viewModel { CallLogViewModel(androidApplication(), get(), androidContext().contentResolver, get()) }
-    viewModel { CallViewModel(androidContext(), get(), get()) }
+    viewModel { CallViewModel(androidApplication(), get(), get()) }
     viewModel { MainViewModel(get()) }
     viewModel { CallAnalyticsViewModel(get(), get()) }
 }

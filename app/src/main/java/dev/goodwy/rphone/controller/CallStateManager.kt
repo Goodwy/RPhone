@@ -43,6 +43,7 @@ class CallStateManager(private val getCallerNameUseCase: GetCallerNameUseCase) {
                 }
             }
         }
+        job.invokeOnCompletion { activeJobs.remove(number, job) }
         activeJobs[number] = job
     }
     

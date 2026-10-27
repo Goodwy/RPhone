@@ -69,6 +69,8 @@ class CallLogViewModel(
         File(application.cacheDir, "call_logs_cache.json")
     }
 
+    @Volatile private var isObserverRegistered = false
+
     private val callLogObserver = object : ContentObserver(Handler(Looper.getMainLooper())) {
         override fun onChange(selfChange: Boolean) {
             debounceJob?.cancel()
@@ -86,14 +88,22 @@ class CallLogViewModel(
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    init {
-        if (hasReadCallLogPermission()) {
-            contentResolver.registerContentObserver(
-                CallLog.Calls.CONTENT_URI,
-                true,
-                callLogObserver
-            )
+    private fun registerObserverIfPermissionGranted() {
+        if (!isObserverRegistered && hasReadCallLogPermission()) {
+            try {
+                contentResolver.registerContentObserver(
+                    CallLog.Calls.CONTENT_URI,
+                    true,
+                    callLogObserver
+                )
+                isObserverRegistered = true
+            } catch (_: Exception) {}
+        }
+    }
 
+    init {
+        registerObserverIfPermissionGranted()
+        if (hasReadCallLogPermission()) {
             // Step 1: serve disk cache immediately so UI is instant
             viewModelScope.launch {
                 val diskCache = loadFromDisk()
@@ -151,10 +161,13 @@ class CallLogViewModel(
         debounceJob?.cancel()
         filterJob?.cancel()
         super.onCleared()
-        try {
-            contentResolver.unregisterContentObserver(callLogObserver)
-        } catch (e: Exception) {
-            e.printStackTrace()
+        if (isObserverRegistered) {
+            try {
+                contentResolver.unregisterContentObserver(callLogObserver)
+                isObserverRegistered = false
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
@@ -163,6 +176,7 @@ class CallLogViewModel(
     }
 
     private fun fetchLogs(forceRefresh: Boolean = false) {
+        registerObserverIfPermissionGranted()
         if (!hasReadCallLogPermission()) return
         if (!forceRefresh && cachedLogs.isNotEmpty()) {
             _allCallLogs.value = cachedLogs

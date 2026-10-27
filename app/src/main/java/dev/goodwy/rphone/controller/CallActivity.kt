@@ -410,6 +410,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
     override fun onPause() {
         super.onPause()
         isInForeground.value = false
+        releaseProximityLock()
     }
 
     private fun setupProximitySensor() {
@@ -475,6 +476,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
 
     override fun onStop() {
         super.onStop()
+        releaseProximityLock()
         callViewModel.setIsActivityVisible(false)
     }
 
