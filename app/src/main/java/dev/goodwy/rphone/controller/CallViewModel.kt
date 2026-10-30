@@ -1,9 +1,10 @@
 package dev.goodwy.rphone.controller
 
+import android.app.Application
 import android.content.Context
 import android.telecom.Call
 import android.telecom.TelecomManager
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.modal.data.CallerMetadata
@@ -16,10 +17,10 @@ import kotlinx.coroutines.Dispatchers
 
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class CallViewModel(
-    private val context: Context,
+    application: Application,
     private val callRepository: ICallRepository,
     private val callStateManager: CallStateManager
-) : ViewModel() {
+) : AndroidViewModel(application) {
 
     val currentCallSession: StateFlow<CallSession?> = callRepository.currentCallSession
     val allCalls: StateFlow<List<Call>> = callRepository.allCalls
@@ -50,13 +51,13 @@ class CallViewModel(
 
     val simLabel: StateFlow<String?> = callRepository.currentCallSession.map { session ->
         val accountHandle = session?.call?.details?.accountHandle ?: return@map null
-        val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
+        val telecomManager = getApplication<Application>().getSystemService(Context.TELECOM_SERVICE) as? TelecomManager
         val account = try {
-            telecomManager.getPhoneAccount(accountHandle)
+            telecomManager?.getPhoneAccount(accountHandle)
         } catch (_: Exception) {
             null
         }
-        account?.label?.toString() ?: context.getString(R.string.call_screen_sim_label, accountHandle.id)
+        account?.label?.toString() ?: getApplication<Application>().getString(R.string.call_screen_sim_label, accountHandle.id)
     }.flowOn(Dispatchers.IO).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     fun answerCall() = callRepository.answerCall()

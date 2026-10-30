@@ -124,22 +124,14 @@ class ContactsViewModel(
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val filteredContacts = combine(
+    private val baseFilteredContacts = combine(
         _allContacts,
         _selectedAccount,
         _showPrivateOnly,
         _showLocalOnly,
-        _visibleAccounts,
-        _sortOrder
-    ) { args ->
-        val contacts = args[0] as List<Contact>
-        val account = args[1] as Account?
-        val privateOnly = args[2] as Boolean
-        val localOnly = args[3] as Boolean
-        val visibleAccounts = args[4] as Set<String>?
-        val sortOrder = args[5] as Int
-
-        val baseFiltered = when {
+        _visibleAccounts
+    ) { contacts, account, privateOnly, localOnly, visibleAccounts ->
+        when {
             privateOnly -> contacts.filter { it.isPrivate }
             localOnly -> contacts.filter { it.accountName == null && it.accountType == null && !it.isPrivate }
             account == null -> {
@@ -148,7 +140,12 @@ class ContactsViewModel(
             }
             else -> contacts.filter { it.accountName == account.name && it.accountType == account.type }
         }
+    }
 
+    val filteredContacts = combine(
+        baseFilteredContacts,
+        _sortOrder
+    ) { baseFiltered, sortOrder ->
         if (sortOrder == 1) {
             baseFiltered.sortedBy {
                 it.familyName.lowercase().ifBlank { it.displayName.lowercase() }
