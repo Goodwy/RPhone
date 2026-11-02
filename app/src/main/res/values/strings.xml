@@ -51,6 +51,9 @@
     <string name="add">Add</string>
     <string name="use_number">Use number: %s</string>
     <string name="scroll_to_top">Scroll to top</string>
+    <string name="details">Details</string>
+    <string name="saved">Saved</string>
+    <string name="save_failed">Failed to save</string>
 
     <!-- Search -->
     <string name="search">Search</string>

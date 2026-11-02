@@ -8,8 +8,8 @@ import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStoreFile
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlin.time.Duration.Companion.milliseconds
 import dev.goodwy.rphone.R
+import kotlin.time.Duration.Companion.milliseconds
 
 private val dataStoreScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 private var _sharedDataStore: DataStore<Preferences>? = null

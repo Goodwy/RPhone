@@ -18,6 +18,7 @@ data class CallLogEntry(
     val isBlocked: Boolean = false,
     val types: List<Int> = emptyList(),
     val ids: List<Long> = emptyList(),
+    val subLogs: List<CallLogEntry> = emptyList(),
     val isCallerIdName: Boolean = false,
     val phoneType: Int? = null,         // Mobile, Home, Work
     val phoneLabel: String? = null      // Custom type

@@ -85,8 +85,6 @@ import dev.goodwy.rphone.controller.util.getAddressTypeText
 import dev.goodwy.rphone.controller.util.getEmailTypeText
 import dev.goodwy.rphone.controller.util.getEventTypeText
 import dev.goodwy.rphone.controller.util.getPhoneTypeText
-import dev.goodwy.rphone.controller.util.millisToString
-import dev.goodwy.rphone.controller.util.stringToMillis
 import dev.goodwy.rphone.modal.data.Contact
 import dev.goodwy.rphone.modal.data.ContactAddress
 import dev.goodwy.rphone.modal.data.ContactEmail
@@ -115,6 +113,9 @@ import org.koin.compose.viewmodel.koinActivityViewModel
 import androidx.core.net.toUri
 import dev.goodwy.rphone.cardCornerExtraSmall
 import dev.goodwy.rphone.cardSpacedBy
+import dev.goodwy.rphone.controller.util.formatContactEventDate
+import dev.goodwy.rphone.controller.util.stringToUtcMillis
+import dev.goodwy.rphone.controller.util.utcMillisToString
 import dev.goodwy.rphone.view.theme.rillCornerDp
 
 private val blankPhoneDetail = ContactPhoneDetail(Phone.TYPE_MOBILE, null, "")
@@ -744,6 +745,7 @@ fun ContactEditScreen(
     val isRotation90 = rotation == if (isLtr) Surface.ROTATION_90 else Surface.ROTATION_270
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        contentWindowInsets = WindowInsets(0),
         topBar = {
             TopAppBar(
                 windowInsets = WindowInsets.systemBars.only(
@@ -1116,13 +1118,9 @@ fun ContactEditScreen(
                             state = listState,
                             modifier = Modifier
                                 .weight(1.7f)
-                                .padding(
-                                    top = innerPadding.calculateTopPadding(),
-                                    start = 0.dp,
-                                    end = 0.dp,
-                                    bottom = 0.dp
-                                )
-                                .fillMaxSize(),
+                                .padding(top = innerPadding.calculateTopPadding())
+                                .fillMaxSize()
+                                .imePadding(),
                             contentPadding = PaddingValues(vertical = 16.dp),
                             verticalArrangement = Arrangement.spacedBy(32.dp)
                         ) {
@@ -1688,14 +1686,9 @@ fun ContactEditScreen(
                     LazyColumn(
                         state = listState,
                         modifier = Modifier
-//                .padding(innerPadding)
-                            .padding(
-                                top = innerPadding.calculateTopPadding(),
-                                start = 0.dp,
-                                end = 0.dp,
-                                bottom = 0.dp
-                            )
-                            .fillMaxSize(),
+                            .padding(top = innerPadding.calculateTopPadding())
+                            .fillMaxSize()
+                            .imePadding(),
                         contentPadding = PaddingValues(vertical = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(32.dp)
                     ) {
@@ -2777,7 +2770,10 @@ fun EditFieldDate(
     onLabelChange: ((String, Int?) -> Unit)? = null,
     availableLabels: List<Pair<Int, String>> = emptyList(),
     cornerDp: Dp,
-) {
+    showYearInDisplay: Boolean = true,
+    showAgeInDisplay: Boolean = false,
+
+    ) {
     var appeared by remember { mutableStateOf(false) }
     var showLabelEditor by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
@@ -2799,12 +2795,12 @@ fun EditFieldDate(
     )
 
     // Convert the YYYY-MM-DD string to milliseconds for the DatePicker
-    val initialDateMillis = remember(value) { stringToMillis(value) }
+    val initialDateMillis = remember(value) { stringToUtcMillis(value) }
     var selectedDateMillis by remember(initialDateMillis) { mutableStateOf(initialDateMillis) }
 
     // Update the external status in the YYYY-MM-DD format
     LaunchedEffect(selectedDateMillis) {
-        val dateString = millisToString(selectedDateMillis, value)
+        val dateString = utcMillisToString(selectedDateMillis, value)
         onValueChange(dateString)
     }
 
@@ -2831,6 +2827,11 @@ fun EditFieldDate(
                 )
             }
 
+            val displayValue = remember(value, showYearInDisplay, showAgeInDisplay) {
+                if (value.isBlank()) ""
+                else formatContactEventDate(value, showYearInDisplay, showAgeInDisplay)
+            }
+
             TextField(
 //                leadingIcon = {
 //                    Icon(
@@ -2851,7 +2852,7 @@ fun EditFieldDate(
                         modifier = Modifier.padding(end = 8.dp)
                     )
                 },
-                value = millisToString(selectedDateMillis, value),
+                value = displayValue,
                 onValueChange = {},
                 label = {
                     Row(
@@ -3082,6 +3083,9 @@ fun EditEventField(
         Event.TYPE_OTHER to stringResource(R.string.other),
     )
 
+    val isBirthday = label == stringResource(R.string.birthday)
+    val hasYear = !value.startsWith("--") && value.isNotBlank()
+
     EditFieldDate(
         value = value,
         onValueChange = onValueChange,
@@ -3090,7 +3094,9 @@ fun EditEventField(
         onDelete = onDelete,
         onLabelChange = onLabelChange,
         availableLabels = eventTypes,
-        cornerDp = cornerDp
+        cornerDp = cornerDp,
+        showYearInDisplay = if (isBirthday) hasYear else true,
+        showAgeInDisplay = isBirthday && hasYear,
     )
 }
 

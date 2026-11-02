@@ -2367,7 +2367,9 @@ fun DialPadKey(
     val showSubLetters = !subLetters.isNullOrBlank()
     val mainFontSize = (if (compact) 18f else 28f) * scaleFactor.coerceIn(0.6f, 1.4f)
     val subFontSize =
-        if (showSubLetters || hasSecondaryLanguage) (10f * scaleFactor.coerceIn(0.6f, 1.4f) * 0.8f) else (10f * scaleFactor.coerceIn(0.6f, 1.4f))
+        if (number == "0") (10f * scaleFactor.coerceIn(0.6f, 1.4f) * 1.2f)
+        else if (showSubLetters || hasSecondaryLanguage) (10f * scaleFactor.coerceIn(0.6f, 1.4f) * 0.8f)
+        else (10f * scaleFactor.coerceIn(0.6f, 1.4f))
     Surface(
         shape = RoundedCornerShape(cornerRadius),
         color = bgColor,
@@ -2422,32 +2424,41 @@ fun DialPadKey(
                 style = MaterialTheme.typography.headlineMedium.copy(fontSize = mainFontSize.sp),
                 fontWeight = FontWeight.Medium
             )
-            if (showSubLetters) {
-                Text(
-                    text = subLetters,
-                    style = MaterialTheme.typography.labelSmall.copy(fontSize = subFontSize.sp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    letterSpacing = 1.sp
-                )
-            } else if (hasSecondaryLanguage) {
-                Text(
-                    text = " ",
-                    style = MaterialTheme.typography.labelSmall.copy(fontSize = subFontSize.sp)
-                )
-            }
-
-            if (letters.isNotBlank()) {
+            if (number == "0") {
                 Text(
                     text = letters,
                     style = MaterialTheme.typography.labelSmall.copy(fontSize = subFontSize.sp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     letterSpacing = 1.sp
                 )
-            } else if (hasSecondaryLanguage) {
-                Text(
-                    text =  " ",
-                    style = MaterialTheme.typography.labelSmall.copy(fontSize = subFontSize.sp)
-                )
+            } else {
+                if (showSubLetters) {
+                    Text(
+                        text = subLetters,
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = subFontSize.sp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        letterSpacing = 1.sp
+                    )
+                } else if (hasSecondaryLanguage) {
+                    Text(
+                        text = " ",
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = subFontSize.sp)
+                    )
+                }
+
+                if (letters.isNotBlank()) {
+                    Text(
+                        text = letters,
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = subFontSize.sp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        letterSpacing = 1.sp
+                    )
+                } else if (hasSecondaryLanguage) {
+                    Text(
+                        text =  " ",
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = subFontSize.sp)
+                    )
+                }
             }
         }
     }

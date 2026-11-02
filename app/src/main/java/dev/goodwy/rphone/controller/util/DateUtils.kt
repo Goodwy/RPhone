@@ -10,6 +10,9 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
+
+private val timeFormatCache = ThreadLocal<Pair<Boolean, java.text.DateFormat>>()
 
 private fun isYesterday(timestamp: Long): Boolean {
     return DateUtils.isToday(timestamp + DateUtils.DAY_IN_MILLIS)
@@ -29,18 +32,38 @@ private fun Context.getRelativeDay(timestamp: Long): String? {
     }
 }
 
-fun Context.formatDateHeader(timestamp: Long): String {
+fun Context.formatDateHeader(timestamp: Long, includeDayOfWeek: Boolean = false): String {
     val relative = getRelativeDay(timestamp)
     if (relative != null) return relative
 
-    val pattern = if (isSameYear(timestamp, System.currentTimeMillis())) "d MMMM" else "d MMMM yyyy"
-    return SimpleDateFormat(pattern, Locale.getDefault()).format(Date(timestamp))
+    val locale = Locale.getDefault()
+    val hasSameYear = isSameYear(timestamp, System.currentTimeMillis())
+    val skeleton = if (hasSameYear) "MMMMd" else "yMMMMd"
+    val pattern = android.text.format.DateFormat.getBestDateTimePattern(locale, skeleton)
+
+    val date = Date(timestamp)
+    val datePart = SimpleDateFormat(pattern, locale).format(date)
+
+    if (!includeDayOfWeek) return datePart
+
+    val dayOfWeek = SimpleDateFormat("EEEE", locale).format(date)
+    return "$datePart ($dayOfWeek)"
+}
+
+fun Context.formatTime(timestamp: Long): String {
+    val is24 = android.text.format.DateFormat.is24HourFormat(this)
+    var cached = timeFormatCache.get()
+    if (cached == null || cached.first != is24) {
+        cached = Pair(is24, android.text.format.DateFormat.getTimeFormat(this))
+        timeFormatCache.set(cached)
+    }
+    return cached.second.format(Date(timestamp))
 }
 
 fun Context.formatDate(timestamp: Long, onlyTime: Boolean = false): String {
     val relative = getRelativeDay(timestamp)
     val isJustNow = isJustNow(timestamp)
-    val time = isJustNow ?: android.text.format.DateFormat.getTimeFormat(this).format(Date(timestamp))
+    val time = isJustNow ?: formatTime(timestamp)
     return if (onlyTime) time
     else if (isJustNow != null) time
     else if (relative != null) "$relative, $time"
@@ -93,49 +116,93 @@ fun Context.formatSecondsToShortTimeString(totalSeconds: Int): String {
     return result
 }
 
-fun stringToMillis(dateString: String): Long? {
-    if (dateString.isBlank()) return null
+/**
+ * Formats the event date from ContactsContract (YYYY-MM-DD or --MM-DD)
+ * into a format that matches the device's locale.
+ *
+ * @param rawDate the raw event string
+ * @param withYear whether to display the year (set to false for birthdays without a year)
+ * @param showAge whether to display the age in parentheses (only for birthdays with a year)
+ */
+fun formatContactEventDate(
+    rawDate: String,
+    withYear: Boolean = true,
+    showAge: Boolean = false
+): String {
+    val millis = stringToUtcMillis(rawDate) ?: return rawDate   // ← UTC
+    val hasYear = !rawDate.startsWith("--") && withYear
 
+    val pattern = if (hasYear) {
+        android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), "yMMMMd")
+    } else {
+        android.text.format.DateFormat.getBestDateTimePattern(Locale.getDefault(), "MMMMd")
+    }
+    val formatted = SimpleDateFormat(pattern, Locale.getDefault()).apply {
+        timeZone = TimeZone.getTimeZone("UTC")                   // ← UTC
+    }.format(Date(millis))
+
+    if (showAge && !rawDate.startsWith("--")) {
+        val age = calculateAge(millis)
+        if (age >= 0) return "$formatted ($age)"
+    }
+    return formatted
+}
+
+/**
+ * Age as of the current date, taking into account whether the person's birthday has already occurred this year.
+ * Returns -1 if the date is in the future.
+ */
+private fun calculateAge(birthMillis: Long): Int {
+    val utc = TimeZone.getTimeZone("UTC")
+    val today = Calendar.getInstance(utc)
+    val birth = Calendar.getInstance(utc).apply { timeInMillis = birthMillis }
+
+    var age = today.get(Calendar.YEAR) - birth.get(Calendar.YEAR)
+    val hadBirthdayThisYear =
+        today.get(Calendar.DAY_OF_YEAR) >= birth.get(Calendar.DAY_OF_YEAR)
+    if (!hadBirthdayThisYear) age--
+    return if (age < 0) -1 else age
+}
+
+/**
+ * Parses the ISO date from ContactsContract (YYYY-MM-DD or --MM-DD)
+ * into milliseconds since UTC midnight - the format expected by the Material3 DatePicker.
+ */
+fun stringToUtcMillis(dateString: String): Long? {
+    if (dateString.isBlank()) return null
     return try {
         when {
-            // Date format: YYYY-MM-DD
             dateString.matches(Regex("\\d{4}-\\d{2}-\\d{2}")) -> {
-                val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.US).apply {
+                    timeZone = TimeZone.getTimeZone("UTC")
+                }
                 sdf.parse(dateString)?.time
             }
-            // Date format without the year: --MM-DD
             dateString.matches(Regex("--\\d{2}-\\d{2}")) -> {
-                // We use `split` instead of `substring` for security reasons
                 val datePart = dateString.substring(2) // "10-22"
-                val parts = datePart.split("-")
-                if (parts.size == 2) {
-                    val month = parts[0]
-                    val day = parts[1]
-                    val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-                    val dateWithYear = "$currentYear-$month-$day"
-                    val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                    sdf.parse(dateWithYear)?.time
-                } else {
-                    null
+                val year = Calendar.getInstance(TimeZone.getTimeZone("UTC")).get(Calendar.YEAR)
+                val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.US).apply {
+                    timeZone = TimeZone.getTimeZone("UTC")
                 }
+                sdf.parse("$year-$datePart")?.time
             }
             else -> null
         }
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         null
     }
 }
 
-fun millisToString(dateMillis: Long?, originalFormat: String? = null): String {
+/**
+ * Converts milliseconds since UTC midnight (from DatePicker) back into an ISO string
+ * for ContactsContract. Preserves "no year" if originalFormat starts with "--".
+ */
+fun utcMillisToString(dateMillis: Long?, originalFormat: String? = null): String {
     if (dateMillis == null) return ""
-
-    // If the original format did not include the year, we return it in the format --MM-DD
-    if (originalFormat?.startsWith("--") == true) {
-        val sdf = SimpleDateFormat("MM-dd", Locale.getDefault())
-        return "--${sdf.format(Date(dateMillis))}"
-    }
-
-    // Standard format with the year
-    val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-    return sdf.format(Date(dateMillis))
+    val sdf = SimpleDateFormat(
+        if (originalFormat?.startsWith("--") == true) "MM-dd" else "yyyy-MM-dd",
+        Locale.US
+    ).apply { timeZone = TimeZone.getTimeZone("UTC") }
+    val formatted = sdf.format(Date(dateMillis))
+    return if (originalFormat?.startsWith("--") == true) "--$formatted" else formatted
 }

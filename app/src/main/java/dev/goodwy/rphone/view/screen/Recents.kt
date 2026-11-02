@@ -51,6 +51,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import android.os.Build
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.rounded.Call
@@ -154,6 +155,12 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
                 // and when it is restored from another screen
                 fabVisible = true
                 notificationManager.clearAllMissedCallNotifications(context)
+                // Recover after default-dialer switch: permission may have been
+                // re-granted while we were backgrounded, and the ViewModel
+                // (activity-scoped) may have stale/empty state.
+                if (isGranted) {
+                    viewModel.refreshOnResume()
+                }
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -584,8 +591,6 @@ fun CallLogFullContent(
 
     val videoLauncher = rememberVideoLauncher()
 
-    var pullToRefreshActive by remember { mutableStateOf(false) }
-
     if (isGranted) {
         val viewModel: CallLogViewModel = koinActivityViewModel()
         val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
@@ -634,7 +639,7 @@ fun CallLogFullContent(
         // Track previous filter index for slide direction
         val filterEntries = CallLogFilter.entries
 //        var previousFilterIndex by remember { mutableIntStateOf(filterEntries.indexOf(selectedFilter)) }
-        val groupedLogs = remember(filteredLogs) { filteredLogs.groupBy { context.formatDateHeader(it.date) } }
+        val groupedLogs = remember(filteredLogs) { filteredLogs.groupBy { context.formatDateHeader(it.date, true) } }
 
         if (showSimPicker && pendingNumber != null) {
             SimPickerDialog(
@@ -673,6 +678,12 @@ fun CallLogFullContent(
 
         val pullToRefreshState = rememberPullToRefreshState()
         val isDataLoading = (logs.isEmpty() && isLoading) || (!favouritesEnabled && isLoadingContacts && allContacts.isEmpty())
+        var pullToRefreshActive by remember { mutableStateOf(false) }
+        LaunchedEffect(isDataLoading) {
+            if (!isDataLoading && pullToRefreshActive) {
+                pullToRefreshActive = false
+            }
+        }
 
         PullToRefreshBox(
             isRefreshing = isDataLoading && pullToRefreshActive,
@@ -680,7 +691,6 @@ fun CallLogFullContent(
                 pullToRefreshActive = true
                 viewModel.refreshLogs()
                 contactsVM.fetchContacts()
-                pullToRefreshActive = false
             },
             modifier = Modifier.fillMaxSize(),
             state = pullToRefreshState,
@@ -709,10 +719,13 @@ fun CallLogFullContent(
                     }
                 }
             } else if (logs.isEmpty()) {
-                PlaceholderView(
-                    icon = Icons.Rounded.Call,
-                    title = stringResource(R.string.no_calls_found),
-                )
+                Box(modifier = Modifier.fillMaxSize()) {
+                    PlaceholderView(
+                        icon = Icons.Rounded.Call,
+                        title = stringResource(R.string.no_calls_found),
+                    )
+
+                }
             } else {
                 Column(modifier = Modifier.fillMaxSize()) {
                     // ── Animated content: slides left/right on filter change ──────
@@ -960,9 +973,15 @@ fun CallLogFullContent(
                             // WITHOUT restarting the slide animation!
                             groupedLogs.forEach { (header, logsInGroup) ->
                                 // Section header as its own item
-                                item(key = "header_$header", contentType = "sectionHeader") {
+                                stickyHeader(key = "header_$header", contentType = "sectionHeader") {
                                     RillScrollAnimatedItem {
-                                        RillSectionHeader(title = header)
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .background(MaterialTheme.colorScheme.surface)
+                                        ) {
+                                            RillSectionHeader(title = header)
+                                        }
                                     }
                                 }
                                 // Individual items per log entry with per-item rounded corners
@@ -1020,8 +1039,7 @@ fun CallLogFullContent(
                                                                 } else {
                                                                     navigator.navigate(
                                                                         ContactDetailsScreenDestination(
-                                                                            contactId = log.contactId
-                                                                                ?: "null",
+                                                                            contactId = log.contactId ?: "null",
                                                                             phoneNumber = log.number,
                                                                             initialName = if (log.number != log.name) log.name else null
                                                                         )
@@ -1032,14 +1050,35 @@ fun CallLogFullContent(
                                                                 onToggleSelection(log)
                                                             },
                                                             onAvatarClick = { log ->
-                                                                if (log.contactId != null) {
+//                                                                if (log.contactId != null) {
+//                                                                    navigator.navigate(
+//                                                                        ContactDetailsScreenDestination(
+//                                                                            contactId = log.contactId,
+//                                                                            phoneNumber = log.number
+//                                                                        )
+//                                                                    )
+//                                                                } else {
+//                                                                    navigator.navigate(
+//                                                                        ContactEditScreenDestination(
+//                                                                            initialPhone = log.number,
+//                                                                            initialName = if (log.number != log.name) log.name else null
+//                                                                        )
+//                                                                    )
+//                                                                }
+                                                                if (selectionMode) {
+                                                                    onToggleSelection(log)
+                                                                } else {
                                                                     navigator.navigate(
                                                                         ContactDetailsScreenDestination(
-                                                                            contactId = log.contactId,
-                                                                            phoneNumber = log.number
+                                                                            contactId = log.contactId ?: "null",
+                                                                            phoneNumber = log.number,
+                                                                            initialName = if (log.number != log.name) log.name else null
                                                                         )
                                                                     )
-                                                                } else {
+                                                                }
+                                                            },
+                                                            onAddClick = { log ->
+                                                                if (log.contactId == null) {
                                                                     navigator.navigate(
                                                                         ContactEditScreenDestination(
                                                                             initialPhone = log.number,

@@ -4,12 +4,9 @@ import android.content.Context
 import android.view.Surface
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.CallEnd
 import androidx.compose.material.icons.rounded.CallToAction
 import androidx.compose.material.icons.rounded.Dialpad
-import androidx.compose.material.icons.rounded.SmartButton
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -25,7 +22,6 @@ import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillAnimatedSection
 import dev.goodwy.rphone.view.components.RillExpressiveCard
 import dev.goodwy.rphone.view.components.RillSwitchListItem
-import dev.goodwy.rphone.view.theme.color_call_button
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator

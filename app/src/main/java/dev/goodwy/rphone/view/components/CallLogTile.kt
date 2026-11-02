@@ -14,18 +14,16 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.CallMade
 import androidx.compose.material.icons.automirrored.filled.CallMissed
 import androidx.compose.material.icons.automirrored.filled.CallReceived
-import androidx.compose.material.icons.automirrored.filled.StarHalf
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.CheckBox
 import androidx.compose.material.icons.rounded.ContentCopy
+import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.TravelExplore
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -38,7 +36,6 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.forceLtr
@@ -46,7 +43,6 @@ import dev.goodwy.rphone.controller.util.formatDate
 import dev.goodwy.rphone.controller.util.formatSecondsToShortTimeString
 import dev.goodwy.rphone.controller.util.getPhoneTypeText
 import dev.goodwy.rphone.controller.util.launchInternetSearch
-import dev.goodwy.rphone.controller.util.toast
 import dev.goodwy.rphone.modal.data.CallLogEntry
 import dev.goodwy.rphone.view.theme.customColors
 
@@ -100,6 +96,7 @@ fun CallLogTile(
     onLongClick: (CallLogEntry) -> Unit,
     onCallClick: (CallLogEntry) -> Unit,
     onAvatarClick: ((CallLogEntry) -> Unit)? = null,
+    onAddClick: ((CallLogEntry) -> Unit)? = null,
     onDelete: (() -> Unit)? = null,
     onShowHistory: () -> Unit,
     isSelected: Boolean = false,
@@ -113,6 +110,7 @@ fun CallLogTile(
         val simLabel = if (showSimLabel && log.simLabel != null) " • " + log.simLabel else ""
         val displayName = if (log.name == log.number) log.number.forceLtr() else log.name?.ifEmpty { log.number } ?: log.number.ifEmpty { "Unknown" }
         CallLogListItem(
+            log = log,
             headline = buildString {
                 append(displayName)
                 if (log.count > 1) append(" (${log.count})")
@@ -142,12 +140,15 @@ fun CallLogTile(
             onCallClick = { onCallClick(log) },
             onAvatarClick = { if (onAvatarClick != null) onAvatarClick(log) },
             onAvatarLongClick = { showMenu = true },
+            onAddClick = { if (onAddClick != null) onAddClick(log) },
+            onShowHistory = onShowHistory,
             directCall = directCall,
             onLongClick = { onLongClick(log) },
             isMenuOpen  = showMenu && !selectionMode,
             onClick     = { onTileClick(log) },
             isSelected = isSelected,
             selectionMode = selectionMode,
+            showSimLabel = showSimLabel
         )
 
         AnimatedVisibility(
@@ -213,7 +214,7 @@ fun CallLogTile(
                 DropdownMenuItem(
                     contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
                     text = { Text(stringResource(R.string.show_full_history)) },
-                    leadingIcon = { Icon(Icons.Rounded.AccessTime, null) },
+                    leadingIcon = { Icon(Icons.Rounded.History, null) },
                     onClick = {
                         showMenu = false
                         onShowHistory()
@@ -289,13 +290,6 @@ fun BatchCallLogActionBar(
                 toast = if (isAllSelected) stringResource(R.string.deselect_all) else stringResource(R.string.select_all)
             )
             Spacer(modifier = Modifier.weight(1f))
-//            if (onCallLogs != null) {
-//                RillIconButton(
-//                    onClick = onCallLogs,
-//                    imageVector = Icons.Rounded.AccessTime,
-//                    contentDescription = stringResource(R.string.show_full_history)
-//                )
-//            }
             if (onBlock != null) {
                 RillIconButton(
                     onClick = { showBlockConfirm = true },
@@ -303,25 +297,11 @@ fun BatchCallLogActionBar(
                     contentDescription = stringResource(R.string.action_block_number)
                 )
             }
-//            if (onClearAll != null) {
-//                RillIconButton(
-//                    onClick = { showClearAllConfirm = true },
-//                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_delete_sweep),
-//                    contentDescription = stringResource(R.string.clear_all_filtered_logs)
-//                )
-//            }
             RillIconButton(
                 onClick = { showDeleteConfirm = true },
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_delete),
                 contentDescription = stringResource(R.string.delete_call_logs)
             )
-//            if (onShare != null) {
-//                RillIconButton(
-//                    onClick = onShare,
-//                    imageVector = Icons.Default.Share,
-//                    contentDescription = stringResource(R.string.share)
-//                )
-//            }
 
             Box {
                 RillIconButton(
@@ -356,7 +336,7 @@ fun BatchCallLogActionBar(
                         DropdownMenuItem(
                             contentPadding = PaddingValues(start = 16.dp, end = 20.dp),
                             text = { Text(stringResource(R.string.show_full_history), lineHeight = MaterialTheme.typography.bodyMedium.fontSize) },
-                            leadingIcon = { Icon(Icons.Rounded.AccessTime, stringResource(R.string.show_full_history)) },
+                            leadingIcon = { Icon(Icons.Rounded.History, stringResource(R.string.show_full_history)) },
                             onClick = {
                                 showSelectionMenuOuter = false
                                 onCallLogs()

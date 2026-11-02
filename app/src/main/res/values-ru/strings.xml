@@ -46,6 +46,9 @@
     <string name="add">Добавить</string>
     <string name="use_number">Использовать номер: %s</string>
     <string name="scroll_to_top">Прокрутить вверх</string>
+    <string name="details">Информация</string>
+    <string name="saved">Сохранено</string>
+    <string name="save_failed">Не удалось сохранить</string>
 
     <!-- Search -->
     <string name="search">Поиск</string>

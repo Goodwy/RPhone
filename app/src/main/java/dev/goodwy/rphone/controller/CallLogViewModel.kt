@@ -69,8 +69,6 @@ class CallLogViewModel(
         File(application.cacheDir, "call_logs_cache.json")
     }
 
-    @Volatile private var isObserverRegistered = false
-
     private val callLogObserver = object : ContentObserver(Handler(Looper.getMainLooper())) {
         override fun onChange(selfChange: Boolean) {
             debounceJob?.cancel()
@@ -81,6 +79,21 @@ class CallLogViewModel(
         }
     }
 
+    @Volatile private var observerRegistered = false
+
+    private fun ensureObserverRegistered() {
+        if (observerRegistered) return
+        if (!hasReadCallLogPermission()) return
+        try {
+            contentResolver.registerContentObserver(
+                CallLog.Calls.CONTENT_URI,
+                true,
+                callLogObserver
+            )
+            observerRegistered = true
+        } catch (_: Exception) {}
+    }
+
     private fun hasReadCallLogPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
             getApplication(),
@@ -88,22 +101,30 @@ class CallLogViewModel(
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    private fun registerObserverIfPermissionGranted() {
-        if (!isObserverRegistered && hasReadCallLogPermission()) {
-            try {
-                contentResolver.registerContentObserver(
-                    CallLog.Calls.CONTENT_URI,
-                    true,
-                    callLogObserver
-                )
-                isObserverRegistered = true
-            } catch (_: Exception) {}
-        }
-    }
-
     init {
-        registerObserverIfPermissionGranted()
+        ensureObserverRegistered()
+
+        viewModelScope.launch {
+            if (hasReadCallLogPermission()) {
+                // Step 1: serve disk cache immediately so UI is instant
+                val diskCache = loadFromDisk()
+                if (diskCache.isNotEmpty()) {
+                    cachedLogs = diskCache
+                    _allCallLogs.value = diskCache
+                }
+                // Step 2: refresh from provider in background
+                fetchLogsInternal()
+            } else {
+                _isLoading.value = false
+            }
+        }
         if (hasReadCallLogPermission()) {
+            contentResolver.registerContentObserver(
+                CallLog.Calls.CONTENT_URI,
+                true,
+                callLogObserver
+            )
+
             // Step 1: serve disk cache immediately so UI is instant
             viewModelScope.launch {
                 val diskCache = loadFromDisk()
@@ -161,13 +182,13 @@ class CallLogViewModel(
         debounceJob?.cancel()
         filterJob?.cancel()
         super.onCleared()
-        if (isObserverRegistered) {
+        if (observerRegistered) {
             try {
                 contentResolver.unregisterContentObserver(callLogObserver)
-                isObserverRegistered = false
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+            observerRegistered = false
         }
     }
 
@@ -175,9 +196,28 @@ class CallLogViewModel(
         fetchLogs(forceRefresh = true)
     }
 
+    fun refreshOnResume() {
+        if (!hasReadCallLogPermission()) {
+            _isLoading.value = false
+            return
+        }
+        ensureObserverRegistered()
+        if (cachedLogs.isEmpty()) {
+            fetchLogs(forceRefresh = true)
+        } else {
+            _allCallLogs.value = cachedLogs
+        }
+    }
+
     private fun fetchLogs(forceRefresh: Boolean = false) {
-        registerObserverIfPermissionGranted()
-        if (!hasReadCallLogPermission()) return
+        if (!hasReadCallLogPermission()) {
+            // Permission was revoked (e.g. after default-dialer change) — stop spinner,
+            // keep whatever we have; UI will show permission view.
+            _isLoading.value = false
+            return
+        }
+        ensureObserverRegistered()
+
         if (!forceRefresh && cachedLogs.isNotEmpty()) {
             _allCallLogs.value = cachedLogs
             return
@@ -194,7 +234,14 @@ class CallLogViewModel(
         _isLoading.value = true
         try {
             if (hasReadCallLogPermission()) {
-                val result = callLogRepo.getCallLogs()
+                ensureObserverRegistered()
+                val result = try {
+                    callLogRepo.getCallLogs()
+                } catch (_: SecurityException) {
+                    // Permission revoked mid-call (default-dialer scenario) — bail out.
+                    _isLoading.value = false
+                    return
+                }
                 // Only push an update to the UI if the data actually changed.
                 // This prevents a visible "refresh flicker" when the disk cache
                 // and the freshly-fetched data are identical (the common case on

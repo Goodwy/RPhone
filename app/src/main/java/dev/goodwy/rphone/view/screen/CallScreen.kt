@@ -62,6 +62,7 @@ import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 import dev.goodwy.rphone.cardCornerExtraSmall
 import dev.goodwy.rphone.controller.lock.AppLockManager
 import dev.goodwy.rphone.controller.sensor.PocketModeManager
+import dev.goodwy.rphone.controller.util.CallBackgroundStore
 import dev.goodwy.rphone.controller.util.NoteManager
 import dev.goodwy.rphone.modal.data.getDisplayName
 import dev.goodwy.rphone.view.components.RillExpressiveCard
@@ -71,7 +72,6 @@ import dev.goodwy.rphone.view.theme.MyColors.dialpadKeyColor
 import dev.goodwy.rphone.view.theme.color_call_end
 import dev.goodwy.rphone.controller.util.formatDuration
 import dev.goodwy.rphone.controller.util.PreferenceManager
-import dev.goodwy.rphone.controller.util.CallBackgroundStore
 import dev.goodwy.rphone.controller.util.forceLtr
 import dev.goodwy.rphone.controller.util.hasCapability
 import dev.goodwy.rphone.controller.util.isHD

@@ -84,6 +84,7 @@ import androidx.compose.material.icons.rounded.PeopleAlt
 import androidx.compose.material.icons.rounded.PersonAdd
 import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material.icons.rounded.QrCode2
+import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.Wallpaper
 import androidx.compose.material.icons.rounded.Widgets
@@ -140,6 +141,7 @@ import dev.goodwy.rphone.controller.util.ContactShortcutUtils
 import dev.goodwy.rphone.controller.util.SocialUtils.openWhatsAppChat
 import dev.goodwy.rphone.controller.util.areNumbersEqual
 import dev.goodwy.rphone.controller.util.forceLtr
+import dev.goodwy.rphone.controller.util.formatContactEventDate
 import dev.goodwy.rphone.controller.util.hasDualSim
 import dev.goodwy.rphone.device_only
 import dev.goodwy.rphone.modal.data.ContactEmail
@@ -148,6 +150,8 @@ import dev.goodwy.rphone.modal.repository.ContactsRepository
 import dev.goodwy.rphone.private_only
 import dev.goodwy.rphone.view.theme.RillDurations
 import dev.goodwy.rphone.view.theme.color_primary
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.util.Calendar
 import kotlin.math.pow
 import kotlin.time.Duration.Companion.milliseconds
@@ -559,6 +563,32 @@ fun ContactDetailsScreen(
                 showShortcutActionPicker = true
             }
         )
+    }
+
+    val saveText = stringResource(R.string.saved)
+    val failedText = stringResource(R.string.save_failed)
+    val savePhotoLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("image/jpeg")
+    ) { targetUri ->
+        val sourceUri = contact?.photoUri ?: return@rememberLauncherForActivityResult
+        if (targetUri != null) {
+            scope.launch(Dispatchers.IO) {
+                try {
+                    context.contentResolver.openInputStream(sourceUri.toUri())?.use { input ->
+                        context.contentResolver.openOutputStream(targetUri)?.use { output ->
+                            input.copyTo(output)
+                        }
+                    } ?: throw IllegalStateException("Cannot open source")
+                    withContext(Dispatchers.Main) {
+                        context.toast(saveText)
+                    }
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) {
+                        context.toast(failedText)
+                    }
+                }
+            }
+        }
     }
     if (showShortcutActionPicker && pendingShortcutNumber != null) {
         val shortcutNumber = pendingShortcutNumber!!
@@ -1367,8 +1397,15 @@ fun ContactDetailsScreen(
                                                 val isBirthday =
                                                     event.type == ContactsContract.CommonDataKinds.Event.TYPE_BIRTHDAY
                                                 val label = getEventTypeText(context, event.type, event.label)
+                                                val formattedDate = remember(event.date, isBirthday) {
+                                                    formatContactEventDate(
+                                                        rawDate = event.date,
+                                                        withYear = !isBirthday || !event.date.startsWith("--"),
+                                                        showAge = isBirthday
+                                                    )
+                                                }
                                                 RillListItem(
-                                                    headline = event.date,
+                                                    headline = formattedDate,
                                                     supporting = label,
                                                     leadingIcon = if (isBirthday) Icons.Outlined.Cake else Icons.Outlined.Event,
                                                     onClick = {
@@ -1402,7 +1439,14 @@ fun ContactDetailsScreen(
                                                             )
                                                         }
                                                     },
-                                                    onLongClick = { context.copyToClipboard(event.date) }
+                                                    onLongClick = {
+                                                        val copyDate = formatContactEventDate(
+                                                            rawDate = event.date,
+                                                            withYear = !isBirthday || !event.date.startsWith("--"),
+                                                            showAge = false
+                                                        )
+                                                        context.copyToClipboard(copyDate)
+                                                    }
                                                 )
                                             }
                                             contact!!.addresses.forEachIndexed { index, address ->
@@ -2242,8 +2286,15 @@ fun ContactDetailsScreen(
                                             val isBirthday =
                                                 event.type == ContactsContract.CommonDataKinds.Event.TYPE_BIRTHDAY
                                             val label = getEventTypeText(context, event.type, event.label)
+                                            val formattedDate = remember(event.date, isBirthday) {
+                                                formatContactEventDate(
+                                                    rawDate = event.date,
+                                                    withYear = !isBirthday || !event.date.startsWith("--"),
+                                                    showAge = isBirthday
+                                                )
+                                            }
                                             RillListItem(
-                                                headline = event.date,
+                                                headline = formattedDate,
                                                 supporting = label,
                                                 leadingIcon = if (isBirthday) Icons.Outlined.Cake else Icons.Outlined.Event,
                                                 onClick = {
@@ -2277,7 +2328,14 @@ fun ContactDetailsScreen(
                                                         )
                                                     }
                                                 },
-                                                onLongClick = { context.copyToClipboard(event.date) }
+                                                onLongClick = {
+                                                    val copyDate = formatContactEventDate(
+                                                        rawDate = event.date,
+                                                        withYear = !isBirthday || !event.date.startsWith("--"),
+                                                        showAge = false
+                                                    )
+                                                    context.copyToClipboard(copyDate)
+                                                }
                                             )
                                         }
                                         contact!!.addresses.forEachIndexed { index, address ->
@@ -2640,8 +2698,26 @@ fun ContactDetailsScreen(
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold,
                                 maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f)
                             )
+
+                            if (contact?.photoUri != null) {
+                                SpringIconButton(
+                                    onClick = {
+                                        val safeName = displayName
+                                            .replace(Regex("[^A-Za-z0-9._-]"), "_")
+                                            .ifBlank { "contact" }
+                                        savePhotoLauncher.launch("$safeName.jpg")
+                                    }
+                                ) {
+                                    Icon(
+                                        Icons.Rounded.Save,
+                                        contentDescription = stringResource(R.string.save),
+                                        tint = Color.White
+                                    )
+                                }
+                            }
                         }
                     }
                 }

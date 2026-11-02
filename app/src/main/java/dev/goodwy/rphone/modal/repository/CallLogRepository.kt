@@ -217,32 +217,35 @@ class CallLogRepository(
                 else -> number
             }
 
+            val singleEntry =
+                CallLogEntry(
+                    id = callId,
+                    number = number,
+                    name = displayName,
+                    type = type,
+                    date = date,
+                    duration = duration,
+                    photoUri = photoUri,
+                    contactId = contactId,
+                    simLabel = simLabel,
+                    isBlocked = isBlocked,
+                    types = listOf(type),
+                    ids = listOf(callId),
+                    isCallerIdName = isCallerIdName,
+                    phoneType = phoneType,
+                    phoneLabel = phoneLabel
+                )
+
             val lastEntry = tempLogs.lastOrNull()
             if (lastEntry != null && lastEntry.number == number) {
+                val currentSubLogs = if (lastEntry.subLogs.isEmpty()) listOf(lastEntry) else lastEntry.subLogs
                 tempLogs[tempLogs.size - 1] = lastEntry.copy(
                     types = lastEntry.types + type,
-                    ids = lastEntry.ids + callId
+                    ids = lastEntry.ids + callId,
+                    subLogs = currentSubLogs + singleEntry
                 )
             } else {
-                tempLogs.add(
-                    CallLogEntry(
-                        id = callId,
-                        number = number,
-                        name = displayName,
-                        type = type,
-                        date = date,
-                        duration = duration,
-                        photoUri = photoUri,
-                        contactId = contactId,
-                        simLabel = simLabel,
-                        isBlocked = isBlocked,
-                        types = listOf(type),
-                        ids = listOf(callId),
-                        isCallerIdName = isCallerIdName,
-                        phoneType = phoneType,
-                        phoneLabel = phoneLabel
-                    )
-                )
+                tempLogs.add(singleEntry)
             }
         }
         callLogs.addAll(tempLogs)

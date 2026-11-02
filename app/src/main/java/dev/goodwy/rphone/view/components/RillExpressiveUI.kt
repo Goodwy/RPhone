@@ -7,6 +7,8 @@ import android.os.Vibrator
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
 import android.os.VibratorManager
+import android.provider.CallLog
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.material3.ripple
@@ -32,18 +34,33 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.repeatable
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.CallMade
+import androidx.compose.material.icons.automirrored.filled.CallMissed
+import androidx.compose.material.icons.automirrored.filled.CallReceived
+import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.History
+import androidx.compose.material.icons.rounded.PersonAdd
+import androidx.compose.material.icons.rounded.TravelExplore
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,6 +85,9 @@ import dev.goodwy.rphone.BuildConfig
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.cardCornerExtraSmall
 import dev.goodwy.rphone.cardSpacedBy
+import dev.goodwy.rphone.controller.util.formatDate
+import dev.goodwy.rphone.controller.util.launchInternetSearch
+import dev.goodwy.rphone.modal.data.CallLogEntry
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import dev.goodwy.rphone.view.theme.MyColors.cardColorSelected
 import dev.goodwy.rphone.view.theme.RillShapeDefaults
@@ -566,6 +586,7 @@ internal fun RillIconBox(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CallLogListItem(
+    log: CallLogEntry,
     headline: String,
     supporting: String? = null,
     leadingIcon: ImageVector? = null,
@@ -579,12 +600,15 @@ fun CallLogListItem(
     onCallClick: () -> Unit,
     onAvatarClick: (() -> Unit)? = null,
     onAvatarLongClick: (() -> Unit)? = null,
+    onAddClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
+    onShowHistory: () -> Unit,
     directCall: Boolean,
     isMenuOpen: Boolean = false,
     modifier: Modifier = Modifier,
     isSelected: Boolean = false,
     selectionMode: Boolean = false,
+    showSimLabel: Boolean
 ) {
     val context = LocalContext.current
     val prefs = koinInject<PreferenceManager>()
@@ -604,6 +628,8 @@ fun CallLogListItem(
         label = "ListItemScale"
     )
 
+    var isExpanded by remember { mutableStateOf(false) }
+
     Surface(
         color = if (isSelected) cardColorSelected else cardColor,
         modifier = modifier
@@ -611,7 +637,7 @@ fun CallLogListItem(
             .scale(scale),
         shadowElevation = 0.dp
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .combinedClickable(
@@ -626,128 +652,303 @@ fun CallLogListItem(
                                 prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
                             )
                         }
-                        if (directCall) onCallClick() else onClick()
+//                            if (directCall) onCallClick() else onClick()
+                        if (directCall) onCallClick() else if (selectionMode) onClick() else { isExpanded = !isExpanded }
                     },
                     onLongClick = onLongClick
-                )
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
+                ),
         ) {
-            if (selectionMode && isSelected) {
-                var appeared by remember { mutableStateOf(false) }
-                LaunchedEffect(Unit) { appeared = true }
-                val iconScale by animateFloatAsState(
-                    targetValue = if (appeared) 1f else 0.5f,
-                    animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-                    label = "iconScale"
-                )
-                val iconAlpha by animateFloatAsState(
-                    targetValue = if (appeared) 1f else 0f,
-                    animationSpec = tween(250),
-                    label = "iconAlpha"
-                )
-                RillAvatar(
-                    name = "",
-                    modifier = Modifier.size(48.dp)
-                        .scale(iconScale)
-                        .alpha(iconAlpha),
-                    icon = Icons.Rounded.Check,
-                    iconContainerColor = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-            } else if (avatarName != null || photoUri != null) {
-                RillAvatar(
-                    name = avatarName ?: "",
-                    photoUri = photoUri,
-                    modifier = Modifier.size(48.dp)
-                        .then(
-                            if (onAvatarClick != null)
-                                Modifier.combinedClickable(
-                                    interactionSource = null,
-                                    indication = ripple(bounded = false, radius = 32.dp),
-                                    onClick = onAvatarClick,
-                                    onLongClick = onAvatarLongClick
-                                )
-                            else Modifier
-                        )
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-            } else if (leadingIcon != null) {
-                RillIconBox(
-                    icon = leadingIcon,
-                    iconContainerColor = iconContainerColor,
-                    iconBgContainerColor = iconBgContainerColor
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-            }
-
-            Column(
+            Row(
                 modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .padding(end = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = headline,
-                    style = MaterialTheme.typography.bodyLarge,
-//                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                if (supportingIcon != null || supporting != null) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        if (supportingIcon != null) {
-                            Icon(
-                                supportingIcon, null,
-                                tint = supportingColor,
-                                modifier = Modifier.size(MaterialTheme.typography.bodyLarge.fontSize.value.dp)
+                if (selectionMode && isSelected) {
+                    var appeared by remember { mutableStateOf(false) }
+                    LaunchedEffect(Unit) { appeared = true }
+                    val iconScale by animateFloatAsState(
+                        targetValue = if (appeared) 1f else 0.5f,
+                        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                        label = "iconScale"
+                    )
+                    val iconAlpha by animateFloatAsState(
+                        targetValue = if (appeared) 1f else 0f,
+                        animationSpec = tween(250),
+                        label = "iconAlpha"
+                    )
+                    RillAvatar(
+                        name = "",
+                        modifier = Modifier.size(48.dp)
+                            .scale(iconScale)
+                            .alpha(iconAlpha),
+                        icon = Icons.Rounded.Check,
+                        iconContainerColor = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                } else if (avatarName != null || photoUri != null) {
+                    RillAvatar(
+                        name = avatarName ?: "",
+                        photoUri = photoUri,
+                        modifier = Modifier.size(48.dp)
+                            .then(
+                                if (onAvatarClick != null)
+                                    Modifier.combinedClickable(
+                                        interactionSource = null,
+                                        indication = ripple(bounded = false, radius = 32.dp),
+                                        onClick = onAvatarClick,
+                                        onLongClick = onAvatarLongClick
+                                    )
+                                else Modifier
                             )
-                            Spacer(modifier = Modifier.width(6.dp))
-                        }
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                } else if (leadingIcon != null) {
+                    RillIconBox(
+                        icon = leadingIcon,
+                        iconContainerColor = iconContainerColor,
+                        iconBgContainerColor = iconBgContainerColor
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                }
 
-                        if (supporting != null) {
-                            Text(
-                                text = supporting,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = supportingColor,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .padding(end = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Text(
+                        text = headline,
+                        style = MaterialTheme.typography.bodyLarge,
+                        lineHeight = MaterialTheme.typography.bodyMedium.lineHeight,
+                        maxLines = if (isExpanded) 2 else 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.animateContentSize(
+                            animationSpec = spring()
+                        )
+                    )
+                    AnimatedVisibility(
+                        visible = !isExpanded,
+                        enter = expandVertically(
+                            animationSpec = tween(220, easing = FastOutSlowInEasing),
+                            expandFrom = Alignment.Bottom
+                        ) + fadeIn(animationSpec = tween(180, delayMillis = 40)),
+                        exit = shrinkVertically(
+                            animationSpec = tween(220, easing = FastOutSlowInEasing),
+                            shrinkTowards = Alignment.Bottom
+                        ) + fadeOut(animationSpec = tween(150)),
+                        label = "supportingVisibility"
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (supportingIcon != null) {
+                                Icon(
+                                    supportingIcon, null,
+                                    tint = supportingColor,
+                                    modifier = Modifier.size(MaterialTheme.typography.bodyLarge.fontSize.value.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                            }
+
+                            if (supporting != null) {
+                                Text(
+                                    text = supporting,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = supportingColor,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
                         }
                     }
                 }
+
+                Icon(
+                    imageVector = if (directCall) Icons.Outlined.Info else Icons.Outlined.Phone, null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .size(28.dp)
+                        .scale(scaleCall)
+                        .combinedClickable(
+                            interactionSource = interactionSourceCall,
+                            indication = ripple(bounded = false, radius = 28.dp),
+                            onClick = {
+                                if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
+                                    performAppHaptic(
+                                        context,
+                                        prefs.getString(
+                                            PreferenceManager.KEY_APP_HAPTICS_STRENGTH,
+                                            "light"
+                                        ) ?: "light",
+                                        prefs.getFloat(
+                                            PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY,
+                                            0.5f
+                                        )
+                                    )
+                                }
+//                                if (directCall) onClick() else onCallClick()
+                                if (directCall) { isExpanded = !isExpanded } else onCallClick()
+                            },
+                            onLongClick = if (!selectionMode) onAvatarLongClick else onLongClick
+                        )
+                )
+                Spacer(modifier = Modifier.width(6.dp))
             }
 
-            Icon(
-                imageVector = if (directCall) Icons.Outlined.Info else Icons.Outlined.Phone, null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier
-                    .size(28.dp)
-                    .scale(scaleCall)
-                    .combinedClickable(
-                        interactionSource = interactionSourceCall,
-                        indication = ripple(bounded = false, radius = 28.dp),
-                        onClick = {
-                            if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                                performAppHaptic(
-                                    context,
-                                    prefs.getString(
-                                        PreferenceManager.KEY_APP_HAPTICS_STRENGTH,
-                                        "light"
-                                    ) ?: "light",
-                                    prefs.getFloat(
-                                        PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY,
-                                        0.5f
-                                    )
+            AnimatedVisibility(
+                visible = isExpanded && !isSelected,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
+                val subItems = remember(log) {
+                    log.subLogs.ifEmpty { listOf(log) }
+                }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, top = 0.dp, bottom = 16.dp)
+                ) {
+                    subItems.forEach { subLog ->
+                        val subIcon = when (subLog.type) {
+                            CallLog.Calls.INCOMING_TYPE -> Icons.AutoMirrored.Filled.CallReceived
+                            CallLog.Calls.OUTGOING_TYPE -> Icons.AutoMirrored.Filled.CallMade
+                            CallLog.Calls.MISSED_TYPE   -> Icons.AutoMirrored.Filled.CallMissed
+                            CallLog.Calls.REJECTED_TYPE -> Icons.AutoMirrored.Filled.CallMissed
+                            CallLog.Calls.BLOCKED_TYPE  -> Icons.Filled.Block
+                            else                        -> Icons.Default.Call
+                        }
+                        val subColor = when (subLog.type) {
+                            CallLog.Calls.MISSED_TYPE, CallLog.Calls.REJECTED_TYPE -> MaterialTheme.colorScheme.error
+                            else -> MaterialTheme.colorScheme.primary
+                        }
+                        val subTypeLabel = when (subLog.type) {
+                            CallLog.Calls.INCOMING_TYPE -> stringResource(R.string.incoming)
+                            CallLog.Calls.OUTGOING_TYPE -> stringResource(R.string.outgoing)
+                            CallLog.Calls.MISSED_TYPE   -> stringResource(R.string.missed)
+                            CallLog.Calls.REJECTED_TYPE -> stringResource(R.string.rejected)
+                            CallLog.Calls.BLOCKED_TYPE  -> stringResource(R.string.blocked)
+                            else                        -> stringResource(R.string.call)
+                        }
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 5.dp, horizontal = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = subIcon,
+                                contentDescription = null,
+                                tint = subColor,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            val simLabel = if (showSimLabel && subLog.simLabel != null) " • " + subLog.simLabel else ""
+                            Text(
+                                text = simLabel + subTypeLabel,
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Medium,
+                                color = subColor
+                            )
+                            Spacer(modifier = Modifier.weight(1f))
+                            Text(
+                                text = context.formatDate(subLog.date, true),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            if (subLog.duration > 0) {
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "(${android.text.format.DateUtils.formatElapsedTime(subLog.duration)})",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
                                 )
                             }
-                            if (directCall) onClick() else onCallClick()
-                        },
-                        onLongClick = if (!selectionMode) onAvatarLongClick else onLongClick
-                    )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    RillExpressiveCard(
+                        shape = MaterialTheme.shapes.large
+                    ) {
+                        TileMoreItem(
+                            headline = stringResource(R.string.details),
+                            leadingIcon = Icons.Outlined.Info,
+                            onClick = onClick
+                        )
+                        TileMoreItem(
+                            headline = stringResource(R.string.show_full_history),
+                            leadingIcon = Icons.Rounded.History,
+                            onClick = onShowHistory
+                        )
+                        TileMoreItem(
+                            headline = stringResource(R.string.lookup),
+                            leadingIcon = Icons.Rounded.TravelExplore,
+                            onClick = { context.launchInternetSearch(log.number) }
+                        )
+                        if (log.contactId == null && onAddClick != null) TileMoreItem(
+                            headline = stringResource(R.string.add_contact),
+                            leadingIcon = Icons.Rounded.PersonAdd,
+                            onClick = onAddClick
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun TileMoreItem(
+    headline: String,
+    leadingIcon: ImageVector,
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.98f else 1f,
+        animationSpec = spring(stiffness = Spring.StiffnessLow, dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "ListItemScale"
+    )
+
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(cardCornerExtraSmall),
+        modifier = Modifier
+            .fillMaxWidth()
+            .scale(scale),
+        shadowElevation = 0.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .alpha(1f)
+                .combinedClickable(
+                    interactionSource = interactionSource,
+                    indication = ripple(),
+                    onClick = onClick,
+                )
+                .padding(horizontal = 6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            RillIconBox(
+                icon = leadingIcon,
+                iconContainerColor = MaterialTheme.colorScheme.onSurface,
+                iconBgContainerColor = MaterialTheme.colorScheme.surface,
             )
             Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                modifier = Modifier.weight(1f),
+                text = headline,
+                style = MaterialTheme.typography.bodyLarge,
+                lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }

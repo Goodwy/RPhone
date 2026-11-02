@@ -289,7 +289,7 @@ fun CallLogFullScreen(
                 } else {
                     val showSimLabel = hasDualSim(context)
                     val groupedLogs = remember(finalFilteredLogs) {
-                        finalFilteredLogs.groupBy { context.formatDateHeader(it.date) }
+                        finalFilteredLogs.groupBy { context.formatDateHeader(it.date, true) }
                     }
 
                     ScrollHapticsEffect(listState = listState)

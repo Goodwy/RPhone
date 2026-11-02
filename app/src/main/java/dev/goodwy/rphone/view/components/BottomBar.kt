@@ -516,11 +516,11 @@ fun BottomBar(navController: NavController) {
         if (!isOnTabScreen && navBarAlpha == 0f) return
 
         val globalBackdrop = LocalLiquidGlassBackdrop.current
-        val navBarShape = RoundedCornerShape(0.dp)
         val useLgBottomNav =
             liquidGlass && lgBottomNav && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && globalBackdrop != null
         val useBlurBottomNav =
             blurEffects && blurBottomNav && !useLgBottomNav && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && globalBackdrop != null
+        val navBarShape = if (useLgBottomNav) RoundedCornerShape(12.dp) else RoundedCornerShape(0.dp)
 
         Box(
             modifier = Modifier
