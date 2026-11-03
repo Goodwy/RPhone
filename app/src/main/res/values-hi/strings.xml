@@ -46,6 +46,9 @@
     <string name="add">जोड़ें</string>
     <string name="use_number">नंबर का उपयोग करें: %s</string>
     <string name="scroll_to_top">ऊपर स्क्रॉल करें</string>
+    <string name="details">विवरण</string>
+    <string name="saved">सहेजा गया</string>
+    <string name="save_failed">सहेजने में विफल</string>
 
     <!-- Search -->
     <string name="search">खोजें</string>

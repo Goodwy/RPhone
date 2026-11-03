@@ -46,6 +46,9 @@
     <string name="add">Lägg till</string>
     <string name="use_number">Använd nummer: %s</string>
     <string name="scroll_to_top">Rulla till toppen</string>
+    <string name="details">Detaljer</string>
+    <string name="saved">Sparat</string>
+    <string name="save_failed">Kunde inte spara</string>
 
     <!-- Search -->
     <string name="search">Sök</string>

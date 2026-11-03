@@ -47,6 +47,9 @@
     <string name="add">צולייגן</string>
     <string name="use_number">נוץ נומער: %s</string>
     <string name="scroll_to_top">גליט צום שפּיץ</string>
+    <string name="details">פּרטים</string>
+    <string name="saved">געהיט</string>
+    <string name="save_failed">האָט נישט געקענט היטן</string>
 
     <!-- Search -->
     <string name="search">זוכן</string>

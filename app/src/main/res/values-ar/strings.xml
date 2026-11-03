@@ -47,6 +47,9 @@
     <string name="add">إضافة</string>
     <string name="use_number">استخدام الرقم: %s</string>
     <string name="scroll_to_top">التمرير إلى الأعلى</string>
+    <string name="details">التفاصيل</string>
+    <string name="saved">تم الحفظ</string>
+    <string name="save_failed">فشل الحفظ</string>
 
     <!-- Search -->
     <string name="search">بحث</string>

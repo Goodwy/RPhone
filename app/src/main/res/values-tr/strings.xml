@@ -46,6 +46,9 @@
     <string name="add">Ekle</string>
     <string name="use_number">Numarayı kullan: %s</string>
     <string name="scroll_to_top">Yukarı kaydır</string>
+    <string name="details">Ayrıntılar</string>
+    <string name="saved">Kaydedildi</string>
+    <string name="save_failed">Kaydedilemedi</string>
 
     <!-- Search -->
     <string name="search">Ara</string>

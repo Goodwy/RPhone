@@ -46,6 +46,9 @@
     <string name="add">Dodaj</string>
     <string name="use_number">Użyj numeru: %s</string>
     <string name="scroll_to_top">Przewiń do góry</string>
+    <string name="details">Szczegóły</string>
+    <string name="saved">Zapisano</string>
+    <string name="save_failed">Nie udało się zapisać</string>
 
     <!-- Search -->
     <string name="search">Szukaj</string>

@@ -47,6 +47,9 @@
     <string name="add">افزودن</string>
     <string name="use_number">استفاده از شماره: %s</string>
     <string name="scroll_to_top">پیمایش به بالا</string>
+    <string name="details">جزئیات</string>
+    <string name="saved">ذخیره شد</string>
+    <string name="save_failed">ذخیره ناموفق بود</string>
 
     <!-- Search -->
     <string name="search">جستجو</string>

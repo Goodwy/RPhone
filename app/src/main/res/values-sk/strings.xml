@@ -46,6 +46,9 @@
     <string name="add">Pridať</string>
     <string name="use_number">Použiť číslo: %s</string>
     <string name="scroll_to_top">Prejsť nahor</string>
+    <string name="details">Podrobnosti</string>
+    <string name="saved">Uložené</string>
+    <string name="save_failed">Uloženie zlyhalo</string>
 
     <!-- Search -->
     <string name="search">Hľadať</string>

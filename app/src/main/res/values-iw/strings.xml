@@ -47,6 +47,9 @@
     <string name="add">הוסף</string>
     <string name="use_number">השתמש במספר: %s</string>
     <string name="scroll_to_top">גלול למעלה</string>
+    <string name="details">פרטים</string>
+    <string name="saved">נשמר</string>
+    <string name="save_failed">השמירה נכשלה</string>
 
     <!-- Search -->
     <string name="search">חיפוש</string>
