@@ -17,6 +17,7 @@ interface IContactsRepository {
     suspend fun deleteContacts(contactIds: List<String>)
     suspend fun moveContacts(contactIds: List<String>, accountName: String?, accountType: String?): Map<String, String>
     suspend fun getAvailableAccounts(): List<Account>
+    fun canCreateLocalContacts(): Boolean
     suspend fun getAvailableAccountsForMoving(): List<Account>
     suspend fun findDuplicates(): List<List<Contact>>
     suspend fun mergeContacts(targetContactId: String, sourceContactIds: List<String>)

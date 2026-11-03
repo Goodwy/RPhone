@@ -12,7 +12,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.filled.*
@@ -53,6 +52,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Label
+import androidx.compose.material.icons.rounded.Abc
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.BlurLinear
 import androidx.compose.material.icons.rounded.BlurOff
@@ -157,6 +157,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
     var incomingCallUI      by remember(settingsState) { mutableStateOf(prefs.getInt(PreferenceManager.KEY_INCOMING_CALL_UI_MODE, 10)) }
     var scrollAnimation     by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SCROLL_ANIMATION, false)) }
     var dialpadAnimation    by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_DIALPAD_ANIMATION, true)) }
+    var dialpadHideLetters  by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_DIALPAD_HIDE_LETTERS, false)) }
     var hideVoiceSearch     by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_HIDE_VOICE_SEARCH, false)) }
     var liquidGlass         by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_LIQUID_GLASS, false)) }
     var blurEffects         by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_BLUR_EFFECTS, false)) }
@@ -915,18 +916,6 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                         prefs.setBoolean(PreferenceManager.KEY_SCROLL_ANIMATION, it)
                                     }
                                 )
-                                RillSwitchListItem(
-                                    headline = stringResource(R.string.dialpad_animations),
-                                    supporting = stringResource(R.string.dialpad_animations_subtitle),
-                                    leadingIcon = Icons.Rounded._123,
-                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
-                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
-                                    checked = dialpadAnimation,
-                                    onCheckedChange = {
-                                        dialpadAnimation = it
-                                        prefs.setBoolean(PreferenceManager.KEY_DIALPAD_ANIMATION, it)
-                                    }
-                                )
                             }
                         }
                     }
@@ -967,6 +956,40 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                     iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
                                     trailingIcon = Icons.Default.ChevronRight,
                                     onClick = { navigator.navigate(CallerUIScreenDestination) }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // ── Dialpad ──────────────────────────────────────────
+                item {
+                    RillAnimatedSection(delayMs = 160L) {
+                        Column {
+                            SettingsSectionLabel(stringResource(R.string.keypad))
+                            RillExpressiveCard {
+                                RillSwitchListItem(
+                                    headline = stringResource(R.string.dialpad_animations),
+                                    supporting = stringResource(R.string.dialpad_animations_subtitle),
+                                    leadingIcon = Icons.Rounded._123,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+                                    checked = dialpadAnimation,
+                                    onCheckedChange = {
+                                        dialpadAnimation = it
+                                        prefs.setBoolean(PreferenceManager.KEY_DIALPAD_ANIMATION, it)
+                                    }
+                                )
+                                RillSwitchListItem(
+                                    headline = stringResource(R.string.hide_dialpad_letters),
+                                    leadingIcon = Icons.Rounded.Abc,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+                                    checked = dialpadHideLetters,
+                                    onCheckedChange = {
+                                        dialpadHideLetters = it
+                                        prefs.setBoolean(PreferenceManager.KEY_DIALPAD_HIDE_LETTERS, it)
+                                    }
                                 )
                             }
                         }

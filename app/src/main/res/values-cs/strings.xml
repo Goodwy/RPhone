@@ -204,6 +204,7 @@
     <string name="incoming_call_ui_vertical_swipe">Svislé přejetí</string>
     <string name="dialpad_animations">Animace klávesnice</string>
     <string name="dialpad_animations_subtitle">Zobrazovat animace při zadávání číslic</string>
+    <string name="hide_dialpad_letters">Skrýt písmena na klávesnici</string>
     <string name="hide_voice_search">Skrýt hlasové vyhledávání</string>
     <string name="hide_voice_search_subtitle">Skryje tlačítko hlasového vyhledávání</string>
 
@@ -628,6 +629,7 @@
     <string name="contacts_permission">Vyžadováno oprávnění ke kontaktům</string>
     <string name="contacts_permission_description">Chcete-li zobrazit své kontakty, povolte oprávnění ke kontaktům.</string>
     <string name="search_contacts_permission_description">Chcete-li vyhledávat ve svých kontaktech a identifikovat příchozí hovory, povolte oprávnění ke kontaktům.</string>
+    <string name="save_local_blocked_by_system">Místní kontakt nelze uložit: výchozí systémový účet pro nové kontakty je nastaven na cloudový účet. Změňte to v nastavení systému nebo vyberte jiný účet.</string>
 
     <!-- Default Dialer -->
     <string name="default_phone_number_cleared">Výchozí telefonní číslo vymazáno</string>

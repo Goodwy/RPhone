@@ -31,6 +31,9 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.goodwy.rphone.R
+import dev.goodwy.rphone.modal.data.LOCAL_SOURCE_KEY
+import dev.goodwy.rphone.modal.data.PRIVATE_SOURCE_KEY
+import dev.goodwy.rphone.modal.data.accountSourceKey
 import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillAnimatedSection
 import dev.goodwy.rphone.view.components.ScrollHapticsEffect
@@ -52,11 +55,17 @@ fun ContactVisibilityScreen(
     val visibleAccounts by viewModel.visibleAccountsFlow.collectAsStateWithLifecycle()
 
     val currentVisible = remember(visibleAccounts, accounts) {
-        visibleAccounts ?: (accounts.map { "${it.type}|${it.name}" } + "local|local" + "private|private").toSet()
+        visibleAccounts ?: (
+                accounts.map { accountSourceKey(it.type, it.name) } +
+                        LOCAL_SOURCE_KEY +
+                        PRIVATE_SOURCE_KEY
+                ).toSet()
     }
 
     fun toggleAccount(key: String, enabled: Boolean) {
-        val newSet = if (enabled) currentVisible + key else currentVisible - key
+        val current = viewModel.visibleAccountsFlow.value
+            ?: (accounts.map { accountSourceKey(it.type, it.name) } + LOCAL_SOURCE_KEY + PRIVATE_SOURCE_KEY).toSet()
+        val newSet = if (enabled) current + key else current - key
         viewModel.setVisibleAccounts(newSet)
     }
 
@@ -144,10 +153,10 @@ fun ContactVisibilityScreen(
                                 leadingIcon = ContactUtils.getAccountIcon(null, true),
                                 iconContainerColor = MaterialTheme.colorScheme.onTertiaryContainer,
                                 iconBgContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                                checked = currentVisible.contains("private|private"),
+                                checked = currentVisible.contains(PRIVATE_SOURCE_KEY),
                                 onCheckedChange = { isChecked: Boolean ->
                                     toggleAccount(
-                                        "private|private",
+                                        PRIVATE_SOURCE_KEY,
                                         isChecked
                                     )
                                 }
@@ -158,17 +167,17 @@ fun ContactVisibilityScreen(
                                 leadingIcon = ContactUtils.getAccountIcon(null),
                                 iconContainerColor = MaterialTheme.colorScheme.onTertiaryContainer,
                                 iconBgContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                                checked = currentVisible.contains("local|local"),
+                                checked = currentVisible.contains(LOCAL_SOURCE_KEY),
                                 onCheckedChange = { isChecked: Boolean ->
                                     toggleAccount(
-                                        "local|local",
+                                        LOCAL_SOURCE_KEY,
                                         isChecked
                                     )
                                 }
                             )
 
                             accounts.forEach { account ->
-                                val key = "${account.type}|${account.name}"
+                                val key = accountSourceKey(account.type, account.name)
                                 RillSwitchListItem(
                                     headline = ContactUtils.getFriendlyAccountName(account),
                                     supporting = account.name,

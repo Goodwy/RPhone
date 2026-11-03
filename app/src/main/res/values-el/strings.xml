@@ -205,6 +205,7 @@
     <string name="incoming_call_ui_vertical_swipe">Κατακόρυφο σβήσιμο</string>
     <string name="dialpad_animations">Κινήσεις πληκτρολογίου</string>
     <string name="dialpad_animations_subtitle">Εμφάνιση κινήσεων κατά την πληκτρολόγηση ψηφίων</string>
+    <string name="hide_dialpad_letters">Απόκρυψη γραμμάτων στο πληκτρολόγιο</string>
     <string name="hide_voice_search">Απόκρυψη φωνητικής αναζήτησης</string>
     <string name="hide_voice_search_subtitle">Αποκρύπτει το κουμπί φωνητικής αναζήτησης</string>
 
@@ -621,6 +622,7 @@
     <string name="contacts_permission">Απαιτείται άδεια πρόσβασης σε επαφές</string>
     <string name="contacts_permission_description">Για να προβάλετε τις επαφές σας, επιτρέψτε την πρόσβαση στις επαφές.</string>
     <string name="search_contacts_permission_description">Για να αναζητήσετε τις επαφές σας και να αναγνωρίζετε εισερχόμενες κλήσεις, επιτρέψτε την πρόσβαση στις επαφές.</string>
+    <string name="save_local_blocked_by_system">Δεν είναι δυνατή η αποθήκευση τοπικής επαφής: ο προεπιλεγμένος λογαριασμός συστήματος για νέες επαφές έχει οριστεί σε λογαριασμό cloud. Αλλάξτε το στις ρυθμίσεις συστήματος ή επιλέξτε άλλον λογαριασμό.</string>
 
     <!-- Default Dialer -->
     <string name="default_phone_number_cleared">Ο προεπιλεγμένος αριθμός τηλεφώνου διαγράφηκε</string>

@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
+import android.os.Build
 import android.provider.ContactsContract
 import android.provider.ContactsContract.CommonDataKinds.Email
 import android.provider.ContactsContract.CommonDataKinds.Event
@@ -27,6 +28,8 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -54,6 +57,7 @@ import androidx.compose.material.icons.rounded.SwitchAccount
 import androidx.compose.material.icons.rounded.Wallpaper
 import androidx.compose.material.icons.rounded.Work
 import androidx.compose.material3.*
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -101,7 +105,6 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.goodwy.rphone.controller.util.CallBackgroundStore
 import dev.goodwy.rphone.controller.util.PreferenceManager
-import dev.goodwy.rphone.device_only
 import dev.goodwy.rphone.private_only
 import dev.goodwy.rphone.view.components.AvatarCropDialog
 import dev.goodwy.rphone.view.components.RillDialog
@@ -116,7 +119,12 @@ import dev.goodwy.rphone.cardSpacedBy
 import dev.goodwy.rphone.controller.util.formatContactEventDate
 import dev.goodwy.rphone.controller.util.stringToUtcMillis
 import dev.goodwy.rphone.controller.util.utcMillisToString
+import dev.goodwy.rphone.modal.data.LOCAL_SOURCE_KEY
+import dev.goodwy.rphone.modal.data.PRIVATE_SOURCE_KEY
+import dev.goodwy.rphone.modal.data.accountSourceKey
 import dev.goodwy.rphone.view.theme.rillCornerDp
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 private val blankPhoneDetail = ContactPhoneDetail(Phone.TYPE_MOBILE, null, "")
 private val blankEvent = ContactEvent(Event.TYPE_BIRTHDAY, null, "")
@@ -317,7 +325,6 @@ fun ContactEditScreen(
         CallBackgroundStore.numberKeys(backgroundNumbers)
     }
     val backgroundAvailable = backgroundContactId != null || backgroundKeys.isNotEmpty()
-    val backgroundErrorMessage = stringResource(R.string.contact_call_background_error)
     val backgroundNoTargetMessage = stringResource(R.string.contact_call_background_no_target)
 
     LaunchedEffect(backgroundContactId, backgroundNumbers) {
@@ -407,9 +414,16 @@ fun ContactEditScreen(
             isPrivate = isPrivate,
             rawContactIds = existingContact?.rawContactIds ?: emptyList(),
             hasMultipleSources = existingContact?.hasMultipleSources ?: false,
+            sourceAccountKeys = when {
+                isPrivate -> setOf(PRIVATE_SOURCE_KEY)
+                else -> setOf(accountSourceKey(selectedAccount?.type, selectedAccount?.name))
+            }
         )
 
-        val originalContact = existingContact?.copy(customRingtone = null) ?: Contact(
+        val originalContact = existingContact?.copy(
+            customRingtone = null,
+            sourceAccountKeys = existingContact.effectiveSourceKeys
+        ) ?: Contact(
             id = "0",
             namePrefix = "",
             givenName = initialName ?: "",
@@ -480,6 +494,8 @@ fun ContactEditScreen(
         closeScreen(isSaved = false)
     }
 
+    var showSnackbarLocalContact by remember { mutableStateOf(false) }
+    val backgroundErrorMessage = stringResource(R.string.contact_call_background_error)
     fun saveAndExit() {
         val finalPhotoUri = tempPhotoUri ?: photoUri
 
@@ -507,6 +523,22 @@ fun ContactEditScreen(
             isPrivate = isPrivate,
         )
         scope.launch {
+            // Guard: creating a Local contact (no account, not private) is
+            //    forbidden by the system when the default account for new contacts
+            //    is Cloud/SIM (Android 16+). Do not save — show a message instead,
+            //    keep the user's input on screen.
+            val isCreatingNew = !isEditingSource && (contactId == null || contactId == "0" || contactId == "null")
+            if (isCreatingNew && !isPrivate && selectedAccount == null &&
+                !contactsVM.canCreateLocalContacts() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+            ) {
+                showSnackbarLocalContact = true
+                scope.launch {
+                    delay(4000.milliseconds)
+                    showSnackbarLocalContact = false
+                }
+                return@launch
+            }
+
             if (isEditingSource && rawContactId != null) {
                 // Update only the specific RawContact
                 contactsVM.updateRawContact(rawContactId, contactToSave)
@@ -723,9 +755,10 @@ fun ContactEditScreen(
             title = stringResource(R.string.save_to_account),
             icon = Icons.Rounded.SwitchAccount,
             availableAccounts = availableAccountsForMoving,
-            currentAccountKey = if (isPrivate) private_only
-                                else if (selectedAccount == null || (selectedAccount?.name == null && selectedAccount?.type == null)) device_only
-                                else "${selectedAccount!!.name}|${selectedAccount!!.type}",
+            localAllowed = contactsVM.canCreateLocalContacts(),
+            currentAccountKey = if (isPrivate) PRIVATE_SOURCE_KEY
+                            else if (selectedAccount == null) LOCAL_SOURCE_KEY
+                            else accountSourceKey(selectedAccount!!.type, selectedAccount!!.name),
             onDismiss = { showPicker = false },
             onAccountSelected = { account, private ->
                 selectedAccount = account
@@ -2446,6 +2479,45 @@ fun ContactEditScreen(
                     visible = showButton,
                     onClick = { scope.launch { listState.animateScrollToItem(0) } }
                 )
+            }
+
+            AnimatedVisibility(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter),
+                visible = showSnackbarLocalContact,
+                enter = slideInVertically { it } + fadeIn(),
+                exit = slideOutVertically { it } + fadeOut()
+            ) {
+                Snackbar(
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .padding(24.dp),
+                    shape = MaterialTheme.shapes.large,
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.End
+                    ) {
+                        Text(
+                            stringResource(R.string.save_local_blocked_by_system),
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        TextButton(
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+                            colors = ButtonDefaults.textButtonColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                            onClick = {
+                                showSnackbarLocalContact = false
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    val intent = Intent(ContactsContract.Settings.ACTION_SET_DEFAULT_ACCOUNT)
+                                    context.startActivity(intent)
+                                }
+                            }
+                        ) {
+                            Text(stringResource(R.string.system_settings))
+                        }
+                    }
+                }
             }
         }
     }

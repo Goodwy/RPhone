@@ -32,7 +32,9 @@ data class Contact(
     val isPrivate: Boolean = false,
     val isHidden: Boolean = false,
     val rawContactIds: List<String> = emptyList(),
-    val hasMultipleSources: Boolean = false
+    val hasMultipleSources: Boolean = false,
+    /** Every account owning a raw contact in this Android aggregate. */
+    val sourceAccountKeys: Set<String> = emptySet()
 ) {
     val displayName: String
         get() = getDisplayName(this)
@@ -51,6 +53,12 @@ data class Contact(
     // For backward compatibility
     @Deprecated("Use displayName instead", ReplaceWith("displayName"))
     val name: String get() = displayName
+    val effectiveSourceKeys: Set<String>
+        get() = when {
+            isPrivate -> setOf(PRIVATE_SOURCE_KEY)
+            sourceAccountKeys.isNotEmpty() -> sourceAccountKeys
+            else -> setOf(accountSourceKey(accountType, accountName))
+        }
 }
 
 @Immutable
@@ -85,6 +93,12 @@ data class ContactAddress(
     val label: String?,
     val formattedAddress: String
 )
+
+const val PRIVATE_SOURCE_KEY = "private|private"
+const val LOCAL_SOURCE_KEY = "local|local"
+
+fun accountSourceKey(type: String?, name: String?): String =
+    if (type == null && name == null) LOCAL_SOURCE_KEY else "$type|$name"
 
 fun getDisplayName(contact: Contact, order: Int = 0): String {
     return buildString {

@@ -1,7 +1,21 @@
 package dev.goodwy.rphone.controller.util
 
 import android.telephony.PhoneNumberUtils
+import com.google.i18n.phonenumbers.PhoneNumberUtil
 import java.util.Locale
+
+private val phoneUtil = PhoneNumberUtil.getInstance()
+
+fun formatPhoneNumberRaw(raw: String, region: String): String {
+    if (raw.isEmpty()) return raw
+    if (raw.any { it == '*' || it == '#' }) return raw
+    return try {
+        val f = phoneUtil.getAsYouTypeFormatter(region)
+        var out = ""
+        for (ch in raw) out = f.inputDigit(ch)
+        out
+    } catch (_: Exception) { raw }
+}
 
 fun formatPhoneNumber(number: String): String {
     return PhoneNumberUtils.formatNumber(number, Locale.getDefault().country) ?: number

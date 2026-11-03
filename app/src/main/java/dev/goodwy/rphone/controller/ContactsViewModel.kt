@@ -9,6 +9,9 @@ import androidx.lifecycle.viewModelScope
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.device_only
 import dev.goodwy.rphone.modal.data.Contact
+import dev.goodwy.rphone.modal.data.LOCAL_SOURCE_KEY
+import dev.goodwy.rphone.modal.data.PRIVATE_SOURCE_KEY
+import dev.goodwy.rphone.modal.data.accountSourceKey
 import dev.goodwy.rphone.modal.db.TrashedContactDao
 import dev.goodwy.rphone.modal.db.TrashedContactEntity
 import dev.goodwy.rphone.modal.repository.ContactsRepository
@@ -90,12 +93,9 @@ class ContactsViewModel(
      * Device-only contacts (no account at all) use the pseudo source "local|local", contacts that
      * only exist inside the app use "private|private", everything else "type|name".
      */
-    private fun visibilityKeyOf(contact: Contact): String = when {
-        contact.accountType == null && contact.accountName == null ->
-            if (contact.isPrivate) "private|private" else "local|local"
-
-        else -> "${contact.accountType}|${contact.accountName}"
-    }
+    private fun visibilityKeysOf(contact: Contact): Set<String> = contact.effectiveSourceKeys
+    private fun isVisibleFromSelectedSources(contact: Contact, visibleAccounts: Set<String>?) =
+        visibleAccounts == null || contact.effectiveSourceKeys.any { it in visibleAccounts }
 
     /**
      * All contacts, reduced to the sources the user has enabled in the contact source settings.
@@ -107,7 +107,7 @@ class ContactsViewModel(
         _visibleAccounts
     ) { contacts, visibleAccounts ->
         if (visibleAccounts == null) contacts
-        else contacts.filter { visibleAccounts.contains(visibilityKeyOf(it)) }
+        else contacts.filter { isVisibleFromSelectedSources(it, visibleAccounts) }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val filteredAvailableAccounts: StateFlow<List<Account>> = combine(
@@ -118,8 +118,7 @@ class ContactsViewModel(
             accounts
         } else {
             accounts.filter { account ->
-                val key = "${account.type}|${account.name}"
-                visibleAccounts.contains(key)
+                visibleAccounts.contains(accountSourceKey(account.type, account.name))
             }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -133,12 +132,15 @@ class ContactsViewModel(
     ) { contacts, account, privateOnly, localOnly, visibleAccounts ->
         when {
             privateOnly -> contacts.filter { it.isPrivate }
-            localOnly -> contacts.filter { it.accountName == null && it.accountType == null && !it.isPrivate }
+            localOnly -> contacts.filter { !it.isPrivate && "local|local" in visibilityKeysOf(it) }
             account == null -> {
                 if (visibleAccounts == null) contacts
-                else contacts.filter { contact -> visibleAccounts.contains(visibilityKeyOf(contact)) }
+                else contacts.filter { contact -> isVisibleFromSelectedSources(contact, visibleAccounts) }
             }
-            else -> contacts.filter { it.accountName == account.name && it.accountType == account.type }
+            else -> contacts.filter { contact ->
+                accountSourceKey(account.type, account.name) in visibilityKeysOf(contact) &&
+                        isVisibleFromSelectedSources(contact, visibleAccounts)
+            }
         }
     }
 
@@ -295,6 +297,8 @@ class ContactsViewModel(
         }
     }
 
+    fun canCreateLocalContacts(): Boolean = contactsRepo.canCreateLocalContacts()
+
     suspend fun saveContact(contact: Contact) {
         contactsRepo.saveContact(contact)
 
@@ -340,19 +344,20 @@ class ContactsViewModel(
         val accounts = _availableAccountsForMoving.value
         if (accounts.isEmpty()) return null
 
-        val accountCounts = mutableMapOf<String, Account>()
         val counts = mutableMapOf<String, Int>()
-
         _allContacts.value.forEach { contact ->
-            if (contact.accountName != null && contact.accountType != null) {
-                val key = "${contact.accountName}|${contact.accountType}"
-                counts[key] = counts.getOrDefault(key, 0) + 1
-                accountCounts[key] = Account(contact.accountName, contact.accountType)
-            }
+            contact.effectiveSourceKeys
+                .filter { it != PRIVATE_SOURCE_KEY && it != LOCAL_SOURCE_KEY }
+                .forEach { key -> counts[key] = counts.getOrDefault(key, 0) + 1 }
         }
 
-        val maxEntry = counts.maxByOrNull { it.value }
-        return maxEntry?.let { accountCounts[it.key] }
+        val maxKey = counts.maxByOrNull { it.value }?.key ?: return null
+        val sep = maxKey.indexOf('|')
+        if (sep <= 0) return null
+        val type = maxKey.substring(0, sep)
+        val name = maxKey.substring(sep + 1)
+        return accounts.firstOrNull { it.type == type && it.name == name }
+            ?: Account(name, type)
     }
 
     fun fetchTrashedContacts() {
@@ -478,12 +483,12 @@ class ContactsViewModel(
         }
     }
 
-    fun moveContacts(contactIds: List<String>, account: Account?): Map<String, String> {
-        var newIdsMap: Map<String, String> = emptyMap()
-        viewModelScope.launch {
-            newIdsMap = contactsRepo.moveContacts(contactIds, account?.name, account?.type)
-            fetchContacts()
+    suspend fun moveContacts(contactIds: List<String>, account: Account?): Map<String, String> {
+        val newIdsMap = withContext(Dispatchers.IO) {
+            contactsRepo.moveContacts(contactIds, account?.name, account?.type)
         }
+        val freshContacts = withContext(Dispatchers.IO) { contactsRepo.getContacts() }
+        _allContacts.value = freshContacts
         return newIdsMap
     }
 
@@ -561,18 +566,18 @@ class ContactsViewModel(
         }
     }
 
-    fun makeContactPrivate(contactId: String) {
-        viewModelScope.launch {
+    suspend fun makeContactPrivate(contactId: String) {
+        withContext(Dispatchers.IO) {
             contactsRepo.makeContactPrivate(contactId)
-            fetchContacts()
         }
+        fetchContacts()
     }
 
-    fun makeContactPublic(contactId: String) {
-        viewModelScope.launch {
+    suspend fun makeContactPublic(contactId: String) {
+        withContext(Dispatchers.IO) {
             contactsRepo.makeContactPublic(contactId)
-            fetchContacts()
         }
+        fetchContacts()
     }
 
     fun exportPrivateContacts(uri: Uri) {
@@ -607,10 +612,9 @@ class ContactsViewModel(
         get() {
             val map = mutableMapOf<String, Int>()
             _allContacts.value.forEach { contact ->
-                val key = "${contact.accountName}|${contact.accountType}"
-                if (contact.accountName != null) {
-                    map[key] = map.getOrDefault(key, 0) + 1
-                }
+                contact.effectiveSourceKeys
+                    .filter { it != PRIVATE_SOURCE_KEY && it != LOCAL_SOURCE_KEY }
+                    .forEach { key -> map[key] = map.getOrDefault(key, 0) + 1 }
             }
             return map
         }

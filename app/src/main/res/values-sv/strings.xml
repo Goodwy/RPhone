@@ -205,6 +205,7 @@
     <string name="incoming_call_ui_vertical_swipe">Vertikalt svep</string>
     <string name="dialpad_animations">Knappsatsanimationer</string>
     <string name="dialpad_animations_subtitle">Visa animationer vid inmatning av siffror</string>
+    <string name="hide_dialpad_letters">Dölj bokstäverna på knappsatsen</string>
     <string name="hide_voice_search">Dölj röstsökning</string>
     <string name="hide_voice_search_subtitle">Döljer knappen för röstsökning</string>
 
@@ -621,6 +622,7 @@
     <string name="contacts_permission">Kontakttillstånd krävs</string>
     <string name="contacts_permission_description">För att visa dina kontakter, tillåt kontakttillstånd.</string>
     <string name="search_contacts_permission_description">För att söka efter dina kontakter och identifiera inkommande samtal, tillåt kontakttillstånd.</string>
+    <string name="save_local_blocked_by_system">Det gick inte att spara en lokal kontakt: systemets standardkonto för nya kontakter är inställt på ett molnkonto. Ändra det i systeminställningarna eller välj ett annat konto.</string>
 
     <!-- Default Dialer -->
     <string name="default_phone_number_cleared">Standardtelefonnummer rensat</string>

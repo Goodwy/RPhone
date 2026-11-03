@@ -50,7 +50,6 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import android.os.Build
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.shape.CornerSize
@@ -72,7 +71,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -109,6 +107,8 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
     val isGranted = permState.status == PermissionStatus.Granted
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
+    val telecomManager = remember { context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager }
+
     val showButton by remember {
         derivedStateOf {
             listState.firstVisibleItemIndex > 2
@@ -147,27 +147,41 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
         selectedEntries = emptySet()
     }
 
+    var wasDefaultDialerOnPause by rememberSaveable { mutableStateOf(true) }
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                // It triggers when the window is first opened, when it is restored from minimised state,
-                // and when it is restored from another screen
-                fabVisible = true
-                notificationManager.clearAllMissedCallNotifications(context)
-                // Recover after default-dialer switch: permission may have been
-                // re-granted while we were backgrounded, and the ViewModel
-                // (activity-scoped) may have stale/empty state.
-                if (isGranted) {
-                    viewModel.refreshOnResume()
+            when (event) {
+                Lifecycle.Event.ON_PAUSE -> {
+                    wasDefaultDialerOnPause =
+                        telecomManager.defaultDialerPackage == context.packageName
                 }
+                Lifecycle.Event.ON_RESUME -> {
+                    // It triggers when the window is first opened, when it is restored from minimised state,
+                    // and when it is restored from another screen
+                    fabVisible = true
+                    notificationManager.clearAllMissedCallNotifications(context)
+
+                    // Recover after default-dialer switch: permission may have been
+                    // re-granted while we were backgrounded, and the ViewModel
+                    // (activity-scoped) may have stale/empty state.
+                    if (isGranted) {
+                        val isDefaultNow =
+                            telecomManager.defaultDialerPackage == context.packageName
+
+                        // Scenario 1: When the app was sent to the background, it was not the default app; when it returned, it became the default app
+                        // Scenario 2: When the app was sent to the background, it was the default app; when it returned, it was no longer the default app
+                        // In both cases, `refreshOnResume` is required
+                        if (wasDefaultDialerOnPause != isDefaultNow) {
+                            viewModel.refreshOnResume()
+                        }
+                    }
+                }
+                else -> {}
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
-
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     if (showDialpad) {

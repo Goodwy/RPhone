@@ -204,6 +204,7 @@
     <string name="incoming_call_ui_vertical_swipe">Scorrimento verticale</string>
     <string name="dialpad_animations">Animazioni tastierino</string>
     <string name="dialpad_animations_subtitle">Mostra animazioni durante la digitazione dei numeri</string>
+    <string name="hide_dialpad_letters">Nascondi le lettere sul tastierino</string>
     <string name="hide_voice_search">Nascondi ricerca vocale</string>
     <string name="hide_voice_search_subtitle">Nasconde il pulsante di ricerca vocale</string>
 
@@ -622,6 +623,7 @@
     <string name="contacts_permission">Autorizzazione contatti richiesta</string>
     <string name="contacts_permission_description">Per visualizzare i tuoi contatti, consenti l\'autorizzazione ai contatti.</string>
     <string name="search_contacts_permission_description">Per cercare nei tuoi contatti e identificare le chiamate in entrata, consenti l\'autorizzazione ai contatti.</string>
+    <string name="save_local_blocked_by_system">Impossibile salvare un contatto locale: l\'account predefinito di sistema per i nuovi contatti è impostato su un account cloud. Modificalo nelle impostazioni di sistema o scegli un altro account.</string>
 
     <!-- Default  -->
     <string name="default_phone_number_cleared">Numero di telefono predefinito cancellato</string>

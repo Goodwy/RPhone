@@ -205,6 +205,7 @@
     <string name="incoming_call_ui_vertical_swipe">Vertikales Wischen</string>
     <string name="dialpad_animations">Wählfeld-Animationen</string>
     <string name="dialpad_animations_subtitle">Animationen bei der Eingabe von Ziffern anzeigen</string>
+    <string name="hide_dialpad_letters">Buchstaben auf dem Wählfeld ausblenden</string>
     <string name="hide_voice_search">Sprachsuche ausblenden</string>
     <string name="hide_voice_search_subtitle">Blendet die Schaltfläche für die Sprachsuche aus</string>
 
@@ -621,6 +622,7 @@
     <string name="contacts_permission">Kontaktberechtigung erforderlich</string>
     <string name="contacts_permission_description">Erlauben Sie den Zugriff auf Ihre Kontakte, um sie anzuzeigen.</string>
     <string name="search_contacts_permission_description">Um Ihre Kontakte zu durchsuchen und eingehende Anrufe zu identifizieren, erlauben Sie den Zugriff auf Ihre Kontakte.</string>
+    <string name="save_local_blocked_by_system">Ein lokaler Kontakt kann nicht gespeichert werden: Das System-Standardkonto für neue Kontakte ist auf ein Cloud-Konto eingestellt. Ändern Sie dies in den Systemeinstellungen oder wählen Sie ein anderes Konto.</string>
 
     <!-- Default Dialer -->
     <string name="default_phone_number_cleared">Standard-Telefonnummer gelöscht</string>

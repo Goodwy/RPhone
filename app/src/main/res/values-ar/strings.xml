@@ -206,6 +206,7 @@
     <string name="incoming_call_ui_vertical_swipe">السحب العمودي</string>
     <string name="dialpad_animations">رسوم متحركة للوحة المفاتيح</string>
     <string name="dialpad_animations_subtitle">إظهار الرسوم المتحركة عند كتابة الأرقام</string>
+    <string name="hide_dialpad_letters">إخفاء الحروف على لوحة المفاتيح</string>
     <string name="hide_voice_search">إخفاء البحث الصوتي</string>
     <string name="hide_voice_search_subtitle">يخفي زر البحث الصوتي</string>
 
@@ -634,6 +635,7 @@
     <string name="contacts_permission">إذن جهات الاتصال مطلوب</string>
     <string name="contacts_permission_description">لعرض جهات الاتصال الخاصة بك، اسمح بإذن جهات الاتصال.</string>
     <string name="search_contacts_permission_description">للبحث في جهات الاتصال الخاصة بك وتحديد المكالمات الواردة، اسمح بإذن جهات الاتصال.</string>
+    <string name="save_local_blocked_by_system">لا يمكن حفظ جهة اتصال محلية: الحساب الافتراضي للنظام لجهات الاتصال الجديدة مضبوط على حساب سحابي. غيّره في إعدادات النظام أو اختر حسابًا آخر.</string>
 
     <!-- Default Dialer -->
     <string name="default_phone_number_cleared">تم مسح رقم الهاتف الافتراضي</string>

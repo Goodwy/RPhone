@@ -10,8 +10,11 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
 import android.provider.ContactsContract
 import android.provider.ContactsContract.CommonDataKinds
+import android.provider.ContactsContract.RawContacts.DefaultAccount
+import android.provider.ContactsContract.RawContacts.DefaultAccount.DefaultAccountAndState
 import android.telephony.SubscriptionManager
 import androidx.core.content.ContextCompat
 import dev.goodwy.rphone.modal.data.Contact
@@ -28,6 +31,7 @@ import dev.goodwy.rphone.controller.util.ContactDumpUtils
 import dev.goodwy.rphone.controller.util.areNumbersEqual
 import dev.goodwy.rphone.controller.util.deduplicateNumbers
 import dev.goodwy.rphone.device_only
+import dev.goodwy.rphone.modal.data.accountSourceKey
 import dev.goodwy.rphone.modal.db.PrivateContactEntity
 import dev.goodwy.rphone.modal.db.TrashedContactDao
 import dev.goodwy.rphone.modal.db.TrashedContactEntity
@@ -53,6 +57,7 @@ class ContactsRepository(
         val contactsMap = mutableMapOf<String, Contact>()
         val rawContactsMap = mutableMapOf<String, MutableList<String>>()
         val accountMap = mutableMapOf<String, Pair<String?, String?>>()
+        val sourceAccountKeysMap = mutableMapOf<String, MutableSet<String>>()
 
         if (includePrivate) {
             privateContactDao.getAll().forEach {
@@ -63,7 +68,7 @@ class ContactsRepository(
             }
         }
 
-        // 1. ALL contacts from Contacts table — one row per contact, basic info only.
+        // 1. ALL contacts from Contacts table - one row per contact, basic info only.
         //    This guarantees no contact is missed, even if it has no
         //    Phone / StructuredName / Email data rows.
         try {
@@ -99,7 +104,7 @@ class ContactsRepository(
             e.printStackTrace()
         }
 
-        // 2. RawContacts — build accountMap and rawContactsMap in one pass
+        // 2. RawContacts - build accountMap and rawContactsMap in one pass
         val rawProjection = arrayOf(
             ContactsContract.RawContacts.CONTACT_ID,
             ContactsContract.RawContacts._ID,
@@ -110,7 +115,8 @@ class ContactsRepository(
             contentResolver.query(
                 ContactsContract.RawContacts.CONTENT_URI,
                 rawProjection,
-                null, null, null
+                null, null,
+                "${ContactsContract.RawContacts.CONTACT_ID} ASC, ${ContactsContract.RawContacts._ID} ASC"
             )?.use { cursor ->
                 val contactIdIdx = cursor.getColumnIndex(ContactsContract.RawContacts.CONTACT_ID)
                 val rawIdIdx = cursor.getColumnIndex(ContactsContract.RawContacts._ID)
@@ -122,11 +128,15 @@ class ContactsRepository(
                     val rawId = cursor.getString(rawIdIdx)
                     if (contactId != null && rawId != null) {
                         rawContactsMap.getOrPut(contactId) { mutableListOf() }.add(rawId)
+                        val name = if (accNameIdx != -1) cursor.getString(accNameIdx) else null
+                        val type = if (accTypeIdx != -1) cursor.getString(accTypeIdx) else null
+                        // Retain the original account for edit/move operations, but
+                        // retain every account for visibility of aggregated contacts.
                         if (accountMap[contactId] == null) {
-                            val name = if (accNameIdx != -1) cursor.getString(accNameIdx) else null
-                            val type = if (accTypeIdx != -1) cursor.getString(accTypeIdx) else null
                             accountMap[contactId] = Pair(name, type)
                         }
+                        sourceAccountKeysMap.getOrPut(contactId) { mutableSetOf() }
+                            .add(accountSourceKey(type, name))
                     }
                 }
             }
@@ -140,15 +150,17 @@ class ContactsRepository(
             val acc = accountMap[id]
             val rawIds = rawContactsMap[id] ?: emptyList()
             val existing = contactsMap[id] ?: return@forEach
+            val sourceKeys = sourceAccountKeysMap[id]?.toSet() ?: emptySet()
             contactsMap[id] = existing.copy(
                 accountName = acc?.first,
                 accountType = acc?.second,
                 rawContactIds = rawIds,
-                hasMultipleSources = rawIds.size > 1
+                hasMultipleSources = sourceKeys.size > 1,
+                sourceAccountKeys = sourceKeys
             )
         }
 
-        // 3. Data — enrich with Phone, StructuredName, Email only (filtered for speed)
+        // 3. Data - enrich with Phone, StructuredName, Email only (filtered for speed)
         val selection = "${ContactsContract.Data.MIMETYPE} IN (?, ?, ?)"
         val selectionArgs = arrayOf(
             CommonDataKinds.Phone.CONTENT_ITEM_TYPE,
@@ -204,7 +216,7 @@ class ContactsRepository(
                     val currentPhoto = cursor.getString(photoIdx)
 
                     // Get existing contact or create fallback.
-                    // Fallback should rarely trigger — only in race conditions
+                    // Fallback should rarely trigger - only in race conditions
                     // when a contact is added between the Contacts query and this Data query.
                     val current = contactsMap[id] ?: run {
                         val accInfo = accountMap[id]
@@ -216,7 +228,8 @@ class ContactsRepository(
                             accountName = accInfo?.first,
                             accountType = accInfo?.second,
                             rawContactIds = rawContactsMap[id] ?: emptyList(),
-                            hasMultipleSources = (rawContactsMap[id]?.size ?: 0) > 1
+                            hasMultipleSources = (sourceAccountKeysMap[id]?.size ?: 0) > 1,
+                            sourceAccountKeys = sourceAccountKeysMap[id]?.toSet() ?: emptySet()
                         )
                     }
 
@@ -277,6 +290,8 @@ class ContactsRepository(
     override suspend fun getContactsFull(includePrivate: Boolean, includeHidden: Boolean): List<Contact> = withContext(Dispatchers.IO) {
         val contactsMap = mutableMapOf<String, Contact>()
         val rawContactsMap = mutableMapOf<String, MutableList<String>>()
+        val accountMap = mutableMapOf<String, Pair<String?, String?>>()
+        val sourceAccountKeysMap = mutableMapOf<String, MutableSet<String>>()
 
         if (includePrivate) {
             privateContactDao.getAll().forEach {
@@ -301,10 +316,12 @@ class ContactsRepository(
                 rawProjection,
                 null,
                 null,
-                null
+                "${ContactsContract.RawContacts.CONTACT_ID} ASC, ${ContactsContract.RawContacts._ID} ASC"
             )?.use { cursor ->
                 val contactIdIdx = cursor.getColumnIndex(ContactsContract.RawContacts.CONTACT_ID)
                 val rawIdIdx = cursor.getColumnIndex(ContactsContract.RawContacts._ID)
+                val accNameIdx = cursor.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_NAME)
+                val accTypeIdx = cursor.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_TYPE)
 
                 while (cursor.moveToNext()) {
                     val contactId = cursor.getString(contactIdIdx)
@@ -312,6 +329,13 @@ class ContactsRepository(
 
                     if (contactId != null && rawId != null) {
                         rawContactsMap.getOrPut(contactId) { mutableListOf() }.add(rawId)
+                        val name = if (accNameIdx != -1) cursor.getString(accNameIdx) else null
+                        val type = if (accTypeIdx != -1) cursor.getString(accTypeIdx) else null
+                        if (accountMap[contactId] == null) {
+                            accountMap[contactId] = Pair(name, type)
+                        }
+                        sourceAccountKeysMap.getOrPut(contactId) { mutableSetOf() }
+                            .add(accountSourceKey(type, name))
                     }
                 }
             }
@@ -366,16 +390,17 @@ class ContactsRepository(
                     val data1 = cursor.getString(data1Idx) ?: ""
                     val isStarred = cursor.getInt(starredIdx) == 1
 
+                    val acc = accountMap[id]
                     val contact = contactsMap.getOrPut(id) {
-                        val (accName, accType) = getAccountInfo(id)
                         Contact(
                             id = id,
                             photoUri = cursor.getString(photoIdx),
                             isFavorite = isStarred,
-                            accountName = accName,
-                            accountType = accType,
+                            accountName = acc?.first,
+                            accountType = acc?.second,
                             rawContactIds = rawContactsMap[id] ?: emptyList(),
-                            hasMultipleSources = (rawContactsMap[id]?.size ?: 0) > 1
+                            hasMultipleSources = (sourceAccountKeysMap[id]?.size ?: 0) > 1,
+                            sourceAccountKeys = sourceAccountKeysMap[id]?.toSet() ?: emptySet()
                         )
                     }
 
@@ -501,6 +526,39 @@ class ContactsRepository(
         } else {
             resolveLookupKey(contactId) ?: return@withContext null
         }
+
+        var firstAccountName: String? = null
+        var firstAccountType: String? = null
+        val sourceKeys = mutableSetOf<String>()
+        try {
+            contentResolver.query(
+                ContactsContract.RawContacts.CONTENT_URI,
+                arrayOf(
+                    ContactsContract.RawContacts.ACCOUNT_NAME,
+                    ContactsContract.RawContacts.ACCOUNT_TYPE
+                ),
+                "${ContactsContract.RawContacts.CONTACT_ID} = ?",
+                arrayOf(resolvedId),
+                "${ContactsContract.RawContacts._ID} ASC"
+            )?.use { c ->
+                val n = c.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_NAME)
+                val t = c.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_TYPE)
+                var isFirst = true
+                while (c.moveToNext()) {
+                    val name = if (n != -1) c.getString(n) else null
+                    val type = if (t != -1) c.getString(t) else null
+                    if (isFirst) {
+                        firstAccountName = name
+                        firstAccountType = type
+                        isFirst = false
+                    }
+                    sourceKeys.add(accountSourceKey(type, name))
+                }
+            }
+        } catch (e: SecurityException) {
+            e.printStackTrace()
+        }
+
         val projection = arrayOf(
             ContactsContract.Data.CONTACT_ID,
             ContactsContract.Data.DISPLAY_NAME_PRIMARY,
@@ -552,17 +610,14 @@ class ContactsRepository(
                     val isStarred = cursor.getInt(starredIdx) == 1
                     val ringtone = cursor.getString(ringtoneIdx)
 
-                    val currentContact = contact ?: run {
-                        val (accName, accType) = getAccountInfo(resolvedId)
-                        Contact(
-                            id = id,
-                            photoUri = cursor.getString(photoIdx),
-                            isFavorite = isStarred,
-                            customRingtone = ringtone,
-                            accountName = accName,
-                            accountType = accType
-                        )
-                    }
+                    val currentContact = contact ?: Contact(
+                        id = id,
+                        photoUri = cursor.getString(photoIdx),
+                        isFavorite = isStarred,
+                        customRingtone = ringtone,
+                        accountName = firstAccountName,
+                        accountType = firstAccountType
+                    )
 
                     contact = when (mimeType) {
                         CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE -> {
@@ -646,7 +701,8 @@ class ContactsRepository(
         } catch (e: SecurityException) {
             e.printStackTrace()
         }
-        return@withContext contact
+
+        return@withContext contact?.copy(sourceAccountKeys = sourceKeys)
     }
 
     override suspend fun toggleFavorite(contactId: String, isFavorite: Boolean) = withContext(Dispatchers.IO) {
@@ -759,10 +815,6 @@ class ContactsRepository(
         return ids
     }
 
-    private fun getRawContactId(contactId: String): String? {
-        return getRawContactIds(contactId).firstOrNull()
-    }
-
     private fun getAccountInfo(contactId: String): Pair<String?, String?> {
         try {
             contentResolver.query(
@@ -801,6 +853,20 @@ class ContactsRepository(
             } else {
                 privateContactDao.update(entity)
             }
+            return@withContext
+        }
+
+        // Local contact (no account): guard against Android 16 restriction.
+        // If the system default account for new contacts is Cloud/SIM, the
+        // ContactsProvider will reject inserts with ACCOUNT_NAME = null.
+        if (contact.accountName == null && contact.accountType == null &&
+            (contact.id.isEmpty() || contact.id == "0") &&
+            !canCreateLocalContacts()
+        ) {
+            android.util.Log.w(
+                "ContactsRepository",
+                "Refusing to create Local contact: default account for new contacts is not Local."
+            )
             return@withContext
         }
 
@@ -1175,7 +1241,7 @@ class ContactsRepository(
         } catch (e: SecurityException) {
             e.printStackTrace()
         } catch (_: IllegalArgumentException) {
-            // Invalid URI—ignore
+            // Invalid URI-ignore
         } catch (e: UnsupportedOperationException) {
             // The contact has already been deleted or is unavailable
             e.printStackTrace()
@@ -1218,7 +1284,7 @@ class ContactsRepository(
         val privateIds = contactIds.filter { it.startsWith("p") }
         val publicIds = contactIds.filter { !it.startsWith("p") }
 
-        // 1. Processing private contacts—making them regular (non-private)
+        // 1. Processing private contacts - making them regular (non-private)
         if (privateIds.isNotEmpty()) {
             privateIds.forEach { id ->
                 val contact = getContactById(id)
@@ -1282,6 +1348,28 @@ class ContactsRepository(
         }
 
         return@withContext idMapping
+    }
+
+    /**
+     * Returns true if the system currently allows creating contacts without an account
+     * (i.e. "Local / Device only" contacts).
+     *
+     * Starting with Android 16 (API 36), ContactsProvider rejects inserts/updates with
+     * ACCOUNT_NAME = null / ACCOUNT_TYPE = null when the default account for new contacts
+     * is set to Cloud or SIM.
+     */
+    override fun canCreateLocalContacts(): Boolean {
+        if (Build.VERSION.SDK_INT < 36) return true
+        return try {
+            val defaultAccount = DefaultAccount.getDefaultAccountForNewContacts(contentResolver)
+            when (defaultAccount.state) {
+                DefaultAccountAndState.DEFAULT_ACCOUNT_STATE_LOCAL,
+                DefaultAccountAndState.DEFAULT_ACCOUNT_STATE_NOT_SET -> true
+                else -> false
+            }
+        } catch (_: Throwable) {
+            true
+        }
     }
 
     override suspend fun getAvailableAccountsForMoving(): List<Account> = withContext(Dispatchers.IO) {
@@ -1441,17 +1529,17 @@ class ContactsRepository(
     override suspend fun findDuplicates(): List<List<Contact>> = withContext(Dispatchers.IO) {
         val allContacts = getContacts()
         val availableAccounts = getAvailableAccountsForMoving()
-        val validAccounts = availableAccounts.map { it.name to it.type }.toSet()
+        val validAccountKeys = availableAccounts
+            .filter {
+                it.name != private_only && it.type != private_only &&
+                        it.name != device_only && it.type != device_only &&
+                        !it.name.contains("sim", ignoreCase = true) &&
+                        !it.type.contains("sim", ignoreCase = true)
+            }
+            .map { accountSourceKey(it.type, it.name) }
+            .toSet()
         val allContactsFiltered = allContacts.filter { contact ->
-            contact.accountName != null &&
-            contact.accountType != null &&
-            contact.accountName != private_only &&
-            contact.accountType != private_only &&
-            contact.accountName != device_only &&
-            contact.accountType != device_only &&
-            !contact.accountName.contains("sim", ignoreCase = true) &&
-            !contact.accountType.contains("sim", ignoreCase = true) &&
-            validAccounts.contains(contact.accountName to contact.accountType)
+            !contact.isPrivate && contact.effectiveSourceKeys.any { it in validAccountKeys }
         }
         val duplicates = mutableListOf<List<Contact>>()
 
@@ -1513,7 +1601,7 @@ class ContactsRepository(
             onProgress?.invoke(index + 1, total)
 
             if (contact.isPrivate) {
-                // For private contacts—update them in the local database
+                // For private contacts - update them in the local database
                 val formattedPhoneNumbers = contact.phoneNumbers.map { it.replace(" ", "") }
                 val formattedPhoneDetails = contact.phoneDetails.map {
                     it.copy(number = it.number.replace(" ", ""))
@@ -2125,7 +2213,7 @@ class ContactsRepository(
         pruneOldTrash()
         return@withContext try {
             trashedContactDao.getAll()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             emptyList()
         }
     }

@@ -143,11 +143,12 @@ import dev.goodwy.rphone.controller.util.areNumbersEqual
 import dev.goodwy.rphone.controller.util.forceLtr
 import dev.goodwy.rphone.controller.util.formatContactEventDate
 import dev.goodwy.rphone.controller.util.hasDualSim
-import dev.goodwy.rphone.device_only
 import dev.goodwy.rphone.modal.data.ContactEmail
+import dev.goodwy.rphone.modal.data.LOCAL_SOURCE_KEY
+import dev.goodwy.rphone.modal.data.PRIVATE_SOURCE_KEY
+import dev.goodwy.rphone.modal.data.accountSourceKey
 import dev.goodwy.rphone.modal.data.getDisplayName
 import dev.goodwy.rphone.modal.repository.ContactsRepository
-import dev.goodwy.rphone.private_only
 import dev.goodwy.rphone.view.theme.RillDurations
 import dev.goodwy.rphone.view.theme.color_primary
 import kotlinx.coroutines.Dispatchers
@@ -267,10 +268,6 @@ fun ContactDetailsScreen(
         } else if (phoneNumber != null) {
             contactsViewModel.getFullContactByNumber(phoneNumber)
         } else null
-        val currentContact = contact
-        contactAccount = if (currentContact != null) availableAccounts.find {
-            it.name == currentContact.accountName && it.type == currentContact.accountType
-        } else null
 
         if (contact == null && contactId != null && contactId != "null") {
             if (phoneNumber != null) {
@@ -309,8 +306,18 @@ fun ContactDetailsScreen(
         if (c != null && !c.isPrivate) {
             val rawContacts = contactsViewModel.getContactSources(c.id)
             contactSources = rawContacts
+            val first = rawContacts.firstOrNull()
+            contactAccount = if (first != null &&
+                !first.accountName.isNullOrBlank() &&
+                !first.accountType.isNullOrBlank()
+            ) {
+                Account(first.accountName, first.accountType)
+            } else {
+                null
+            }
         } else {
             contactSources = emptyList()
+            contactAccount = null
         }
     }
 
@@ -1676,9 +1683,9 @@ fun ContactDetailsScreen(
                                             MoveSingleContactDialog(
                                                 contact = contact!!,
                                                 availableAccounts = availableAccountsForMoving,
-                                                currentAccountKey = if (contact!!.accountName == null && contact!!.accountType == null && contact!!.isPrivate) private_only
-                                                else if (contact!!.accountName == null && contact!!.accountType == null) device_only
-                                                else "${contact!!.accountName}|${contact!!.accountType}",
+                                                currentAccountKey = if (contact!!.isPrivate) PRIVATE_SOURCE_KEY
+                                                                else if (contact!!.accountName == null && contact!!.accountType == null) LOCAL_SOURCE_KEY
+                                                                else accountSourceKey(contact!!.accountType, contact!!.accountName),
                                                 contactsViewModel = contactsViewModel,
                                                 onDismiss = { showMoveDialog = false },
                                                 onSuccess = { selectedAccount, isPrivate, newContactId ->
@@ -2571,9 +2578,9 @@ fun ContactDetailsScreen(
                                         MoveSingleContactDialog(
                                             contact = contact!!,
                                             availableAccounts = availableAccountsForMoving,
-                                            currentAccountKey = if (contact!!.accountName == null && contact!!.accountType == null && contact!!.isPrivate) private_only
-                                            else if (contact!!.accountName == null && contact!!.accountType == null) device_only
-                                            else "${contact!!.accountName}|${contact!!.accountType}",
+                                            currentAccountKey = if (contact!!.isPrivate) PRIVATE_SOURCE_KEY
+                                                            else if (contact!!.accountName == null && contact!!.accountType == null) LOCAL_SOURCE_KEY
+                                                            else accountSourceKey(contact!!.accountType, contact!!.accountName),
                                             contactsViewModel = contactsViewModel,
                                             onDismiss = { showMoveDialog = false },
                                             onSuccess = { selectedAccount, isPrivate, newContactId ->

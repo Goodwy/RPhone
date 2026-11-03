@@ -39,28 +39,29 @@ fun rememberVideoLauncher(): VideoLauncher {
             .filter { it.videoCallAction != null }
             .sortedBy { it.name }
 
-        if (apps.size > 1) RillSelectionDialog(
-            onDismissRequest = { showAppPicker = false },
-            title = stringResource(R.string.video_call),
-            items = apps,
-            itemLabel = { it.name },
-            onItemSelected = { app ->
-                val ok = app.videoCallAction?.invoke(context, pendingNumber) ?: false
-                if (!ok) app.action(context, pendingNumber)
-                showAppPicker = false
-            },
-            icon = videoImage,
-            itemIcon = { app ->
-                ImageVector.vectorResource(id = app.iconRes)
-            },
-            itemSupporting = { app -> app.packageName },
-            isSettings = false
-        )
-        else if (apps.size == 1) apps.first().let { app ->
-            app.action(context, pendingNumber)
+        if (apps.size > 1) {
+            RillSelectionDialog(
+                onDismissRequest = { showAppPicker = false },
+                title = stringResource(R.string.video_call),
+                items = apps,
+                itemLabel = { it.name },
+                onItemSelected = { app ->
+                    val ok = app.videoCallAction?.invoke(context, pendingNumber) ?: false
+                    if (!ok) app.action(context, pendingNumber)
+                    showAppPicker = false
+                },
+                icon = videoImage,
+                itemIcon = { app ->
+                    ImageVector.vectorResource(id = app.iconRes)
+                },
+                itemSupporting = { app -> app.packageName },
+                isSettings = false
+            )
+        } else if (apps.size == 1) {
             showAppPicker = false
-        }
-        else {
+            apps.first().action(context, pendingNumber)
+        } else {
+            showAppPicker = false
             context.toast(stringResource(R.string.no_valid_app_found))
         }
     }

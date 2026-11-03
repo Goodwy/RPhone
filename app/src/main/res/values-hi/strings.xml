@@ -205,6 +205,7 @@
     <string name="incoming_call_ui_vertical_swipe">ऊर्ध्वाधर स्वाइप</string>
     <string name="dialpad_animations">डायलपैड एनिमेशन</string>
     <string name="dialpad_animations_subtitle">अंक टाइप करते समय एनिमेशन दिखाएँ</string>
+    <string name="hide_dialpad_letters">डायलपैड पर अक्षर छुपाएं</string>
     <string name="hide_voice_search">वॉइस खोज छुपाएं</string>
     <string name="hide_voice_search_subtitle">वॉइस खोज बटन छुपाता है</string>
 
@@ -621,6 +622,7 @@
     <string name="contacts_permission">संपर्क अनुमति आवश्यक</string>
     <string name="contacts_permission_description">अपने संपर्क देखने के लिए, संपर्क अनुमति की अनुमति दें।</string>
     <string name="search_contacts_permission_description">अपने संपर्क खोजने और आने वाली कॉल की पहचान करने के लिए, संपर्क अनुमति की अनुमति दें।</string>
+    <string name="save_local_blocked_by_system">स्थानीय संपर्क सहेजा नहीं जा सकता: नए संपर्कों के लिए सिस्टम डिफ़ॉल्ट खाता क्लाउड खाते पर सेट है। इसे सिस्टम सेटिंग्स में बदलें या कोई अन्य खाता चुनें।</string>
 
     <!-- Default Dialer -->
     <string name="default_phone_number_cleared">डिफ़ॉल्ट फ़ोन नंबर साफ़ किया गया</string>

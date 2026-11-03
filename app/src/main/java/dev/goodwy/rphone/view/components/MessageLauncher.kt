@@ -70,29 +70,30 @@ fun rememberMessageLauncher(): MessageLauncher {
             messengers
         }
 
-        if (apps.size > 1) RillSelectionDialog(
-            onDismissRequest = { showAppPicker = false },
-            title = stringResource(R.string.message),
-            items = apps,
-            itemLabel = { it.name },
-            onItemSelected = { app ->
-                showAppPicker = false
-                if (app.id == "sms") {
-                    performSMS(pendingNumber)
-                } else {
-                    app.action(context, pendingNumber)
-                }
-            },
-            icon = ImageVector.vectorResource(R.drawable.ic_message_filled),
-            itemIcon = { app ->
-                app.iconRes.let { ImageVector.vectorResource(it) }
-            },
-            itemSupporting = { app -> app.packageName },
-            isSettings = false
-        )
-        else apps.first().let { app ->
-            app.action(context, pendingNumber)
+        if (apps.size > 1) {
+            RillSelectionDialog(
+                onDismissRequest = { showAppPicker = false },
+                title = stringResource(R.string.message),
+                items = apps,
+                itemLabel = { it.name },
+                onItemSelected = { app ->
+                    showAppPicker = false
+                    if (app.id == "sms") {
+                        performSMS(pendingNumber)
+                    } else {
+                        app.action(context, pendingNumber)
+                    }
+                },
+                icon = ImageVector.vectorResource(R.drawable.ic_message_filled),
+                itemIcon = { app ->
+                    app.iconRes.let { ImageVector.vectorResource(it) }
+                },
+                itemSupporting = { app -> app.packageName },
+                isSettings = false
+            )
+        } else {
             showAppPicker = false
+            performSMS(pendingNumber)
         }
     }
 

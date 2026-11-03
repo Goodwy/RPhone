@@ -204,6 +204,7 @@
     <string name="incoming_call_ui_vertical_swipe">Вертикальный свайп</string>
     <string name="dialpad_animations">Анимации набора</string>
     <string name="dialpad_animations_subtitle">Показывать анимацию появления цифр при наборе номера</string>
+    <string name="hide_dialpad_letters">Скрыть буквы на клавиатуре</string>
     <string name="hide_voice_search">Скрыть голосовой поиск</string>
     <string name="hide_voice_search_subtitle">Скрывает кнопку голосового поиска</string>
 
@@ -629,6 +630,7 @@
     <string name="contacts_permission">Требуется разрешение на доступ к контактам</string>
     <string name="contacts_permission_description">Чтобы просматривать свои контакты, предоставьте разрешение на доступ к контактам.</string>
     <string name="search_contacts_permission_description">Чтобы выполнять поиск по контактам и определять входящие звонки, предоставьте приложение доступ к контактам.</string>
+    <string name="save_local_blocked_by_system">Не удаётся сохранить локальный контакт: по умолчанию для новых контактов используется облачная учётная запись. Измените это в настройках системы или выберите другую учетную запись.</string>
 
     <!-- Default Dialer -->
     <string name="default_phone_number_cleared">Признак номер по умолчанию удален</string>

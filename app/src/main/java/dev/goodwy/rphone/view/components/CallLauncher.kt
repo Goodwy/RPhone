@@ -92,28 +92,33 @@ fun rememberCallLauncher(): CallLauncher {
             messengers
         }
 
-        RillSelectionDialog(
-            onDismissRequest = { showAppPicker = false },
-            title = stringResource(R.string.voice_call),
-            items = apps,
-            itemLabel = { it.name },
-            onItemSelected = { app ->
-                showAppPicker = false
-                if (app.id == "system_call") {
-                    performSystemCall(pendingNumber)
-                } else {
-                    val ok = app.voiceCallAction?.invoke(context, pendingNumber) ?: false
-                    if (!ok) app.action(context, pendingNumber)
-                }
-            },
-            icon = Icons.Rounded.Phone,
-            itemIcon = { app ->
-                if (app.id == "system_call") Icons.Outlined.Phone
-                else ImageVector.vectorResource(id = app.iconRes)
-            },
-            itemSupporting = { app -> app.packageName },
-            isSettings = false
-        )
+        if (apps.size > 1) {
+            RillSelectionDialog(
+                onDismissRequest = { showAppPicker = false },
+                title = stringResource(R.string.voice_call),
+                items = apps,
+                itemLabel = { it.name },
+                onItemSelected = { app ->
+                    showAppPicker = false
+                    if (app.id == "system_call") {
+                        performSystemCall(pendingNumber)
+                    } else {
+                        val ok = app.voiceCallAction?.invoke(context, pendingNumber) ?: false
+                        if (!ok) app.action(context, pendingNumber)
+                    }
+                },
+                icon = Icons.Rounded.Phone,
+                itemIcon = { app ->
+                    if (app.id == "system_call") Icons.Outlined.Phone
+                    else ImageVector.vectorResource(id = app.iconRes)
+                },
+                itemSupporting = { app -> app.packageName },
+                isSettings = false
+            )
+        } else {
+            showAppPicker = false
+            performSystemCall(pendingNumber)
+        }
     }
 
     // ── SimPicker ──────────────────────────────────────

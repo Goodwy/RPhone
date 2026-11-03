@@ -525,6 +525,7 @@ class PreferenceManager(context: Context) {
         const val KEY_HIGH_SCORE               = "horse_game_high_score"
         const val KEY_ALWAYS_FULLSCREEN_CALLS  = "always_fullscreen_calls"
         const val KEY_DIALPAD_ANIMATION        = "dialpad_animation_enabled"
+        const val KEY_DIALPAD_HIDE_LETTERS     = "dialpad_hide_letters"
         const val KEY_HIDE_VOICE_SEARCH        = "hide_voice_search"
     }
 

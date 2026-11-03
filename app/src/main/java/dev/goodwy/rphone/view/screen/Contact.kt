@@ -74,12 +74,13 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.bottomBarHeight
 import dev.goodwy.rphone.controller.util.ContactUtils
-import dev.goodwy.rphone.device_only
 import dev.goodwy.rphone.view.theme.customColors
 import dev.goodwy.rphone.view.theme.TabTransitionStyle
 import com.ramcosta.composedestinations.generated.destinations.ContactEditScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactVisibilityScreenDestination
-import dev.goodwy.rphone.private_only
+import dev.goodwy.rphone.modal.data.LOCAL_SOURCE_KEY
+import dev.goodwy.rphone.modal.data.PRIVATE_SOURCE_KEY
+import dev.goodwy.rphone.modal.data.accountSourceKey
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinActivityViewModel
@@ -209,19 +210,18 @@ fun ContactScreen(navController: NavController, navigator: DestinationsNavigator
                     val selectedContacts = filteredContacts.filter { selectedIds.contains(it.id) }
                     val currentAccountKey = remember(selectedIds) {
                         if (selectedContacts.isNotEmpty()) {
-                            val firstAccount = if (selectedContacts.first().accountName == null &&
-                                selectedContacts.first().accountType == null && !selectedContacts.first().isPrivate) {
-                                device_only
+                            val firstAccount = if (selectedContacts.first().isPrivate) {
+                                PRIVATE_SOURCE_KEY
                             } else if (selectedContacts.first().accountName == null &&
-                                selectedContacts.first().accountType == null && selectedContacts.first().isPrivate) {
-                                private_only
+                                selectedContacts.first().accountType == null) {
+                                LOCAL_SOURCE_KEY
                             } else {
-                                "${selectedContacts.first().accountName}|${selectedContacts.first().accountType}"
+                                accountSourceKey(selectedContacts.first().accountType, selectedContacts.first().accountName)
                             }
                             val allSameAccount = selectedContacts.all {
-                                val account = if (it.accountName == null && it.accountType == null && !it.isPrivate) device_only
-                                            else if (it.accountName == null && it.accountType == null) private_only
-                                            else "${it.accountName}|${it.accountType}"
+                                val account = if (it.isPrivate) PRIVATE_SOURCE_KEY
+                                else if (it.accountName == null && it.accountType == null) LOCAL_SOURCE_KEY
+                                else accountSourceKey(it.accountType, it.accountName)
                                 account == firstAccount
                             }
                             if (allSameAccount) firstAccount else "-1"
@@ -235,16 +235,23 @@ fun ContactScreen(navController: NavController, navigator: DestinationsNavigator
                         selectedCount = selectedIds.size,
                         onClear = { selectedIds = emptySet() },
                         onDelete = {
-                            contactsVM.deleteContacts(selectedIds.toList())
+                            val ids = selectedIds.toList()
+                            contactsVM.deleteContacts(ids)
                             selectedIds = emptySet()
                         },
                         onMove = if (showMove) { account ->
-                            contactsVM.moveContacts(selectedIds.toList(), account)
-                            selectedIds = emptySet()
+                            val ids = selectedIds.toList()
+                            scope.launch {
+                                contactsVM.moveContacts(ids, account)
+                                selectedIds = emptySet()
+                            }
                         } else null,
                         onMoveToPrivate = {
-                            selectedIds.forEach { contactsVM.makeContactPrivate(it) }
-                            selectedIds = emptySet()
+                            val ids = selectedIds.toList()
+                            scope.launch {
+                                ids.forEach { contactsVM.makeContactPrivate(it) }
+                                selectedIds = emptySet()
+                            }
                         },
                         onAddToFav = {
                             filteredContacts.filter { selectedIds.contains(it.id) }.forEach { contactsVM.toggleFavorite(it, true) }
@@ -394,8 +401,8 @@ fun AccountFilterBar(
     val showLocalOnly by viewModel.showLocalOnly.collectAsStateWithLifecycle()
     val showPrivateOnly by viewModel.showPrivateOnly.collectAsStateWithLifecycle()
     val visibleAccounts by viewModel.visibleAccountsFlow.collectAsStateWithLifecycle()
-    val showLocalOnlyAccount = visibleAccounts?.contains("local|local") ?: true
-    val showPrivateOnlyAccount = visibleAccounts?.contains("private|private") ?: true
+    val showLocalOnlyAccount = visibleAccounts?.contains(LOCAL_SOURCE_KEY) ?: true
+    val showPrivateOnlyAccount = visibleAccounts?.contains(PRIVATE_SOURCE_KEY) ?: true
     LaunchedEffect(Unit) { viewModel.fetchAccounts() }
 
     // ── Contact count and add pill ────────────────────────────────
@@ -417,15 +424,8 @@ fun AccountFilterBar(
     var showAccountSheet by remember { mutableStateOf(false) }
 
     val totalVisibleContacts = remember(allContacts, visibleAccounts) {
-        when {
-            visibleAccounts != null -> allContacts.count { contact ->
-                val key = if (contact.accountType == null && contact.accountName == null && !contact.isPrivate) "local|local"
-                            else if (contact.accountType == null && contact.accountName == null) "private|private"
-                            else "${contact.accountType}|${contact.accountName}"
-                visibleAccounts!!.contains(key)
-            }
-            else -> allContacts.size
-        }
+        val vis = visibleAccounts ?: return@remember allContacts.size
+        allContacts.count { contact -> contact.effectiveSourceKeys.any { it in vis } }
     }
 
     val contactsCountText = when {
@@ -440,7 +440,7 @@ fun AccountFilterBar(
             "$deviceOnly · $deviceOnlyCount"
         }
         selectedAccount != null -> {
-            val acc = accounts.find { it.name == selectedAccount!!.name }
+            val acc = accounts.find { it.name == selectedAccount!!.name && it.type == selectedAccount!!.type }
             "${acc?.name} · ${filteredContacts.size}"
         }
         else -> pluralStringResource(R.plurals.contacts_count, filteredContacts.size, filteredContacts.size)
@@ -583,10 +583,10 @@ fun AccountFilterBar(
                 showPrivateOnly = showPrivateOnly,
                 totalCount = totalVisibleContacts,
                 contactCountByAccount = { accountName, accountType ->
-                    if (accountName == null) {
+                    if (accountName == null && accountType == null) {
                         allContacts.count { it.accountName == null && it.accountType == null }
                     } else {
-                        countMap["$accountName|$accountType"] ?: 0
+                        countMap[accountSourceKey(accountType, accountName)] ?: 0
                     }
                 },
                 contactCountByPrivate = allContacts.count { it.isPrivate },
@@ -641,6 +641,7 @@ fun BatchActionBar(
     var showDeleteConfirm by remember { mutableStateOf(false) }
     var showFavDeleteConfirm by remember { mutableStateOf(false) }
     var showAddFavConfirm by remember { mutableStateOf(false) }
+    val contactsVM: ContactsViewModel = koinActivityViewModel()
 
     Surface(
         color = MaterialTheme.colorScheme.primaryContainer,
@@ -824,6 +825,7 @@ fun BatchActionBar(
     if (showMoveDialog) {
         MoveToAccountDialog(
             availableAccounts = availableAccounts,
+            localAllowed = contactsVM.canCreateLocalContacts(),
             currentAccountKey = currentAccountKey,
             onDismiss = { showMoveDialog = false },
             onAccountSelected = { account, isPrivate ->
@@ -1009,7 +1011,8 @@ private fun AccountSwitcherSheet(
                             icon = ContactUtils.getAccountIcon(account),
                             name = ContactUtils.getAccountName(account),
                             subtitle = pluralStringResource(R.plurals.contacts_count, count, count),
-                            isSelected = !showLocalOnly && !showPrivateOnly && selectedAccount?.name == account.name,
+                            isSelected = !showLocalOnly && !showPrivateOnly &&
+                                    selectedAccount?.name == account.name && selectedAccount?.type == account.type,
                             onClick = { onSelectAccount(account) }
                         )
                     }

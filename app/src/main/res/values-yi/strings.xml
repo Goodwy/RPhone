@@ -205,6 +205,7 @@
     <string name="incoming_call_ui_vertical_swipe">ווערטיקאַל גליט</string>
     <string name="dialpad_animations">ווייל אַנימאַציעס</string>
     <string name="dialpad_animations_subtitle">ווײַזן אַנימאַציעס בײַ אַרײַנטיפּן ציפֿערן</string>
+    <string name="hide_dialpad_letters">באַהאַלטן אותיות אויף דעם ווייל לוח</string>
     <string name="hide_voice_search">באַהאַלטן שטים זוכן</string>
     <string name="hide_voice_search_subtitle">באַהאַלטן דעם שטים זוכן קנעפּל</string>
 
@@ -627,6 +628,7 @@
     <string name="contacts_permission">קאָנטאַקט דערלויבעניש פֿאַרלאַנגט</string>
     <string name="contacts_permission_description">צו ווײַזן דײַנע קאָנטאַקטן, דערלויב קאָנטאַקט דערלויבעניש.</string>
     <string name="search_contacts_permission_description">צו זוכן דײַנע קאָנטאַקטן און ידענטיפֿיצירן איינקומענדיקע רופן, דערלויב קאָנטאַקט דערלויבעניש.</string>
+    <string name="save_local_blocked_by_system">מען קען נישט היטן אַ לאָקאַלן קאָנטאַקט: דער סיסטעם סטאנדאַרד קאָנטע פֿאַר נייע קאָנטאַקטן איז איינגעשטעלט אויף אַ וואָלקן קאָנטע. ענדער דאָס אין די סיסטעם איינשטעלונגען אָדער קלויב אַן אַנדער קאָנטע.</string>
 
     <!-- Default Dialer -->
     <string name="default_phone_number_cleared">סטאנדאַרד טעלעפֿאָן נומער גערייניקט</string>

@@ -205,6 +205,7 @@
     <string name="incoming_call_ui_vertical_swipe">Deslizar vertical</string>
     <string name="dialpad_animations">Animaciones del teclado</string>
     <string name="dialpad_animations_subtitle">Mostrar animaciones al escribir dígitos</string>
+    <string name="hide_dialpad_letters">Ocultar letras del teclado</string>
     <string name="hide_voice_search">Ocultar búsqueda por voz</string>
     <string name="hide_voice_search_subtitle">Oculta el botón de búsqueda por voz</string>
 
@@ -624,6 +625,7 @@
     <string name="contacts_permission">Permiso de contactos requerido</string>
     <string name="contacts_permission_description">Para ver tus contactos, permite el acceso a los contactos.</string>
     <string name="search_contacts_permission_description">Para buscar tus contactos e identificar llamadas entrantes, permite el acceso a los contactos.</string>
+    <string name="save_local_blocked_by_system">No se puede guardar un contacto local: la cuenta predeterminada del sistema para nuevos contactos está configurada como una cuenta en la nube. Cámbiala en los ajustes del sistema o elige otra cuenta.</string>
 
     <!-- Default Dialer -->
     <string name="default_phone_number_cleared">Número de teléfono predeterminado borrado</string>

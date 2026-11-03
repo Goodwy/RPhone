@@ -205,6 +205,7 @@
     <string name="incoming_call_ui_vertical_swipe">Przesunięcie pionowe</string>
     <string name="dialpad_animations">Animacje klawiatury</string>
     <string name="dialpad_animations_subtitle">Pokazuj animacje podczas wpisywania cyfr</string>
+    <string name="hide_dialpad_letters">Ukryj litery na klawiaturze</string>
     <string name="hide_voice_search">Ukryj wyszukiwanie głosowe</string>
     <string name="hide_voice_search_subtitle">Ukrywa przycisk wyszukiwania głosowego</string>
 
@@ -627,6 +628,7 @@
     <string name="contacts_permission">Wymagane uprawnienie do kontaktów</string>
     <string name="contacts_permission_description">Aby wyświetlić swoje kontakty, zezwól na dostęp do kontaktów.</string>
     <string name="search_contacts_permission_description">Aby wyszukiwać kontakty i identyfikować połączenia przychodzące, zezwól na dostęp do kontaktów.</string>
+    <string name="save_local_blocked_by_system">Nie można zapisać kontaktu lokalnego: domyślne konto systemowe dla nowych kontaktów jest ustawione na konto w chmurze. Zmień to w ustawieniach systemowych lub wybierz inne konto.</string>
 
     <!-- Default Dialer -->
     <string name="default_phone_number_cleared">Domyślny numer telefonu wyczyszczony</string>

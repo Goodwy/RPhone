@@ -205,6 +205,7 @@
     <string name="incoming_call_ui_vertical_swipe">Dikey Kaydırma</string>
     <string name="dialpad_animations">Tuş takımı animasyonları</string>
     <string name="dialpad_animations_subtitle">Rakam yazarken animasyonları göster</string>
+    <string name="hide_dialpad_letters">Tuş takımındaki harfleri gizle</string>
     <string name="hide_voice_search">Sesli aramayı gizle</string>
     <string name="hide_voice_search_subtitle">Sesli arama düğmesini gizler</string>
 
@@ -621,6 +622,7 @@
     <string name="contacts_permission">Kişi İzni Gerekli</string>
     <string name="contacts_permission_description">Kişilerinizi görüntülemek için kişi iznine izin verin.</string>
     <string name="search_contacts_permission_description">Kişilerinizde arama yapmak ve gelen aramaları tanımlamak için kişi iznine izin verin.</string>
+    <string name="save_local_blocked_by_system">Yerel kişi kaydedilemiyor: yeni kişiler için sistem varsayılan hesabı bir bulut hesabı olarak ayarlanmış. Bunu sistem ayarlarından değiştirin veya başka bir hesap seçin.</string>
 
     <!-- Default Dialer -->
     <string name="default_phone_number_cleared">Varsayılan telefon numarası temizlendi</string>

@@ -205,6 +205,7 @@
     <string name="incoming_call_ui_vertical_swipe">کشیدن عمودی</string>
     <string name="dialpad_animations">انیمیشن‌های صفحه کلید</string>
     <string name="dialpad_animations_subtitle">نمایش انیمیشن‌ها هنگام تایپ اعداد</string>
+    <string name="hide_dialpad_letters">پنهان کردن حروف روی صفحه کلید</string>
     <string name="hide_voice_search">پنهان کردن جستجوی صوتی</string>
     <string name="hide_voice_search_subtitle">دکمه جستجوی صوتی را پنهان می‌کند</string>
 
@@ -621,6 +622,7 @@
     <string name="contacts_permission">مجوز مخاطبان لازم است</string>
     <string name="contacts_permission_description">برای مشاهده مخاطبان خود، به مخاطبان اجازه دسترسی دهید.</string>
     <string name="search_contacts_permission_description">برای جستجوی مخاطبان و شناسایی تماس‌های ورودی، به مخاطبان اجازه دسترسی دهید.</string>
+    <string name="save_local_blocked_by_system">امکان ذخیره مخاطب محلی وجود ندارد: حساب پیش‌فرض سیستم برای مخاطبان جدید روی یک حساب ابری تنظیم شده است. آن را در تنظیمات سیستم تغییر دهید یا حساب دیگری انتخاب کنید.</string>
 
     <!-- Default Dialer -->
     <string name="default_phone_number_cleared">شماره تلفن پیش‌فرض پاک شد</string>

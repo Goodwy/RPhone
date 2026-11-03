@@ -10,6 +10,7 @@ import android.media.SoundPool
 import android.os.Build
 import android.provider.CallLog
 import android.telecom.TelecomManager
+import android.telephony.TelephonyManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
@@ -67,6 +68,7 @@ import dev.goodwy.rphone.liquidglass.effects.lens
 import dev.goodwy.rphone.liquidglass.effects.colorControls
 import dev.goodwy.rphone.liquidglass.highlight.Highlight
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.automirrored.outlined.Backspace
 import androidx.compose.material.icons.outlined.Call
 import androidx.compose.material.icons.rounded.People
@@ -105,6 +107,7 @@ import com.ramcosta.composedestinations.generated.destinations.SpeedDialScreenDe
 import dev.goodwy.rphone.controller.UssdRepository
 import dev.goodwy.rphone.controller.util.DialpadT9
 import dev.goodwy.rphone.controller.util.forceLtr
+import dev.goodwy.rphone.controller.util.formatPhoneNumberRaw
 import dev.goodwy.rphone.controller.util.normalizeNumberDigits
 import dev.goodwy.rphone.liquidglass.backdrops.layerBackdrop
 import dev.goodwy.rphone.liquidglass.backdrops.rememberLayerBackdrop
@@ -120,6 +123,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import java.util.Locale
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
@@ -276,10 +280,20 @@ fun DialPadContent(
         val allContacts by contactsVM.visibleContacts.collectAsStateWithLifecycle()
         val logs by logsViewModel.allCallLogs.collectAsStateWithLifecycle()
         var number by remember { mutableStateOf(initialNumber ?: DialpadDraftHolder.pendingNumber) }
+        val region = remember {
+            val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+            tm.networkCountryIso?.uppercase()
+                ?: tm.simCountryIso?.uppercase()
+                ?: Locale.getDefault().country.uppercase()
+        }
+        val displayNumber = remember(number, region) {
+            formatPhoneNumberRaw(number, region)
+        }
         // Where new digits get inserted / backspace deletes from. Defaults to the end of the number
         // (normal typing behaviour), but the user can tap anywhere in the number to move it, so they
         // can fill in a missing digit in the middle without having to delete and retype everything.
         var cursorPosition by remember { mutableIntStateOf(number.length) }
+        val displayCursor = rawToDisplayIndex(number, displayNumber, cursorPosition)
 
         // Route every edit through these so the cursor position stays correct and consistent no
         // matter where the edit originates from (dialpad keys, backspace, paste, clipboard banner,
@@ -333,8 +347,11 @@ fun DialPadContent(
 
         val messageLauncher = rememberMessageLauncher()
 
+        val dialpadHideLetters by remember(settingsState) {
+            mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_DIALPAD_HIDE_LETTERS, false))
+        }
         val t9Enabled = prefs.getBoolean(PreferenceManager.KEY_T9_DIALING, true)
-        val hasSecondaryLang = remember { DialpadT9.getCurrentLanguage() != DialpadT9.LOCALE_EN }
+        val hasSecondaryLang = remember { DialpadT9.getCurrentLanguage() != DialpadT9.LOCALE_EN && !dialpadHideLetters }
         var showSimPicker by remember { mutableStateOf(false) }
         val telecomManager =
             remember { context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager }
@@ -1007,10 +1024,12 @@ fun DialPadContent(
                                 // Start with 30sp. The more characters there are, the more the font size decreases.
                                 val dynamicFontSize = (30f - (numberLength * 0.45f)).coerceIn(10f, 30f).toInt()
                                 DialpadNumberDisplay(
-                                    number = number,
+                                    number = displayNumber,
                                     fontSize = dynamicFontSize,
-                                    cursorPosition = cursorPosition,
-                                    onCursorPositionChange = { cursorPosition = it },
+                                    cursorPosition = displayCursor,
+                                    onCursorPositionChange = { displayIdx ->
+                                        cursorPosition = displayToRawIndex(displayNumber, displayIdx)
+                                    },
                                     onLongPress = {
                                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                         showOverflowMenu = true
@@ -1046,8 +1065,8 @@ fun DialPadContent(
                                     row.forEach { key ->
                                         DialPadKey(
                                             number = key,
-                                            letters = subKeys[key] ?: "",
-                                            subLetters = getT9SubKey(key),
+                                            letters = if (!dialpadHideLetters) subKeys[key] ?: "" else null,
+                                            subLetters = if (!dialpadHideLetters) getT9SubKey(key) else null,
                                             hasSecondaryLanguage = hasSecondaryLang,
                                             soundPool = soundPool,
                                             context = context,
@@ -1895,10 +1914,10 @@ fun DialPadContent(
                                                                         horizontal = 24.dp
                                                                     ),
                                                                     text = { Text(stringResource(R.string.add_pause)) },
-//                                                        leadingIcon = { Icon(Icons.Default.Delete, null, tint = MaterialTheme.colorScheme.error) },
                                                                     onClick = {
                                                                         showOverflowMenu = false
                                                                         number += ","
+                                                                        cursorPosition = number.length
                                                                     }
                                                                 )
                                                                 DropdownMenuItem(
@@ -1906,10 +1925,10 @@ fun DialPadContent(
                                                                         horizontal = 24.dp
                                                                     ),
                                                                     text = { Text(stringResource(R.string.add_wait)) },
-//                                                        leadingIcon = { Icon(Icons.Default.Share, null) },
                                                                     onClick = {
                                                                         showOverflowMenu = false
                                                                         number += ";"
+                                                                        cursorPosition = number.length
                                                                     }
                                                                 )
                                                                 DropdownMenuItem(
@@ -1917,7 +1936,6 @@ fun DialPadContent(
                                                                         horizontal = 24.dp
                                                                     ),
                                                                     text = { Text(stringResource(R.string.copy)) },
-//                                                        leadingIcon = { Icon(Icons.Default.ContentCopy, null) },
                                                                     onClick = {
                                                                         showOverflowMenu = false
                                                                         clipboard.setText(
@@ -1934,7 +1952,6 @@ fun DialPadContent(
                                                                         horizontal = 24.dp
                                                                     ),
                                                                     text = { Text(stringResource(R.string.paste)) },
-//                                                        leadingIcon = { Icon(Icons.Default.ContentPaste, null) },
                                                                     onClick = {
                                                                         showOverflowMenu = false
                                                                         replaceNumber(pasteText)
@@ -1969,11 +1986,11 @@ fun DialPadContent(
                                                             30f
                                                         ).toInt()
                                                     DialpadNumberDisplay(
-                                                        number = number,
+                                                        number = displayNumber,
                                                         fontSize = dynamicFontSize,
-                                                        cursorPosition = cursorPosition,
-                                                        onCursorPositionChange = {
-                                                            cursorPosition = it
+                                                        cursorPosition = displayCursor,
+                                                        onCursorPositionChange = { displayIdx ->
+                                                            cursorPosition = displayToRawIndex(displayNumber, displayIdx)
                                                         },
                                                         onLongPress = {
                                                             haptic.performHapticFeedback(
@@ -2039,8 +2056,8 @@ fun DialPadContent(
                                                     row.forEach { key ->
                                                         DialPadKey(
                                                             number = key,
-                                                            letters = subKeys[key] ?: "",
-                                                            subLetters = getT9SubKey(key),
+                                                            letters = if (!dialpadHideLetters) subKeys[key] ?: "" else null,
+                                                            subLetters = if (!dialpadHideLetters) getT9SubKey(key) else null,
                                                             hasSecondaryLanguage = hasSecondaryLang,
                                                             soundPool = soundPool,
                                                             context = context,
@@ -2328,7 +2345,7 @@ fun DialerActionExpressive(
 @Composable
 fun DialPadKey(
     number: String,
-    letters: String,
+    letters: String? = null,
     subLetters: String? = null,
     hasSecondaryLanguage: Boolean = false,
     soundPool: SoundPool,
@@ -2426,7 +2443,7 @@ fun DialPadKey(
             )
             if (number == "0") {
                 Text(
-                    text = letters,
+                    text = "+",
                     style = MaterialTheme.typography.labelSmall.copy(fontSize = subFontSize.sp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     letterSpacing = 1.sp
@@ -2446,18 +2463,20 @@ fun DialPadKey(
                     )
                 }
 
-                if (letters.isNotBlank()) {
-                    Text(
-                        text = letters,
-                        style = MaterialTheme.typography.labelSmall.copy(fontSize = subFontSize.sp),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        letterSpacing = 1.sp
-                    )
-                } else if (hasSecondaryLanguage) {
-                    Text(
-                        text =  " ",
-                        style = MaterialTheme.typography.labelSmall.copy(fontSize = subFontSize.sp)
-                    )
+                if (letters != null) {
+                    if (letters.isNotBlank()) {
+                        Text(
+                            text = letters,
+                            style = MaterialTheme.typography.labelSmall.copy(fontSize = subFontSize.sp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            letterSpacing = 1.sp
+                        )
+                    } else if (hasSecondaryLanguage) {
+                        Text(
+                            text = " ",
+                            style = MaterialTheme.typography.labelSmall.copy(fontSize = subFontSize.sp)
+                        )
+                    }
                 }
             }
         }
@@ -2541,10 +2560,18 @@ private fun DialpadNumberDisplay(
 
     val clampedCursor = cursorPosition.coerceIn(0, stableChars.size)
 
+    val listState = rememberLazyListState()
+    LaunchedEffect(stableChars.size, cursorPosition) {
+        if (stableChars.isNotEmpty()) {
+            val target = (cursorPosition + 1).coerceIn(0, stableChars.size + 1)
+            listState.animateScrollToItem(target)
+        }
+    }
     LazyRow(
+        state = listState,
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
-        userScrollEnabled = false,
+        userScrollEnabled = number.length > 12,
         modifier = Modifier.fillMaxWidth()
     ) {
         // Leading spacer matching the trailing tap zone's width below, so the digits (and the
@@ -2685,6 +2712,29 @@ private fun Sequence<Contact>.dedupeForDialpad(): Sequence<Contact> {
         }
         !isDuplicate
     }
+}
+
+private fun isSignificantChar(c: Char): Boolean =
+    c.isDigit() || c == '+' || c == '*' || c == '#'
+
+private fun rawToDisplayIndex(raw: String, display: String, rawIdx: Int): Int {
+    if (rawIdx >= raw.length) return display.length
+    var seen = 0
+    for (i in display.indices) {
+        if (isSignificantChar(display[i])) {
+            if (seen == rawIdx) return i
+            seen++
+        }
+    }
+    return display.length
+}
+
+private fun displayToRawIndex(display: String, displayIdx: Int): Int {
+    var raw = 0
+    for (i in 0 until displayIdx.coerceIn(0, display.length)) {
+        if (isSignificantChar(display[i])) raw++
+    }
+    return raw
 }
 
 object T9Matcher {

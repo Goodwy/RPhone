@@ -18,15 +18,18 @@ import androidx.compose.ui.unit.dp
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.ContactsViewModel
 import dev.goodwy.rphone.controller.util.ContactUtils
-import dev.goodwy.rphone.device_only
 import dev.goodwy.rphone.modal.data.Contact
-import dev.goodwy.rphone.private_only
+import dev.goodwy.rphone.modal.data.LOCAL_SOURCE_KEY
+import dev.goodwy.rphone.modal.data.PRIVATE_SOURCE_KEY
+import dev.goodwy.rphone.modal.data.accountSourceKey
+import kotlinx.coroutines.launch
 
 @Composable
 fun MoveToAccountDialog(
     title: String = stringResource(R.string.move_to_another_account),
     icon: ImageVector? = Icons.AutoMirrored.Rounded.DriveFileMove,
     availableAccounts: List<Account>,
+    localAllowed: Boolean,
     currentAccountKey: String? = "-1",
     onDismiss: () -> Unit,
     onAccountSelected: (Account?, isPrivate: Boolean) -> Unit
@@ -43,12 +46,12 @@ fun MoveToAccountDialog(
     ) {
         Surface(
             onClick = {
-                if (currentAccountKey != null) {
+                if (currentAccountKey != PRIVATE_SOURCE_KEY) {
                     onAccountSelected(null, true)
                 }
             },
             shape = RoundedCornerShape(16.dp),
-            color = if (currentAccountKey == private_only) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+            color = if (currentAccountKey == PRIVATE_SOURCE_KEY) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
             modifier = Modifier.fillMaxWidth()
         ) {
             Row(
@@ -81,14 +84,14 @@ fun MoveToAccountDialog(
             }
         }
 
-        Surface(
+        if (localAllowed) Surface(
             onClick = {
-                if (currentAccountKey != null) {
+                if (currentAccountKey != LOCAL_SOURCE_KEY) {
                     onAccountSelected(null, false)
                 }
             },
             shape = RoundedCornerShape(16.dp),
-            color = if (currentAccountKey == device_only) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+            color = if (currentAccountKey == LOCAL_SOURCE_KEY) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
             modifier = Modifier.fillMaxWidth()
         ) {
             Row(
@@ -122,7 +125,7 @@ fun MoveToAccountDialog(
         }
 
         availableAccounts.forEachIndexed { index, account ->
-            val isCurrentAccount = currentAccountKey == "${account.name}|${account.type}"
+            val isCurrentAccount = currentAccountKey == accountSourceKey(account.type, account.name)
 
             Surface(
                 onClick = {
@@ -181,24 +184,28 @@ fun MoveSingleContactDialog(
     onDismiss: () -> Unit,
     onSuccess: (Account?, isPrivate: Boolean, newContactId: String) -> Unit = {_, _, _ -> }
 ) {
+    val scope = rememberCoroutineScope()
     MoveToAccountDialog(
         availableAccounts = availableAccounts,
+        localAllowed = contactsViewModel.canCreateLocalContacts(),
         currentAccountKey = currentAccountKey,
         onDismiss = onDismiss,
         onAccountSelected = { account, isPrivate ->
-            val newIdsMap = if (isPrivate) {
-                contactsViewModel.makeContactPrivate(contact.id)
-                emptyMap()
-            } else {
-                val list = listOf(contact.id)
-                contactsViewModel.moveContacts(list, account)
+            scope.launch {
+                if (isPrivate) {
+                    contactsViewModel.makeContactPrivate(contact.id)
+                    val newId = contact.phoneNumbers.firstNotNullOfOrNull { number ->
+                        contactsViewModel.getFullContactByNumber(number)?.id
+                            ?.takeIf { it.startsWith("p") }
+                    } ?: contact.id
+                    onSuccess(null, true, newId)
+                } else {
+                    val newIdsMap = contactsViewModel.moveContacts(listOf(contact.id), account)
+                    val finalId = newIdsMap[contact.id] ?: contact.id
+                    onSuccess(account, false, finalId)
+                }
+                onDismiss()
             }
-
-            // Find a new ID or keep the old one
-            val finalId = newIdsMap[contact.id] ?: contact.id
-
-            onSuccess(account, isPrivate, finalId)
-            onDismiss()
         }
     )
 }
@@ -207,23 +214,28 @@ fun MoveSingleContactDialog(
 fun MoveMultipleContactsDialog(
     contactIds: List<String>,
     availableAccounts: List<Account>,
+    localAllowed: Boolean,
     currentAccountKey: String? = null,
     contactsViewModel: ContactsViewModel,
     onDismiss: () -> Unit,
     onSuccess: (Account?, isPrivate: Boolean) -> Unit = {_, _ -> }
 ) {
+    val scope = rememberCoroutineScope()
     MoveToAccountDialog(
         availableAccounts = availableAccounts,
+        localAllowed = localAllowed,
         currentAccountKey = currentAccountKey,
         onDismiss = onDismiss,
         onAccountSelected = { account, isPrivate ->
-            if (isPrivate) {
-                contactIds.forEach { contactsViewModel.makeContactPrivate(it) }
-            } else {
-                contactsViewModel.moveContacts(contactIds, account)
+            scope.launch {
+                if (isPrivate) {
+                    contactIds.forEach { contactsViewModel.makeContactPrivate(it) }
+                } else {
+                    contactsViewModel.moveContacts(contactIds, account)
+                }
+                onSuccess(account, isPrivate)
+                onDismiss()
             }
-            onSuccess(account, isPrivate)
-            onDismiss()
         }
     )
 }

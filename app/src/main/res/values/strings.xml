@@ -209,6 +209,7 @@
     <string name="incoming_call_ui_vertical_swipe">Vertical Swipe</string>
     <string name="dialpad_animations">Dialpad animations</string>
     <string name="dialpad_animations_subtitle">Show animations when typing digits</string>
+    <string name="hide_dialpad_letters">Hide dialpad letters</string>
     <string name="hide_voice_search">Hide voice search</string>
     <string name="hide_voice_search_subtitle">Hides the voice search button</string>
 
@@ -633,6 +634,7 @@
     <string name="contacts_permission">Contacts Permission Required</string>
     <string name="contacts_permission_description">To view your contacts, allow contacts permission.</string>
     <string name="search_contacts_permission_description">To search your contacts and identify incoming calls, allow contacts permission.</string>
+    <string name="save_local_blocked_by_system">Cannot save a local contact: the system default account for new contacts is set to a cloud account. Change it in system settings or choose another account.</string>
 
     <!-- Default  -->
     <string name="default_phone_number_cleared">Default phone number cleared</string>

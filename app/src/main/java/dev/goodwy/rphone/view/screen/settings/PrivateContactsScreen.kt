@@ -184,8 +184,10 @@ fun PrivateContactsScreen(
                     PrivateContactCard(
                         contact = contact,
                         onMoveToPublic = {
-                            viewModel.makeContactPublic(contact.id)
-                            context.toast(textToast)
+                            scope.launch {
+                                viewModel.makeContactPublic(contact.id)
+                                context.toast(textToast)
+                            }
                         },
                         onDelete = { viewModel.deleteContact(contact.id) }
                     )

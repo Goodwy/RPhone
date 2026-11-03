@@ -206,6 +206,7 @@
     <string name="incoming_call_ui_vertical_swipe">החלקה אנכית</string>
     <string name="dialpad_animations">אנימציות לוח חיוג</string>
     <string name="dialpad_animations_subtitle">הצג אנימציות בעת הקלדת ספרות</string>
+    <string name="hide_dialpad_letters">הסתר אותיות בלוח החיוג</string>
     <string name="hide_voice_search">הסתר חיפוש קולי</string>
     <string name="hide_voice_search_subtitle">מסתיר את כפתור החיפוש הקולי</string>
 
@@ -625,6 +626,7 @@
     <string name="contacts_permission">נדרשת הרשאת אנשי קשר</string>
     <string name="contacts_permission_description">כדי להציג את אנשי הקשר שלך, אפשר הרשאת אנשי קשר.</string>
     <string name="search_contacts_permission_description">כדי לחפש באנשי הקשר שלך ולזהות שיחות נכנסות, אפשר הרשאת אנשי קשר.</string>
+    <string name="save_local_blocked_by_system">לא ניתן לשמור איש קשר מקומי: חשבון ברירת המחדל של המערכת לאנשי קשר חדשים מוגדר כחשבון ענן. שנה זאת בהגדרות המערכת או בחר חשבון אחר.</string>
 
     <!-- Default Dialer -->
     <string name="default_phone_number_cleared">מספר הטלפון המוגדר כברירת מחדל נמחק</string>
