@@ -17,6 +17,7 @@ import dev.goodwy.rphone.modal.data.CallLogEntry
 import dev.goodwy.rphone.modal.data.CallLogFilter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,6 +26,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
@@ -61,7 +63,6 @@ class CallLogViewModel(
 
     // In-memory cache
     @Volatile private var cachedLogs: List<CallLogEntry> = emptyList()
-    @Volatile private var isFetching = false
     private var debounceJob: Job? = null
 
     // Disk cache file
@@ -74,7 +75,7 @@ class CallLogViewModel(
             debounceJob?.cancel()
             debounceJob = viewModelScope.launch {
                 delay(300.milliseconds)
-                fetchLogs(forceRefresh = true)
+                fetchLogs(forceRefresh = true, cancelInFlight = true)
             }
         }
     }
@@ -117,26 +118,6 @@ class CallLogViewModel(
             } else {
                 _isLoading.value = false
             }
-        }
-        if (hasReadCallLogPermission()) {
-            contentResolver.registerContentObserver(
-                CallLog.Calls.CONTENT_URI,
-                true,
-                callLogObserver
-            )
-
-            // Step 1: serve disk cache immediately so UI is instant
-            viewModelScope.launch {
-                val diskCache = loadFromDisk()
-                if (diskCache.isNotEmpty()) {
-                    cachedLogs = diskCache
-                    _allCallLogs.value = diskCache
-                }
-                // Step 2: refresh from provider in background
-                fetchLogsInternal()
-            }
-        } else {
-            _isLoading.value = false
         }
 
         viewModelScope.launch {
@@ -181,6 +162,7 @@ class CallLogViewModel(
     override fun onCleared() {
         debounceJob?.cancel()
         filterJob?.cancel()
+        fetchJob?.cancel()
         super.onCleared()
         if (observerRegistered) {
             try {
@@ -193,7 +175,8 @@ class CallLogViewModel(
     }
 
     fun refreshLogs() {
-        fetchLogs(forceRefresh = true)
+        viewModelScope.launch { callLogRepo.invalidateContactCache() }
+        fetchLogs(forceRefresh = true, cancelInFlight = true)
     }
 
     fun refreshOnResume() {
@@ -202,14 +185,13 @@ class CallLogViewModel(
             return
         }
         ensureObserverRegistered()
-        if (cachedLogs.isEmpty()) {
-            fetchLogs(forceRefresh = true)
-        } else {
-            _allCallLogs.value = cachedLogs
-        }
+        viewModelScope.launch { callLogRepo.invalidateContactCache() }
+        fetchLogs(forceRefresh = true, cancelInFlight = true)
     }
 
-    private fun fetchLogs(forceRefresh: Boolean = false) {
+    private var fetchJob: Job? = null
+
+    private fun fetchLogs(forceRefresh: Boolean = false, cancelInFlight: Boolean = false) {
         if (!hasReadCallLogPermission()) {
             // Permission was revoked (e.g. after default-dialer change) — stop spinner,
             // keep whatever we have; UI will show permission view.
@@ -222,16 +204,22 @@ class CallLogViewModel(
             _allCallLogs.value = cachedLogs
             return
         }
-        if (isFetching) return
-        viewModelScope.launch {
+
+        if (cancelInFlight) {
+            fetchJob?.cancel()
+        } else if (fetchJob?.isActive == true) {
+            return
+        }
+
+        fetchJob = viewModelScope.launch {
             fetchLogsInternal()
         }
     }
 
     private suspend fun fetchLogsInternal() {
-        if (isFetching) return
-        isFetching = true
-        _isLoading.value = true
+        if (_allCallLogs.value.isEmpty()) {
+            _isLoading.value = true
+        }
         try {
             if (hasReadCallLogPermission()) {
                 ensureObserverRegistered()
@@ -251,13 +239,14 @@ class CallLogViewModel(
                             a.number != b.number || a.date != b.date || a.type != b.type || a.name != b.name || a.isBlocked != b.isBlocked
                         }
                 cachedLogs = result
-                saveToDisk(result)
-                if (changed) {
+                try {
+                    saveToDisk(result)
+                } catch (_: Exception) { }
+                if (changed && currentCoroutineContext().isActive) {
                     _allCallLogs.value = result
                 }
             }
         } finally {
-            isFetching = false
             _isLoading.value = false
         }
     }
@@ -284,21 +273,21 @@ class CallLogViewModel(
     fun deleteCallLog(number: String) {
         viewModelScope.launch {
             callLogRepo.deleteCallLog(number)
-            fetchLogs()
+            fetchLogs(forceRefresh = true, cancelInFlight = true)
         }
     }
 
     fun deleteCallLogsByIds(ids: List<Long>) {
         viewModelScope.launch {
             callLogRepo.deleteCallLogsByIds(ids)
-            fetchLogs()
+            fetchLogs(forceRefresh = true, cancelInFlight = true)
         }
     }
 
     fun clearCallLogs() {
         viewModelScope.launch {
             callLogRepo.clearCallLogs()
-            fetchLogs()
+            fetchLogs(forceRefresh = true, cancelInFlight = true)
         }
     }
 }

@@ -1,9 +1,7 @@
 package dev.goodwy.rphone.view.screen
 
-import android.content.Context
 import android.content.Intent
 import android.provider.CallLog
-import android.telecom.TelecomManager
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.*
@@ -45,7 +43,6 @@ import dev.goodwy.rphone.controller.util.formatDateHeader
 import dev.goodwy.rphone.controller.util.makeCall
 import dev.goodwy.rphone.controller.util.placeCallWithSimPreference
 import dev.goodwy.rphone.controller.util.PreferenceManager
-import dev.goodwy.rphone.controller.util.formatPhoneNumber
 import dev.goodwy.rphone.modal.data.CallLogEntry
 import dev.goodwy.rphone.modal.data.CallLogFilter
 import dev.goodwy.rphone.view.components.*
@@ -91,9 +88,9 @@ fun CallLogFullScreen(
     val showButton by remember {
         derivedStateOf { listState.firstVisibleItemIndex > 2 }
     }
-    val telecomManager = remember { context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager }
     val prefs = koinInject<PreferenceManager>()
     val simPref = remember { prefs.getInt("default_sim", 0) }
+    val includeDayOfWeek = remember { prefs.getBoolean(PreferenceManager.KEY_INCLUDE_DAY_OF_WEEK, true) }
 
     var showSimPicker by remember { mutableStateOf(false) }
     var showNumberPicker by remember { mutableStateOf(false) }
@@ -289,7 +286,7 @@ fun CallLogFullScreen(
                 } else {
                     val showSimLabel = hasDualSim(context)
                     val groupedLogs = remember(finalFilteredLogs) {
-                        finalFilteredLogs.groupBy { context.formatDateHeader(it.date, true) }
+                        finalFilteredLogs.groupBy { context.formatDateHeader(it.date, includeDayOfWeek) }
                     }
 
                     ScrollHapticsEffect(listState = listState)
@@ -324,27 +321,7 @@ fun CallLogFullScreen(
                                                     selectedEntries = selectedEntries + lg
                                                 }
                                             },
-                                            onCallClick = {
-//                                                val hasPermission = androidx.core.content.ContextCompat.checkSelfPermission(
-//                                                    context,
-//                                                    android.Manifest.permission.READ_PHONE_STATE
-//                                                ) == android.content.pm.PackageManager.PERMISSION_GRANTED
-//
-//                                                val targetContactId = lg.contactId ?: contactId
-//
-//                                                if (hasPermission) {
-//                                                    val accounts = telecomManager.callCapablePhoneAccounts
-//                                                    if (accounts.size > 1) {
-//                                                        pendingNumber = lg.number
-//                                                        pendingContactId = targetContactId
-//                                                        showSimPicker = true
-//                                                    } else {
-//                                                        makeCall(context, lg.number, contactId = targetContactId)
-//                                                    }
-//                                                } else {
-//                                                    makeCall(context, lg.number, contactId = targetContactId)
-//                                                }
-                                            },
+                                            onCallClick = {},
                                             selected = selectedEntries.any { it.id == lg.id },
                                             showNumber = hasMultipleNumbers,
                                             showSimLabel = showSimLabel,

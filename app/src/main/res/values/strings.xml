@@ -276,6 +276,17 @@
     <string name="settings_speed_dial_no_number">No number</string>
     <string name="settings_speed_dial_open">Open Speed Dial Settings?</string>
 
+    <!-- Call Log -->
+    <string name="settings_call_log_limit">Recent calls limit</string>
+    <string name="settings_call_log_limit_supporting">Limit the number of recent call log entries loaded to improve loading speed and performance</string>
+    <string name="settings_call_log_limit_100">100 calls</string>
+    <string name="settings_call_log_limit_250">250 calls</string>
+    <string name="settings_call_log_limit_500">500 calls</string>
+    <string name="settings_call_log_limit_1000">1,000 calls</string>
+    <string name="settings_call_log_limit_unlimited">Unlimited</string>
+    <string name="settings_include_day_of_week">Show weekday in date headers</string>
+    <string name="settings_include_day_of_week_supporting">Adds the day of the week to date headers in your recent calls</string>
+
     <string name="quick_response">Quick Response</string>
     <string name="quick_responses">Quick Responses</string>
     <string name="quick_responses_subtitle">Manage canned SMS decline responses for incoming calls</string>

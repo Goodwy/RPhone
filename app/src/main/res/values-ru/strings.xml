@@ -271,6 +271,17 @@
     <string name="settings_speed_dial_no_number">Нет номеров</string>
     <string name="settings_speed_dial_open">Открыть настройки Быстрого набора?</string>
 
+    <!-- Call Log Limit -->
+    <string name="settings_call_log_limit">Лимит последних звонков</string>
+    <string name="settings_call_log_limit_supporting">Ограничить количество последних загруженных записей журнала вызовов для увеличения скорости загрузки и производительности</string>
+    <string name="settings_call_log_limit_100">100 звонков</string>
+    <string name="settings_call_log_limit_250">250 звонков</string>
+    <string name="settings_call_log_limit_500">500 звонков</string>
+    <string name="settings_call_log_limit_1000">1000 звонков</string>
+    <string name="settings_call_log_limit_unlimited">Без ограничений</string>
+    <string name="settings_include_day_of_week">Показывать день недели в заголовках дат</string>
+    <string name="settings_include_day_of_week_supporting">Добавляет день недели к заголовкам дат в недавних звонках</string>
+
     <string name="quick_response">Быстрый ответ</string>
     <string name="quick_responses">Быстрые ответы</string>
     <string name="quick_responses_subtitle">Управление шаблонными SMS-ответами об отказе на входящие звонки</string>

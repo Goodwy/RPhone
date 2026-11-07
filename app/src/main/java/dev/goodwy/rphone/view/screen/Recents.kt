@@ -4,9 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import dev.goodwy.rphone.view.theme.TabTransitionStyle
-import android.content.Context
 import android.content.Intent
-import android.telecom.TelecomManager
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
@@ -104,10 +102,8 @@ import kotlin.time.Duration.Companion.milliseconds
 fun RecentScreen(navController: NavController, navigator: DestinationsNavigator) {
     val context = LocalContext.current
     val permState = rememberPermissionState(Manifest.permission.READ_CALL_LOG)
-    val isGranted = permState.status == PermissionStatus.Granted
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
-    val telecomManager = remember { context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager }
 
     val showButton by remember {
         derivedStateOf {
@@ -120,6 +116,15 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
             if (listState.firstVisibleItemIndex != 0 || listState.firstVisibleItemScrollOffset != 0) {
                 listState.animateScrollToItem(0)
             }
+        }
+    }
+
+    val isGranted = permState.status == PermissionStatus.Granted
+    var hasRequestedOnGrant by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(isGranted) {
+        if (isGranted && !hasRequestedOnGrant) {
+            hasRequestedOnGrant = true
+            viewModel.refreshOnResume()
         }
     }
 
@@ -147,37 +152,16 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
         selectedEntries = emptySet()
     }
 
-    var wasDefaultDialerOnPause by rememberSaveable { mutableStateOf(true) }
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_PAUSE -> {
-                    wasDefaultDialerOnPause =
-                        telecomManager.defaultDialerPackage == context.packageName
-                }
-                Lifecycle.Event.ON_RESUME -> {
-                    // It triggers when the window is first opened, when it is restored from minimised state,
-                    // and when it is restored from another screen
-                    fabVisible = true
-                    notificationManager.clearAllMissedCallNotifications(context)
+            if (event == Lifecycle.Event.ON_RESUME) {
+                // It triggers when the window is first opened, when it is restored from minimised state,
+                // and when it is restored from another screen
+                fabVisible = true
+                notificationManager.clearAllMissedCallNotifications(context)
 
-                    // Recover after default-dialer switch: permission may have been
-                    // re-granted while we were backgrounded, and the ViewModel
-                    // (activity-scoped) may have stale/empty state.
-                    if (isGranted) {
-                        val isDefaultNow =
-                            telecomManager.defaultDialerPackage == context.packageName
-
-                        // Scenario 1: When the app was sent to the background, it was not the default app; when it returned, it became the default app
-                        // Scenario 2: When the app was sent to the background, it was the default app; when it returned, it was no longer the default app
-                        // In both cases, `refreshOnResume` is required
-                        if (wasDefaultDialerOnPause != isDefaultNow) {
-                            viewModel.refreshOnResume()
-                        }
-                    }
-                }
-                else -> {}
+//                if (isGranted) viewModel.refreshOnResume()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -612,7 +596,6 @@ fun CallLogFullContent(
         val filteredLogs by viewModel.filteredLogs.collectAsStateWithLifecycle()
         val selectedFilter by viewModel.selectedFilter.collectAsStateWithLifecycle()
         val context = LocalContext.current
-        val telecomManager = remember { context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager }
 
         val contactsVM: ContactsViewModel = koinActivityViewModel()
         val settingsState by prefs.settingsChanged.collectAsStateWithLifecycle()
@@ -645,6 +628,7 @@ fun CallLogFullContent(
         var showSimPicker by remember { mutableStateOf(false) }
         var pendingNumber by remember { mutableStateOf<String?>(null) }
         val simPref = remember(settingsState) { prefs.getInt(PreferenceManager.KEY_DEFAULT_SIM, prefs.getDefaultSimIndexDefault()) }
+        val includeDayOfWeek = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_INCLUDE_DAY_OF_WEEK, true) }
         var swipeEnabled by remember(settingsState) { mutableStateOf(prefs.isSwipeActionsEnabled()) }
         var swipeRightAction by remember(settingsState) { mutableStateOf(SwipeActionType.fromId(prefs.getSwipeRightAction())) }
         var swipeLeftAction by remember(settingsState) { mutableStateOf(SwipeActionType.fromId(prefs.getSwipeLeftAction())) }
@@ -653,7 +637,7 @@ fun CallLogFullContent(
         // Track previous filter index for slide direction
         val filterEntries = CallLogFilter.entries
 //        var previousFilterIndex by remember { mutableIntStateOf(filterEntries.indexOf(selectedFilter)) }
-        val groupedLogs = remember(filteredLogs) { filteredLogs.groupBy { context.formatDateHeader(it.date, true) } }
+        val groupedLogs = remember(filteredLogs) { filteredLogs.groupBy { context.formatDateHeader(it.date, includeDayOfWeek) } }
 
         if (showSimPicker && pendingNumber != null) {
             SimPickerDialog(
@@ -691,16 +675,23 @@ fun CallLogFullContent(
         }
 
         val pullToRefreshState = rememberPullToRefreshState()
-        val isDataLoading = (logs.isEmpty() && isLoading) || (!favouritesEnabled && isLoadingContacts && allContacts.isEmpty())
         var pullToRefreshActive by remember { mutableStateOf(false) }
-        LaunchedEffect(isDataLoading) {
-            if (!isDataLoading && pullToRefreshActive) {
+        LaunchedEffect(isLoading) {
+            if (!isLoading && pullToRefreshActive) {
                 pullToRefreshActive = false
             }
         }
+        var hasLoadedOnce by rememberSaveable { mutableStateOf(false) }
+        LaunchedEffect(logs, isLoading, isLoadingContacts) {
+            if (!isLoading && !isLoadingContacts) hasLoadedOnce = true
+        }
+
+        val isInitialLoading = !hasLoadedOnce && logs.isEmpty() && (isLoading || isLoadingContacts)
+        val showEmptyPlaceholder = hasLoadedOnce && logs.isEmpty() && !isLoading && !isLoadingContacts
+        val isRefreshing = pullToRefreshActive && isLoading
 
         PullToRefreshBox(
-            isRefreshing = isDataLoading && pullToRefreshActive,
+            isRefreshing = isRefreshing,
             onRefresh = {
                 pullToRefreshActive = true
                 viewModel.refreshLogs()
@@ -711,11 +702,11 @@ fun CallLogFullContent(
             indicator = {
                 RillPullToRefreshIndicator(
                     state = pullToRefreshState,
-                    isRefreshing = isDataLoading && pullToRefreshActive
+                    isRefreshing = isRefreshing
                 )
             }
         ) {
-            if (isDataLoading) {
+            if (isInitialLoading) {
                 // Only show a spinner on the very first launch when no disk cache exists.
                 // On subsequent opens the disk cache fills instantly so this won't be seen.
                 var showSpinner by remember { mutableStateOf(false) }
@@ -732,7 +723,7 @@ fun CallLogFullContent(
                         )
                     }
                 }
-            } else if (logs.isEmpty()) {
+            } else if (showEmptyPlaceholder) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     PlaceholderView(
                         icon = Icons.Rounded.Call,
@@ -746,7 +737,7 @@ fun CallLogFullContent(
                     // On the very first data load (startup) we use a slow fade-in so the
                     // list appears gracefully instead of jumping. Once the user starts
                     // changing filters the normal slide transition takes over.
-                    var hasLoadedOnce by remember { mutableStateOf(false) }
+                    var hasAnimatedOnce by remember { mutableStateOf(false) }
                     // IMPORTANT: Scroll the list OUTSIDE AnimatedContent.
                     // This prevents the exit animation from conflicting with the scrolling.
                     var lastFilter by rememberSaveable { mutableStateOf(selectedFilter) }
@@ -762,7 +753,7 @@ fun CallLogFullContent(
                     AnimatedContent(
                         targetState = selectedFilter,
                         transitionSpec = {
-                            if (!hasLoadedOnce) {
+                            if (!hasAnimatedOnce) {
                                 // Startup: slow gentle fade, no slide
                                 fadeIn(
                                     animationSpec = tween(
@@ -797,7 +788,7 @@ fun CallLogFullContent(
                         modifier = Modifier.fillMaxSize(),
                         label = "filterSlide"
                     ) { currentFilter ->
-                        SideEffect { hasLoadedOnce = true }
+                        SideEffect { hasAnimatedOnce = true }
                         ScrollHapticsEffect(listState = listState)
                         LazyColumn(
                             state = listState,

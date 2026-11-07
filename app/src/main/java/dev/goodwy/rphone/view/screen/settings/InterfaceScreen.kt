@@ -60,6 +60,7 @@ import androidx.compose.material.icons.rounded.CallEnd
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.FormatSize
 import androidx.compose.material.icons.rounded.Layers
+import androidx.compose.material.icons.rounded.Mic
 import androidx.compose.material.icons.rounded.MicNone
 import androidx.compose.material.icons.rounded.PhoneInTalk
 import androidx.compose.material.icons.rounded.RoundedCorner
@@ -94,8 +95,11 @@ import com.ramcosta.composedestinations.generated.destinations.AppIconScreenDest
 import com.ramcosta.composedestinations.generated.destinations.AvatarsPreferenceScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.BlurEffectsElementsScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.CallerUIScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.DonateScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.LiquidGlassElementsScreenDestination
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.darken
+import dev.goodwy.rphone.icons.page_header
 import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillIconBox
 import dev.goodwy.rphone.view.components.RillSelectListItem
@@ -104,8 +108,6 @@ import dev.goodwy.rphone.view.components.shake
 import dev.goodwy.rphone.view.theme.color_call_end
 import dev.goodwy.rphone.view.theme.color_default_primary
 import dev.goodwy.rphone.view.theme.customColors
-import com.ramcosta.composedestinations.generated.destinations.DonateScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.LiquidGlassElementsScreenDestination
 import dev.goodwy.rphone.bottomBarHeight
 import dev.goodwy.rphone.controller.PurchaseHelper
 import dev.goodwy.rphone.view.components.RillSelectionDialog
@@ -159,6 +161,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
     var dialpadAnimation    by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_DIALPAD_ANIMATION, true)) }
     var dialpadHideLetters  by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_DIALPAD_HIDE_LETTERS, false)) }
     var hideVoiceSearch     by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_HIDE_VOICE_SEARCH, false)) }
+    var includeDayOfWeek    by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_INCLUDE_DAY_OF_WEEK, true)) }
     var liquidGlass         by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_LIQUID_GLASS, false)) }
     var blurEffects         by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_BLUR_EFFECTS, false)) }
     var cardRoundness       by remember(settingsState) { mutableStateOf(prefs.getInt(PreferenceManager.KEY_CARD_ROUNDNESS, RillShapeDefaults.DefaultRoundness)) }
@@ -178,13 +181,6 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
     var selectedAppNameKey by remember {
         mutableStateOf(prefs.getString(PreferenceManager.KEY_APP_NAME_PRESET, "default") ?: "default")
     }
-
-    // Call UI section checkboxes dialog
-    var showCallUIDialog   by remember(settingsState) { mutableStateOf(false) }
-    var callUIShowToday    by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_CALL_UI_SHOW_TODAY, true)) }
-    var callUIShowMissed   by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_CALL_UI_SHOW_MISSED, true)) }
-    var callUIShowOutgoing by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_CALL_UI_SHOW_OUTGOING, true)) }
-    var callUIShowCallTime by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_CALL_UI_SHOW_CALL_TIME, true)) }
 
     var hexInput by remember(settingsState) { mutableStateOf(String.format("%06X", 0xFFFFFF and customPrimaryColor)) }
     var hexError by remember(settingsState) { mutableStateOf(false) }
@@ -243,69 +239,6 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
         } else {
             hexError = true
         }
-    }
-
-    // ── Call UI Dialog ────────────────────────────────────────────────────────
-    if (showCallUIDialog) {
-        AlertDialog(
-            onDismissRequest = { showCallUIDialog = false },
-            icon = { Icon(Icons.Default.Dashboard, null, tint = MaterialTheme.colorScheme.customColors.colorCyan) },
-            title = { Text("Call UI Elements") },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(
-                        "Toggle which stat cards appear in the Calls home screen.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    listOf(
-                        Triple("Today", callUIShowToday) { v: Boolean ->
-                            callUIShowToday = v
-                            prefs.setBoolean(PreferenceManager.KEY_CALL_UI_SHOW_TODAY, v)
-                        },
-                        Triple("Missed", callUIShowMissed) { v: Boolean ->
-                            callUIShowMissed = v
-                            prefs.setBoolean(PreferenceManager.KEY_CALL_UI_SHOW_MISSED, v)
-                        },
-                        Triple("Outgoing", callUIShowOutgoing) { v: Boolean ->
-                            callUIShowOutgoing = v
-                            prefs.setBoolean(PreferenceManager.KEY_CALL_UI_SHOW_OUTGOING, v)
-                        },
-                        Triple("Call Time", callUIShowCallTime) { v: Boolean ->
-                            callUIShowCallTime = v
-                            prefs.setBoolean(PreferenceManager.KEY_CALL_UI_SHOW_CALL_TIME, v)
-                        }
-                    ).forEach { (label, checked, onChange) ->
-                        Surface(
-                            shape = RoundedCornerShape(10.dp),
-                            color = MaterialTheme.colorScheme.surfaceVariant,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 4.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-                                Checkbox(
-                                    checked = checked,
-                                    onCheckedChange = onChange,
-                                    colors = CheckboxDefaults.colors(
-                                        checkedColor = MaterialTheme.colorScheme.primary,
-                                        uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                )
-                            }
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showCallUIDialog = false }) { Text("Done") }
-            }
-        )
     }
 
     // Font state
@@ -1014,13 +947,25 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                 RillSwitchListItem(
                                     headline = stringResource(R.string.hide_voice_search),
                                     supporting = stringResource(R.string.hide_voice_search_subtitle),
-                                    leadingIcon = Icons.Rounded.MicNone,
+                                    leadingIcon = if (hideVoiceSearch) Icons.Rounded.MicNone else Icons.Rounded.Mic,
                                     iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
                                     iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
                                     checked = hideVoiceSearch,
                                     onCheckedChange = {
                                         hideVoiceSearch = it
                                         prefs.setBoolean(PreferenceManager.KEY_HIDE_VOICE_SEARCH, it)
+                                    }
+                                )
+                                RillSwitchListItem(
+                                    headline = stringResource(R.string.settings_include_day_of_week),
+                                    supporting = stringResource(R.string.settings_include_day_of_week_supporting),
+                                    leadingIcon = page_header,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+                                    checked = includeDayOfWeek,
+                                    onCheckedChange = {
+                                        includeDayOfWeek = it
+                                        prefs.setBoolean(PreferenceManager.KEY_INCLUDE_DAY_OF_WEEK, it)
                                     }
                                 )
                             }

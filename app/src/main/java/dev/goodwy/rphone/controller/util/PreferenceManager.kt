@@ -429,6 +429,9 @@ class PreferenceManager(context: Context) {
         const val KEY_AUTO_DECLINE_NON_CONTACTS = "auto_decline_non_contacts"
         const val KEY_DUAL_SIM_DIALPAD_BUTTONS = "dual_sim_dialpad_buttons"
 
+        const val KEY_CALL_LOG_LIMIT = "call_log_limit"
+        const val CALL_LOG_LIMIT_DEFAULT = 1000
+        const val KEY_AUTO_PASTE_CLIPBOARD = "auto_paste_clipboard"
         const val KEY_CALL_ANALYTICS_TRACKING = "call_analytics_tracking"
 
         // Ever
@@ -527,7 +530,14 @@ class PreferenceManager(context: Context) {
         const val KEY_DIALPAD_ANIMATION        = "dialpad_animation_enabled"
         const val KEY_DIALPAD_HIDE_LETTERS     = "dialpad_hide_letters"
         const val KEY_HIDE_VOICE_SEARCH        = "hide_voice_search"
+        const val KEY_INCLUDE_DAY_OF_WEEK        = "include_day_of_week"
     }
+
+    fun getCallLogLimit(): Int = getInt(KEY_CALL_LOG_LIMIT, CALL_LOG_LIMIT_DEFAULT)
+    fun setCallLogLimit(limit: Int) = setInt(KEY_CALL_LOG_LIMIT, limit)
+
+    fun isAutoPasteClipboardEnabled(): Boolean = getBoolean(KEY_AUTO_PASTE_CLIPBOARD, false)
+    fun setAutoPasteClipboardEnabled(enabled: Boolean) = setBoolean(KEY_AUTO_PASTE_CLIPBOARD, enabled)
 
     fun isCallAnalyticsTrackingEnabled(): Boolean = getBoolean(KEY_CALL_ANALYTICS_TRACKING, true)
     fun setCallAnalyticsTrackingEnabled(enabled: Boolean) = setBoolean(KEY_CALL_ANALYTICS_TRACKING, enabled)

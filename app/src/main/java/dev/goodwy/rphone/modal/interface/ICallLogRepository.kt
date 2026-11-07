@@ -8,4 +8,5 @@ interface ICallLogRepository {
     suspend fun deleteCallLog(number: String)
     suspend fun deleteCallLogsByIds(ids: List<Long>)
     suspend fun clearCallLogs()
+    suspend fun invalidateContactCache()
 }

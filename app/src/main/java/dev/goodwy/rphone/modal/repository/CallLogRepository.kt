@@ -5,6 +5,7 @@ import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
+import android.os.Bundle
 import android.provider.CallLog
 import android.telecom.PhoneAccountHandle
 import android.telecom.TelecomManager
@@ -21,6 +22,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 
 class CallLogRepository(
     private val context: Context,
@@ -46,6 +50,9 @@ class CallLogRepository(
         }
 
         val allContacts = try { contactsRepo.getContacts() } catch (e: Exception) { emptyList() }
+        if (allContacts.isEmpty()) {
+            return emptyMap()
+        }
         val map = mutableMapOf<String, Contact>()
         allContacts.forEach { contact ->
             contact.phoneNumbers.forEach { number ->
@@ -77,22 +84,30 @@ class CallLogRepository(
             CallLog.Calls.DURATION
         )
 
-        baseProjection.add("phone_account_label")
         baseProjection.add(CallLog.Calls.PHONE_ACCOUNT_ID)
         baseProjection.add(CallLog.Calls.PHONE_ACCOUNT_COMPONENT_NAME)
 
+        val limit = preferenceManager.getCallLogLimit()
+        val uri = if (limit > 0) {
+            CallLog.Calls.CONTENT_URI.buildUpon()
+                .appendQueryParameter(CallLog.Calls.LIMIT_PARAM_KEY, limit.toString())
+                .build()
+        } else {
+            CallLog.Calls.CONTENT_URI
+        }
+
         try {
             val cursor = contentResolver.query(
-                CallLog.Calls.CONTENT_URI,
+                uri,
                 baseProjection.toTypedArray(),
                 null,
                 null,
                 "${CallLog.Calls.DATE} DESC"
             )
 
-            cursor?.use { parseCursor(it, callLogs, contactMap) }
+            cursor?.use { parseCursor(it, callLogs, contactMap, limit) }
         } catch (e: Exception) {
-            // If the above fails due to "phone_account_label" or other columns, try a safer subset
+            // If the above fails, try a safer subset
             try {
                 val safeProjection = arrayOf(
                     CallLog.Calls._ID, CallLog.Calls.NUMBER, CallLog.Calls.CACHED_NAME,
@@ -107,7 +122,7 @@ class CallLogRepository(
                     null,
                     "${CallLog.Calls.DATE} DESC"
                 )
-                cursor?.use { parseCursor(it, callLogs, contactMap) }
+                cursor?.use { parseCursor(it, callLogs, contactMap, limit) }
             } catch (e2: Exception) {
                 e2.printStackTrace()
             }
@@ -141,7 +156,7 @@ class CallLogRepository(
         }
     }
 
-    private fun parseCursor(cursor: Cursor, callLogs: MutableList<CallLogEntry>, contactMap: Map<String, Contact>) {
+    private fun parseCursor(cursor: Cursor, callLogs: MutableList<CallLogEntry>, contactMap: Map<String, Contact>, limit: Int = 0) {
         val idIdx = cursor.getColumnIndex(CallLog.Calls._ID)
         val numberIdx = cursor.getColumnIndex(CallLog.Calls.NUMBER)
         val cachedNameIdx = cursor.getColumnIndex(CallLog.Calls.CACHED_NAME)
@@ -151,7 +166,6 @@ class CallLogRepository(
         val dateIdx = cursor.getColumnIndex(CallLog.Calls.DATE)
         val durationIdx = cursor.getColumnIndex(CallLog.Calls.DURATION)
 
-        val labelIdx = cursor.getColumnIndex("phone_account_label")
         val accountIdIdx = cursor.getColumnIndex(CallLog.Calls.PHONE_ACCOUNT_ID)
         val componentNameIdx = cursor.getColumnIndex(CallLog.Calls.PHONE_ACCOUNT_COMPONENT_NAME)
 
@@ -161,19 +175,27 @@ class CallLogRepository(
 
         val displayOrder = preferenceManager.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0)
 
+        val zone = ZoneId.systemDefault()
+        fun dayKey(dateMillis: Long): LocalDate =
+            Instant.ofEpochMilli(dateMillis).atZone(zone).toLocalDate()
+        var lastEntryDay: LocalDate? = null
+
         while (cursor.moveToNext()) {
+            if (limit > 0 && tempLogs.size >= limit) {
+                break
+            }
             val callId = cursor.getLong(idIdx)
             val number = cursor.getString(numberIdx) ?: unknownLabel
             val type = cursor.getInt(typeIdx)
             val date = cursor.getLong(dateIdx)
             val duration = cursor.getLong(durationIdx)
 
-            var simLabel = if (labelIdx != -1) cursor.getString(labelIdx) else null
+            var simLabel: String? = null
 
             val isBlocked = type == CallLog.Calls.BLOCKED_TYPE// || type == CallLog.Calls.REJECTED_TYPE
 
             // If label is missing, try to resolve it from account ID
-            if (simLabel.isNullOrEmpty() && accountIdIdx != -1 && componentNameIdx != -1) {
+            if (accountIdIdx != -1 && componentNameIdx != -1) {
                 val accountId = cursor.getString(accountIdIdx)
                 val componentStr = cursor.getString(componentNameIdx)
 
@@ -237,7 +259,13 @@ class CallLogRepository(
                 )
 
             val lastEntry = tempLogs.lastOrNull()
-            if (lastEntry != null && lastEntry.number == number) {
+            // Group only if the number and date are the same
+            val sameDay = if (lastEntry != null) {
+                val lastDay = lastEntryDay ?: dayKey(lastEntry.date).also { lastEntryDay = it }
+                lastDay == dayKey(date)
+            } else false
+
+            if (lastEntry != null && lastEntry.number == number && sameDay) {
                 val currentSubLogs = if (lastEntry.subLogs.isEmpty()) listOf(lastEntry) else lastEntry.subLogs
                 tempLogs[tempLogs.size - 1] = lastEntry.copy(
                     types = lastEntry.types + type,
@@ -246,6 +274,7 @@ class CallLogRepository(
                 )
             } else {
                 tempLogs.add(singleEntry)
+                lastEntryDay = dayKey(date)
             }
         }
         callLogs.addAll(tempLogs)
@@ -281,5 +310,12 @@ class CallLogRepository(
             e.printStackTrace()
         }
         Unit
+    }
+
+    override suspend fun invalidateContactCache() {
+        contactMapMutex.withLock {
+            cachedContactMap = null
+            lastContactMapUpdate = 0L
+        }
     }
 }

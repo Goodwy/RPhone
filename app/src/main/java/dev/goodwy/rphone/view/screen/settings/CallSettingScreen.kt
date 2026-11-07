@@ -18,12 +18,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Dialpad
 import androidx.compose.material.icons.rounded.CropFree
+import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.PictureInPicture
 import androidx.compose.material.icons.rounded.ScreenLockPortrait
 import androidx.compose.material.icons.rounded.SettingsPhone
 import androidx.compose.material.icons.rounded.SimCard
 import androidx.compose.material.icons.rounded.SpatialTracking
-import androidx.compose.material.icons.rounded.TouchApp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -71,6 +71,7 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
     var defaultSim by remember(settingsState) { mutableStateOf(prefs.getInt(PreferenceManager.KEY_DEFAULT_SIM, prefs.getDefaultSimIndexDefault())) }
     var fullscreenCalls by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_ALWAYS_FULLSCREEN_CALLS, false)) }
     var speedDial by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SPEED_DIAL, true)) }
+    var callLogLimit by remember(settingsState) { mutableStateOf(prefs.getCallLogLimit()) }
 
     val defaultBusyMsg = stringResource(R.string.busy_mode_default_message)
     var busyMode by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_BUSY_MODE_ENABLED, false)) }
@@ -144,6 +145,25 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
                             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorIndigo,
                             trailingIcon = Icons.Default.ChevronRight,
                             onClick = { navigator.navigate(SpeedDialScreenDestination) }
+                        )
+                        RillSelectListItem(
+                            headline = stringResource(R.string.settings_call_log_limit),
+                            supporting = stringResource(R.string.settings_call_log_limit_supporting),
+                            leadingIcon = Icons.Rounded.History,
+                            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
+                            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
+                            options = listOf(
+                                stringResource(R.string.settings_call_log_limit_100) to 100,
+                                stringResource(R.string.settings_call_log_limit_250) to 250,
+                                stringResource(R.string.settings_call_log_limit_500) to 500,
+                                stringResource(R.string.settings_call_log_limit_1000) to 1000,
+                                stringResource(R.string.settings_call_log_limit_unlimited) to 0
+                            ),
+                            selectedValue = callLogLimit,
+                            onValueChange = {
+                                callLogLimit = it
+                                prefs.setCallLogLimit(it)
+                            }
                         )
                     }
                 }
