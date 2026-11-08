@@ -443,6 +443,7 @@ private fun CallingCardPhotoStep(
     onRemovePhoto: () -> Unit
 ) {
     val compactHeight = LocalConfiguration.current.screenHeightDp < 560
+    val previewDescription = stringResource(R.string.calling_card_photo_preview)
 
     Column(
         modifier = Modifier
@@ -473,7 +474,7 @@ private fun CallingCardPhotoStep(
                     modifier = Modifier
                         .fillMaxSize()
                         .semantics {
-                            contentDescription = stringResource(R.string.calling_card_photo_preview)
+                            contentDescription = previewDescription
                         }
                 ) {
                     // Same rendering the live call screen uses: Crop for the
