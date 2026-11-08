@@ -43,7 +43,8 @@ fun ExpressiveBackground(
     photoUri: String?,
     backgroundUri: String? = null,
     liquidGlassBackdrop: LayerBackdrop,
-    hideGradient: Boolean
+    hideGradient: Boolean,
+    enableParticles: Boolean = true
 ) {
     val context = LocalContext.current
     val scheme = MaterialTheme.colorScheme
@@ -67,7 +68,7 @@ fun ExpressiveBackground(
     }
 
     Box(modifier = Modifier.fillMaxSize().layerBackdrop(liquidGlassBackdrop).background(surface)) {
-        if (!customVisible) {
+        if (!customVisible && enableParticles) {
             FloatingParticles()
         }
 

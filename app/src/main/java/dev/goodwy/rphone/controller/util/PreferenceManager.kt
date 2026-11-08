@@ -328,6 +328,49 @@ class PreferenceManager(context: Context) {
         }
     }
 
+    fun getCallingCardStyle(contactId: String): String? {
+        return try {
+            getString(callingCardStyleIdKey(contactId), null)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    fun getCallingCardStyleForNumber(numberKey: String): String? {
+        return try {
+            getString(callingCardStyleNumberKey(numberKey), null)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    fun getCallingCardStyleEntries(): Map<String, String> {
+        return try {
+            _prefsCache.value.asMap()
+                .filterKeys { it.name.startsWith(CALLING_CARD_STYLE_PREFIX) }
+                .mapNotNull { (key, value) ->
+                    val stringValue = value as? String
+                    if (stringValue.isNullOrBlank()) null else key.name to stringValue
+                }
+                .toMap()
+        } catch (e: Exception) {
+            emptyMap()
+        }
+    }
+
+    suspend fun updateCallingCardStyleEntriesSuspend(updates: Map<String, String?>) {
+        if (updates.isEmpty()) return
+        dataStore.edit { prefs ->
+            updates.forEach { (key, value) ->
+                if (key.startsWith(CALLING_CARD_STYLE_PREFIX)) {
+                    val dataStoreKey = stringPreferencesKey(key)
+                    if (value == null) prefs.remove(dataStoreKey)
+                    else prefs[dataStoreKey] = value
+                }
+            }
+        }
+    }
+
     fun getVisibleAccounts(): Set<String>? {
         val str = getString(KEY_VISIBLE_ACCOUNTS, null) ?: return null
         return str.split(",").filter { it.isNotEmpty() }.toSet()
@@ -340,6 +383,16 @@ class PreferenceManager(context: Context) {
     companion object {
         const val CONTACT_BACKGROUND_PREFIX = "contact_background_"
         const val CONTACT_BACKGROUND_NUMBER_PREFIX = "contact_background_num_"
+        const val CALLING_CARD_STYLE_PREFIX = "calling_card_style_"
+        const val CALLING_CARD_STYLE_NUMBER_PREFIX = "calling_card_style_num_"
+
+        fun callingCardStyleIdKey(contactId: String): String {
+            return CALLING_CARD_STYLE_PREFIX + contactId
+        }
+
+        fun callingCardStyleNumberKey(numberKey: String): String {
+            return CALLING_CARD_STYLE_NUMBER_PREFIX + numberKey
+        }
 
         const val KEY_DEFAULT_SIM           = "default_sim"
         const val KEY_DYNAMIC_COLORS        = "dynamic_colors"

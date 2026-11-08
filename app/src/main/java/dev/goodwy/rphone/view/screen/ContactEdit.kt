@@ -104,6 +104,8 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.goodwy.rphone.controller.util.CallBackgroundStore
+import dev.goodwy.rphone.controller.util.CallingCardStore
+import dev.goodwy.rphone.controller.util.CallingCardStyle
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.private_only
 import dev.goodwy.rphone.view.components.AvatarCropDialog
@@ -201,6 +203,11 @@ fun ContactEditScreen(
     var tempPhotoUri by remember { mutableStateOf<String?>(null) }
     var cropTargetUriString by remember { mutableStateOf<String?>(null) }
     var tempBackgroundDeleted by remember { mutableStateOf(false) }
+    var callingCardStyle by remember { mutableStateOf<CallingCardStyle?>(null) }
+    var tempCallingCardStyle by remember { mutableStateOf<CallingCardStyle?>(null) }
+    var tempCallingCardStyleCleared by remember { mutableStateOf(false) }
+    var defaultCallingCardStyle by remember { mutableStateOf(CallingCardStyle.ThemeDefault) }
+    var showCallingCardEditor by remember { mutableStateOf(false) }
 
     var isPrivate by remember(existingContact) { mutableStateOf(existingContact?.isPrivate ?: false) }
     var selectedAccount by remember(existingContact, availableAccounts) {
@@ -316,11 +323,16 @@ fun ContactEditScreen(
 
     val scope = rememberCoroutineScope()
 
-    val knownNumbers = remember(existingContact, initialPhone) {
-        ((existingContact?.phoneNumbers ?: emptyList()) + listOfNotNull(initialPhone)).distinct()
+    // Follow the numbers currently in the form so a new contact gets its card
+    // stored under the number the user actually types.
+    val backgroundNumbers = remember(existingContact, initialPhone, phoneNumbers.toList()) {
+        ((existingContact?.phoneNumbers ?: emptyList()) +
+                phoneNumbers +
+                listOfNotNull(initialPhone))
+            .filter { it.isNotBlank() }
+            .distinct()
     }
     val backgroundContactId = existingContact?.id?.takeIf { it.isNotBlank() }
-    val backgroundNumbers = knownNumbers
     val backgroundKeys = remember(backgroundNumbers) {
         CallBackgroundStore.numberKeys(backgroundNumbers)
     }
@@ -329,37 +341,42 @@ fun ContactEditScreen(
 
     LaunchedEffect(backgroundContactId, backgroundNumbers) {
         callBackground = CallBackgroundStore.peek(context, backgroundContactId, backgroundNumbers)
+        callingCardStyle = CallingCardStore.peek(context, backgroundContactId, backgroundNumbers)
+        defaultCallingCardStyle =
+            CallingCardStore.peekDefault(context) ?: CallingCardStyle.ThemeDefault
     }
 
-    val backgroundPickerLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocument()
-    ) { uri ->
-        if (uri != null) {
-            runCatching {
-                context.contentResolver.takePersistableUriPermission(
-                    uri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION
-                )
+    fun applyCallingCardBackground(next: String?) {
+        val current = if (tempBackgroundDeleted) null else (tempCallBackground ?: callBackground)
+        when {
+            next == null -> {
+                if (current != null) {
+                    tempBackgroundDeleted = true
+                    tempCallBackground = null
+                    selectedBackgroundUri = null
+                    callBackground = null
+                }
             }
-            selectedBackgroundUri = uri
-            tempCallBackground = uri.toString()
-            tempBackgroundDeleted = false
+            next == current -> Unit
+            else -> {
+                tempCallBackground = next
+                selectedBackgroundUri = next.toUri()
+                tempBackgroundDeleted = false
+            }
         }
     }
 
     val onBackgroundClick: () -> Unit = {
-        when {
-            !backgroundAvailable -> {
-                scope.launch { snackbarHostState.showSnackbar(backgroundNoTargetMessage) }
-            }
-            else -> {
-                backgroundPickerLauncher.launch(arrayOf("image/*"))
-            }
+        if (!backgroundAvailable) {
+            scope.launch { snackbarHostState.showSnackbar(backgroundNoTargetMessage) }
+        } else {
+            showCallingCardEditor = true
         }
     }
 
     val currentContactForPreview = remember(
-        namePrefix, givenName, middleName, familyName, nameSuffix, nickname, company, jobTitle, notes
+        namePrefix, givenName, middleName, familyName, nameSuffix, nickname, company, jobTitle, notes,
+        phoneNumbers.toList()
     ) {
         Contact(
             id = "",
@@ -451,7 +468,11 @@ fun ContactEditScreen(
                 tempCallBackground != null ||
                 tempBackgroundDeleted
 
-        return currentContact != originalContact || hasBackgroundChange || hasPhotoChange
+        val hasCallingCardStyleChange = tempCallingCardStyle != null ||
+                tempCallingCardStyleCleared
+
+        return currentContact != originalContact || hasBackgroundChange ||
+                hasCallingCardStyleChange || hasPhotoChange
     }
 
     fun closeScreen(isSaved: Boolean = false) {
@@ -480,6 +501,8 @@ fun ContactEditScreen(
         selectedBackgroundUri = null
         tempCallBackground = null
         tempBackgroundDeleted = false
+        tempCallingCardStyle = null
+        tempCallingCardStyleCleared = false
 
         // If the photo was temporarily modified, we'll restore the original
         if (existingContact?.photoUri != null) {
@@ -576,11 +599,33 @@ fun ContactEditScreen(
                 tempBackgroundDeleted = false
             }
 
+            // Editing the calling card font and name colour
+            if (tempCallingCardStyleCleared) {
+                CallingCardStore.clear(context, backgroundContactId, backgroundNumbers)
+                callingCardStyle = null
+            } else {
+                tempCallingCardStyle?.let { style ->
+                    CallingCardStore.save(
+                        context,
+                        backgroundContactId,
+                        backgroundNumbers,
+                        style
+                    )
+                    callingCardStyle = CallingCardStore.peek(
+                        context,
+                        backgroundContactId,
+                        backgroundNumbers
+                    )
+                }
+            }
+
             // Clear all temporary data
             tempPhotoUri = null
             selectedBackgroundUri = null
             tempCallBackground = null
             tempBackgroundDeleted = false
+            tempCallingCardStyle = null
+            tempCallingCardStyleCleared = false
 
             closeScreen(isSaved = true)
         }
@@ -620,6 +665,48 @@ fun ContactEditScreen(
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary
                 )
+            }
+        )
+    }
+
+    if (showCallingCardEditor) {
+        val previewName = getDisplayName(currentContactForPreview)
+        val shownStyle = if (tempCallingCardStyleCleared) {
+            defaultCallingCardStyle
+        } else {
+            tempCallingCardStyle ?: callingCardStyle ?: defaultCallingCardStyle
+        }
+        CallingCardEditorDialog(
+            contactName = previewName.ifBlank { stringResource(R.string.label_unknown) },
+            phoneNumber = phoneNumbers.firstOrNull { it.isNotBlank() }.orEmpty(),
+            contactPhotoUri = tempPhotoUri ?: photoUri,
+            initialBackgroundUri =
+                if (tempBackgroundDeleted) null else (tempCallBackground ?: callBackground),
+            inheritedBackgroundUri = CallBackgroundStore.defaultModel(context),
+            initialStyle = shownStyle,
+            fallbackStyle = defaultCallingCardStyle,
+            onDismiss = { showCallingCardEditor = false },
+            onDone = { result ->
+                applyCallingCardBackground(result.backgroundUri)
+                val next = result.style
+                when {
+                    next == null -> {
+                        if (callingCardStyle != null) {
+                            tempCallingCardStyle = null
+                            tempCallingCardStyleCleared = true
+                        } else {
+                            // Nothing stored, so there is nothing to discard.
+                            tempCallingCardStyle = null
+                            tempCallingCardStyleCleared = false
+                        }
+                    }
+                    next == shownStyle -> Unit
+                    else -> {
+                        tempCallingCardStyle = next
+                        tempCallingCardStyleCleared = false
+                    }
+                }
+                showCallingCardEditor = false
             }
         )
     }
@@ -1058,7 +1145,10 @@ fun ContactEditScreen(
                                 }
                                 Spacer(Modifier.width(32.dp))
                                 Box(contentAlignment = Alignment.BottomEnd) {
-                                    val displayBackground = tempCallBackground ?: callBackground
+                                    // A pending delete removes the background on save, so stop
+                                    // showing either the temporary or the stored one right away.
+                                    val displayBackground =
+                                        if (tempBackgroundDeleted) null else (tempCallBackground ?: callBackground)
                                     if (displayBackground != null) {
                                         AsyncImage(
                                             model = displayBackground,
@@ -1824,7 +1914,10 @@ fun ContactEditScreen(
                                 }
                                 Spacer(Modifier.width(32.dp))
                                 Box(contentAlignment = Alignment.BottomEnd) {
-                                    val displayBackground = tempCallBackground ?: callBackground
+                                    // A pending delete removes the background on save, so stop
+                                    // showing either the temporary or the stored one right away.
+                                    val displayBackground =
+                                        if (tempBackgroundDeleted) null else (tempCallBackground ?: callBackground)
                                     if (displayBackground != null) {
                                         AsyncImage(
                                             model = displayBackground,

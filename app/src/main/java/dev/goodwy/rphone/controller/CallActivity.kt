@@ -38,6 +38,8 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.CallBackgroundStore
+import dev.goodwy.rphone.controller.util.CallingCardStore
+import dev.goodwy.rphone.controller.util.CallingCardStyle
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.util.isConference
 import dev.goodwy.rphone.liquidglass.LocalLiquidGlassBackdrop
@@ -58,7 +60,8 @@ private data class CallIdentity(
     val number: String,
     val name: String,
     val photoUri: String?,
-    val backgroundUri: String?
+    val backgroundUri: String?,
+    val callingCardStyle: CallingCardStyle
 )
 
 private data class CachedCallIdentity(
@@ -86,6 +89,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
         super.onCreate(savedInstanceState)
 
         CallBackgroundStore.attach(preferenceManager)
+        CallingCardStore.attach(preferenceManager)
 
         val telecomManager = getSystemService(Context.TELECOM_SERVICE) as? TelecomManager
         val isTelecomInCall = try {
@@ -258,6 +262,7 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
                                     audioState = audioState,
                                     initialConnectTime = connectTime,
                                     backgroundUri = targetIdentity.backgroundUri,
+                                    callingCardStyle = targetIdentity.callingCardStyle,
                                     skipIncomingScreen = answeredFromNotification,
                                     isConference = isConference,
                                     liquidGlassBackdrop = liquidGlassBackdrop
@@ -294,10 +299,30 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
         val conference = stringResource(R.string.conference)
         var identity by remember(number, cnam, unknownLabel) {
             val base = if (isConference) {
-                CallIdentity("", conference, null, null)
+                CallIdentity(
+                    number = "",
+                    name = conference,
+                    photoUri = null,
+                    backgroundUri = null,
+                    callingCardStyle = CallingCardStore.effectiveStyle(
+                        context,
+                        contactId = null,
+                        numbers = emptyList()
+                    )
+                )
             } else {
                 cachedIdentity(number, settingsState)
-                    ?: CallIdentity(number, cnam ?: number.ifEmpty { unknownLabel }, null, null)
+                    ?: CallIdentity(
+                        number = number,
+                        name = cnam ?: number.ifEmpty { unknownLabel },
+                        photoUri = null,
+                        backgroundUri = null,
+                        callingCardStyle = CallingCardStore.effectiveStyle(
+                            context,
+                            contactId = null,
+                            numbers = listOfNotNull(number.ifEmpty { null })
+                        )
+                    )
             }
             mutableStateOf(
                 if (base.backgroundUri == null) {
@@ -356,11 +381,21 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
               ?: identity.name.takeIf { contactFailed && it.isNotBlank() }
               ?: number.ifEmpty { unknownLabel }
 
+            val styleNumbers = (contact?.phoneNumbers ?: emptyList()) + listOfNotNull(
+                number.ifEmpty { null }
+            )
+            val callingCardStyle = CallingCardStore.effectiveStyle(
+                context = context,
+                contactId = contactId,
+                numbers = styleNumbers
+            )
+
             val resolved = CallIdentity(
                 number = number,
                 name = resolvedName,
                 photoUri = contact?.photoUri ?: identity.photoUri.takeIf { contactFailed },
-                backgroundUri = background
+                backgroundUri = background,
+                callingCardStyle = callingCardStyle
             )
             cacheIdentity(number, resolved, settingsState)
             identity = resolved

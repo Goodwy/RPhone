@@ -137,6 +137,8 @@ import com.ramcosta.composedestinations.generated.destinations.ContactEditScreen
 import dev.goodwy.rphone.cardSpacedBy
 import dev.goodwy.rphone.controller.util.BlockedNumbersManager
 import dev.goodwy.rphone.controller.util.CallBackgroundStore
+import dev.goodwy.rphone.controller.util.CallingCardStore
+import dev.goodwy.rphone.controller.util.CallingCardStyle
 import dev.goodwy.rphone.controller.util.ContactShortcutUtils
 import dev.goodwy.rphone.controller.util.SocialUtils.openWhatsAppChat
 import dev.goodwy.rphone.controller.util.areNumbersEqual
@@ -375,9 +377,14 @@ fun ContactDetailsScreen(
     var showSourcesDialog by remember { mutableStateOf(false) }
 
     var callBackground by remember { mutableStateOf<String?>(null) }
+    var callingCardStyle by remember { mutableStateOf<CallingCardStyle?>(null) }
     var backgroundSaving by remember { mutableStateOf(false) }
-    var showBackgroundDialog by remember { mutableStateOf(false) }
+    var showCallingCardEditor by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
+    val settingsState by prefs.settingsChanged.collectAsStateWithLifecycle()
+    val defaultCardStyle = remember(settingsState) {
+        CallingCardStore.peekDefault(context) ?: CallingCardStyle.ThemeDefault
+    }
 
     var blockedVersion by remember { mutableIntStateOf(0) }
     val knownNumbers = remember(contact, phoneNumber) {
@@ -401,43 +408,14 @@ fun ContactDetailsScreen(
 
     LaunchedEffect(backgroundContactId, backgroundNumbers) {
         callBackground = CallBackgroundStore.peek(context, backgroundContactId, backgroundNumbers)
-    }
-
-    val backgroundPickerLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocument()
-    ) { uri ->
-        if (uri != null) {
-            runCatching {
-                context.contentResolver.takePersistableUriPermission(
-                    uri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION
-                )
-            }
-            scope.launch {
-                backgroundSaving = true
-                val saved = CallBackgroundStore.save(
-                    context,
-                    backgroundContactId,
-                    backgroundNumbers,
-                    uri
-                )
-                backgroundSaving = false
-                if (saved) {
-                    callBackground = CallBackgroundStore.peek(context, backgroundContactId, backgroundNumbers)
-                } else {
-                    snackbarHostState.showSnackbar(backgroundErrorMessage)
-                }
-            }
-        }
+        callingCardStyle = CallingCardStore.peek(context, backgroundContactId, backgroundNumbers)
     }
 
     val onBackgroundClick: () -> Unit = {
-        when {
-            !backgroundAvailable -> {
-                scope.launch { snackbarHostState.showSnackbar(backgroundNoTargetMessage) }
-            }
-            callBackground != null -> showBackgroundDialog = true
-            else -> backgroundPickerLauncher.launch(arrayOf("image/*"))
+        if (!backgroundAvailable) {
+            scope.launch { snackbarHostState.showSnackbar(backgroundNoTargetMessage) }
+        } else {
+            showCallingCardEditor = true
         }
     }
 
@@ -658,29 +636,74 @@ fun ContactDetailsScreen(
         }
     }
 
-    if (showBackgroundDialog) {
-        CallBackgroundBottomSheet(
-            callBackground = callBackground,
-            tempCallBackground = null,
-            tempBackgroundDeleted = false,
-            onDismiss = { showBackgroundDialog = false },
-            onChange = {
-                backgroundPickerLauncher.launch(arrayOf("image/*"))
-            },
-            onRemove = {
+    if (showCallingCardEditor) {
+        CallingCardEditorDialog(
+            contactName = displayName.orEmpty(),
+            phoneNumber = knownNumbers.firstOrNull().orEmpty(),
+            contactPhotoUri = contact?.photoUri,
+            initialBackgroundUri = callBackground,
+            inheritedBackgroundUri = CallBackgroundStore.defaultModel(context),
+            initialStyle = callingCardStyle ?: defaultCardStyle,
+            fallbackStyle = defaultCardStyle,
+            onDismiss = { showCallingCardEditor = false },
+            onDone = { result ->
+                showCallingCardEditor = false
                 scope.launch {
-                    CallBackgroundStore.clear(
-                        context,
-                        backgroundContactId,
-                        backgroundNumbers
-                    )
-                    callBackground = null
-                    showBackgroundDialog = false
+                    backgroundSaving = true
+                    if (result.backgroundUri != callBackground) {
+                        if (result.backgroundUri == null) {
+                            CallBackgroundStore.clear(
+                                context,
+                                backgroundContactId,
+                                backgroundNumbers
+                            )
+                            callBackground = null
+                        } else {
+                            val saved = CallBackgroundStore.save(
+                                context,
+                                backgroundContactId,
+                                backgroundNumbers,
+                                result.backgroundUri.toUri()
+                            )
+                            if (saved) {
+                                callBackground = CallBackgroundStore.peek(
+                                    context,
+                                    backgroundContactId,
+                                    backgroundNumbers
+                                )
+                            } else {
+                                snackbarHostState.showSnackbar(backgroundErrorMessage)
+                            }
+                        }
+                    }
+
+                    val nextStyle = result.style
+                    val storedStyle = callingCardStyle
+                    when {
+                        nextStyle == null -> {
+                            CallingCardStore.clear(context, backgroundContactId, backgroundNumbers)
+                            callingCardStyle = null
+                        }
+                        // Pressing Done without customizing must not pin the
+                        // global default onto this contact.
+                        storedStyle == null && nextStyle == defaultCardStyle -> Unit
+                        nextStyle == storedStyle -> Unit
+                        else -> {
+                            CallingCardStore.save(
+                                context,
+                                backgroundContactId,
+                                backgroundNumbers,
+                                nextStyle
+                            )
+                            callingCardStyle = CallingCardStore.peek(
+                                context,
+                                backgroundContactId,
+                                backgroundNumbers
+                            )
+                        }
+                    }
+                    backgroundSaving = false
                 }
-            },
-            onReset = {
-                // No need to refresh, as changes are saved immediately
-                showBackgroundDialog = false
             }
         )
     }
@@ -3190,226 +3213,6 @@ fun SourcesDialog(
                     }
                 }
             }
-        }
-    }
-}
-
-@SuppressLint("ConfigurationScreenWidthHeight")
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun CallBackgroundBottomSheet(
-    callBackground: String?,
-    tempCallBackground: String?,
-    tempBackgroundDeleted: Boolean,
-    onDismiss: () -> Unit,
-    onChange: () -> Unit,
-    onRemove: () -> Unit,
-    onReset: () -> Unit
-) {
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true,
-        confirmValueChange = { true }
-    )
-
-    val displayBackground = tempCallBackground ?: callBackground
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.dp
-    val screenHeight = configuration.screenHeightDp.dp
-    val aspectRatio = screenHeight / screenWidth
-
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        shape = RoundedCornerShape(
-            topStart = 0.dp,
-            topEnd = 0.dp
-        ),
-        containerColor = MaterialTheme.colorScheme.surface,
-        dragHandle = null,
-        scrimColor = Color.Black.copy(alpha = 0.6f),
-        contentWindowInsets = { WindowInsets(0) }
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 20.dp)
-                .navigationBarsPadding()
-                .statusBarsPadding(),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            // Drag handle
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp, bottom = 4.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Surface(
-                    shape = RoundedCornerShape(3.dp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
-                    modifier = Modifier.size(width = 36.dp, height = 4.dp)
-                ) {}
-            }
-
-            // Title
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.contact_call_background),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-                SpringIconButton(
-                    onClick = onDismiss
-                ) {
-                    Icon(Icons.Default.Close, stringResource(R.string.close))
-                }
-            }
-
-            // Background Preview
-            Box(
-                modifier = Modifier
-                    .padding(horizontal = 24.dp)
-                    .padding(top = 12.dp, bottom = 24.dp)
-                    .fillMaxWidth()
-                    .heightIn(
-                        min = 300.dp,
-                        max = (screenWidth * aspectRatio * 0.75f)
-                    )
-                    .weight(1f)
-                    .clip(MaterialTheme.shapes.extraLarge)
-                    .background(MaterialTheme.colorScheme.surfaceContainerLowest)
-            ) {
-                if (displayBackground != null) {
-                    AsyncImage(
-                        model = displayBackground,
-                        contentDescription = stringResource(R.string.contact_call_background_preview),
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.surfaceContainerHighest),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Wallpaper,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(80.dp)
-                        )
-                    }
-                }
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                // "Edit" button
-                Button(
-                    onClick = {
-                        onDismiss()
-                        onChange()
-                    },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(48.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Edit,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = if (displayBackground != null) {
-                            stringResource(R.string.contact_call_background_change)
-                        } else {
-                            stringResource(R.string.contact_call_background_choose)
-                        },
-                        style = MaterialTheme.typography.labelLarge,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-
-                // "Delete" button—only if there is a background
-                if (displayBackground != null) {
-                    Button(
-                        onClick = {
-                            onDismiss()
-                            onRemove()
-                        },
-                        modifier = Modifier
-                            .weight(0.6f)
-                            .height(48.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer,
-                            contentColor = MaterialTheme.colorScheme.error
-                        )
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_delete),
-                            contentDescription = stringResource(R.string.contact_call_background_remove),
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = stringResource(R.string.contact_call_background_remove),
-                            style = MaterialTheme.typography.labelLarge,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
-                }
-
-                // "Reset" button—only if there are temporary changes
-                if (tempCallBackground != null || tempBackgroundDeleted) {
-                    Button(
-                        onClick = {
-                            onDismiss()
-                            onReset()
-                        },
-                        modifier = Modifier
-                            .weight(0.6f)
-                            .height(48.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.Undo,
-                            contentDescription = stringResource(R.string.reset),
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = stringResource(R.string.reset),
-                            style = MaterialTheme.typography.labelLarge,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

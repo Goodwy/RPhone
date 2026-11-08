@@ -81,6 +81,24 @@ object CallBackgroundStore {
         return numbers.mapNotNull { numberKey(it) }.distinct()
     }
 
+    /**
+     * Decides whether the circular caller avatar is shown on the call screen.
+     *
+     * A custom per-contact or per-number background always hides the avatar. The global
+     * default background follows [hideAvatarWithBg], and no background leaves the avatar
+     * visible when [showCallScreenAvatar] is enabled.
+     */
+    fun shouldShowAvatar(
+        showCallScreenAvatar: Boolean,
+        hideAvatarWithBg: Boolean,
+        backgroundUri: String?,
+        defaultBackgroundUri: String?
+    ): Boolean {
+        val hasBackground = !backgroundUri.isNullOrEmpty()
+        val isCustomBackground = hasBackground && backgroundUri != defaultBackgroundUri
+        return showCallScreenAvatar && !(hideAvatarWithBg && hasBackground) && !isCustomBackground
+    }
+
     private fun numberDigits(number: String?): String {
         val raw = number?.trim().orEmpty()
         if (raw.isEmpty()) return ""
