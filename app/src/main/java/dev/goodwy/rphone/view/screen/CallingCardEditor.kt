@@ -133,7 +133,7 @@ fun CallingCardEditorDialog(
     }
     var usingDefault by rememberSaveable { mutableStateOf(false) }
     var pendingCameraUri by rememberSaveable { mutableStateOf<String?>(null) }
-    var cloudProblem by remember { mutableStateOf<CloudPhotoProblem?>(null) }
+    var googlePhotosNotInstalled by remember { mutableStateOf(false) }
 
     // The inherited global background is shown for context, but it is not a
     // draft value: Done still returns only what the user picked here.
@@ -167,6 +167,10 @@ fun CallingCardEditorDialog(
     val galleryPicker = rememberLauncherForActivityResult(
         ActivityResultContracts.PickVisualMedia()
     ) { uri -> acceptPickedUri(uri) }
+
+    val googlePhotosLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result -> acceptPickedUri(result.data?.data) }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
@@ -218,18 +222,23 @@ fun CallingCardEditorDialog(
     }
 
     fun launchGooglePhotos() {
-        scope.launch {
-            val status = withContext(Dispatchers.IO) {
-                CallingCardPhotoSupport.cloudPhotoStatus(context)
-            }
-            when (CallingCardPhotoSupport.cloudPhotoAction(status)) {
-                CallingCardPhotoSupport.CloudPhotoAction.OPEN_PICKER -> launchGallery()
-                CallingCardPhotoSupport.CloudPhotoAction.OPEN_SETTINGS ->
-                    cloudProblem = CloudPhotoProblem.NOT_SELECTED
-                CallingCardPhotoSupport.CloudPhotoAction.FALLBACK ->
-                    cloudProblem = CloudPhotoProblem.UNAVAILABLE
-            }
+        val googlePhotosIntent = Intent(Intent.ACTION_PICK).apply {
+            type = "image/*"
+            setPackage("com.google.android.apps.photos")
         }
+        if (googlePhotosIntent.resolveActivity(context.packageManager) != null) {
+            googlePhotosLauncher.launch(googlePhotosIntent)
+        } else {
+            googlePhotosNotInstalled = true
+        }
+    }
+
+    fun launchGalleryFallback() {
+        googlePhotosLauncher.launch(
+            Intent(Intent.ACTION_GET_CONTENT).apply {
+                type = "image/*"
+            }
+        )
     }
 
     fun discardDrafts() {
@@ -320,77 +329,25 @@ fun CallingCardEditorDialog(
         }
     }
 
-    cloudProblem?.let { problem ->
-        CloudPhotoProblemDialog(
-            problem = problem,
-            onDismiss = { cloudProblem = null },
-            onUseGallery = {
-                cloudProblem = null
-                launchGallery()
+    if (googlePhotosNotInstalled) {
+        AlertDialog(
+            onDismissRequest = { googlePhotosNotInstalled = false },
+            text = { Text(stringResource(R.string.calling_card_google_photos_not_installed)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    googlePhotosNotInstalled = false
+                    launchGalleryFallback()
+                }) {
+                    Text(stringResource(R.string.calling_card_action_gallery))
+                }
             },
-            onOpenSettings = {
-                cloudProblem = null
-                if (!CallingCardPhotoSupport.openPhotoPickerSettings(context)) {
-                    showMessage(
-                        context.getString(R.string.calling_card_google_photos_settings_failed)
-                    )
+            dismissButton = {
+                TextButton(onClick = { googlePhotosNotInstalled = false }) {
+                    Text(stringResource(R.string.calling_card_google_photos_cancel))
                 }
             }
         )
     }
-}
-
-private enum class CloudPhotoProblem {
-    UNAVAILABLE,
-    NOT_SELECTED
-}
-
-@Composable
-private fun CloudPhotoProblemDialog(
-    problem: CloudPhotoProblem,
-    onDismiss: () -> Unit,
-    onUseGallery: () -> Unit,
-    onOpenSettings: () -> Unit
-) {
-    val title = when (problem) {
-        CloudPhotoProblem.NOT_SELECTED ->
-            stringResource(R.string.calling_card_google_photos_not_selected_title)
-        CloudPhotoProblem.UNAVAILABLE ->
-            stringResource(R.string.calling_card_google_photos_unavailable_title)
-    }
-    val body = when (problem) {
-        CloudPhotoProblem.NOT_SELECTED ->
-            stringResource(R.string.calling_card_google_photos_not_selected_body)
-        CloudPhotoProblem.UNAVAILABLE ->
-            stringResource(R.string.calling_card_google_photos_unavailable_body)
-    }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = { Text(body) },
-        confirmButton = {
-            if (problem == CloudPhotoProblem.NOT_SELECTED) {
-                TextButton(onClick = onOpenSettings) {
-                    Text(stringResource(R.string.calling_card_google_photos_open_settings))
-                }
-            } else {
-                TextButton(onClick = onUseGallery) {
-                    Text(stringResource(R.string.calling_card_google_photos_use_gallery))
-                }
-            }
-        },
-        dismissButton = {
-            if (problem == CloudPhotoProblem.NOT_SELECTED) {
-                TextButton(onClick = onUseGallery) {
-                    Text(stringResource(R.string.calling_card_google_photos_use_gallery))
-                }
-            } else {
-                TextButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.calling_card_google_photos_cancel))
-                }
-            }
-        }
-    )
 }
 
 @Composable

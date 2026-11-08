@@ -573,6 +573,7 @@
     <string name="calling_card_image_unreadable">That image could not be opened. Choose another one.</string>
     <string name="calling_card_google_photos_unavailable_title">Google Photos is not available</string>
     <string name="calling_card_google_photos_unavailable_body">This device cannot offer Google Photos cloud selection in the system photo picker. You can still choose a photo stored on the device.</string>
+    <string name="calling_card_google_photos_not_installed">Google Photos is not installed.</string>
     <string name="calling_card_google_photos_not_selected_title">Google Photos is not selected</string>
     <string name="calling_card_google_photos_not_selected_body">The photo picker can use Google Photos, but another cloud provider is selected. Open the photo picker settings, choose Google Photos, then try again.</string>
     <string name="calling_card_google_photos_open_settings">Photo picker settings</string>
