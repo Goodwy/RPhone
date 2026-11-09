@@ -90,6 +90,19 @@
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="viber" />
         </intent>
+        <!-- Adaptive calling cards: camera app discovery and the documented
+             Android photo picker cloud provider interface. -->
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE" />
+        </intent>
+        <intent>
+            <action android:name="android.content.action.CLOUD_MEDIA_PROVIDER" />
+        </intent>
+        <intent>
+            <action android:name="android.provider.action.PICK_IMAGES_SETTINGS" />
+        </intent>
+        <package android:name="com.google.android.apps.photos" />
+        <package android:name="com.google.android.apps.photosgo" />
     </queries>
 
     <application

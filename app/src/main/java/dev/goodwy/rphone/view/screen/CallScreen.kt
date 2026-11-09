@@ -63,6 +63,8 @@ import dev.goodwy.rphone.cardCornerExtraSmall
 import dev.goodwy.rphone.controller.lock.AppLockManager
 import dev.goodwy.rphone.controller.sensor.PocketModeManager
 import dev.goodwy.rphone.controller.util.CallBackgroundStore
+import dev.goodwy.rphone.controller.util.CallingCardStyle
+import dev.goodwy.rphone.controller.util.callingCardNameShadow
 import dev.goodwy.rphone.controller.util.NoteManager
 import dev.goodwy.rphone.modal.data.getDisplayName
 import dev.goodwy.rphone.view.components.RillExpressiveCard
@@ -101,6 +103,7 @@ fun ExpressiveCallScreen(
     audioState: CallAudioState?,
     initialConnectTime: Long = 0L,
     backgroundUri: String? = null,
+    callingCardStyle: CallingCardStyle = CallingCardStyle.ThemeDefault,
     skipIncomingScreen: Boolean = false,
     isConference: Boolean,
     liquidGlassBackdrop: LayerBackdrop
@@ -141,10 +144,13 @@ fun ExpressiveCallScreen(
     val hideAvatarWithBg = remember(settingsState) {
         preferenceManager.getBoolean(PreferenceManager.KEY_HIDE_AVATAR_WITH_BACKGROUND, false)
     }
-    val hasBackground = !backgroundUri.isNullOrEmpty()
     val defaultBg = remember(settingsState) { CallBackgroundStore.defaultModel(context) }
-    val customVisible = hasBackground && (backgroundUri != defaultBg)
-    val shouldShowAvatar = showCallScreenAvatar && !(hideAvatarWithBg && hasBackground) && !customVisible
+    val shouldShowAvatar = CallBackgroundStore.shouldShowAvatar(
+        showCallScreenAvatar = showCallScreenAvatar,
+        hideAvatarWithBg = hideAvatarWithBg,
+        backgroundUri = backgroundUri,
+        defaultBackgroundUri = defaultBg
+    )
 
     val globalBackdrop = LocalLiquidGlassBackdrop.current
     val liquidGlass = remember(settingsState) { preferenceManager.getBoolean(PreferenceManager.KEY_LIQUID_GLASS, false) }
@@ -398,11 +404,20 @@ fun ExpressiveCallScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
 
+                        val nameColor =
+                            callingCardStyle.textColor ?: MaterialTheme.colorScheme.onSurface
+                        val nameShadow = callingCardNameShadow(
+                            color = nameColor,
+                            hasBackground = !backgroundUri.isNullOrEmpty()
+                        )
                         Text(
                             text = contactName,
-                            style = MaterialTheme.typography.headlineSmall,
+                            style = MaterialTheme.typography.headlineSmall.copy(
+                                fontFamily = callingCardStyle.font.family,
+                                shadow = nameShadow
+                            ),
                             fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurface,
+                            color = nameColor,
                             textAlign = TextAlign.Center,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis

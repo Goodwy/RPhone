@@ -49,7 +49,9 @@ val commonModule = module {
         CallLogRepository(androidContext(), androidContext().contentResolver, get(), get())
     }
     single {
-        PreferenceManager(androidContext())
+        PreferenceManager(androidContext()).also {
+            dev.goodwy.rphone.controller.util.CallingCardStore.attach(it)
+        }
     }
     // Clean Architecture Wires
     single<ICallerRepository> { CallerRepositoryImpl(get()) }

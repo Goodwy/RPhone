@@ -27,6 +27,7 @@ import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 import androidx.core.net.toUri
 import androidx.core.graphics.scale
 import dev.goodwy.rphone.controller.util.CallBackgroundStore
+import dev.goodwy.rphone.controller.util.CallingCardStore
 import dev.goodwy.rphone.controller.util.ContactDumpUtils
 import dev.goodwy.rphone.controller.util.areNumbersEqual
 import dev.goodwy.rphone.controller.util.deduplicateNumbers
@@ -1225,6 +1226,7 @@ class ContactsRepository(
             emptyList()
         }
         CallBackgroundStore.clearBlocking(context, contactId, numbers)
+        CallingCardStore.clearBlocking(context, contactId, numbers)
     }
 
     private suspend fun deleteContactInternal(contactId: String, clearBackground: Boolean) {
@@ -1702,6 +1704,7 @@ class ContactsRepository(
         deleteContactInternal(contactId, false)
 
         CallBackgroundStore.carryBlocking(context, contactId, "p$localId", contact.phoneNumbers)
+        CallingCardStore.carryBlocking(context, contactId, "p$localId", contact.phoneNumbers)
     }
 
     override suspend fun makeContactPublic(contactId: String) = withContext(Dispatchers.IO) {
@@ -1716,6 +1719,7 @@ class ContactsRepository(
             getContactByNumber(number)?.id?.takeIf { it.isNotBlank() && !it.startsWith("p") }
         }
         CallBackgroundStore.carryBlocking(context, contactId, newId, contact.phoneNumbers)
+        CallingCardStore.carryBlocking(context, contactId, newId, contact.phoneNumbers)
     }
 
     override suspend fun exportPrivateContacts(uri: Uri) = withContext(Dispatchers.IO) {
@@ -2341,6 +2345,7 @@ class ContactsRepository(
             }
 
             CallBackgroundStore.clearBlocking(context, sourceId, emptyList())
+            CallingCardStore.clearBlocking(context, sourceId, emptyList())
         }
 
         try {
