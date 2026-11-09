@@ -272,6 +272,17 @@
     <string name="settings_speed_dial_no_number">Sem número</string>
     <string name="settings_speed_dial_open">Abrir as definições de marcação rápida?</string>
 
+    <!-- Call Log -->
+    <string name="settings_call_log_limit">Limite de chamadas recentes</string>
+    <string name="settings_call_log_limit_supporting">Limite o número de entradas recentes do registo de chamadas carregadas para melhorar a velocidade de carregamento e o desempenho</string>
+    <string name="settings_call_log_limit_100">100 chamadas</string>
+    <string name="settings_call_log_limit_250">250 chamadas</string>
+    <string name="settings_call_log_limit_500">500 chamadas</string>
+    <string name="settings_call_log_limit_1000">1 000 chamadas</string>
+    <string name="settings_call_log_limit_unlimited">Ilimitado</string>
+    <string name="settings_include_day_of_week">Mostrar dia da semana nos cabeçalhos de data</string>
+    <string name="settings_include_day_of_week_supporting">Adiciona o dia da semana aos cabeçalhos de data nas suas chamadas recentes</string>
+
     <string name="quick_response">Resposta rápida</string>
     <string name="quick_responses">Respostas rápidas</string>
     <string name="quick_responses_subtitle">Gerir respostas SMS predefinidas de recusa para chamadas recebidas</string>
@@ -626,6 +637,8 @@
     <string name="contacts_permission_description">Para ver os seus contactos, permita o acesso aos contactos.</string>
     <string name="search_contacts_permission_description">Para pesquisar os seus contactos e identificar chamadas recebidas, permita o acesso aos contactos.</string>
     <string name="save_local_blocked_by_system">Não é possível guardar um contacto local: a conta predefinida do sistema para novos contactos está definida como uma conta na nuvem. Altere-a nas definições do sistema ou escolha outra conta.</string>
+    <string name="fsi_banner_title">As chamadas em ecrã completo são limitadas</string>
+    <string name="fsi_banner_message">As chamadas recebidas podem não ser apresentadas corretamente no ecrã de bloqueio. Permita notificações em ecrã completo para que as chamadas apareçam corretamente quando o ecrã estiver bloqueado.</string>
 
     <!-- Default Dialer -->
     <string name="default_phone_number_cleared">Número de telefone predefinido limpo</string>

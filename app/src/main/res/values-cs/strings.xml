@@ -271,6 +271,17 @@
     <string name="settings_speed_dial_no_number">Žádné číslo</string>
     <string name="settings_speed_dial_open">Otevřít nastavení rychlého vytáčení?</string>
 
+    <!-- Call Log -->
+    <string name="settings_call_log_limit">Limit nedávných hovorů</string>
+    <string name="settings_call_log_limit_supporting">Omezte počet načítaných nedávných záznamů protokolu hovorů pro zlepšení rychlosti načítání a výkonu</string>
+    <string name="settings_call_log_limit_100">100 hovorů</string>
+    <string name="settings_call_log_limit_250">250 hovorů</string>
+    <string name="settings_call_log_limit_500">500 hovorů</string>
+    <string name="settings_call_log_limit_1000">1 000 hovorů</string>
+    <string name="settings_call_log_limit_unlimited">Neomezeno</string>
+    <string name="settings_include_day_of_week">Zobrazit den v týdnu v záhlavích dat</string>
+    <string name="settings_include_day_of_week_supporting">Přidá den v týdnu k záhlavím dat ve vašich nedávných hovorech</string>
+
     <string name="quick_response">Rychlá odpověď</string>
     <string name="quick_responses">Rychlé odpovědi</string>
     <string name="quick_responses_subtitle">Správa připravených SMS odpovědí pro odmítnutí příchozích hovorů</string>
@@ -630,6 +641,8 @@
     <string name="contacts_permission_description">Chcete-li zobrazit své kontakty, povolte oprávnění ke kontaktům.</string>
     <string name="search_contacts_permission_description">Chcete-li vyhledávat ve svých kontaktech a identifikovat příchozí hovory, povolte oprávnění ke kontaktům.</string>
     <string name="save_local_blocked_by_system">Místní kontakt nelze uložit: výchozí systémový účet pro nové kontakty je nastaven na cloudový účet. Změňte to v nastavení systému nebo vyberte jiný účet.</string>
+    <string name="fsi_banner_title">Hovory na celou obrazovku jsou omezeny</string>
+    <string name="fsi_banner_message">Příchozí hovory se na zamykací obrazovce nemusí zobrazovat správně. Povolte oznámení na celou obrazovku, aby se hovory při uzamčené obrazovce zobrazovaly správně.</string>
 
     <!-- Default Dialer -->
     <string name="default_phone_number_cleared">Výchozí telefonní číslo vymazáno</string>

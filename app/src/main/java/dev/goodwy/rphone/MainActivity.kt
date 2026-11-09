@@ -59,6 +59,8 @@ import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Assistant
 import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.AccessTimeFilled
+import androidx.compose.material.icons.rounded.NotificationsOff
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -109,8 +111,10 @@ import dev.goodwy.rphone.controller.MainViewModel
 import dev.goodwy.rphone.controller.NavigationTarget
 import dev.goodwy.rphone.controller.PurchaseHelper
 import dev.goodwy.rphone.controller.lock.AppLockManager
+import dev.goodwy.rphone.controller.util.canUseFullScreenIntent
 import dev.goodwy.rphone.controller.util.fetchLatestRelease
 import dev.goodwy.rphone.controller.util.isNewerVersion
+import dev.goodwy.rphone.controller.util.openFullScreenIntentSettings
 import dev.goodwy.rphone.view.components.TabSpec
 import dev.goodwy.rphone.view.components.UpdateAvailableDialog
 import dev.goodwy.rphone.view.components.parseTabOrder
@@ -301,7 +305,6 @@ class MainActivity : FragmentActivity() {
                             callSession?.state != Call.STATE_DISCONNECTING
 
                     var showCallBanner by remember { mutableStateOf(false) }
-
                     LaunchedEffect(hasOngoingCall) {
                         if (hasOngoingCall) {
                             // A delay to ensure no banner appears before the call screen opens
@@ -309,6 +312,17 @@ class MainActivity : FragmentActivity() {
                             showCallBanner = true
                         } else {
                             showCallBanner = false
+                        }
+                    }
+
+                    var showFsiBanner by remember { mutableStateOf(false) }
+                    val isDefaultDialerForFsi = remember { isAlreadyDefaultDialer(this@MainActivity) }
+                    LaunchedEffect(Unit) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
+                            isDefaultDialerForFsi && !canUseFullScreenIntent()
+                        ) {
+                            val snoozedUntil = prefs.getLong(PreferenceManager.KEY_FSI_BANNER_SNOOZED_UNTIL, 0L)
+                            if (System.currentTimeMillis() >= snoozedUntil) showFsiBanner = true
                         }
                     }
 
@@ -364,6 +378,74 @@ class MainActivity : FragmentActivity() {
                                             color = Color.White,
                                             fontWeight = FontWeight.SemiBold
                                         )
+                                    }
+                                }
+                            }
+
+                            // ── Full-screen intent permission banner ────────────────────────────────
+                            AnimatedVisibility(
+                                visible = showFsiBanner && !showCallBanner,
+                                enter = slideInVertically { -it } + fadeIn(),
+                                exit = slideOutVertically { -it } + fadeOut()
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(MaterialTheme.colorScheme.tertiaryContainer)
+                                        .statusBarsPadding()
+                                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    ) {
+                                        Icon(
+                                            Icons.Rounded.NotificationsOff,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Text(
+                                            text = stringResource(R.string.fsi_banner_title),
+                                            style = MaterialTheme.typography.titleSmall,
+                                            color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+                                    }
+                                    Text(
+                                        text = stringResource(R.string.fsi_banner_message),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onTertiaryContainer
+                                    )
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.End,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        TextButton(
+                                            colors = ButtonDefaults.textButtonColors(
+                                                contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                                            ),
+                                            onClick = {
+                                                // Postpone for 2 days
+                                                val until = System.currentTimeMillis() + 2L * 24 * 60 * 60 * 1000
+                                                prefs.setLong(PreferenceManager.KEY_FSI_BANNER_SNOOZED_UNTIL, until)
+                                                showFsiBanner = false
+                                            }
+                                        ) {
+                                            Text(stringResource(R.string.not_now))
+                                        }
+                                        Spacer(Modifier.width(8.dp))
+                                        Button(
+
+                                            onClick = {
+                                                openFullScreenIntentSettings()
+                                                showFsiBanner = false
+                                            }
+                                        ) {
+                                            Text(stringResource(R.string.allow))
+                                        }
                                     }
                                 }
                             }
@@ -641,7 +723,7 @@ class MainActivity : FragmentActivity() {
                                                 .padding(scaffoldPadding)
                                                 .layerBackdrop(liquidGlassBackdrop)
                                                 .then(
-                                                    if (showCallBanner)
+                                                    if (showCallBanner || showFsiBanner)
                                                         Modifier.consumeWindowInsets(WindowInsets.statusBars)
                                                     else
                                                         Modifier

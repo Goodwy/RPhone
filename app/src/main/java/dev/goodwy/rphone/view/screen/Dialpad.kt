@@ -390,9 +390,7 @@ fun DialPadContent(
         var showClipboardBanner by remember { mutableStateOf(false) }
         LaunchedEffect(Unit) {
             val clipText = clipboard.getText()?.text?.filter { it.isDigit() || it == '+' } ?: ""
-            if (clipText.length in 7..15) {
-                showClipboardBanner = true
-            }
+            if (clipText.length in 7..15) showClipboardBanner = true
         }
 
         var showOverflowMenu by remember { mutableStateOf(false) }
@@ -1179,7 +1177,6 @@ fun DialPadContent(
                     modifier = Modifier
                         .fillMaxSize()
                         .then(if (!isBottomSheet) Modifier.statusBarsPadding() else Modifier)
-//            .padding(top = 16.dp)
                 ) {
                     val screenHeight = maxHeight
                     val screenWidth = maxWidth
@@ -1188,7 +1185,6 @@ fun DialPadContent(
                     // dialpad card fixed at bottom. Nothing moves when results appear.
                     Box(
                         modifier = Modifier.fillMaxSize(),
-//                verticalArrangement = Arrangement.Top
                         contentAlignment = Alignment.BottomEnd
                     ) {
                         // ── Middle section: results / pills / clipboard (scrollable, fills space) ──
@@ -1691,9 +1687,9 @@ fun DialPadContent(
                                                     .padding(horizontal = 20.dp)
                                             )
                                             TextButton(onClick = {
-                                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); replaceNumber(
-                                                clipText
-                                            ); showClipboardBanner = false
+                                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                                replaceNumber(clipText)
+                                                showClipboardBanner = false
                                             }) {
                                                 Text(
                                                     stringResource(R.string.use),

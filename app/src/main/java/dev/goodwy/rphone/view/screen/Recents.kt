@@ -792,8 +792,8 @@ fun CallLogFullContent(
                         ScrollHapticsEffect(listState = listState)
                         LazyColumn(
                             state = listState,
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(top = 8.dp, bottom = 168.dp),
+                            modifier = Modifier.fillMaxSize().padding(top = 8.dp),
+                            contentPadding = PaddingValues(bottom = 168.dp),
                             verticalArrangement = Arrangement.spacedBy(0.dp)
                         ) {
                             if (!favouritesEnabled && favorites.isNotEmpty() && selectedFilter == CallLogFilter.All) {

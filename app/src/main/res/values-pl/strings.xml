@@ -272,6 +272,17 @@
     <string name="settings_speed_dial_no_number">Brak numeru</string>
     <string name="settings_speed_dial_open">Otworzyć ustawienia szybkiego wybierania?</string>
 
+    <!-- Call Log -->
+    <string name="settings_call_log_limit">Limit ostatnich połączeń</string>
+    <string name="settings_call_log_limit_supporting">Ogranicz liczbę wczytywanych ostatnich wpisów dziennika połączeń, aby poprawić szybkość ładowania i wydajność</string>
+    <string name="settings_call_log_limit_100">100 połączeń</string>
+    <string name="settings_call_log_limit_250">250 połączeń</string>
+    <string name="settings_call_log_limit_500">500 połączeń</string>
+    <string name="settings_call_log_limit_1000">1000 połączeń</string>
+    <string name="settings_call_log_limit_unlimited">Bez limitu</string>
+    <string name="settings_include_day_of_week">Pokaż dzień tygodnia w nagłówkach dat</string>
+    <string name="settings_include_day_of_week_supporting">Dodaje dzień tygodnia do nagłówków dat w ostatnich połączeniach</string>
+
     <string name="quick_response">Szybka odpowiedź</string>
     <string name="quick_responses">Szybkie odpowiedzi</string>
     <string name="quick_responses_subtitle">Zarządzaj szablonowymi odpowiedziami SMS odmowy dla połączeń przychodzących</string>
@@ -629,6 +640,8 @@
     <string name="contacts_permission_description">Aby wyświetlić swoje kontakty, zezwól na dostęp do kontaktów.</string>
     <string name="search_contacts_permission_description">Aby wyszukiwać kontakty i identyfikować połączenia przychodzące, zezwól na dostęp do kontaktów.</string>
     <string name="save_local_blocked_by_system">Nie można zapisać kontaktu lokalnego: domyślne konto systemowe dla nowych kontaktów jest ustawione na konto w chmurze. Zmień to w ustawieniach systemowych lub wybierz inne konto.</string>
+    <string name="fsi_banner_title">Połączenia na pełnym ekranie są ograniczone</string>
+    <string name="fsi_banner_message">Połączenia przychodzące mogą nie być prawidłowo wyświetlane na ekranie blokady. Zezwól na powiadomienia pełnoekranowe, aby połączenia pojawiały się poprawnie, gdy ekran jest zablokowany.</string>
 
     <!-- Default Dialer -->
     <string name="default_phone_number_cleared">Domyślny numer telefonu wyczyszczony</string>

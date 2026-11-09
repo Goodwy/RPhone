@@ -272,6 +272,17 @@
     <string name="settings_speed_dial_no_number">Inget nummer</string>
     <string name="settings_speed_dial_open">Öppna inställningar för snabbuppringning?</string>
 
+    <!-- Call Log -->
+    <string name="settings_call_log_limit">Gräns för senaste samtal</string>
+    <string name="settings_call_log_limit_supporting">Begränsa antalet inlästa senaste samtalsloggposter för att förbättra laddningshastighet och prestanda</string>
+    <string name="settings_call_log_limit_100">100 samtal</string>
+    <string name="settings_call_log_limit_250">250 samtal</string>
+    <string name="settings_call_log_limit_500">500 samtal</string>
+    <string name="settings_call_log_limit_1000">1 000 samtal</string>
+    <string name="settings_call_log_limit_unlimited">Obegränsat</string>
+    <string name="settings_include_day_of_week">Visa veckodag i datumrubriker</string>
+    <string name="settings_include_day_of_week_supporting">Lägger till veckodagen i datumrubrikerna i dina senaste samtal</string>
+
     <string name="quick_response">Snabbsvar</string>
     <string name="quick_responses">Snabbsvar</string>
     <string name="quick_responses_subtitle">Hantera färdiga SMS-avböjningssvar för inkommande samtal</string>
@@ -623,6 +634,8 @@
     <string name="contacts_permission_description">För att visa dina kontakter, tillåt kontakttillstånd.</string>
     <string name="search_contacts_permission_description">För att söka efter dina kontakter och identifiera inkommande samtal, tillåt kontakttillstånd.</string>
     <string name="save_local_blocked_by_system">Det gick inte att spara en lokal kontakt: systemets standardkonto för nya kontakter är inställt på ett molnkonto. Ändra det i systeminställningarna eller välj ett annat konto.</string>
+    <string name="fsi_banner_title">Helskärmssamtal är begränsade</string>
+    <string name="fsi_banner_message">Inkommande samtal kanske inte visas korrekt på låsskärmen. Tillåt aviseringar i helskärm så att samtalen visas korrekt när skärmen är låst.</string>
 
     <!-- Default Dialer -->
     <string name="default_phone_number_cleared">Standardtelefonnummer rensat</string>

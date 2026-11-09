@@ -1,6 +1,5 @@
 package dev.goodwy.rphone.controller
 
-import android.app.KeyguardManager
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration

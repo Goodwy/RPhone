@@ -12,7 +12,6 @@ import androidx.compose.foundation.gestures.*
 import androidx.compose.foundation.interaction.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.*
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowRight
 import androidx.compose.material.icons.automirrored.rounded.Send
@@ -625,7 +624,7 @@ fun HorizontalSwipeToAnswer(
     )
 
     val iconRotation by remember { derivedStateOf { dragProgress.value * 135f } }
-    val buttonBgColor = if (useLg || useBlur) bottomBarColor.copy(alpha = 0.35f) else MaterialTheme.colorScheme.surfaceVariant
+    val buttonBgColor = if (useLg || useBlur) cardColor.copy(alpha = 0.35f) else MaterialTheme.colorScheme.surfaceVariant
 
     Surface(
         shape           = CircleShape,
@@ -665,9 +664,10 @@ fun HorizontalSwipeToAnswer(
                 stringResource(R.string.decline),
                 modifier = Modifier
                     .align(Alignment.CenterStart)
-                    .padding(start = 32.dp)
+                    .padding(start = (28 * (1 - (-1 * dragProgress.value)).coerceIn(0f, 2f)).dp)
                     .alpha((1f - (dragProgress.value * -2f).coerceIn(0f, 1f)) * hintAlpha),
                 style = MaterialTheme.typography.titleMedium,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = declineRed.copy(alpha = 0.8f)
             )
@@ -676,9 +676,10 @@ fun HorizontalSwipeToAnswer(
                 stringResource(R.string.answer),
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
-                    .padding(end = 32.dp)
+                    .padding(end = (28 * (1 - dragProgress.value).coerceIn(0f, 2f)).dp)
                     .alpha((1f - (dragProgress.value * 2f).coerceIn(0f, 1f)) * hintAlpha),
                 style = MaterialTheme.typography.titleMedium,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = answerGreen.copy(alpha = 0.8f)
             )
@@ -1027,7 +1028,7 @@ fun IPhoneSwipeToAnswer(
     val maxDrag = trackWidthPx - handleSizePx - (handlePaddingPx * 2)
 
     val trackBgColor =
-        if (useLg || useBlur) bottomBarColor else MaterialTheme.colorScheme.onSurface.copy(alpha = if (isDark) 0.15f else 0.1f)
+        if (useLg || useBlur) cardColor else MaterialTheme.colorScheme.onSurface.copy(alpha = if (isDark) 0.15f else 0.1f)
     val buttonContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
     val handleBgColor = Color.White
 
@@ -1533,10 +1534,11 @@ fun DefaultSwipeToAnswer(
     val maxDrag = trackWidthPx - handleWidthPx - (handlePaddingPx * 2)
 
     val buttonBgColor =
-        if (useLg || useBlur) bottomBarColor else MaterialTheme.colorScheme.onSurface.copy(alpha = if (isDark) 0.15f else 0.1f)
+        if (useLg || useBlur) cardColor else MaterialTheme.colorScheme.onSurface.copy(alpha = if (isDark) 0.15f else 0.1f)
     val buttonContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
     val buttonIconColor = MaterialTheme.colorScheme.onSurface
-    val handleBgColor = Color.White
+    val handleContentColor = Color.White
+    val handleBgColor = MaterialTheme.colorScheme.onSurface
 
     val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
     val shimmerOffset by infiniteTransition.animateFloat(
@@ -1751,7 +1753,7 @@ fun DefaultSwipeToAnswer(
                     })
                     .height(handleHeight)
                     .clip(CircleShape)
-                    .background(handleBgColor)
+                    .background(handleContentColor)
                     .pointerInput(Unit) {
                         detectHorizontalDragGestures(
                             onDragEnd = {
@@ -1785,14 +1787,14 @@ fun DefaultSwipeToAnswer(
                 contentAlignment = Alignment.CenterEnd
             ) {
                 Icon(
-                    Icons.Rounded.DensityMedium,
+                    Icons.Rounded.Call,
                     contentDescription = null,
-                    tint = Color.Black.copy(alpha = 0.6f),
+                    tint = color_call_button, //Color.Black.copy(alpha = 0.6f),
                     modifier = Modifier
-                        .padding(end = 35.dp)
-                        .rotate(90f)
-                        .size(26.dp)
-//                        .graphicsLayer { rotationZ = iconRotation }
+                        .padding(end = 30.dp)
+//                        .rotate(90f)
+                        .size(36.dp)
+                        .graphicsLayer { rotationZ = iconRotation }
                 )
             }
         }

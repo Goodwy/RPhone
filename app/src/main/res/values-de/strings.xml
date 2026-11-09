@@ -272,6 +272,17 @@
     <string name="settings_speed_dial_no_number">Keine Nummer</string>
     <string name="settings_speed_dial_open">Kurzwahl-Einstellungen öffnen?</string>
 
+    <!-- Call Log -->
+    <string name="settings_call_log_limit">Limit für letzte Anrufe</string>
+    <string name="settings_call_log_limit_supporting">Begrenzen Sie die Anzahl der geladenen Anrufprotokolleinträge, um Ladegeschwindigkeit und Leistung zu verbessern</string>
+    <string name="settings_call_log_limit_100">100 Anrufe</string>
+    <string name="settings_call_log_limit_250">250 Anrufe</string>
+    <string name="settings_call_log_limit_500">500 Anrufe</string>
+    <string name="settings_call_log_limit_1000">1.000 Anrufe</string>
+    <string name="settings_call_log_limit_unlimited">Unbegrenzt</string>
+    <string name="settings_include_day_of_week">Wochentag in Datumsüberschriften anzeigen</string>
+    <string name="settings_include_day_of_week_supporting">Fügt den Wochentag zu den Datumsüberschriften in Ihren letzten Anrufen hinzu</string>
+
     <string name="quick_response">Schnellantwort</string>
     <string name="quick_responses">Schnellantworten</string>
     <string name="quick_responses_subtitle">Vorlagen für SMS-Ablehnungsantworten auf eingehende Anrufe verwalten</string>
@@ -623,6 +634,8 @@
     <string name="contacts_permission_description">Erlauben Sie den Zugriff auf Ihre Kontakte, um sie anzuzeigen.</string>
     <string name="search_contacts_permission_description">Um Ihre Kontakte zu durchsuchen und eingehende Anrufe zu identifizieren, erlauben Sie den Zugriff auf Ihre Kontakte.</string>
     <string name="save_local_blocked_by_system">Ein lokaler Kontakt kann nicht gespeichert werden: Das System-Standardkonto für neue Kontakte ist auf ein Cloud-Konto eingestellt. Ändern Sie dies in den Systemeinstellungen oder wählen Sie ein anderes Konto.</string>
+    <string name="fsi_banner_title">Vollbild-Anrufe sind eingeschränkt</string>
+    <string name="fsi_banner_message">Eingehende Anrufe werden auf dem Sperrbildschirm möglicherweise nicht korrekt angezeigt. Erlauben Sie Vollbildbenachrichtigungen, damit Anrufe bei gesperrtem Bildschirm ordnungsgemäß erscheinen.</string>
 
     <!-- Default Dialer -->
     <string name="default_phone_number_cleared">Standard-Telefonnummer gelöscht</string>

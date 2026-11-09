@@ -273,6 +273,17 @@
     <string name="settings_speed_dial_no_number">אין מספר</string>
     <string name="settings_speed_dial_open">לפתוח את הגדרות החיוג המהיר?</string>
 
+    <!-- Call Log -->
+    <string name="settings_call_log_limit">מגבלת שיחות אחרונות</string>
+    <string name="settings_call_log_limit_supporting">הגבל את מספר רשומות יומן השיחות האחרונות שנטענות כדי לשפר את מהירות הטעינה והביצועים</string>
+    <string name="settings_call_log_limit_100">100 שיחות</string>
+    <string name="settings_call_log_limit_250">250 שיחות</string>
+    <string name="settings_call_log_limit_500">500 שיחות</string>
+    <string name="settings_call_log_limit_1000">1,000 שיחות</string>
+    <string name="settings_call_log_limit_unlimited">ללא הגבלה</string>
+    <string name="settings_include_day_of_week">הצג יום בשבוע בכותרות תאריך</string>
+    <string name="settings_include_day_of_week_supporting">מוסיף את יום השבוע לכותרות התאריך בשיחות האחרונות שלך</string>
+
     <string name="quick_response">תגובה מהירה</string>
     <string name="quick_responses">תגובות מהירות</string>
     <string name="quick_responses_subtitle">ניהול תגובות SMS מוכנות לדחיית שיחות נכנסות</string>
@@ -627,6 +638,8 @@
     <string name="contacts_permission_description">כדי להציג את אנשי הקשר שלך, אפשר הרשאת אנשי קשר.</string>
     <string name="search_contacts_permission_description">כדי לחפש באנשי הקשר שלך ולזהות שיחות נכנסות, אפשר הרשאת אנשי קשר.</string>
     <string name="save_local_blocked_by_system">לא ניתן לשמור איש קשר מקומי: חשבון ברירת המחדל של המערכת לאנשי קשר חדשים מוגדר כחשבון ענן. שנה זאת בהגדרות המערכת או בחר חשבון אחר.</string>
+    <string name="fsi_banner_title">שיחות במסך מלא מוגבלות</string>
+    <string name="fsi_banner_message">ייתכן ששיחות נכנסות לא יוצגו כראוי במסך הנעילה. אפשר התראות במסך מלא כדי שהשיחות יופיעו כראוי כשהמסך נעול.</string>
 
     <!-- Default Dialer -->
     <string name="default_phone_number_cleared">מספר הטלפון המוגדר כברירת מחדל נמחק</string>

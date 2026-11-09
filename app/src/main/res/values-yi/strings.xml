@@ -272,6 +272,17 @@
     <string name="settings_speed_dial_no_number">קיין נומער</string>
     <string name="settings_speed_dial_open">עפֿענען גיך ווייל איינשטעלונגען?</string>
 
+    <!-- Call Log -->
+    <string name="settings_call_log_limit">גרענעץ פֿאַר לעצטע רופן</string>
+    <string name="settings_call_log_limit_supporting">באַגרענעץ די צאָל לעצטע רוף לאָג אײַנטראָגן וואָס ווערן אַראָפּגעלאָדן צו פֿאַרבעסערן לאָדן גיכקייט און פּערפֿאָרמאַנס</string>
+    <string name="settings_call_log_limit_100">100 רופן</string>
+    <string name="settings_call_log_limit_250">250 רופן</string>
+    <string name="settings_call_log_limit_500">500 רופן</string>
+    <string name="settings_call_log_limit_1000">1,000 רופן</string>
+    <string name="settings_call_log_limit_unlimited">אומבאַגרענעצט</string>
+    <string name="settings_include_day_of_week">ווײַזן טאָג פֿון וואָך אין דאַטע קעפּלעך</string>
+    <string name="settings_include_day_of_week_supporting">צולייגט דעם טאָג פֿון וואָך צו די דאַטע קעפּלעך אין דײַנע לעצטע רופן</string>
+
     <string name="quick_response">גיך ענטפֿער</string>
     <string name="quick_responses">גיך ענטפֿערס</string>
     <string name="quick_responses_subtitle">פֿאַרוואַלטן פֿאַרטיקע SMS אָפּוואַרף ענטפֿערס פֿאַר איינקומענדיקע רופן</string>
@@ -629,6 +640,8 @@
     <string name="contacts_permission_description">צו ווײַזן דײַנע קאָנטאַקטן, דערלויב קאָנטאַקט דערלויבעניש.</string>
     <string name="search_contacts_permission_description">צו זוכן דײַנע קאָנטאַקטן און ידענטיפֿיצירן איינקומענדיקע רופן, דערלויב קאָנטאַקט דערלויבעניש.</string>
     <string name="save_local_blocked_by_system">מען קען נישט היטן אַ לאָקאַלן קאָנטאַקט: דער סיסטעם סטאנדאַרד קאָנטע פֿאַר נייע קאָנטאַקטן איז איינגעשטעלט אויף אַ וואָלקן קאָנטע. ענדער דאָס אין די סיסטעם איינשטעלונגען אָדער קלויב אַן אַנדער קאָנטע.</string>
+    <string name="fsi_banner_title">פֿול-סקרין רופן זענען באַגרענעצט</string>
+    <string name="fsi_banner_message">איינקומענדיקע רופן וועלן מעגלעך נישט ריכטיק ווערן געוויזן אויף דעם פֿאַרשליסונג פאַרשטעל. דערלויב פֿול-סקרין נאָטיפיקאַציעס אַזוי רופן זאָלן ריכטיק דערשייַנען ווען דער פאַרשטעל איז פֿאַרשליסן.</string>
 
     <!-- Default Dialer -->
     <string name="default_phone_number_cleared">סטאנדאַרד טעלעפֿאָן נומער גערייניקט</string>

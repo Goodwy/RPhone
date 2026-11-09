@@ -271,6 +271,17 @@
     <string name="settings_speed_dial_no_number">Nessun numero</string>
     <string name="settings_speed_dial_open">Aprire le impostazioni della composizione rapida?</string>
 
+    <!-- Call Log -->
+    <string name="settings_call_log_limit">Limite chiamate recenti</string>
+    <string name="settings_call_log_limit_supporting">Limita il numero di voci recenti del registro chiamate caricate per migliorare la velocità di caricamento e le prestazioni</string>
+    <string name="settings_call_log_limit_100">100 chiamate</string>
+    <string name="settings_call_log_limit_250">250 chiamate</string>
+    <string name="settings_call_log_limit_500">500 chiamate</string>
+    <string name="settings_call_log_limit_1000">1.000 chiamate</string>
+    <string name="settings_call_log_limit_unlimited">Illimitato</string>
+    <string name="settings_include_day_of_week">Mostra giorno della settimana nelle intestazioni delle date</string>
+    <string name="settings_include_day_of_week_supporting">Aggiunge il giorno della settimana alle intestazioni delle date nelle tue chiamate recenti</string>
+
     <string name="quick_response">Risposta rapida</string>
     <string name="quick_responses">Risposte rapide</string>
     <string name="quick_responses_subtitle">Gestisci le risposte SMS predefinite di rifiuto per le chiamate in entrata</string>
@@ -624,6 +635,8 @@
     <string name="contacts_permission_description">Per visualizzare i tuoi contatti, consenti l\'autorizzazione ai contatti.</string>
     <string name="search_contacts_permission_description">Per cercare nei tuoi contatti e identificare le chiamate in entrata, consenti l\'autorizzazione ai contatti.</string>
     <string name="save_local_blocked_by_system">Impossibile salvare un contatto locale: l\'account predefinito di sistema per i nuovi contatti è impostato su un account cloud. Modificalo nelle impostazioni di sistema o scegli un altro account.</string>
+    <string name="fsi_banner_title">Le chiamate a schermo intero sono limitate</string>
+    <string name="fsi_banner_message">Le chiamate in entrata potrebbero non essere visualizzate correttamente sulla schermata di blocco. Consenti le notifiche a schermo intero affinché le chiamate appaiano correttamente quando lo schermo è bloccato.</string>
 
     <!-- Default  -->
     <string name="default_phone_number_cleared">Numero di telefono predefinito cancellato</string>

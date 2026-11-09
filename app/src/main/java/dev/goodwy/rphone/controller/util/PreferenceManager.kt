@@ -125,6 +125,13 @@ class PreferenceManager(context: Context) {
         scope.launch { dataStore.edit { it[intPreferencesKey(key)] = value } }
     }
 
+    fun getLong(key: String, defaultValue: Long): Long =
+        _prefsCache.value[longPreferencesKey(key)] ?: defaultValue
+
+    fun setLong(key: String, value: Long) {
+        scope.launch { dataStore.edit { it[longPreferencesKey(key)] = value } }
+    }
+
     fun getFloat(key: String, defaultValue: Float): Float =
         _prefsCache.value[floatPreferencesKey(key)] ?: defaultValue
 
@@ -530,7 +537,9 @@ class PreferenceManager(context: Context) {
         const val KEY_DIALPAD_ANIMATION        = "dialpad_animation_enabled"
         const val KEY_DIALPAD_HIDE_LETTERS     = "dialpad_hide_letters"
         const val KEY_HIDE_VOICE_SEARCH        = "hide_voice_search"
-        const val KEY_INCLUDE_DAY_OF_WEEK        = "include_day_of_week"
+        const val KEY_INCLUDE_DAY_OF_WEEK      = "include_day_of_week"
+
+        const val KEY_FSI_BANNER_SNOOZED_UNTIL = "fsi_banner_snoozed_until"
     }
 
     fun getCallLogLimit(): Int = getInt(KEY_CALL_LOG_LIMIT, CALL_LOG_LIMIT_DEFAULT)

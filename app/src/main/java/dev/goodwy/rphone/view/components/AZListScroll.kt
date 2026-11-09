@@ -178,14 +178,14 @@ fun AZListContent(
         }
     }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(modifier = modifier.fillMaxSize().padding(top = 8.dp)) {
         val configuration = LocalConfiguration.current
         val screenHeightDp = configuration.screenHeightDp.dp
         val bottomPadding = screenHeightDp - 340.dp
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(top = 8.dp, bottom = bottomPadding)
+            contentPadding = PaddingValues(bottom = bottomPadding)
         ) {
             finalGrouped.forEach { (initial, contactsForChar) ->
                 // ── Letter header ──────────────────────────────────────────

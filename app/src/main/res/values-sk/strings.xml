@@ -271,6 +271,17 @@
     <string name="settings_speed_dial_no_number">Žiadne číslo</string>
     <string name="settings_speed_dial_open">Otvoriť nastavenia rýchleho vytáčania?</string>
 
+    <!-- Call Log -->
+    <string name="settings_call_log_limit">Limit nedávnych hovorov</string>
+    <string name="settings_call_log_limit_supporting">Obmedzte počet načítaných nedávnych záznamov protokolu hovorov na zlepšenie rýchlosti načítavania a výkonu</string>
+    <string name="settings_call_log_limit_100">100 hovorov</string>
+    <string name="settings_call_log_limit_250">250 hovorov</string>
+    <string name="settings_call_log_limit_500">500 hovorov</string>
+    <string name="settings_call_log_limit_1000">1 000 hovorov</string>
+    <string name="settings_call_log_limit_unlimited">Neobmedzené</string>
+    <string name="settings_include_day_of_week">Zobraziť deň v týždni v hlavičkách dátumov</string>
+    <string name="settings_include_day_of_week_supporting">Pridá deň v týždni k hlavičkám dátumov vo vašich nedávnych hovoroch</string>
+
     <string name="quick_response">Rýchla odpoveď</string>
     <string name="quick_responses">Rýchle odpovede</string>
     <string name="quick_responses_subtitle">Správa pripravených SMS odpovedí na odmietnutie prichádzajúcich hovorov</string>
@@ -630,6 +641,8 @@
     <string name="contacts_permission_description">Ak chcete zobraziť svoje kontakty, povoľte povolenie ku kontaktom.</string>
     <string name="search_contacts_permission_description">Ak chcete vyhľadávať vo svojich kontaktoch a identifikovať prichádzajúce hovory, povoľte povolenie ku kontaktom.</string>
     <string name="save_local_blocked_by_system">Miestny kontakt nie je možné uložiť: predvolený systémový účet pre nové kontakty je nastavený na cloudový účet. Zmeňte to v nastaveniach systému alebo vyberte iný účet.</string>
+    <string name="fsi_banner_title">Hovory na celú obrazovku sú obmedzené</string>
+    <string name="fsi_banner_message">Prichádzajúce hovory sa na uzamknutej obrazovke nemusia zobrazovať správne. Povoľte oznámenia na celú obrazovku, aby sa hovory pri uzamknutej obrazovke zobrazovali správne.</string>
 
     <!-- Default Dialer -->
     <string name="default_phone_number_cleared">Predvolené telefónne číslo vymazané</string>

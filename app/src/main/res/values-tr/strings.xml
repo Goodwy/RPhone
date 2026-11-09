@@ -272,6 +272,17 @@
     <string name="settings_speed_dial_no_number">Numara yok</string>
     <string name="settings_speed_dial_open">Hızlı arama ayarları açılsın mı?</string>
 
+    <!-- Call Log -->
+    <string name="settings_call_log_limit">Son arama sınırı</string>
+    <string name="settings_call_log_limit_supporting">Yükleme hızını ve performansı artırmak için yüklenen son arama kaydı sayısını sınırlayın</string>
+    <string name="settings_call_log_limit_100">100 arama</string>
+    <string name="settings_call_log_limit_250">250 arama</string>
+    <string name="settings_call_log_limit_500">500 arama</string>
+    <string name="settings_call_log_limit_1000">1.000 arama</string>
+    <string name="settings_call_log_limit_unlimited">Sınırsız</string>
+    <string name="settings_include_day_of_week">Tarih başlıklarında haftanın gününü göster</string>
+    <string name="settings_include_day_of_week_supporting">Son aramalarınızdaki tarih başlıklarına haftanın gününü ekler</string>
+
     <string name="quick_response">Hızlı yanıt</string>
     <string name="quick_responses">Hızlı yanıtlar</string>
     <string name="quick_responses_subtitle">Gelen aramalar için hazır SMS reddetme yanıtlarını yönetin</string>
@@ -623,6 +634,8 @@
     <string name="contacts_permission_description">Kişilerinizi görüntülemek için kişi iznine izin verin.</string>
     <string name="search_contacts_permission_description">Kişilerinizde arama yapmak ve gelen aramaları tanımlamak için kişi iznine izin verin.</string>
     <string name="save_local_blocked_by_system">Yerel kişi kaydedilemiyor: yeni kişiler için sistem varsayılan hesabı bir bulut hesabı olarak ayarlanmış. Bunu sistem ayarlarından değiştirin veya başka bir hesap seçin.</string>
+    <string name="fsi_banner_title">Tam ekran aramalar sınırlı</string>
+    <string name="fsi_banner_message">Gelen aramalar kilit ekranında düzgün görüntülenmeyebilir. Ekran kilitliyken aramaların doğru şekilde görünmesi için tam ekran bildirimlerine izin verin.</string>
 
     <!-- Default Dialer -->
     <string name="default_phone_number_cleared">Varsayılan telefon numarası temizlendi</string>

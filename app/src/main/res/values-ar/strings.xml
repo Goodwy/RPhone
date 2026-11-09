@@ -273,6 +273,17 @@
     <string name="settings_speed_dial_no_number">لا يوجد رقم</string>
     <string name="settings_speed_dial_open">فتح إعدادات الاتصال السريع؟</string>
 
+    <!-- Call Log -->
+    <string name="settings_call_log_limit">حد المكالمات الأخيرة</string>
+    <string name="settings_call_log_limit_supporting">حدد عدد إدخالات سجل المكالمات الأخيرة التي يتم تحميلها لتحسين سرعة التحميل والأداء</string>
+    <string name="settings_call_log_limit_100">100 مكالمة</string>
+    <string name="settings_call_log_limit_250">250 مكالمة</string>
+    <string name="settings_call_log_limit_500">500 مكالمة</string>
+    <string name="settings_call_log_limit_1000">1,000 مكالمة</string>
+    <string name="settings_call_log_limit_unlimited">غير محدود</string>
+    <string name="settings_include_day_of_week">إظهار يوم الأسبوع في رؤوس التواريخ</string>
+    <string name="settings_include_day_of_week_supporting">يضيف يوم الأسبوع إلى رؤوس التواريخ في مكالماتك الأخيرة</string>
+
     <string name="quick_response">رد سريع</string>
     <string name="quick_responses">الردود السريعة</string>
     <string name="quick_responses_subtitle">إدارة ردود SMS الجاهزة للرفض على المكالمات الواردة</string>
@@ -636,6 +647,8 @@
     <string name="contacts_permission_description">لعرض جهات الاتصال الخاصة بك، اسمح بإذن جهات الاتصال.</string>
     <string name="search_contacts_permission_description">للبحث في جهات الاتصال الخاصة بك وتحديد المكالمات الواردة، اسمح بإذن جهات الاتصال.</string>
     <string name="save_local_blocked_by_system">لا يمكن حفظ جهة اتصال محلية: الحساب الافتراضي للنظام لجهات الاتصال الجديدة مضبوط على حساب سحابي. غيّره في إعدادات النظام أو اختر حسابًا آخر.</string>
+    <string name="fsi_banner_title">المكالمات بملء الشاشة محدودة</string>
+    <string name="fsi_banner_message">قد لا تظهر المكالمات الواردة بشكل صحيح على شاشة القفل. اسمح بالإشعارات بملء الشاشة لتظهر المكالمات بشكل صحيح عندما تكون الشاشة مقفلة.</string>
 
     <!-- Default Dialer -->
     <string name="default_phone_number_cleared">تم مسح رقم الهاتف الافتراضي</string>

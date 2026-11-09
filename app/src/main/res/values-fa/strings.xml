@@ -272,6 +272,17 @@
     <string name="settings_speed_dial_no_number">بدون شماره</string>
     <string name="settings_speed_dial_open">تنظیمات شماره‌گیری سریع باز شود؟</string>
 
+    <!-- Call Log -->
+    <string name="settings_call_log_limit">محدودیت تماس‌های اخیر</string>
+    <string name="settings_call_log_limit_supporting">تعداد ورودی‌های لاگ تماس اخیر بارگذاری‌شده را محدود کنید تا سرعت بارگذاری و عملکرد بهبود یابد</string>
+    <string name="settings_call_log_limit_100">۱۰۰ تماس</string>
+    <string name="settings_call_log_limit_250">۲۵۰ تماس</string>
+    <string name="settings_call_log_limit_500">۵۰۰ تماس</string>
+    <string name="settings_call_log_limit_1000">۱٬۰۰۰ تماس</string>
+    <string name="settings_call_log_limit_unlimited">نامحدود</string>
+    <string name="settings_include_day_of_week">نمایش روز هفته در سرصفحه‌های تاریخ</string>
+    <string name="settings_include_day_of_week_supporting">روز هفته را به سرصفحه‌های تاریخ در تماس‌های اخیر شما اضافه می‌کند</string>
+
     <string name="quick_response">پاسخ سریع</string>
     <string name="quick_responses">پاسخ‌های سریع</string>
     <string name="quick_responses_subtitle">مدیریت پاسخ‌های SMS آماده رد تماس برای تماس‌های ورودی</string>
@@ -623,6 +634,8 @@
     <string name="contacts_permission_description">برای مشاهده مخاطبان خود، به مخاطبان اجازه دسترسی دهید.</string>
     <string name="search_contacts_permission_description">برای جستجوی مخاطبان و شناسایی تماس‌های ورودی، به مخاطبان اجازه دسترسی دهید.</string>
     <string name="save_local_blocked_by_system">امکان ذخیره مخاطب محلی وجود ندارد: حساب پیش‌فرض سیستم برای مخاطبان جدید روی یک حساب ابری تنظیم شده است. آن را در تنظیمات سیستم تغییر دهید یا حساب دیگری انتخاب کنید.</string>
+    <string name="fsi_banner_title">تماس‌های تمام‌صفحه محدود هستند</string>
+    <string name="fsi_banner_message">ممکن است تماس‌های ورودی به‌درستی روی صفحه قفل نمایش داده نشوند. برای اینکه تماس‌ها هنگام قفل بودن صفحه به‌درستی نمایش داده شوند، اعلان‌های تمام‌صفحه را مجاز کنید.</string>
 
     <!-- Default Dialer -->
     <string name="default_phone_number_cleared">شماره تلفن پیش‌فرض پاک شد</string>

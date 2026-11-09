@@ -272,6 +272,17 @@
     <string name="settings_speed_dial_no_number">Sin número</string>
     <string name="settings_speed_dial_open">¿Abrir ajustes de marcación rápida?</string>
 
+    <!-- Call Log -->
+    <string name="settings_call_log_limit">Límite de llamadas recientes</string>
+    <string name="settings_call_log_limit_supporting">Limita el número de entradas recientes del registro de llamadas cargadas para mejorar la velocidad de carga y el rendimiento</string>
+    <string name="settings_call_log_limit_100">100 llamadas</string>
+    <string name="settings_call_log_limit_250">250 llamadas</string>
+    <string name="settings_call_log_limit_500">500 llamadas</string>
+    <string name="settings_call_log_limit_1000">1000 llamadas</string>
+    <string name="settings_call_log_limit_unlimited">Ilimitado</string>
+    <string name="settings_include_day_of_week">Mostrar día de la semana en los encabezados de fecha</string>
+    <string name="settings_include_day_of_week_supporting">Añade el día de la semana a los encabezados de fecha en tus llamadas recientes</string>
+
     <string name="quick_response">Respuesta rápida</string>
     <string name="quick_responses">Respuestas rápidas</string>
     <string name="quick_responses_subtitle">Gestionar respuestas SMS predefinidas de rechazo para llamadas entrantes</string>
@@ -626,6 +637,8 @@
     <string name="contacts_permission_description">Para ver tus contactos, permite el acceso a los contactos.</string>
     <string name="search_contacts_permission_description">Para buscar tus contactos e identificar llamadas entrantes, permite el acceso a los contactos.</string>
     <string name="save_local_blocked_by_system">No se puede guardar un contacto local: la cuenta predeterminada del sistema para nuevos contactos está configurada como una cuenta en la nube. Cámbiala en los ajustes del sistema o elige otra cuenta.</string>
+    <string name="fsi_banner_title">Las llamadas a pantalla completa están limitadas</string>
+    <string name="fsi_banner_message">Es posible que las llamadas entrantes no se muestren correctamente en la pantalla de bloqueo. Permite las notificaciones a pantalla completa para que las llamadas aparezcan correctamente cuando la pantalla esté bloqueada.</string>
 
     <!-- Default Dialer -->
     <string name="default_phone_number_cleared">Número de teléfono predeterminado borrado</string>

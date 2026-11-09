@@ -272,6 +272,17 @@
     <string name="settings_speed_dial_no_number">Aucun numéro</string>
     <string name="settings_speed_dial_open">Ouvrir les paramètres de numérotation rapide ?</string>
 
+    <!-- Call Log -->
+    <string name="settings_call_log_limit">Limite des appels récents</string>
+    <string name="settings_call_log_limit_supporting">Limitez le nombre d\'entrées du journal d\'appels récentes chargées pour améliorer la vitesse de chargement et les performances</string>
+    <string name="settings_call_log_limit_100">100 appels</string>
+    <string name="settings_call_log_limit_250">250 appels</string>
+    <string name="settings_call_log_limit_500">500 appels</string>
+    <string name="settings_call_log_limit_1000">1 000 appels</string>
+    <string name="settings_call_log_limit_unlimited">Illimité</string>
+    <string name="settings_include_day_of_week">Afficher le jour de la semaine dans les en-têtes de date</string>
+    <string name="settings_include_day_of_week_supporting">Ajoute le jour de la semaine aux en-têtes de date dans vos appels récents</string>
+
     <string name="quick_response">Réponse rapide</string>
     <string name="quick_responses">Réponses rapides</string>
     <string name="quick_responses_subtitle">Gérer les réponses SMS prédéfinies de refus pour les appels entrants</string>
@@ -623,6 +634,8 @@
     <string name="contacts_permission_description">Pour afficher vos contacts, autorisez l\'accès aux contacts.</string>
     <string name="search_contacts_permission_description">Pour rechercher vos contacts et identifier les appels entrants, autorisez l\'accès aux contacts.</string>
     <string name="save_local_blocked_by_system">Impossible d\'enregistrer un contact local : le compte système par défaut pour les nouveaux contacts est un compte cloud. Modifiez-le dans les paramètres système ou choisissez un autre compte.</string>
+    <string name="fsi_banner_title">Les appels en plein écran sont limités</string>
+    <string name="fsi_banner_message">Les appels entrants peuvent ne pas s\'afficher correctement sur l\'écran de verrouillage. Autorisez les notifications en plein écran pour que les appels apparaissent correctement lorsque l\'écran est verrouillé.</string>
 
     <!-- Default Dialer -->
     <string name="default_phone_number_cleared">Numéro de téléphone par défaut effacé</string>

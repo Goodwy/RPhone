@@ -51,7 +51,7 @@ class CallService : InCallService() {
     private var redialCount = 0
     private val callStartTimes = mutableMapOf<Call, Long>()
     private var lastFloatingCallMetadata: Triple<String, String, String?>? = null
-    private var notificationUpdateJob: Job? = null
+    private var notificationUpdateJobs = mutableMapOf<Call, Job>()
 
     // BroadcastReceiver for monitoring when the screen is locked or turned off
     private val screenStateReceiver = object : BroadcastReceiver() {
@@ -86,9 +86,10 @@ class CallService : InCallService() {
         )
 
         serviceScope.launch {
-            callRepository.isActivityVisible.collect {
-                callRepository.currentCallSession.value?.call?.let { currentCall ->
-                    updateNotification(currentCall)
+            callRepository.isActivityVisible.collect { visible ->
+                callRepository.currentCallSession.value?.call?.let { updateNotification(it) }
+                if (visible) {
+                    calls?.find { it.state == Call.STATE_RINGING }?.let { updateNotification(it) }
                 }
             }
         }
@@ -380,8 +381,8 @@ class CallService : InCallService() {
     }
 
     private fun updateNotification(call: Call, forcedHigh: Boolean? = null) {
-        notificationUpdateJob?.cancel()
-        notificationUpdateJob = serviceScope.launch {
+        notificationUpdateJobs[call]?.cancel()
+        notificationUpdateJobs[call] = serviceScope.launch {
             val details = call.details ?: return@launch
             val handle = details.handle
             val number = handle?.schemeSpecificPart ?: ""
@@ -391,14 +392,21 @@ class CallService : InCallService() {
 
             if (!isActive || call.state == Call.STATE_DISCONNECTED) return@launch
 
-            val isHigh = forcedHigh ?: isDeviceLocked()
+            val callScreenVisible = callRepository.isActivityVisible.value
+
+            val isHigh = when {
+                callScreenVisible -> false
+                forcedHigh != null -> forcedHigh
+                else -> isDeviceLocked()
+            }
 
             val notification = notificationManager.buildCallNotification(
                 call,
                 contactName,
                 contactPhoto,
                 callRepository.audioState.value,
-                isHigh
+                isHigh,
+                suppressHeadsUp = callScreenVisible
             )
             if (isActive && call.state != Call.STATE_DISCONNECTED) {
                 startForeground(
@@ -483,6 +491,7 @@ class CallService : InCallService() {
 
     override fun onCallRemoved(call: Call) {
         super.onCallRemoved(call)
+        notificationUpdateJobs.remove(call)?.cancel()
         handledBusyCalls.remove(call)
         call.unregisterCallback(callCallback)
 
@@ -566,6 +575,9 @@ class CallService : InCallService() {
         try {
             unregisterReceiver(screenStateReceiver)
         } catch (_: Exception) {}
+
+        notificationUpdateJobs.values.forEach { it.cancel() }
+        notificationUpdateJobs.clear()
 
         (callRepository as? CallRepositoryImpl)?.unbindService()
         serviceScope.cancel()

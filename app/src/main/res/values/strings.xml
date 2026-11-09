@@ -646,6 +646,8 @@
     <string name="contacts_permission_description">To view your contacts, allow contacts permission.</string>
     <string name="search_contacts_permission_description">To search your contacts and identify incoming calls, allow contacts permission.</string>
     <string name="save_local_blocked_by_system">Cannot save a local contact: the system default account for new contacts is set to a cloud account. Change it in system settings or choose another account.</string>
+    <string name="fsi_banner_title">Full-screen calls are limited</string>
+    <string name="fsi_banner_message">Incoming calls may not show correctly on the lock screen. Allow full-screen notifications so calls appear properly when the screen is locked.</string>
 
     <!-- Default  -->
     <string name="default_phone_number_cleared">Default phone number cleared</string>

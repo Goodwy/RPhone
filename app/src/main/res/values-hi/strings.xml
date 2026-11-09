@@ -272,6 +272,17 @@
     <string name="settings_speed_dial_no_number">कोई नंबर नहीं</string>
     <string name="settings_speed_dial_open">स्पीड डायल सेटिंग्स खोलें?</string>
 
+    <!-- Call Log -->
+    <string name="settings_call_log_limit">हाल की कॉल की सीमा</string>
+    <string name="settings_call_log_limit_supporting">लोडिंग गति और प्रदर्शन को बेहतर बनाने के लिए लोड की जाने वाली हाल की कॉल लॉग प्रविष्टियों की संख्या सीमित करें</string>
+    <string name="settings_call_log_limit_100">100 कॉल</string>
+    <string name="settings_call_log_limit_250">250 कॉल</string>
+    <string name="settings_call_log_limit_500">500 कॉल</string>
+    <string name="settings_call_log_limit_1000">1,000 कॉल</string>
+    <string name="settings_call_log_limit_unlimited">असीमित</string>
+    <string name="settings_include_day_of_week">तारीख हेडर में सप्ताह का दिन दिखाएँ</string>
+    <string name="settings_include_day_of_week_supporting">आपकी हाल की कॉल में तारीख हेडर में सप्ताह का दिन जोड़ता है</string>
+
     <string name="quick_response">त्वरित उत्तर</string>
     <string name="quick_responses">त्वरित उत्तर</string>
     <string name="quick_responses_subtitle">इनकमिंग कॉल के लिए तैयार SMS अस्वीकृति उत्तर प्रबंधित करें</string>
@@ -623,6 +634,8 @@
     <string name="contacts_permission_description">अपने संपर्क देखने के लिए, संपर्क अनुमति की अनुमति दें।</string>
     <string name="search_contacts_permission_description">अपने संपर्क खोजने और आने वाली कॉल की पहचान करने के लिए, संपर्क अनुमति की अनुमति दें।</string>
     <string name="save_local_blocked_by_system">स्थानीय संपर्क सहेजा नहीं जा सकता: नए संपर्कों के लिए सिस्टम डिफ़ॉल्ट खाता क्लाउड खाते पर सेट है। इसे सिस्टम सेटिंग्स में बदलें या कोई अन्य खाता चुनें।</string>
+    <string name="fsi_banner_title">फुल-स्क्रीन कॉल सीमित हैं</string>
+    <string name="fsi_banner_message">इनकमिंग कॉल लॉक स्क्रीन पर सही ढंग से नहीं दिख सकती हैं। फुल-स्क्रीन सूचनाओं की अनुमति दें ताकि स्क्रीन लॉक होने पर कॉल सही ढंग से दिखाई दें।</string>
 
     <!-- Default Dialer -->
     <string name="default_phone_number_cleared">डिफ़ॉल्ट फ़ोन नंबर साफ़ किया गया</string>

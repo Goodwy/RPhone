@@ -272,6 +272,17 @@
     <string name="settings_speed_dial_no_number">Χωρίς αριθμό</string>
     <string name="settings_speed_dial_open">Άνοιγμα ρυθμίσεων ταχείας κλήσης;</string>
 
+    <!-- Call Log -->
+    <string name="settings_call_log_limit">Όριο πρόσφατων κλήσεων</string>
+    <string name="settings_call_log_limit_supporting">Περιορίστε τον αριθμό των πρόσφατων καταχωρήσεων αρχείου κλήσεων που φορτώνονται για βελτίωση της ταχύτητας φόρτωσης και της απόδοσης</string>
+    <string name="settings_call_log_limit_100">100 κλήσεις</string>
+    <string name="settings_call_log_limit_250">250 κλήσεις</string>
+    <string name="settings_call_log_limit_500">500 κλήσεις</string>
+    <string name="settings_call_log_limit_1000">1.000 κλήσεις</string>
+    <string name="settings_call_log_limit_unlimited">Απεριόριστο</string>
+    <string name="settings_include_day_of_week">Εμφάνιση ημέρας εβδομάδας στις κεφαλίδες ημερομηνιών</string>
+    <string name="settings_include_day_of_week_supporting">Προσθέτει την ημέρα της εβδομάδας στις κεφαλίδες ημερομηνιών στις πρόσφατες κλήσεις σας</string>
+
     <string name="quick_response">Γρήγορη απάντηση</string>
     <string name="quick_responses">Γρήγορες απαντήσεις</string>
     <string name="quick_responses_subtitle">Διαχείριση προκαθορισμένων απαντήσεων SMS απόρριψης για εισερχόμενες κλήσεις</string>
@@ -623,6 +634,8 @@
     <string name="contacts_permission_description">Για να προβάλετε τις επαφές σας, επιτρέψτε την πρόσβαση στις επαφές.</string>
     <string name="search_contacts_permission_description">Για να αναζητήσετε τις επαφές σας και να αναγνωρίζετε εισερχόμενες κλήσεις, επιτρέψτε την πρόσβαση στις επαφές.</string>
     <string name="save_local_blocked_by_system">Δεν είναι δυνατή η αποθήκευση τοπικής επαφής: ο προεπιλεγμένος λογαριασμός συστήματος για νέες επαφές έχει οριστεί σε λογαριασμό cloud. Αλλάξτε το στις ρυθμίσεις συστήματος ή επιλέξτε άλλον λογαριασμό.</string>
+    <string name="fsi_banner_title">Οι κλήσεις πλήρους οθόνης είναι περιορισμένες</string>
+    <string name="fsi_banner_message">Οι εισερχόμενες κλήσεις ενδέχεται να μην εμφανίζονται σωστά στην οθόνη κλειδώματος. Επιτρέψτε τις ειδοποιήσεις πλήρους οθόνης ώστε οι κλήσεις να εμφανίζονται σωστά όταν η οθόνη είναι κλειδωμένη.</string>
 
     <!-- Default Dialer -->
     <string name="default_phone_number_cleared">Ο προεπιλεγμένος αριθμός τηλεφώνου διαγράφηκε</string>
