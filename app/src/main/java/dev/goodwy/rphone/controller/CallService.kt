@@ -388,7 +388,6 @@ class CallService : InCallService() {
             val number = handle?.schemeSpecificPart ?: ""
             val contactName = getContactNameFromCache(number)
             val photoUri = getContactPhotoFromCache(number)
-            val contactPhoto = notificationManager.getContactBitmap(photoUri)
 
             if (!isActive || call.state == Call.STATE_DISCONNECTED) return@launch
 
@@ -400,10 +399,10 @@ class CallService : InCallService() {
                 else -> isDeviceLocked()
             }
 
-            val notification = notificationManager.buildCallNotification(
+            val quickNotification = notificationManager.buildCallNotification(
                 call,
                 contactName,
-                contactPhoto,
+                null,
                 callRepository.audioState.value,
                 isHigh,
                 suppressHeadsUp = callScreenVisible
@@ -411,9 +410,30 @@ class CallService : InCallService() {
             if (isActive && call.state != Call.STATE_DISCONNECTED) {
                 startForeground(
                     CallNotificationManager.NOTIFICATION_ID,
-                    notification,
+                    quickNotification,
                     android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
                 )
+            }
+
+            if (photoUri != null) {
+                val contactPhoto = notificationManager.getContactBitmap(photoUri)
+                if (contactPhoto != null && isActive && call.state != Call.STATE_DISCONNECTED) {
+                    val withPhoto = notificationManager.buildCallNotification(
+                        call,
+                        contactName,
+                        contactPhoto,
+                        callRepository.audioState.value,
+                        isHigh,
+                        suppressHeadsUp = callScreenVisible
+                    )
+                    if (isActive && call.state != Call.STATE_DISCONNECTED) {
+                        startForeground(
+                            CallNotificationManager.NOTIFICATION_ID,
+                            withPhoto,
+                            android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
+                        )
+                    }
+                }
             }
 
             // Start/stop floating bubble based on preference

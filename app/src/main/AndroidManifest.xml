@@ -249,8 +249,7 @@
             android:permission="android.permission.BIND_INCALL_SERVICE"
             android:foregroundServiceType="phoneCall"
             android:exported="true"
-            android:directBootAware="true"
-            tools:targetApi="29">
+            android:directBootAware="true">
             <meta-data
                 android:name="android.telecom.IN_CALL_SERVICE_UI"
                 android:value="true" />
