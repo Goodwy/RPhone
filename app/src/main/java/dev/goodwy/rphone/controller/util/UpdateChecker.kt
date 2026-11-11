@@ -43,8 +43,9 @@ private fun parseReleaseJson(json: JSONObject): ReleaseInfo {
 }
 
 suspend fun fetchLatestRelease(apiUrl: String): ReleaseInfo? = withContext(Dispatchers.IO) {
+    var connection: HttpURLConnection? = null
     try {
-        val connection = URL(apiUrl).openConnection() as HttpURLConnection
+        connection = URL(apiUrl).openConnection() as HttpURLConnection
         connection.apply {
             requestMethod = "GET"
             setRequestProperty("Accept", "application/vnd.github+json")
@@ -54,7 +55,9 @@ suspend fun fetchLatestRelease(apiUrl: String): ReleaseInfo? = withContext(Dispa
         if (connection.responseCode != 200) return@withContext null
         val body = connection.inputStream.bufferedReader().readText()
         parseReleaseJson(JSONObject(body))
-    } catch (_: Exception) { null }
+    } catch (_: Exception) { null } finally {
+        connection?.disconnect()
+    }
 }
 
 /**
@@ -63,8 +66,9 @@ suspend fun fetchLatestRelease(apiUrl: String): ReleaseInfo? = withContext(Dispa
  * currently-installed version, so the user can compare it against the latest.
  */
 suspend fun fetchReleaseForVersion(apiListUrl: String, version: String): ReleaseInfo? = withContext(Dispatchers.IO) {
+    var connection: HttpURLConnection? = null
     try {
-        val connection = URL(apiListUrl).openConnection() as HttpURLConnection
+        connection = URL(apiListUrl).openConnection() as HttpURLConnection
         connection.apply {
             requestMethod = "GET"
             setRequestProperty("Accept", "application/vnd.github+json")
@@ -81,7 +85,9 @@ suspend fun fetchReleaseForVersion(apiListUrl: String, version: String): Release
             if (tag == target) return@withContext parseReleaseJson(obj)
         }
         null
-    } catch (_: Exception) { null }
+    } catch (_: Exception) { null } finally {
+        connection?.disconnect()
+    }
 }
 
 fun isNewerVersion(latest: String, current: String): Boolean {

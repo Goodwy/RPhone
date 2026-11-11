@@ -106,7 +106,6 @@ class CallService : InCallService() {
     private fun updateRingingAlerts() {
         val ringingCall = calls?.find { it.state == Call.STATE_RINGING }
         if (ringingCall != null) {
-            val number = ringingCall.details?.handle?.schemeSpecificPart?.let { Uri.decode(it) } ?: ""
             if (!preferenceManager.getBoolean(PreferenceManager.KEY_BUSY_MODE_ENABLED, false)) {
                 flashNotificationManager.startFlashing()
             }
@@ -590,7 +589,7 @@ class CallService : InCallService() {
     override fun onDestroy() {
         super.onDestroy()
 
-        flashNotificationManager.stopFlashing()
+        flashNotificationManager.close() // cancels flash job + internal scope
 
         try {
             unregisterReceiver(screenStateReceiver)
@@ -598,6 +597,7 @@ class CallService : InCallService() {
 
         notificationUpdateJobs.values.forEach { it.cancel() }
         notificationUpdateJobs.clear()
+        handledBusyCalls.clear()
 
         (callRepository as? CallRepositoryImpl)?.unbindService()
         serviceScope.cancel()

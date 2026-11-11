@@ -45,10 +45,19 @@ object CallBackgroundStore {
         val failed: Boolean
     )
 
+    private const val MAX_CACHE_ENTRIES = 100
+
     private val ioScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val fileState = ConcurrentHashMap<String, Boolean>()
     private val pendingChecks: MutableSet<String> = ConcurrentHashMap.newKeySet()
     private val missStrikes = ConcurrentHashMap<String, Int>()
+
+    private fun setFileState(path: String, exists: Boolean) {
+        if (fileState.size >= MAX_CACHE_ENTRIES) {
+            fileState.clear()
+        }
+        fileState[path] = exists
+    }
 
     @Volatile
     private var lastPruneAt = 0L
@@ -356,11 +365,11 @@ object CallBackgroundStore {
         if (isLocalPath(stored)) {
             val file = File(stored)
             if (file.exists() && file.length() > 0L) {
-                fileState[stored] = true
+                setFileState(stored, true)
                 missStrikes.remove(stored)
                 return stored
             }
-            fileState[stored] = false
+            setFileState(stored, false)
             val strikes = (missStrikes[stored] ?: 0) + 1
             if (strikes >= MISS_TOLERANCE) {
                 missStrikes.remove(stored)

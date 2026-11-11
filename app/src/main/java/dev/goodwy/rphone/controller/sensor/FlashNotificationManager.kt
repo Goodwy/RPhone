@@ -9,6 +9,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -16,7 +17,7 @@ import kotlinx.coroutines.launch
 class FlashNotificationManager(
     private val context: Context,
     private val preferenceManager: PreferenceManager
-) {
+) : java.io.Closeable {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var flashJob: Job? = null
 
@@ -76,6 +77,13 @@ class FlashNotificationManager(
         scope.launch {
             setTorch(cameraId, false)
         }
+    }
+
+    /** Cancel the internal scope; called from [CallService.onDestroy]. */
+    override fun close() {
+        flashJob?.cancel()
+        flashJob = null
+        scope.cancel()
     }
 
     private fun setTorch(cameraId: String, enabled: Boolean) {

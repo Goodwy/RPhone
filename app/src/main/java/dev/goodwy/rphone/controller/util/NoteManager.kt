@@ -6,7 +6,10 @@ import java.io.File
 object NoteManager {
 
     fun getNotesDir(context: Context): File {
-        val dir = File(context.getExternalFilesDir(null), "Notes")
+        // getExternalFilesDir() can return null when external storage is unavailable;
+        // fall back to internal storage to avoid a NullPointerException.
+        val base = context.getExternalFilesDir(null) ?: context.filesDir
+        val dir = File(base, "Notes")
         if (!dir.exists()) dir.mkdirs()
         return dir
     }

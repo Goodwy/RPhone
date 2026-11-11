@@ -39,7 +39,10 @@ import dev.goodwy.rphone.controller.util.NoteManager
 import dev.goodwy.rphone.view.components.SpringIconButton
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import dev.goodwy.rphone.view.theme.Rill4Theme
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -49,6 +52,8 @@ class FloatingNotesService : Service() {
     private lateinit var windowManager: WindowManager
     private var overlayView: ComposeView? = null
     private var lifecycleOwner: ServiceLifecycleOwner? = null
+    // Service-level scope ensures note writes survive ComposeView detach.
+    private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     companion object {
         const val EXTRA_CONTACT_NAME = "contact_name"
@@ -104,9 +109,18 @@ class FloatingNotesService : Service() {
             setContent {
                 Rill4Theme {
                     FloatingNoteOverlay(
-                        contactName = contactName,
-                        phoneNumber = phoneNumber,
-                        onDismiss   = { removeOverlay(); stopSelf() }
+                        contactName  = contactName,
+                        phoneNumber  = phoneNumber,
+                        // Use the service scope so the write survives ComposeView detach.
+                        onSaveAndDismiss = { name, number, text ->
+                            serviceScope.launch {
+                                withContext(Dispatchers.IO) {
+                                    NoteManager.writeNote(applicationContext, name, number, text)
+                                }
+                                removeOverlay()
+                                stopSelf()
+                            }
+                        }
                     )
                 }
             }
@@ -128,6 +142,7 @@ class FloatingNotesService : Service() {
 
     override fun onDestroy() {
         removeOverlay()
+        serviceScope.cancel()
         super.onDestroy()
     }
 }
@@ -138,7 +153,7 @@ class FloatingNotesService : Service() {
 private fun FloatingNoteOverlay(
     contactName: String,
     phoneNumber: String,
-    onDismiss: () -> Unit
+    onSaveAndDismiss: (name: String, number: String, text: String) -> Unit
 ) {
     val context      = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -158,12 +173,9 @@ private fun FloatingNoteOverlay(
 
     fun saveAndDismiss() {
         coroutineScope.launch {
-            withContext(Dispatchers.IO) {
-                NoteManager.writeNote(context, contactName, phoneNumber, text)
-            }
             showing = false                    // trigger exit animation
             delay(420)                         // wait for it to finish
-            onDismiss()
+            onSaveAndDismiss(contactName, phoneNumber, text)
         }
     }
 

@@ -41,14 +41,16 @@ class CallLogRepository(
     private val contactMapMutex = Mutex()
 
     private suspend fun getOrFetchContactMap(): Map<String, Contact> {
-        val now = System.currentTimeMillis()
+        // Check cache under the lock first (fast path)
         contactMapMutex.withLock {
             val existing = cachedContactMap
+            val now = System.currentTimeMillis()
             if (existing != null && now - lastContactMapUpdate < CONTACT_MAP_TTL) {
                 return existing
             }
         }
 
+        // Fetch outside the lock so coroutines don't block each other
         val allContacts = try { contactsRepo.getContacts() } catch (e: Exception) { emptyList() }
         if (allContacts.isEmpty()) {
             return emptyMap()
@@ -62,10 +64,18 @@ class CallLogRepository(
             }
         }
 
+        // Write back under lock — only update if no other coroutine already wrote a fresher value
         return contactMapMutex.withLock {
-            cachedContactMap = map
-            lastContactMapUpdate = System.currentTimeMillis()
-            map
+            val now = System.currentTimeMillis()
+            val existing = cachedContactMap
+            if (existing != null && now - lastContactMapUpdate < CONTACT_MAP_TTL) {
+                // Another coroutine already refreshed; discard our result and return theirs
+                existing
+            } else {
+                cachedContactMap = map
+                lastContactMapUpdate = now
+                map
+            }
         }
     }
 
@@ -296,8 +306,13 @@ class CallLogRepository(
     override suspend fun deleteCallLogsByIds(ids: List<Long>) = withContext(Dispatchers.IO) {
         if (ids.isEmpty()) return@withContext
         try {
-            val selection = "${CallLog.Calls._ID} IN (${ids.joinToString(",")})"
-            contentResolver.delete(CallLog.Calls.CONTENT_URI, selection, null)
+            // Build a parameterized IN clause to avoid string concatenation / injection risk.
+            // ContentResolver doesn't support bind args for IN directly, so we use
+            // placeholders and pass the IDs as String selection args.
+            val placeholders = ids.joinToString(",") { "?" }
+            val selection = "${CallLog.Calls._ID} IN ($placeholders)"
+            val selectionArgs = ids.map { it.toString() }.toTypedArray()
+            contentResolver.delete(CallLog.Calls.CONTENT_URI, selection, selectionArgs)
         } catch (e: Exception) {
             e.printStackTrace()
         }
