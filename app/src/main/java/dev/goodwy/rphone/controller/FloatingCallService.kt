@@ -198,7 +198,13 @@ class FloatingCallService : Service() {
     private fun BubbleUI(name: String, phoneNumber: String, photoUri: String?, onTap: () -> Unit) {
         val context = LocalContext.current
         val km = remember { context.getSystemService(KeyguardManager::class.java) }
-        val isLocked = km.isKeyguardLocked
+        // Re-read isKeyguardLocked reactively so the bubble updates on lock/unlock events.
+        val isLocked by produceState(initialValue = km.isKeyguardLocked) {
+            while (true) {
+                delay(500.milliseconds)
+                value = km.isKeyguardLocked
+            }
+        }
 
         var entered by remember { mutableStateOf(false) }
         LaunchedEffect(Unit) { delay(50.milliseconds); entered = true }
@@ -425,7 +431,13 @@ class FloatingCallService : Service() {
     ) {
         val context    = LocalContext.current
         val km = remember { context.getSystemService(KeyguardManager::class.java) }
-        val isLocked = km.isKeyguardLocked
+        // Re-read isKeyguardLocked reactively so the sheet updates on lock/unlock events.
+        val isLocked by produceState(initialValue = km.isKeyguardLocked) {
+            while (true) {
+                delay(500.milliseconds)
+                value = km.isKeyguardLocked
+            }
+        }
 
         val audioState by callRepository.audioState.collectAsStateWithLifecycle()
         val isMuted    = audioState?.isMuted ?: false

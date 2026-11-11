@@ -88,6 +88,8 @@ class FlipToSilenceManager(private val context: Context) : SensorEventListener {
     }
 
     private fun triggerSilence() {
+        // Save the callback reference BEFORE stopListening() nulls it out
+        val pendingCallback = onSilenceCallback
         stopListening()
 
         // Silence the incoming call ringer
@@ -111,7 +113,7 @@ class FlipToSilenceManager(private val context: Context) : SensorEventListener {
             // Ignore vibration exception
         }
 
-        onSilenceCallback?.invoke()
+        pendingCallback?.invoke()
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}

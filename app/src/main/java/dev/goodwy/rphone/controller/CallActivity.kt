@@ -413,6 +413,9 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
     private fun cacheIdentity(number: String, identity: CallIdentity, version: Int) {
         identityCache.entries.removeAll { it.value.version != version }
         if (number.isEmpty()) return
+        if (identityCache.size >= 20) {
+            identityCache.clear()
+        }
         identityCache[number] = CachedCallIdentity(identity, version)
     }
 

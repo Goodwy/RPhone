@@ -93,6 +93,15 @@ class CallNotificationManager(
                 lockscreenVisibility = Notification.VISIBILITY_PUBLIC
                 enableVibration(false)
             }
+            MISSED_CHANNEL_ID -> NotificationChannel(
+                MISSED_CHANNEL_ID,
+                context.getString(R.string.notif_channel_missed_calls),
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                enableVibration(true)
+                setShowBadge(true)
+            }
             else -> NotificationChannel(
                 CHANNEL_ID_LOW,
                 context.getString(R.string.notif_channel_outgoing_calls),
@@ -348,16 +357,8 @@ class CallNotificationManager(
         contactName: String,
         photoUri: String?
     ) {
-        val channel = NotificationChannel(
-            MISSED_CHANNEL_ID,
-            context.getString(R.string.notif_channel_missed_calls),
-            NotificationManager.IMPORTANCE_DEFAULT
-        ).apply {
-            lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-            enableVibration(true)
-            setShowBadge(true)
-        }
-        notificationManager.createNotificationChannel(channel)
+        // Use the shared ensureChannel() so the channel is only created once.
+        ensureChannel(MISSED_CHANNEL_ID)
 
         val handle = call.details.handle
         val number = handle?.schemeSpecificPart ?: ""
