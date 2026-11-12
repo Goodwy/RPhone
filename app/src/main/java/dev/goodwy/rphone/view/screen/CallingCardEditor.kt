@@ -7,15 +7,21 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,20 +35,22 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.AddAPhoto
 import androidx.compose.material.icons.rounded.AddPhotoAlternate
 import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.Wallpaper
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -50,6 +58,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -59,37 +68,54 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.view.ViewCompat
 import coil.compose.AsyncImage
 import dev.goodwy.rphone.liquidglass.backdrops.rememberLayerBackdrop
 import dev.goodwy.rphone.R
+import dev.goodwy.rphone.cardCornerExtraSmall
+import dev.goodwy.rphone.cardSpacedBy
 import dev.goodwy.rphone.controller.util.CallingCardFont
 import dev.goodwy.rphone.controller.util.CallingCardPhotoSupport
 import dev.goodwy.rphone.controller.util.CallingCardStyle
 import dev.goodwy.rphone.controller.util.CallingCardStyleCodec
+import dev.goodwy.rphone.controller.util.darken
+import dev.goodwy.rphone.view.components.ColorSwatch
+import dev.goodwy.rphone.view.components.NavigationIcon
+import dev.goodwy.rphone.view.components.Title
+import dev.goodwy.rphone.view.theme.LocalIsDarkTheme
+import dev.goodwy.rphone.view.theme.MyColors.dialpadKeyColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.math.roundToInt
 
 /**
  * Draft produced by the two-step calling card editor.
@@ -143,6 +169,7 @@ fun CallingCardEditorDialog(
         scope.launch { snackbarHostState.showSnackbar(message) }
     }
 
+    val callingCardImageUnreadable = stringResource(R.string.calling_card_image_unreadable)
     fun acceptPickedUri(uri: Uri?) {
         if (uri == null) return
         runCatching {
@@ -159,7 +186,7 @@ fun CallingCardEditorDialog(
                 CallingCardPhotoSupport.deleteIfCapture(context, backgroundUri)
                 backgroundUri = uri.toString()
             } else {
-                showMessage(context.getString(R.string.calling_card_image_unreadable))
+                showMessage(callingCardImageUnreadable)
             }
         }
     }
@@ -172,6 +199,7 @@ fun CallingCardEditorDialog(
         ActivityResultContracts.StartActivityForResult()
     ) { result -> acceptPickedUri(result.data?.data) }
 
+    val callingCardCameraFailed = stringResource(R.string.calling_card_camera_failed)
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
     ) { success ->
@@ -190,7 +218,7 @@ fun CallingCardEditorDialog(
                 backgroundUri = target
             } else {
                 CallingCardPhotoSupport.deleteCaptureUri(context, target)
-                showMessage(context.getString(R.string.calling_card_camera_failed))
+                showMessage(callingCardCameraFailed)
             }
         }
     }
@@ -201,14 +229,15 @@ fun CallingCardEditorDialog(
         )
     }
 
+    val callingCardCameraUnavailable = stringResource(R.string.calling_card_camera_unavailable)
     fun launchCamera() {
         if (!CallingCardPhotoSupport.isCameraAvailable(context)) {
-            showMessage(context.getString(R.string.calling_card_camera_unavailable))
+            showMessage(callingCardCameraUnavailable)
             return
         }
         val target = CallingCardPhotoSupport.createCaptureTarget(context)
         if (target == null) {
-            showMessage(context.getString(R.string.calling_card_camera_failed))
+            showMessage(callingCardCameraFailed)
             return
         }
         pendingCameraUri = target.uri.toString()
@@ -217,7 +246,7 @@ fun CallingCardEditorDialog(
         } catch (e: Exception) {
             pendingCameraUri = null
             CallingCardPhotoSupport.discard(target)
-            showMessage(context.getString(R.string.calling_card_camera_unavailable))
+            showMessage(callingCardCameraUnavailable)
         }
     }
 
@@ -266,6 +295,15 @@ fun CallingCardEditorDialog(
             decorFitsSystemWindows = false
         )
     ) {
+        val isDark = LocalIsDarkTheme.current
+        val view = LocalView.current
+        SideEffect {
+            ViewCompat.getWindowInsetsController(view)?.apply {
+                isAppearanceLightStatusBars = !isDark
+                isAppearanceLightNavigationBars = !isDark
+            }
+        }
+
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.surface
@@ -343,7 +381,7 @@ fun CallingCardEditorDialog(
             },
             dismissButton = {
                 TextButton(onClick = { googlePhotosNotInstalled = false }) {
-                    Text(stringResource(R.string.calling_card_google_photos_cancel))
+                    Text(stringResource(R.string.not_now))
                 }
             }
         )
@@ -354,35 +392,37 @@ fun CallingCardEditorDialog(
 private fun EditorHeader(
     title: String,
     onBack: () -> Unit,
-    backLabel: String,
     actionLabel: String,
-    onAction: () -> Unit
+    onAction: () -> Unit,
+    usingDefault: Boolean = false,
+    onUseDefault: (() -> Unit)? = null
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 8.dp),
+            .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = onBack) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                contentDescription = backLabel
-            )
+        NavigationIcon(onClick = onBack)
+        Box(modifier = Modifier.weight(1f).padding(horizontal = 6.dp)) {
+            Title(title)
         }
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = 4.dp),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        TextButton(onClick = onAction) {
+
+
+        if (onUseDefault != null) {
+            Button(
+                onClick = onUseDefault,
+                enabled = !usingDefault,
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+            ) {
+                Text(stringResource(R.string.reset))
+            }
+            Spacer(Modifier.width(6.dp))
+        }
+        Button(onClick = onAction) {
             Text(actionLabel)
         }
+        Spacer(Modifier.width(16.dp))
     }
 }
 
@@ -401,6 +441,7 @@ private fun CallingCardPhotoStep(
 ) {
     val compactHeight = LocalConfiguration.current.screenHeightDp < 560
     val previewDescription = stringResource(R.string.calling_card_photo_preview)
+    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     Column(
         modifier = Modifier
@@ -409,67 +450,119 @@ private fun CallingCardPhotoStep(
             .navigationBarsPadding()
     ) {
         EditorHeader(
-            title = stringResource(R.string.calling_card_photo_title),
+            title = stringResource(R.string.contact_call_background_choose),
             onBack = onBack,
-            backLabel = stringResource(R.string.calling_card_back),
             actionLabel = stringResource(R.string.calling_card_next),
             onAction = onNext
         )
 
-        val callScreenBackdrop = rememberLayerBackdrop()
-        PortraitPreviewFrame(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .padding(
-                    horizontal = if (compactHeight) 16.dp else 24.dp,
-                    vertical = if (compactHeight) 4.dp else 8.dp
-                )
-        ) {
-            if (backgroundUri != null) {
-                Box(
+
+        if (isLandscape) {
+            Row(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+
+                val callScreenBackdrop = rememberLayerBackdrop()
+                PortraitPreviewFrame(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .semantics {
-                            contentDescription = previewDescription
-                        }
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .padding(
+                            horizontal = if (compactHeight) 16.dp else 24.dp,
+                            vertical = if (compactHeight) 4.dp else 8.dp
+                        ),
+                    shape = MaterialTheme.shapes.large
                 ) {
-                    // Same rendering the live call screen uses: Crop for the
-                    // custom background and the same scrims, so the preview shows
-                    // exactly what will be saved.
-                    ExpressiveBackground(
-                        photoUri = photoUri,
-                        backgroundUri = backgroundUri,
-                        liquidGlassBackdrop = callScreenBackdrop,
-                        hideGradient = false,
-                        enableParticles = false
+                    if (backgroundUri != null) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .semantics {
+                                    contentDescription = previewDescription
+                                }
+                        ) {
+                            // Same rendering the live call screen uses: Crop for the
+                            // custom background and the same scrims, so the preview shows
+                            // exactly what will be saved.
+                            ExpressiveBackground(
+                                photoUri = photoUri,
+                                backgroundUri = backgroundUri,
+                                liquidGlassBackdrop = callScreenBackdrop,
+                                hideGradient = false,
+                                enableParticles = false
+                            )
+                        }
+                    } else {
+                        NoPhotoPlaceholder(contactName = contactName, photoUri = photoUri)
+                    }
+                }
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxSize()
+//                        .verticalScroll(rememberScrollState())
+                ) {
+                    CallingCardPhotoActionBar(
+                        canRemovePhoto = canRemovePhoto,
+                        onCamera = onCamera,
+                        onGallery = onGallery,
+                        onGooglePhotos = onGooglePhotos,
+                        onRemovePhoto = onRemovePhoto,
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
-            } else {
-                NoPhotoPlaceholder(contactName = contactName, photoUri = photoUri)
             }
-        }
-
-        if (!compactHeight) {
-            Text(
-                text = stringResource(R.string.calling_card_photo_supporting),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+        } else {
+            val callScreenBackdrop = rememberLayerBackdrop()
+            PortraitPreviewFrame(
                 modifier = Modifier
+                    .weight(1f)
                     .fillMaxWidth()
-                    .padding(horizontal = 28.dp, vertical = 4.dp)
+                    .padding(
+                        horizontal = if (compactHeight) 16.dp else 24.dp,
+                        vertical = if (compactHeight) 4.dp else 8.dp
+                    )
+            ) {
+                if (backgroundUri != null) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .semantics {
+                                contentDescription = previewDescription
+                            }
+                    ) {
+                        // Same rendering the live call screen uses: Crop for the
+                        // custom background and the same scrims, so the preview shows
+                        // exactly what will be saved.
+                        ExpressiveBackground(
+                            photoUri = photoUri,
+                            backgroundUri = backgroundUri,
+                            liquidGlassBackdrop = callScreenBackdrop,
+                            hideGradient = false,
+                            enableParticles = false
+                        )
+                    }
+                } else {
+                    NoPhotoPlaceholder(contactName = contactName, photoUri = photoUri)
+                }
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            CallingCardPhotoActionBar(
+                canRemovePhoto = canRemovePhoto,
+                onCamera = onCamera,
+                onGallery = onGallery,
+                onGooglePhotos = onGooglePhotos,
+                onRemovePhoto = onRemovePhoto
             )
+
+            Spacer(Modifier.height(if (compactHeight) 2.dp else 8.dp))
         }
-
-        CallingCardPhotoActionBar(
-            canRemovePhoto = canRemovePhoto,
-            onCamera = onCamera,
-            onGallery = onGallery,
-            onGooglePhotos = onGooglePhotos,
-            onRemovePhoto = onRemovePhoto
-        )
-
-        Spacer(Modifier.height(if (compactHeight) 2.dp else 8.dp))
     }
 }
 
@@ -479,19 +572,20 @@ private fun CallingCardPhotoActionBar(
     onCamera: () -> Unit,
     onGallery: () -> Unit,
     onGooglePhotos: () -> Unit,
-    onRemovePhoto: () -> Unit
+    onRemovePhoto: () -> Unit,
+    modifier: Modifier = Modifier.fillMaxWidth()
 ) {
     Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surfaceContainer,
+        modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 16.dp).fillMaxWidth(),
+        color = dialpadKeyColor,
+        shape = MaterialTheme.shapes.extraLarge,
         tonalElevation = 3.dp
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 4.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(2.dp),
-            verticalAlignment = Alignment.Top
+            modifier = modifier
+                .padding(horizontal = 16.dp, vertical = 40.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             PhotoActionButton(
                 modifier = Modifier.weight(1f),
@@ -537,7 +631,7 @@ private fun CallingCardPhotoActionBar(
                 onClick = onRemovePhoto,
                 icon = {
                     Icon(
-                        imageVector = Icons.Rounded.DeleteOutline,
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_delete),
                         contentDescription = null,
                         modifier = Modifier.size(24.dp)
                     )
@@ -571,28 +665,39 @@ private fun PhotoActionButton(
         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
     }
 
+    val interaction = remember { MutableInteractionSource() }
+    val isPressed by interaction.collectIsPressedAsState()
+    val radius by animateDpAsState(
+        if (isPressed) 16.dp else 42.dp,
+        spring(stiffness = Spring.StiffnessLow),
+        label = "btnRadius"
+    )
+
     Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
-            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
-            .semantics(mergeDescendants = true) {
-                if (!enabled) disabled()
-            }
-            .padding(vertical = 6.dp, horizontal = 2.dp),
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
-            modifier = Modifier
-                .size(44.dp)
-                .clip(CircleShape)
-                .background(containerColor),
-            contentAlignment = Alignment.Center
+        Surface(
+            onClick = onClick,
+            enabled = enabled,
+            modifier = Modifier.height(56.dp).fillMaxWidth(),
+            shape = RoundedCornerShape(radius),
+            color = containerColor,
+            interactionSource = interaction
         ) {
-            CompositionLocalProvider(LocalContentColor provides contentColor) {
-                icon()
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(containerColor),
+                contentAlignment = Alignment.Center
+            ) {
+                CompositionLocalProvider(LocalContentColor provides contentColor) {
+                    icon()
+                }
             }
         }
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(8.dp))
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
@@ -665,79 +770,175 @@ private fun CallingCardCustomizeStep(
 ) {
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-            .navigationBarsPadding()
+    Box(
+        modifier = Modifier.fillMaxSize()
     ) {
-        EditorHeader(
-            title = stringResource(R.string.calling_card_customize_title),
-            onBack = onBack,
-            backLabel = stringResource(R.string.calling_card_back),
-            actionLabel = stringResource(R.string.calling_card_done),
-            onAction = onDone
+        if (!isLandscape) LivePreview(
+            contactName = contactName,
+            phoneNumber = phoneNumber,
+            photoUri = photoUri,
+            backgroundUri = backgroundUri,
+            style = style
         )
 
-        if (isLandscape) {
-            Row(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(20.dp)
-            ) {
-                PortraitPreviewFrame(
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding(),
+            horizontalAlignment = Alignment.End
+        ) {
+            EditorHeader(
+                title = stringResource(R.string.calling_card_customize_title),
+                onBack = onBack,
+                actionLabel = stringResource(R.string.done),
+                onAction = onDone,
+                usingDefault = usingDefault,
+                onUseDefault = if (isLandscape) onUseDefault else null
+            )
+
+            if (isLandscape) {
+                Row(
                     modifier = Modifier
                         .weight(1f)
-                        .fillMaxSize()
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
-                    LivePreview(
+//                    PortraitPreviewFrame(
+//                        modifier = Modifier
+//                            .weight(1f)
+//                            .fillMaxSize()
+//                    ) {
+//                        LivePreview(
+//                            contactName = contactName,
+//                            phoneNumber = phoneNumber,
+//                            photoUri = photoUri,
+//                            backgroundUri = backgroundUri,
+//                            style = style
+//                        )
+//                    }
+                    ScaledCallScreenPreview(
                         contactName = contactName,
                         phoneNumber = phoneNumber,
                         photoUri = photoUri,
                         backgroundUri = backgroundUri,
-                        style = style
-                    )
-                }
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                ) {
-                    AppearanceControls(
                         style = style,
-                        usingDefault = usingDefault,
-                        onStyleChange = onStyleChange,
-                        onUseDefault = onUseDefault
+                        modifier = Modifier.weight(1f).fillMaxSize()
                     )
-                }
-            }
-        } else {
-            PortraitPreviewFrame(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 8.dp)
-            ) {
-                LivePreview(
-                    contactName = contactName,
-                    phoneNumber = phoneNumber,
-                    photoUri = photoUri,
-                    backgroundUri = backgroundUri,
-                    style = style
-                )
-            }
-            AppearanceControls(
-                style = style,
-                usingDefault = usingDefault,
-                onStyleChange = onStyleChange,
-                onUseDefault = onUseDefault
-            )
-        }
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        AppearanceControls(
+                            modifier = Modifier.fillMaxHeight(),
+                            style = style,
+                            showBlur = backgroundUri != null,
+                            usingDefault = usingDefault,
+                            onStyleChange = onStyleChange,
+                            onUseDefault = onUseDefault
+                        )
 
-        Spacer(Modifier.height(12.dp))
+                        if (backgroundUri != null) {
+                            Spacer(Modifier.height(cardSpacedBy))
+                            Surface(
+                                modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 16.dp).fillMaxWidth(),
+                                color = dialpadKeyColor,
+                                shape = MaterialTheme.shapes.extraLarge.copy(
+                                    topStart = CornerSize(cardCornerExtraSmall), topEnd = CornerSize(cardCornerExtraSmall)
+                                ),
+                                tonalElevation = 3.dp
+                            ) {
+                                Slider(
+                                    value = style.blurRadiusDp.toFloat(),
+                                    onValueChange = { v ->
+                                        onStyleChange(style.copy(blurRadiusDp = v.roundToInt()))
+                                    },
+                                    valueRange = 0f..CallingCardStyle.MAX_BLUR_DP.toFloat(),
+                                    steps = CallingCardStyle.MAX_BLUR_DP - 1,
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                                    thumb = {
+                                        SliderDefaults.Thumb(
+                                            interactionSource = remember { MutableInteractionSource() },
+                                            modifier = Modifier.scale(scaleX = 0.8f, scaleY = 0.8f)
+                                        )
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            } else {
+                Spacer(Modifier.weight(1f))
+
+//            PortraitPreviewFrame(
+//                modifier = Modifier
+//                    .weight(1f)
+//                    .fillMaxWidth()
+//                    .padding(horizontal = 24.dp, vertical = 8.dp)
+//            ) {
+//                LivePreview(
+//                    contactName = contactName,
+//                    phoneNumber = phoneNumber,
+//                    photoUri = photoUri,
+//                    backgroundUri = backgroundUri,
+//                    style = style
+//                )
+//            }
+
+                Button(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    onClick = onUseDefault,
+                    enabled = !usingDefault,
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                ) {
+                    Text(stringResource(R.string.reset))
+                }
+
+                Spacer(Modifier.height(8.dp))
+
+                AppearanceControls(
+                    modifier = Modifier,
+                    style = style,
+                    showBlur = backgroundUri != null,
+                    usingDefault = usingDefault,
+                    onStyleChange = onStyleChange,
+                    onUseDefault = onUseDefault
+                )
+
+                if (backgroundUri != null) {
+                    Spacer(Modifier.height(cardSpacedBy))
+                    Surface(
+                        modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 16.dp).fillMaxWidth(),
+                        color = dialpadKeyColor,
+                        shape = MaterialTheme.shapes.extraLarge.copy(
+                            topStart = CornerSize(cardCornerExtraSmall), topEnd = CornerSize(cardCornerExtraSmall)
+                        ),
+                        tonalElevation = 3.dp
+                    ) {
+                        Slider(
+                            value = style.blurRadiusDp.toFloat(),
+                            onValueChange = { v ->
+                                onStyleChange(style.copy(blurRadiusDp = v.roundToInt()))
+                            },
+                            valueRange = 0f..CallingCardStyle.MAX_BLUR_DP.toFloat(),
+                            steps = CallingCardStyle.MAX_BLUR_DP - 1,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            thumb = {
+                                SliderDefaults.Thumb(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    modifier = Modifier.scale(scaleX = 0.8f, scaleY = 0.8f)
+                                )
+                            }
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(8.dp))
+            }
+        }
     }
 }
 
@@ -762,69 +963,119 @@ private fun LivePreview(
 
 @Composable
 private fun AppearanceControls(
+    modifier: Modifier,
     style: CallingCardStyle,
+    showBlur: Boolean,
     usingDefault: Boolean,
     onStyleChange: (CallingCardStyle) -> Unit,
     onUseDefault: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp)
+    Surface(
+        modifier = modifier.padding(horizontal = 16.dp).fillMaxWidth()
+            .then(
+                if (showBlur) Modifier
+                else Modifier.padding(bottom = 16.dp)
+            ),
+        color = dialpadKeyColor,
+        shape = if (showBlur) MaterialTheme.shapes.extraLarge.copy(
+            bottomEnd = CornerSize(cardCornerExtraSmall), bottomStart = CornerSize(cardCornerExtraSmall)
+        ) else MaterialTheme.shapes.extraLarge,
+        tonalElevation = 3.dp
     ) {
-        Text(
-            text = stringResource(R.string.calling_card_font_title),
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.SemiBold
-        )
-        Spacer(Modifier.height(8.dp))
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp),
+            verticalArrangement = Arrangement.Center
         ) {
-            items(CallingCardFont.entries, key = { it.id }) { font ->
-                FontPreset(
-                    font = font,
-                    selected = !usingDefault && style.font == font,
-                    onClick = { onStyleChange(style.copy(font = font)) }
-                )
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                items(CallingCardFont.entries, key = { it.id }) { font ->
+                    FontPreset(
+                        font = font,
+                        selected = !usingDefault && style.font == font,
+                        onClick = {
+                            val clampedWeight = style.fontWeight.coerceIn(font.minWeight, font.maxWeight)
+                            onStyleChange(style.copy(font = font, fontWeight = clampedWeight))
+                        }
+                    )
+                }
             }
-        }
 
-        Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(16.dp))
+            Slider(
+                value = style.fontSizeSp.toFloat(),
+                onValueChange = { v ->
+                    onStyleChange(style.copy(fontSizeSp = v.roundToInt().coerceIn(
+                        CallingCardStyle.MIN_FONT_SIZE_SP, CallingCardStyle.MAX_FONT_SIZE_SP
+                    )))
+                },
+                valueRange = CallingCardStyle.MIN_FONT_SIZE_SP.toFloat()..CallingCardStyle.MAX_FONT_SIZE_SP.toFloat(),
+                steps = CallingCardStyle.MAX_FONT_SIZE_SP - CallingCardStyle.MIN_FONT_SIZE_SP - 1,
+                modifier = Modifier.padding(horizontal = 16.dp),
+                thumb = {
+                    SliderDefaults.Thumb(
+                        interactionSource = remember { MutableInteractionSource() },
+                        modifier = Modifier.scale(scaleX = 0.8f, scaleY = 0.8f)
+                    )
+                }
+            )
+            Spacer(Modifier.height(12.dp))
 
-        Text(
-            text = stringResource(R.string.calling_card_text_color_title),
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.SemiBold
-        )
-        Spacer(Modifier.height(8.dp))
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            item(key = "theme") {
-                ColorSwatch(
-                    color = null,
-                    label = stringResource(R.string.calling_card_color_default),
-                    selected = !usingDefault && style.textColorArgb == null,
-                    onClick = { onStyleChange(style.copy(textColorArgb = null)) }
-                )
+            val weightMin = style.font.minWeight
+            val weightMax = style.font.maxWeight
+            Slider(
+                value = style.fontWeight.toFloat().coerceIn(
+                    weightMin.toFloat(), weightMax.toFloat()
+                ),
+                onValueChange = { v ->
+                    val stepped = (v / CallingCardStyle.WEIGHT_STEP).roundToInt() * CallingCardStyle.WEIGHT_STEP
+                    onStyleChange(style.copy(fontWeight = stepped.coerceIn(weightMin, weightMax)))
+                },
+                valueRange = weightMin.toFloat()..weightMax.toFloat(),
+                steps = ((weightMax - weightMin) / CallingCardStyle.WEIGHT_STEP - 1).coerceAtLeast(0),
+                modifier = Modifier.padding(horizontal = 16.dp),
+                thumb = {
+                    SliderDefaults.Thumb(
+                        interactionSource = remember { MutableInteractionSource() },
+                        modifier = Modifier.scale(scaleX = 0.8f, scaleY = 0.8f)
+                    )
+                }
+            )
+
+            Spacer(Modifier.height(16.dp))
+
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                item(key = "theme") {
+                    ColorSwatch(
+                        color = null,
+                        label = stringResource(R.string.calling_card_color_default),
+                        selected = !usingDefault && style.textColorArgb == null,
+                        onClick = { onStyleChange(style.copy(textColorArgb = null)) }
+                    )
+                }
+                items(callingCardColors, key = { it.argb }) { preset ->
+                    ColorSwatch(
+                        color = Color(preset.argb),
+                        label = if (preset.labelRes != null) stringResource(preset.labelRes) else null,
+                        selected = !usingDefault && style.textColorArgb == preset.argb,
+                        onClick = { onStyleChange(style.copy(textColorArgb = preset.argb)) }
+                    )
+                }
             }
-            items(callingCardColors, key = { it.argb }) { preset ->
-                ColorSwatch(
-                    color = Color(preset.argb),
-                    label = stringResource(preset.labelRes),
-                    selected = !usingDefault && style.textColorArgb == preset.argb,
-                    onClick = { onStyleChange(style.copy(textColorArgb = preset.argb)) }
-                )
-            }
-        }
 
-        Spacer(Modifier.height(8.dp))
-        TextButton(
-            onClick = onUseDefault,
-            enabled = !usingDefault
-        ) {
-            Text(stringResource(R.string.calling_card_use_default))
+//            Spacer(Modifier.height(8.dp))
+//            TextButton(
+//                onClick = onUseDefault,
+//                enabled = !usingDefault
+//            ) {
+//                Text(stringResource(R.string.calling_card_use_default))
+//            }
         }
     }
 }
@@ -848,7 +1099,7 @@ private fun FontPreset(
     Column(
         modifier = Modifier
             .width(78.dp)
-            .clip(RoundedCornerShape(18.dp))
+            .clip(MaterialTheme.shapes.large)
             .background(container)
             .selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
             .padding(vertical = 10.dp, horizontal = 6.dp),
@@ -873,58 +1124,49 @@ private fun FontPreset(
 }
 
 @Composable
-private fun ColorSwatch(
-    color: Color?,
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    val borderColor = if (selected) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.outlineVariant
-    }
-    Box(
-        modifier = Modifier
-            .size(44.dp)
-            .clip(CircleShape)
-            .background(color ?: MaterialTheme.colorScheme.surfaceContainerHighest)
-            .border(if (selected) 3.dp else 1.dp, borderColor, CircleShape)
-            .selectable(selected = selected, role = Role.RadioButton, onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        if (color == null) {
-            Text(
-                text = "A",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        } else if (selected) {
-            Icon(
-                imageVector = Icons.Rounded.Check,
-                contentDescription = label,
-                tint = if (color.luminance() > 0.5f) Color.Black else Color.White,
-                modifier = Modifier.size(20.dp)
-            )
-        }
-    }
+private fun rememberScreenAspectRatio(): Float {
+    val density = LocalDensity.current
+    val windowInfo = LocalWindowInfo.current
+
+    val widthDp = with(density) { windowInfo.containerSize.width.toDp() }
+    val heightDp = with(density) { windowInfo.containerSize.height.toDp() }
+
+    // Always portrait orientation: shorter side / longer side
+    val (w, h) = if (widthDp < heightDp) widthDp to heightDp else heightDp to widthDp
+    return (w / h)
 }
 
 @Composable
 private fun PortraitPreviewFrame(
     modifier: Modifier = Modifier,
+    shape: Shape = MaterialTheme.shapes.extraExtraLarge,
     content: @Composable () -> Unit
 ) {
+    val aspectRatio = rememberScreenAspectRatio()
+
     BoxWithConstraints(
         modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
-        val frameWidth: Dp = minOf(maxWidth, maxHeight * 9f / 16f)
-        val frameHeight: Dp = frameWidth * 16f / 9f
+        val frameWidth: Dp
+        val frameHeight: Dp
+        if (maxWidth / maxHeight > aspectRatio) {
+            frameHeight = maxHeight
+            frameWidth = maxHeight * aspectRatio
+        } else {
+            frameWidth = maxWidth
+            frameHeight = maxWidth / aspectRatio
+        }
+
         Surface(
             modifier = Modifier
                 .size(frameWidth, frameHeight)
-                .clip(RoundedCornerShape(28.dp)),
+                .clip(shape)
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                    shape = shape
+                ),
             color = MaterialTheme.colorScheme.surfaceContainerHighest,
             tonalElevation = 2.dp
         ) {
@@ -935,18 +1177,93 @@ private fun PortraitPreviewFrame(
     }
 }
 
-private data class ColorPreset(val argb: Int, val labelRes: Int)
+@Composable
+private fun ScaledCallScreenPreview(
+    contactName: String,
+    phoneNumber: String,
+    photoUri: String?,
+    backgroundUri: String?,
+    style: CallingCardStyle,
+    modifier: Modifier = Modifier
+) {
+    val configuration = LocalConfiguration.current
+    val shortSide = minOf(configuration.screenWidthDp, configuration.screenHeightDp).dp
+    val longSide = maxOf(configuration.screenWidthDp, configuration.screenHeightDp).dp
+
+    BoxWithConstraints(modifier = modifier, contentAlignment = Alignment.Center) {
+        val scale = minOf(maxWidth / shortSide, maxHeight / longSide)
+        val scaledWidth = shortSide * scale
+        val scaledHeight = longSide * scale
+
+        val baseDensity = LocalDensity.current
+        val scaledDensity = Density(
+            density = baseDensity.density * scale,
+            fontScale = baseDensity.fontScale
+        )
+
+        Box(
+            modifier = Modifier
+                .size(scaledWidth, scaledHeight)
+                .clip(MaterialTheme.shapes.large)
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.large)
+        ) {
+            CompositionLocalProvider(LocalDensity provides scaledDensity) {
+                CallScreenPreview(
+                    contactName = contactName,
+                    phoneNumber = phoneNumber,
+                    photoUri = photoUri,
+                    backgroundUri = backgroundUri,
+                    style = CallScreenPreviewStyle.Default,
+                    callingCardStyle = style,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+    }
+}
+
+private data class ColorPreset(val argb: Int, val labelRes: Int? = null)
 
 private val callingCardColors = listOf(
-    ColorPreset(0xFFFFFFFF.toInt(), R.string.calling_card_color_white),
-    ColorPreset(0xFFFFF1CC.toInt(), R.string.calling_card_color_cream),
-    ColorPreset(0xFFFFC857.toInt(), R.string.calling_card_color_gold),
-    ColorPreset(0xFFFF8A80.toInt(), R.string.calling_card_color_coral),
-    ColorPreset(0xFF8ECAE6.toInt(), R.string.calling_card_color_sky),
-    ColorPreset(0xFFA8E6CF.toInt(), R.string.calling_card_color_mint),
-    ColorPreset(0xFFCDB4DB.toInt(), R.string.calling_card_color_lavender),
-    ColorPreset(0xFF101418.toInt(), R.string.calling_card_color_ink)
+    ColorPreset(0xFFFFFFFF.toInt()),
+    ColorPreset(0xFF000000.toInt()),
+    ColorPreset(0xFFFF98CF.toInt()),
+    ColorPreset(0xFFFF6796.toInt()),
+    ColorPreset(0xFFEC1F27.toInt()),
+    ColorPreset(0xFFFF8535.toInt()),
+    ColorPreset(0xFFE75D00.toInt()),
+    ColorPreset(0xFFFEEEB8.toInt()),
+    ColorPreset(0xFFFFE056.toInt()),
+    ColorPreset(0xFFC6EFF3.toInt()),
+    ColorPreset(0xFF63BE33.toInt()),
+    ColorPreset(0xFF2D5F13.toInt()),
+    ColorPreset(0xFF72D8C8.toInt()),
+    ColorPreset(0xFF0072DA.toInt()),
+    ColorPreset(0xFF4DE1F5.toInt()),
+    ColorPreset(0xFFB0D4FE.toInt()),
+    ColorPreset(0xFF94A8FE.toInt()),
+    ColorPreset(0xFF201C75.toInt()),
+    ColorPreset(0xFFC498F8.toInt()),
+    ColorPreset(0xFF7A43BF.toInt())
 )
+//private val callingCardColors = listOf(
+//    ColorPreset(0xFF78D3F7.toInt()),
+//    ColorPreset(0xFF7FA5F7.toInt()),
+//    ColorPreset(0xFFAB8DF6.toInt()),
+//    ColorPreset(0xFFC45FF5.toInt()),
+//    ColorPreset(0xFFDE789C.toInt()),
+//    ColorPreset(0xFFEF9485.toInt()),
+//    ColorPreset(0xFFF2A984.toInt()),
+//    ColorPreset(0xFFF5C883.toInt()),
+//    ColorPreset(0xFFF8DA85.toInt()),
+//    ColorPreset(0xFFFDF9A0.toInt()),
+//    ColorPreset(0xFFEAF19A.toInt()),
+//    ColorPreset(0xFFBADB93.toInt()),
+//    ColorPreset(0xFFB4C1AB.toInt()),
+//    ColorPreset(0xFFA3B6BC.toInt()),
+//    ColorPreset(0xFFB5A8B5.toInt()),
+//    ColorPreset(0xFFB8B1A8.toInt())
+//)
 
 private val CallingCardStyleSaver = Saver<CallingCardStyle, String>(
     save = { CallingCardStyleCodec.encode(it) },

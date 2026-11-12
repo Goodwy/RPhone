@@ -147,7 +147,7 @@
     <!-- Contributors -->
     <string name="contributors">Συντελεστές</string>
     <string name="development_team">Ομάδα ανάπτυξης</string>
-    <string name="apps_that_inspired_us">Εφαρμογές που μας ενέπνευσαν</string>
+    <string name="origin_and_credits">Προέλευση &amp; ευχαριστίες</string>
 
     <!-- Settings -->
     <string name="settings">Ρυθμίσεις</string>
@@ -549,8 +549,34 @@
     <string name="settings_call_default_background">Προεπιλεγμένο φόντο κλήσης</string>
     <string name="settings_call_default_background_set">Εμφανίζεται προσαρμοσμένη εικόνα σε κάθε κλήση</string>
     <string name="settings_call_default_background_none">Δεν έχει οριστεί — οι κλήσεις χρησιμοποιούν το θέμα της εφαρμογής</string>
-    <string name="settings_interface_hide_avatar_with_bg">Απόκρυψη εικόνας προφίλ όταν υπάρχει διαθέσιμο φόντο</string>
-    <string name="settings_interface_hide_avatar_with_bg_supporting">Απόκρυψη του άβαταρ του καλούντος στην οθόνη κλήσης όταν είναι ενεργό ένα φόντο κλήσης</string>
+    <string name="settings_interface_hide_avatar_with_bg">Απόκρυψη εικόνας προφίλ με προεπιλεγμένο φόντο</string>
+    <string name="settings_interface_hide_avatar_with_bg_supporting">Τα προσαρμοσμένα φόντα κλήσης κρύβουν πάντα το άβαταρ του καλούντος. Αυτή η ρύθμιση ισχύει μόνο για το προεπιλεγμένο φόντο</string>
+    <string name="calling_card_customize_title">Προσαρμογή</string>
+    <string name="calling_card_next">Επόμενο</string>
+    <string name="calling_card_no_photo">Δεν έχει επιλεγεί φωτογραφία</string>
+    <string name="calling_card_photo_preview">Επιλεγμένη φωτογραφία για την οθόνη κλήσης</string>
+    <string name="calling_card_action_camera">Κάμερα</string>
+    <string name="calling_card_action_gallery">Συλλογή</string>
+    <string name="calling_card_action_google_photos">Google Φωτογραφίες</string>
+    <string name="calling_card_action_remove">Αφαίρεση</string>
+    <string name="calling_card_camera_unavailable">Δεν υπάρχει διαθέσιμη εφαρμογή κάμερας σε αυτήν τη συσκευή.</string>
+    <string name="calling_card_camera_failed">Δεν ήταν δυνατή η αποθήκευση αυτής της φωτογραφίας. Δοκιμάστε ξανά.</string>
+    <string name="calling_card_image_unreadable">Δεν ήταν δυνατό το άνοιγμα αυτής της εικόνας. Επιλέξτε άλλη.</string>
+    <string name="calling_card_google_photos_not_installed">Το Google Φωτογραφίες δεν είναι εγκατεστημένο.</string>
+    <string name="calling_card_google_photos_use_gallery">Χρήση συλλογής</string>
+    <string name="calling_card_color_default">Θέμα</string>
+    <string name="calling_card_style_customized">Προσαρμοσμένη γραμματοσειρά και χρώμα κειμένου</string>
+    <string name="calling_card_font_system">Προεπιλεγμένη</string>
+    <string name="calling_card_overrides_title">Φόντα &amp; στυλ κλήσεων</string>
+    <string name="calling_card_overrides_subtitle">Διαχείριση φόντων και στυλ για επαφές και αριθμούς</string>
+    <string name="calling_card_overrides_numbers">Αριθμοί</string>
+    <string name="calling_card_overrides_empty">Δεν υπάρχουν προσαρμοσμένα φόντα ή στυλ ακόμη</string>
+    <string name="calling_card_override_badge_background">Φόντο</string>
+    <string name="calling_card_override_badge_style">Στυλ</string>
+    <string name="calling_card_override_deleted">Η προσαρμογή αφαιρέθηκε</string>
+    <string name="calling_card_override_saved">Η προσαρμογή αποθηκεύτηκε</string>
+    <string name="calling_card_override_save_failed">Δεν ήταν δυνατή η αποθήκευση του φόντου</string>
+    <string name="calling_card_override_unknown_contact">Επαφή #%1$s</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">Προσθήκη στην αρχική οθόνη</string>

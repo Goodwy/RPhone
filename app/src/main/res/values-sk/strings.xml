@@ -146,7 +146,7 @@
     <!-- Contributors -->
     <string name="contributors">Prispievatelia</string>
     <string name="development_team">Vývojový tím</string>
-    <string name="apps_that_inspired_us">Aplikácie, ktoré nás inšpirovali</string>
+    <string name="origin_and_credits">Pôvod a poďakovanie</string>
 
     <!-- Settings -->
     <string name="settings">Nastavenia</string>
@@ -550,8 +550,34 @@
     <string name="settings_call_default_background">Predvolené pozadie hovoru</string>
     <string name="settings_call_default_background_set">Pri každom hovore sa zobrazí vlastný obrázok</string>
     <string name="settings_call_default_background_none">Nenastavené — hovory používajú tému aplikácie</string>
-    <string name="settings_interface_hide_avatar_with_bg">Skryť profilový obrázok, keď je k dispozícii pozadie</string>
-    <string name="settings_interface_hide_avatar_with_bg_supporting">Skryť avatar volajúceho na obrazovke hovoru, keď je aktívny obrázok pozadia hovoru</string>
+    <string name="settings_interface_hide_avatar_with_bg">Skryť profilový obrázok pri predvolenom pozadí</string>
+    <string name="settings_interface_hide_avatar_with_bg_supporting">Vlastné pozadia hovorov vždy skrývajú avatar volajúceho. Toto nastavenie platí iba pre predvolené pozadie</string>
+    <string name="calling_card_customize_title">Prispôsobiť</string>
+    <string name="calling_card_next">Ďalej</string>
+    <string name="calling_card_no_photo">Nie je vybratá žiadna fotografia</string>
+    <string name="calling_card_photo_preview">Vybraná fotografia pre obrazovku hovoru</string>
+    <string name="calling_card_action_camera">Fotoaparát</string>
+    <string name="calling_card_action_gallery">Galéria</string>
+    <string name="calling_card_action_google_photos">Google Fotky</string>
+    <string name="calling_card_action_remove">Odstrániť</string>
+    <string name="calling_card_camera_unavailable">V tomto zariadení nie je dostupná žiadna aplikácia fotoaparátu.</string>
+    <string name="calling_card_camera_failed">Fotografiu sa nepodarilo uložiť. Skúste to znova.</string>
+    <string name="calling_card_image_unreadable">Obrázok sa nepodarilo otvoriť. Vyberte iný.</string>
+    <string name="calling_card_google_photos_not_installed">Google Fotky nie sú nainštalované.</string>
+    <string name="calling_card_google_photos_use_gallery">Použiť galériu</string>
+    <string name="calling_card_color_default">Téma</string>
+    <string name="calling_card_style_customized">Vlastné písmo a farba textu</string>
+    <string name="calling_card_font_system">Predvolené</string>
+    <string name="calling_card_overrides_title">Pozadia a štýly hovorov</string>
+    <string name="calling_card_overrides_subtitle">Správa pozadí a štýlov pre kontakty a čísla</string>
+    <string name="calling_card_overrides_numbers">Čísla</string>
+    <string name="calling_card_overrides_empty">Zatiaľ žiadne vlastné pozadia ani štýly</string>
+    <string name="calling_card_override_badge_background">Pozadie</string>
+    <string name="calling_card_override_badge_style">Štýl</string>
+    <string name="calling_card_override_deleted">Prispôsobenie odstránené</string>
+    <string name="calling_card_override_saved">Prispôsobenie uložené</string>
+    <string name="calling_card_override_save_failed">Pozadie sa nepodarilo uložiť</string>
+    <string name="calling_card_override_unknown_contact">Kontakt #%1$s</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">Pridať na domovskú obrazovku</string>

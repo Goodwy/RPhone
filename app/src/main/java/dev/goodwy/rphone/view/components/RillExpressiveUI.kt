@@ -45,7 +45,9 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.CallMade
@@ -76,15 +78,18 @@ import dev.goodwy.rphone.controller.util.PreferenceManager
 import kotlinx.coroutines.delay
 import org.koin.compose.koinInject
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.BuildConfig
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.cardCornerExtraSmall
 import dev.goodwy.rphone.cardSpacedBy
+import dev.goodwy.rphone.controller.util.darken
 import dev.goodwy.rphone.controller.util.formatDate
 import dev.goodwy.rphone.controller.util.launchInternetSearch
 import dev.goodwy.rphone.modal.data.CallLogEntry
@@ -1061,6 +1066,43 @@ fun CallLogListItemSimple(
     }
 }
 
+// Heading for Settings
+@Composable
+fun HeadlineText(
+    text: String,
+    maxLines: Int = 2,
+    overflow: TextOverflow = TextOverflow.Ellipsis,
+    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier
+) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodyLarge,
+        lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
+//        fontWeight = FontWeight.SemiBold,
+        maxLines = maxLines,
+        overflow = overflow,
+        modifier = modifier
+    )
+}
+
+// Supporting for Settings
+@Composable
+fun SupportingText(
+    text: String,
+    maxLines: Int = Int.MAX_VALUE,
+    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier
+) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.8f),
+        lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
+        maxLines = maxLines,
+        overflow = TextOverflow.Ellipsis,
+        modifier = modifier
+    )
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun RillListItem(
@@ -1168,24 +1210,10 @@ fun RillListItem(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 if (headline != null) {
-                    Text(
-                        text = headline,
-                        style = MaterialTheme.typography.bodyLarge,
-//                    fontWeight = FontWeight.SemiBold,
-                        lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    HeadlineText(text = headline)
                 }
                 if (supporting != null) {
-                    Text(
-                        text = supporting,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.8f),
-                        lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
-//                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    SupportingText(text = supporting)
                 }
                 if (annotated != null) {
                     Text(
@@ -1285,19 +1313,9 @@ fun RillSwitchListItem(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Text(
-                    text = headline,
-                    style = MaterialTheme.typography.bodyLarge,
-                    lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
-//                    fontWeight = FontWeight.SemiBold
-                )
+                HeadlineText(text = headline)
                 if (supporting != null) {
-                    Text(
-                        text = supporting,
-                        style = MaterialTheme.typography.bodyMedium,
-                        lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.8f)
-                    )
+                    SupportingText(text = supporting)
                 }
             }
 
@@ -1379,19 +1397,13 @@ fun RillSwitchListItem(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Text(
+                HeadlineText(
                     text = headline,
-                    style = MaterialTheme.typography.bodyLarge,
-                    lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
-//                    fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.alpha(alpha)
                 )
                 if (supporting != null) {
-                    Text(
+                    SupportingText(
                         text = supporting,
-                        style = MaterialTheme.typography.bodyMedium,
-                        lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.8f),
                         modifier = Modifier.alpha(alpha)
                     )
                 }
@@ -1485,20 +1497,10 @@ fun RillSelectListItem(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Text(
-                    text = headline,
-                    style = MaterialTheme.typography.bodyLarge,
-                    lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
-//                    fontWeight = FontWeight.SemiBold
-                )
+                HeadlineText(text = headline)
                 val displaySupporting = supporting ?: currentOption
                 if (displaySupporting.isNotBlank()) {
-                    Text(
-                        text = displaySupporting,
-                        style = MaterialTheme.typography.bodyMedium,
-                        lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.8f)
-                    )
+                    SupportingText(text = displaySupporting)
                 }
             }
 
@@ -1573,11 +1575,8 @@ fun RillSliderListItem(
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Row {
-                    Text(
+                    HeadlineText(
                         text = headline,
-                        style = MaterialTheme.typography.bodyLarge,
-                        lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
-//                    fontWeight = FontWeight.SemiBold
                         modifier = Modifier.weight(1f)
                     )
                     Text(
@@ -1723,6 +1722,53 @@ fun RillBlurFab(
             elevation = FloatingActionButtonDefaults.elevation(0.dp),
             modifier = modifier
         ) { content() }
+    }
+}
+
+@Composable
+fun ColorSwatch(
+    color: Color?,
+    label: String?,
+    selected: Boolean,
+    selectedColor: Color = MaterialTheme.colorScheme.primary,
+    onClick: () -> Unit
+) {
+    val borderColor = if (selected) {
+        selectedColor
+    } else {
+        color?.darken() ?: MaterialTheme.colorScheme.outlineVariant
+    }
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val cornerRadius by animateDpAsState(
+        targetValue = if (isPressed || selected) 12.dp else 50.dp,
+        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+        label = "ButtonShape"
+    )
+
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .clip(RoundedCornerShape(cornerRadius))
+            .background(color ?: MaterialTheme.colorScheme.surfaceContainerHighest)
+            .border(if (selected) 3.dp else 2.dp, borderColor, RoundedCornerShape(cornerRadius))
+            .selectable(selected = selected, role = Role.RadioButton, onClick = onClick, interactionSource = interactionSource),
+        contentAlignment = Alignment.Center
+    ) {
+        if (color == null) {
+            Text(
+                text = "A",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        } else if (selected) {
+            Icon(
+                imageVector = Icons.Rounded.Check,
+                contentDescription = label,
+                tint = if (color.luminance() > 0.5f) Color.Black else Color.White,
+                modifier = Modifier.size(20.dp)
+            )
+        }
     }
 }
 

@@ -12,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.goodwy.rphone.GITHUB_DEV
@@ -35,12 +34,13 @@ data class Contributor(
 val appContributors = listOf(
     Contributor("Goodwy", "Maintainer", GITHUB_DEV),
     Contributor("UranophileLab", "Core contributors", "https://github.com/UranophileLab"),
+    Contributor("Yug Dabgar", "Contributors", "https://github.com/yugdabgar21"),
 )
 
 val otherContributors = listOf(
-    Contributor("RivoPhoneApp", "user-grinch", "https://github.com/user-grinch/RivoPhoneApp"),
-    Contributor("Ever-Dialer", "hari161008", "https://github.com/hari161008/Ever-Dialer"),
-    Contributor( "Phone by Google","Google LLC", "https://play.google.com/store/apps/details?id=com.google.android.dialer"),
+    Contributor("RivoPhoneApp by user-grinch", "This app includes code from RivoPhoneApp (© 2025-2026 RivoPhone Project). Licensed under GPL-3.0.", "https://github.com/user-grinch/RivoPhoneApp"),
+    Contributor("Ever-Dialer by hari161008", "Rill Phone is based on Ever-Dialer. Licensed under GPL-3.0.", "https://github.com/hari161008/Ever-Dialer"),
+    Contributor( "Phone by Google","The user interface of Rill Phone is inspired by the layout and visual patterns of Google's Phone app. No proprietary code or assets from Google's app are used.", "https://play.google.com/store/apps/details?id=com.google.android.dialer"),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -101,7 +101,7 @@ fun ContributorsScreen(
             }
             item {
                 Column {
-                    SettingsSectionLabel(stringResource(R.string.apps_that_inspired_us))
+                    SettingsSectionLabel(stringResource(R.string.origin_and_credits))
                     RillExpressiveCard {
                         otherContributors.forEachIndexed { index, contributor ->
                             RillListItem(

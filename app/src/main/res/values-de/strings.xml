@@ -147,7 +147,7 @@
     <!-- Contributors -->
     <string name="contributors">Mitwirkende</string>
     <string name="development_team">Entwicklungsteam</string>
-    <string name="apps_that_inspired_us">Apps, die uns inspiriert haben</string>
+    <string name="origin_and_credits">Ursprung &amp; Danksagungen</string>
 
     <!-- Settings -->
     <string name="settings">Einstellungen</string>
@@ -549,8 +549,34 @@
     <string name="settings_call_default_background">Standard-Anrufhintergrund</string>
     <string name="settings_call_default_background_set">Bei jedem Anruf wird ein benutzerdefiniertes Bild angezeigt</string>
     <string name="settings_call_default_background_none">Nicht festgelegt — Anrufe verwenden das App-Design</string>
-    <string name="settings_interface_hide_avatar_with_bg">Profilbild ausblenden, wenn ein Hintergrund verfügbar ist</string>
-    <string name="settings_interface_hide_avatar_with_bg_supporting">Anrufer-Avatar auf dem Anrufbildschirm ausblenden, wenn ein Anrufhintergrund aktiv ist</string>
+    <string name="settings_interface_hide_avatar_with_bg">Profilbild bei Standardhintergrund ausblenden</string>
+    <string name="settings_interface_hide_avatar_with_bg_supporting">Benutzerdefinierte Anrufhintergründe blenden den Anrufer-Avatar immer aus. Diese Einstellung gilt nur für den Standardhintergrund</string>
+    <string name="calling_card_customize_title">Anpassen</string>
+    <string name="calling_card_next">Weiter</string>
+    <string name="calling_card_no_photo">Kein Foto ausgewählt</string>
+    <string name="calling_card_photo_preview">Ausgewähltes Foto für den Anrufbildschirm</string>
+    <string name="calling_card_action_camera">Kamera</string>
+    <string name="calling_card_action_gallery">Galerie</string>
+    <string name="calling_card_action_google_photos">Google Fotos</string>
+    <string name="calling_card_action_remove">Entfernen</string>
+    <string name="calling_card_camera_unavailable">Auf diesem Gerät ist keine Kamera-App verfügbar.</string>
+    <string name="calling_card_camera_failed">Das Foto konnte nicht gespeichert werden. Versuchen Sie es erneut.</string>
+    <string name="calling_card_image_unreadable">Dieses Bild konnte nicht geöffnet werden. Wählen Sie ein anderes.</string>
+    <string name="calling_card_google_photos_not_installed">Google Fotos ist nicht installiert.</string>
+    <string name="calling_card_google_photos_use_gallery">Galerie verwenden</string>
+    <string name="calling_card_color_default">Design</string>
+    <string name="calling_card_style_customized">Benutzerdefinierte Schriftart und Textfarbe</string>
+    <string name="calling_card_font_system">Standard</string>
+    <string name="calling_card_overrides_title">Anrufhintergründe &amp; Stile</string>
+    <string name="calling_card_overrides_subtitle">Hintergründe und Stile für Kontakte und Nummern verwalten</string>
+    <string name="calling_card_overrides_numbers">Nummern</string>
+    <string name="calling_card_overrides_empty">Noch keine benutzerdefinierten Hintergründe oder Stile</string>
+    <string name="calling_card_override_badge_background">Hintergrund</string>
+    <string name="calling_card_override_badge_style">Stil</string>
+    <string name="calling_card_override_deleted">Anpassung entfernt</string>
+    <string name="calling_card_override_saved">Anpassung gespeichert</string>
+    <string name="calling_card_override_save_failed">Hintergrund konnte nicht gespeichert werden</string>
+    <string name="calling_card_override_unknown_contact">Kontakt #%1$s</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">Zum Startbildschirm hinzufügen</string>

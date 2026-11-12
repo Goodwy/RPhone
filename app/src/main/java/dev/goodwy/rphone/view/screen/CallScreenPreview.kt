@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -120,60 +121,74 @@ fun CallScreenPreview(
             backgroundUri = effectiveBackgroundUri,
             liquidGlassBackdrop = backdrop,
             hideGradient = false,
-            enableParticles = false
+            enableParticles = false,
+            backgroundBlurDp = callingCardStyle.blurRadiusDp
         )
 
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 20.dp, vertical = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = stringResource(R.string.call_status_calling),
-                style = MaterialTheme.typography.titleMedium.copy(fontSize = style.statusFontSize),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
 
-            Spacer(Modifier.height(10.dp))
+            // --- HERO SECTION ---
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top,
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .padding(horizontal = 24.dp)
+                    .weight(1f)
+            ) {
+                Spacer(Modifier.weight(0.5f))
+                Text(
+                    text = stringResource(R.string.call_status_calling),
+                    style = MaterialTheme.typography.titleMedium.copy(fontSize = style.statusFontSize),
+                    color = nameColor,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
 
-            Text(
-                text = displayName,
-                style = MaterialTheme.typography.headlineSmall.copy(
-                    fontSize = style.nameFontSize,
-                    fontFamily = callingCardStyle.font.family,
-                    shadow = nameShadow
-                ),
-                fontWeight = style.nameFontWeight,
-                color = nameColor,
-                textAlign = TextAlign.Center,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            if (showNumber) {
-                Spacer(Modifier.height(6.dp))
+                Spacer(Modifier.height(10.dp))
 
                 Text(
-                    text = phoneNumber,
-                    style = MaterialTheme.typography.titleMedium.copy(fontSize = style.numberFontSize),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    text = displayName,
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        fontSize = callingCardStyle.fontSizeSp.sp,
+                        fontFamily = callingCardStyle.font.family,
+                        fontWeight = callingCardStyle.weight,
+                        shadow = nameShadow
+                    ),
+                    color = nameColor,
                     textAlign = TextAlign.Center,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+
+                if (showNumber) {
+                    Spacer(Modifier.height(6.dp))
+
+                    Text(
+                        text = phoneNumber,
+                        style = MaterialTheme.typography.titleMedium.copy(fontSize = style.numberFontSize),
+                        color = nameColor,
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                Spacer(Modifier.height(20.dp))
+
+                if (showAvatar) {
+                    HeroAvatar(photoUri = photoUri, avatarSize = style.avatarSize)
+                } else {
+                    Spacer(Modifier.height(style.avatarSize))
+                }
+                Spacer(Modifier.weight(0.6f))
             }
 
-            Spacer(Modifier.height(20.dp))
-
-            if (showAvatar) {
-                HeroAvatar(photoUri = photoUri, avatarSize = style.avatarSize)
-            } else {
-                Spacer(Modifier.height(style.avatarSize))
-            }
+            Spacer(Modifier.weight(1f))
         }
     }
 }

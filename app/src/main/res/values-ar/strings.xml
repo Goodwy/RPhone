@@ -148,7 +148,7 @@
     <!-- Contributors -->
     <string name="contributors">المساهمون</string>
     <string name="development_team">فريق التطوير</string>
-    <string name="apps_that_inspired_us">التطبيقات التي ألهمتنا</string>
+    <string name="origin_and_credits">الأصل والشكر</string>
 
     <!-- Settings -->
     <string name="settings">الإعدادات</string>
@@ -550,8 +550,34 @@
     <string name="settings_call_default_background">خلفية المكالمة الافتراضية</string>
     <string name="settings_call_default_background_set">يتم عرض صورة مخصصة في كل مكالمة</string>
     <string name="settings_call_default_background_none">غير محددة — تستخدم المكالمات سمة التطبيق</string>
-    <string name="settings_interface_hide_avatar_with_bg">إخفاء صورة الملف الشخصي عند توفر خلفية</string>
-    <string name="settings_interface_hide_avatar_with_bg_supporting">إخفاء صورة المتصل على شاشة المكالمة عند تفعيل خلفية المكالمة</string>
+    <string name="settings_interface_hide_avatar_with_bg">إخفاء صورة الملف الشخصي مع الخلفية الافتراضية</string>
+    <string name="settings_interface_hide_avatar_with_bg_supporting">خلفيات المكالمات المخصصة تخفي دائمًا صورة المتصل. ينطبق هذا الإعداد على الخلفية الافتراضية فقط</string>
+    <string name="calling_card_customize_title">تخصيص</string>
+    <string name="calling_card_next">التالي</string>
+    <string name="calling_card_no_photo">لم يتم اختيار صورة</string>
+    <string name="calling_card_photo_preview">الصورة المختارة لشاشة المكالمة</string>
+    <string name="calling_card_action_camera">الكاميرا</string>
+    <string name="calling_card_action_gallery">المعرض</string>
+    <string name="calling_card_action_google_photos">صور Google</string>
+    <string name="calling_card_action_remove">إزالة</string>
+    <string name="calling_card_camera_unavailable">لا يوجد تطبيق كاميرا متاح على هذا الجهاز.</string>
+    <string name="calling_card_camera_failed">تعذر حفظ هذه الصورة. حاول مرة أخرى.</string>
+    <string name="calling_card_image_unreadable">تعذر فتح هذه الصورة. اختر صورة أخرى.</string>
+    <string name="calling_card_google_photos_not_installed">صور Google غير مثبتة.</string>
+    <string name="calling_card_google_photos_use_gallery">استخدام المعرض</string>
+    <string name="calling_card_color_default">السمة</string>
+    <string name="calling_card_style_customized">خط ولون نص مخصصان</string>
+    <string name="calling_card_font_system">افتراضي</string>
+    <string name="calling_card_overrides_title">خلفيات وأنماط المكالمات</string>
+    <string name="calling_card_overrides_subtitle">إدارة الخلفيات والأنماط لجهات الاتصال والأرقام</string>
+    <string name="calling_card_overrides_numbers">الأرقام</string>
+    <string name="calling_card_overrides_empty">لا توجد خلفيات أو أنماط مخصصة بعد</string>
+    <string name="calling_card_override_badge_background">الخلفية</string>
+    <string name="calling_card_override_badge_style">النمط</string>
+    <string name="calling_card_override_deleted">تمت إزالة التخصيص</string>
+    <string name="calling_card_override_saved">تم حفظ التخصيص</string>
+    <string name="calling_card_override_save_failed">تعذر حفظ الخلفية</string>
+    <string name="calling_card_override_unknown_contact">جهة الاتصال #%1$s</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">إضافة إلى الشاشة الرئيسية</string>

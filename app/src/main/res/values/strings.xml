@@ -5,6 +5,11 @@
     <string name="label_unknown" translatable="false">Unknown</string>
     <string name="whatsapp" translatable="false">WhatsApp</string>
     <string name="telegram" translatable="false">Telegram</string>
+    <string name="calling_card_font_inter" translatable="false">Inter</string>
+    <string name="calling_card_font_lora" translatable="false">Lora</string>
+    <string name="calling_card_font_playfair" translatable="false">Playfair</string>
+    <string name="calling_card_font_mono" translatable="false">Mono</string>
+    <string name="calling_card_font_caveat" translatable="false">Caveat</string>
 
     <string name="widget_description">Recent calls with quick dial</string>
     <string name="copy" tools:ignore="PrivateResource">Copy</string>
@@ -151,7 +156,7 @@
     <!-- Contributors -->
     <string name="contributors">Contributors</string>
     <string name="development_team">Development Team</string>
-    <string name="apps_that_inspired_us">Apps That Inspired Us</string>
+    <string name="origin_and_credits">Origin &amp; Credits</string>
 
     <!-- Settings -->
     <string name="settings">Settings</string>
@@ -552,16 +557,13 @@
     <string name="contact_call_background_error">Could not save that image</string>
     <string name="contact_call_background_no_target">Save the number as a contact first</string>
     <string name="contact_call_background_preview">Call screen background preview</string>
-    <string name="calling_card_photo_title">Choose a photo</string>
-    <string name="calling_card_photo_supporting">Portrait photos fill the call screen best.</string>
+    <string name="settings_call_default_background">Default call background</string>
+    <string name="settings_call_default_background_set">A custom image is shown on every call</string>
+    <string name="settings_call_default_background_none">Not set — calls use the app theme</string>
+    <string name="settings_interface_hide_avatar_with_bg">Hide profile picture with default background</string>
+    <string name="settings_interface_hide_avatar_with_bg_supporting">Custom call backgrounds always hide the caller avatar. This setting applies to the default background only</string>
     <string name="calling_card_customize_title">Customize</string>
     <string name="calling_card_next">Next</string>
-    <string name="calling_card_done">Done</string>
-    <string name="calling_card_back">Back</string>
-    <string name="calling_card_choose_photo">Choose photo</string>
-    <string name="calling_card_change_photo">Change photo</string>
-    <string name="calling_card_browse_files">Browse</string>
-    <string name="calling_card_remove_photo">Remove photo</string>
     <string name="calling_card_no_photo">No photo selected</string>
     <string name="calling_card_photo_preview">Selected calling card photo</string>
     <string name="calling_card_action_camera">Camera</string>
@@ -571,39 +573,21 @@
     <string name="calling_card_camera_unavailable">No camera app is available on this device.</string>
     <string name="calling_card_camera_failed">Could not save that photo. Try again.</string>
     <string name="calling_card_image_unreadable">That image could not be opened. Choose another one.</string>
-    <string name="calling_card_google_photos_unavailable_title">Google Photos is not available</string>
-    <string name="calling_card_google_photos_unavailable_body">This device cannot offer Google Photos cloud selection in the system photo picker. You can still choose a photo stored on the device.</string>
     <string name="calling_card_google_photos_not_installed">Google Photos is not installed.</string>
-    <string name="calling_card_google_photos_not_selected_title">Google Photos is not selected</string>
-    <string name="calling_card_google_photos_not_selected_body">The photo picker can use Google Photos, but another cloud provider is selected. Open the photo picker settings, choose Google Photos, then try again.</string>
-    <string name="calling_card_google_photos_open_settings">Photo picker settings</string>
     <string name="calling_card_google_photos_use_gallery">Use gallery</string>
-    <string name="calling_card_google_photos_cancel">Not now</string>
-    <string name="calling_card_google_photos_settings_failed">Could not open photo picker settings.</string>
-    <string name="calling_card_font_title">Font</string>
-    <string name="calling_card_text_color_title">Text color</string>
     <string name="calling_card_color_default">Theme</string>
-    <string name="calling_card_color_white">White</string>
-    <string name="calling_card_color_cream">Cream</string>
-    <string name="calling_card_color_gold">Gold</string>
-    <string name="calling_card_color_coral">Coral</string>
-    <string name="calling_card_color_sky">Sky</string>
-    <string name="calling_card_color_mint">Mint</string>
-    <string name="calling_card_color_lavender">Lavender</string>
-    <string name="calling_card_color_ink">Ink</string>
-    <string name="calling_card_use_default">Use app default</string>
     <string name="calling_card_style_customized">Custom font and text color</string>
     <string name="calling_card_font_system">Default</string>
-    <string name="calling_card_font_inter">Inter</string>
-    <string name="calling_card_font_lora">Lora</string>
-    <string name="calling_card_font_playfair">Playfair</string>
-    <string name="calling_card_font_mono">Mono</string>
-    <string name="calling_card_font_caveat">Caveat</string>
-    <string name="settings_call_default_background">Default call background</string>
-    <string name="settings_call_default_background_set">A custom image is shown on every call</string>
-    <string name="settings_call_default_background_none">Not set — calls use the app theme</string>
-    <string name="settings_interface_hide_avatar_with_bg">Hide profile picture when background is available</string>
-    <string name="settings_interface_hide_avatar_with_bg_supporting">Hide caller avatar on call screen when a call background image is active</string>
+    <string name="calling_card_overrides_title">Call backgrounds &amp; styles</string>
+    <string name="calling_card_overrides_subtitle">Manage backgrounds and styles for contacts and numbers</string>
+    <string name="calling_card_overrides_numbers">Numbers</string>
+    <string name="calling_card_overrides_empty">No custom backgrounds or styles yet</string>
+    <string name="calling_card_override_badge_background">Background</string>
+    <string name="calling_card_override_badge_style">Style</string>
+    <string name="calling_card_override_deleted">Customization removed</string>
+    <string name="calling_card_override_saved">Customization saved</string>
+    <string name="calling_card_override_save_failed">Couldn\'t save the background</string>
+    <string name="calling_card_override_unknown_contact">Contact #%1$s</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">Add to home screen</string>

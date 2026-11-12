@@ -365,6 +365,21 @@ class PreferenceManager(context: Context) {
         }
     }
 
+    fun getCallingCardStyleNumberEntries(): Map<String, String> {
+        return try {
+            _prefsCache.value.asMap()
+                .filterKeys { it.name.startsWith(CALLING_CARD_STYLE_NUMBER_PREFIX) }
+                .mapNotNull { (key, value) ->
+                    val stringValue = value as? String
+                    if (stringValue.isNullOrBlank()) null else {
+                        val numberKey = key.name.removePrefix(CALLING_CARD_STYLE_NUMBER_PREFIX)
+                        numberKey to stringValue
+                    }
+                }
+                .toMap()
+        } catch (e: Exception) { emptyMap() }
+    }
+
     suspend fun updateCallingCardStyleEntriesSuspend(updates: Map<String, String?>) {
         if (updates.isEmpty()) return
         dataStore.edit { prefs ->

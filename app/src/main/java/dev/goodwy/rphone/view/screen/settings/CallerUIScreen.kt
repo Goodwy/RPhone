@@ -1,10 +1,7 @@
 package dev.goodwy.rphone.view.screen.settings
 
 import android.content.Context
-import android.content.Intent
 import android.view.Surface
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -19,8 +16,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.rounded.CallEnd
+import androidx.compose.material.icons.rounded.RememberMe
 import androidx.compose.material.icons.rounded.Wallpaper
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -37,7 +36,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.R
@@ -49,13 +47,20 @@ import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import dev.goodwy.rphone.view.theme.color_call_end
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.CallingCardOverridesScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.DonateScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.goodwy.rphone.controller.PurchaseHelper
 import dev.goodwy.rphone.controller.util.CallBackgroundStore
 import dev.goodwy.rphone.controller.util.CallingCardStore
 import dev.goodwy.rphone.controller.util.CallingCardStyle
+import dev.goodwy.rphone.icons.background_replace
+import dev.goodwy.rphone.view.components.HeadlineText
+import dev.goodwy.rphone.view.components.RillIconBox
+import dev.goodwy.rphone.view.components.RillListItem
+import dev.goodwy.rphone.view.components.RillSwitchListItem
 import dev.goodwy.rphone.view.components.SupportProjectItem
+import dev.goodwy.rphone.view.components.SupportingText
 import dev.goodwy.rphone.view.components.Title
 import dev.goodwy.rphone.view.components.shake
 import dev.goodwy.rphone.view.screen.CallScreenPreview
@@ -96,6 +101,7 @@ fun CallerUIScreen(navigator: DestinationsNavigator) {
 
     var themeMode   by remember(settingsState) { mutableStateOf(prefs.getString(PreferenceManager.KEY_THEME_MODE, "auto") ?: "auto") }
     var hangupWidth by remember(settingsState) { mutableFloatStateOf(prefs.getFloat(PreferenceManager.KEY_HANGUP_WIDTH, 0.5f).coerceIn(0.1f, 1.0f)) }
+    var hideAvatarWithBg          by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_HIDE_AVATAR_WITH_BACKGROUND, false)) }
 
     var defaultCallBg by remember { mutableStateOf<String?>(null) }
     var defaultCardStyle by remember { mutableStateOf(CallingCardStyle.ThemeDefault) }
@@ -207,174 +213,177 @@ fun CallerUIScreen(navigator: DestinationsNavigator) {
                 }
 
                 item {
-                    RillExpressiveCard {
-                        Column(
-                            modifier = Modifier
-                                .background(color = cardColor)
-                                .padding(16.dp)
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                Surface(
-                                    shape = RoundedCornerShape(10.dp),
-                                    color = MaterialTheme.colorScheme.customColors.colorBlue,
-                                    modifier = Modifier.size(36.dp)
+                    RillAnimatedSection(delayMs = 30L) {
+                        Column {
+                            SettingsSectionLabel(stringResource(R.string.contact_call_background))
+                            RillExpressiveCard {
+                                Column(
+                                    modifier = Modifier
+                                        .background(color = cardColor)
+                                        .padding(16.dp)
                                 ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Icon(
-                                            Icons.Rounded.Wallpaper,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.customColors.colorDarkBlue,
-                                            modifier = Modifier.size(18.dp)
-                                        )
-                                    }
-                                }
-                                Column {
-                                    Text(
-                                        stringResource(R.string.settings_call_default_background),
-                                        style = MaterialTheme.typography.titleSmall,
-                                        fontWeight = FontWeight.SemiBold
-                                    )
-                                    Spacer(Modifier.height(2.dp))
-                                    Text(
-                                        if (defaultCallBg != null) {
-                                            stringResource(R.string.settings_call_default_background_set)
-                                        } else {
-                                            stringResource(R.string.settings_call_default_background_none)
-                                        },
-                                        style = MaterialTheme.typography.bodySmall,
-                                        lineHeight = MaterialTheme.typography.bodyMedium.fontSize, //14.sp
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    if (hasDefaultCardStyle) {
-                                        Spacer(Modifier.height(2.dp))
-                                        Text(
-                                            stringResource(R.string.calling_card_style_customized),
-                                            style = MaterialTheme.typography.bodySmall,
-                                            lineHeight = MaterialTheme.typography.bodyMedium.fontSize,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                }
-                            }
-                            Spacer(Modifier.height(16.dp))
-                            Box(
-                                modifier = Modifier
-                                    .padding(horizontal = 2.dp)
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(20.dp))
-                                    .height(220.dp)
-                                    .background(MaterialTheme.colorScheme.surfaceContainerHighest),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                if (loadingBg) {
-                                    CircularProgressIndicator()
-                                } else if (defaultCallBg != null || hasDefaultCardStyle) {
-                                    CallScreenPreview(
-                                        contactName = stringResource(R.string.label_unknown),
-                                        backgroundUri = defaultCallBg,
-                                        style = CallScreenPreviewStyle.Default,
-                                        callingCardStyle = defaultCardStyle,
-                                        modifier = Modifier.fillMaxSize()
-                                    )
-                                } else {
-                                    Icon(
-                                        imageVector = Icons.Rounded.Wallpaper,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.size(40.dp)
-                                    )
-                                }
-                                if (savingCallBg) {
-                                    CircularProgressIndicator(color = MaterialTheme.colorScheme.onSurface)
-                                }
-                            }
-                            Spacer(Modifier.height(12.dp))
-                            Row(
-                                modifier = Modifier
-                                    .padding(horizontal = 2.dp)
-                                    .fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                val isDark = isSystemInDarkTheme()
-                                val borderColor =
-                                    if (!isPro) {
-                                        if (themeMode == "dark" || (themeMode == "auto" && isDark)) BorderStroke(
-                                            3.dp,
-                                            MaterialTheme.colorScheme.customColors.colorPurple
-                                        )
-                                        else BorderStroke(
-                                            3.dp,
-                                            MaterialTheme.colorScheme.customColors.colorDarkPurple.copy(
-                                                0.4f
-                                            )
-                                        )
-                                    } else null
-                                FilledTonalButton(
-                                    onClick = {
-                                        if (isPro) {
-                                            showCallingCardEditor = true
-                                        } else {
-                                            enabledShake = true
-                                            showSnackbar = true
-                                            scope.launch {
-                                                delay(3000.milliseconds)
-                                                showSnackbar = false
-                                            }
-                                        }
-                                    },
-                                    border = borderColor,
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Icon(
-                                        Icons.Outlined.Edit,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                    Spacer(Modifier.width(8.dp))
-                                    Text(
-                                        if (defaultCallBg != null) {
-                                            stringResource(R.string.contact_call_background_change)
-                                        } else {
-                                            stringResource(R.string.contact_call_background_choose)
-                                        },
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                    )
-                                }
-                                val shouldShowClear = defaultCallBg != null || hasDefaultCardStyle
-                                if (shouldShowClear) {
-                                    val clearLabel = if (defaultCallBg != null) {
-                                        stringResource(R.string.contact_call_background_remove)
-                                    } else {
-                                        stringResource(R.string.clear_default)
-                                    }
-                                    OutlinedButton(
-                                        onClick = {
-                                            scope.launch {
-                                                CallBackgroundStore.clearDefault(context)
-                                                CallingCardStore.clearDefault(context)
-                                                defaultCallBg = null
-                                                defaultCardStyle = CallingCardStyle.ThemeDefault
-                                                hasDefaultCardStyle = false
-                                            }
-                                        }
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(16.dp)
                                     ) {
-                                        Icon(
-                                            ImageVector.vectorResource(id = R.drawable.ic_delete),
-                                            contentDescription = clearLabel,
-                                            modifier = Modifier.size(18.dp)
+                                        RillIconBox(
+                                            icon = Icons.Rounded.Wallpaper,
+                                            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
+                                            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
+                                            shape = CircleShape,
                                         )
-                                        Spacer(Modifier.width(8.dp))
-                                        Text(
-                                            clearLabel,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis,
-                                        )
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            HeadlineText(text = stringResource(R.string.settings_call_default_background))
+                                            Spacer(Modifier.height(4.dp))
+                                            SupportingText(
+                                                text = if (defaultCallBg != null) {
+                                                    stringResource(R.string.settings_call_default_background_set)
+                                                } else {
+                                                    stringResource(R.string.settings_call_default_background_none)
+                                                }
+                                            )
+                                            if (hasDefaultCardStyle) {
+                                                Spacer(Modifier.height(2.dp))
+                                                SupportingText(text = stringResource(R.string.calling_card_style_customized))
+                                            }
+                                        }
+                                    }
+                                    Spacer(Modifier.height(16.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .padding(horizontal = 2.dp)
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(20.dp))
+                                            .height(220.dp)
+                                            .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        if (loadingBg) {
+                                            CircularProgressIndicator()
+                                        } else if (defaultCallBg != null || hasDefaultCardStyle) {
+                                            CallScreenPreview(
+                                                contactName = stringResource(R.string.label_unknown),
+                                                backgroundUri = defaultCallBg,
+                                                style = CallScreenPreviewStyle.Default,
+                                                callingCardStyle = defaultCardStyle,
+                                                modifier = Modifier.fillMaxSize()
+                                            )
+                                        } else {
+                                            Icon(
+                                                imageVector = Icons.Rounded.Wallpaper,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                modifier = Modifier.size(40.dp)
+                                            )
+                                        }
+                                        if (savingCallBg) {
+                                            CircularProgressIndicator(color = MaterialTheme.colorScheme.onSurface)
+                                        }
+                                    }
+                                    Spacer(Modifier.height(12.dp))
+                                    Row(
+                                        modifier = Modifier
+                                            .padding(horizontal = 2.dp)
+                                            .fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        val isDark = isSystemInDarkTheme()
+                                        val borderColor =
+                                            if (!isPro) {
+                                                if (themeMode == "dark" || (themeMode == "auto" && isDark)) BorderStroke(
+                                                    3.dp,
+                                                    MaterialTheme.colorScheme.customColors.colorPurple
+                                                )
+                                                else BorderStroke(
+                                                    3.dp,
+                                                    MaterialTheme.colorScheme.customColors.colorDarkPurple.copy(
+                                                        0.4f
+                                                    )
+                                                )
+                                            } else null
+                                        FilledTonalButton(
+                                            onClick = {
+                                                if (isPro) {
+                                                    showCallingCardEditor = true
+                                                } else {
+                                                    enabledShake = true
+                                                    showSnackbar = true
+                                                    scope.launch {
+                                                        delay(3000.milliseconds)
+                                                        showSnackbar = false
+                                                    }
+                                                }
+                                            },
+                                            border = borderColor,
+                                            modifier = Modifier.weight(1f)
+                                        ) {
+                                            Icon(
+                                                Icons.Outlined.Edit,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                            Spacer(Modifier.width(8.dp))
+                                            Text(
+                                                if (defaultCallBg != null) {
+                                                    stringResource(R.string.contact_call_background_change)
+                                                } else {
+                                                    stringResource(R.string.contact_call_background_choose)
+                                                },
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis,
+                                            )
+                                        }
+                                        val shouldShowClear = defaultCallBg != null || hasDefaultCardStyle
+                                        if (shouldShowClear) {
+                                            val clearLabel = if (defaultCallBg != null) {
+                                                stringResource(R.string.contact_call_background_remove)
+                                            } else {
+                                                stringResource(R.string.clear_default)
+                                            }
+                                            OutlinedButton(
+                                                onClick = {
+                                                    scope.launch {
+                                                        CallBackgroundStore.clearDefault(context)
+                                                        CallingCardStore.clearDefault(context)
+                                                        defaultCallBg = null
+                                                        defaultCardStyle = CallingCardStyle.ThemeDefault
+                                                        hasDefaultCardStyle = false
+                                                    }
+                                                }
+                                            ) {
+                                                Icon(
+                                                    ImageVector.vectorResource(id = R.drawable.ic_delete),
+                                                    contentDescription = clearLabel,
+                                                    modifier = Modifier.size(18.dp)
+                                                )
+                                                Spacer(Modifier.width(8.dp))
+                                                Text(
+                                                    clearLabel,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis,
+                                                )
+                                            }
+                                        }
                                     }
                                 }
+                                RillListItem(
+                                    headline = stringResource(R.string.calling_card_overrides_title),
+                                    supporting = stringResource(R.string.calling_card_overrides_subtitle),
+                                    leadingIcon = background_replace,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
+                                    trailingIcon = Icons.Default.ChevronRight,
+                                    onClick = { navigator.navigate(CallingCardOverridesScreenDestination) }
+                                )
+                                RillSwitchListItem(
+                                    headline = stringResource(R.string.settings_interface_hide_avatar_with_bg),
+                                    supporting = stringResource(R.string.settings_interface_hide_avatar_with_bg_supporting),
+                                    leadingIcon = if (hideAvatarWithBg) Icons.Rounded.Wallpaper else Icons.Rounded.RememberMe,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+                                    checked = hideAvatarWithBg,
+                                    onCheckedChange = { hideAvatarWithBg = it; prefs.setBoolean(PreferenceManager.KEY_HIDE_AVATAR_WITH_BACKGROUND, it) }
+                                )
                             }
                         }
                     }
@@ -393,35 +402,22 @@ fun CallerUIScreen(navigator: DestinationsNavigator) {
                                 ) {
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                        horizontalArrangement = Arrangement.spacedBy(16.dp)
                                     ) {
-                                        Surface(
-                                            shape = RoundedCornerShape(10.dp),
-                                            color = color_call_end.copy(alpha = 0.15f),
-                                            modifier = Modifier.size(36.dp)
+                                        RillIconBox(
+                                            icon = Icons.Rounded.CallEnd,
+                                            iconContainerColor = color_call_end,
+                                            iconBgContainerColor = color_call_end.copy(alpha = 0.15f),
+                                            shape = CircleShape,
+                                        )
+                                        Column(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .fillMaxHeight(),
+                                            verticalArrangement = Arrangement.spacedBy(4.dp),
                                         ) {
-                                            Box(contentAlignment = Alignment.Center) {
-                                                Icon(
-                                                    Icons.Rounded.CallEnd,
-                                                    contentDescription = null,
-                                                    tint = color_call_end,
-                                                    modifier = Modifier.size(18.dp)
-                                                )
-                                            }
-                                        }
-                                        Column {
-                                            Text(
-                                                stringResource(R.string.customize_width),
-                                                style = MaterialTheme.typography.titleSmall,
-                                                fontWeight = FontWeight.SemiBold
-                                            )
-                                            Spacer(Modifier.height(2.dp))
-                                            Text(
-                                                stringResource(R.string.customize_width_subtitle),
-                                                style = MaterialTheme.typography.bodySmall,
-                                                lineHeight = MaterialTheme.typography.bodyMedium.fontSize, //14.sp
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
+                                            HeadlineText(text = stringResource(R.string.customize_width))
+                                            SupportingText(text = stringResource(R.string.customize_width_subtitle))
                                         }
                                     }
 
@@ -439,12 +435,14 @@ fun CallerUIScreen(navigator: DestinationsNavigator) {
                                             ),
                                             color = color_call_end,
                                             modifier = if (isCircle) Modifier.size(64.dp)
-                                            else Modifier.fillMaxWidth(
-                                                hangupWidth.coerceIn(
-                                                    0.1f,
-                                                    1.0f
+                                            else Modifier
+                                                .fillMaxWidth(
+                                                    hangupWidth.coerceIn(
+                                                        0.1f,
+                                                        1.0f
+                                                    )
                                                 )
-                                            ).height(64.dp)
+                                                .height(64.dp)
                                         ) {
                                             Box(contentAlignment = Alignment.Center) {
                                                 Row(
@@ -500,7 +498,9 @@ fun CallerUIScreen(navigator: DestinationsNavigator) {
                                     }
 
                                     Row(
-                                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(top = 4.dp),
                                         horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
                                         Text(
@@ -546,7 +546,9 @@ fun CallerUIScreen(navigator: DestinationsNavigator) {
                 exit = slideOutVertically { it } + fadeOut()
             ) {
                 Snackbar(
-                    modifier = Modifier.navigationBarsPadding().padding(24.dp),
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .padding(24.dp),
                     shape = MaterialTheme.shapes.large,
                     containerColor = MaterialTheme.colorScheme.surfaceVariant,
                     action = {

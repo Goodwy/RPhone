@@ -147,7 +147,7 @@
     <!-- Contributors -->
     <string name="contributors">Katkıda Bulunanlar</string>
     <string name="development_team">Geliştirme Ekibi</string>
-    <string name="apps_that_inspired_us">Bize İlham Veren Uygulamalar</string>
+    <string name="origin_and_credits">Köken ve Teşekkürler</string>
 
     <!-- Settings -->
     <string name="settings">Ayarlar</string>
@@ -549,8 +549,34 @@
     <string name="settings_call_default_background">Varsayılan arama arka planı</string>
     <string name="settings_call_default_background_set">Her aramada özel bir resim gösterilir</string>
     <string name="settings_call_default_background_none">Ayarlanmadı — aramalar uygulama temasını kullanır</string>
-    <string name="settings_interface_hide_avatar_with_bg">Arka plan mevcut olduğunda profil resmini gizle</string>
-    <string name="settings_interface_hide_avatar_with_bg_supporting">Bir arama arka planı etkinken arama ekranındaki arayan avatarını gizle</string>
+    <string name="settings_interface_hide_avatar_with_bg">Varsayılan arka planla profil resmini gizle</string>
+    <string name="settings_interface_hide_avatar_with_bg_supporting">Özel arama arka planları arayan avatarını her zaman gizler. Bu ayar yalnızca varsayılan arka plan için geçerlidir</string>
+    <string name="calling_card_customize_title">Özelleştir</string>
+    <string name="calling_card_next">İleri</string>
+    <string name="calling_card_no_photo">Fotoğraf seçilmedi</string>
+    <string name="calling_card_photo_preview">Arama ekranı için seçilen fotoğraf</string>
+    <string name="calling_card_action_camera">Kamera</string>
+    <string name="calling_card_action_gallery">Galeri</string>
+    <string name="calling_card_action_google_photos">Google Fotoğraflar</string>
+    <string name="calling_card_action_remove">Kaldır</string>
+    <string name="calling_card_camera_unavailable">Bu cihazda kamera uygulaması mevcut değil.</string>
+    <string name="calling_card_camera_failed">Bu fotoğraf kaydedilemedi. Tekrar deneyin.</string>
+    <string name="calling_card_image_unreadable">Bu görsel açılamadı. Başka bir tane seçin.</string>
+    <string name="calling_card_google_photos_not_installed">Google Fotoğraflar yüklü değil.</string>
+    <string name="calling_card_google_photos_use_gallery">Galeriyi kullan</string>
+    <string name="calling_card_color_default">Tema</string>
+    <string name="calling_card_style_customized">Özel yazı tipi ve metin rengi</string>
+    <string name="calling_card_font_system">Varsayılan</string>
+    <string name="calling_card_overrides_title">Arama arka planları ve stilleri</string>
+    <string name="calling_card_overrides_subtitle">Kişiler ve numaralar için arka planları ve stilleri yönetin</string>
+    <string name="calling_card_overrides_numbers">Numaralar</string>
+    <string name="calling_card_overrides_empty">Henüz özel arka plan veya stil yok</string>
+    <string name="calling_card_override_badge_background">Arka plan</string>
+    <string name="calling_card_override_badge_style">Stil</string>
+    <string name="calling_card_override_deleted">Özelleştirme kaldırıldı</string>
+    <string name="calling_card_override_saved">Özelleştirme kaydedildi</string>
+    <string name="calling_card_override_save_failed">Arka plan kaydedilemedi</string>
+    <string name="calling_card_override_unknown_contact">Kişi #%1$s</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">Ana ekrana ekle</string>

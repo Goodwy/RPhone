@@ -1,8 +1,6 @@
 package dev.goodwy.rphone.controller.util
 
 import android.content.Context
-import android.content.SharedPreferences
-import android.os.Environment
 import org.json.JSONObject
 import java.io.File
 import java.io.FileInputStream

@@ -147,7 +147,7 @@
     <!-- Contributors -->
     <string name="contributors">योगदानकर्ता</string>
     <string name="development_team">विकास टीम</string>
-    <string name="apps_that_inspired_us">ऐप्स जिन्होंने हमें प्रेरित किया</string>
+    <string name="origin_and_credits">मूल और आभार</string>
 
     <!-- Settings -->
     <string name="settings">सेटिंग्स</string>
@@ -549,8 +549,34 @@
     <string name="settings_call_default_background">डिफ़ॉल्ट कॉल बैकग्राउंड</string>
     <string name="settings_call_default_background_set">हर कॉल पर कस्टम इमेज दिखाई जाती है</string>
     <string name="settings_call_default_background_none">सेट नहीं — कॉल ऐप थीम का उपयोग करती हैं</string>
-    <string name="settings_interface_hide_avatar_with_bg">बैकग्राउंड उपलब्ध होने पर प्रोफ़ाइल तस्वीर छुपाएं</string>
-    <string name="settings_interface_hide_avatar_with_bg_supporting">कॉल बैकग्राउंड सक्रिय होने पर कॉल स्क्रीन पर कॉलर अवतार छुपाएं</string>
+    <string name="settings_interface_hide_avatar_with_bg">डिफ़ॉल्ट बैकग्राउंड के साथ प्रोफ़ाइल तस्वीर छुपाएं</string>
+    <string name="settings_interface_hide_avatar_with_bg_supporting">कस्टम कॉल बैकग्राउंड हमेशा कॉलर अवतार छुपाते हैं। यह सेटिंग केवल डिफ़ॉल्ट बैकग्राउंड पर लागू होती है</string>
+    <string name="calling_card_customize_title">अनुकूलित करें</string>
+    <string name="calling_card_next">आगे</string>
+    <string name="calling_card_no_photo">कोई फ़ोटो चयनित नहीं</string>
+    <string name="calling_card_photo_preview">कॉल स्क्रीन के लिए चयनित फ़ोटो</string>
+    <string name="calling_card_action_camera">कैमरा</string>
+    <string name="calling_card_action_gallery">गैलरी</string>
+    <string name="calling_card_action_google_photos">Google फ़ोटो</string>
+    <string name="calling_card_action_remove">हटाएं</string>
+    <string name="calling_card_camera_unavailable">इस डिवाइस पर कोई कैमरा ऐप उपलब्ध नहीं है।</string>
+    <string name="calling_card_camera_failed">वह फ़ोटो सहेजी नहीं जा सकी। पुनः प्रयास करें।</string>
+    <string name="calling_card_image_unreadable">वह छवि खोली नहीं जा सकी। दूसरी चुनें।</string>
+    <string name="calling_card_google_photos_not_installed">Google फ़ोटो इंस्टॉल नहीं है।</string>
+    <string name="calling_card_google_photos_use_gallery">गैलरी का उपयोग करें</string>
+    <string name="calling_card_color_default">थीम</string>
+    <string name="calling_card_style_customized">कस्टम फ़ॉन्ट और टेक्स्ट रंग</string>
+    <string name="calling_card_font_system">डिफ़ॉल्ट</string>
+    <string name="calling_card_overrides_title">कॉल बैकग्राउंड और स्टाइल</string>
+    <string name="calling_card_overrides_subtitle">संपर्कों और नंबरों के लिए बैकग्राउंड और स्टाइल प्रबंधित करें</string>
+    <string name="calling_card_overrides_numbers">नंबर</string>
+    <string name="calling_card_overrides_empty">अभी तक कोई कस्टम बैकग्राउंड या स्टाइल नहीं</string>
+    <string name="calling_card_override_badge_background">बैकग्राउंड</string>
+    <string name="calling_card_override_badge_style">स्टाइल</string>
+    <string name="calling_card_override_deleted">अनुकूलन हटाया गया</string>
+    <string name="calling_card_override_saved">अनुकूलन सहेजा गया</string>
+    <string name="calling_card_override_save_failed">बैकग्राउंड सहेजा नहीं जा सका</string>
+    <string name="calling_card_override_unknown_contact">संपर्क #%1$s</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">होम स्क्रीन पर जोड़ें</string>

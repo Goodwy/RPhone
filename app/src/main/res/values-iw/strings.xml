@@ -148,7 +148,7 @@
     <!-- Contributors -->
     <string name="contributors">תורמים</string>
     <string name="development_team">צוות הפיתוח</string>
-    <string name="apps_that_inspired_us">אפליקציות שנתנו לנו השראה</string>
+    <string name="origin_and_credits">מקור ותודות</string>
 
     <!-- Settings -->
     <string name="settings">הגדרות</string>
@@ -550,8 +550,34 @@
     <string name="settings_call_default_background">רקע שיחה ברירת מחדל</string>
     <string name="settings_call_default_background_set">תמונה מותאמת אישית מוצגת בכל שיחה</string>
     <string name="settings_call_default_background_none">לא הוגדר — שיחות משתמשות בערכת הנושא של האפליקציה</string>
-    <string name="settings_interface_hide_avatar_with_bg">הסתר תמונת פרופיל כאשר רקע זמין</string>
-    <string name="settings_interface_hide_avatar_with_bg_supporting">הסתר את אווטאר המתקשר במסך השיחה כאשר רקע שיחה פעיל</string>
+    <string name="settings_interface_hide_avatar_with_bg">הסתר תמונת פרופיל עם רקע ברירת מחדל</string>
+    <string name="settings_interface_hide_avatar_with_bg_supporting">רקעי שיחה מותאמים אישית תמיד מסתירים את אווטאר המתקשר. הגדרה זו חלה רק על רקע ברירת המחדל</string>
+    <string name="calling_card_customize_title">התאם אישית</string>
+    <string name="calling_card_next">הבא</string>
+    <string name="calling_card_no_photo">לא נבחרה תמונה</string>
+    <string name="calling_card_photo_preview">התמונה שנבחרה למסך השיחה</string>
+    <string name="calling_card_action_camera">מצלמה</string>
+    <string name="calling_card_action_gallery">גלריה</string>
+    <string name="calling_card_action_google_photos">Google תמונות</string>
+    <string name="calling_card_action_remove">הסר</string>
+    <string name="calling_card_camera_unavailable">אין אפליקציית מצלמה זמינה במכשיר זה.</string>
+    <string name="calling_card_camera_failed">לא ניתן היה לשמור את התמונה. נסה שוב.</string>
+    <string name="calling_card_image_unreadable">לא ניתן היה לפתוח את התמונה. בחר תמונה אחרת.</string>
+    <string name="calling_card_google_photos_not_installed">Google תמונות אינו מותקן.</string>
+    <string name="calling_card_google_photos_use_gallery">השתמש בגלריה</string>
+    <string name="calling_card_color_default">ערכת נושא</string>
+    <string name="calling_card_style_customized">גופן וצבע טקסט מותאמים אישית</string>
+    <string name="calling_card_font_system">ברירת מחדל</string>
+    <string name="calling_card_overrides_title">רקעים וסגנונות שיחה</string>
+    <string name="calling_card_overrides_subtitle">נהל רקעים וסגנונות עבור אנשי קשר ומספרים</string>
+    <string name="calling_card_overrides_numbers">מספרים</string>
+    <string name="calling_card_overrides_empty">אין עדיין רקעים או סגנונות מותאמים אישית</string>
+    <string name="calling_card_override_badge_background">רקע</string>
+    <string name="calling_card_override_badge_style">סגנון</string>
+    <string name="calling_card_override_deleted">ההתאמה האישית הוסרה</string>
+    <string name="calling_card_override_saved">ההתאמה האישית נשמרה</string>
+    <string name="calling_card_override_save_failed">לא ניתן היה לשמור את הרקע</string>
+    <string name="calling_card_override_unknown_contact">איש קשר #%1$s</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">הוסף למסך הבית</string>

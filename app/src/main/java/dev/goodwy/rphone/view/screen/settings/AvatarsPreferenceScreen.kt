@@ -213,8 +213,8 @@ fun AvatarsPreferenceScreen(navigator: DestinationsNavigator) {
                                 headline = stringResource(R.string.settings_interface_hide_avatar_with_bg),
                                 supporting = stringResource(R.string.settings_interface_hide_avatar_with_bg_supporting),
                                 leadingIcon = if (hideAvatarWithBg) Icons.Rounded.Wallpaper else Icons.Rounded.RememberMe,
-                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOliva,
-                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOliva,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
                                 checked = hideAvatarWithBg,
                                 onCheckedChange = { hideAvatarWithBg = it; prefs.setBoolean(PreferenceManager.KEY_HIDE_AVATAR_WITH_BACKGROUND, it) }
                             )

@@ -147,7 +147,7 @@
     <!-- Contributors -->
     <string name="contributors">בײַשטײַערער</string>
     <string name="development_team">אַנטוויקלונג מאַנשאַפֿט</string>
-    <string name="apps_that_inspired_us">אַפּס וואָס האָבן אונדז אָנגעריגט</string>
+    <string name="origin_and_credits">אָנהייב &amp; דאַנקען</string>
 
     <!-- Settings -->
     <string name="settings">איינשטעלונגען</string>
@@ -549,8 +549,34 @@
     <string name="settings_call_default_background">סטאנדאַרד רוף הינטערגרונט</string>
     <string name="settings_call_default_background_set">אַ פּערזענלעך בילד ווערט געוויזן אויף יעדן רוף</string>
     <string name="settings_call_default_background_none">נישט איינגעשטעלט — רופן ניצן די אַפּ טעמע</string>
-    <string name="settings_interface_hide_avatar_with_bg">באַהאַלטן פּראָפֿיל בילד ווען אַ הינטערגרונט איז פֿאַראַן</string>
-    <string name="settings_interface_hide_avatar_with_bg_supporting">באַהאַלטן דעם רופֿער אַוואַטאַר אויף דעם רוף פאַרשטעל ווען אַ רוף הינטערגרונט איז אַקטיוו</string>
+    <string name="settings_interface_hide_avatar_with_bg">באַהאַלטן פּראָפֿיל בילד מיט סטאנדאַרד הינטערגרונט</string>
+    <string name="settings_interface_hide_avatar_with_bg_supporting">פּערזענלעכע רוף הינטערגרונטן באַהאַלטן שטענדיק דעם רופֿער אַוואַטאַר. די איינשטעלונג גילט נאָר פֿאַר דעם סטאנדאַרד הינטערגרונט</string>
+    <string name="calling_card_customize_title">פּערזענליכען</string>
+    <string name="calling_card_next">ווײַטער</string>
+    <string name="calling_card_no_photo">קיין פֿאָטאָ נישט אויסגעוויילט</string>
+    <string name="calling_card_photo_preview">אויסגעוויילטע פֿאָטאָ פֿאַר דעם רוף פאַרשטעל</string>
+    <string name="calling_card_action_camera">קאַמעראַ</string>
+    <string name="calling_card_action_gallery">גאַלעריע</string>
+    <string name="calling_card_action_google_photos">Google פֿאָטאָס</string>
+    <string name="calling_card_action_remove">אַראָפּנעמען</string>
+    <string name="calling_card_camera_unavailable">קיין קאַמעראַ אַפּ איז נישט פֿאַראַן אויף דעם גערעט.</string>
+    <string name="calling_card_camera_failed">האָט נישט געקענט היטן די פֿאָטאָ. פּרוביר נאָכאַמאָל.</string>
+    <string name="calling_card_image_unreadable">האָט נישט געקענט עפֿענען דאָס בילד. קלויב אַן אַנדער.</string>
+    <string name="calling_card_google_photos_not_installed">Google פֿאָטאָס איז נישט אינסטאַלירט.</string>
+    <string name="calling_card_google_photos_use_gallery">נוץ גאַלעריע</string>
+    <string name="calling_card_color_default">טעמע</string>
+    <string name="calling_card_style_customized">פּערזענלעכער שריפֿט און טעקסט פֿאַרב</string>
+    <string name="calling_card_font_system">סטאנדאַרד</string>
+    <string name="calling_card_overrides_title">רוף הינטערגרונטן &amp; סטילן</string>
+    <string name="calling_card_overrides_subtitle">פֿאַרוואַלטן הינטערגרונטן און סטילן פֿאַר קאָנטאַקטן און נומערן</string>
+    <string name="calling_card_overrides_numbers">נומערן</string>
+    <string name="calling_card_overrides_empty">נאָך נישט קיין פּערזענלעכע הינטערגרונטן אָדער סטילן</string>
+    <string name="calling_card_override_badge_background">הינטערגרונט</string>
+    <string name="calling_card_override_badge_style">סטיל</string>
+    <string name="calling_card_override_deleted">פּערזענליכקייט אַראָפּגענומען</string>
+    <string name="calling_card_override_saved">פּערזענליכקייט געהיט</string>
+    <string name="calling_card_override_save_failed">האָט נישט געקענט היטן דעם הינטערגרונט</string>
+    <string name="calling_card_override_unknown_contact">קאָנטאַקט #%1$s</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">צולייגן צו היים פאַרשטעל</string>

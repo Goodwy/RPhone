@@ -146,7 +146,7 @@
     <!-- Contributors -->
     <string name="contributors">Участники</string>
     <string name="development_team">Команда разработчиков</string>
-    <string name="apps_that_inspired_us">Приложения, которыми мы вдохновлялись</string>
+    <string name="origin_and_credits">Источник и благодарности</string>
 
     <!-- Settings -->
     <string name="settings">Настройки</string>
@@ -551,8 +551,34 @@
     <string name="settings_call_default_background">Фон вызова по умолчанию</string>
     <string name="settings_call_default_background_set">При каждом звонке отображается индивидуальное изображение</string>
     <string name="settings_call_default_background_none">Не задано — при звонках используется тема приложения</string>
-    <string name="settings_interface_hide_avatar_with_bg">Скрыть изображение профиля при наличии фона</string>
-    <string name="settings_interface_hide_avatar_with_bg_supporting">Скрывать аватар абонента на экране вызова, когда активен фон вызова</string>
+    <string name="settings_interface_hide_avatar_with_bg">Скрывать фото профиля при фоне по умолчанию</string>
+    <string name="settings_interface_hide_avatar_with_bg_supporting">Пользовательский фон звонка всегда скрывает аватар. Эта настройка действует только на фон по умолчанию</string>
+    <string name="calling_card_customize_title">Настроить</string>
+    <string name="calling_card_next">Далее</string>
+    <string name="calling_card_no_photo">Фотография не выбрана</string>
+    <string name="calling_card_photo_preview">Выбранное изображение для фона экрана вызова</string>
+    <string name="calling_card_action_camera">Камера</string>
+    <string name="calling_card_action_gallery">Галерея</string>
+    <string name="calling_card_action_google_photos">Google Фото</string>
+    <string name="calling_card_action_remove">Удалить</string>
+    <string name="calling_card_camera_unavailable">На этом устройстве отсутствует приложение Камера.</string>
+    <string name="calling_card_camera_failed">Не удалось сохранить эту фотографию. Попробуйте ещё раз.</string>
+    <string name="calling_card_image_unreadable">Это изображение не удалось открыть. Выберите другое.</string>
+    <string name="calling_card_google_photos_not_installed">Приложение Google Фото не установлено.</string>
+    <string name="calling_card_google_photos_use_gallery">Использовать галерею</string>
+    <string name="calling_card_color_default">Тема</string>
+    <string name="calling_card_style_customized">Пользовательский шрифт и цвет текста</string>
+    <string name="calling_card_font_system">По умолчанию</string>
+    <string name="calling_card_overrides_title">Обои и стили контактов</string>
+    <string name="calling_card_overrides_subtitle">Управление обоями и стилями для контактов и номеров</string>
+    <string name="calling_card_overrides_numbers">Номера</string>
+    <string name="calling_card_overrides_empty">Пока нет настроенных обоев или стилей</string>
+    <string name="calling_card_override_badge_background">Обои</string>
+    <string name="calling_card_override_badge_style">Стиль</string>
+    <string name="calling_card_override_deleted">Настройка удалена</string>
+    <string name="calling_card_override_saved">Настройка сохранена</string>
+    <string name="calling_card_override_save_failed">Не удалось сохранить обои</string>
+    <string name="calling_card_override_unknown_contact">Контакт #%1$s</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">Добавить на главный экран</string>

@@ -92,6 +92,7 @@ import dev.goodwy.rphone.controller.ContactsViewModel
 import dev.goodwy.rphone.controller.PurchaseHelper
 import dev.goodwy.rphone.controller.util.ContactUtils.getAccountIcon
 import dev.goodwy.rphone.controller.util.openLink
+import dev.goodwy.rphone.icons.background_replace
 import dev.goodwy.rphone.view.components.Title
 import dev.goodwy.rphone.view.components.shake
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
@@ -395,11 +396,28 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
             options = listOf(
                 stringResource(R.string.settings_call_default_background),
+                stringResource(R.string.calling_card_overrides_title),
+                stringResource(R.string.calling_card_overrides_subtitle),
+                stringResource(R.string.calling_card_override_badge_style),
+                stringResource(R.string.calling_card_customize_title),
+                stringResource(R.string.settings_interface_hide_avatar_with_bg),
+                stringResource(R.string.settings_interface_hide_avatar_with_bg_supporting),
                 stringResource(R.string.end_call_button),
                 stringResource(R.string.customize_width),
                 stringResource(R.string.customize_width_subtitle),
             )
         ) { navigator.navigate(CallerUIScreenDestination) },
+        SettingsSearchEntry(
+            headline = stringResource(R.string.calling_card_overrides_title),
+            supporting = stringResource(R.string.calling_card_overrides_subtitle),
+            leadingIcon = background_replace,
+            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
+            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
+            options = listOf(
+                stringResource(R.string.calling_card_override_badge_style),
+                stringResource(R.string.calling_card_customize_title),
+            )
+        ) { navigator.navigate(CallingCardOverridesScreenDestination) },
         SettingsSearchEntry(
             headline = stringResource(R.string.avatars_settings),
             supporting = stringResource(R.string.avatars_settings_subtitle),
@@ -910,11 +928,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                     }
 
                     item {
-                        Spacer(
-                            modifier = Modifier
-                                .height(80.dp)
-                                .navigationBarsPadding()
-                        )
+                        SettingsBottomPadding(120.dp)
                     }
                 } else {
                     if (!isPro && proCheckDone) {

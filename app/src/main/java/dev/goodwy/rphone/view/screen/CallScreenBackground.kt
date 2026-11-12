@@ -1,3 +1,5 @@
+// Based on RivoPhoneApp by user-grinch (© 2025-2026 RivoPhone Project / user-grinch), GPL-3.0.
+// Modified by Goodwy on 2026-11-12.
 package dev.goodwy.rphone.view.screen
 
 import androidx.compose.animation.core.LinearEasing
@@ -43,7 +45,8 @@ fun ExpressiveBackground(
     backgroundUri: String? = null,
     liquidGlassBackdrop: LayerBackdrop,
     hideGradient: Boolean,
-    enableParticles: Boolean = true
+    enableParticles: Boolean = true,
+    backgroundBlurDp: Int = 0
 ) {
     val context = LocalContext.current
     val scheme = MaterialTheme.colorScheme
@@ -85,7 +88,11 @@ fun ExpressiveBackground(
             AsyncImage(
                 model = request,
                 contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize()
+                    .then(
+                        if (backgroundBlurDp > 0) Modifier.blur(backgroundBlurDp.dp)
+                        else Modifier
+                    ),
                 onSuccess = { customFailed = false },
                 onError = { customFailed = true },
                 contentScale = ContentScale.Crop

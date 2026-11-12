@@ -1,3 +1,5 @@
+// Based on RivoPhoneApp by user-grinch (© 2025-2026 RivoPhone Project / user-grinch), GPL-3.0.
+// Modified by Goodwy on 2026-11-12.
 package dev.goodwy.rphone.modal.db
 
 import androidx.room.*

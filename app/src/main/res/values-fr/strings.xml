@@ -147,7 +147,7 @@
     <!-- Contributors -->
     <string name="contributors">Contributeurs</string>
     <string name="development_team">Équipe de développement</string>
-    <string name="apps_that_inspired_us">Applications qui nous ont inspirés</string>
+    <string name="origin_and_credits">Origine et remerciements</string>
 
     <!-- Settings -->
     <string name="settings">Paramètres</string>
@@ -549,8 +549,34 @@
     <string name="settings_call_default_background">Arrière-plan d\'appel par défaut</string>
     <string name="settings_call_default_background_set">Une image personnalisée est affichée pour chaque appel</string>
     <string name="settings_call_default_background_none">Non défini — les appels utilisent le thème de l\'application</string>
-    <string name="settings_interface_hide_avatar_with_bg">Masquer la photo de profil lorsqu\'un arrière-plan est disponible</string>
-    <string name="settings_interface_hide_avatar_with_bg_supporting">Masquer l\'avatar de l\'appelant sur l\'écran d\'appel lorsqu\'un arrière-plan d\'appel est actif</string>
+    <string name="settings_interface_hide_avatar_with_bg">Masquer la photo de profil avec l\'arrière-plan par défaut</string>
+    <string name="settings_interface_hide_avatar_with_bg_supporting">Les arrière-plans d\'appel personnalisés masquent toujours l\'avatar de l\'appelant. Ce paramètre s\'applique uniquement à l\'arrière-plan par défaut</string>
+    <string name="calling_card_customize_title">Personnaliser</string>
+    <string name="calling_card_next">Suivant</string>
+    <string name="calling_card_no_photo">Aucune photo sélectionnée</string>
+    <string name="calling_card_photo_preview">Photo sélectionnée pour l\'écran d\'appel</string>
+    <string name="calling_card_action_camera">Appareil photo</string>
+    <string name="calling_card_action_gallery">Galerie</string>
+    <string name="calling_card_action_google_photos">Google Photos</string>
+    <string name="calling_card_action_remove">Supprimer</string>
+    <string name="calling_card_camera_unavailable">Aucune application appareil photo n\'est disponible sur cet appareil.</string>
+    <string name="calling_card_camera_failed">Impossible d\'enregistrer cette photo. Réessayez.</string>
+    <string name="calling_card_image_unreadable">Cette image n\'a pas pu être ouverte. Choisissez-en une autre.</string>
+    <string name="calling_card_google_photos_not_installed">Google Photos n\'est pas installé.</string>
+    <string name="calling_card_google_photos_use_gallery">Utiliser la galerie</string>
+    <string name="calling_card_color_default">Thème</string>
+    <string name="calling_card_style_customized">Police et couleur de texte personnalisées</string>
+    <string name="calling_card_font_system">Par défaut</string>
+    <string name="calling_card_overrides_title">Arrière-plans et styles d\'appel</string>
+    <string name="calling_card_overrides_subtitle">Gérer les arrière-plans et styles pour les contacts et les numéros</string>
+    <string name="calling_card_overrides_numbers">Numéros</string>
+    <string name="calling_card_overrides_empty">Aucun arrière-plan ou style personnalisé pour l\'instant</string>
+    <string name="calling_card_override_badge_background">Arrière-plan</string>
+    <string name="calling_card_override_badge_style">Style</string>
+    <string name="calling_card_override_deleted">Personnalisation supprimée</string>
+    <string name="calling_card_override_saved">Personnalisation enregistrée</string>
+    <string name="calling_card_override_save_failed">Impossible d\'enregistrer l\'arrière-plan</string>
+    <string name="calling_card_override_unknown_contact">Contact n° %1$s</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">Ajouter à l\'écran d\'accueil</string>

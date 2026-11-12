@@ -46,6 +46,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.time.Duration.Companion.milliseconds
 
 class FloatingNotesService : Service() {
 
@@ -169,12 +170,12 @@ private fun FloatingNoteOverlay(
     // ── Animation state ───────────────────────────────────────────────────────
     // `showing` drives both enter and exit. Flip to false to play exit then call onDismiss.
     var showing by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { delay(40); showing = true }
+    LaunchedEffect(Unit) { delay(40.milliseconds); showing = true }
 
     fun saveAndDismiss() {
         coroutineScope.launch {
             showing = false                    // trigger exit animation
-            delay(420)                         // wait for it to finish
+            delay(420.milliseconds)                         // wait for it to finish
             onSaveAndDismiss(contactName, phoneNumber, text)
         }
     }
@@ -329,7 +330,7 @@ private fun FloatingNoteOverlay(
 @Composable
 private fun CardElement(index: Int, content: @Composable BoxScope.() -> Unit) {
     var ready by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { delay(160L + index * 65L); ready = true }
+    LaunchedEffect(Unit) { delay((160L + index * 65L).milliseconds); ready = true }
 
     val alpha by animateFloatAsState(
         targetValue   = if (ready) 1f else 0f,

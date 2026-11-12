@@ -438,7 +438,6 @@ class MainActivity : FragmentActivity() {
                                         }
                                         Spacer(Modifier.width(8.dp))
                                         Button(
-
                                             onClick = {
                                                 openFullScreenIntentSettings()
                                                 showFsiBanner = false

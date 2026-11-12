@@ -9,10 +9,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 class FlashNotificationManager(
     private val context: Context,
@@ -58,10 +59,10 @@ class FlashNotificationManager(
             try {
                 while (isActive) {
                     setTorch(cameraId, true)
-                    delay(250.toLong())
+                    delay(250.toLong().milliseconds)
                     if (!isActive) break
                     setTorch(cameraId, false)
-                    delay(250.toLong())
+                    delay(250.toLong().milliseconds)
                 }
             } finally {
                 setTorch(cameraId, false)

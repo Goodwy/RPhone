@@ -65,10 +65,32 @@ object CallingCardPhotoSupport {
         }
     }
 
+    /**
+     * Deletes ALL capture files except the active one (if provided).
+     * Called when the editor starts to prevent "recent" files
+     * from unfinished sessions from accumulating.
+     */
+    fun pruneAllCapturesExcept(context: Context, activeUri: Uri? = null) {
+        runCatching {
+            val directory = File(context.cacheDir, CAPTURE_DIRECTORY)
+            if (!directory.exists()) return
+            val activePath = activeUri?.let { captureFile(context, it)?.absolutePath }
+            directory.listFiles()?.forEach { file ->
+                if (file.isFile && file.absolutePath != activePath) {
+                    file.delete()
+                }
+            }
+        }
+    }
+
     fun createCaptureTarget(context: Context): CaptureTarget? {
         return try {
             val directory = File(context.cacheDir, CAPTURE_DIRECTORY)
             if (!directory.exists() && !directory.mkdirs()) return null
+
+            // Deleting files from previous unfinished sessions
+            pruneAllCapturesExcept(context)
+
             pruneOldCaptures(directory)
             val file = File.createTempFile("capture_", ".jpg", directory)
             val uri = FileProvider.getUriForFile(

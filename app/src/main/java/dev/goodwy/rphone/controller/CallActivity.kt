@@ -1,3 +1,5 @@
+// Based on RivoPhoneApp by user-grinch (© 2025-2026 RivoPhone Project / user-grinch), GPL-3.0.
+// Modified by Goodwy on 2026-11-12.
 package dev.goodwy.rphone.controller
 
 import android.content.Context
@@ -88,7 +90,6 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
         super.onCreate(savedInstanceState)
 
         CallBackgroundStore.attach(preferenceManager)
-        CallingCardStore.attach(preferenceManager)
 
         val telecomManager = getSystemService(Context.TELECOM_SERVICE) as? TelecomManager
         val isTelecomInCall = try {

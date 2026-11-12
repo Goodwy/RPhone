@@ -147,7 +147,7 @@
     <!-- Contributors -->
     <string name="contributors">Colaboradores</string>
     <string name="development_team">Equipo de desarrollo</string>
-    <string name="apps_that_inspired_us">Aplicaciones que nos inspiraron</string>
+    <string name="origin_and_credits">Origen y créditos</string>
 
     <!-- Settings -->
     <string name="settings">Ajustes</string>
@@ -549,8 +549,34 @@
     <string name="settings_call_default_background">Fondo de llamada predeterminado</string>
     <string name="settings_call_default_background_set">Se muestra una imagen personalizada en cada llamada</string>
     <string name="settings_call_default_background_none">No establecido — las llamadas usan el tema de la aplicación</string>
-    <string name="settings_interface_hide_avatar_with_bg">Ocultar la foto de perfil cuando haya un fondo disponible</string>
-    <string name="settings_interface_hide_avatar_with_bg_supporting">Ocultar el avatar del interlocutor en la pantalla de llamada cuando haya un fondo de llamada activo</string>
+    <string name="settings_interface_hide_avatar_with_bg">Ocultar foto de perfil con el fondo predeterminado</string>
+    <string name="settings_interface_hide_avatar_with_bg_supporting">Los fondos de llamada personalizados siempre ocultan el avatar del interlocutor. Esta opción solo se aplica al fondo predeterminado</string>
+    <string name="calling_card_customize_title">Personalizar</string>
+    <string name="calling_card_next">Siguiente</string>
+    <string name="calling_card_no_photo">Ninguna foto seleccionada</string>
+    <string name="calling_card_photo_preview">Foto seleccionada para la pantalla de llamada</string>
+    <string name="calling_card_action_camera">Cámara</string>
+    <string name="calling_card_action_gallery">Galería</string>
+    <string name="calling_card_action_google_photos">Google Fotos</string>
+    <string name="calling_card_action_remove">Eliminar</string>
+    <string name="calling_card_camera_unavailable">No hay ninguna aplicación de cámara disponible en este dispositivo.</string>
+    <string name="calling_card_camera_failed">No se pudo guardar esa foto. Inténtalo de nuevo.</string>
+    <string name="calling_card_image_unreadable">No se pudo abrir esa imagen. Elige otra.</string>
+    <string name="calling_card_google_photos_not_installed">Google Fotos no está instalado.</string>
+    <string name="calling_card_google_photos_use_gallery">Usar galería</string>
+    <string name="calling_card_color_default">Tema</string>
+    <string name="calling_card_style_customized">Fuente y color de texto personalizados</string>
+    <string name="calling_card_font_system">Predeterminada</string>
+    <string name="calling_card_overrides_title">Fondos y estilos de llamada</string>
+    <string name="calling_card_overrides_subtitle">Gestiona fondos y estilos para contactos y números</string>
+    <string name="calling_card_overrides_numbers">Números</string>
+    <string name="calling_card_overrides_empty">Aún no hay fondos ni estilos personalizados</string>
+    <string name="calling_card_override_badge_background">Fondo</string>
+    <string name="calling_card_override_badge_style">Estilo</string>
+    <string name="calling_card_override_deleted">Personalización eliminada</string>
+    <string name="calling_card_override_saved">Personalización guardada</string>
+    <string name="calling_card_override_save_failed">No se pudo guardar el fondo</string>
+    <string name="calling_card_override_unknown_contact">Contacto n.º %1$s</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">Añadir a la pantalla de inicio</string>

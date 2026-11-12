@@ -1,3 +1,5 @@
+// Based on RivoPhoneApp by user-grinch (© 2025-2026 RivoPhone Project / user-grinch), GPL-3.0.
+// Modified by Goodwy on 2026-11-12.
 package dev.goodwy.rphone.view.screen
 
 import android.annotation.SuppressLint
@@ -53,6 +55,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -76,6 +79,7 @@ import dev.goodwy.rphone.controller.util.formatDuration
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.util.forceLtr
 import dev.goodwy.rphone.controller.util.hasCapability
+import dev.goodwy.rphone.controller.util.hasDualSim
 import dev.goodwy.rphone.controller.util.isHD
 import dev.goodwy.rphone.liquidglass.LocalLiquidGlassBackdrop
 import dev.goodwy.rphone.liquidglass.backdrops.LayerBackdrop
@@ -272,7 +276,12 @@ fun ExpressiveCallScreen(
         .fillMaxSize()
         .background(MaterialTheme.colorScheme.surface)
     ) {
-        ExpressiveBackground(photoUri, backgroundUri, liquidGlassBackdrop, useLgCallScreen || useBlurCallScreen)
+        ExpressiveBackground(
+            photoUri,
+            backgroundUri,
+            liquidGlassBackdrop,
+            useLgCallScreen || useBlurCallScreen,
+            backgroundBlurDp = callingCardStyle.blurRadiusDp)
 
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -394,29 +403,30 @@ fun ExpressiveCallScreen(
                             else -> stringResource(R.string.call_status_connecting)
                         }
 
-                        Text(
-                            text = statusText,
-                            style = MaterialTheme.typography.titleMedium,
-                            color = if (callState == Call.STATE_HOLDING) MaterialTheme.colorScheme.tertiary
-                            else MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-
                         val nameColor =
                             callingCardStyle.textColor ?: MaterialTheme.colorScheme.onSurface
                         val nameShadow = callingCardNameShadow(
                             color = nameColor,
                             hasBackground = !backgroundUri.isNullOrEmpty()
                         )
+
+                        Text(
+                            text = statusText,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = if (callState == Call.STATE_HOLDING) MaterialTheme.colorScheme.tertiary
+                                    else nameColor,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
                         Text(
                             text = contactName,
                             style = MaterialTheme.typography.headlineSmall.copy(
+                                fontSize = callingCardStyle.fontSizeSp.sp,
                                 fontFamily = callingCardStyle.font.family,
+                                fontWeight = callingCardStyle.weight,
                                 shadow = nameShadow
                             ),
-                            fontWeight = FontWeight.Medium,
                             color = nameColor,
                             textAlign = TextAlign.Center,
                             maxLines = 1,
@@ -427,18 +437,23 @@ fun ExpressiveCallScreen(
                             Spacer(modifier = Modifier.height(10.dp))
                             Text(
                                 text = phoneNumber,
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontFamily = callingCardStyle.font.family,
+                                    shadow = nameShadow
+                                ),
+                                color = nameColor,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
                         }
 
                         val currentSimLabel = simLabel
+                        val showSimLabel = hasDualSim(context) && currentSimLabel != null
                         val isHD = call.isHD()
-                        if (currentSimLabel != null || isHD) {
+                        if (showSimLabel || isHD) {
+                            Spacer(modifier = Modifier.height(6.dp))
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                if (currentSimLabel != null) Surface(
+                                if (showSimLabel) Surface(
                                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                                     shape = RoundedCornerShape(8.dp),
                                     modifier = Modifier.padding(top = 8.dp)
@@ -446,7 +461,7 @@ fun ExpressiveCallScreen(
                                     Text(
                                         text = currentSimLabel,
                                         style = MaterialTheme.typography.labelMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        color = nameColor,
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
@@ -460,7 +475,7 @@ fun ExpressiveCallScreen(
                                     Text(
                                         text = "HD",
                                         style = MaterialTheme.typography.labelMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        color = nameColor,
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
@@ -475,8 +490,11 @@ fun ExpressiveCallScreen(
                             ) {
                                 Text(
                                     text = "",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontFamily = callingCardStyle.font.family,
+                                        shadow = nameShadow
+                                    ),
+                                    color = nameColor,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis

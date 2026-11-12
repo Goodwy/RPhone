@@ -147,7 +147,7 @@
     <!-- Contributors -->
     <string name="contributors">Współtwórcy</string>
     <string name="development_team">Zespół deweloperski</string>
-    <string name="apps_that_inspired_us">Aplikacje, które nas zainspirowały</string>
+    <string name="origin_and_credits">Pochodzenie i podziękowania</string>
 
     <!-- Settings -->
     <string name="settings">Ustawienia</string>
@@ -549,8 +549,34 @@
     <string name="settings_call_default_background">Domyślne tło połączenia</string>
     <string name="settings_call_default_background_set">Niestandardowy obraz jest wyświetlany podczas każdego połączenia</string>
     <string name="settings_call_default_background_none">Nie ustawiono — połączenia używają motywu aplikacji</string>
-    <string name="settings_interface_hide_avatar_with_bg">Ukryj zdjęcie profilowe, gdy dostępne jest tło</string>
-    <string name="settings_interface_hide_avatar_with_bg_supporting">Ukryj awatar dzwoniącego na ekranie połączenia, gdy aktywne jest tło połączenia</string>
+    <string name="settings_interface_hide_avatar_with_bg">Ukryj zdjęcie profilowe przy domyślnym tle</string>
+    <string name="settings_interface_hide_avatar_with_bg_supporting">Niestandardowe tła połączeń zawsze ukrywają awatar dzwoniącego. To ustawienie dotyczy tylko domyślnego tła</string>
+    <string name="calling_card_customize_title">Dostosuj</string>
+    <string name="calling_card_next">Dalej</string>
+    <string name="calling_card_no_photo">Nie wybrano zdjęcia</string>
+    <string name="calling_card_photo_preview">Wybrane zdjęcie dla ekranu połączenia</string>
+    <string name="calling_card_action_camera">Aparat</string>
+    <string name="calling_card_action_gallery">Galeria</string>
+    <string name="calling_card_action_google_photos">Zdjęcia Google</string>
+    <string name="calling_card_action_remove">Usuń</string>
+    <string name="calling_card_camera_unavailable">Na tym urządzeniu nie ma aplikacji aparatu.</string>
+    <string name="calling_card_camera_failed">Nie udało się zapisać tego zdjęcia. Spróbuj ponownie.</string>
+    <string name="calling_card_image_unreadable">Nie udało się otworzyć tego obrazu. Wybierz inny.</string>
+    <string name="calling_card_google_photos_not_installed">Zdjęcia Google nie są zainstalowane.</string>
+    <string name="calling_card_google_photos_use_gallery">Użyj galerii</string>
+    <string name="calling_card_color_default">Motyw</string>
+    <string name="calling_card_style_customized">Niestandardowa czcionka i kolor tekstu</string>
+    <string name="calling_card_font_system">Domyślna</string>
+    <string name="calling_card_overrides_title">Tła i style połączeń</string>
+    <string name="calling_card_overrides_subtitle">Zarządzaj tłami i stylami dla kontaktów i numerów</string>
+    <string name="calling_card_overrides_numbers">Numery</string>
+    <string name="calling_card_overrides_empty">Brak niestandardowych teł lub stylów</string>
+    <string name="calling_card_override_badge_background">Tło</string>
+    <string name="calling_card_override_badge_style">Styl</string>
+    <string name="calling_card_override_deleted">Dostosowanie usunięte</string>
+    <string name="calling_card_override_saved">Dostosowanie zapisane</string>
+    <string name="calling_card_override_save_failed">Nie udało się zapisać tła</string>
+    <string name="calling_card_override_unknown_contact">Kontakt #%1$s</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">Dodaj do ekranu głównego</string>

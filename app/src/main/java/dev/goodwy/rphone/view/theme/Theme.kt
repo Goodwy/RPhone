@@ -339,7 +339,8 @@ fun Rill4Theme(
     val shapes = remember(cardRoundness) { rillShapes(cardRoundness) }
 
     CompositionLocalProvider(
-        LocalCustomColors provides customColors
+        LocalCustomColors provides customColors,
+        LocalIsDarkTheme provides darkTheme
     ) {
         MaterialTheme(
             colorScheme = colorScheme,
@@ -349,6 +350,8 @@ fun Rill4Theme(
         )
     }
 }
+
+val LocalIsDarkTheme = staticCompositionLocalOf { false }
 
 // My Colors
 data class CustomColors(

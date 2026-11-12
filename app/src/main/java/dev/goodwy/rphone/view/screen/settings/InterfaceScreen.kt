@@ -121,6 +121,7 @@ import kotlin.time.Duration.Companion.milliseconds
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.vectorResource
 import androidx.core.net.toUri
+import dev.goodwy.rphone.view.components.ColorSwatch
 
 data class ThemeOption(val key: String, val label: String)
 
@@ -475,37 +476,23 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                     ) {
                                         LazyRow(
                                             contentPadding = PaddingValues(horizontal = 16.dp),
-                                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                            horizontalArrangement = Arrangement.spacedBy(10.dp)
                                         ) {
                                             items(presetColors) { color ->
                                                 val currentColor = customPrimaryColor == color.toArgb()
-                                                val interactionSource = remember { MutableInteractionSource() }
-                                                val isPressed by interactionSource.collectIsPressedAsState()
 
-                                                val cornerRadius by animateDpAsState(
-                                                    targetValue = if (isPressed || currentColor) 12.dp else 50.dp,
-                                                    animationSpec = spring(stiffness = Spring.StiffnessMedium),
-                                                    label = "ButtonShape"
-                                                )
-                                                Box(
-                                                    modifier = Modifier
-                                                        .size(40.dp)
-                                                        .clip(RoundedCornerShape(cornerRadius))
-                                                        .background(color)
-                                                        .border(
-                                                            width = if (currentColor) 3.dp else 2.dp,
-                                                            color = if (currentColor) MaterialTheme.colorScheme.onSurface else color.darken(),
-                                                            shape = RoundedCornerShape(cornerRadius)
-                                                        )
-                                                        .clickable(
-                                                            interactionSource = interactionSource
-                                                        ) {
-                                                            customPrimaryColor = color.toArgb()
-                                                            prefs.setInt("custom_primary_color", color.toArgb())
-                                                            hexInput = String.format("%06X", 0xFFFFFF and color.toArgb())
-                                                            hexError = false
-                                                            triggerRestartPrompt(scope, snackbarHostState, context)
-                                                        }
+                                                ColorSwatch(
+                                                    color = color,
+                                                    label = null,
+                                                    selected = currentColor,
+                                                    selectedColor = MaterialTheme.colorScheme.onSurface,
+                                                    onClick = {
+                                                        customPrimaryColor = color.toArgb()
+                                                        prefs.setInt("custom_primary_color", color.toArgb())
+                                                        hexInput = String.format("%06X", 0xFFFFFF and color.toArgb())
+                                                        hexError = false
+                                                        triggerRestartPrompt(scope, snackbarHostState, context)
+                                                    }
                                                 )
                                             }
                                         }

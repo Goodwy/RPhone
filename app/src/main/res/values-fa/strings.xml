@@ -147,7 +147,7 @@
     <!-- Contributors -->
     <string name="contributors">همکاران</string>
     <string name="development_team">تیم توسعه</string>
-    <string name="apps_that_inspired_us">برنامه‌هایی که الهام‌بخش ما بودند</string>
+    <string name="origin_and_credits">منشأ و قدردانی‌ها</string>
 
     <!-- Settings -->
     <string name="settings">تنظیمات</string>
@@ -549,8 +549,34 @@
     <string name="settings_call_default_background">پس‌زمینه پیش‌فرض تماس</string>
     <string name="settings_call_default_background_set">یک تصویر سفارشی در هر تماس نمایش داده می‌شود</string>
     <string name="settings_call_default_background_none">تنظیم نشده — تماس‌ها از تم برنامه استفاده می‌کنند</string>
-    <string name="settings_interface_hide_avatar_with_bg">پنهان کردن تصویر پروفایل در صورت وجود پس‌زمینه</string>
-    <string name="settings_interface_hide_avatar_with_bg_supporting">پنهان کردن آواتار تماس‌گیرنده در صفحه تماس وقتی پس‌زمینه تماس فعال است</string>
+    <string name="settings_interface_hide_avatar_with_bg">پنهان کردن تصویر پروفایل با پس‌زمینه پیش‌فرض</string>
+    <string name="settings_interface_hide_avatar_with_bg_supporting">پس‌زمینه‌های سفارشی تماس همیشه آواتار تماس‌گیرنده را پنهان می‌کنند. این تنظیم فقط برای پس‌زمینه پیش‌فرض اعمال می‌شود</string>
+    <string name="calling_card_customize_title">سفارشی‌سازی</string>
+    <string name="calling_card_next">بعدی</string>
+    <string name="calling_card_no_photo">هیچ عکسی انتخاب نشده</string>
+    <string name="calling_card_photo_preview">عکس انتخاب‌شده برای صفحه تماس</string>
+    <string name="calling_card_action_camera">دوربین</string>
+    <string name="calling_card_action_gallery">گالری</string>
+    <string name="calling_card_action_google_photos">Google Photos</string>
+    <string name="calling_card_action_remove">حذف</string>
+    <string name="calling_card_camera_unavailable">هیچ برنامه دوربینی روی این دستگاه موجود نیست.</string>
+    <string name="calling_card_camera_failed">ذخیره آن عکس ممکن نشد. دوباره تلاش کنید.</string>
+    <string name="calling_card_image_unreadable">آن تصویر باز نشد. تصویر دیگری انتخاب کنید.</string>
+    <string name="calling_card_google_photos_not_installed">Google Photos نصب نیست.</string>
+    <string name="calling_card_google_photos_use_gallery">استفاده از گالری</string>
+    <string name="calling_card_color_default">تم</string>
+    <string name="calling_card_style_customized">قلم و رنگ متن سفارشی</string>
+    <string name="calling_card_font_system">پیش‌فرض</string>
+    <string name="calling_card_overrides_title">پس‌زمینه‌ها و سبک‌های تماس</string>
+    <string name="calling_card_overrides_subtitle">مدیریت پس‌زمینه‌ها و سبک‌ها برای مخاطبان و شماره‌ها</string>
+    <string name="calling_card_overrides_numbers">شماره‌ها</string>
+    <string name="calling_card_overrides_empty">هنوز پس‌زمینه یا سبک سفارشی وجود ندارد</string>
+    <string name="calling_card_override_badge_background">پس‌زمینه</string>
+    <string name="calling_card_override_badge_style">سبک</string>
+    <string name="calling_card_override_deleted">سفارشی‌سازی حذف شد</string>
+    <string name="calling_card_override_saved">سفارشی‌سازی ذخیره شد</string>
+    <string name="calling_card_override_save_failed">ذخیره پس‌زمینه ممکن نشد</string>
+    <string name="calling_card_override_unknown_contact">مخاطب #%1$s</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">افزودن به صفحه اصلی</string>

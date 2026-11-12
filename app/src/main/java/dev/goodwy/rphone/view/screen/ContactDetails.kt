@@ -90,6 +90,7 @@ import androidx.compose.material.icons.rounded.Wallpaper
 import androidx.compose.material.icons.rounded.Widgets
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Shadow
@@ -787,10 +788,15 @@ fun ContactDetailsScreen(
     )
     Box(modifier = Modifier.fillMaxSize()) {
         if (showCallBackground) {
+            val backgroundBlurDp = callingCardStyle?.blurRadiusDp ?: 0
             AsyncImage(
                 model = request,
                 contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize()
+                    .then(
+                        if (backgroundBlurDp > 0) Modifier.blur(backgroundBlurDp.dp)
+                        else Modifier
+                    ),
                 contentScale = ContentScale.Crop
             )
 

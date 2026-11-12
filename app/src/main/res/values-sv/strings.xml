@@ -147,7 +147,7 @@
     <!-- Contributors -->
     <string name="contributors">Bidragsgivare</string>
     <string name="development_team">Utvecklingsteam</string>
-    <string name="apps_that_inspired_us">Appar som inspirerade oss</string>
+    <string name="origin_and_credits">Ursprung &amp; tack</string>
 
     <!-- Settings -->
     <string name="settings">Inställningar</string>
@@ -549,8 +549,34 @@
     <string name="settings_call_default_background">Standard samtalsbakgrund</string>
     <string name="settings_call_default_background_set">En anpassad bild visas vid varje samtal</string>
     <string name="settings_call_default_background_none">Inte inställd — samtal använder apptemat</string>
-    <string name="settings_interface_hide_avatar_with_bg">Dölj profilbilden när en bakgrund är tillgänglig</string>
-    <string name="settings_interface_hide_avatar_with_bg_supporting">Dölj uppringarens avatar på samtalskärmen när en samtalsbakgrund är aktiv</string>
+    <string name="settings_interface_hide_avatar_with_bg">Dölj profilbild med standardbakgrund</string>
+    <string name="settings_interface_hide_avatar_with_bg_supporting">Anpassade samtalsbakgrunder döljer alltid uppringarens avatar. Den här inställningen gäller endast standardbakgrunden</string>
+    <string name="calling_card_customize_title">Anpassa</string>
+    <string name="calling_card_next">Nästa</string>
+    <string name="calling_card_no_photo">Inget foto valt</string>
+    <string name="calling_card_photo_preview">Valt foto för samtalskärmen</string>
+    <string name="calling_card_action_camera">Kamera</string>
+    <string name="calling_card_action_gallery">Galleri</string>
+    <string name="calling_card_action_google_photos">Google Foton</string>
+    <string name="calling_card_action_remove">Ta bort</string>
+    <string name="calling_card_camera_unavailable">Det finns ingen kameraapp på den här enheten.</string>
+    <string name="calling_card_camera_failed">Kunde inte spara fotot. Försök igen.</string>
+    <string name="calling_card_image_unreadable">Bilden kunde inte öppnas. Välj en annan.</string>
+    <string name="calling_card_google_photos_not_installed">Google Foton är inte installerat.</string>
+    <string name="calling_card_google_photos_use_gallery">Använd galleri</string>
+    <string name="calling_card_color_default">Tema</string>
+    <string name="calling_card_style_customized">Anpassat typsnitt och textfärg</string>
+    <string name="calling_card_font_system">Standard</string>
+    <string name="calling_card_overrides_title">Samtalsbakgrunder &amp; stilar</string>
+    <string name="calling_card_overrides_subtitle">Hantera bakgrunder och stilar för kontakter och nummer</string>
+    <string name="calling_card_overrides_numbers">Nummer</string>
+    <string name="calling_card_overrides_empty">Inga anpassade bakgrunder eller stilar ännu</string>
+    <string name="calling_card_override_badge_background">Bakgrund</string>
+    <string name="calling_card_override_badge_style">Stil</string>
+    <string name="calling_card_override_deleted">Anpassning borttagen</string>
+    <string name="calling_card_override_saved">Anpassning sparad</string>
+    <string name="calling_card_override_save_failed">Kunde inte spara bakgrunden</string>
+    <string name="calling_card_override_unknown_contact">Kontakt #%1$s</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">Lägg till på startsidan</string>
