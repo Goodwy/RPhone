@@ -6,8 +6,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import dev.goodwy.rphone.R
 import java.util.Locale
@@ -26,12 +28,13 @@ enum class CallingCardFont(
     val maxWeight: Int = 900
 ) {
     System("system", R.string.calling_card_font_system),
-    Inter("inter", R.string.calling_card_font_inter, R.font.calling_card_inter_medium, 300, 800),
-    Lora("lora", R.string.calling_card_font_lora, R.font.calling_card_lora_medium, 400, 700),
-    Playfair("playfair", R.string.calling_card_font_playfair, R.font.calling_card_playfair_medium, 300, 800),
-    Mono("mono", R.string.calling_card_font_mono, R.font.calling_card_mono_medium, 300, 800),
-    Caveat("caveat", R.string.calling_card_font_caveat, R.font.calling_card_caveat_medium, 400, 700);
+    Inter("inter", R.string.calling_card_font_inter, R.font.calling_card_inter, 300, 800),
+    Lora("lora", R.string.calling_card_font_lora, R.font.calling_card_lora, 400, 700),
+    Playfair("playfair", R.string.calling_card_font_playfair, R.font.calling_card_playfair, 400, 800),
+    Mono("mono", R.string.calling_card_font_mono, R.font.calling_card_mono, 300, 800),
+    Caveat("caveat", R.string.calling_card_font_caveat, R.font.calling_card_caveat, 400, 700);
 
+    @OptIn(ExperimentalTextApi::class)
     val family: FontFamily by lazy {
 //        fontRes?.let { FontFamily(Font(it, weight = FontWeight.Normal)) } ?: FontFamily.Default
 
@@ -39,44 +42,44 @@ enum class CallingCardFont(
             System -> FontFamily.Default
 
             Inter -> FontFamily(
-                Font(R.font.calling_card_inter_light,  FontWeight.Light),   // 300
-                Font(R.font.calling_card_inter_regular,  FontWeight.Normal),   // 400
-                Font(R.font.calling_card_inter_medium,   FontWeight.Medium),   // 500
-                Font(R.font.calling_card_inter_semibold, FontWeight.SemiBold), // 600
-                Font(R.font.calling_card_inter_bold,     FontWeight.Bold),      // 700
-                Font(R.font.calling_card_inter_extrabold,     FontWeight.ExtraBold)      // 800
+                Font(R.font.calling_card_inter,  FontWeight.Light, variationSettings = FontVariation.Settings(FontVariation.weight(300))),   // 300
+                Font(R.font.calling_card_inter,  FontWeight.Normal, variationSettings = FontVariation.Settings(FontVariation.weight(400))),   // 400
+                Font(R.font.calling_card_inter,   FontWeight.Medium, variationSettings = FontVariation.Settings(FontVariation.weight(500))),   // 500
+                Font(R.font.calling_card_inter, FontWeight.SemiBold, variationSettings = FontVariation.Settings(FontVariation.weight(600))), // 600
+                Font(R.font.calling_card_inter,     FontWeight.Bold, variationSettings = FontVariation.Settings(FontVariation.weight(700))),      // 700
+                Font(R.font.calling_card_inter,     FontWeight.ExtraBold, variationSettings = FontVariation.Settings(FontVariation.weight(800)))      // 800
             )
 
             Lora -> FontFamily(
-                Font(R.font.calling_card_lora_regular,  FontWeight.Normal),    // 400
-                Font(R.font.calling_card_lora_medium,   FontWeight.Medium),    // 500
-                Font(R.font.calling_card_lora_semibold, FontWeight.SemiBold),  // 600
-                Font(R.font.calling_card_lora_bold,     FontWeight.Bold),       // 700
+                Font(R.font.calling_card_lora,  FontWeight.Normal, variationSettings = FontVariation.Settings(FontVariation.weight(400))),    // 400
+                Font(R.font.calling_card_lora,   FontWeight.Medium, variationSettings = FontVariation.Settings(FontVariation.weight(500))),    // 500
+                Font(R.font.calling_card_lora, FontWeight.SemiBold, variationSettings = FontVariation.Settings(FontVariation.weight(600))),  // 600
+                Font(R.font.calling_card_lora,     FontWeight.Bold, variationSettings = FontVariation.Settings(FontVariation.weight(700))),       // 700
             )
 
             Playfair -> FontFamily(
-                Font(R.font.calling_card_playfair_light,  FontWeight.Light),   // 300
-                Font(R.font.calling_card_playfair_regular,   FontWeight.Normal),   // 400
-                Font(R.font.calling_card_playfair_medium,    FontWeight.Medium),   // 500
-                Font(R.font.calling_card_playfair_semibold,  FontWeight.SemiBold), // 600
-                Font(R.font.calling_card_playfair_bold,      FontWeight.Bold),      // 700
-                Font(R.font.calling_card_playfair_extrabold,     FontWeight.ExtraBold)      // 800
+//                Font(R.font.calling_card_playfair,  FontWeight.Light, variationSettings = FontVariation.Settings(FontVariation.weight(300))),   // 300
+                Font(R.font.calling_card_playfair,   FontWeight.Normal, variationSettings = FontVariation.Settings(FontVariation.weight(400))),   // 400
+                Font(R.font.calling_card_playfair,    FontWeight.Medium, variationSettings = FontVariation.Settings(FontVariation.weight(500))),   // 500
+                Font(R.font.calling_card_playfair,  FontWeight.SemiBold, variationSettings = FontVariation.Settings(FontVariation.weight(600))), // 600
+                Font(R.font.calling_card_playfair,      FontWeight.Bold, variationSettings = FontVariation.Settings(FontVariation.weight(700))),      // 700
+                Font(R.font.calling_card_playfair,     FontWeight.ExtraBold, variationSettings = FontVariation.Settings(FontVariation.weight(800)))      // 800
             )
 
             Mono -> FontFamily(
-                Font(R.font.calling_card_mono_light,  FontWeight.Light),   // 300
-                Font(R.font.calling_card_mono_regular,  FontWeight.Normal),   // 400
-                Font(R.font.calling_card_mono_medium,   FontWeight.Medium),   // 500
-                Font(R.font.calling_card_mono_semibold,  FontWeight.SemiBold), // 600
-                Font(R.font.calling_card_mono_bold,     FontWeight.Bold),      // 700
-                Font(R.font.calling_card_mono_extrabold,     FontWeight.ExtraBold)      // 800
+                Font(R.font.calling_card_mono,  FontWeight.Light, variationSettings = FontVariation.Settings(FontVariation.weight(300))),   // 300
+                Font(R.font.calling_card_mono,  FontWeight.Normal, variationSettings = FontVariation.Settings(FontVariation.weight(400))),   // 400
+                Font(R.font.calling_card_mono,   FontWeight.Medium, variationSettings = FontVariation.Settings(FontVariation.weight(500))),   // 500
+                Font(R.font.calling_card_mono,  FontWeight.SemiBold, variationSettings = FontVariation.Settings(FontVariation.weight(600))), // 600
+                Font(R.font.calling_card_mono,     FontWeight.Bold, variationSettings = FontVariation.Settings(FontVariation.weight(700))),      // 700
+                Font(R.font.calling_card_mono,     FontWeight.ExtraBold, variationSettings = FontVariation.Settings(FontVariation.weight(800))),      // 800
             )
 
             Caveat -> FontFamily(
-                Font(R.font.calling_card_caveat_regular, FontWeight.Normal),  // 400
-                Font(R.font.calling_card_caveat_medium,  FontWeight.Medium),  // 500
-                Font(R.font.calling_card_caveat_semibold, FontWeight.SemiBold), // 600
-                Font(R.font.calling_card_caveat_bold,    FontWeight.Bold)     // 700
+                Font(R.font.calling_card_caveat, FontWeight.Normal, variationSettings = FontVariation.Settings(FontVariation.weight(400))),  // 400
+                Font(R.font.calling_card_caveat,  FontWeight.Medium, variationSettings = FontVariation.Settings(FontVariation.weight(500))),  // 500
+                Font(R.font.calling_card_caveat, FontWeight.SemiBold, variationSettings = FontVariation.Settings(FontVariation.weight(600))), // 600
+                Font(R.font.calling_card_caveat,    FontWeight.Bold, variationSettings = FontVariation.Settings(FontVariation.weight(700)))     // 700
             )
         }
     }
