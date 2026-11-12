@@ -253,6 +253,7 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
                                     prefs.setBoolean(PreferenceManager.KEY_POCKET_MODE, it)
                                 }
                             )
+                            // Busy Mode — Copyright (C) 2024–2026 Goodwy
                             RillSwitchListItem(
                                 headline   = stringResource(R.string.busy_mode),
                                 supporting = stringResource(R.string.busy_mode_subtitle),

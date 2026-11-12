@@ -253,6 +253,8 @@ class CallService : InCallService() {
         }
     }
 
+    // ── Busy Mode Subsystem ───────────────────────────────────────────────────
+    // Copyright (C) 2024–2026 Goodwy
     private val handledBusyCalls = java.util.Collections.synchronizedSet(HashSet<Call>())
 
     private fun handleBusyModeCall(call: Call, number: String) {

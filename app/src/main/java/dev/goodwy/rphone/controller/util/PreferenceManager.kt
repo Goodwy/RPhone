@@ -443,6 +443,7 @@ class PreferenceManager(context: Context) {
         const val KEY_CONTACT_DISPLAY_ORDER = "contact_display_order"
 
         const val KEY_POCKET_MODE = "pocket_mode"
+        // Busy Mode — Copyright (C) 2024–2026 Goodwy
         const val KEY_BUSY_MODE_ENABLED = "busy_mode_enabled"
         const val KEY_BUSY_MODE_MESSAGE_ENABLED = "busy_mode_message_enabled"
         const val KEY_BUSY_MODE_MESSAGE = "busy_mode_message"
