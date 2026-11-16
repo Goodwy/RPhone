@@ -59,6 +59,7 @@
     <string name="details">Details</string>
     <string name="saved">Saved</string>
     <string name="save_failed">Failed to save</string>
+    <string name="warning">Warning</string>
 
     <!-- Search -->
     <string name="search">Search</string>
@@ -588,6 +589,7 @@
     <string name="calling_card_override_saved">Customization saved</string>
     <string name="calling_card_override_save_failed">Couldn\'t save the background</string>
     <string name="calling_card_override_unknown_contact">Contact #%1$s</string>
+    <string name="calling_card_sync_warning_message">Call screen appearance is stored only in this app. It is not synced with Google Contacts or other address books, because they have no field for it. Changes here affect calls in this app only. To move these settings and background images to another device, use Backup &amp; Restore.</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">Add to home screen</string>
@@ -762,17 +764,56 @@
 
     <!-- Backup & Restore -->
     <string name="backup_and_restore">Backup &amp; Restore</string>
-    <string name="restoring_backup">Restoring backup…</string>
-    <string name="backup_created">Backup created</string>
-    <string name="backup_created_description">Backup saved to: %s</string>
-    <string name="restore_complete">Restore complete</string>
-    <string name="restore_complete_description">Your data has been restored successfully. Please restart the app.</string>
-    <string name="operation_failed">Operation failed</string>
-    <string name="create_backup">Create Backup</string>
-    <string name="create_backup_subtitle">Save app configuration and call notes</string>
-    <string name="failed_to_create_backup">Failed to create backup</string>
-    <string name="restore_backup">Restore Backup</string>
-    <string name="restore_backup_subtitle">Restore app configuration and call notes</string>
+    <string name="backup_and_restore_supporting">Save app settings, call backgrounds, contacts and call logs to a file</string>
+
+    <!-- Backup screen: tabs -->
+    <string name="create_backup">Create backup</string>
+    <string name="restore_backup">Restore backup</string>
+
+    <!-- Backup screen: create tab -->
+    <string name="select_data_to_backup">Select data to include in your backup file</string>
+    <string name="backup_settings_supporting">App preferences, including custom fonts (call screen appearance is backed up separately)</string>
+    <string name="backup_contacts_supporting">Device &amp; local contacts list</string>
+    <string name="backup_private_contacts_supporting">Private contacts stored only in this app (not in the system address book)</string>
+    <string name="backup_call_backgrounds_title">Call screen appearance</string>
+    <string name="backup_call_backgrounds_supporting">Contact backgrounds and styles (font, color, blur), the default call screen appearance, and all background image files</string>
+    <string name="backup_call_logs_supporting">Device call history and logs</string>
+    <string name="backup_call_notes_supporting">Contact notes and general standalone notes</string>
+    <string name="backup_share_button">Share backup</string>
+    <string name="backup_save_button">Save backup</string>
+    <string name="backup_auto_backup_title">Auto backup</string>
+    <string name="backup_auto_backup_enabled">Enabled · Automatic backups scheduled</string>
+    <string name="backup_auto_backup_disabled">Disabled · Configure automatic backups</string>
+
+    <!-- Backup screen: restore tab -->
+    <string name="restore_select_file_hint">Select an .rphone backup file from your storage</string>
+    <string name="restore_no_file_selected">No backup file selected</string>
+    <string name="restore_tap_to_choose">Tap below to choose a backup file to restore</string>
+    <string name="restore_file_size">%1$d KB</string>
+    <string name="restore_browse_button">Browse backup file</string>
+    <string name="restore_choose_another_button">Choose another file</string>
+    <string name="restore_select_items_hint">Select items to restore from this file</string>
+    <string name="restore_not_in_backup">Not present in this backup</string>
+    <string name="restore_selected_button">Restore selected</string>
+    <string name="restore_backup_version">Backup version: %1$d</string>
+    <string name="restore_backup_created_at">Created: %1$s</string>
+    <string name="restore_backup_newer_version_warning">This backup was created by a newer app version (backup v%1$d, app v%2$d). Some data may not be restored correctly.</string>
+
+    <!-- Backup screen: dialogs -->
+    <string name="backup_creating_title">Creating backup…</string>
+    <string name="backup_creating_message">Please wait while your backup archive is being created.</string>
+    <string name="backup_restoring_title">Restoring backup…</string>
+    <string name="backup_restoring_message">Please wait while your selected data is restored.</string>
+    <string name="backup_success_title">Backup created</string>
+    <string name="backup_success_message">Your backup file has been created successfully:\n%1$s</string>
+    <string name="restore_success_title">Restore complete</string>
+    <string name="restore_success_message">Your data and settings have been restored successfully. It is recommended to restart the app to apply all visual changes.</string>
+    <string name="backup_error_title">Operation failed</string>
+    <string name="backup_error_save">Failed to save backup</string>
+    <string name="backup_error_create">Failed to create backup</string>
+    <string name="backup_error_restore">Restore failed</string>
+    <string name="backup_error_read_file">Failed to read backup file</string>
+    <string name="backup_error_unknown">Unknown error during restore</string>
 
     <!-- Pocket Mode -->
     <string name="pocket_mode_active">Pocket Mode Active</string>

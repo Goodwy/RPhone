@@ -49,6 +49,7 @@
     <string name="details">Информация</string>
     <string name="saved">Сохранено</string>
     <string name="save_failed">Не удалось сохранить</string>
+    <string name="warning">Предупреждение</string>
 
     <!-- Search -->
     <string name="search">Поиск</string>
@@ -579,6 +580,7 @@
     <string name="calling_card_override_saved">Настройка сохранена</string>
     <string name="calling_card_override_save_failed">Не удалось сохранить обои</string>
     <string name="calling_card_override_unknown_contact">Контакт #%1$s</string>
+    <string name="calling_card_sync_warning_message">Оформление экрана звонка хранится только в этом приложении. Оно не синхронизируется с контактами Google и другими адресными книгами, потому что в них нет такого поля. Изменения здесь влияют только на звонки в этом приложении. Чтобы перенести эти настройки и изображения фонов на другое устройство, используйте «Резервное копирование и восстановление».</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">Добавить на главный экран</string>
@@ -753,17 +755,56 @@
 
     <!-- Backup & Restore -->
     <string name="backup_and_restore">Резервное копирование и восстановление</string>
-    <string name="restoring_backup">Восстановление резервной копии…</string>
-    <string name="backup_created">Резервная копия создана</string>
-    <string name="backup_created_description">Резервная копия сохранена в: %s</string>
-    <string name="restore_complete">Восстановление завершено</string>
-    <string name="restore_complete_description">Ваши данные были успешно восстановлены. Пожалуйста, перезапустите приложение.</string>
-    <string name="operation_failed">Операция завершилась неудачей</string>
+    <string name="backup_and_restore_supporting">Сохраняйте настройки, фоны звонков, контакты и журнал звонков в файл</string>
+
+    <!-- Backup screen: tabs -->
     <string name="create_backup">Создать резервную копию</string>
-    <string name="create_backup_subtitle">Сохранить настройки приложения и заметки о звонках</string>
-    <string name="failed_to_create_backup">Не удалось создать резервную копию</string>
-    <string name="restore_backup">Восстановить резервную копию</string>
-    <string name="restore_backup_subtitle">Восстановить настройки приложения и заметки о звонках</string>
+    <string name="restore_backup">Восстановить из копии</string>
+
+    <!-- Backup screen: create tab -->
+    <string name="select_data_to_backup">Выберите данные для включения в резервную копию</string>
+    <string name="backup_settings_supporting">Параметры приложения, включая пользовательские шрифты (оформление экрана звонка копируется отдельно)</string>
+    <string name="backup_contacts_supporting">Список контактов устройства и локальных контактов</string>
+    <string name="backup_private_contacts_supporting">Приватные контакты, хранящиеся только в этом приложении (не в системной адресной книге)</string>
+    <string name="backup_call_backgrounds_title">Оформления экрана вызова</string>
+    <string name="backup_call_backgrounds_supporting">Фоны и стили контактов (шрифт, цвет, размытие), оформление экрана звонка по умолчанию и все файлы изображений фонов</string>
+    <string name="backup_call_logs_supporting">История и журнал звонков устройства</string>
+    <string name="backup_call_notes_supporting">Заметки к контактам и отдельные заметки</string>
+    <string name="backup_share_button">Поделиться копией</string>
+    <string name="backup_save_button">Сохранить копию</string>
+    <string name="backup_auto_backup_title">Автоматическое резервное копирование</string>
+    <string name="backup_auto_backup_enabled">Включено · Автоматические копии запланированы</string>
+    <string name="backup_auto_backup_disabled">Выключено · Настройте автоматическое копирование</string>
+
+    <!-- Backup screen: restore tab -->
+    <string name="restore_select_file_hint">Выберите файл резервной копии .rphone из хранилища</string>
+    <string name="restore_no_file_selected">Файл резервной копии не выбран</string>
+    <string name="restore_tap_to_choose">Нажмите ниже, чтобы выбрать файл для восстановления</string>
+    <string name="restore_file_size">%1$d КБ</string>
+    <string name="restore_browse_button">Выбрать файл копии</string>
+    <string name="restore_choose_another_button">Выбрать другой файл</string>
+    <string name="restore_select_items_hint">Выберите элементы для восстановления из этого файла</string>
+    <string name="restore_not_in_backup">Отсутствует в этой копии</string>
+    <string name="restore_selected_button">Восстановить выбранное</string>
+    <string name="restore_backup_version">Версия резервной копии: %1$d</string>
+    <string name="restore_backup_created_at">Создана: %1$s</string>
+    <string name="restore_backup_newer_version_warning">Эта копия создана более новой версией приложения (копия v%1$d, приложение v%2$d). Некоторые данные могут восстановиться некорректно.</string>
+
+    <!-- Backup screen: dialogs -->
+    <string name="backup_creating_title">Создание резервной копии…</string>
+    <string name="backup_creating_message">Подождите, архив резервной копии создаётся.</string>
+    <string name="backup_restoring_title">Восстановление из копии…</string>
+    <string name="backup_restoring_message">Подождите, выбранные данные восстанавливаются.</string>
+    <string name="backup_success_title">Копия создана</string>
+    <string name="backup_success_message">Файл резервной копии успешно создан:\n%1$s</string>
+    <string name="restore_success_title">Восстановление завершено</string>
+    <string name="restore_success_message">Данные и настройки успешно восстановлены. Рекомендуется перезапустить приложение, чтобы применить все визуальные изменения.</string>
+    <string name="backup_error_title">Операция не выполнена</string>
+    <string name="backup_error_save">Не удалось сохранить копию</string>
+    <string name="backup_error_create">Не удалось создать копию</string>
+    <string name="backup_error_restore">Не удалось восстановить данные</string>
+    <string name="backup_error_read_file">Не удалось прочитать файл копии</string>
+    <string name="backup_error_unknown">Неизвестная ошибка при восстановлении</string>
 
     <!-- Pocket Mode -->
     <string name="pocket_mode_active">Карманный режим включен</string>
