@@ -746,17 +746,56 @@
 
     <!-- Backup & Restore -->
     <string name="backup_and_restore">Backup e ripristino</string>
-    <string name="restoring_backup">Ripristino del backup…</string>
-    <string name="backup_created">Backup creato</string>
-    <string name="backup_created_description">Backup salvato in: %s</string>
-    <string name="restore_complete">Ripristino completato</string>
-    <string name="restore_complete_description">I tuoi dati sono stati ripristinati con successo. Riavvia l\'app.</string>
-    <string name="operation_failed">Operazione non riuscita</string>
+    <string name="backup_and_restore_supporting">Salva le impostazioni dell\'app, gli sfondi delle chiamate, i contatti e i registri delle chiamate in un file</string>
+
+    <!-- Backup screen: tabs -->
     <string name="create_backup">Crea backup</string>
-    <string name="create_backup_subtitle">Salva configurazione dell\'app e note di chiamata</string>
-    <string name="failed_to_create_backup">Impossibile creare il backup</string>
     <string name="restore_backup">Ripristina backup</string>
-    <string name="restore_backup_subtitle">Ripristina configurazione dell\'app e note di chiamata</string>
+
+    <!-- Backup screen: create tab -->
+    <string name="select_data_to_backup">Seleziona i dati da includere nel tuo file di backup</string>
+    <string name="backup_settings_supporting">Preferenze dell\'app, inclusi i caratteri personalizzati (l\'aspetto della schermata di chiamata viene salvato separatamente)</string>
+    <string name="backup_contacts_supporting">Elenco contatti del dispositivo e locali</string>
+    <string name="backup_private_contacts_supporting">Contatti privati archiviati solo in questa app (non nella rubrica di sistema)</string>
+    <string name="backup_call_backgrounds_title">Aspetto della schermata di chiamata</string>
+    <string name="backup_call_backgrounds_supporting">Sfondi e stili dei contatti (carattere, colore, sfocatura), l\'aspetto predefinito della schermata di chiamata e tutti i file immagine di sfondo</string>
+    <string name="backup_call_logs_supporting">Cronologia e registri delle chiamate del dispositivo</string>
+    <string name="backup_call_notes_supporting">Note dei contatti e note autonome generali</string>
+    <string name="backup_share_button">Condividi backup</string>
+    <string name="backup_save_button">Salva backup</string>
+    <string name="backup_auto_backup_title">Backup automatico</string>
+    <string name="backup_auto_backup_enabled">Attivato · Backup automatici pianificati</string>
+    <string name="backup_auto_backup_disabled">Disattivato · Configura backup automatici</string>
+
+    <!-- Backup screen: restore tab -->
+    <string name="restore_select_file_hint">Seleziona un file di backup .rphone dalla tua memoria</string>
+    <string name="restore_no_file_selected">Nessun file di backup selezionato</string>
+    <string name="restore_tap_to_choose">Tocca sotto per scegliere un file di backup da ripristinare</string>
+    <string name="restore_file_size">%1$d KB</string>
+    <string name="restore_browse_button">Sfoglia file di backup</string>
+    <string name="restore_choose_another_button">Scegli un altro file</string>
+    <string name="restore_select_items_hint">Seleziona gli elementi da ripristinare da questo file</string>
+    <string name="restore_not_in_backup">Non presente in questo backup</string>
+    <string name="restore_selected_button">Ripristina selezionati</string>
+    <string name="restore_backup_version">Versione backup: %1$d</string>
+    <string name="restore_backup_created_at">Creato: %1$s</string>
+    <string name="restore_backup_newer_version_warning">Questo backup è stato creato da una versione più recente dell\'app (backup v%1$d, app v%2$d). Alcuni dati potrebbero non essere ripristinati correttamente.</string>
+
+    <!-- Backup screen: dialogs -->
+    <string name="backup_creating_title">Creazione backup…</string>
+    <string name="backup_creating_message">Attendere mentre viene creato l\'archivio di backup.</string>
+    <string name="backup_restoring_title">Ripristino backup…</string>
+    <string name="backup_restoring_message">Attendere mentre vengono ripristinati i dati selezionati.</string>
+    <string name="backup_success_title">Backup creato</string>
+    <string name="backup_success_message">Il tuo file di backup è stato creato con successo:\n%1$s</string>
+    <string name="restore_success_title">Ripristino completato</string>
+    <string name="restore_success_message">I tuoi dati e le impostazioni sono stati ripristinati con successo. Si consiglia di riavviare l\'app per applicare tutte le modifiche visive.</string>
+    <string name="backup_error_title">Operazione non riuscita</string>
+    <string name="backup_error_save">Impossibile salvare il backup</string>
+    <string name="backup_error_create">Impossibile creare il backup</string>
+    <string name="backup_error_restore">Ripristino non riuscito</string>
+    <string name="backup_error_read_file">Impossibile leggere il file di backup</string>
+    <string name="backup_error_unknown">Errore sconosciuto durante il ripristino</string>
 
     <!-- Pocket Mode -->
     <string name="pocket_mode_active">Modalità tasca attiva</string>

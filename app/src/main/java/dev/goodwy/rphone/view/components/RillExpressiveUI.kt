@@ -1264,6 +1264,7 @@ fun RillSwitchListItem(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     val context = LocalContext.current
     val prefs = koinInject<PreferenceManager>()
@@ -1276,6 +1277,7 @@ fun RillSwitchListItem(
     )
 
     Surface(
+        enabled = enabled,
         onClick = {
             if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
                 performAppHaptic(
@@ -1321,8 +1323,19 @@ fun RillSwitchListItem(
 
             Spacer(modifier = Modifier.width(12.dp))
             Switch(
-                checked = checked,
-                onCheckedChange = onCheckedChange,
+                checked = checked && enabled,
+                onCheckedChange = {
+                    if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
+                        performAppHaptic(
+                            context,
+                            prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light")
+                                ?: "light",
+                            prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
+                        )
+                    }
+                    onCheckedChange(it)
+                },
+                enabled = enabled,
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = MaterialTheme.colorScheme.primary,
                     checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,
@@ -1420,7 +1433,17 @@ fun RillSwitchListItem(
             Spacer(modifier = Modifier.width(12.dp))
             Switch(
                 checked = checked,
-                onCheckedChange = onCheckedChange, //onCheckedChange(!checked)
+                onCheckedChange = {
+                    if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
+                        performAppHaptic(
+                            context,
+                            prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light")
+                                ?: "light",
+                            prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
+                        )
+                    }
+                    onCheckedChange(it)
+                },
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = MaterialTheme.colorScheme.primary,
                     checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,

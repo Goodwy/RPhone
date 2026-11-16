@@ -144,25 +144,25 @@ class PreferenceManager(context: Context) {
         return _prefsCache.value.asMap().mapKeys { it.key.name }.mapValues { it.value }
     }
 
-    /** Restores preferences from a map, typically from a backup. */
-    fun restoreAllPreferences(preferences: Map<String, Any>) {
-        scope.launch {
-            dataStore.edit { prefs ->
-                preferences.forEach { (key, value) ->
-                    when (value) {
-                        is Boolean -> prefs[booleanPreferencesKey(key)] = value
-                        is Int -> prefs[intPreferencesKey(key)] = value
-                        is Long -> prefs[longPreferencesKey(key)] = value
-                        is Float -> prefs[floatPreferencesKey(key)] = value
-                        is String -> prefs[stringPreferencesKey(key)] = value
-                        is Double -> prefs[floatPreferencesKey(key)] = value.toFloat()
-                        // Handle comma-separated strings that represent Sets (legacy or current backup format)
-                        // If it's a known set key, we might want to handle it specifically, 
-                        // but usually the app reads them as CSV anyway.
-                    }
+    suspend fun getAllPreferencesSuspend(): Map<String, Any> =
+        dataStore.data.first().asMap().mapKeys { it.key.name }.mapValues { it.value }
+
+    suspend fun restoreAllPreferences(preferences: Map<String, Any>) {
+        dataStore.edit { prefs ->
+            preferences.forEach { (key, value) ->
+                when (value) {
+                    is Boolean -> prefs[booleanPreferencesKey(key)] = value
+                    is Int -> prefs[intPreferencesKey(key)] = value
+                    is Long -> prefs[longPreferencesKey(key)] = value
+                    is Float -> prefs[floatPreferencesKey(key)] = value
+                    is String -> prefs[stringPreferencesKey(key)] = value
+                    is Double -> prefs[floatPreferencesKey(key)] = value.toFloat()
+                    is Set<*> -> prefs[stringSetPreferencesKey(key)] =
+                        value.mapNotNull { it?.toString() }.toSet()
                 }
             }
         }
+        _prefsCache.value = dataStore.data.first()
     }
 
     /** Returns true if an incoming call from [phoneNumber] should be gated behind biometric. */
@@ -402,6 +402,52 @@ class PreferenceManager(context: Context) {
         setString(KEY_VISIBLE_ACCOUNTS, accounts.joinToString(","))
     }
 
+    // ── Auto Backup Configuration Helpers ─────────────────────────────────
+    fun isAutoBackupEnabled(): Boolean = getBoolean(KEY_AUTO_BACKUP_ENABLED, false)
+    fun setAutoBackupEnabled(enabled: Boolean) = setBoolean(KEY_AUTO_BACKUP_ENABLED, enabled)
+
+    fun getAutoBackupFolderUri(): String? = getString(KEY_AUTO_BACKUP_FOLDER_URI, null)
+    fun setAutoBackupFolderUri(uri: String?) = setString(KEY_AUTO_BACKUP_FOLDER_URI, uri)
+
+    fun getAutoBackupIntervalValue(): Int = getInt(KEY_AUTO_BACKUP_INTERVAL_VALUE, 2)
+    fun setAutoBackupIntervalValue(value: Int) = setInt(KEY_AUTO_BACKUP_INTERVAL_VALUE, value)
+
+    fun getAutoBackupIntervalUnit(): String = getString(KEY_AUTO_BACKUP_INTERVAL_UNIT, "hours") ?: "hours"
+    fun setAutoBackupIntervalUnit(unit: String) = setString(KEY_AUTO_BACKUP_INTERVAL_UNIT, unit)
+
+    fun isAutoBackupItemSettings(): Boolean = getBoolean(KEY_AUTO_BACKUP_ITEMS_SETTINGS, true)
+    fun setAutoBackupItemSettings(enabled: Boolean) = setBoolean(KEY_AUTO_BACKUP_ITEMS_SETTINGS, enabled)
+
+    fun isAutoBackupItemCallingCards(): Boolean = getBoolean(KEY_AUTO_BACKUP_ITEMS_CALLING_CARDS, true)
+    fun setAutoBackupItemCallingCards(enabled: Boolean) = setBoolean(KEY_AUTO_BACKUP_ITEMS_CALLING_CARDS, enabled)
+
+    fun isAutoBackupItemNotes(): Boolean = getBoolean(KEY_AUTO_BACKUP_ITEMS_NOTES, true)
+    fun setAutoBackupItemNotes(enabled: Boolean) = setBoolean(KEY_AUTO_BACKUP_ITEMS_NOTES, enabled)
+
+    fun isAutoBackupItemContacts(): Boolean = getBoolean(KEY_AUTO_BACKUP_ITEMS_CONTACTS, false)
+    fun setAutoBackupItemContacts(enabled: Boolean) = setBoolean(KEY_AUTO_BACKUP_ITEMS_CONTACTS, enabled)
+
+    fun isAutoBackupItemPrivateContacts(): Boolean = getBoolean(KEY_AUTO_BACKUP_ITEMS_PRIVATE_CONTACTS, false)
+    fun setAutoBackupItemPrivateContacts(enabled: Boolean) = setBoolean(KEY_AUTO_BACKUP_ITEMS_PRIVATE_CONTACTS, enabled)
+
+    fun isAutoBackupItemCallLogs(): Boolean = getBoolean(KEY_AUTO_BACKUP_ITEMS_CALL_LOGS, false)
+    fun setAutoBackupItemCallLogs(enabled: Boolean) = setBoolean(KEY_AUTO_BACKUP_ITEMS_CALL_LOGS, enabled)
+
+    fun isAutoDeleteBackupsTimeEnabled(): Boolean = getBoolean(KEY_AUTO_DELETE_BACKUPS_TIME_ENABLED, false)
+    fun setAutoDeleteBackupsTimeEnabled(enabled: Boolean) = setBoolean(KEY_AUTO_DELETE_BACKUPS_TIME_ENABLED, enabled)
+
+    fun getAutoDeleteBackupsTimeValue(): Int = getInt(KEY_AUTO_DELETE_BACKUPS_TIME_VALUE, 7)
+    fun setAutoDeleteBackupsTimeValue(value: Int) = setInt(KEY_AUTO_DELETE_BACKUPS_TIME_VALUE, value)
+
+    fun getAutoDeleteBackupsTimeUnit(): String = getString(KEY_AUTO_DELETE_BACKUPS_TIME_UNIT, "days") ?: "days"
+    fun setAutoDeleteBackupsTimeUnit(unit: String) = setString(KEY_AUTO_DELETE_BACKUPS_TIME_UNIT, unit)
+
+    fun isAutoDeleteBackupsCountEnabled(): Boolean = getBoolean(KEY_AUTO_DELETE_BACKUPS_COUNT_ENABLED, false)
+    fun setAutoDeleteBackupsCountEnabled(enabled: Boolean) = setBoolean(KEY_AUTO_DELETE_BACKUPS_COUNT_ENABLED, enabled)
+
+    fun getAutoDeleteBackupsCountValue(): Int = getInt(KEY_AUTO_DELETE_BACKUPS_COUNT_VALUE, 5)
+    fun setAutoDeleteBackupsCountValue(value: Int) = setInt(KEY_AUTO_DELETE_BACKUPS_COUNT_VALUE, value)
+
     companion object {
         const val CONTACT_BACKGROUND_PREFIX = "contact_background_"
         const val CONTACT_BACKGROUND_NUMBER_PREFIX = "contact_background_num_"
@@ -555,6 +601,23 @@ class PreferenceManager(context: Context) {
         const val KEY_FLOATING_CALL            = "floating_ongoing_call"
         const val KEY_FLOATING_BUBBLE_X         = "floating_bubble_x"
         const val KEY_FLOATING_BUBBLE_Y         = "floating_bubble_y"
+        // ── Auto Backup Configuration ───────────────────────────────────────
+        const val KEY_AUTO_BACKUP_ENABLED              = "auto_backup_enabled"
+        const val KEY_AUTO_BACKUP_FOLDER_URI           = "auto_backup_folder_uri"
+        const val KEY_AUTO_BACKUP_INTERVAL_VALUE       = "auto_backup_interval_value" // default: 2
+        const val KEY_AUTO_BACKUP_INTERVAL_UNIT        = "auto_backup_interval_unit"  // default: "hours"
+        const val KEY_AUTO_BACKUP_ITEMS_SETTINGS       = "auto_backup_items_settings"
+        const val KEY_AUTO_BACKUP_ITEMS_CALLING_CARDS  = "auto_backup_items_calling_cards"
+        const val KEY_AUTO_BACKUP_ITEMS_NOTES          = "auto_backup_items_notes"
+        const val KEY_AUTO_BACKUP_ITEMS_CONTACTS       = "auto_backup_items_contacts"
+        const val KEY_AUTO_BACKUP_ITEMS_PRIVATE_CONTACTS = "auto_backup_items_private_contacts"
+        const val KEY_AUTO_BACKUP_ITEMS_CALL_LOGS      = "auto_backup_items_call_logs"
+        // Auto Delete Backups Configuration
+        const val KEY_AUTO_DELETE_BACKUPS_TIME_ENABLED = "auto_delete_backups_time_enabled"
+        const val KEY_AUTO_DELETE_BACKUPS_TIME_VALUE   = "auto_delete_backups_time_value" // default: 7
+        const val KEY_AUTO_DELETE_BACKUPS_TIME_UNIT    = "auto_delete_backups_time_unit"  // default: "days"
+        const val KEY_AUTO_DELETE_BACKUPS_COUNT_ENABLED = "auto_delete_backups_count_enabled"
+        const val KEY_AUTO_DELETE_BACKUPS_COUNT_VALUE   = "auto_delete_backups_count_value" // default: 5
         // Tab Sections visibility
         const val KEY_TAB_SHOW_FAVORITES       = "tab_show_favorites"
         const val KEY_TAB_SHOW_CALLS           = "tab_show_calls"

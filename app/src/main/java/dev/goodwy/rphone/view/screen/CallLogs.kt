@@ -73,7 +73,12 @@ fun CallLogFullScreen(
     numbersList: Array<String>? = null
 ) {
     val viewModel: CallLogViewModel = koinActivityViewModel()
-    val allLogs by viewModel.allCallLogs.collectAsStateWithLifecycle()
+    val allLogs by viewModel.ungroupedLogs.collectAsStateWithLifecycle()
+    val isLoading by viewModel.isUngroupedLoading.collectAsStateWithLifecycle()
+    LaunchedEffect(Unit) {
+        viewModel.loadUngroupedLogs()
+    }
+
     val selectedFilter by viewModel.selectedFilter.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val listState = rememberLazyListState()
@@ -271,15 +276,15 @@ fun CallLogFullScreen(
             val hasMultipleNumbers = filteredNumbersList.size > 1 || (numbersList != null && numbersList.size > 1)
             Box(
                 modifier = Modifier
-//                    .padding(innerPadding)
                     .padding(
                         top = innerPadding.calculateTopPadding(),
                         start = 0.dp,
                         end = 0.dp,
                         bottom = 0.dp
                     )
-                    .fillMaxSize()) {
-                if (filteredLogsByContact.isEmpty()) {
+                    .fillMaxSize()
+            ) {
+                if (filteredLogsByContact.isEmpty() && !isLoading) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(stringResource(R.string.no_call_history_found), color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }

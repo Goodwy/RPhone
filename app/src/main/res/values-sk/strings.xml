@@ -752,17 +752,56 @@
 
     <!-- Backup & Restore -->
     <string name="backup_and_restore">Zálohovanie a obnovenie</string>
-    <string name="restoring_backup">Obnovovanie zálohy…</string>
-    <string name="backup_created">Záloha vytvorená</string>
-    <string name="backup_created_description">Záloha uložená do: %s</string>
-    <string name="restore_complete">Obnovenie dokončené</string>
-    <string name="restore_complete_description">Vaše údaje boli úspešne obnovené. Restartujte prosím aplikáciu.</string>
-    <string name="operation_failed">Operácia zlyhala</string>
+    <string name="backup_and_restore_supporting">Uložte nastavenia aplikácie, pozadia hovorov, kontakty a protokoly hovorov do súboru</string>
+
+    <!-- Backup screen: tabs -->
     <string name="create_backup">Vytvoriť zálohu</string>
-    <string name="create_backup_subtitle">Uložiť konfiguráciu aplikácie a poznámky k hovorom</string>
-    <string name="failed_to_create_backup">Zálohu sa nepodarilo vytvoriť</string>
     <string name="restore_backup">Obnoviť zálohu</string>
-    <string name="restore_backup_subtitle">Obnoviť konfiguráciu aplikácie a poznámky k hovorom</string>
+
+    <!-- Backup screen: create tab -->
+    <string name="select_data_to_backup">Vyberte údaje, ktoré chcete zahrnúť do súboru zálohy</string>
+    <string name="backup_settings_supporting">Predvoľby aplikácie vrátane vlastných písiem (vzhľad obrazovky hovoru sa zálohuje samostatne)</string>
+    <string name="backup_contacts_supporting">Zoznam kontaktov zariadenia a miestnych kontaktov</string>
+    <string name="backup_private_contacts_supporting">Súkromné kontakty uložené iba v tejto aplikácii (nie v systémovom adresári)</string>
+    <string name="backup_call_backgrounds_title">Vzhľad obrazovky hovoru</string>
+    <string name="backup_call_backgrounds_supporting">Pozadia a štýly kontaktov (písmo, farba, rozostrenie), predvolený vzhľad obrazovky hovoru a všetky súbory obrázkov pozadia</string>
+    <string name="backup_call_logs_supporting">História a protokoly hovorov zariadenia</string>
+    <string name="backup_call_notes_supporting">Poznámky ku kontaktom a všeobecné samostatné poznámky</string>
+    <string name="backup_share_button">Zdieľať zálohu</string>
+    <string name="backup_save_button">Uložiť zálohu</string>
+    <string name="backup_auto_backup_title">Automatická záloha</string>
+    <string name="backup_auto_backup_enabled">Zapnuté · Automatické zálohy naplánované</string>
+    <string name="backup_auto_backup_disabled">Vypnuté · Nastaviť automatické zálohy</string>
+
+    <!-- Backup screen: restore tab -->
+    <string name="restore_select_file_hint">Vyberte súbor zálohy .rphone z úložiska</string>
+    <string name="restore_no_file_selected">Nie je vybratý žiadny súbor zálohy</string>
+    <string name="restore_tap_to_choose">Klepnite nižšie na výber súboru zálohy na obnovenie</string>
+    <string name="restore_file_size">%1$d KB</string>
+    <string name="restore_browse_button">Prehľadať súbor zálohy</string>
+    <string name="restore_choose_another_button">Vybrať iný súbor</string>
+    <string name="restore_select_items_hint">Vyberte položky na obnovenie z tohto súboru</string>
+    <string name="restore_not_in_backup">V tejto zálohe nie je</string>
+    <string name="restore_selected_button">Obnoviť vybrané</string>
+    <string name="restore_backup_version">Verzia zálohy: %1$d</string>
+    <string name="restore_backup_created_at">Vytvorené: %1$s</string>
+    <string name="restore_backup_newer_version_warning">Táto záloha bola vytvorená novšou verziou aplikácie (záloha v%1$d, aplikácia v%2$d). Niektoré údaje nemusia byť obnovené správne.</string>
+
+    <!-- Backup screen: dialogs -->
+    <string name="backup_creating_title">Vytváranie zálohy…</string>
+    <string name="backup_creating_message">Počkajte prosím, kým sa vytvorí archív zálohy.</string>
+    <string name="backup_restoring_title">Obnovovanie zálohy…</string>
+    <string name="backup_restoring_message">Počkajte prosím, kým sa obnovia vybrané údaje.</string>
+    <string name="backup_success_title">Záloha vytvorená</string>
+    <string name="backup_success_message">Váš súbor zálohy bol úspešne vytvorený:\n%1$s</string>
+    <string name="restore_success_title">Obnovenie dokončené</string>
+    <string name="restore_success_message">Vaše údaje a nastavenia boli úspešne obnovené. Odporúča sa restartovať aplikáciu, aby sa použili všetky vizuálne zmeny.</string>
+    <string name="backup_error_title">Operácia zlyhala</string>
+    <string name="backup_error_save">Nepodarilo sa uložiť zálohu</string>
+    <string name="backup_error_create">Nepodarilo sa vytvoriť zálohu</string>
+    <string name="backup_error_restore">Obnovenie zlyhalo</string>
+    <string name="backup_error_read_file">Nepodarilo sa prečítať súbor zálohy</string>
+    <string name="backup_error_unknown">Neznáma chyba počas obnovovania</string>
 
     <!-- Pocket Mode -->
     <string name="pocket_mode_active">Vreckový režim aktívny</string>

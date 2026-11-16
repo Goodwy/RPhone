@@ -218,8 +218,12 @@ fun ContactDetailsScreen(
     val contactsViewModel: ContactsViewModel = koinActivityViewModel()
     val callLogViewModel: CallLogViewModel = koinActivityViewModel()
 
-    val allLogs by callLogViewModel.allCallLogs.collectAsStateWithLifecycle()
-    val availableAccounts = contactsViewModel.availableAccounts.collectAsStateWithLifecycle().value
+//    val allLogs by callLogViewModel.allCallLogs.collectAsStateWithLifecycle()
+    val allLogs by callLogViewModel.ungroupedLogs.collectAsStateWithLifecycle()
+    val isLoading by callLogViewModel.isUngroupedLoading.collectAsStateWithLifecycle()
+    LaunchedEffect(Unit) {
+        callLogViewModel.loadUngroupedLogs()
+    }
     val availableAccountsForMoving = contactsViewModel.availableAccountsForMoving.collectAsStateWithLifecycle().value
 
     var contact by remember { mutableStateOf<Contact?>(null) }
@@ -420,12 +424,8 @@ fun ContactDetailsScreen(
         }
     }
 
-    val contactLogs = remember(contact, phoneNumber, allLogs) {
+    val contactLogs = remember(contact, phoneNumber, allLogs, isLoading) {
         allLogs.filter { log ->
-//            (contact != null && (log.contactId == contact!!.id ||
-//                contact!!.phoneNumbers.any { n -> log.number.replace(" ", "").contains(n.replace(" ", "")) }))
-//                    || (phoneNumber != null && log.number.replace(" ", "").contains(phoneNumber.replace(" ", "")))
-
             val normalizedLogNumber = log.number.replace(" ", "")
             val normalizedPhoneNumber = phoneNumber?.replace(" ", "")
 
@@ -991,6 +991,7 @@ fun ContactDetailsScreen(
                                     ) {
                                         Text(
                                             text = displayName,
+                                            color = MaterialTheme.colorScheme.onSurface,
                                             style = MaterialTheme.typography.headlineLarge,
                                             fontWeight = FontWeight.Bold,
                                             textAlign = TextAlign.Center
@@ -1000,6 +1001,7 @@ fun ContactDetailsScreen(
                                                 Spacer(modifier = Modifier.height(12.dp))
                                                 Text(
                                                     text = it,
+                                                    color = MaterialTheme.colorScheme.onSurface,
                                                     style = MaterialTheme.typography.bodyMedium,
                                                     textAlign = TextAlign.Center,
                                                 )
@@ -1009,6 +1011,7 @@ fun ContactDetailsScreen(
                                             Spacer(modifier = Modifier.height(12.dp))
                                             Text(
                                                 text = companyAndJob,
+                                                color = MaterialTheme.colorScheme.onSurface,
                                                 style = MaterialTheme.typography.bodyMedium,
                                                 textAlign = TextAlign.Center
                                             )
@@ -1022,7 +1025,7 @@ fun ContactDetailsScreen(
                                             .fillMaxWidth()
                                             .background(MaterialTheme.colorScheme.surface)
                                             .padding(vertical = 8.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                                     ) {
                                         RillExpressiveButton(
                                             modifier = Modifier.weight(1f),
@@ -1872,7 +1875,7 @@ fun ContactDetailsScreen(
                                             if (showCallBackground) Color.Transparent else MaterialTheme.colorScheme.surface,
                                         )
                                         .padding(vertical = 8.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                                 ) {
                                     RillExpressiveButton(
                                         modifier = Modifier.weight(1f),

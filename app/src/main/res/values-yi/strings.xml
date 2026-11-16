@@ -751,17 +751,56 @@
 
     <!-- Backup & Restore -->
     <string name="backup_and_restore">באַקאַפּ און צוריקשטעלן</string>
-    <string name="restoring_backup">שטעלט צוריק באַקאַפּ…</string>
-    <string name="backup_created">באַקאַפּ געשאַפֿן</string>
-    <string name="backup_created_description">באַקאַפּ געהיט אין: %s</string>
-    <string name="restore_complete">צוריקשטעלונג פֿאַרענדיקט</string>
-    <string name="restore_complete_description">דײַנע דאַטן זענען צוריקגעשטעלט געוואָרן. ביטע אָנהייב די אַפּ פֿון ניי.</string>
-    <string name="operation_failed">אָפּעראַציע דורכגעפֿאַלן</string>
+    <string name="backup_and_restore_supporting">היט אַפּ איינשטעלונגען, רוף הינטערגרונטן, קאָנטאַקטן און רוף לאָגס אין אַ טעקע</string>
+
+    <!-- Backup screen: tabs -->
     <string name="create_backup">שאַף באַקאַפּ</string>
-    <string name="create_backup_subtitle">היט אַפּ קאָנפֿיגוראַציע און רוף הערות</string>
-    <string name="failed_to_create_backup">האָט נישט געקענט שאַפֿן באַקאַפּ</string>
     <string name="restore_backup">שטעל צוריק באַקאַפּ</string>
-    <string name="restore_backup_subtitle">שטעל צוריק אַפּ קאָנפֿיגוראַציע און רוף הערות</string>
+
+    <!-- Backup screen: create tab -->
+    <string name="select_data_to_backup">קלויב דאַטן צו אַרײַננעמען אין דײַן באַקאַפּ טעקע</string>
+    <string name="backup_settings_supporting">אַפּ פּרעפֿערענצן, אַרײַנגערעכנט פּערזענלעכע שריפֿטן (דער אויסזען פֿון רוף פאַרשטעל ווערט באַקאַפּירט באַזונדער)</string>
+    <string name="backup_contacts_supporting">גערעט און לאָקאַלע קאָנטאַקט ליסטע</string>
+    <string name="backup_private_contacts_supporting">פּריוואַטע קאָנטאַקטן געהיט נאָר אין דער אַפּ (נישט אין סיסטעם אַדרעס בוך)</string>
+    <string name="backup_call_backgrounds_title">אויסזען פֿון רוף פאַרשטעל</string>
+    <string name="backup_call_backgrounds_supporting">קאָנטאַקט הינטערגרונטן און סטילן (שריפֿט, פֿאַרב, בלער), דער סטאנדאַרד אויסזען פֿון רוף פאַרשטעל, און אַלע הינטערגרונט בילד טעקעס</string>
+    <string name="backup_call_logs_supporting">גערעט רוף היסטאָריע און לאָגס</string>
+    <string name="backup_call_notes_supporting">קאָנטאַקט הערות און אַלגעמיינע פֿרײַשטענדיקע הערות</string>
+    <string name="backup_share_button">טייל באַקאַפּ</string>
+    <string name="backup_save_button">היט באַקאַפּ</string>
+    <string name="backup_auto_backup_title">אויטאָ באַקאַפּ</string>
+    <string name="backup_auto_backup_enabled">אַקטיוו · אויטאָ באַקאַפּס פּלאַנירט</string>
+    <string name="backup_auto_backup_disabled">אָפּגעשטעלט · קאָנפֿיגוריר אויטאָ באַקאַפּס</string>
+
+    <!-- Backup screen: restore tab -->
+    <string name="restore_select_file_hint">קלויב אַ .rphone באַקאַפּ טעקע פֿון דײַן אויפֿבאַהיטונג</string>
+    <string name="restore_no_file_selected">קיין באַקאַפּ טעקע נישט אויסגעוויילט</string>
+    <string name="restore_tap_to_choose">דריק אונטן צו קלויבן אַ באַקאַפּ טעקע צו צוריקשטעלן</string>
+    <string name="restore_file_size">%1$d KB</string>
+    <string name="restore_browse_button">דורכקוק באַקאַפּ טעקע</string>
+    <string name="restore_choose_another_button">קלויב אַן אַנדער טעקע</string>
+    <string name="restore_select_items_hint">קלויב עלעמענטן צו צוריקשטעלן פֿון דער טעקע</string>
+    <string name="restore_not_in_backup">נישט פֿאַראַן אין דעם באַקאַפּ</string>
+    <string name="restore_selected_button">שטעל צוריק אויסגעוויילטע</string>
+    <string name="restore_backup_version">באַקאַפּ ווערסיע: %1$d</string>
+    <string name="restore_backup_created_at">געשאַפֿן: %1$s</string>
+    <string name="restore_backup_newer_version_warning">דער באַקאַפּ איז געשאַפֿן געוואָרן דורך אַ נייערער אַפּ ווערסיע (באַקאַפּ v%1$d, אַפּ v%2$d). טייל דאַטן וועלן מעגלעך נישט ריכטיק צוריקגעשטעלט ווערן.</string>
+
+    <!-- Backup screen: dialogs -->
+    <string name="backup_creating_title">שאַפֿט באַקאַפּ…</string>
+    <string name="backup_creating_message">ביטע וואַרט בשעת דײַן באַקאַפּ אַרכיוו ווערט געשאַפֿן.</string>
+    <string name="backup_restoring_title">שטעלט צוריק באַקאַפּ…</string>
+    <string name="backup_restoring_message">ביטע וואַרט בשעת דײַנע אויסגעוויילטע דאַטן ווערן צוריקגעשטעלט.</string>
+    <string name="backup_success_title">באַקאַפּ געשאַפֿן</string>
+    <string name="backup_success_message">דײַן באַקאַפּ טעקע איז מיט דערפֿאָלג געשאַפֿן געוואָרן:\n%1$s</string>
+    <string name="restore_success_title">צוריקשטעלונג פֿאַרענדיקט</string>
+    <string name="restore_success_message">דײַנע דאַטן און איינשטעלונגען זענען מיט דערפֿאָלג צוריקגעשטעלט געוואָרן. עס ווערט רעקאָמענדירט אָנצוהייבן די אַפּ פֿון ניי צו אַנ�ווענדן אַלע וויזועלע ענדערונגען.</string>
+    <string name="backup_error_title">אָפּעראַציע דורכגעפֿאַלן</string>
+    <string name="backup_error_save">האָט נישט געקענט היטן באַקאַפּ</string>
+    <string name="backup_error_create">האָט נישט געקענט שאַפֿן באַקאַפּ</string>
+    <string name="backup_error_restore">צוריקשטעלונג דורכגעפֿאַלן</string>
+    <string name="backup_error_read_file">האָט נישט געקענט לייענען באַקאַפּ טעקע</string>
+    <string name="backup_error_unknown">אומבאַקאַנטער פֿעלער בשעת צוריקשטעלן</string>
 
     <!-- Pocket Mode -->
     <string name="pocket_mode_active">קעשענע מאָדע אַקטיוו</string>

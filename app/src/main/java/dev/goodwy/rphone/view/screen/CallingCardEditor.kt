@@ -39,14 +39,15 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.rounded.AddAPhoto
 import androidx.compose.material.icons.rounded.AddPhotoAlternate
-import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Wallpaper
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
@@ -68,13 +69,11 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -106,12 +105,13 @@ import dev.goodwy.rphone.controller.util.CallingCardFont
 import dev.goodwy.rphone.controller.util.CallingCardPhotoSupport
 import dev.goodwy.rphone.controller.util.CallingCardStyle
 import dev.goodwy.rphone.controller.util.CallingCardStyleCodec
-import dev.goodwy.rphone.controller.util.darken
 import dev.goodwy.rphone.view.components.ColorSwatch
 import dev.goodwy.rphone.view.components.NavigationIcon
+import dev.goodwy.rphone.view.components.RillDialog
 import dev.goodwy.rphone.view.components.Title
 import dev.goodwy.rphone.view.theme.LocalIsDarkTheme
 import dev.goodwy.rphone.view.theme.MyColors.dialpadKeyColor
+import dev.goodwy.rphone.view.theme.customColors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -397,6 +397,38 @@ private fun EditorHeader(
     usingDefault: Boolean = false,
     onUseDefault: (() -> Unit)? = null
 ) {
+
+    var showWarningDialog by remember { mutableStateOf(false) }
+
+    if (showWarningDialog) {
+        RillDialog(
+            onDismissRequest = { showWarningDialog = false },
+            title = stringResource(R.string.warning),
+            icon = Icons.Outlined.Info,
+            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+            confirmButton = {
+                TextButton(onClick = {
+                    showWarningDialog = false
+                }) {
+                    Text(
+                        stringResource(R.string.close),
+                        textAlign = TextAlign.End,
+                    )
+                }
+            },
+//            dismissButton = {
+//                TextButton(onClick = {
+//                    showWarningDialog = false
+//                }) {
+//                    Text(stringResource(R.string.copy_path))
+//                }
+//            }
+        ) {
+            Text(stringResource(R.string.calling_card_sync_warning_message))
+        }
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -409,6 +441,17 @@ private fun EditorHeader(
         }
 
 
+        IconButton(
+            onClick = { showWarningDialog = true },
+            enabled = !usingDefault,
+//            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+        ) {
+            Icon(
+                Icons.Outlined.Info, stringResource(R.string.back),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Spacer(Modifier.width(6.dp))
         if (onUseDefault != null) {
             Button(
                 onClick = onUseDefault,
@@ -805,19 +848,6 @@ private fun CallingCardCustomizeStep(
                         .padding(horizontal = 16.dp, vertical = 4.dp),
                     horizontalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
-//                    PortraitPreviewFrame(
-//                        modifier = Modifier
-//                            .weight(1f)
-//                            .fillMaxSize()
-//                    ) {
-//                        LivePreview(
-//                            contactName = contactName,
-//                            phoneNumber = phoneNumber,
-//                            photoUri = photoUri,
-//                            backgroundUri = backgroundUri,
-//                            style = style
-//                        )
-//                    }
                     ScaledCallScreenPreview(
                         contactName = contactName,
                         phoneNumber = phoneNumber,
@@ -872,21 +902,6 @@ private fun CallingCardCustomizeStep(
                 }
             } else {
                 Spacer(Modifier.weight(1f))
-
-//            PortraitPreviewFrame(
-//                modifier = Modifier
-//                    .weight(1f)
-//                    .fillMaxWidth()
-//                    .padding(horizontal = 24.dp, vertical = 8.dp)
-//            ) {
-//                LivePreview(
-//                    contactName = contactName,
-//                    phoneNumber = phoneNumber,
-//                    photoUri = photoUri,
-//                    backgroundUri = backgroundUri,
-//                    style = style
-//                )
-//            }
 
                 Button(
                     modifier = Modifier.padding(horizontal = 16.dp),

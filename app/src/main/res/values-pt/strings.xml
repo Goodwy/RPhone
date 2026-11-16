@@ -748,17 +748,56 @@
 
     <!-- Backup & Restore -->
     <string name="backup_and_restore">Cópia de segurança e restauro</string>
-    <string name="restoring_backup">A restaurar cópia de segurança…</string>
-    <string name="backup_created">Cópia de segurança criada</string>
-    <string name="backup_created_description">Cópia de segurança guardada em: %s</string>
-    <string name="restore_complete">Restauro concluído</string>
-    <string name="restore_complete_description">Os seus dados foram restaurados com sucesso. Reinicie a aplicação.</string>
-    <string name="operation_failed">Operação falhou</string>
+    <string name="backup_and_restore_supporting">Guarde as definições da aplicação, os fundos de chamada, os contactos e os registos de chamadas num ficheiro</string>
+
+    <!-- Backup screen: tabs -->
     <string name="create_backup">Criar cópia de segurança</string>
-    <string name="create_backup_subtitle">Guardar configuração da aplicação e notas de chamadas</string>
-    <string name="failed_to_create_backup">Falha ao criar cópia de segurança</string>
     <string name="restore_backup">Restaurar cópia de segurança</string>
-    <string name="restore_backup_subtitle">Restaurar configuração da aplicação e notas de chamadas</string>
+
+    <!-- Backup screen: create tab -->
+    <string name="select_data_to_backup">Selecione os dados a incluir no seu ficheiro de cópia de segurança</string>
+    <string name="backup_settings_supporting">Preferências da aplicação, incluindo tipos de letra personalizados (o aspeto do ecrã de chamada é copiado separadamente)</string>
+    <string name="backup_contacts_supporting">Lista de contactos do dispositivo e locais</string>
+    <string name="backup_private_contacts_supporting">Contactos privados guardados apenas nesta aplicação (não no livro de endereços do sistema)</string>
+    <string name="backup_call_backgrounds_title">Aspeto do ecrã de chamada</string>
+    <string name="backup_call_backgrounds_supporting">Fundos e estilos dos contactos (tipo de letra, cor, desfoque), o aspeto predefinido do ecrã de chamada e todos os ficheiros de imagem de fundo</string>
+    <string name="backup_call_logs_supporting">Histórico e registos de chamadas do dispositivo</string>
+    <string name="backup_call_notes_supporting">Notas de contactos e notas autónomas gerais</string>
+    <string name="backup_share_button">Partilhar cópia</string>
+    <string name="backup_save_button">Guardar cópia</string>
+    <string name="backup_auto_backup_title">Cópia de segurança automática</string>
+    <string name="backup_auto_backup_enabled">Ativada · Cópias automáticas agendadas</string>
+    <string name="backup_auto_backup_disabled">Desativada · Configurar cópias automáticas</string>
+
+    <!-- Backup screen: restore tab -->
+    <string name="restore_select_file_hint">Selecione um ficheiro de cópia de segurança .rphone do seu armazenamento</string>
+    <string name="restore_no_file_selected">Nenhum ficheiro de cópia selecionado</string>
+    <string name="restore_tap_to_choose">Toque abaixo para escolher um ficheiro de cópia a restaurar</string>
+    <string name="restore_file_size">%1$d KB</string>
+    <string name="restore_browse_button">Procurar ficheiro de cópia</string>
+    <string name="restore_choose_another_button">Escolher outro ficheiro</string>
+    <string name="restore_select_items_hint">Selecione os itens a restaurar deste ficheiro</string>
+    <string name="restore_not_in_backup">Não presente nesta cópia</string>
+    <string name="restore_selected_button">Restaurar seleção</string>
+    <string name="restore_backup_version">Versão da cópia: %1$d</string>
+    <string name="restore_backup_created_at">Criada: %1$s</string>
+    <string name="restore_backup_newer_version_warning">Esta cópia foi criada por uma versão mais recente da aplicação (cópia v%1$d, aplicação v%2$d). Alguns dados podem não ser restaurados corretamente.</string>
+
+    <!-- Backup screen: dialogs -->
+    <string name="backup_creating_title">A criar cópia de segurança…</string>
+    <string name="backup_creating_message">Aguarde enquanto o seu arquivo de cópia de segurança está a ser criado.</string>
+    <string name="backup_restoring_title">A restaurar cópia de segurança…</string>
+    <string name="backup_restoring_message">Aguarde enquanto os dados selecionados estão a ser restaurados.</string>
+    <string name="backup_success_title">Cópia criada</string>
+    <string name="backup_success_message">O seu ficheiro de cópia de segurança foi criado com êxito:\n%1$s</string>
+    <string name="restore_success_title">Restauro concluído</string>
+    <string name="restore_success_message">Os seus dados e definições foram restaurados com êxito. Recomenda-se reiniciar a aplicação para aplicar todas as alterações visuais.</string>
+    <string name="backup_error_title">Operação falhou</string>
+    <string name="backup_error_save">Falha ao guardar a cópia</string>
+    <string name="backup_error_create">Falha ao criar a cópia</string>
+    <string name="backup_error_restore">Falha no restauro</string>
+    <string name="backup_error_read_file">Falha ao ler o ficheiro de cópia</string>
+    <string name="backup_error_unknown">Erro desconhecido durante o restauro</string>
 
     <!-- Pocket Mode -->
     <string name="pocket_mode_active">Modo bolso ativo</string>

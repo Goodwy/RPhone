@@ -74,7 +74,8 @@ fun CallScreenPreview(
     backgroundUri: String? = null,
     style: CallScreenPreviewStyle = CallScreenPreviewStyle.Default,
     callingCardStyle: CallingCardStyle = CallingCardStyle.ThemeDefault,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    defaultPreview: Boolean = false
 ) {
     val context = LocalContext.current
     val preferenceManager = koinInject<PreferenceManager>()
@@ -140,7 +141,7 @@ fun CallScreenPreview(
                     .padding(horizontal = 24.dp)
                     .weight(1f)
             ) {
-                Spacer(Modifier.weight(0.5f))
+                if (!defaultPreview) Spacer(Modifier.weight(0.5f))
                 Text(
                     text = stringResource(R.string.call_status_calling),
                     style = MaterialTheme.typography.titleMedium.copy(fontSize = style.statusFontSize),
@@ -185,10 +186,10 @@ fun CallScreenPreview(
                 } else {
                     Spacer(Modifier.height(style.avatarSize))
                 }
-                Spacer(Modifier.weight(0.6f))
+                if (!defaultPreview) Spacer(Modifier.weight(0.6f))
             }
 
-            Spacer(Modifier.weight(1f))
+            if (!defaultPreview) Spacer(Modifier.weight(1f))
         }
     }
 }

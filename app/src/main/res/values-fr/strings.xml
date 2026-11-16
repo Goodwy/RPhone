@@ -745,17 +745,56 @@
 
     <!-- Backup & Restore -->
     <string name="backup_and_restore">Sauvegarde &amp; Restauration</string>
-    <string name="restoring_backup">Restauration de la sauvegarde…</string>
-    <string name="backup_created">Sauvegarde créée</string>
-    <string name="backup_created_description">Sauvegarde enregistrée dans : %s</string>
-    <string name="restore_complete">Restauration terminée</string>
-    <string name="restore_complete_description">Vos données ont été restaurées avec succès. Veuillez redémarrer l\'application.</string>
-    <string name="operation_failed">Opération échouée</string>
+    <string name="backup_and_restore_supporting">Enregistrez les paramètres de l\'application, les arrière-plans d\'appel, les contacts et les journaux d\'appels dans un fichier</string>
+
+    <!-- Backup screen: tabs -->
     <string name="create_backup">Créer une sauvegarde</string>
-    <string name="create_backup_subtitle">Enregistrer la configuration de l\'application et les notes d\'appel</string>
-    <string name="failed_to_create_backup">Échec de la création de la sauvegarde</string>
     <string name="restore_backup">Restaurer une sauvegarde</string>
-    <string name="restore_backup_subtitle">Restaurer la configuration de l\'application et les notes d\'appel</string>
+
+    <!-- Backup screen: create tab -->
+    <string name="select_data_to_backup">Sélectionnez les données à inclure dans votre fichier de sauvegarde</string>
+    <string name="backup_settings_supporting">Préférences de l\'application, y compris les polices personnalisées (l\'apparence de l\'écran d\'appel est sauvegardée séparément)</string>
+    <string name="backup_contacts_supporting">Liste des contacts de l\'appareil et locaux</string>
+    <string name="backup_private_contacts_supporting">Contacts privés stockés uniquement dans cette application (pas dans le carnet d\'adresses système)</string>
+    <string name="backup_call_backgrounds_title">Apparence de l\'écran d\'appel</string>
+    <string name="backup_call_backgrounds_supporting">Arrière-plans et styles des contacts (police, couleur, flou), l\'apparence par défaut de l\'écran d\'appel et tous les fichiers d\'images d\'arrière-plan</string>
+    <string name="backup_call_logs_supporting">Historique et journaux d\'appels de l\'appareil</string>
+    <string name="backup_call_notes_supporting">Notes de contact et notes autonomes générales</string>
+    <string name="backup_share_button">Partager la sauvegarde</string>
+    <string name="backup_save_button">Enregistrer la sauvegarde</string>
+    <string name="backup_auto_backup_title">Sauvegarde automatique</string>
+    <string name="backup_auto_backup_enabled">Activée · Sauvegardes automatiques planifiées</string>
+    <string name="backup_auto_backup_disabled">Désactivée · Configurer les sauvegardes automatiques</string>
+
+    <!-- Backup screen: restore tab -->
+    <string name="restore_select_file_hint">Sélectionnez un fichier de sauvegarde .rphone depuis votre stockage</string>
+    <string name="restore_no_file_selected">Aucun fichier de sauvegarde sélectionné</string>
+    <string name="restore_tap_to_choose">Appuyez ci-dessous pour choisir un fichier de sauvegarde à restaurer</string>
+    <string name="restore_file_size">%1$d Ko</string>
+    <string name="restore_browse_button">Parcourir les fichiers de sauvegarde</string>
+    <string name="restore_choose_another_button">Choisir un autre fichier</string>
+    <string name="restore_select_items_hint">Sélectionnez les éléments à restaurer depuis ce fichier</string>
+    <string name="restore_not_in_backup">Absent de cette sauvegarde</string>
+    <string name="restore_selected_button">Restaurer la sélection</string>
+    <string name="restore_backup_version">Version de la sauvegarde : %1$d</string>
+    <string name="restore_backup_created_at">Créée : %1$s</string>
+    <string name="restore_backup_newer_version_warning">Cette sauvegarde a été créée par une version plus récente de l\'application (sauvegarde v%1$d, application v%2$d). Certaines données risquent de ne pas être restaurées correctement.</string>
+
+    <!-- Backup screen: dialogs -->
+    <string name="backup_creating_title">Création de la sauvegarde…</string>
+    <string name="backup_creating_message">Veuillez patienter pendant la création de votre archive de sauvegarde.</string>
+    <string name="backup_restoring_title">Restauration de la sauvegarde…</string>
+    <string name="backup_restoring_message">Veuillez patienter pendant la restauration des données sélectionnées.</string>
+    <string name="backup_success_title">Sauvegarde créée</string>
+    <string name="backup_success_message">Votre fichier de sauvegarde a été créé avec succès :\n%1$s</string>
+    <string name="restore_success_title">Restauration terminée</string>
+    <string name="restore_success_message">Vos données et paramètres ont été restaurés avec succès. Il est recommandé de redémarrer l\'application pour appliquer toutes les modifications visuelles.</string>
+    <string name="backup_error_title">Opération échouée</string>
+    <string name="backup_error_save">Échec de l\'enregistrement de la sauvegarde</string>
+    <string name="backup_error_create">Échec de la création de la sauvegarde</string>
+    <string name="backup_error_restore">Échec de la restauration</string>
+    <string name="backup_error_read_file">Échec de la lecture du fichier de sauvegarde</string>
+    <string name="backup_error_unknown">Erreur inconnue lors de la restauration</string>
 
     <!-- Pocket Mode -->
     <string name="pocket_mode_active">Mode poche actif</string>

@@ -748,17 +748,56 @@
 
     <!-- Backup & Restore -->
     <string name="backup_and_restore">Backup e restauração</string>
-    <string name="restoring_backup">Restaurando backup…</string>
-    <string name="backup_created">Backup criado</string>
-    <string name="backup_created_description">Backup salvo em: %s</string>
-    <string name="restore_complete">Restauração concluída</string>
-    <string name="restore_complete_description">Seus dados foram restaurados com sucesso. Reinicie o aplicativo.</string>
-    <string name="operation_failed">Operação falhou</string>
+    <string name="backup_and_restore_supporting">Salve as configurações do aplicativo, os fundos de chamada, os contatos e os registros de chamadas em um arquivo</string>
+
+    <!-- Backup screen: tabs -->
     <string name="create_backup">Criar backup</string>
-    <string name="create_backup_subtitle">Salvar configuração do aplicativo e notas de chamadas</string>
-    <string name="failed_to_create_backup">Falha ao criar backup</string>
     <string name="restore_backup">Restaurar backup</string>
-    <string name="restore_backup_subtitle">Restaurar configuração do aplicativo e notas de chamadas</string>
+
+    <!-- Backup screen: create tab -->
+    <string name="select_data_to_backup">Selecione os dados a incluir no seu arquivo de backup</string>
+    <string name="backup_settings_supporting">Preferências do aplicativo, incluindo fontes personalizadas (a aparência da tela de chamada é copiada separadamente)</string>
+    <string name="backup_contacts_supporting">Lista de contatos do dispositivo e locais</string>
+    <string name="backup_private_contacts_supporting">Contatos privados armazenados apenas neste aplicativo (não na agenda do sistema)</string>
+    <string name="backup_call_backgrounds_title">Aparência da tela de chamada</string>
+    <string name="backup_call_backgrounds_supporting">Fundos e estilos dos contatos (fonte, cor, desfoque), a aparência padrão da tela de chamada e todos os arquivos de imagem de fundo</string>
+    <string name="backup_call_logs_supporting">Histórico e registros de chamadas do dispositivo</string>
+    <string name="backup_call_notes_supporting">Notas de contatos e notas independentes gerais</string>
+    <string name="backup_share_button">Compartilhar backup</string>
+    <string name="backup_save_button">Salvar backup</string>
+    <string name="backup_auto_backup_title">Backup automático</string>
+    <string name="backup_auto_backup_enabled">Ativado · Backups automáticos agendados</string>
+    <string name="backup_auto_backup_disabled">Desativado · Configurar backups automáticos</string>
+
+    <!-- Backup screen: restore tab -->
+    <string name="restore_select_file_hint">Selecione um arquivo de backup .rphone do seu armazenamento</string>
+    <string name="restore_no_file_selected">Nenhum arquivo de backup selecionado</string>
+    <string name="restore_tap_to_choose">Toque abaixo para escolher um arquivo de backup para restaurar</string>
+    <string name="restore_file_size">%1$d KB</string>
+    <string name="restore_browse_button">Procurar arquivo de backup</string>
+    <string name="restore_choose_another_button">Escolher outro arquivo</string>
+    <string name="restore_select_items_hint">Selecione os itens a restaurar deste arquivo</string>
+    <string name="restore_not_in_backup">Não presente neste backup</string>
+    <string name="restore_selected_button">Restaurar selecionados</string>
+    <string name="restore_backup_version">Versão do backup: %1$d</string>
+    <string name="restore_backup_created_at">Criado em: %1$s</string>
+    <string name="restore_backup_newer_version_warning">Este backup foi criado por uma versão mais recente do aplicativo (backup v%1$d, aplicativo v%2$d). Alguns dados podem não ser restaurados corretamente.</string>
+
+    <!-- Backup screen: dialogs -->
+    <string name="backup_creating_title">Criando backup…</string>
+    <string name="backup_creating_message">Aguarde enquanto seu arquivo de backup está sendo criado.</string>
+    <string name="backup_restoring_title">Restaurando backup…</string>
+    <string name="backup_restoring_message">Aguarde enquanto os dados selecionados são restaurados.</string>
+    <string name="backup_success_title">Backup criado</string>
+    <string name="backup_success_message">Seu arquivo de backup foi criado com sucesso:\n%1$s</string>
+    <string name="restore_success_title">Restauração concluída</string>
+    <string name="restore_success_message">Seus dados e configurações foram restaurados com sucesso. Recomenda-se reiniciar o aplicativo para aplicar todas as alterações visuais.</string>
+    <string name="backup_error_title">Operação falhou</string>
+    <string name="backup_error_save">Falha ao salvar o backup</string>
+    <string name="backup_error_create">Falha ao criar o backup</string>
+    <string name="backup_error_restore">Falha na restauração</string>
+    <string name="backup_error_read_file">Falha ao ler o arquivo de backup</string>
+    <string name="backup_error_unknown">Erro desconhecido durante a restauração</string>
 
     <!-- Pocket Mode -->
     <string name="pocket_mode_active">Modo bolso ativo</string>

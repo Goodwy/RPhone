@@ -54,6 +54,39 @@ class CallLogViewModel(
     val filteredLogs: StateFlow<List<CallLogEntry>> = _filteredLogs.asStateFlow()
     private var filterJob: Job? = null
 
+    // Flat list for the story screen
+    private val _ungroupedLogs = MutableStateFlow<List<CallLogEntry>>(emptyList())
+    val ungroupedLogs: StateFlow<List<CallLogEntry>> = _ungroupedLogs.asStateFlow()
+
+    private val _isUngroupedLoading = MutableStateFlow(false)
+    val isUngroupedLoading: StateFlow<Boolean> = _isUngroupedLoading.asStateFlow()
+
+    @Volatile private var ungroupedLoaded = false
+
+    /** Load a flat list (without grouping). Cached in memory for the duration of the VM's lifetime. */
+    fun loadUngroupedLogs(forceRefresh: Boolean = false) {
+        if (!hasReadCallLogPermission()) return
+        if (ungroupedLoaded && !forceRefresh && _ungroupedLogs.value.isNotEmpty()) return
+
+        viewModelScope.launch {
+            _isUngroupedLoading.value = true
+            try {
+                val result = callLogRepo.getCallLogs(groupSameDayNumber = false)
+                _ungroupedLogs.value = result
+                ungroupedLoaded = true
+            } catch (_: SecurityException) {
+                // permission revoked
+            } finally {
+                _isUngroupedLoading.value = false
+            }
+        }
+    }
+
+    /** Mark flat cache stale — do NOT clear the UI list. */
+    private fun invalidateUngrouped() {
+        ungroupedLoaded = false
+    }
+
     private val _scrollToTop = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val scrollToTop: SharedFlow<Unit> = _scrollToTop.asSharedFlow()
 
@@ -72,9 +105,12 @@ class CallLogViewModel(
 
     private val callLogObserver = object : ContentObserver(Handler(Looper.getMainLooper())) {
         override fun onChange(selfChange: Boolean) {
+            val hadUngrouped = ungroupedLoaded || _ungroupedLogs.value.isNotEmpty()
+            invalidateUngrouped()
             debounceJob?.cancel()
             debounceJob = viewModelScope.launch {
                 delay(300.milliseconds)
+                if (hadUngrouped) loadUngroupedLogs(forceRefresh = true)
                 fetchLogs(forceRefresh = true, cancelInFlight = true)
             }
         }
@@ -236,7 +272,13 @@ class CallLogViewModel(
                 // every app open after the first one).
                 val changed = result.size != cachedLogs.size ||
                         result.zip(cachedLogs).any { (a, b) ->
-                            a.number != b.number || a.date != b.date || a.type != b.type || a.name != b.name || a.isBlocked != b.isBlocked
+                            a.number != b.number ||
+                                    a.date != b.date ||
+                                    a.type != b.type ||
+                                    a.name != b.name ||
+                                    a.isBlocked != b.isBlocked ||
+                                    a.ids != b.ids ||
+                                    a.types != b.types
                         }
                 cachedLogs = result
                 try {
@@ -270,23 +312,28 @@ class CallLogViewModel(
         }
     }
 
-    fun deleteCallLog(number: String) {
+    private fun deleteThenRefreshUngrouped(delete: suspend () -> Unit) {
         viewModelScope.launch {
-            callLogRepo.deleteCallLog(number)
-            fetchLogs(forceRefresh = true, cancelInFlight = true)
+            val hadUngrouped = ungroupedLoaded || _ungroupedLogs.value.isNotEmpty()
+            delete()
+            invalidateUngrouped()
+            if (hadUngrouped) loadUngroupedLogs(forceRefresh = true)
+            // DO NOT call `fetchLogs`—ContentObserver will do this on its own after 300 ms
+//            fetchLogs(forceRefresh = true, cancelInFlight = true)
         }
     }
 
-    fun deleteCallLogsByIds(ids: List<Long>) {
-        viewModelScope.launch {
-            callLogRepo.deleteCallLogsByIds(ids)
-            fetchLogs(forceRefresh = true, cancelInFlight = true)
-        }
-    }
+    fun deleteCallLog(number: String) =
+        deleteThenRefreshUngrouped { callLogRepo.deleteCallLog(number) }
+
+    fun deleteCallLogsByIds(ids: List<Long>) =
+        deleteThenRefreshUngrouped { callLogRepo.deleteCallLogsByIds(ids) }
 
     fun clearCallLogs() {
         viewModelScope.launch {
             callLogRepo.clearCallLogs()
+            invalidateUngrouped()
+            _ungroupedLogs.value = emptyList()
             fetchLogs(forceRefresh = true, cancelInFlight = true)
         }
     }

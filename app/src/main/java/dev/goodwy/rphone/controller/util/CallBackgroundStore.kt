@@ -23,6 +23,8 @@ import java.io.InputStream
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import androidx.core.net.toUri
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 
 object CallBackgroundStore {
 
@@ -768,4 +770,47 @@ object CallBackgroundStore {
             null
         }
     }
+
+    private const val ZIP_BG_DIR = "call_backgrounds/"
+
+    /**
+     * Writes every referenced background file into [zip] under "call_backgrounds/<name>".
+     * Referenced = present in Prefs (contact_background_*), not just "all files in dir".
+     */
+    fun exportBackgroundsToZip(context: Context, zip: ZipOutputStream) {
+        val app = context.applicationContext
+        val manager = prefs(app)
+        val dir = storageDir(app) ?: return
+        val referencedNames = manager.getContactBackgroundEntries().values
+            .mapNotNull { path -> if (path.startsWith("/")) File(path).name else null }
+            .toSet()
+        dir.listFiles()?.forEach { file ->
+            if (file.isFile && file.name in referencedNames) {
+                zip.putNextEntry(ZipEntry(ZIP_BG_DIR + file.name))
+                file.inputStream().use { it.copyTo(zip) }
+                zip.closeEntry()
+            }
+        }
+    }
+
+    /**
+     * Restores a single background file entry into the store directory.
+     * [name] is the file name without the "call_backgrounds/" prefix.
+     */
+    fun importBackgroundEntry(context: Context, name: String, data: InputStream): Boolean {
+        val app = context.applicationContext
+        val dir = storageDir(app) ?: return false
+        val safeName = name.substringAfterLast('/')
+        if (safeName.isEmpty() || safeName.contains("..")) return false
+        val target = File(dir, safeName)
+        if (!target.canonicalPath.startsWith(dir.canonicalPath)) return false
+        return try {
+            FileOutputStream(target).use { data.copyTo(it) }
+            fileState[target.absolutePath] = true
+            true
+        } catch (_: Exception) { false }
+    }
+
+    /** Exposes the store directory for path remapping after a restore. */
+    fun storageDirForRestore(context: Context): File? = storageDir(context.applicationContext)
 }

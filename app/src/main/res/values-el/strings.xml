@@ -745,17 +745,56 @@
 
     <!-- Backup & Restore -->
     <string name="backup_and_restore">Δημιουργία αντιγράφων ασφαλείας &amp; Επαναφορά</string>
-    <string name="restoring_backup">Επαναφορά αντιγράφου ασφαλείας…</string>
-    <string name="backup_created">Δημιουργήθηκε αντίγραφο ασφαλείας</string>
-    <string name="backup_created_description">Το αντίγραφο ασφαλείας αποθηκεύτηκε στο: %s</string>
-    <string name="restore_complete">Η επαναφορά ολοκληρώθηκε</string>
-    <string name="restore_complete_description">Τα δεδομένα σας επαναφέρθηκαν με επιτυχία. Παρακαλώ επανεκκινήστε την εφαρμογή.</string>
-    <string name="operation_failed">Η λειτουργία απέτυχε</string>
+    <string name="backup_and_restore_supporting">Αποθηκεύστε τις ρυθμίσεις της εφαρμογής, τα φόντα κλήσεων, τις επαφές και τα αρχεία κλήσεων σε ένα αρχείο</string>
+
+    <!-- Backup screen: tabs -->
     <string name="create_backup">Δημιουργία αντιγράφου ασφαλείας</string>
-    <string name="create_backup_subtitle">Αποθήκευση ρυθμίσεων εφαρμογής και σημειώσεων κλήσεων</string>
-    <string name="failed_to_create_backup">Αποτυχία δημιουργίας αντιγράφου ασφαλείας</string>
     <string name="restore_backup">Επαναφορά αντιγράφου ασφαλείας</string>
-    <string name="restore_backup_subtitle">Επαναφορά ρυθμίσεων εφαρμογής και σημειώσεων κλήσεων</string>
+
+    <!-- Backup screen: create tab -->
+    <string name="select_data_to_backup">Επιλέξτε τα δεδομένα που θα συμπεριληφθούν στο αρχείο αντιγράφου ασφαλείας</string>
+    <string name="backup_settings_supporting">Προτιμήσεις εφαρμογής, συμπεριλαμβανομένων προσαρμοσμένων γραμματοσειρών (η εμφάνιση της οθόνης κλήσης δημιουργείται αντίγραφο ξεχωριστά)</string>
+    <string name="backup_contacts_supporting">Λίστα επαφών συσκευής και τοπικών επαφών</string>
+    <string name="backup_private_contacts_supporting">Ιδιωτικές επαφές που αποθηκεύονται μόνο σε αυτήν την εφαρμογή (όχι στο σύστημα διευθύνσεων)</string>
+    <string name="backup_call_backgrounds_title">Εμφάνιση οθόνης κλήσης</string>
+    <string name="backup_call_backgrounds_supporting">Φόντα και στυλ επαφών (γραμματοσειρά, χρώμα, θόλωση), η προεπιλεγμένη εμφάνιση της οθόνης κλήσης και όλα τα αρχεία εικόνων φόντου</string>
+    <string name="backup_call_logs_supporting">Ιστορικό και αρχεία κλήσεων συσκευής</string>
+    <string name="backup_call_notes_supporting">Σημειώσεις επαφών και γενικές αυτόνομες σημειώσεις</string>
+    <string name="backup_share_button">Κοινοποίηση αντιγράφου</string>
+    <string name="backup_save_button">Αποθήκευση αντιγράφου</string>
+    <string name="backup_auto_backup_title">Αυτόματο αντίγραφο ασφαλείας</string>
+    <string name="backup_auto_backup_enabled">Ενεργό · Προγραμματισμένα αυτόματα αντίγραφα</string>
+    <string name="backup_auto_backup_disabled">Ανενεργό · Ρύθμιση αυτόματων αντιγράφων</string>
+
+    <!-- Backup screen: restore tab -->
+    <string name="restore_select_file_hint">Επιλέξτε ένα αρχείο αντιγράφου ασφαλείας .rphone από τον χώρο αποθήκευσής σας</string>
+    <string name="restore_no_file_selected">Δεν έχει επιλεγεί αρχείο αντιγράφου</string>
+    <string name="restore_tap_to_choose">Πατήστε παρακάτω για να επιλέξετε αρχείο προς επαναφορά</string>
+    <string name="restore_file_size">%1$d KB</string>
+    <string name="restore_browse_button">Αναζήτηση αρχείου αντιγράφου</string>
+    <string name="restore_choose_another_button">Επιλογή άλλου αρχείου</string>
+    <string name="restore_select_items_hint">Επιλέξτε στοιχεία προς επαναφορά από αυτό το αρχείο</string>
+    <string name="restore_not_in_backup">Δεν υπάρχει σε αυτό το αντίγραφο</string>
+    <string name="restore_selected_button">Επαναφορά επιλεγμένων</string>
+    <string name="restore_backup_version">Έκδοση αντιγράφου: %1$d</string>
+    <string name="restore_backup_created_at">Δημιουργήθηκε: %1$s</string>
+    <string name="restore_backup_newer_version_warning">Αυτό το αντίγραφο δημιουργήθηκε από νεότερη έκδοση της εφαρμογής (αντίγραφο v%1$d, εφαρμογή v%2$d). Ορισμένα δεδομένα ενδέχεται να μην επαναφερθούν σωστά.</string>
+
+    <!-- Backup screen: dialogs -->
+    <string name="backup_creating_title">Δημιουργία αντιγράφου…</string>
+    <string name="backup_creating_message">Παρακαλώ περιμένετε όσο δημιουργείται το αρχείο αντιγράφου ασφαλείας.</string>
+    <string name="backup_restoring_title">Επαναφορά αντιγράφου…</string>
+    <string name="backup_restoring_message">Παρακαλώ περιμένετε όσο επαναφέρονται τα επιλεγμένα δεδομένα.</string>
+    <string name="backup_success_title">Το αντίγραφο δημιουργήθηκε</string>
+    <string name="backup_success_message">Το αρχείο αντιγράφου ασφαλείας δημιουργήθηκε με επιτυχία:\n%1$s</string>
+    <string name="restore_success_title">Η επαναφορά ολοκληρώθηκε</string>
+    <string name="restore_success_message">Τα δεδομένα και οι ρυθμίσεις σας επαναφέρθηκαν με επιτυχία. Συνιστάται η επανεκκίνηση της εφαρμογής για την εφαρμογή όλων των οπτικών αλλαγών.</string>
+    <string name="backup_error_title">Η λειτουργία απέτυχε</string>
+    <string name="backup_error_save">Αποτυχία αποθήκευσης αντιγράφου</string>
+    <string name="backup_error_create">Αποτυχία δημιουργίας αντιγράφου</string>
+    <string name="backup_error_restore">Η επαναφορά απέτυχε</string>
+    <string name="backup_error_read_file">Αποτυχία ανάγνωσης αρχείου αντιγράφου</string>
+    <string name="backup_error_unknown">Άγνωστο σφάλμα κατά την επαναφορά</string>
 
     <!-- Pocket Mode -->
     <string name="pocket_mode_active">Λειτουργία τσέπης ενεργή</string>

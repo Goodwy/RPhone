@@ -5,7 +5,8 @@ import dev.goodwy.rphone.modal.`interface`.ICallerRepository
 
 class GetCallerNameUseCase(private val repository: ICallerRepository) {
     suspend operator fun invoke(incomingNumber: String, cnamName: String?): CallerMetadata {
-        val localContact = repository.getContactByNumber(incomingNumber)
+//        val localContact = repository.getContactByNumber(incomingNumber)
+        val localContact = runCatching { repository.getContactByNumber(incomingNumber) }.getOrElse { null }
         val cleanCnam = cnamName?.takeIf { it.isNotBlank() }
 
         val hasLocalName = localContact?.hasLocalName() == true

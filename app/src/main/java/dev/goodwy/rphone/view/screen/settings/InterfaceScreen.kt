@@ -298,7 +298,6 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
         containerColor = MaterialTheme.colorScheme.surface
     ) { padding ->
         Box(modifier = Modifier
-//            .padding(padding)
             .padding(
                 top = padding.calculateTopPadding(),
                 start = 0.dp,

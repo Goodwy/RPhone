@@ -745,17 +745,56 @@
 
     <!-- Backup & Restore -->
     <string name="backup_and_restore">Säkerhetskopiering och återställning</string>
-    <string name="restoring_backup">Återställer säkerhetskopia…</string>
-    <string name="backup_created">Säkerhetskopia skapad</string>
-    <string name="backup_created_description">Säkerhetskopia sparad i: %s</string>
-    <string name="restore_complete">Återställning slutförd</string>
-    <string name="restore_complete_description">Dina data har återställts. Starta om appen.</string>
-    <string name="operation_failed">Åtgärden misslyckades</string>
+    <string name="backup_and_restore_supporting">Spara appinställningar, samtalsbakgrunder, kontakter och samtalsloggar till en fil</string>
+
+    <!-- Backup screen: tabs -->
     <string name="create_backup">Skapa säkerhetskopia</string>
-    <string name="create_backup_subtitle">Spara appkonfiguration och samtalsanteckningar</string>
-    <string name="failed_to_create_backup">Misslyckades med att skapa säkerhetskopia</string>
     <string name="restore_backup">Återställ säkerhetskopia</string>
-    <string name="restore_backup_subtitle">Återställ appkonfiguration och samtalsanteckningar</string>
+
+    <!-- Backup screen: create tab -->
+    <string name="select_data_to_backup">Välj vilka data som ska ingå i din säkerhetskopiefil</string>
+    <string name="backup_settings_supporting">Appinställningar, inklusive anpassade typsnitt (samtalskärmens utseende säkerhetskopieras separat)</string>
+    <string name="backup_contacts_supporting">Enhetens och lokala kontaktlista</string>
+    <string name="backup_private_contacts_supporting">Privata kontakter som endast lagras i denna app (inte i systemets adressbok)</string>
+    <string name="backup_call_backgrounds_title">Samtalskärmens utseende</string>
+    <string name="backup_call_backgrounds_supporting">Kontaktbakgrunder och stilar (typsnitt, färg, oskärpa), samtalskärmens standardutseende och alla bakgrundsbildfiler</string>
+    <string name="backup_call_logs_supporting">Enhetens samtalshistorik och loggar</string>
+    <string name="backup_call_notes_supporting">Kontaktanteckningar och allmänna fristående anteckningar</string>
+    <string name="backup_share_button">Dela säkerhetskopia</string>
+    <string name="backup_save_button">Spara säkerhetskopia</string>
+    <string name="backup_auto_backup_title">Automatisk säkerhetskopiering</string>
+    <string name="backup_auto_backup_enabled">Aktiverad · Automatiska säkerhetskopior schemalagda</string>
+    <string name="backup_auto_backup_disabled">Inaktiverad · Konfigurera automatiska säkerhetskopior</string>
+
+    <!-- Backup screen: restore tab -->
+    <string name="restore_select_file_hint">Välj en .rphone-säkerhetskopiefil från din lagring</string>
+    <string name="restore_no_file_selected">Ingen säkerhetskopiefil vald</string>
+    <string name="restore_tap_to_choose">Tryck nedan för att välja en säkerhetskopiefil att återställa</string>
+    <string name="restore_file_size">%1$d KB</string>
+    <string name="restore_browse_button">Bläddra efter säkerhetskopiefil</string>
+    <string name="restore_choose_another_button">Välj en annan fil</string>
+    <string name="restore_select_items_hint">Välj objekt att återställa från denna fil</string>
+    <string name="restore_not_in_backup">Finns inte i denna säkerhetskopia</string>
+    <string name="restore_selected_button">Återställ valda</string>
+    <string name="restore_backup_version">Säkerhetskopieversion: %1$d</string>
+    <string name="restore_backup_created_at">Skapad: %1$s</string>
+    <string name="restore_backup_newer_version_warning">Denna säkerhetskopia skapades av en nyare appversion (säkerhetskopia v%1$d, app v%2$d). Vissa data kanske inte återställs korrekt.</string>
+
+    <!-- Backup screen: dialogs -->
+    <string name="backup_creating_title">Skapar säkerhetskopia…</string>
+    <string name="backup_creating_message">Vänta medan ditt säkerhetskopiearkiv skapas.</string>
+    <string name="backup_restoring_title">Återställer säkerhetskopia…</string>
+    <string name="backup_restoring_message">Vänta medan dina valda data återställs.</string>
+    <string name="backup_success_title">Säkerhetskopia skapad</string>
+    <string name="backup_success_message">Din säkerhetskopiefil har skapats:\n%1$s</string>
+    <string name="restore_success_title">Återställning klar</string>
+    <string name="restore_success_message">Dina data och inställningar har återställts. Det rekommenderas att starta om appen för att tillämpa alla visuella ändringar.</string>
+    <string name="backup_error_title">Åtgärden misslyckades</string>
+    <string name="backup_error_save">Kunde inte spara säkerhetskopian</string>
+    <string name="backup_error_create">Kunde inte skapa säkerhetskopian</string>
+    <string name="backup_error_restore">Återställningen misslyckades</string>
+    <string name="backup_error_read_file">Kunde inte läsa säkerhetskopiefilen</string>
+    <string name="backup_error_unknown">Okänt fel vid återställning</string>
 
     <!-- Pocket Mode -->
     <string name="pocket_mode_active">Fickläge aktivt</string>

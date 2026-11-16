@@ -751,17 +751,56 @@
 
     <!-- Backup & Restore -->
     <string name="backup_and_restore">Kopia zapasowa i przywracanie</string>
-    <string name="restoring_backup">Przywracanie kopii zapasowej…</string>
-    <string name="backup_created">Kopia zapasowa utworzona</string>
-    <string name="backup_created_description">Kopia zapasowa zapisana w: %s</string>
-    <string name="restore_complete">Przywracanie zakończone</string>
-    <string name="restore_complete_description">Twoje dane zostały pomyślnie przywrócone. Uruchom ponownie aplikację.</string>
-    <string name="operation_failed">Operacja nie powiodła się</string>
+    <string name="backup_and_restore_supporting">Zapisuj ustawienia aplikacji, tła połączeń, kontakty i dzienniki połączeń do pliku</string>
+
+    <!-- Backup screen: tabs -->
     <string name="create_backup">Utwórz kopię zapasową</string>
-    <string name="create_backup_subtitle">Zapisz konfigurację aplikacji i notatki z połączeń</string>
-    <string name="failed_to_create_backup">Nie udało się utworzyć kopii zapasowej</string>
     <string name="restore_backup">Przywróć kopię zapasową</string>
-    <string name="restore_backup_subtitle">Przywróć konfigurację aplikacji i notatki z połączeń</string>
+
+    <!-- Backup screen: create tab -->
+    <string name="select_data_to_backup">Wybierz dane do uwzględnienia w pliku kopii zapasowej</string>
+    <string name="backup_settings_supporting">Preferencje aplikacji, w tym niestandardowe czcionki (wygląd ekranu połączenia jest kopiowany osobno)</string>
+    <string name="backup_contacts_supporting">Lista kontaktów urządzenia i lokalnych</string>
+    <string name="backup_private_contacts_supporting">Prywatne kontakty przechowywane tylko w tej aplikacji (nie w systemowej książce adresowej)</string>
+    <string name="backup_call_backgrounds_title">Wygląd ekranu połączenia</string>
+    <string name="backup_call_backgrounds_supporting">Tła i style kontaktów (czcionka, kolor, rozmycie), domyślny wygląd ekranu połączenia i wszystkie pliki obrazów tła</string>
+    <string name="backup_call_logs_supporting">Historia i dzienniki połączeń urządzenia</string>
+    <string name="backup_call_notes_supporting">Notatki kontaktów i ogólne samodzielne notatki</string>
+    <string name="backup_share_button">Udostępnij kopię</string>
+    <string name="backup_save_button">Zapisz kopię</string>
+    <string name="backup_auto_backup_title">Automatyczna kopia zapasowa</string>
+    <string name="backup_auto_backup_enabled">Włączona · Zaplanowano automatyczne kopie</string>
+    <string name="backup_auto_backup_disabled">Wyłączona · Skonfiguruj automatyczne kopie</string>
+
+    <!-- Backup screen: restore tab -->
+    <string name="restore_select_file_hint">Wybierz plik kopii zapasowej .rphone z pamięci</string>
+    <string name="restore_no_file_selected">Nie wybrano pliku kopii zapasowej</string>
+    <string name="restore_tap_to_choose">Dotknij poniżej, aby wybrać plik do przywrócenia</string>
+    <string name="restore_file_size">%1$d KB</string>
+    <string name="restore_browse_button">Przeglądaj plik kopii</string>
+    <string name="restore_choose_another_button">Wybierz inny plik</string>
+    <string name="restore_select_items_hint">Wybierz elementy do przywrócenia z tego pliku</string>
+    <string name="restore_not_in_backup">Brak w tej kopii</string>
+    <string name="restore_selected_button">Przywróć wybrane</string>
+    <string name="restore_backup_version">Wersja kopii: %1$d</string>
+    <string name="restore_backup_created_at">Utworzono: %1$s</string>
+    <string name="restore_backup_newer_version_warning">Ta kopia została utworzona przez nowszą wersję aplikacji (kopia v%1$d, aplikacja v%2$d). Niektóre dane mogą nie zostać przywrócone poprawnie.</string>
+
+    <!-- Backup screen: dialogs -->
+    <string name="backup_creating_title">Tworzenie kopii zapasowej…</string>
+    <string name="backup_creating_message">Poczekaj, trwa tworzenie archiwum kopii zapasowej.</string>
+    <string name="backup_restoring_title">Przywracanie kopii zapasowej…</string>
+    <string name="backup_restoring_message">Poczekaj, trwa przywracanie wybranych danych.</string>
+    <string name="backup_success_title">Kopia utworzona</string>
+    <string name="backup_success_message">Plik kopii zapasowej został pomyślnie utworzony:\n%1$s</string>
+    <string name="restore_success_title">Przywracanie zakończone</string>
+    <string name="restore_success_message">Dane i ustawienia zostały pomyślnie przywrócone. Zaleca się ponowne uruchomienie aplikacji, aby zastosować wszystkie zmiany wizualne.</string>
+    <string name="backup_error_title">Operacja nie powiodła się</string>
+    <string name="backup_error_save">Nie udało się zapisać kopii</string>
+    <string name="backup_error_create">Nie udało się utworzyć kopii</string>
+    <string name="backup_error_restore">Przywracanie nie powiodło się</string>
+    <string name="backup_error_read_file">Nie udało się odczytać pliku kopii</string>
+    <string name="backup_error_unknown">Nieznany błąd podczas przywracania</string>
 
     <!-- Pocket Mode -->
     <string name="pocket_mode_active">Tryb kieszeniowy aktywny</string>

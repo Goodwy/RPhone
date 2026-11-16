@@ -79,7 +79,7 @@ class CallLogRepository(
         }
     }
 
-    override suspend fun getCallLogs(): List<CallLogEntry> = withContext(Dispatchers.IO) {
+    override suspend fun getCallLogs(groupSameDayNumber: Boolean): List<CallLogEntry> = withContext(Dispatchers.IO) {
         val callLogs = mutableListOf<CallLogEntry>()
         val contactMap = getOrFetchContactMap()
 
@@ -115,7 +115,7 @@ class CallLogRepository(
                 "${CallLog.Calls.DATE} DESC"
             )
 
-            cursor?.use { parseCursor(it, callLogs, contactMap, limit) }
+            cursor?.use { parseCursor(it, callLogs, contactMap, limit, groupSameDayNumber) }
         } catch (e: Exception) {
             // If the above fails, try a safer subset
             try {
@@ -132,7 +132,7 @@ class CallLogRepository(
                     null,
                     "${CallLog.Calls.DATE} DESC"
                 )
-                cursor?.use { parseCursor(it, callLogs, contactMap, limit) }
+                cursor?.use { parseCursor(it, callLogs, contactMap, limit, groupSameDayNumber) }
             } catch (e2: Exception) {
                 e2.printStackTrace()
             }
@@ -166,7 +166,13 @@ class CallLogRepository(
         }
     }
 
-    private fun parseCursor(cursor: Cursor, callLogs: MutableList<CallLogEntry>, contactMap: Map<String, Contact>, limit: Int = 0) {
+    private fun parseCursor(
+        cursor: Cursor,
+        callLogs: MutableList<CallLogEntry>,
+        contactMap: Map<String, Contact>,
+        limit: Int = 0,
+        groupSameDayNumber: Boolean = true
+    ) {
         val idIdx = cursor.getColumnIndex(CallLog.Calls._ID)
         val numberIdx = cursor.getColumnIndex(CallLog.Calls.NUMBER)
         val cachedNameIdx = cursor.getColumnIndex(CallLog.Calls.CACHED_NAME)
@@ -268,23 +274,27 @@ class CallLogRepository(
                     phoneLabel = phoneLabel
                 )
 
-            val lastEntry = tempLogs.lastOrNull()
-            // Group only if the number and date are the same
-            val sameDay = if (lastEntry != null) {
-                val lastDay = lastEntryDay ?: dayKey(lastEntry.date).also { lastEntryDay = it }
-                lastDay == dayKey(date)
-            } else false
+            if (groupSameDayNumber) {
+                val lastEntry = tempLogs.lastOrNull()
+                // Group only if the number and date are the same
+                val sameDay = if (lastEntry != null) {
+                    val lastDay = lastEntryDay ?: dayKey(lastEntry.date).also { lastEntryDay = it }
+                    lastDay == dayKey(date)
+                } else false
 
-            if (lastEntry != null && lastEntry.number == number && sameDay) {
-                val currentSubLogs = if (lastEntry.subLogs.isEmpty()) listOf(lastEntry) else lastEntry.subLogs
-                tempLogs[tempLogs.size - 1] = lastEntry.copy(
-                    types = lastEntry.types + type,
-                    ids = lastEntry.ids + callId,
-                    subLogs = currentSubLogs + singleEntry
-                )
+                if (lastEntry != null && lastEntry.number == number && sameDay) {
+                    val currentSubLogs = if (lastEntry.subLogs.isEmpty()) listOf(lastEntry) else lastEntry.subLogs
+                    tempLogs[tempLogs.size - 1] = lastEntry.copy(
+                        types = lastEntry.types + type,
+                        ids = lastEntry.ids + callId,
+                        subLogs = currentSubLogs + singleEntry
+                    )
+                } else {
+                    tempLogs.add(singleEntry)
+                    lastEntryDay = dayKey(date)
+                }
             } else {
                 tempLogs.add(singleEntry)
-                lastEntryDay = dayKey(date)
             }
         }
         callLogs.addAll(tempLogs)

@@ -745,17 +745,56 @@
 
     <!-- Backup & Restore -->
     <string name="backup_and_restore">Yedekleme ve Geri Yükleme</string>
-    <string name="restoring_backup">Yedek geri yükleniyor…</string>
-    <string name="backup_created">Yedek oluşturuldu</string>
-    <string name="backup_created_description">Yedek şuraya kaydedildi: %s</string>
-    <string name="restore_complete">Geri yükleme tamamlandı</string>
-    <string name="restore_complete_description">Verileriniz başarıyla geri yüklendi. Lütfen uygulamayı yeniden başlatın.</string>
-    <string name="operation_failed">İşlem başarısız</string>
+    <string name="backup_and_restore_supporting">Uygulama ayarlarını, arama arka planlarını, kişileri ve arama kayıtlarını bir dosyaya kaydedin</string>
+
+    <!-- Backup screen: tabs -->
     <string name="create_backup">Yedek oluştur</string>
-    <string name="create_backup_subtitle">Uygulama yapılandırmasını ve arama notlarını kaydet</string>
-    <string name="failed_to_create_backup">Yedek oluşturulamadı</string>
     <string name="restore_backup">Yedeği geri yükle</string>
-    <string name="restore_backup_subtitle">Uygulama yapılandırmasını ve arama notlarını geri yükle</string>
+
+    <!-- Backup screen: create tab -->
+    <string name="select_data_to_backup">Yedek dosyanıza dahil edilecek verileri seçin</string>
+    <string name="backup_settings_supporting">Özel yazı tipleri dahil uygulama tercihleri (arama ekranı görünümü ayrı olarak yedeklenir)</string>
+    <string name="backup_contacts_supporting">Cihaz ve yerel kişi listesi</string>
+    <string name="backup_private_contacts_supporting">Yalnızca bu uygulamada saklanan özel kişiler (sistem adres defterinde değil)</string>
+    <string name="backup_call_backgrounds_title">Arama ekranı görünümü</string>
+    <string name="backup_call_backgrounds_supporting">Kişi arka planları ve stilleri (yazı tipi, renk, bulanıklık), varsayılan arama ekranı görünümü ve tüm arka plan görsel dosyaları</string>
+    <string name="backup_call_logs_supporting">Cihaz arama geçmişi ve kayıtları</string>
+    <string name="backup_call_notes_supporting">Kişi notları ve genel bağımsız notlar</string>
+    <string name="backup_share_button">Yedeği paylaş</string>
+    <string name="backup_save_button">Yedeği kaydet</string>
+    <string name="backup_auto_backup_title">Otomatik yedekleme</string>
+    <string name="backup_auto_backup_enabled">Etkin · Otomatik yedeklemeler planlandı</string>
+    <string name="backup_auto_backup_disabled">Devre dışı · Otomatik yedeklemeleri yapılandır</string>
+
+    <!-- Backup screen: restore tab -->
+    <string name="restore_select_file_hint">Depolama alanınızdan bir .rphone yedek dosyası seçin</string>
+    <string name="restore_no_file_selected">Yedek dosyası seçilmedi</string>
+    <string name="restore_tap_to_choose">Geri yüklenecek yedek dosyasını seçmek için aşağıya dokunun</string>
+    <string name="restore_file_size">%1$d KB</string>
+    <string name="restore_browse_button">Yedek dosyasına göz at</string>
+    <string name="restore_choose_another_button">Başka bir dosya seç</string>
+    <string name="restore_select_items_hint">Bu dosyadan geri yüklenecek öğeleri seçin</string>
+    <string name="restore_not_in_backup">Bu yedekte mevcut değil</string>
+    <string name="restore_selected_button">Seçilenleri geri yükle</string>
+    <string name="restore_backup_version">Yedek sürümü: %1$d</string>
+    <string name="restore_backup_created_at">Oluşturulma: %1$s</string>
+    <string name="restore_backup_newer_version_warning">Bu yedek daha yeni bir uygulama sürümü tarafından oluşturulmuş (yedek v%1$d, uygulama v%2$d). Bazı veriler doğru şekilde geri yüklenmeyebilir.</string>
+
+    <!-- Backup screen: dialogs -->
+    <string name="backup_creating_title">Yedek oluşturuluyor…</string>
+    <string name="backup_creating_message">Yedek arşiviniz oluşturulurken lütfen bekleyin.</string>
+    <string name="backup_restoring_title">Yedek geri yükleniyor…</string>
+    <string name="backup_restoring_message">Seçilen verileriniz geri yüklenirken lütfen bekleyin.</string>
+    <string name="backup_success_title">Yedek oluşturuldu</string>
+    <string name="backup_success_message">Yedek dosyanız başarıyla oluşturuldu:\n%1$s</string>
+    <string name="restore_success_title">Geri yükleme tamamlandı</string>
+    <string name="restore_success_message">Verileriniz ve ayarlarınız başarıyla geri yüklendi. Tüm görsel değişiklikleri uygulamak için uygulamayı yeniden başlatmanız önerilir.</string>
+    <string name="backup_error_title">İşlem başarısız</string>
+    <string name="backup_error_save">Yedek kaydedilemedi</string>
+    <string name="backup_error_create">Yedek oluşturulamadı</string>
+    <string name="backup_error_restore">Geri yükleme başarısız</string>
+    <string name="backup_error_read_file">Yedek dosyası okunamadı</string>
+    <string name="backup_error_unknown">Geri yükleme sırasında bilinmeyen hata</string>
 
     <!-- Pocket Mode -->
     <string name="pocket_mode_active">Cep modu etkin</string>

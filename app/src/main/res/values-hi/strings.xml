@@ -745,17 +745,56 @@
 
     <!-- Backup & Restore -->
     <string name="backup_and_restore">बैकअप और पुनर्स्थापना</string>
-    <string name="restoring_backup">बैकअप पुनर्स्थापित किया जा रहा है…</string>
-    <string name="backup_created">बैकअप बनाया गया</string>
-    <string name="backup_created_description">बैकअप यहाँ सहेजा गया: %s</string>
-    <string name="restore_complete">पुनर्स्थापना पूर्ण</string>
-    <string name="restore_complete_description">आपका डेटा सफलतापूर्वक पुनर्स्थापित किया गया। कृपया ऐप को पुनः आरंभ करें।</string>
-    <string name="operation_failed">कार्य विफल</string>
+    <string name="backup_and_restore_supporting">ऐप सेटिंग्स, कॉल बैकग्राउंड, संपर्क और कॉल लॉग को फ़ाइल में सहेजें</string>
+
+    <!-- Backup screen: tabs -->
     <string name="create_backup">बैकअप बनाएँ</string>
-    <string name="create_backup_subtitle">ऐप कॉन्फ़िगरेशन और कॉल नोट्स सहेजें</string>
-    <string name="failed_to_create_backup">बैकअप बनाने में विफल</string>
     <string name="restore_backup">बैकअप पुनर्स्थापित करें</string>
-    <string name="restore_backup_subtitle">ऐप कॉन्फ़िगरेशन और कॉल नोट्स पुनर्स्थापित करें</string>
+
+    <!-- Backup screen: create tab -->
+    <string name="select_data_to_backup">अपनी बैकअप फ़ाइल में शामिल करने के लिए डेटा चुनें</string>
+    <string name="backup_settings_supporting">ऐप प्राथमिकताएँ, जिनमें कस्टम फ़ॉन्ट शामिल हैं (कॉल स्क्रीन की उपस्थिति अलग से बैकअप की जाती है)</string>
+    <string name="backup_contacts_supporting">डिवाइस और स्थानीय संपर्क सूची</string>
+    <string name="backup_private_contacts_supporting">केवल इस ऐप में संग्रहीत निजी संपर्क (सिस्टम पता पुस्तिका में नहीं)</string>
+    <string name="backup_call_backgrounds_title">कॉल स्क्रीन की उपस्थिति</string>
+    <string name="backup_call_backgrounds_supporting">संपर्क बैकग्राउंड और स्टाइल (फ़ॉन्ट, रंग, ब्लर), डिफ़ॉल्ट कॉल स्क्रीन उपस्थिति, और सभी बैकग्राउंड छवि फ़ाइलें</string>
+    <string name="backup_call_logs_supporting">डिवाइस कॉल इतिहास और लॉग</string>
+    <string name="backup_call_notes_supporting">संपर्क नोट्स और सामान्य स्वतंत्र नोट्स</string>
+    <string name="backup_share_button">बैकअप साझा करें</string>
+    <string name="backup_save_button">बैकअप सहेजें</string>
+    <string name="backup_auto_backup_title">स्वचालित बैकअप</string>
+    <string name="backup_auto_backup_enabled">सक्षम · स्वचालित बैकअप निर्धारित</string>
+    <string name="backup_auto_backup_disabled">अक्षम · स्वचालित बैकअप कॉन्फ़िगर करें</string>
+
+    <!-- Backup screen: restore tab -->
+    <string name="restore_select_file_hint">अपने स्टोरेज से एक .rphone बैकअप फ़ाइल चुनें</string>
+    <string name="restore_no_file_selected">कोई बैकअप फ़ाइल चयनित नहीं</string>
+    <string name="restore_tap_to_choose">पुनर्स्थापित करने के लिए बैकअप फ़ाइल चुनने हेतु नीचे टैप करें</string>
+    <string name="restore_file_size">%1$d KB</string>
+    <string name="restore_browse_button">बैकअप फ़ाइल ब्राउज़ करें</string>
+    <string name="restore_choose_another_button">दूसरी फ़ाइल चुनें</string>
+    <string name="restore_select_items_hint">इस फ़ाइल से पुनर्स्थापित करने के लिए आइटम चुनें</string>
+    <string name="restore_not_in_backup">इस बैकअप में मौजूद नहीं</string>
+    <string name="restore_selected_button">चयनित पुनर्स्थापित करें</string>
+    <string name="restore_backup_version">बैकअप संस्करण: %1$d</string>
+    <string name="restore_backup_created_at">बनाया गया: %1$s</string>
+    <string name="restore_backup_newer_version_warning">यह बैकअप ऐप के नए संस्करण द्वारा बनाया गया था (बैकअप v%1$d, ऐप v%2$d)। कुछ डेटा सही ढंग से पुनर्स्थापित नहीं हो सकता।</string>
+
+    <!-- Backup screen: dialogs -->
+    <string name="backup_creating_title">बैकअप बनाया जा रहा है…</string>
+    <string name="backup_creating_message">कृपया प्रतीक्षा करें जब तक आपका बैकअप आर्काइव बन रहा है।</string>
+    <string name="backup_restoring_title">बैकअप पुनर्स्थापित किया जा रहा है…</string>
+    <string name="backup_restoring_message">कृपया प्रतीक्षा करें जब तक आपका चयनित डेटा पुनर्स्थापित हो रहा है।</string>
+    <string name="backup_success_title">बैकअप बनाया गया</string>
+    <string name="backup_success_message">आपकी बैकअप फ़ाइल सफलतापूर्वक बनाई गई:\n%1$s</string>
+    <string name="restore_success_title">पुनर्स्थापना पूर्ण</string>
+    <string name="restore_success_message">आपका डेटा और सेटिंग्स सफलतापूर्वक पुनर्स्थापित हो गए हैं। सभी दृश्य परिवर्तन लागू करने के लिए ऐप को पुनः आरंभ करने की अनुशंसा की जाती है।</string>
+    <string name="backup_error_title">कार्य विफल</string>
+    <string name="backup_error_save">बैकअप सहेजने में विफल</string>
+    <string name="backup_error_create">बैकअप बनाने में विफल</string>
+    <string name="backup_error_restore">पुनर्स्थापना विफल</string>
+    <string name="backup_error_read_file">बैकअप फ़ाइल पढ़ने में विफल</string>
+    <string name="backup_error_unknown">पुनर्स्थापना के दौरान अज्ञात त्रुटि</string>
 
     <!-- Pocket Mode -->
     <string name="pocket_mode_active">पॉकेट मोड सक्रिय</string>

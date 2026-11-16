@@ -2,7 +2,6 @@ package dev.goodwy.rphone.view.screen.settings
 
 import android.app.Activity
 import android.content.Context
-import android.net.Uri
 import android.os.Build
 import android.view.Surface
 import androidx.activity.compose.BackHandler
@@ -22,7 +21,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.CallMerge
 import androidx.compose.material.icons.automirrored.rounded.CallSplit
@@ -33,8 +31,6 @@ import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Backup
 import androidx.compose.material.icons.rounded.BubbleChart
 import androidx.compose.material.icons.rounded.Call
-import androidx.compose.material.icons.rounded.CheckCircle
-import androidx.compose.material.icons.rounded.Error
 import androidx.compose.material.icons.rounded.Fingerprint
 import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material.icons.rounded.Lock
@@ -64,10 +60,8 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.goodwy.rphone.R
-import dev.goodwy.rphone.controller.util.BackupManager
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.util.getAppVersion
 import dev.goodwy.rphone.view.components.NavigationIcon
@@ -108,7 +102,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinActivityViewModel
-import java.io.File
 import kotlin.time.Duration.Companion.milliseconds
 
 object SettingsHolder {
@@ -172,8 +165,6 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
     var enabledShake by remember { mutableStateOf(false) }
     var showSnackbar   by remember(settingsState) { mutableStateOf(false) }
 
-    var backupState       by remember { mutableStateOf<BackupDialogState>(BackupDialogState.Idle) }
-
     var visible by remember { mutableStateOf(false) }
     var isClosing by remember { mutableStateOf(false) }
 
@@ -198,26 +189,6 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
     )
     LaunchedEffect(Unit) { visible = true }
 
-    // Restore file picker
-    val restoreLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        if (uri != null) {
-            scope.launch {
-                backupState = BackupDialogState.Restoring
-                try {
-                    val tmpFile = File(context.cacheDir, "restore_tmp.rphone")
-                    context.contentResolver.openInputStream(uri)?.use { input ->
-                        tmpFile.outputStream().use { output -> input.copyTo(output) }
-                    }
-                    val ok = BackupManager.restoreBackup(context, tmpFile)
-                    tmpFile.delete()
-                    backupState = if (ok) BackupDialogState.RestoreSuccess else BackupDialogState.Error("Restore failed")
-                } catch (e: Exception) {
-                    backupState = BackupDialogState.Error(e.message ?: "Unknown error")
-                }
-            }
-        }
-    }
-
     // Default dialer
     val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as android.telecom.TelecomManager
     var isDefaultDialer by remember { mutableStateOf(telecomManager.defaultDialerPackage == context.packageName) }
@@ -235,69 +206,11 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
         onDispose { lifecycleOwner?.lifecycle?.removeObserver(observer) }
     }
 
-    // ── Backup Dialogs ────────────────────────────────────────────────────────
-    when (val state = backupState) {
-        is BackupDialogState.Restoring -> Dialog(onDismissRequest = {}) {
-            Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surfaceContainerHigh) {
-                Column(Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    CircularProgressIndicator()
-                    Text(stringResource(R.string.restoring_backup), style = MaterialTheme.typography.bodyLarge)
-                }
-            }
-        }
-        is BackupDialogState.BackupSuccess -> AlertDialog(onDismissRequest = { backupState = BackupDialogState.Idle }, icon = { Icon(Icons.Rounded.CheckCircle, null, tint = MaterialTheme.colorScheme.customColors.colorDarkGreen) }, title = { Text(stringResource(R.string.backup_created)) }, text = { Text(stringResource(R.string.backup_created_description, state.path)) }, confirmButton = { TextButton(onClick = { backupState = BackupDialogState.Idle }) { Text(stringResource(R.string.ok)) } })
-        is BackupDialogState.RestoreSuccess -> AlertDialog(onDismissRequest = { backupState = BackupDialogState.Idle }, icon = { Icon(Icons.Rounded.CheckCircle, null, tint = MaterialTheme.colorScheme.customColors.colorDarkGreen) }, title = { Text(stringResource(R.string.restore_complete)) }, text = { Text(stringResource(R.string.restore_complete_description)) }, confirmButton = { TextButton(onClick = { backupState = BackupDialogState.Idle }) { Text(stringResource(R.string.ok)) } })
-        is BackupDialogState.Error -> AlertDialog(onDismissRequest = { backupState = BackupDialogState.Idle }, icon = { Icon(Icons.Rounded.Error, null, tint = MaterialTheme.colorScheme.error) }, title = { Text(stringResource(R.string.operation_failed)) }, text = { Text(state.message) }, confirmButton = { TextButton(onClick = { backupState = BackupDialogState.Idle }) { Text(stringResource(R.string.ok)) } })
-        else -> {}
-    }
-
-    // Create backup file picker
-    val failedToCreateBackup = stringResource(R.string.failed_to_create_backup)
-    val createBackupLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("application/octet-stream")
-    ) { uri: Uri? ->
-        if (uri != null) {
-            scope.launch {
-                backupState = BackupDialogState.Restoring
-                try {
-                    // 1. Creating a backup in the app cache
-                    val backupFile = BackupManager.createBackup(context)
-
-                    if (backupFile != null) {
-                        // 2. Copy the created file to the user-selected location
-                        context.contentResolver.openOutputStream(uri)?.use { output ->
-                            backupFile.inputStream().use { input -> input.copyTo(output) }
-                        }
-                        backupState = BackupDialogState.BackupSuccess(uri.toString())
-                    } else {
-                        backupState = BackupDialogState.Error(failedToCreateBackup)
-                    }
-
-                    // 3. Delete a temporary file from the cache
-                    backupFile?.delete()
-                } catch (e: Exception) {
-                    backupState = BackupDialogState.Error(e.message ?: "Unknown error")
-                }
-            }
-        }
-    }
-    fun createBackup() {
-        val timestamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.getDefault()).format(java.util.Date())
-        val defaultFileName = "RPhone_Backup_$timestamp.rphone"
-        createBackupLauncher.launch(defaultFileName)
-    }
-
-    fun restoreBackup() {
-        restoreLauncher.launch("*/*")
-    }
-
-
     val viewModel: ContactsViewModel = koinActivityViewModel()
     val trashedContacts by viewModel.trashedContacts.collectAsState()
     LaunchedEffect(Unit) {
         viewModel.fetchTrashedContacts()
     }
-    var trashEnabled by remember(settingsState) { mutableStateOf(prefs.isContactsTrashEnabled()) }
 
     // ── Search in Settings ─────────────────────────────────────────────────
     var settingsSearchQuery by remember { mutableStateOf("") }
@@ -719,18 +632,24 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
         ) { navigator.navigate(DonateScreenDestination) },
         SettingsSearchEntry(
             headline = stringResource(R.string.create_backup),
-            supporting = stringResource(R.string.create_backup_subtitle),
+            supporting = stringResource(R.string.backup_and_restore_supporting),
             leadingIcon = Icons.Rounded.Backup,
             iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPink,
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPink,
-        ) { createBackup() },
+            options = listOf(
+                stringResource(R.string.backup_and_restore),
+            )
+        ) { navigator.navigate(BackupScreenDestination(initialTab = 0)) },
         SettingsSearchEntry(
             headline = stringResource(R.string.restore_backup),
-            supporting = stringResource(R.string.restore_backup_subtitle),
+            supporting = stringResource(R.string.backup_and_restore_supporting),
             leadingIcon = Icons.Rounded.Restore,
-            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
-            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
-        ) { restoreBackup() },
+            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPink,
+            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPink,
+            options = listOf(
+                stringResource(R.string.backup_and_restore),
+            )
+        ) { navigator.navigate(BackupScreenDestination(initialTab = 1)) },
         SettingsSearchEntry(
             headline = stringResource(R.string.about),
             supporting = "Version $appVersion ($storeName)",
@@ -1094,40 +1013,25 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                         }
                     }
 
-                    // ── Backup & Restore ─────────────────────────────────────────────
-                    item {
-                        RillAnimatedSection(delayMs = 200L) {
-                            Column {
-                                SettingsSectionLabel(stringResource(R.string.backup_and_restore))
-                                RillExpressiveCard {
-                                    RillListItem(
-                                        headline = stringResource(R.string.create_backup),
-                                        supporting = stringResource(R.string.create_backup_subtitle),
-                                        leadingIcon = Icons.Rounded.Backup,
-                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPink,
-                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPink,
-                                        trailingIcon = Icons.Default.ChevronRight,
-                                        onClick = { createBackup() }
-                                    )
-                                    RillListItem(
-                                        headline = stringResource(R.string.restore_backup),
-                                        supporting = stringResource(R.string.restore_backup_subtitle),
-                                        leadingIcon = Icons.Rounded.Restore,
-                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPink,
-                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPink,
-                                        trailingIcon = Icons.Default.ChevronRight,
-                                        onClick = { restoreBackup() })
-                                }
-                            }
-                        }
-                    }
-
                     // ── Other ────────────────────────────────────────────────────────
                     item {
                         RillAnimatedSection(delayMs = 240L) {
                             Column {
                                 SettingsSectionLabel(stringResource(R.string.other))
                                 RillExpressiveCard {
+                                    RillListItem(
+                                        headline = stringResource(R.string.backup_and_restore),
+                                        supporting = stringResource(R.string.backup_and_restore_supporting),
+                                        leadingIcon = Icons.Rounded.Backup,
+                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPink,
+                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPink,
+                                        trailingIcon = Icons.Default.ChevronRight,
+                                        onClick = {
+                                            navigator.navigate(
+                                                BackupScreenDestination(initialTab = 0)
+                                            )
+                                        }
+                                    )
                                     if (isPro) {
                                         RillListItem(
                                             headline = stringResource(R.string.support_development),
@@ -1216,23 +1120,16 @@ private data class SettingsSearchEntry(
     val onClick: () -> Unit
 )
 
-private sealed class BackupDialogState {
-    object Idle : BackupDialogState()
-    object Restoring : BackupDialogState()
-    data class BackupSuccess(val path: String) : BackupDialogState()
-    object RestoreSuccess : BackupDialogState()
-    data class Error(val message: String) : BackupDialogState()
-}
-
 @Composable
 fun SettingsSectionLabel(
     text: String,
-    modifier: Modifier = Modifier.padding(start = 20.dp, bottom = 8.dp)
+    modifier: Modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 8.dp)
 ) {
     Text(
         text,
-        style = MaterialTheme.typography.labelLarge,
         modifier = modifier,
+        style = MaterialTheme.typography.labelLarge,
+        lineHeight = MaterialTheme.typography.labelMedium.lineHeight,
         color = MaterialTheme.colorScheme.primary
     )
 }

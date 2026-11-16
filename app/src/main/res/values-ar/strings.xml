@@ -758,17 +758,56 @@
 
     <!-- Backup & Restore -->
     <string name="backup_and_restore">النسخ الاحتياطي والاستعادة</string>
-    <string name="restoring_backup">جاري استعادة النسخ الاحتياطي…</string>
-    <string name="backup_created">تم إنشاء النسخ الاحتياطي</string>
-    <string name="backup_created_description">تم حفظ النسخ الاحتياطي في: %s</string>
-    <string name="restore_complete">اكتملت الاستعادة</string>
-    <string name="restore_complete_description">تم استعادة بياناتك بنجاح. يرجى إعادة تشغيل التطبيق.</string>
-    <string name="operation_failed">فشلت العملية</string>
+    <string name="backup_and_restore_supporting">احفظ إعدادات التطبيق وخلفيات المكالمات وجهات الاتصال وسجلات المكالمات في ملف</string>
+
+    <!-- Backup screen: tabs -->
     <string name="create_backup">إنشاء نسخ احتياطي</string>
-    <string name="create_backup_subtitle">حفظ تكوين التطبيق وملاحظات المكالمات</string>
-    <string name="failed_to_create_backup">فشل إنشاء النسخ الاحتياطي</string>
-    <string name="restore_backup">استعادة النسخ الاحتياطي</string>
-    <string name="restore_backup_subtitle">استعادة تكوين التطبيق وملاحظات المكالمات</string>
+    <string name="restore_backup">استعادة نسخ احتياطي</string>
+
+    <!-- Backup screen: create tab -->
+    <string name="select_data_to_backup">حدد البيانات التي تريد تضمينها في ملف النسخ الاحتياطي</string>
+    <string name="backup_settings_supporting">تفضيلات التطبيق، بما في ذلك الخطوط المخصصة (يتم نسخ مظهر شاشة المكالمة بشكل منفصل)</string>
+    <string name="backup_contacts_supporting">قائمة جهات اتصال الجهاز والمحلية</string>
+    <string name="backup_private_contacts_supporting">جهات اتصال خاصة مخزنة فقط في هذا التطبيق (وليس في دفتر عناوين النظام)</string>
+    <string name="backup_call_backgrounds_title">مظهر شاشة المكالمة</string>
+    <string name="backup_call_backgrounds_supporting">خلفيات وأنماط جهات الاتصال (الخط، اللون، التمويه)، والمظهر الافتراضي لشاشة المكالمة، وجميع ملفات صور الخلفية</string>
+    <string name="backup_call_logs_supporting">سجل مكالمات الجهاز والسجلات</string>
+    <string name="backup_call_notes_supporting">ملاحظات جهات الاتصال والملاحظات المستقلة العامة</string>
+    <string name="backup_share_button">مشاركة النسخة</string>
+    <string name="backup_save_button">حفظ النسخة</string>
+    <string name="backup_auto_backup_title">نسخ احتياطي تلقائي</string>
+    <string name="backup_auto_backup_enabled">ممكّن · النسخ الاحتياطية التلقائية مجدولة</string>
+    <string name="backup_auto_backup_disabled">معطّل · تكوين النسخ الاحتياطية التلقائية</string>
+
+    <!-- Backup screen: restore tab -->
+    <string name="restore_select_file_hint">اختر ملف نسخ احتياطي .rphone من مساحة التخزين</string>
+    <string name="restore_no_file_selected">لم يتم اختيار ملف نسخ احتياطي</string>
+    <string name="restore_tap_to_choose">اضغط أدناه لاختيار ملف نسخ احتياطي لاستعادته</string>
+    <string name="restore_file_size">%1$d كيلوبايت</string>
+    <string name="restore_browse_button">تصفح ملف النسخة</string>
+    <string name="restore_choose_another_button">اختيار ملف آخر</string>
+    <string name="restore_select_items_hint">حدد العناصر المراد استعادتها من هذا الملف</string>
+    <string name="restore_not_in_backup">غير موجود في هذه النسخة</string>
+    <string name="restore_selected_button">استعادة المحدد</string>
+    <string name="restore_backup_version">إصدار النسخة: %1$d</string>
+    <string name="restore_backup_created_at">أُنشئت: %1$s</string>
+    <string name="restore_backup_newer_version_warning">تم إنشاء هذا النسخ الاحتياطي بواسطة إصدار أحدث من التطبيق (النسخة v%1$d، التطبيق v%2$d). قد لا تتم استعادة بعض البيانات بشكل صحيح.</string>
+
+    <!-- Backup screen: dialogs -->
+    <string name="backup_creating_title">جارٍ إنشاء النسخة الاحتياطية…</string>
+    <string name="backup_creating_message">يرجى الانتظار بينما يتم إنشاء أرشيف النسخة الاحتياطية.</string>
+    <string name="backup_restoring_title">جارٍ استعادة النسخة الاحتياطية…</string>
+    <string name="backup_restoring_message">يرجى الانتظار بينما تتم استعادة بياناتك المحددة.</string>
+    <string name="backup_success_title">تم إنشاء النسخة</string>
+    <string name="backup_success_message">تم إنشاء ملف النسخة الاحتياطية بنجاح:\n%1$s</string>
+    <string name="restore_success_title">اكتملت الاستعادة</string>
+    <string name="restore_success_message">تمت استعادة بياناتك وإعداداتك بنجاح. يُوصى بإعادة تشغيل التطبيق لتطبيق جميع التغييرات المرئية.</string>
+    <string name="backup_error_title">فشلت العملية</string>
+    <string name="backup_error_save">فشل حفظ النسخة</string>
+    <string name="backup_error_create">فشل إنشاء النسخة</string>
+    <string name="backup_error_restore">فشلت الاستعادة</string>
+    <string name="backup_error_read_file">فشل قراءة ملف النسخة</string>
+    <string name="backup_error_unknown">خطأ غير معروف أثناء الاستعادة</string>
 
     <!-- Pocket Mode -->
     <string name="pocket_mode_active">وضع الجيب نشط</string>

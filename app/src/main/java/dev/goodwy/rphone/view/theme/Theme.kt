@@ -316,17 +316,18 @@ fun Rill4Theme(
     }
 
     val customFontFamily: FontFamily = remember(customFontPath, settingsState) {
-        if (customFontPath != null) {
-            val file = File(customFontPath)
-            if (file.exists()) {
-                try { FontFamily(Typeface.createFromFile(file)) }
-                catch (e: Exception) { FontFamily.Default }
-            } else FontFamily.Default
-        } else FontFamily.Default
+        AppFontHelper.resolveFontFamily(customFontPath)
     }
 
-    val typography = remember(customFontFamily, fontSizeScale) {
-        buildTypography(customFontFamily, fontSizeScale)
+    val typography = remember(customFontFamily, fontSizeScale/*, fontHeightScale, fontWidthScale, weightOffset, skewX*/) {
+        buildTypography(
+            fontFamily = customFontFamily,
+            scale = fontSizeScale,
+//            heightScale = fontHeightScale,
+//            widthScale = fontWidthScale,
+//            weightOffset = weightOffset,
+//            skewX = skewX
+        )
     }
 
     val customColors = rememberCustomColors(

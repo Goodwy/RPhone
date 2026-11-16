@@ -253,7 +253,7 @@ fun CallerUIScreen(navigator: DestinationsNavigator) {
                                         modifier = Modifier
                                             .padding(horizontal = 2.dp)
                                             .fillMaxWidth()
-                                            .clip(RoundedCornerShape(20.dp))
+                                            .clip(MaterialTheme.shapes.largeIncreased)
                                             .height(220.dp)
                                             .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                                         contentAlignment = Alignment.Center
@@ -266,7 +266,8 @@ fun CallerUIScreen(navigator: DestinationsNavigator) {
                                                 backgroundUri = defaultCallBg,
                                                 style = CallScreenPreviewStyle.Default,
                                                 callingCardStyle = defaultCardStyle,
-                                                modifier = Modifier.fillMaxSize()
+                                                modifier = Modifier.fillMaxSize(),
+                                                defaultPreview = true
                                             )
                                         } else {
                                             Icon(

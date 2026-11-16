@@ -745,17 +745,56 @@
 
     <!-- Backup & Restore -->
     <string name="backup_and_restore">پشتیبان‌گیری و بازیابی</string>
-    <string name="restoring_backup">در حال بازیابی پشتیبان…</string>
-    <string name="backup_created">پشتیبان ایجاد شد</string>
-    <string name="backup_created_description">پشتیبان در این مسیر ذخیره شد: %s</string>
-    <string name="restore_complete">بازیابی کامل شد</string>
-    <string name="restore_complete_description">داده‌های شما با موفقیت بازیابی شدند. لطفاً برنامه را مجدداً راه‌اندازی کنید.</string>
-    <string name="operation_failed">عملیات ناموفق</string>
+    <string name="backup_and_restore_supporting">تنظیمات برنامه، پس‌زمینه‌های تماس، مخاطبان و لاگ‌های تماس را در یک فایل ذخیره کنید</string>
+
+    <!-- Backup screen: tabs -->
     <string name="create_backup">ایجاد پشتیبان</string>
-    <string name="create_backup_subtitle">ذخیره تنظیمات برنامه و یادداشت‌های تماس</string>
-    <string name="failed_to_create_backup">ایجاد پشتیبان ناموفق</string>
     <string name="restore_backup">بازیابی پشتیبان</string>
-    <string name="restore_backup_subtitle">بازیابی تنظیمات برنامه و یادداشت‌های تماس</string>
+
+    <!-- Backup screen: create tab -->
+    <string name="select_data_to_backup">داده‌هایی را که می‌خواهید در فایل پشتیبان قرار گیرند انتخاب کنید</string>
+    <string name="backup_settings_supporting">تنظیمات برنامه، شامل قلم‌های سفارشی (ظاهر صفحه تماس به‌طور جداگانه پشتیبان‌گیری می‌شود)</string>
+    <string name="backup_contacts_supporting">فهرست مخاطبان دستگاه و مخاطبان محلی</string>
+    <string name="backup_private_contacts_supporting">مخاطبان خصوصی که فقط در این برنامه ذخیره شده‌اند (نه در دفترچه آدرس سیستم)</string>
+    <string name="backup_call_backgrounds_title">ظاهر صفحه تماس</string>
+    <string name="backup_call_backgrounds_supporting">پس‌زمینه‌ها و سبک‌های مخاطبان (قلم، رنگ، محو)، ظاهر پیش‌فرض صفحه تماس و همه فایل‌های تصویر پس‌زمینه</string>
+    <string name="backup_call_logs_supporting">تاریخچه و لاگ‌های تماس دستگاه</string>
+    <string name="backup_call_notes_supporting">یادداشت‌های مخاطبان و یادداشت‌های مستقل عمومی</string>
+    <string name="backup_share_button">اشتراک‌گذاری پشتیبان</string>
+    <string name="backup_save_button">ذخیره پشتیبان</string>
+    <string name="backup_auto_backup_title">پشتیبان‌گیری خودکار</string>
+    <string name="backup_auto_backup_enabled">فعال · پشتیبان‌گیری‌های خودکار زمان‌بندی شده</string>
+    <string name="backup_auto_backup_disabled">غیرفعال · پیکربندی پشتیبان‌گیری خودکار</string>
+
+    <!-- Backup screen: restore tab -->
+    <string name="restore_select_file_hint">یک فایل پشتیبان .rphone از حافظه خود انتخاب کنید</string>
+    <string name="restore_no_file_selected">هیچ فایل پشتیبانی انتخاب نشده</string>
+    <string name="restore_tap_to_choose">برای انتخاب فایل پشتیبان جهت بازیابی، به پایین ضربه بزنید</string>
+    <string name="restore_file_size">%1$d کیلوبایت</string>
+    <string name="restore_browse_button">مرور فایل پشتیبان</string>
+    <string name="restore_choose_another_button">انتخاب فایل دیگر</string>
+    <string name="restore_select_items_hint">موارد قابل بازیابی از این فایل را انتخاب کنید</string>
+    <string name="restore_not_in_backup">در این پشتیبان موجود نیست</string>
+    <string name="restore_selected_button">بازیابی موارد انتخاب‌شده</string>
+    <string name="restore_backup_version">نسخه پشتیبان: %1$d</string>
+    <string name="restore_backup_created_at">ایجاد شده: %1$s</string>
+    <string name="restore_backup_newer_version_warning">این پشتیبان توسط نسخه جدیدتری از برنامه ایجاد شده است (پشتیبان v%1$d، برنامه v%2$d). برخی داده‌ها ممکن است به‌درستی بازیابی نشوند.</string>
+
+    <!-- Backup screen: dialogs -->
+    <string name="backup_creating_title">در حال ایجاد پشتیبان…</string>
+    <string name="backup_creating_message">لطفاً تا ایجاد آرشیو پشتیبان صبر کنید.</string>
+    <string name="backup_restoring_title">در حال بازیابی پشتیبان…</string>
+    <string name="backup_restoring_message">لطفاً تا بازیابی داده‌های انتخاب‌شده صبر کنید.</string>
+    <string name="backup_success_title">پشتیبان ایجاد شد</string>
+    <string name="backup_success_message">فایل پشتیبان شما با موفقیت ایجاد شد:\n%1$s</string>
+    <string name="restore_success_title">بازیابی کامل شد</string>
+    <string name="restore_success_message">داده‌ها و تنظیمات شما با موفقیت بازیابی شدند. توصیه می‌شود برنامه را مجدداً راه‌اندازی کنید تا همه تغییرات ظاهری اعمال شوند.</string>
+    <string name="backup_error_title">عملیات ناموفق</string>
+    <string name="backup_error_save">ذخیره پشتیبان ناموفق بود</string>
+    <string name="backup_error_create">ایجاد پشتیبان ناموفق بود</string>
+    <string name="backup_error_restore">بازیابی ناموفق بود</string>
+    <string name="backup_error_read_file">خواندن فایل پشتیبان ناموفق بود</string>
+    <string name="backup_error_unknown">خطای ناشناخته در حین بازیابی</string>
 
     <!-- Pocket Mode -->
     <string name="pocket_mode_active">حالت جیب فعال است</string>

@@ -181,7 +181,7 @@ fun AZListContent(
     Box(modifier = modifier.fillMaxSize().padding(top = 8.dp)) {
         val configuration = LocalConfiguration.current
         val screenHeightDp = configuration.screenHeightDp.dp
-        val bottomPadding = screenHeightDp - 340.dp
+        val bottomPadding = if (screenHeightDp > 340.dp) screenHeightDp - 340.dp else (screenHeightDp * 0.3f)
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),

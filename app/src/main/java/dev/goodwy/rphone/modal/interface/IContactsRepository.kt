@@ -29,6 +29,7 @@ interface IContactsRepository {
     suspend fun getRawContactData(rawContactId: String): Contact?
     suspend fun updateRawContact(rawContactId: String, contact: Contact)
     suspend fun dumpContact(contactId: String): String
+    suspend fun getPrivateContacts(): List<Contact>
 
     // Private Contacts
     suspend fun makeContactPrivate(contactId: String)

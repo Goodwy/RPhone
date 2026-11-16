@@ -749,17 +749,56 @@
 
     <!-- Backup & Restore -->
     <string name="backup_and_restore">גיבוי ושחזור</string>
-    <string name="restoring_backup">משחזר גיבוי…</string>
-    <string name="backup_created">גיבוי נוצר</string>
-    <string name="backup_created_description">הגיבוי נשמר ב: %s</string>
-    <string name="restore_complete">השחזור הושלם</string>
-    <string name="restore_complete_description">הנתונים שלך שוחזרו בהצלחה. אנא הפעל מחדש את האפליקציה.</string>
-    <string name="operation_failed">הפעולה נכשלה</string>
+    <string name="backup_and_restore_supporting">שמור הגדרות אפליקציה, רקעי שיחות, אנשי קשר ויומני שיחות לקובץ</string>
+
+    <!-- Backup screen: tabs -->
     <string name="create_backup">צור גיבוי</string>
-    <string name="create_backup_subtitle">שמור תצורת אפליקציה והערות שיחה</string>
-    <string name="failed_to_create_backup">נכשל ביצירת גיבוי</string>
     <string name="restore_backup">שחזר גיבוי</string>
-    <string name="restore_backup_subtitle">שחזר תצורת אפליקציה והערות שיחה</string>
+
+    <!-- Backup screen: create tab -->
+    <string name="select_data_to_backup">בחר אילו נתונים לכלול בקובץ הגיבוי שלך</string>
+    <string name="backup_settings_supporting">העדפות אפליקציה, כולל גופנים מותאמים אישית (מראה מסך השיחה מגובה בנפרד)</string>
+    <string name="backup_contacts_supporting">רשימת אנשי קשר של המכשיר ומקומיים</string>
+    <string name="backup_private_contacts_supporting">אנשי קשר פרטיים המאוחסנים רק באפליקציה זו (לא בספר הכתובות של המערכת)</string>
+    <string name="backup_call_backgrounds_title">מראה מסך השיחה</string>
+    <string name="backup_call_backgrounds_supporting">רקעים וסגנונות של אנשי קשר (גופן, צבע, טשטוש), מראה ברירת המחדל של מסך השיחה וכל קובצי תמונות הרקע</string>
+    <string name="backup_call_logs_supporting">היסטוריית שיחות ויומנים של המכשיר</string>
+    <string name="backup_call_notes_supporting">הערות אנשי קשר והערות עצמאיות כלליות</string>
+    <string name="backup_share_button">שתף גיבוי</string>
+    <string name="backup_save_button">שמור גיבוי</string>
+    <string name="backup_auto_backup_title">גיבוי אוטומטי</string>
+    <string name="backup_auto_backup_enabled">מופעל · גיבויים אוטומטיים מתוזמנים</string>
+    <string name="backup_auto_backup_disabled">מושבת · הגדר גיבויים אוטומטיים</string>
+
+    <!-- Backup screen: restore tab -->
+    <string name="restore_select_file_hint">בחר קובץ גיבוי .rphone מהאחסון שלך</string>
+    <string name="restore_no_file_selected">לא נבחר קובץ גיבוי</string>
+    <string name="restore_tap_to_choose">הקש למטה כדי לבחור קובץ גיבוי לשחזור</string>
+    <string name="restore_file_size">%1$d KB</string>
+    <string name="restore_browse_button">עיין בקובץ גיבוי</string>
+    <string name="restore_choose_another_button">בחר קובץ אחר</string>
+    <string name="restore_select_items_hint">בחר פריטים לשחזור מקובץ זה</string>
+    <string name="restore_not_in_backup">לא קיים בגיבוי זה</string>
+    <string name="restore_selected_button">שחזר נבחרים</string>
+    <string name="restore_backup_version">גרסת גיבוי: %1$d</string>
+    <string name="restore_backup_created_at">נוצר: %1$s</string>
+    <string name="restore_backup_newer_version_warning">גיבוי זה נוצר על ידי גרסת אפליקציה חדשה יותר (גיבוי v%1$d, אפליקציה v%2$d). ייתכן שחלק מהנתונים לא ישוחזרו כראוי.</string>
+
+    <!-- Backup screen: dialogs -->
+    <string name="backup_creating_title">יוצר גיבוי…</string>
+    <string name="backup_creating_message">אנא המתן בזמן שארכיון הגיבוי שלך נוצר.</string>
+    <string name="backup_restoring_title">משחזר גיבוי…</string>
+    <string name="backup_restoring_message">אנא המתן בזמן שהנתונים שנבחרו משוחזרים.</string>
+    <string name="backup_success_title">גיבוי נוצר</string>
+    <string name="backup_success_message">קובץ הגיבוי שלך נוצר בהצלחה:\n%1$s</string>
+    <string name="restore_success_title">השחזור הושלם</string>
+    <string name="restore_success_message">הנתונים וההגדרות שלך שוחזרו בהצלחה. מומלץ להפעיל מחדש את האפליקציה כדי להחיל את כל השינויים החזותיים.</string>
+    <string name="backup_error_title">הפעולה נכשלה</string>
+    <string name="backup_error_save">שמירת הגיבוי נכשלה</string>
+    <string name="backup_error_create">יצירת הגיבוי נכשלה</string>
+    <string name="backup_error_restore">השחזור נכשל</string>
+    <string name="backup_error_read_file">קריאת קובץ הגיבוי נכשלה</string>
+    <string name="backup_error_unknown">שגיאה לא ידועה במהלך השחזור</string>
 
     <!-- Pocket Mode -->
     <string name="pocket_mode_active">מצב כיס פעיל</string>

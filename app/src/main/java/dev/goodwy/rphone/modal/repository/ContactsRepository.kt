@@ -3013,4 +3013,8 @@ class ContactsRepository(
     override suspend fun dumpContact(contactId: String): String = withContext(Dispatchers.IO) {
         ContactDumpUtils.dumpFullContact(contentResolver, contactId)
     }
+
+    override suspend fun getPrivateContacts(): List<Contact> = withContext(Dispatchers.IO) {
+        privateContactDao.getAll().map { it.toContact() }
+    }
 }
