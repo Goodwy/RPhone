@@ -1,7 +1,9 @@
 package dev.goodwy.rphone.controller.util
 
+import android.provider.ContactsContract
 import android.telephony.PhoneNumberUtils
 import com.google.i18n.phonenumbers.PhoneNumberUtil
+import dev.goodwy.rphone.modal.data.ContactPhoneDetail
 import java.util.Locale
 
 private val phoneUtil = PhoneNumberUtil.getInstance()
@@ -46,6 +48,31 @@ fun deduplicateNumbers(numbers: List<String>): List<String> {
         }
     }
     return unique
+}
+
+fun deduplicatePhoneDetails(details: List<ContactPhoneDetail>): List<ContactPhoneDetail> {
+    val result = mutableListOf<ContactPhoneDetail>()
+    details.forEach { detail ->
+        val existingIndex = result.indexOfFirst { areNumbersEqual(it.number, detail.number) }
+        if (existingIndex == -1) {
+            result.add(detail)
+        } else {
+            val existing = result[existingIndex]
+            val betterNumber = when {
+                detail.number.contains("+") && !existing.number.contains("+") -> detail.number
+                detail.number.length > existing.number.length &&
+                        (detail.number.contains("+") == existing.number.contains("+")) -> detail.number
+                else -> existing.number
+            }
+            result[existingIndex] = existing.copy(
+                number = betterNumber,
+                isPrimary = existing.isPrimary || detail.isPrimary,
+                type = if (existing.type == ContactsContract.CommonDataKinds.Phone.TYPE_OTHER) detail.type else existing.type,
+                label = existing.label ?: detail.label
+            )
+        }
+    }
+    return result
 }
 
 /**

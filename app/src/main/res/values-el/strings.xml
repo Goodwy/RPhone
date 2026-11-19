@@ -49,6 +49,7 @@
     <string name="details">Λεπτομέρειες</string>
     <string name="saved">Αποθηκεύτηκε</string>
     <string name="save_failed">Αποτυχία αποθήκευσης</string>
+    <string name="warning">Προειδοποίηση</string>
 
     <!-- Search -->
     <string name="search">Αναζήτηση</string>
@@ -262,6 +263,9 @@
     <string name="auto_speaker_subtitle">Αυτόματη εναλλαγή σε μεγάφωνο όταν το τηλέφωνο είναι μακριά από το αυτί και πίσω στο ακουστικό όταν είναι κοντά</string>
     <string name="fullscreen_calls">Κλήσεις πλήρους οθόνης</string>
     <string name="fullscreen_calls_subtitle">Οι εισερχόμενες κλήσεις εμφανίζονται πάντα σε λειτουργία πλήρους οθόνης</string>
+    <string name="fullscreen_calls_off_subtitle">Οι εισερχόμενες κλήσεις εμφανίζονται ως ειδοποίηση όταν είναι δυνατόν</string>
+    <string name="open_call_screen_from_notification">Άνοιγμα οθόνης κλήσης μετά την απάντηση</string>
+    <string name="open_call_screen_from_notification_subtitle">Εμφάνιση της οθόνης κλήσης όταν απαντάτε από ειδοποίηση. Απενεργοποιήστε για να παραμείνετε στην τρέχουσα εφαρμογή</string>
 
     <!-- Speed dial -->
     <string name="settings_speed_dial_title">Ταχεία κλήση</string>
@@ -766,13 +770,51 @@
     <string name="backup_auto_backup_enabled">Ενεργό · Προγραμματισμένα αυτόματα αντίγραφα</string>
     <string name="backup_auto_backup_disabled">Ανενεργό · Ρύθμιση αυτόματων αντιγράφων</string>
 
+    <!-- Auto backup screen: main -->
+    <string name="auto_backup_settings_title">Ρυθμίσεις αυτόματου αντιγράφου ασφαλείας</string>
+    <string name="auto_backup_enabled_supporting">Το αυτόματο αντίγραφο ασφαλείας είναι ενεργό</string>
+    <string name="auto_backup_disabled_supporting">Ενεργοποιήστε για αυτόματη δημιουργία αντιγράφων των δεδομένων σας</string>
+
+    <!-- Auto backup screen: folder -->
+    <string name="auto_backup_folder_title">Φάκελος αντιγράφων</string>
+    <string name="auto_backup_folder_none">Δεν έχει επιλεγεί φάκελος</string>
+    <string name="auto_backup_folder_none_hint">Δεν έχει επιλεγεί φάκελος • Πατήστε για επιλογή φακέλου αντιγράφων</string>
+
+    <!-- Auto backup screen: what to backup -->
+    <string name="auto_backup_what_title">Τι θα δημιουργείται αντίγραφο</string>
+    <string name="auto_backup_what_summary_none">Δεν έχει επιλεγεί τίποτα</string>
+
+    <!-- Auto backup screen: interval -->
+    <string name="auto_backup_every_title">Αντίγραφο κάθε:</string>
+    <string name="auto_backup_interval_value_label">Τιμή</string>
+    <plurals name="auto_backup_unit_minutes">
+        <item quantity="one">Λεπτό</item>
+        <item quantity="other">Λεπτά</item>
+    </plurals>
+    <plurals name="auto_backup_unit_hours">
+        <item quantity="one">Ώρα</item>
+        <item quantity="other">Ώρες</item>
+    </plurals>
+    <plurals name="auto_backup_unit_days">
+        <item quantity="one">Ημέρα</item>
+        <item quantity="other">Ημέρες</item>
+    </plurals>
+
+    <!-- Auto backup screen: auto delete section -->
+    <string name="auto_backup_delete_section">Αυτόματη διαγραφή αντιγράφων</string>
+    <string name="auto_backup_delete_by_time_title">Αυτόματη διαγραφή αντιγράφων κατά ηλικία</string>
+    <string name="auto_backup_delete_by_time_supporting">Διαγραφή αντιγράφων παλαιότερων από:</string>
+    <string name="auto_backup_delete_amount_label">Ποσότητα</string>
+    <string name="auto_backup_delete_by_count_title">Αυτόματη διαγραφή αντιγράφων κατά πλήθος</string>
+    <string name="auto_backup_delete_by_count_supporting">Μέγιστος αριθμός αντιγράφων προς διατήρηση:</string>
+    <string name="auto_backup_delete_count_label">Πλήθος</string>
+
     <!-- Backup screen: restore tab -->
     <string name="restore_select_file_hint">Επιλέξτε ένα αρχείο αντιγράφου ασφαλείας .rphone από τον χώρο αποθήκευσής σας</string>
     <string name="restore_no_file_selected">Δεν έχει επιλεγεί αρχείο αντιγράφου</string>
-    <string name="restore_tap_to_choose">Πατήστε παρακάτω για να επιλέξετε αρχείο προς επαναφορά</string>
+    <string name="restore_tap_to_choose">Πατήστε για να επιλέξετε αρχείο αντιγράφου ασφαλείας προς επαναφορά</string>
+    <string name="restore_tap_to_choose_another">Πατήστε για να επιλέξετε άλλο αρχείο αντιγράφου ασφαλείας προς επαναφορά</string>
     <string name="restore_file_size">%1$d KB</string>
-    <string name="restore_browse_button">Αναζήτηση αρχείου αντιγράφου</string>
-    <string name="restore_choose_another_button">Επιλογή άλλου αρχείου</string>
     <string name="restore_select_items_hint">Επιλέξτε στοιχεία προς επαναφορά από αυτό το αρχείο</string>
     <string name="restore_not_in_backup">Δεν υπάρχει σε αυτό το αντίγραφο</string>
     <string name="restore_selected_button">Επαναφορά επιλεγμένων</string>

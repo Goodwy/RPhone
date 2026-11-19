@@ -49,6 +49,7 @@
     <string name="details">विवरण</string>
     <string name="saved">सहेजा गया</string>
     <string name="save_failed">सहेजने में विफल</string>
+    <string name="warning">चेतावनी</string>
 
     <!-- Search -->
     <string name="search">खोजें</string>
@@ -262,6 +263,9 @@
     <string name="auto_speaker_subtitle">जब फोन कान से दूर हो तो स्वचालित रूप से लाउडस्पीकर पर स्विच करें, और पास होने पर ईयरपीस पर वापस जाएँ</string>
     <string name="fullscreen_calls">फुल-स्क्रीन कॉल</string>
     <string name="fullscreen_calls_subtitle">आने वाली कॉल हमेशा फुल-स्क्रीन मोड में दिखाई जाती हैं</string>
+    <string name="fullscreen_calls_off_subtitle">इनकमिंग कॉल जब संभव हो सूचना के रूप में दिखाई जाती हैं</string>
+    <string name="open_call_screen_from_notification">उत्तर देने के बाद कॉल स्क्रीन खोलें</string>
+    <string name="open_call_screen_from_notification_subtitle">सूचना से उत्तर देने पर कॉल स्क्रीन दिखाएँ। वर्तमान ऐप में बने रहने के लिए बंद करें</string>
 
     <!-- Speed dial -->
     <string name="settings_speed_dial_title">स्पीड डायल</string>
@@ -766,13 +770,51 @@
     <string name="backup_auto_backup_enabled">सक्षम · स्वचालित बैकअप निर्धारित</string>
     <string name="backup_auto_backup_disabled">अक्षम · स्वचालित बैकअप कॉन्फ़िगर करें</string>
 
+    <!-- Auto backup screen: main -->
+    <string name="auto_backup_settings_title">स्वचालित बैकअप सेटिंग्स</string>
+    <string name="auto_backup_enabled_supporting">स्वचालित बैकअप चालू है</string>
+    <string name="auto_backup_disabled_supporting">अपने डेटा के स्वचालित बैकअप बनाने के लिए सक्षम करें</string>
+
+    <!-- Auto backup screen: folder -->
+    <string name="auto_backup_folder_title">बैकअप फ़ोल्डर</string>
+    <string name="auto_backup_folder_none">कोई फ़ोल्डर चयनित नहीं</string>
+    <string name="auto_backup_folder_none_hint">कोई फ़ोल्डर चयनित नहीं • बैकअप फ़ोल्डर चुनने के लिए टैप करें</string>
+
+    <!-- Auto backup screen: what to backup -->
+    <string name="auto_backup_what_title">क्या बैकअप करना है</string>
+    <string name="auto_backup_what_summary_none">कुछ भी चयनित नहीं</string>
+
+    <!-- Auto backup screen: interval -->
+    <string name="auto_backup_every_title">बैकअप हर:</string>
+    <string name="auto_backup_interval_value_label">मान</string>
+    <plurals name="auto_backup_unit_minutes">
+        <item quantity="one">मिनट</item>
+        <item quantity="other">मिनट</item>
+    </plurals>
+    <plurals name="auto_backup_unit_hours">
+        <item quantity="one">घंटा</item>
+        <item quantity="other">घंटे</item>
+    </plurals>
+    <plurals name="auto_backup_unit_days">
+        <item quantity="one">दिन</item>
+        <item quantity="other">दिन</item>
+    </plurals>
+
+    <!-- Auto backup screen: auto delete section -->
+    <string name="auto_backup_delete_section">बैकअप स्वचालित रूप से हटाएं</string>
+    <string name="auto_backup_delete_by_time_title">आयु के अनुसार बैकअप स्वचालित रूप से हटाएं</string>
+    <string name="auto_backup_delete_by_time_supporting">इससे पुराने बैकअप हटाएं:</string>
+    <string name="auto_backup_delete_amount_label">मात्रा</string>
+    <string name="auto_backup_delete_by_count_title">संख्या के अनुसार बैकअप स्वचालित रूप से हटाएं</string>
+    <string name="auto_backup_delete_by_count_supporting">रखने के लिए अधिकतम बैकअप संख्या:</string>
+    <string name="auto_backup_delete_count_label">संख्या</string>
+
     <!-- Backup screen: restore tab -->
     <string name="restore_select_file_hint">अपने स्टोरेज से एक .rphone बैकअप फ़ाइल चुनें</string>
     <string name="restore_no_file_selected">कोई बैकअप फ़ाइल चयनित नहीं</string>
-    <string name="restore_tap_to_choose">पुनर्स्थापित करने के लिए बैकअप फ़ाइल चुनने हेतु नीचे टैप करें</string>
+    <string name="restore_tap_to_choose">पुनर्स्थापित करने के लिए बैकअप फ़ाइल चुनने हेतु टैप करें</string>
+    <string name="restore_tap_to_choose_another">पुनर्स्थापित करने के लिए दूसरी बैकअप फ़ाइल चुनने हेतु टैप करें</string>
     <string name="restore_file_size">%1$d KB</string>
-    <string name="restore_browse_button">बैकअप फ़ाइल ब्राउज़ करें</string>
-    <string name="restore_choose_another_button">दूसरी फ़ाइल चुनें</string>
     <string name="restore_select_items_hint">इस फ़ाइल से पुनर्स्थापित करने के लिए आइटम चुनें</string>
     <string name="restore_not_in_backup">इस बैकअप में मौजूद नहीं</string>
     <string name="restore_selected_button">चयनित पुनर्स्थापित करें</string>

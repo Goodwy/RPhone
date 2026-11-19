@@ -51,10 +51,12 @@ class BiometricCallActivity : FragmentActivity() {
             when (action) {
                 "ANSWER" -> {
                     try { call?.answer(VideoProfile.STATE_AUDIO_ONLY) } catch (_: Exception) {}
-                    startActivity(Intent(this, CallActivity::class.java).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-                        putExtra("ANSWERED_FROM_NOTIFICATION", true)
-                    })
+                    if ( prefs.isOpenCallScreen()) {
+                        startActivity(Intent(this, CallActivity::class.java).apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                            putExtra("ANSWERED_FROM_NOTIFICATION", true)
+                        })
+                    }
                 }
                 "DECLINE" -> try { call?.disconnect() } catch (_: Exception) {}
             }
@@ -75,10 +77,12 @@ class BiometricCallActivity : FragmentActivity() {
                         when (action) {
                             "ANSWER" -> {
                                 try { call.answer(VideoProfile.STATE_AUDIO_ONLY) } catch (_: Exception) {}
-                                startActivity(Intent(activity, CallActivity::class.java).apply {
-                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-                                    putExtra("ANSWERED_FROM_NOTIFICATION", true)
-                                })
+                                if ( prefs.isOpenCallScreen()) {
+                                    startActivity(Intent(activity, CallActivity::class.java).apply {
+                                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                                        putExtra("ANSWERED_FROM_NOTIFICATION", true)
+                                    })
+                                }
                             }
                             "DECLINE" -> try { call.disconnect() } catch (_: Exception) {}
                         }

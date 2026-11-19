@@ -39,9 +39,14 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.rounded.AddAPhoto
 import androidx.compose.material.icons.rounded.AddPhotoAlternate
+import androidx.compose.material.icons.rounded.BlurOff
+import androidx.compose.material.icons.rounded.BlurOn
+import androidx.compose.material.icons.rounded.FormatBold
+import androidx.compose.material.icons.rounded.TextFields
 import androidx.compose.material.icons.rounded.Wallpaper
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -881,21 +886,34 @@ private fun CallingCardCustomizeStep(
                                 ),
                                 tonalElevation = 3.dp
                             ) {
-                                Slider(
-                                    value = style.blurRadiusDp.toFloat(),
-                                    onValueChange = { v ->
-                                        onStyleChange(style.copy(blurRadiusDp = v.roundToInt()))
-                                    },
-                                    valueRange = 0f..CallingCardStyle.MAX_BLUR_DP.toFloat(),
-                                    steps = CallingCardStyle.MAX_BLUR_DP - 1,
-                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                                    thumb = {
-                                        SliderDefaults.Thumb(
-                                            interactionSource = remember { MutableInteractionSource() },
-                                            modifier = Modifier.scale(scaleX = 0.8f, scaleY = 0.8f)
-                                        )
-                                    }
-                                )
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        Icons.Rounded.BlurOff, null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Slider(
+                                        value = style.blurRadiusDp.toFloat(),
+                                        onValueChange = { v ->
+                                            onStyleChange(style.copy(blurRadiusDp = v.roundToInt()))
+                                        },
+                                        valueRange = 0f..CallingCardStyle.MAX_BLUR_DP.toFloat(),
+                                        steps = CallingCardStyle.MAX_BLUR_DP - 1,
+                                        modifier = Modifier.weight(1f).padding(horizontal = 6.dp),
+                                        thumb = {
+                                            SliderDefaults.Thumb(
+                                                interactionSource = remember { MutableInteractionSource() },
+                                                modifier = Modifier.scale(scaleX = 0.8f, scaleY = 0.8f)
+                                            )
+                                        }
+                                    )
+                                    Icon(
+                                        Icons.Rounded.BlurOn, null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
                         }
                     }
@@ -933,21 +951,34 @@ private fun CallingCardCustomizeStep(
                         ),
                         tonalElevation = 3.dp
                     ) {
-                        Slider(
-                            value = style.blurRadiusDp.toFloat(),
-                            onValueChange = { v ->
-                                onStyleChange(style.copy(blurRadiusDp = v.roundToInt()))
-                            },
-                            valueRange = 0f..CallingCardStyle.MAX_BLUR_DP.toFloat(),
-                            steps = CallingCardStyle.MAX_BLUR_DP - 1,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                            thumb = {
-                                SliderDefaults.Thumb(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    modifier = Modifier.scale(scaleX = 0.8f, scaleY = 0.8f)
-                                )
-                            }
-                        )
+                        Row(
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Rounded.BlurOff, null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Slider(
+                                value = style.blurRadiusDp.toFloat(),
+                                onValueChange = { v ->
+                                    onStyleChange(style.copy(blurRadiusDp = v.roundToInt()))
+                                },
+                                valueRange = 0f..CallingCardStyle.MAX_BLUR_DP.toFloat(),
+                                steps = CallingCardStyle.MAX_BLUR_DP - 1,
+                                modifier = Modifier.weight(1f).padding(horizontal = 6.dp),
+                                thumb = {
+                                    SliderDefaults.Thumb(
+                                        interactionSource = remember { MutableInteractionSource() },
+                                        modifier = Modifier.scale(scaleX = 0.8f, scaleY = 0.8f)
+                                    )
+                                }
+                            )
+                            Icon(
+                                Icons.Rounded.BlurOn, null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
 
@@ -1020,45 +1051,71 @@ private fun AppearanceControls(
             }
 
             Spacer(Modifier.height(16.dp))
-            Slider(
-                value = style.fontSizeSp.toFloat(),
-                onValueChange = { v ->
-                    onStyleChange(style.copy(fontSizeSp = v.roundToInt().coerceIn(
-                        CallingCardStyle.MIN_FONT_SIZE_SP, CallingCardStyle.MAX_FONT_SIZE_SP
-                    )))
-                },
-                valueRange = CallingCardStyle.MIN_FONT_SIZE_SP.toFloat()..CallingCardStyle.MAX_FONT_SIZE_SP.toFloat(),
-                steps = CallingCardStyle.MAX_FONT_SIZE_SP - CallingCardStyle.MIN_FONT_SIZE_SP - 1,
-                modifier = Modifier.padding(horizontal = 16.dp),
-                thumb = {
-                    SliderDefaults.Thumb(
-                        interactionSource = remember { MutableInteractionSource() },
-                        modifier = Modifier.scale(scaleX = 0.8f, scaleY = 0.8f)
-                    )
-                }
-            )
-            Spacer(Modifier.height(12.dp))
+            Row(
+                modifier = Modifier.padding(horizontal = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    ImageVector.vectorResource(id = R.drawable.ic_format_size_small), null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Slider(
+                    value = style.fontSizeSp.toFloat(),
+                    onValueChange = { v ->
+                        onStyleChange(style.copy(fontSizeSp = v.roundToInt().coerceIn(
+                            CallingCardStyle.MIN_FONT_SIZE_SP, CallingCardStyle.MAX_FONT_SIZE_SP
+                        )))
+                    },
+                    valueRange = CallingCardStyle.MIN_FONT_SIZE_SP.toFloat()..CallingCardStyle.MAX_FONT_SIZE_SP.toFloat(),
+                    steps = CallingCardStyle.MAX_FONT_SIZE_SP - CallingCardStyle.MIN_FONT_SIZE_SP - 1,
+                    modifier = Modifier.weight(1f).padding(horizontal = 6.dp),
+                    thumb = {
+                        SliderDefaults.Thumb(
+                            interactionSource = remember { MutableInteractionSource() },
+                            modifier = Modifier.scale(scaleX = 0.8f, scaleY = 0.8f)
+                        )
+                    }
+                )
+                Icon(
+                    ImageVector.vectorResource(id = R.drawable.ic_format_size_big), null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Spacer(Modifier.height(10.dp))
 
-            val weightMin = style.font.minWeight
-            val weightMax = style.font.maxWeight
-            Slider(
-                value = style.fontWeight.toFloat().coerceIn(
-                    weightMin.toFloat(), weightMax.toFloat()
-                ),
-                onValueChange = { v ->
-                    val stepped = (v / CallingCardStyle.WEIGHT_STEP).roundToInt() * CallingCardStyle.WEIGHT_STEP
-                    onStyleChange(style.copy(fontWeight = stepped.coerceIn(weightMin, weightMax)))
-                },
-                valueRange = weightMin.toFloat()..weightMax.toFloat(),
-                steps = ((weightMax - weightMin) / CallingCardStyle.WEIGHT_STEP - 1).coerceAtLeast(0),
-                modifier = Modifier.padding(horizontal = 16.dp),
-                thumb = {
-                    SliderDefaults.Thumb(
-                        interactionSource = remember { MutableInteractionSource() },
-                        modifier = Modifier.scale(scaleX = 0.8f, scaleY = 0.8f)
-                    )
-                }
-            )
+            Row(
+                modifier = Modifier.padding(horizontal = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    ImageVector.vectorResource(id = R.drawable.ic_format_light), null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                val weightMin = style.font.minWeight
+                val weightMax = style.font.maxWeight
+                Slider(
+                    value = style.fontWeight.toFloat().coerceIn(
+                        weightMin.toFloat(), weightMax.toFloat()
+                    ),
+                    onValueChange = { v ->
+                        val stepped = (v / CallingCardStyle.WEIGHT_STEP).roundToInt() * CallingCardStyle.WEIGHT_STEP
+                        onStyleChange(style.copy(fontWeight = stepped.coerceIn(weightMin, weightMax)))
+                    },
+                    valueRange = weightMin.toFloat()..weightMax.toFloat(),
+                    steps = ((weightMax - weightMin) / CallingCardStyle.WEIGHT_STEP - 1).coerceAtLeast(0),
+                    modifier = Modifier.weight(1f).padding(horizontal = 6.dp),
+                    thumb = {
+                        SliderDefaults.Thumb(
+                            interactionSource = remember { MutableInteractionSource() },
+                            modifier = Modifier.scale(scaleX = 0.8f, scaleY = 0.8f)
+                        )
+                    }
+                )
+                Icon(
+                    ImageVector.vectorResource(id = R.drawable.ic_format_bold), null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
 
             Spacer(Modifier.height(16.dp))
 

@@ -50,6 +50,7 @@
     <string name="details">التفاصيل</string>
     <string name="saved">تم الحفظ</string>
     <string name="save_failed">فشل الحفظ</string>
+    <string name="warning">تحذير</string>
 
     <!-- Search -->
     <string name="search">بحث</string>
@@ -263,6 +264,9 @@
     <string name="auto_speaker_subtitle">التبديل تلقائيًا إلى مكبر الصوت عندما يكون الهاتف بعيدًا عن الأذن، والعودة إلى سماعة الأذن عندما يكون قريبًا</string>
     <string name="fullscreen_calls">مكالمات ملء الشاشة</string>
     <string name="fullscreen_calls_subtitle">يتم دائمًا عرض المكالمات الواردة في وضع ملء الشاشة</string>
+    <string name="fullscreen_calls_off_subtitle">تظهر المكالمات الواردة كإشعار كلما أمكن ذلك</string>
+    <string name="open_call_screen_from_notification">فتح شاشة المكالمة بعد الرد</string>
+    <string name="open_call_screen_from_notification_subtitle">إظهار شاشة المكالمة عند الرد من إشعار. أوقف هذا الخيار للبقاء في التطبيق الحالي</string>
 
     <!-- Speed dial -->
     <string name="settings_speed_dial_title">الاتصال السريع</string>
@@ -779,13 +783,60 @@
     <string name="backup_auto_backup_enabled">ممكّن · النسخ الاحتياطية التلقائية مجدولة</string>
     <string name="backup_auto_backup_disabled">معطّل · تكوين النسخ الاحتياطية التلقائية</string>
 
+    <!-- Auto backup screen: main -->
+    <string name="auto_backup_settings_title">إعدادات النسخ الاحتياطي التلقائي</string>
+    <string name="auto_backup_enabled_supporting">النسخ الاحتياطي التلقائي مفعّل</string>
+    <string name="auto_backup_disabled_supporting">فعّل لإنشاء نسخ احتياطية تلقائية لبياناتك</string>
+
+    <!-- Auto backup screen: folder -->
+    <string name="auto_backup_folder_title">مجلد النسخ الاحتياطي</string>
+    <string name="auto_backup_folder_none">لم يتم اختيار مجلد</string>
+    <string name="auto_backup_folder_none_hint">لم يتم اختيار مجلد • اضغط لاختيار مجلد النسخ الاحتياطي</string>
+
+    <!-- Auto backup screen: what to backup -->
+    <string name="auto_backup_what_title">ما الذي سيتم نسخه احتياطيًا</string>
+    <string name="auto_backup_what_summary_none">لم يتم اختيار شيء</string>
+
+    <!-- Auto backup screen: interval -->
+    <string name="auto_backup_every_title">نسخ احتياطي كل:</string>
+    <string name="auto_backup_interval_value_label">القيمة</string>
+    <plurals name="auto_backup_unit_minutes" tools:ignore="MissingQuantity">
+        <item quantity="one">دقيقة</item>
+        <item quantity="two">دقيقتان</item>
+        <item quantity="few">دقائق</item>
+        <item quantity="many">دقيقة</item>
+        <item quantity="other">دقيقة</item>
+    </plurals>
+    <plurals name="auto_backup_unit_hours" tools:ignore="MissingQuantity">
+        <item quantity="one">ساعة</item>
+        <item quantity="two">ساعتان</item>
+        <item quantity="few">ساعات</item>
+        <item quantity="many">ساعة</item>
+        <item quantity="other">ساعة</item>
+    </plurals>
+    <plurals name="auto_backup_unit_days" tools:ignore="MissingQuantity">
+        <item quantity="one">يوم</item>
+        <item quantity="two">يومان</item>
+        <item quantity="few">أيام</item>
+        <item quantity="many">يومًا</item>
+        <item quantity="other">يوم</item>
+    </plurals>
+
+    <!-- Auto backup screen: auto delete section -->
+    <string name="auto_backup_delete_section">الحذف التلقائي للنسخ الاحتياطية</string>
+    <string name="auto_backup_delete_by_time_title">حذف النسخ الاحتياطية تلقائيًا حسب العمر</string>
+    <string name="auto_backup_delete_by_time_supporting">حذف النسخ الأقدم من:</string>
+    <string name="auto_backup_delete_amount_label">الكمية</string>
+    <string name="auto_backup_delete_by_count_title">حذف النسخ الاحتياطية تلقائيًا حسب العدد</string>
+    <string name="auto_backup_delete_by_count_supporting">الحد الأقصى لعدد النسخ المراد الاحتفاظ بها:</string>
+    <string name="auto_backup_delete_count_label">العدد</string>
+
     <!-- Backup screen: restore tab -->
     <string name="restore_select_file_hint">اختر ملف نسخ احتياطي .rphone من مساحة التخزين</string>
     <string name="restore_no_file_selected">لم يتم اختيار ملف نسخ احتياطي</string>
-    <string name="restore_tap_to_choose">اضغط أدناه لاختيار ملف نسخ احتياطي لاستعادته</string>
+    <string name="restore_tap_to_choose">اضغط لاختيار ملف نسخ احتياطي لاستعادته</string>
+    <string name="restore_tap_to_choose_another">اضغط لاختيار ملف نسخ احتياطي آخر لاستعادته</string>
     <string name="restore_file_size">%1$d كيلوبايت</string>
-    <string name="restore_browse_button">تصفح ملف النسخة</string>
-    <string name="restore_choose_another_button">اختيار ملف آخر</string>
     <string name="restore_select_items_hint">حدد العناصر المراد استعادتها من هذا الملف</string>
     <string name="restore_not_in_backup">غير موجود في هذه النسخة</string>
     <string name="restore_selected_button">استعادة المحدد</string>

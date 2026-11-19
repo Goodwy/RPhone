@@ -49,6 +49,7 @@
     <string name="details">Ayrıntılar</string>
     <string name="saved">Kaydedildi</string>
     <string name="save_failed">Kaydedilemedi</string>
+    <string name="warning">Uyarı</string>
 
     <!-- Search -->
     <string name="search">Ara</string>
@@ -262,6 +263,9 @@
     <string name="auto_speaker_subtitle">Telefon kulaktan uzakta olduğunda otomatik olarak hoparlöre geçin ve yakın olduğunda ahizeye geri dönün</string>
     <string name="fullscreen_calls">Tam ekran aramalar</string>
     <string name="fullscreen_calls_subtitle">Gelen aramalar her zaman tam ekran modunda gösterilir</string>
+    <string name="fullscreen_calls_off_subtitle">Gelen aramalar mümkün olduğunda bildirim olarak gösterilir</string>
+    <string name="open_call_screen_from_notification">Yanıtladıktan sonra arama ekranını aç</string>
+    <string name="open_call_screen_from_notification_subtitle">Bir bildirimden yanıtladığınızda arama ekranını göster. Mevcut uygulamada kalmak için kapatın</string>
 
     <!-- Speed dial -->
     <string name="settings_speed_dial_title">Hızlı arama</string>
@@ -766,13 +770,51 @@
     <string name="backup_auto_backup_enabled">Etkin · Otomatik yedeklemeler planlandı</string>
     <string name="backup_auto_backup_disabled">Devre dışı · Otomatik yedeklemeleri yapılandır</string>
 
+    <!-- Auto backup screen: main -->
+    <string name="auto_backup_settings_title">Otomatik yedekleme ayarları</string>
+    <string name="auto_backup_enabled_supporting">Otomatik yedekleme açık</string>
+    <string name="auto_backup_disabled_supporting">Verilerinizin otomatik yedeklerini oluşturmak için etkinleştirin</string>
+
+    <!-- Auto backup screen: folder -->
+    <string name="auto_backup_folder_title">Yedekleme klasörü</string>
+    <string name="auto_backup_folder_none">Klasör seçilmedi</string>
+    <string name="auto_backup_folder_none_hint">Klasör seçilmedi • Yedekleme klasörü seçmek için dokunun</string>
+
+    <!-- Auto backup screen: what to backup -->
+    <string name="auto_backup_what_title">Nelerin yedekleneceği</string>
+    <string name="auto_backup_what_summary_none">Hiçbiri seçilmedi</string>
+
+    <!-- Auto backup screen: interval -->
+    <string name="auto_backup_every_title">Yedekleme sıklığı:</string>
+    <string name="auto_backup_interval_value_label">Değer</string>
+    <plurals name="auto_backup_unit_minutes">
+        <item quantity="one">Dakika</item>
+        <item quantity="other">Dakika</item>
+    </plurals>
+    <plurals name="auto_backup_unit_hours">
+        <item quantity="one">Saat</item>
+        <item quantity="other">Saat</item>
+    </plurals>
+    <plurals name="auto_backup_unit_days">
+        <item quantity="one">Gün</item>
+        <item quantity="other">Gün</item>
+    </plurals>
+
+    <!-- Auto backup screen: auto delete section -->
+    <string name="auto_backup_delete_section">Yedekleri otomatik sil</string>
+    <string name="auto_backup_delete_by_time_title">Yedekleri yaşa göre otomatik sil</string>
+    <string name="auto_backup_delete_by_time_supporting">Şundan eski yedekleri sil:</string>
+    <string name="auto_backup_delete_amount_label">Miktar</string>
+    <string name="auto_backup_delete_by_count_title">Yedekleri sayıya göre otomatik sil</string>
+    <string name="auto_backup_delete_by_count_supporting">Saklanacak maksimum yedek sayısı:</string>
+    <string name="auto_backup_delete_count_label">Sayı</string>
+
     <!-- Backup screen: restore tab -->
     <string name="restore_select_file_hint">Depolama alanınızdan bir .rphone yedek dosyası seçin</string>
     <string name="restore_no_file_selected">Yedek dosyası seçilmedi</string>
-    <string name="restore_tap_to_choose">Geri yüklenecek yedek dosyasını seçmek için aşağıya dokunun</string>
+    <string name="restore_tap_to_choose">Geri yüklenecek bir yedek dosyası seçmek için dokunun</string>
+    <string name="restore_tap_to_choose_another">Geri yüklenecek başka bir yedek dosyası seçmek için dokunun</string>
     <string name="restore_file_size">%1$d KB</string>
-    <string name="restore_browse_button">Yedek dosyasına göz at</string>
-    <string name="restore_choose_another_button">Başka bir dosya seç</string>
     <string name="restore_select_items_hint">Bu dosyadan geri yüklenecek öğeleri seçin</string>
     <string name="restore_not_in_backup">Bu yedekte mevcut değil</string>
     <string name="restore_selected_button">Seçilenleri geri yükle</string>

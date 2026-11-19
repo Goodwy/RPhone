@@ -31,6 +31,7 @@ import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Backup
 import androidx.compose.material.icons.rounded.BubbleChart
 import androidx.compose.material.icons.rounded.Call
+import androidx.compose.material.icons.rounded.CloudSync
 import androidx.compose.material.icons.rounded.Fingerprint
 import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material.icons.rounded.Lock
@@ -74,6 +75,7 @@ import dev.goodwy.rphone.view.theme.customColors
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.*
+import com.ramcosta.composedestinations.generated.destinations.AutoBackupScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.CallSettingScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.goodwy.rphone.BuildConfig
@@ -216,6 +218,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
     var settingsSearchQuery by remember { mutableStateOf("") }
     val isGPlay = BuildConfig.FLAVOR == "gplay"
     val isFoss = BuildConfig.FLAVOR == "foss"
+    val isAutoBackupOn = prefs.isAutoBackupEnabled()
     val settingsSearchEntries = listOf(
         SettingsSearchEntry(
             headline = stringResource(R.string.interface_settings),
@@ -410,6 +413,9 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.floating_ongoing_call_subtitle),
                 stringResource(R.string.fullscreen_calls),
                 stringResource(R.string.fullscreen_calls_subtitle),
+                stringResource(R.string.fullscreen_calls_off_subtitle),
+                stringResource(R.string.open_call_screen_from_notification),
+                stringResource(R.string.open_call_screen_from_notification_subtitle),
             )
         ) { navigator.navigate(CallSettingScreenDestination) },
         SettingsSearchEntry(
@@ -650,6 +656,21 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 stringResource(R.string.backup_and_restore),
             )
         ) { navigator.navigate(BackupScreenDestination(initialTab = 1)) },
+        SettingsSearchEntry(
+            headline = stringResource(R.string.backup_auto_backup_title),
+            supporting = if (isAutoBackupOn) stringResource(R.string.backup_auto_backup_enabled) else stringResource(R.string.backup_auto_backup_disabled),
+            leadingIcon = Icons.Rounded.CloudSync,
+            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
+            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
+            options = listOf(
+                stringResource(R.string.auto_backup_folder_title),
+                stringResource(R.string.auto_backup_what_title),
+                stringResource(R.string.auto_backup_every_title),
+                stringResource(R.string.auto_backup_delete_section),
+                stringResource(R.string.auto_backup_delete_by_time_title),
+                stringResource(R.string.auto_backup_delete_by_count_title),
+            )
+        ) { navigator.navigate(AutoBackupScreenDestination) },
         SettingsSearchEntry(
             headline = stringResource(R.string.about),
             supporting = "Version $appVersion ($storeName)",
@@ -1023,8 +1044,8 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                                         headline = stringResource(R.string.backup_and_restore),
                                         supporting = stringResource(R.string.backup_and_restore_supporting),
                                         leadingIcon = Icons.Rounded.Backup,
-                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPink,
-                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPink,
+                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
+                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
                                         trailingIcon = Icons.Default.ChevronRight,
                                         onClick = {
                                             navigator.navigate(

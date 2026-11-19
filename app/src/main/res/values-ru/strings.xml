@@ -262,6 +262,9 @@
     <string name="auto_speaker_subtitle">Автоматически переключаться на громкую связь, когда телефон находится вдали от уха, и обратно на наушник, когда он находится рядом</string>
     <string name="fullscreen_calls">Полноэкранные звонки</string>
     <string name="fullscreen_calls_subtitle">Входящие звонки всегда отображаются в полноэкранном режиме</string>
+    <string name="fullscreen_calls_off_subtitle">Входящие звонки отображаются в виде уведомления, когда это возможно</string>
+    <string name="open_call_screen_from_notification">Открывать экран звонка после ответа</string>
+    <string name="open_call_screen_from_notification_subtitle">Показывать экран звонка при ответе из уведомления. Отключите, чтобы остаться в текущем приложении</string>
 
     <!-- Speed dial -->
     <string name="settings_speed_dial_title">Быстрый набор</string>
@@ -776,13 +779,57 @@
     <string name="backup_auto_backup_enabled">Включено · Автоматические копии запланированы</string>
     <string name="backup_auto_backup_disabled">Выключено · Настройте автоматическое копирование</string>
 
+    <!-- Auto backup screen: main -->
+    <string name="auto_backup_settings_title">Настройки автоматического резервного копирования</string>
+    <string name="auto_backup_enabled_supporting">Автоматическое копирование включено</string>
+    <string name="auto_backup_disabled_supporting">Включите, чтобы автоматически создавать копии данных</string>
+
+    <!-- Auto backup screen: folder -->
+    <string name="auto_backup_folder_title">Папка для копий</string>
+    <string name="auto_backup_folder_none">Папка не выбрана</string>
+    <string name="auto_backup_folder_none_hint">Папка не выбрана • Нажмите, чтобы выбрать папку для копий</string>
+
+    <!-- Auto backup screen: what to backup -->
+    <string name="auto_backup_what_title">Что копировать</string>
+    <string name="auto_backup_what_summary_none">Ничего не выбрано</string>
+
+    <!-- Auto backup screen: interval -->
+    <string name="auto_backup_every_title">Создавать копию каждые:</string>
+    <string name="auto_backup_interval_value_label">Значение</string>
+    <plurals name="auto_backup_unit_minutes">
+        <item quantity="one">Минута</item>
+        <item quantity="few">Минуты</item>
+        <item quantity="many">Минут</item>
+        <item quantity="other">Минуты</item>
+    </plurals>
+    <plurals name="auto_backup_unit_hours">
+        <item quantity="one">Час</item>
+        <item quantity="few">Часа</item>
+        <item quantity="many">Часов</item>
+        <item quantity="other">Часа</item>
+    </plurals>
+    <plurals name="auto_backup_unit_days">
+        <item quantity="one">День</item>
+        <item quantity="few">Дня</item>
+        <item quantity="many">Дней</item>
+        <item quantity="other">Дня</item>
+    </plurals>
+
+    <!-- Auto backup screen: auto delete section -->
+    <string name="auto_backup_delete_section">Автоудаление копий</string>
+    <string name="auto_backup_delete_by_time_title">Автоудаление по возрасту</string>
+    <string name="auto_backup_delete_by_time_supporting">Удалять копии старше:</string>
+    <string name="auto_backup_delete_amount_label">Количество</string>
+    <string name="auto_backup_delete_by_count_title">Автоудаление по количеству</string>
+    <string name="auto_backup_delete_by_count_supporting">Максимальное число копий:</string>
+    <string name="auto_backup_delete_count_label">Число</string>
+
     <!-- Backup screen: restore tab -->
     <string name="restore_select_file_hint">Выберите файл резервной копии .rphone из хранилища</string>
     <string name="restore_no_file_selected">Файл резервной копии не выбран</string>
-    <string name="restore_tap_to_choose">Нажмите ниже, чтобы выбрать файл для восстановления</string>
+    <string name="restore_tap_to_choose">Нажмите, чтобы выбрать файл для восстановления</string>
+    <string name="restore_tap_to_choose_another">Нажмите, чтобы выбрать другой файл для восстановления</string>
     <string name="restore_file_size">%1$d КБ</string>
-    <string name="restore_browse_button">Выбрать файл копии</string>
-    <string name="restore_choose_another_button">Выбрать другой файл</string>
     <string name="restore_select_items_hint">Выберите элементы для восстановления из этого файла</string>
     <string name="restore_not_in_backup">Отсутствует в этой копии</string>
     <string name="restore_selected_button">Восстановить выбранное</string>

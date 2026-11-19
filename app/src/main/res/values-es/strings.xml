@@ -49,6 +49,7 @@
     <string name="details">Detalles</string>
     <string name="saved">Guardado</string>
     <string name="save_failed">Error al guardar</string>
+    <string name="warning">Advertencia</string>
 
     <!-- Search -->
     <string name="search">Buscar</string>
@@ -262,6 +263,9 @@
     <string name="auto_speaker_subtitle">Cambiar automáticamente al altavoz cuando el teléfono está lejos del oído, y de vuelta al auricular cuando está cerca</string>
     <string name="fullscreen_calls">Llamadas a pantalla completa</string>
     <string name="fullscreen_calls_subtitle">Las llamadas entrantes siempre se muestran en modo de pantalla completa</string>
+    <string name="fullscreen_calls_off_subtitle">Las llamadas entrantes se muestran como notificación siempre que sea posible</string>
+    <string name="open_call_screen_from_notification">Abrir la pantalla de llamada después de responder</string>
+    <string name="open_call_screen_from_notification_subtitle">Mostrar la pantalla de llamada cuando respondas desde una notificación. Desactívalo para seguir usando la aplicación actual</string>
 
     <!-- Speed dial -->
     <string name="settings_speed_dial_title">Marcación rápida</string>
@@ -769,13 +773,51 @@
     <string name="backup_auto_backup_enabled">Activada · Copias automáticas programadas</string>
     <string name="backup_auto_backup_disabled">Desactivada · Configurar copias automáticas</string>
 
+    <!-- Auto backup screen: main -->
+    <string name="auto_backup_settings_title">Ajustes de copia de seguridad automática</string>
+    <string name="auto_backup_enabled_supporting">La copia de seguridad automática está activada</string>
+    <string name="auto_backup_disabled_supporting">Actívala para crear copias de seguridad automáticas de tus datos</string>
+
+    <!-- Auto backup screen: folder -->
+    <string name="auto_backup_folder_title">Carpeta de copias de seguridad</string>
+    <string name="auto_backup_folder_none">Ninguna carpeta seleccionada</string>
+    <string name="auto_backup_folder_none_hint">Ninguna carpeta seleccionada • Toca para elegir una carpeta de copias</string>
+
+    <!-- Auto backup screen: what to backup -->
+    <string name="auto_backup_what_title">Qué copiar</string>
+    <string name="auto_backup_what_summary_none">Nada seleccionado</string>
+
+    <!-- Auto backup screen: interval -->
+    <string name="auto_backup_every_title">Copia cada:</string>
+    <string name="auto_backup_interval_value_label">Valor</string>
+    <plurals name="auto_backup_unit_minutes">
+        <item quantity="one">Minuto</item>
+        <item quantity="other">Minutos</item>
+    </plurals>
+    <plurals name="auto_backup_unit_hours">
+        <item quantity="one">Hora</item>
+        <item quantity="other">Horas</item>
+    </plurals>
+    <plurals name="auto_backup_unit_days">
+        <item quantity="one">Día</item>
+        <item quantity="other">Días</item>
+    </plurals>
+
+    <!-- Auto backup screen: auto delete section -->
+    <string name="auto_backup_delete_section">Eliminación automática de copias</string>
+    <string name="auto_backup_delete_by_time_title">Eliminar copias automáticamente por antigüedad</string>
+    <string name="auto_backup_delete_by_time_supporting">Eliminar copias anteriores a:</string>
+    <string name="auto_backup_delete_amount_label">Cantidad</string>
+    <string name="auto_backup_delete_by_count_title">Eliminar copias automáticamente por cantidad</string>
+    <string name="auto_backup_delete_by_count_supporting">Número máximo de copias a conservar:</string>
+    <string name="auto_backup_delete_count_label">Número</string>
+
     <!-- Backup screen: restore tab -->
     <string name="restore_select_file_hint">Selecciona un archivo de copia de seguridad .rphone de tu almacenamiento</string>
     <string name="restore_no_file_selected">Ningún archivo de copia seleccionado</string>
-    <string name="restore_tap_to_choose">Toca abajo para elegir un archivo de copia que restaurar</string>
+    <string name="restore_tap_to_choose">Toca para elegir un archivo de copia de seguridad que restaurar</string>
+    <string name="restore_tap_to_choose_another">Toca para elegir otro archivo de copia de seguridad que restaurar</string>
     <string name="restore_file_size">%1$d KB</string>
-    <string name="restore_browse_button">Buscar archivo de copia</string>
-    <string name="restore_choose_another_button">Elegir otro archivo</string>
     <string name="restore_select_items_hint">Selecciona los elementos que deseas restaurar de este archivo</string>
     <string name="restore_not_in_backup">No presente en esta copia</string>
     <string name="restore_selected_button">Restaurar selección</string>

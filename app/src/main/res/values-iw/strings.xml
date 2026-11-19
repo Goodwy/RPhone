@@ -50,6 +50,7 @@
     <string name="details">פרטים</string>
     <string name="saved">נשמר</string>
     <string name="save_failed">השמירה נכשלה</string>
+    <string name="warning">אזהרה</string>
 
     <!-- Search -->
     <string name="search">חיפוש</string>
@@ -263,6 +264,9 @@
     <string name="auto_speaker_subtitle">עבור אוטומטית לרמקול כאשר הטלפון רחוק מהאוזן, ובחזרה לאפרכסת כאשר הוא קרוב</string>
     <string name="fullscreen_calls">שיחות במסך מלא</string>
     <string name="fullscreen_calls_subtitle">שיחות נכנסות מוצגות תמיד במצב מסך מלא</string>
+    <string name="fullscreen_calls_off_subtitle">שיחות נכנסות מוצגות כהתראה כשאפשר</string>
+    <string name="open_call_screen_from_notification">פתח את מסך השיחה לאחר מענה</string>
+    <string name="open_call_screen_from_notification_subtitle">הצג את מסך השיחה כשאתה עונה מהתראה. כבה כדי להישאר באפליקציה הנוכחית</string>
 
     <!-- Speed dial -->
     <string name="settings_speed_dial_title">חיוג מהיר</string>
@@ -770,13 +774,57 @@
     <string name="backup_auto_backup_enabled">מופעל · גיבויים אוטומטיים מתוזמנים</string>
     <string name="backup_auto_backup_disabled">מושבת · הגדר גיבויים אוטומטיים</string>
 
+    <!-- Auto backup screen: main -->
+    <string name="auto_backup_settings_title">הגדרות גיבוי אוטומטי</string>
+    <string name="auto_backup_enabled_supporting">גיבוי אוטומטי מופעל</string>
+    <string name="auto_backup_disabled_supporting">הפעל כדי ליצור גיבויים אוטומטיים של הנתונים שלך</string>
+
+    <!-- Auto backup screen: folder -->
+    <string name="auto_backup_folder_title">תיקיית גיבויים</string>
+    <string name="auto_backup_folder_none">לא נבחרה תיקייה</string>
+    <string name="auto_backup_folder_none_hint">לא נבחרה תיקייה • הקש כדי לבחור תיקיית גיבויים</string>
+
+    <!-- Auto backup screen: what to backup -->
+    <string name="auto_backup_what_title">מה לגבות</string>
+    <string name="auto_backup_what_summary_none">לא נבחר דבר</string>
+
+    <!-- Auto backup screen: interval -->
+    <string name="auto_backup_every_title">גיבוי כל:</string>
+    <string name="auto_backup_interval_value_label">ערך</string>
+    <plurals name="auto_backup_unit_minutes">
+        <item quantity="one">דקה</item>
+        <item quantity="two">שתי דקות</item>
+        <item quantity="many">דקות</item>
+        <item quantity="other">דקות</item>
+    </plurals>
+    <plurals name="auto_backup_unit_hours">
+        <item quantity="one">שעה</item>
+        <item quantity="two">שעתיים</item>
+        <item quantity="many">שעות</item>
+        <item quantity="other">שעות</item>
+    </plurals>
+    <plurals name="auto_backup_unit_days">
+        <item quantity="one">יום</item>
+        <item quantity="two">יומיים</item>
+        <item quantity="many">ימים</item>
+        <item quantity="other">ימים</item>
+    </plurals>
+
+    <!-- Auto backup screen: auto delete section -->
+    <string name="auto_backup_delete_section">מחיקה אוטומטית של גיבויים</string>
+    <string name="auto_backup_delete_by_time_title">מחק גיבויים אוטומטית לפי גיל</string>
+    <string name="auto_backup_delete_by_time_supporting">מחק גיבויים ישנים מ:</string>
+    <string name="auto_backup_delete_amount_label">כמות</string>
+    <string name="auto_backup_delete_by_count_title">מחק גיבויים אוטומטית לפי מספר</string>
+    <string name="auto_backup_delete_by_count_supporting">מספר גיבויים מקסימלי לשמירה:</string>
+    <string name="auto_backup_delete_count_label">מספר</string>
+
     <!-- Backup screen: restore tab -->
     <string name="restore_select_file_hint">בחר קובץ גיבוי .rphone מהאחסון שלך</string>
     <string name="restore_no_file_selected">לא נבחר קובץ גיבוי</string>
-    <string name="restore_tap_to_choose">הקש למטה כדי לבחור קובץ גיבוי לשחזור</string>
+    <string name="restore_tap_to_choose">הקש כדי לבחור קובץ גיבוי לשחזור</string>
+    <string name="restore_tap_to_choose_another">הקש כדי לבחור קובץ גיבוי אחר לשחזור</string>
     <string name="restore_file_size">%1$d KB</string>
-    <string name="restore_browse_button">עיין בקובץ גיבוי</string>
-    <string name="restore_choose_another_button">בחר קובץ אחר</string>
     <string name="restore_select_items_hint">בחר פריטים לשחזור מקובץ זה</string>
     <string name="restore_not_in_backup">לא קיים בגיבוי זה</string>
     <string name="restore_selected_button">שחזר נבחרים</string>

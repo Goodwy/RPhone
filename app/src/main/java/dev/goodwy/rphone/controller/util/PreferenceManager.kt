@@ -665,6 +665,7 @@ class PreferenceManager(context: Context) {
         const val KEY_AVATAR_FRAME             = "avatar_frame"
         const val KEY_HIGH_SCORE               = "horse_game_high_score"
         const val KEY_ALWAYS_FULLSCREEN_CALLS  = "always_fullscreen_calls"
+        const val KEY_OPEN_CALL_SCREEN_FROM_NOTIFICATION  = "open_call_screen_from_notification"
         const val KEY_DIALPAD_ANIMATION        = "dialpad_animation_enabled"
         const val KEY_DIALPAD_HIDE_LETTERS     = "dialpad_hide_letters"
         const val KEY_HIDE_VOICE_SEARCH        = "hide_voice_search"
@@ -672,6 +673,11 @@ class PreferenceManager(context: Context) {
 
         const val KEY_FSI_BANNER_SNOOZED_UNTIL = "fsi_banner_snoozed_until"
     }
+
+    fun isAlwaysFullscreenCalls(): Boolean = getBoolean(KEY_ALWAYS_FULLSCREEN_CALLS, false)
+    fun setAlwaysFullscreenCalls(enabled: Boolean) = setBoolean(KEY_ALWAYS_FULLSCREEN_CALLS, enabled)
+    fun isOpenCallScreen(): Boolean = getBoolean(KEY_OPEN_CALL_SCREEN_FROM_NOTIFICATION, true)
+    fun setOpenCallScreen(enabled: Boolean) = setBoolean(KEY_OPEN_CALL_SCREEN_FROM_NOTIFICATION, enabled)
 
     fun getCallLogLimit(): Int = getInt(KEY_CALL_LOG_LIMIT, CALL_LOG_LIMIT_DEFAULT)
     fun setCallLogLimit(limit: Int) = setInt(KEY_CALL_LOG_LIMIT, limit)
@@ -695,11 +701,6 @@ class PreferenceManager(context: Context) {
     fun isHiddenContactsVisible(): Boolean = getBoolean(KEY_HIDDEN_CONTACTS_VISIBLE, false)
     fun setHiddenContactsVisible(visible: Boolean) = setBoolean(KEY_HIDDEN_CONTACTS_VISIBLE, visible)
 
-    fun getFloatingBarRoundness(): Int = getInt(KEY_FLOATING_BAR_ROUNDNESS, DEFAULT_FLOATING_BAR_ROUNDNESS)
-    fun setFloatingBarRoundness(roundness: Int) = setInt(KEY_FLOATING_BAR_ROUNDNESS, roundness)
-
-    fun isFloatingBarBlurEnabled(): Boolean = isUiBlurEnabled()
-    fun setFloatingBarBlurEnabled(enabled: Boolean) = setUiBlurEnabled(enabled)
     fun isUiBlurEnabled(): Boolean = getBoolean(KEY_UI_BLUR, getBoolean(KEY_FLOATING_BAR_BLUR, false))
     fun setUiBlurEnabled(enabled: Boolean) {
         setBoolean(KEY_UI_BLUR, enabled)
@@ -717,27 +718,6 @@ class PreferenceManager(context: Context) {
 
     fun getSwipeLeftSecondAction(): Int = getInt(KEY_SWIPE_LEFT_SECOND_ACTION, SWIPE_ACTION_DELETE)
     fun setSwipeLeftSecondAction(action: Int) = setInt(KEY_SWIPE_LEFT_SECOND_ACTION, action)
-
-    fun isSupporter(): Boolean = getBoolean(KEY_IS_SUPPORTER, false)
-    fun setSupporter(isSupporter: Boolean) = setBoolean(KEY_IS_SUPPORTER, isSupporter)
-
-    fun isPostCallScreenEnabled(): Boolean = getBoolean(KEY_POST_CALL_SCREEN, true)
-    fun setPostCallScreenEnabled(enabled: Boolean) = setBoolean(KEY_POST_CALL_SCREEN, enabled)
-
-    fun isMissedCallCardEnabled(): Boolean = getBoolean(KEY_MISSED_CALL_CARD, true)
-    fun setMissedCallCardEnabled(enabled: Boolean) = setBoolean(KEY_MISSED_CALL_CARD, enabled)
-
-    fun isAutoDeclineUnknownEnabled(): Boolean = getBoolean(KEY_AUTO_DECLINE_UNKNOWN, false)
-    fun setAutoDeclineUnknownEnabled(enabled: Boolean) = setBoolean(KEY_AUTO_DECLINE_UNKNOWN, enabled)
-
-    fun isAutoDeclineNonContactsEnabled(): Boolean = getBoolean(KEY_AUTO_DECLINE_NON_CONTACTS, false)
-    fun setAutoDeclineNonContactsEnabled(enabled: Boolean) = setBoolean(KEY_AUTO_DECLINE_NON_CONTACTS, enabled)
-
-    fun isDualSimDialpadButtonsEnabled(): Boolean = getBoolean(KEY_DUAL_SIM_DIALPAD_BUTTONS, false)
-    fun setDualSimDialpadButtonsEnabled(enabled: Boolean) = setBoolean(KEY_DUAL_SIM_DIALPAD_BUTTONS, enabled)
-
-    fun isAutoSpeakerProximityEnabled(): Boolean = getBoolean(KEY_AUTO_SPEAKER_PROXIMITY, false)
-    fun setAutoSpeakerProximityEnabled(enabled: Boolean) = setBoolean(KEY_AUTO_SPEAKER_PROXIMITY, enabled)
 
     fun isContactsTrashEnabled(): Boolean = getBoolean(KEY_CONTACTS_TRASH_ENABLED, true)
     fun setContactsTrashEnabled(enabled: Boolean) = setBoolean(KEY_CONTACTS_TRASH_ENABLED, enabled)

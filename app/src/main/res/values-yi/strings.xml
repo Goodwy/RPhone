@@ -50,6 +50,7 @@
     <string name="details">פּרטים</string>
     <string name="saved">געהיט</string>
     <string name="save_failed">האָט נישט געקענט היטן</string>
+    <string name="warning">וואָרענונג</string>
 
     <!-- Search -->
     <string name="search">זוכן</string>
@@ -262,6 +263,9 @@
     <string name="auto_speaker_subtitle">אויטאָמאַטיש אומשטעלן צו הויך-רעדער ווען טעלעפֿון איז ווײַט פֿון אויער, און צוריק צו אויער-רעדער ווען נאָענט</string>
     <string name="fullscreen_calls">פֿול-סקרין רופן</string>
     <string name="fullscreen_calls_subtitle">איינקומענדיקע רופן ווערן שטענדיק געוויזן אין פֿול-סקרין מאָדע</string>
+    <string name="fullscreen_calls_off_subtitle">איינקומענדיקע רופן ווערן געוויזן ווי אַ נאָטיפיקאַציע ווען מעגלעך</string>
+    <string name="open_call_screen_from_notification">עפֿענען רוף פאַרשטעל נאָך ענטפֿערן</string>
+    <string name="open_call_screen_from_notification_subtitle">ווײַזן דעם רוף פאַרשטעל ווען דו ענטפֿערסט פֿון אַ נאָטיפיקאַציע. שטעל אָפּ צו בלײַבן אין דער איצטיקער אַפּ</string>
 
     <!-- Speed dial -->
     <string name="settings_speed_dial_title">גיך ווייל</string>
@@ -772,13 +776,51 @@
     <string name="backup_auto_backup_enabled">אַקטיוו · אויטאָ באַקאַפּס פּלאַנירט</string>
     <string name="backup_auto_backup_disabled">אָפּגעשטעלט · קאָנפֿיגוריר אויטאָ באַקאַפּס</string>
 
+    <!-- Auto backup screen: main -->
+    <string name="auto_backup_settings_title">אויטאָ באַקאַפּ איינשטעלונגען</string>
+    <string name="auto_backup_enabled_supporting">אויטאָ באַקאַפּ איז אָן</string>
+    <string name="auto_backup_disabled_supporting">אַקטיוויזיר צו שאַפֿן אויטאָ באַקאַפּס פֿון דײַנע דאַטן</string>
+
+    <!-- Auto backup screen: folder -->
+    <string name="auto_backup_folder_title">באַקאַפּ טעקע</string>
+    <string name="auto_backup_folder_none">קיין טעקע נישט אויסגעוויילט</string>
+    <string name="auto_backup_folder_none_hint">קיין טעקע נישט אויסגעוויילט • קלאַפּ צו קלויבן אַ באַקאַפּ טעקע</string>
+
+    <!-- Auto backup screen: what to backup -->
+    <string name="auto_backup_what_title">וואָס צו באַקאַפּירן</string>
+    <string name="auto_backup_what_summary_none">גאָרנישט אויסגעוויילט</string>
+
+    <!-- Auto backup screen: interval -->
+    <string name="auto_backup_every_title">באַקאַפּ יעדע:</string>
+    <string name="auto_backup_interval_value_label">ווערט</string>
+    <plurals name="auto_backup_unit_minutes">
+        <item quantity="one">מינוט</item>
+        <item quantity="other">מינוט</item>
+    </plurals>
+    <plurals name="auto_backup_unit_hours">
+        <item quantity="one">שעה</item>
+        <item quantity="other">שעה\'ן</item>
+    </plurals>
+    <plurals name="auto_backup_unit_days">
+        <item quantity="one">טאָג</item>
+        <item quantity="other">טעג</item>
+    </plurals>
+
+    <!-- Auto backup screen: auto delete section -->
+    <string name="auto_backup_delete_section">אויטאָ אויסמעקן באַקאַפּס</string>
+    <string name="auto_backup_delete_by_time_title">אויטאָ אויסמעקן באַקאַפּס לויט עלטער</string>
+    <string name="auto_backup_delete_by_time_supporting">אויסמעקן באַקאַפּס עלטער ווי:</string>
+    <string name="auto_backup_delete_amount_label">קוואַנטיטעט</string>
+    <string name="auto_backup_delete_by_count_title">אויטאָ אויסמעקן באַקאַפּס לויט צאָל</string>
+    <string name="auto_backup_delete_by_count_supporting">מאַקסימום צאָל באַקאַפּס צו האַלטן:</string>
+    <string name="auto_backup_delete_count_label">צאָל</string>
+
     <!-- Backup screen: restore tab -->
     <string name="restore_select_file_hint">קלויב אַ .rphone באַקאַפּ טעקע פֿון דײַן אויפֿבאַהיטונג</string>
     <string name="restore_no_file_selected">קיין באַקאַפּ טעקע נישט אויסגעוויילט</string>
-    <string name="restore_tap_to_choose">דריק אונטן צו קלויבן אַ באַקאַפּ טעקע צו צוריקשטעלן</string>
+    <string name="restore_tap_to_choose">קלאַפּ צו קלויבן אַ באַקאַפּ טעקע צו צוריקשטעלן</string>
+    <string name="restore_tap_to_choose_another">קלאַפּ צו קלויבן אַן אַנדער באַקאַפּ טעקע צו צוריקשטעלן</string>
     <string name="restore_file_size">%1$d KB</string>
-    <string name="restore_browse_button">דורכקוק באַקאַפּ טעקע</string>
-    <string name="restore_choose_another_button">קלויב אַן אַנדער טעקע</string>
     <string name="restore_select_items_hint">קלויב עלעמענטן צו צוריקשטעלן פֿון דער טעקע</string>
     <string name="restore_not_in_backup">נישט פֿאַראַן אין דעם באַקאַפּ</string>
     <string name="restore_selected_button">שטעל צוריק אויסגעוויילטע</string>

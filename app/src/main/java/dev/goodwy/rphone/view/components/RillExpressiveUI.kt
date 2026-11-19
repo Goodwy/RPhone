@@ -547,6 +547,7 @@ internal fun RillIconBox(
     iconContainerColor: Color?,
     iconBgContainerColor: Color? = null,
     shape: Shape = CircleShape,
+    size: Dp = 44.dp,
     modifier: Modifier = Modifier
 ) {
     var appeared by remember { mutableStateOf(false) }
@@ -569,7 +570,7 @@ internal fun RillIconBox(
 
     Surface(
         modifier = modifier
-            .size(44.dp)
+            .size(size)
             .scale(iconScale)
             .alpha(iconAlpha),
         shape = shape,
@@ -580,7 +581,7 @@ internal fun RillIconBox(
             Icon(
                 icon, null,
                 tint = fgColor,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(size * 0.55f)
             )
         }
     }
@@ -1089,13 +1090,14 @@ fun HeadlineText(
 @Composable
 fun SupportingText(
     text: String,
+    color: Color? = null,
     maxLines: Int = Int.MAX_VALUE,
     @SuppressLint("ModifierParameter") modifier: Modifier = Modifier
 ) {
     Text(
         text = text,
         style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.8f),
+        color = color ?: MaterialTheme.colorScheme.onSurfaceVariant.copy(0.8f),
         lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
         maxLines = maxLines,
         overflow = TextOverflow.Ellipsis,
@@ -1108,6 +1110,7 @@ fun SupportingText(
 fun RillListItem(
     headline: String? = null,
     supporting: String? = null,
+    supportingColor: Color? = null,
     annotated: AnnotatedString? = null,
     leadingIcon: ImageVector? = null,
     shape: Shape = CircleShape,
@@ -1213,7 +1216,10 @@ fun RillListItem(
                     HeadlineText(text = headline)
                 }
                 if (supporting != null) {
-                    SupportingText(text = supporting)
+                    SupportingText(
+                        text = supporting,
+                        color = supportingColor
+                    )
                 }
                 if (annotated != null) {
                     Text(
@@ -1336,12 +1342,12 @@ fun RillSwitchListItem(
                     onCheckedChange(it)
                 },
                 enabled = enabled,
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = MaterialTheme.colorScheme.primary,
-                    checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,
-                    uncheckedThumbColor = MaterialTheme.colorScheme.outline,
-                    uncheckedTrackColor = MaterialTheme.colorScheme.surfaceContainerHighest
-                )
+//                colors = SwitchDefaults.colors(
+//                    checkedThumbColor = MaterialTheme.colorScheme.primary,
+//                    checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,
+//                    uncheckedThumbColor = MaterialTheme.colorScheme.outline,
+//                    uncheckedTrackColor = MaterialTheme.colorScheme.surfaceContainerHighest
+//                )
             )
         }
     }
@@ -1351,6 +1357,7 @@ fun RillSwitchListItem(
 fun RillSwitchListItem(
     headline: String,
     supporting: String? = null,
+    supportingColor: Color? = null,
     leadingIcon: ImageVector? = null,
     iconContainerColor: Color? = null,
     iconBgContainerColor: Color? = null,
@@ -1358,6 +1365,7 @@ fun RillSwitchListItem(
     onCheckedChange: (Boolean) -> Unit,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     val context = LocalContext.current
     val prefs = koinInject<PreferenceManager>()
@@ -1368,7 +1376,7 @@ fun RillSwitchListItem(
         animationSpec = spring(stiffness = Spring.StiffnessMedium),
         label = "SwitchItemScale"
     )
-    val alpha = if (checked) 1f else 0.6f
+//    val alpha = if (checked) 1f else 0.6f
 
     Surface(
         onClick = {
@@ -1388,7 +1396,7 @@ fun RillSwitchListItem(
             .scale(scale),
         shadowElevation = 0.dp,
         interactionSource = interactionSource,
-        enabled = checked
+        enabled = enabled
     ) {
         Row(
             modifier = Modifier
@@ -1401,7 +1409,7 @@ fun RillSwitchListItem(
                     icon = leadingIcon,
                     iconContainerColor = iconContainerColor,
                     iconBgContainerColor = iconBgContainerColor,
-                    modifier = Modifier.alpha(alpha)
+//                    modifier = Modifier.alpha(alpha)
                 )
                 Spacer(modifier = Modifier.width(16.dp))
             }
@@ -1412,12 +1420,12 @@ fun RillSwitchListItem(
             ) {
                 HeadlineText(
                     text = headline,
-                    modifier = Modifier.alpha(alpha)
+//                    modifier = Modifier.alpha(alpha)
                 )
                 if (supporting != null) {
                     SupportingText(
                         text = supporting,
-                        modifier = Modifier.alpha(alpha)
+                        color = supportingColor
                     )
                 }
             }
@@ -1426,13 +1434,13 @@ fun RillSwitchListItem(
             Icon(
                 Icons.Default.ChevronRight, null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                modifier = Modifier.size(20.dp).alpha(alpha)
+//                modifier = Modifier.size(20.dp).alpha(alpha)
             )
             Spacer(modifier = Modifier.width(6.dp))
             VerticalDivider(thickness = 1.dp, modifier = Modifier.height(38.dp))
             Spacer(modifier = Modifier.width(12.dp))
             Switch(
-                checked = checked,
+                checked = checked && enabled,
                 onCheckedChange = {
                     if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
                         performAppHaptic(
@@ -1444,12 +1452,13 @@ fun RillSwitchListItem(
                     }
                     onCheckedChange(it)
                 },
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = MaterialTheme.colorScheme.primary,
-                    checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,
-                    uncheckedThumbColor = MaterialTheme.colorScheme.outline,
-                    uncheckedTrackColor = MaterialTheme.colorScheme.surfaceContainerHighest
-                )
+                enabled = enabled,
+//                colors = SwitchDefaults.colors(
+//                    checkedThumbColor = MaterialTheme.colorScheme.primary,
+//                    checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,
+//                    uncheckedThumbColor = MaterialTheme.colorScheme.outline,
+//                    uncheckedTrackColor = MaterialTheme.colorScheme.surfaceContainerHighest
+//                )
             )
         }
     }

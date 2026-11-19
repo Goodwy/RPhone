@@ -9,14 +9,22 @@ import android.telecom.TelecomManager
 import android.view.Surface
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Dialpad
+import androidx.compose.material.icons.rounded.AdUnits
 import androidx.compose.material.icons.rounded.CropFree
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.PictureInPicture
@@ -24,6 +32,8 @@ import androidx.compose.material.icons.rounded.ScreenLockPortrait
 import androidx.compose.material.icons.rounded.SettingsPhone
 import androidx.compose.material.icons.rounded.SimCard
 import androidx.compose.material.icons.rounded.SpatialTracking
+import androidx.compose.material.icons.rounded.VideogameAsset
+import androidx.compose.material.icons.rounded.VideogameAssetOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -69,7 +79,8 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
     var floatingCall by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_FLOATING_CALL, false)) }
     var autoSpeaker by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_AUTO_SPEAKER, false)) }
     var defaultSim by remember(settingsState) { mutableStateOf(prefs.getInt(PreferenceManager.KEY_DEFAULT_SIM, prefs.getDefaultSimIndexDefault())) }
-    var fullscreenCalls by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_ALWAYS_FULLSCREEN_CALLS, false)) }
+    var fullscreenCalls by remember(settingsState) { mutableStateOf(prefs.isAlwaysFullscreenCalls()) }
+    var openCallScreen by remember(settingsState) { mutableStateOf(prefs.isOpenCallScreen()) }
     var speedDial by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SPEED_DIAL, true)) }
     var callLogLimit by remember(settingsState) { mutableStateOf(prefs.getCallLogLimit()) }
 
@@ -231,16 +242,35 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
                         RillExpressiveCard {
                             RillSwitchListItem(
                                 headline   = stringResource(R.string.fullscreen_calls),
-                                supporting = stringResource(R.string.fullscreen_calls_subtitle),
-                                leadingIcon = Icons.Rounded.CropFree,
+                                supporting = if (fullscreenCalls) stringResource(R.string.fullscreen_calls_subtitle) else stringResource(R.string.fullscreen_calls_off_subtitle),
+                                leadingIcon = if (fullscreenCalls) Icons.Rounded.CropFree else Icons.Rounded.AdUnits,
                                 iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
                                 checked = fullscreenCalls,
                                 onCheckedChange = {
                                     fullscreenCalls = it
-                                    prefs.setBoolean(PreferenceManager.KEY_ALWAYS_FULLSCREEN_CALLS, it)
+                                    prefs.setAlwaysFullscreenCalls(it)
                                 }
                             )
+
+                            AnimatedVisibility(
+                                visible = !fullscreenCalls,
+                                enter = expandVertically(spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMediumLow)) + fadeIn(tween(220)),
+                                exit = shrinkVertically(tween(180)) + fadeOut(tween(140))
+                            ) {
+                                RillSwitchListItem(
+                                    headline   = stringResource(R.string.open_call_screen_from_notification),
+                                    supporting = stringResource(R.string.open_call_screen_from_notification_subtitle),
+                                    leadingIcon = if (openCallScreen) Icons.Rounded.VideogameAssetOff else Icons.Rounded.VideogameAsset,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
+                                    checked = openCallScreen,
+                                    onCheckedChange = {
+                                        openCallScreen = it
+                                        prefs.setOpenCallScreen(it)
+                                    }
+                                )
+                            }
                             RillSwitchListItem(
                                 headline   = stringResource(R.string.pocket_mode_prevention),
                                 supporting = stringResource(R.string.pocket_mode_prevention_subtitle),
@@ -274,7 +304,12 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
                                     }
                                 }
                             )
-                            if (busyMode) {
+
+                            AnimatedVisibility(
+                                visible = busyMode,
+                                enter = expandVertically(spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMediumLow)) + fadeIn(tween(220)),
+                                exit = shrinkVertically(tween(180)) + fadeOut(tween(140))
+                            ) {
                                 RillSwitchListItem(
                                     headline = stringResource(R.string.busy_mode_message),
                                     supporting = busyMessage.ifEmpty { defaultBusyMsg },

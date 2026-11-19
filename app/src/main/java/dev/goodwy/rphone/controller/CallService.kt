@@ -495,7 +495,7 @@ class CallService : InCallService() {
             updateRingingAlerts()
             updateNotification(call)
 
-            val fullscreenCalls = preferenceManager.getBoolean(PreferenceManager.KEY_ALWAYS_FULLSCREEN_CALLS, false)
+            val fullscreenCalls = preferenceManager.isAlwaysFullscreenCalls()
             if (call.state != Call.STATE_RINGING || fullscreenCalls) {
                 val intent = Intent(this@CallService, CallActivity::class.java).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP)
@@ -554,11 +554,13 @@ class CallService : InCallService() {
                     launchBiometricCallActivity("ANSWER")
                 } else {
                     callRepository.answerCall()
-                    val intent = Intent(this, CallActivity::class.java).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-                        putExtra("ANSWERED_FROM_NOTIFICATION", true)
+                    if (isDeviceLocked() || preferenceManager.isOpenCallScreen()) {
+                        val intent = Intent(this, CallActivity::class.java).apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                            putExtra("ANSWERED_FROM_NOTIFICATION", true)
+                        }
+                        startActivity(intent)
                     }
-                    startActivity(intent)
                 }
             }
             "DECLINE_CALL" -> {

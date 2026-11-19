@@ -50,6 +50,7 @@
     <string name="details">جزئیات</string>
     <string name="saved">ذخیره شد</string>
     <string name="save_failed">ذخیره ناموفق بود</string>
+    <string name="warning">هشدار</string>
 
     <!-- Search -->
     <string name="search">جستجو</string>
@@ -262,6 +263,9 @@
     <string name="auto_speaker_subtitle">به طور خودکار به بلندگو تغییر دهید زمانی که گوشی از گوش دور است، و زمانی که نزدیک است به گوشی برگردید</string>
     <string name="fullscreen_calls">تماس‌های تمام صفحه</string>
     <string name="fullscreen_calls_subtitle">تماس‌های ورودی همیشه در حالت تمام صفحه نمایش داده می‌شوند</string>
+    <string name="fullscreen_calls_off_subtitle">تماس‌های ورودی در صورت امکان به‌صورت اعلان نمایش داده می‌شوند</string>
+    <string name="open_call_screen_from_notification">باز کردن صفحه تماس پس از پاسخ</string>
+    <string name="open_call_screen_from_notification_subtitle">نمایش صفحه تماس هنگام پاسخ دادن از اعلان. برای ماندن در برنامه فعلی خاموش کنید</string>
 
     <!-- Speed dial -->
     <string name="settings_speed_dial_title">شماره‌گیری سریع</string>
@@ -766,13 +770,51 @@
     <string name="backup_auto_backup_enabled">فعال · پشتیبان‌گیری‌های خودکار زمان‌بندی شده</string>
     <string name="backup_auto_backup_disabled">غیرفعال · پیکربندی پشتیبان‌گیری خودکار</string>
 
+    <!-- Auto backup screen: main -->
+    <string name="auto_backup_settings_title">تنظیمات پشتیبان‌گیری خودکار</string>
+    <string name="auto_backup_enabled_supporting">پشتیبان‌گیری خودکار روشن است</string>
+    <string name="auto_backup_disabled_supporting">برای ایجاد پشتیبان‌های خودکار از داده‌های خود فعال کنید</string>
+
+    <!-- Auto backup screen: folder -->
+    <string name="auto_backup_folder_title">پوشه پشتیبان</string>
+    <string name="auto_backup_folder_none">هیچ پوشه‌ای انتخاب نشده</string>
+    <string name="auto_backup_folder_none_hint">هیچ پوشه‌ای انتخاب نشده • برای انتخاب پوشه پشتیبان ضربه بزنید</string>
+
+    <!-- Auto backup screen: what to backup -->
+    <string name="auto_backup_what_title">چه چیزی پشتیبان‌گیری شود</string>
+    <string name="auto_backup_what_summary_none">هیچ‌چیز انتخاب نشده</string>
+
+    <!-- Auto backup screen: interval -->
+    <string name="auto_backup_every_title">پشتیبان‌گیری هر:</string>
+    <string name="auto_backup_interval_value_label">مقدار</string>
+    <plurals name="auto_backup_unit_minutes">
+        <item quantity="one">دقیقه</item>
+        <item quantity="other">دقیقه</item>
+    </plurals>
+    <plurals name="auto_backup_unit_hours">
+        <item quantity="one">ساعت</item>
+        <item quantity="other">ساعت</item>
+    </plurals>
+    <plurals name="auto_backup_unit_days">
+        <item quantity="one">روز</item>
+        <item quantity="other">روز</item>
+    </plurals>
+
+    <!-- Auto backup screen: auto delete section -->
+    <string name="auto_backup_delete_section">حذف خودکار پشتیبان‌ها</string>
+    <string name="auto_backup_delete_by_time_title">حذف خودکار پشتیبان‌ها بر اساس سن</string>
+    <string name="auto_backup_delete_by_time_supporting">حذف پشتیبان‌های قدیمی‌تر از:</string>
+    <string name="auto_backup_delete_amount_label">مقدار</string>
+    <string name="auto_backup_delete_by_count_title">حذف خودکار پشتیبان‌ها بر اساس تعداد</string>
+    <string name="auto_backup_delete_by_count_supporting">حداکثر تعداد پشتیبان برای نگهداری:</string>
+    <string name="auto_backup_delete_count_label">تعداد</string>
+
     <!-- Backup screen: restore tab -->
     <string name="restore_select_file_hint">یک فایل پشتیبان .rphone از حافظه خود انتخاب کنید</string>
     <string name="restore_no_file_selected">هیچ فایل پشتیبانی انتخاب نشده</string>
-    <string name="restore_tap_to_choose">برای انتخاب فایل پشتیبان جهت بازیابی، به پایین ضربه بزنید</string>
+    <string name="restore_tap_to_choose">برای انتخاب فایل پشتیبان جهت بازیابی ضربه بزنید</string>
+    <string name="restore_tap_to_choose_another">برای انتخاب فایل پشتیبان دیگر جهت بازیابی ضربه بزنید</string>
     <string name="restore_file_size">%1$d کیلوبایت</string>
-    <string name="restore_browse_button">مرور فایل پشتیبان</string>
-    <string name="restore_choose_another_button">انتخاب فایل دیگر</string>
     <string name="restore_select_items_hint">موارد قابل بازیابی از این فایل را انتخاب کنید</string>
     <string name="restore_not_in_backup">در این پشتیبان موجود نیست</string>
     <string name="restore_selected_button">بازیابی موارد انتخاب‌شده</string>

@@ -6,6 +6,7 @@ import android.app.SearchManager
 import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -17,6 +18,7 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.BlockedNumberContract.BlockedNumbers
 import android.provider.ContactsContract
+import android.provider.OpenableColumns
 import android.telecom.PhoneAccountHandle
 import android.telecom.TelecomManager
 import android.telephony.TelephonyManager
@@ -34,6 +36,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.net.toUri
 import dev.goodwy.rphone.R
+import java.io.File
 
 fun makeCall(context: Context, number: String, accountHandle: PhoneAccountHandle? = null, contactId: String? = null) {
     val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
@@ -689,3 +692,33 @@ fun HtmlTextView(
 }
 
 fun String.forceLtr(): String = "\u200E$this"
+
+fun Context.getFileName(uri: Uri): String? {
+    return when (uri.scheme) {
+        ContentResolver.SCHEME_CONTENT -> {
+            contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                    if (nameIndex >= 0) cursor.getString(nameIndex) else null
+                } else null
+            }
+        }
+        ContentResolver.SCHEME_FILE -> File(uri.path ?: "").name
+        else -> uri.lastPathSegment
+    }
+}
+
+fun Context.getFileSize(uri: Uri): Long? {
+    return when (uri.scheme) {
+        ContentResolver.SCHEME_CONTENT -> {
+            contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+                    if (sizeIndex >= 0 && !cursor.isNull(sizeIndex)) cursor.getLong(sizeIndex) else null
+                } else null
+            }
+        }
+        ContentResolver.SCHEME_FILE -> File(uri.path ?: "").length().takeIf { it > 0 }
+        else -> null
+    }
+}

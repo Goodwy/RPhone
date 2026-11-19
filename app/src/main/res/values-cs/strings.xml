@@ -49,6 +49,7 @@
     <string name="details">Podrobnosti</string>
     <string name="saved">Uloženo</string>
     <string name="save_failed">Uložení se nezdařilo</string>
+    <string name="warning">Upozornění</string>
 
     <!-- Search -->
     <string name="search">Hledat</string>
@@ -261,6 +262,9 @@
     <string name="auto_speaker_subtitle">Automaticky přepnout na hlasitý reproduktor, když je telefon daleko od ucha, a zpět na sluchátko, když je blízko</string>
     <string name="fullscreen_calls">Hovory na celou obrazovku</string>
     <string name="fullscreen_calls_subtitle">Příchozí hovory se vždy zobrazují na celou obrazovku</string>
+    <string name="fullscreen_calls_off_subtitle">Příchozí hovory se zobrazují jako oznámení, kdykoli je to možné</string>
+    <string name="open_call_screen_from_notification">Otevřít obrazovku hovoru po přijetí</string>
+    <string name="open_call_screen_from_notification_subtitle">Zobrazit obrazovku hovoru při přijetí z oznámení. Vypněte, abyste zůstali v aktuální aplikaci</string>
 
     <!-- Speed dial -->
     <string name="settings_speed_dial_title">Rychlé vytáčení</string>
@@ -773,13 +777,57 @@
     <string name="backup_auto_backup_enabled">Zapnuto · Automatické zálohy naplánovány</string>
     <string name="backup_auto_backup_disabled">Vypnuto · Nastavit automatické zálohy</string>
 
+    <!-- Auto backup screen: main -->
+    <string name="auto_backup_settings_title">Nastavení automatické zálohy</string>
+    <string name="auto_backup_enabled_supporting">Automatická záloha je zapnuta</string>
+    <string name="auto_backup_disabled_supporting">Zapněte pro automatické vytváření záloh vašich dat</string>
+
+    <!-- Auto backup screen: folder -->
+    <string name="auto_backup_folder_title">Složka záloh</string>
+    <string name="auto_backup_folder_none">Není vybrána žádná složka</string>
+    <string name="auto_backup_folder_none_hint">Není vybrána žádná složka • Klepnutím vyberte složku záloh</string>
+
+    <!-- Auto backup screen: what to backup -->
+    <string name="auto_backup_what_title">Co zálohovat</string>
+    <string name="auto_backup_what_summary_none">Nic nevybráno</string>
+
+    <!-- Auto backup screen: interval -->
+    <string name="auto_backup_every_title">Zálohovat každých:</string>
+    <string name="auto_backup_interval_value_label">Hodnota</string>
+    <plurals name="auto_backup_unit_minutes">
+        <item quantity="one">Minuta</item>
+        <item quantity="few">Minuty</item>
+        <item quantity="many">Minuty</item>
+        <item quantity="other">Minut</item>
+    </plurals>
+    <plurals name="auto_backup_unit_hours">
+        <item quantity="one">Hodina</item>
+        <item quantity="few">Hodiny</item>
+        <item quantity="many">Hodiny</item>
+        <item quantity="other">Hodin</item>
+    </plurals>
+    <plurals name="auto_backup_unit_days">
+        <item quantity="one">Den</item>
+        <item quantity="few">Dny</item>
+        <item quantity="many">Dne</item>
+        <item quantity="other">Dní</item>
+    </plurals>
+
+    <!-- Auto backup screen: auto delete section -->
+    <string name="auto_backup_delete_section">Automatické mazání záloh</string>
+    <string name="auto_backup_delete_by_time_title">Automaticky mazat zálohy podle stáří</string>
+    <string name="auto_backup_delete_by_time_supporting">Mazat zálohy starší než:</string>
+    <string name="auto_backup_delete_amount_label">Množství</string>
+    <string name="auto_backup_delete_by_count_title">Automaticky mazat zálohy podle počtu</string>
+    <string name="auto_backup_delete_by_count_supporting">Maximální počet záloh k uchování:</string>
+    <string name="auto_backup_delete_count_label">Počet</string>
+
     <!-- Backup screen: restore tab -->
     <string name="restore_select_file_hint">Vyberte soubor zálohy .rphone z úložiště</string>
     <string name="restore_no_file_selected">Není vybrán žádný soubor zálohy</string>
-    <string name="restore_tap_to_choose">Klepnutím níže vyberte soubor zálohy k obnovení</string>
+    <string name="restore_tap_to_choose">Klepnutím vyberte soubor zálohy k obnovení</string>
+    <string name="restore_tap_to_choose_another">Klepnutím vyberte jiný soubor zálohy k obnovení</string>
     <string name="restore_file_size">%1$d KB</string>
-    <string name="restore_browse_button">Procházet soubor zálohy</string>
-    <string name="restore_choose_another_button">Vybrat jiný soubor</string>
     <string name="restore_select_items_hint">Vyberte položky k obnovení z tohoto souboru</string>
     <string name="restore_not_in_backup">V této záloze není</string>
     <string name="restore_selected_button">Obnovit vybrané</string>

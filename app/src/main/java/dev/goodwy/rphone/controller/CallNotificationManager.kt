@@ -123,7 +123,7 @@ class CallNotificationManager(
         high: Boolean = false,
         suppressHeadsUp: Boolean = false
     ): Notification {
-        val fullscreenCalls = preferenceManager.getBoolean(PreferenceManager.KEY_ALWAYS_FULLSCREEN_CALLS, false)
+        val fullscreenCalls = preferenceManager.isAlwaysFullscreenCalls()
         val isRinging = call.state == Call.STATE_RINGING
 
         val channelIdToUse: String = when {

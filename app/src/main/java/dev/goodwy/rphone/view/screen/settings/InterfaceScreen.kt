@@ -463,8 +463,8 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                 )
                                 AnimatedVisibility(
                                     visible = !dynamicColors,
-                                    enter = fadeIn(tween(250)) + expandVertically(tween(250)),
-                                    exit = fadeOut(tween(200)) + shrinkVertically(tween(200))
+                                    enter = expandVertically(spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMediumLow)) + fadeIn(tween(220)),
+                                    exit = shrinkVertically(tween(180)) + fadeOut(tween(140))
                                 ) {
                                     Column(modifier = Modifier
                                         .background(
@@ -614,9 +614,6 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                                     }
                                             }) { Icon(Icons.Default.Refresh, "Revert font", tint = color_call_end) }
                                         }
-//                                        IconButton(onClick = { fontPickerLauncher.launch("font/ttf") }) {
-//                                            Icon(Icons.Default.FolderOpen, "Pick font", tint = MaterialTheme.colorScheme.primary)
-//                                        }
                                     }
                                 }
 
@@ -678,33 +675,6 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                         prefs.setInt(PreferenceManager.KEY_CARD_ROUNDNESS, cardRoundness)
                                     }
                                 )
-
-                                RillListItem(
-                                    headline = stringResource(R.string.app_name_change),
-                                    supporting = appNamePresets.firstOrNull { it.key == selectedAppNameKey }?.label ?: stringResource(R.string.app_launcher_name),
-                                    leadingIcon = Icons.AutoMirrored.Rounded.Label,
-                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
-                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
-                                    onClick = { showAppNameDialog = true }
-                                )
-
-                                val icons = remember { buildIcons(context) }
-
-                                var selectedKey by remember {
-                                    mutableStateOf(prefs.getString(KEY_SELECTED_APP_ICON, "default") ?: "default")
-                                }
-                                val iconBitmaps = remember {
-                                    val entry = icons.firstOrNull { it.key == selectedKey }
-                                    if (entry != null) loadBitmapFromRes(context, entry.previewRes)?.asImageBitmap() else null
-                                }
-                                RillListItem(
-                                    headline = stringResource(R.string.app_icon),
-                                    supporting = stringResource(R.string.app_icon_subtitle),
-                                    leadingImageBitmap = iconBitmaps,
-                                    onClick = {
-                                        navigator.navigate(AppIconScreenDestination)
-                                    }
-                                )
                             }
                         }
                     }
@@ -743,8 +713,8 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                     )
                                     AnimatedVisibility(
                                         visible = liquidGlass,
-                                        enter = fadeIn(tween(250)) + expandVertically(tween(250)),
-                                        exit = fadeOut(tween(200)) + shrinkVertically(tween(200))
+                                        enter = expandVertically(spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMediumLow)) + fadeIn(tween(220)),
+                                        exit = shrinkVertically(tween(180)) + fadeOut(tween(140))
                                     ) {
                                         RillListItem(
                                             headline = stringResource(R.string.liquid_glass_elements),
@@ -759,8 +729,8 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
 
                                     AnimatedVisibility(
                                         visible = !liquidGlass,
-                                        enter = fadeIn(tween(250)) + expandVertically(tween(250)),
-                                        exit = fadeOut(tween(200)) + shrinkVertically(tween(200))
+                                        enter = expandVertically(spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMediumLow)) + fadeIn(tween(220)),
+                                        exit = shrinkVertically(tween(180)) + fadeOut(tween(140))
                                     ) {
                                         RillSwitchListItem(
                                             headline = stringResource(R.string.material_blur_effects),
@@ -780,8 +750,8 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                     }
                                     AnimatedVisibility(
                                         visible = blurEffects && !liquidGlass,
-                                        enter = fadeIn(tween(250)) + expandVertically(tween(250)),
-                                        exit = fadeOut(tween(200)) + shrinkVertically(tween(200))
+                                        enter = expandVertically(spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMediumLow)) + fadeIn(tween(220)),
+                                        exit = shrinkVertically(tween(180)) + fadeOut(tween(140))
                                     ) {
                                         RillListItem(
                                             headline = stringResource(R.string.blur_effect_elements),
@@ -795,8 +765,8 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                     }
                                     AnimatedVisibility(
                                         visible = liquidGlass || blurEffects,
-                                        enter = fadeIn(tween(250)) + expandVertically(tween(250)),
-                                        exit = fadeOut(tween(200)) + shrinkVertically(tween(200))
+                                        enter = expandVertically(spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMediumLow)) + fadeIn(tween(220)),
+                                        exit = shrinkVertically(tween(180)) + fadeOut(tween(140))
                                     ) {
                                         RillSliderListItem(
                                             headline = stringResource(R.string.blur_intensity),
@@ -922,6 +892,31 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                             SettingsSectionLabel(stringResource(R.string.other))
                             RillExpressiveCard {
                                 RillListItem(
+                                    headline = stringResource(R.string.app_name_change),
+                                    supporting = appNamePresets.firstOrNull { it.key == selectedAppNameKey }?.label ?: stringResource(R.string.app_launcher_name),
+                                    leadingIcon = Icons.AutoMirrored.Rounded.Label,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+                                    onClick = { showAppNameDialog = true }
+                                )
+
+                                val icons = remember { buildIcons(context) }
+                                var selectedKey by remember {
+                                    mutableStateOf(prefs.getString(KEY_SELECTED_APP_ICON, "default") ?: "default")
+                                }
+                                val iconBitmaps = remember {
+                                    val entry = icons.firstOrNull { it.key == selectedKey }
+                                    if (entry != null) loadBitmapFromRes(context, entry.previewRes)?.asImageBitmap() else null
+                                }
+                                RillListItem(
+                                    headline = stringResource(R.string.app_icon),
+                                    supporting = stringResource(R.string.app_icon_subtitle),
+                                    leadingImageBitmap = iconBitmaps,
+                                    onClick = {
+                                        navigator.navigate(AppIconScreenDestination)
+                                    }
+                                )
+                                RillListItem(
                                     headline = stringResource(R.string.avatars_settings),
                                     supporting = stringResource(R.string.avatars_settings_subtitle),
                                     leadingIcon = Icons.Rounded.AccountCircle,
@@ -929,18 +924,6 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                     iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
                                     trailingIcon = Icons.Default.ChevronRight,
                                     onClick = { navigator.navigate(AvatarsPreferenceScreenDestination) }
-                                )
-                                RillSwitchListItem(
-                                    headline = stringResource(R.string.hide_voice_search),
-                                    supporting = stringResource(R.string.hide_voice_search_subtitle),
-                                    leadingIcon = if (hideVoiceSearch) Icons.Rounded.MicNone else Icons.Rounded.Mic,
-                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
-                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
-                                    checked = hideVoiceSearch,
-                                    onCheckedChange = {
-                                        hideVoiceSearch = it
-                                        prefs.setBoolean(PreferenceManager.KEY_HIDE_VOICE_SEARCH, it)
-                                    }
                                 )
                                 RillSwitchListItem(
                                     headline = stringResource(R.string.settings_include_day_of_week),
@@ -952,6 +935,18 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                     onCheckedChange = {
                                         includeDayOfWeek = it
                                         prefs.setBoolean(PreferenceManager.KEY_INCLUDE_DAY_OF_WEEK, it)
+                                    }
+                                )
+                                RillSwitchListItem(
+                                    headline = stringResource(R.string.hide_voice_search),
+                                    supporting = stringResource(R.string.hide_voice_search_subtitle),
+                                    leadingIcon = if (hideVoiceSearch) Icons.Rounded.MicNone else Icons.Rounded.Mic,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+                                    checked = hideVoiceSearch,
+                                    onCheckedChange = {
+                                        hideVoiceSearch = it
+                                        prefs.setBoolean(PreferenceManager.KEY_HIDE_VOICE_SEARCH, it)
                                     }
                                 )
                             }

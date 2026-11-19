@@ -49,6 +49,7 @@
     <string name="details">Details</string>
     <string name="saved">Gespeichert</string>
     <string name="save_failed">Speichern fehlgeschlagen</string>
+    <string name="warning">Warnung</string>
 
     <!-- Search -->
     <string name="search">Suche</string>
@@ -262,6 +263,9 @@
     <string name="auto_speaker_subtitle">Automatisch auf Lautsprecher umschalten, wenn das Telefon vom Ohr entfernt ist, und zurück zum Hörer, wenn es nah ist</string>
     <string name="fullscreen_calls">Vollbild-Anrufe</string>
     <string name="fullscreen_calls_subtitle">Eingehende Anrufe werden immer im Vollbildmodus angezeigt</string>
+    <string name="fullscreen_calls_off_subtitle">Eingehende Anrufe werden nach Möglichkeit als Benachrichtigung angezeigt</string>
+    <string name="open_call_screen_from_notification">Anrufbildschirm nach dem Annehmen öffnen</string>
+    <string name="open_call_screen_from_notification_subtitle">Den Anrufbildschirm anzeigen, wenn Sie über eine Benachrichtigung antworten. Deaktivieren, um in der aktuellen App zu bleiben</string>
 
     <!-- Speed dial -->
     <string name="settings_speed_dial_title">Kurzwahl</string>
@@ -766,13 +770,51 @@
     <string name="backup_auto_backup_enabled">Aktiviert · Automatische Backups geplant</string>
     <string name="backup_auto_backup_disabled">Deaktiviert · Automatische Backups konfigurieren</string>
 
+    <!-- Auto backup screen: main -->
+    <string name="auto_backup_settings_title">Einstellungen für automatisches Backup</string>
+    <string name="auto_backup_enabled_supporting">Automatisches Backup ist eingeschaltet</string>
+    <string name="auto_backup_disabled_supporting">Aktivieren, um automatische Backups Ihrer Daten zu erstellen</string>
+
+    <!-- Auto backup screen: folder -->
+    <string name="auto_backup_folder_title">Backup-Ordner</string>
+    <string name="auto_backup_folder_none">Kein Ordner ausgewählt</string>
+    <string name="auto_backup_folder_none_hint">Kein Ordner ausgewählt • Tippen, um einen Backup-Ordner auszuwählen</string>
+
+    <!-- Auto backup screen: what to backup -->
+    <string name="auto_backup_what_title">Was gesichert werden soll</string>
+    <string name="auto_backup_what_summary_none">Nichts ausgewählt</string>
+
+    <!-- Auto backup screen: interval -->
+    <string name="auto_backup_every_title">Backup alle:</string>
+    <string name="auto_backup_interval_value_label">Wert</string>
+    <plurals name="auto_backup_unit_minutes">
+        <item quantity="one">Minute</item>
+        <item quantity="other">Minuten</item>
+    </plurals>
+    <plurals name="auto_backup_unit_hours">
+        <item quantity="one">Stunde</item>
+        <item quantity="other">Stunden</item>
+    </plurals>
+    <plurals name="auto_backup_unit_days">
+        <item quantity="one">Tag</item>
+        <item quantity="other">Tage</item>
+    </plurals>
+
+    <!-- Auto backup screen: auto delete section -->
+    <string name="auto_backup_delete_section">Backups automatisch löschen</string>
+    <string name="auto_backup_delete_by_time_title">Backups nach Alter automatisch löschen</string>
+    <string name="auto_backup_delete_by_time_supporting">Backups löschen, die älter sind als:</string>
+    <string name="auto_backup_delete_amount_label">Menge</string>
+    <string name="auto_backup_delete_by_count_title">Backups nach Anzahl automatisch löschen</string>
+    <string name="auto_backup_delete_by_count_supporting">Maximale Anzahl aufzubewahrender Backups:</string>
+    <string name="auto_backup_delete_count_label">Anzahl</string>
+
     <!-- Backup screen: restore tab -->
     <string name="restore_select_file_hint">Wählen Sie eine .rphone-Backup-Datei aus Ihrem Speicher</string>
     <string name="restore_no_file_selected">Keine Backup-Datei ausgewählt</string>
-    <string name="restore_tap_to_choose">Tippen Sie unten, um eine Backup-Datei zum Wiederherstellen auszuwählen</string>
+    <string name="restore_tap_to_choose">Tippen Sie, um eine Backup-Datei zum Wiederherstellen auszuwählen</string>
+    <string name="restore_tap_to_choose_another">Tippen Sie, um eine andere Backup-Datei zum Wiederherstellen auszuwählen</string>
     <string name="restore_file_size">%1$d KB</string>
-    <string name="restore_browse_button">Backup-Datei durchsuchen</string>
-    <string name="restore_choose_another_button">Andere Datei wählen</string>
     <string name="restore_select_items_hint">Wählen Sie die Elemente aus, die aus dieser Datei wiederhergestellt werden sollen</string>
     <string name="restore_not_in_backup">In diesem Backup nicht vorhanden</string>
     <string name="restore_selected_button">Ausgewählte wiederherstellen</string>

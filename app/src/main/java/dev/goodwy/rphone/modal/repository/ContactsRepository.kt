@@ -31,6 +31,7 @@ import dev.goodwy.rphone.controller.util.CallingCardStore
 import dev.goodwy.rphone.controller.util.ContactDumpUtils
 import dev.goodwy.rphone.controller.util.areNumbersEqual
 import dev.goodwy.rphone.controller.util.deduplicateNumbers
+import dev.goodwy.rphone.controller.util.deduplicatePhoneDetails
 import dev.goodwy.rphone.device_only
 import dev.goodwy.rphone.modal.data.accountSourceKey
 import dev.goodwy.rphone.modal.db.PrivateContactEntity
@@ -238,15 +239,15 @@ class ContactsRepository(
 
                     val updatedContact = when (mimeType) {
                         CommonDataKinds.Phone.CONTENT_ITEM_TYPE -> {
-                            if (data1.isNotBlank() && current.phoneNumbers.none { areNumbersEqual(it, data1) }) {
+                            if (data1.isNotBlank()) {
                                 val isPrimary = cursor.getInt(isPrimaryIdx) == 1 || cursor.getInt(isSuperPrimaryIdx) == 1
 
                                 current.copy(
-                                    phoneNumbers = current.phoneNumbers + data1,
-                                    phoneDetails = (current.phoneDetails + ContactPhoneDetail(
+                                    phoneNumbers = deduplicateNumbers(current.phoneNumbers + data1),
+                                    phoneDetails = deduplicatePhoneDetails(current.phoneDetails + ContactPhoneDetail(
                                         number = data1,
                                         isPrimary = isPrimary
-                                    )).distinctBy { it.number }
+                                    ))
                                 )
                             } else current
                         }
@@ -447,7 +448,7 @@ class ContactsRepository(
 
                             contactsMap[id] = contact.copy(
                                 phoneNumbers = deduplicateNumbers(contact.phoneNumbers + data1),
-                                phoneDetails = (contact.phoneDetails + phoneDetail).distinctBy { it.number }
+                                phoneDetails = deduplicatePhoneDetails(contact.phoneDetails + phoneDetail)
                             )
                         }
                         CommonDataKinds.Email.CONTENT_ITEM_TYPE -> {
@@ -659,7 +660,7 @@ class ContactsRepository(
 
                             currentContact.copy(
                                 phoneNumbers = deduplicateNumbers(currentContact.phoneNumbers + data1),
-                                phoneDetails = (currentContact.phoneDetails + phoneDetail).distinctBy { it.number }
+                                phoneDetails = deduplicatePhoneDetails(currentContact.phoneDetails + phoneDetail)
                             )
                         }
                         CommonDataKinds.Email.CONTENT_ITEM_TYPE -> {
@@ -873,6 +874,8 @@ class ContactsRepository(
 
         val ops = ArrayList<ContentProviderOperation>()
         val photoBytes = contact.photoUri?.let { getPhotoBytes(it) }
+        val dedupPhoneDetails = deduplicatePhoneDetails(contact.phoneDetails)
+        val dedupPhoneNumbers = deduplicateNumbers(contact.phoneNumbers)
 
         if (contact.id.isEmpty() || contact.id == "0") {
             // New Contact
@@ -947,8 +950,8 @@ class ContactsRepository(
             }
 
             // Phone numbers with details
-            if (contact.phoneDetails.isNotEmpty()) {
-                contact.phoneDetails.forEach { phoneDetail ->
+            if (dedupPhoneDetails.isNotEmpty()) {
+                dedupPhoneDetails.forEach { phoneDetail ->
                     ops.add(
                         ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
                             .withValueBackReference(
@@ -971,7 +974,7 @@ class ContactsRepository(
                 }
             } else {
                 // Private users don't have phoneDetails
-                contact.phoneNumbers.forEach { number ->
+                dedupPhoneNumbers.forEach { number ->
                     ops.add(
                         ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
                             .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactIndex)
@@ -1122,8 +1125,8 @@ class ContactsRepository(
                 }
 
                 // Add phone numbers
-                if (contact.phoneDetails.isNotEmpty()) {
-                contact.phoneDetails.forEach { phoneDetail ->
+                if (dedupPhoneDetails.isNotEmpty()) {
+                    dedupPhoneDetails.forEach { phoneDetail ->
                     ops.add(
                         ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
                             .withValue(ContactsContract.Data.RAW_CONTACT_ID, rawContactId)
@@ -1137,7 +1140,7 @@ class ContactsRepository(
                 }
                 } else {
                     // Private users don't have phoneDetails
-                    contact.phoneNumbers.forEach { number ->
+                    dedupPhoneNumbers.forEach { number ->
                         ops.add(
                             ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
                                 .withValue(ContactsContract.Data.RAW_CONTACT_ID, rawContactId)
@@ -2504,7 +2507,7 @@ class ContactsRepository(
 
                             currentContact.copy(
                                 phoneNumbers = deduplicateNumbers(currentContact.phoneNumbers + data1),
-                                phoneDetails = (currentContact.phoneDetails + phoneDetail).distinctBy { it.number }
+                                phoneDetails = deduplicatePhoneDetails(currentContact.phoneDetails + phoneDetail)
                             )
                         }
                         CommonDataKinds.Email.CONTENT_ITEM_TYPE -> {
@@ -2729,8 +2732,10 @@ class ContactsRepository(
                 .build()
         )
 
-        if (contact.phoneDetails.isNotEmpty()) {
-            contact.phoneDetails.forEach { phoneDetail ->
+        val dedupPhoneDetails = deduplicatePhoneDetails(contact.phoneDetails)
+        val dedupPhoneNumbers = deduplicateNumbers(contact.phoneNumbers)
+        if (dedupPhoneDetails.isNotEmpty()) {
+            dedupPhoneDetails.forEach { phoneDetail ->
                 ops.add(
                     ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
                         .withValue(ContactsContract.Data.RAW_CONTACT_ID, rawContactId)
@@ -2742,8 +2747,8 @@ class ContactsRepository(
                         .build()
                 )
             }
-        } else if (contact.phoneNumbers.isNotEmpty()) {
-            contact.phoneNumbers.forEach { number ->
+        } else if (dedupPhoneNumbers.isNotEmpty()) {
+            dedupPhoneNumbers.forEach { number ->
                 ops.add(
                     ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
                         .withValue(ContactsContract.Data.RAW_CONTACT_ID, rawContactId)

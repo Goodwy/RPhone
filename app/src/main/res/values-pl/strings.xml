@@ -49,6 +49,7 @@
     <string name="details">Szczegóły</string>
     <string name="saved">Zapisano</string>
     <string name="save_failed">Nie udało się zapisać</string>
+    <string name="warning">Ostrzeżenie</string>
 
     <!-- Search -->
     <string name="search">Szukaj</string>
@@ -262,6 +263,9 @@
     <string name="auto_speaker_subtitle">Automatycznie przełączaj na głośnomówiący, gdy telefon jest oddalony od ucha, i z powrotem na słuchawkę, gdy jest blisko</string>
     <string name="fullscreen_calls">Połączenia na pełnym ekranie</string>
     <string name="fullscreen_calls_subtitle">Połączenia przychodzące są zawsze wyświetlane w trybie pełnoekranowym</string>
+    <string name="fullscreen_calls_off_subtitle">Połączenia przychodzące są wyświetlane jako powiadomienie, gdy to możliwe</string>
+    <string name="open_call_screen_from_notification">Otwieraj ekran połączenia po odebraniu</string>
+    <string name="open_call_screen_from_notification_subtitle">Pokazuj ekran połączenia, gdy odbierzesz z powiadomienia. Wyłącz, aby pozostać w bieżącej aplikacji</string>
 
     <!-- Speed dial -->
     <string name="settings_speed_dial_title">Szybkie wybieranie</string>
@@ -772,13 +776,57 @@
     <string name="backup_auto_backup_enabled">Włączona · Zaplanowano automatyczne kopie</string>
     <string name="backup_auto_backup_disabled">Wyłączona · Skonfiguruj automatyczne kopie</string>
 
+    <!-- Auto backup screen: main -->
+    <string name="auto_backup_settings_title">Ustawienia automatycznej kopii zapasowej</string>
+    <string name="auto_backup_enabled_supporting">Automatyczna kopia zapasowa jest włączona</string>
+    <string name="auto_backup_disabled_supporting">Włącz, aby automatycznie tworzyć kopie zapasowe danych</string>
+
+    <!-- Auto backup screen: folder -->
+    <string name="auto_backup_folder_title">Folder kopii zapasowych</string>
+    <string name="auto_backup_folder_none">Nie wybrano folderu</string>
+    <string name="auto_backup_folder_none_hint">Nie wybrano folderu • Dotknij, aby wybrać folder kopii zapasowych</string>
+
+    <!-- Auto backup screen: what to backup -->
+    <string name="auto_backup_what_title">Co kopiować</string>
+    <string name="auto_backup_what_summary_none">Nic nie wybrano</string>
+
+    <!-- Auto backup screen: interval -->
+    <string name="auto_backup_every_title">Twórz kopię co:</string>
+    <string name="auto_backup_interval_value_label">Wartość</string>
+    <plurals name="auto_backup_unit_minutes">
+        <item quantity="one">Minutę</item>
+        <item quantity="few">Minuty</item>
+        <item quantity="many">Minut</item>
+        <item quantity="other">Minuty</item>
+    </plurals>
+    <plurals name="auto_backup_unit_hours">
+        <item quantity="one">Godzinę</item>
+        <item quantity="few">Godziny</item>
+        <item quantity="many">Godzin</item>
+        <item quantity="other">Godziny</item>
+    </plurals>
+    <plurals name="auto_backup_unit_days">
+        <item quantity="one">Dzień</item>
+        <item quantity="few">Dni</item>
+        <item quantity="many">Dni</item>
+        <item quantity="other">Dnia</item>
+    </plurals>
+
+    <!-- Auto backup screen: auto delete section -->
+    <string name="auto_backup_delete_section">Automatyczne usuwanie kopii</string>
+    <string name="auto_backup_delete_by_time_title">Automatycznie usuwaj kopie według wieku</string>
+    <string name="auto_backup_delete_by_time_supporting">Usuwaj kopie starsze niż:</string>
+    <string name="auto_backup_delete_amount_label">Ilość</string>
+    <string name="auto_backup_delete_by_count_title">Automatycznie usuwaj kopie według liczby</string>
+    <string name="auto_backup_delete_by_count_supporting">Maksymalna liczba kopii do zachowania:</string>
+    <string name="auto_backup_delete_count_label">Liczba</string>
+
     <!-- Backup screen: restore tab -->
     <string name="restore_select_file_hint">Wybierz plik kopii zapasowej .rphone z pamięci</string>
     <string name="restore_no_file_selected">Nie wybrano pliku kopii zapasowej</string>
-    <string name="restore_tap_to_choose">Dotknij poniżej, aby wybrać plik do przywrócenia</string>
+    <string name="restore_tap_to_choose">Dotknij, aby wybrać plik kopii zapasowej do przywrócenia</string>
+    <string name="restore_tap_to_choose_another">Dotknij, aby wybrać inny plik kopii zapasowej do przywrócenia</string>
     <string name="restore_file_size">%1$d KB</string>
-    <string name="restore_browse_button">Przeglądaj plik kopii</string>
-    <string name="restore_choose_another_button">Wybierz inny plik</string>
     <string name="restore_select_items_hint">Wybierz elementy do przywrócenia z tego pliku</string>
     <string name="restore_not_in_backup">Brak w tej kopii</string>
     <string name="restore_selected_button">Przywróć wybrane</string>

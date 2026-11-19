@@ -49,6 +49,7 @@
     <string name="details">Detaljer</string>
     <string name="saved">Sparat</string>
     <string name="save_failed">Kunde inte spara</string>
+    <string name="warning">Varning</string>
 
     <!-- Search -->
     <string name="search">Sök</string>
@@ -262,6 +263,9 @@
     <string name="auto_speaker_subtitle">Växla automatiskt till högtalare när telefonen är borta från örat, och tillbaka till hörluren när den är nära</string>
     <string name="fullscreen_calls">Helskärmssamtal</string>
     <string name="fullscreen_calls_subtitle">Inkommande samtal visas alltid i helskärmsläge</string>
+    <string name="fullscreen_calls_off_subtitle">Inkommande samtal visas som en avisering när det är möjligt</string>
+    <string name="open_call_screen_from_notification">Öppna samtalskärmen efter att du svarat</string>
+    <string name="open_call_screen_from_notification_subtitle">Visa samtalskärmen när du svarar från en avisering. Stäng av för att stanna kvar i den aktuella appen</string>
 
     <!-- Speed dial -->
     <string name="settings_speed_dial_title">Snabbuppringning</string>
@@ -766,13 +770,51 @@
     <string name="backup_auto_backup_enabled">Aktiverad · Automatiska säkerhetskopior schemalagda</string>
     <string name="backup_auto_backup_disabled">Inaktiverad · Konfigurera automatiska säkerhetskopior</string>
 
+    <!-- Auto backup screen: main -->
+    <string name="auto_backup_settings_title">Inställningar för automatisk säkerhetskopiering</string>
+    <string name="auto_backup_enabled_supporting">Automatisk säkerhetskopiering är på</string>
+    <string name="auto_backup_disabled_supporting">Aktivera för att skapa automatiska säkerhetskopior av dina data</string>
+
+    <!-- Auto backup screen: folder -->
+    <string name="auto_backup_folder_title">Säkerhetskopiemapp</string>
+    <string name="auto_backup_folder_none">Ingen mapp vald</string>
+    <string name="auto_backup_folder_none_hint">Ingen mapp vald • Tryck för att välja en säkerhetskopiemapp</string>
+
+    <!-- Auto backup screen: what to backup -->
+    <string name="auto_backup_what_title">Vad som ska säkerhetskopieras</string>
+    <string name="auto_backup_what_summary_none">Inget valt</string>
+
+    <!-- Auto backup screen: interval -->
+    <string name="auto_backup_every_title">Säkerhetskopiera var:</string>
+    <string name="auto_backup_interval_value_label">Värde</string>
+    <plurals name="auto_backup_unit_minutes">
+        <item quantity="one">Minut</item>
+        <item quantity="other">Minuter</item>
+    </plurals>
+    <plurals name="auto_backup_unit_hours">
+        <item quantity="one">Timme</item>
+        <item quantity="other">Timmar</item>
+    </plurals>
+    <plurals name="auto_backup_unit_days">
+        <item quantity="one">Dag</item>
+        <item quantity="other">Dagar</item>
+    </plurals>
+
+    <!-- Auto backup screen: auto delete section -->
+    <string name="auto_backup_delete_section">Ta bort säkerhetskopior automatiskt</string>
+    <string name="auto_backup_delete_by_time_title">Ta bort säkerhetskopior automatiskt efter ålder</string>
+    <string name="auto_backup_delete_by_time_supporting">Ta bort säkerhetskopior äldre än:</string>
+    <string name="auto_backup_delete_amount_label">Mängd</string>
+    <string name="auto_backup_delete_by_count_title">Ta bort säkerhetskopior automatiskt efter antal</string>
+    <string name="auto_backup_delete_by_count_supporting">Maximalt antal säkerhetskopior att behålla:</string>
+    <string name="auto_backup_delete_count_label">Antal</string>
+
     <!-- Backup screen: restore tab -->
     <string name="restore_select_file_hint">Välj en .rphone-säkerhetskopiefil från din lagring</string>
     <string name="restore_no_file_selected">Ingen säkerhetskopiefil vald</string>
-    <string name="restore_tap_to_choose">Tryck nedan för att välja en säkerhetskopiefil att återställa</string>
+    <string name="restore_tap_to_choose">Tryck för att välja en säkerhetskopiefil att återställa</string>
+    <string name="restore_tap_to_choose_another">Tryck för att välja en annan säkerhetskopiefil att återställa</string>
     <string name="restore_file_size">%1$d KB</string>
-    <string name="restore_browse_button">Bläddra efter säkerhetskopiefil</string>
-    <string name="restore_choose_another_button">Välj en annan fil</string>
     <string name="restore_select_items_hint">Välj objekt att återställa från denna fil</string>
     <string name="restore_not_in_backup">Finns inte i denna säkerhetskopia</string>
     <string name="restore_selected_button">Återställ valda</string>

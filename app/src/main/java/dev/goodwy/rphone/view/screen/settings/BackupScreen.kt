@@ -12,6 +12,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
@@ -22,27 +23,32 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.StickyNote2
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.rounded.AccessTimeFilled
 import androidx.compose.material.icons.rounded.Backup
+import androidx.compose.material.icons.rounded.CloudDone
+import androidx.compose.material.icons.rounded.CloudSync
 import androidx.compose.material.icons.rounded.PeopleAlt
+import androidx.compose.material.icons.rounded.QuestionMark
 import androidx.compose.material.icons.rounded.Restore
+import androidx.compose.material.icons.rounded.Upload
+import androidx.compose.material.icons.rounded.VolunteerActivism
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import dev.goodwy.rphone.controller.util.BackupManager
@@ -50,15 +56,27 @@ import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.view.components.RillAnimatedSection
 import dev.goodwy.rphone.view.components.RillExpressiveCard
 import dev.goodwy.rphone.view.components.RillSwitchListItem
+import com.ramcosta.composedestinations.generated.destinations.AutoBackupScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.DonateScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.cardCornerExtraSmall
+import dev.goodwy.rphone.controller.PurchaseHelper
+import dev.goodwy.rphone.controller.util.AutoBackupManager
 import dev.goodwy.rphone.controller.util.ContactUtils.getAccountIcon
+import dev.goodwy.rphone.controller.util.getFileName
+import dev.goodwy.rphone.controller.util.getFileSize
 import dev.goodwy.rphone.icons.background_replace
 import dev.goodwy.rphone.view.components.NavigationIcon
+import dev.goodwy.rphone.view.components.RillIconBox
+import dev.goodwy.rphone.view.components.RillListItem
 import dev.goodwy.rphone.view.components.Title
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
+import dev.goodwy.rphone.view.theme.RillMaterialShapes
+import dev.goodwy.rphone.view.theme.color_call_button
+import dev.goodwy.rphone.view.theme.color_call_end
 import dev.goodwy.rphone.view.theme.customColors
+import dev.goodwy.rphone.view.theme.rillPolygonShape
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -66,9 +84,6 @@ import org.koin.compose.koinInject
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
-
-private val ColorGreen = Color(0xFF4CAF50)
-private val ColorRed = Color(0xFFE53935)
 
 private sealed class BackupScreenState {
     object Idle : BackupScreenState()
@@ -93,6 +108,9 @@ fun BackupScreen(
 
     var selectedTab by remember { mutableIntStateOf(initialTab) }
     var screenState by remember { mutableStateOf<BackupScreenState>(BackupScreenState.Idle) }
+    var autoBackupEnabled by remember { mutableStateOf(prefs.isAutoBackupEnabled()) }
+    var folderUriStr by remember { mutableStateOf(prefs.getAutoBackupFolderUri()) }
+    val isFolderSet = !folderUriStr.isNullOrBlank()
 
     // ── Backup options state ──────────────────────────────────────────────────
     var backupSettings by remember { mutableStateOf(true) }
@@ -114,6 +132,9 @@ fun BackupScreen(
     var restoreContacts by remember { mutableStateOf(false) }
     var restorePrivateContacts by remember { mutableStateOf(false) }
     var restoreCallLogs by remember { mutableStateOf(false) }
+
+    var restoreOriginalName by remember { mutableStateOf<String?>(null) }
+    var restoreOriginalSize by remember { mutableStateOf<Long?>(null) }
 
     val hasAnyRestoreSelected = restoreContents != null && (
             (restoreSettings && restoreContents!!.hasSettings) ||
@@ -166,6 +187,9 @@ fun BackupScreen(
         if (uri != null) {
             scope.launch(Dispatchers.IO) {
                 try {
+                    val originalName = context.getFileName(uri) ?: "restore_page_tmp.rphone"
+                    val originalSize = context.getFileSize(uri)
+
                     val tmpFile = File(context.cacheDir, "restore_page_tmp.rphone")
                     context.contentResolver.openInputStream(uri)?.use { input ->
                         tmpFile.outputStream().use { output -> input.copyTo(output) }
@@ -173,6 +197,8 @@ fun BackupScreen(
                     val contents = BackupManager.inspectBackup(tmpFile)
                     withContext(Dispatchers.Main) {
                         selectedRestoreFile = tmpFile
+                        restoreOriginalName = originalName
+                        restoreOriginalSize = originalSize
                         restoreContents = contents
                         restoreSettings = contents.hasSettings
                         restoreCallBackgrounds = contents.hasCallBackgrounds
@@ -249,6 +275,20 @@ fun BackupScreen(
         }
     }
 
+    val purchaseHelper: PurchaseHelper = koinInject()
+    val isPro by purchaseHelper.isPro.collectAsStateWithLifecycle()
+    LaunchedEffect(Unit) {
+        val savedIsProIap = prefs.getBoolean(PreferenceManager.KEY_IS_PRO_IAP, false)
+        val savedIsProSub = prefs.getBoolean(PreferenceManager.KEY_IS_PRO_SUB, false)
+        val savedIsProFoss = prefs.getBoolean(PreferenceManager.KEY_IS_PRO_FOSS, false)
+        if (savedIsProIap || savedIsProSub || savedIsProFoss) {
+            purchaseHelper.setProStatusImmediate(true)
+            purchaseHelper.checkProStatus()
+        } else {
+            purchaseHelper.checkProStatus()
+        }
+    }
+
     val rotation =
         (context.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager).defaultDisplay.rotation
     val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
@@ -275,12 +315,54 @@ fun BackupScreen(
             verticalArrangement = Arrangement.spacedBy(20.dp),
             contentPadding = PaddingValues(16.dp)
         ) {
+            item {
+                RillAnimatedSection(delayMs = 30L) {
+                    RillExpressiveCard {
+                        if (isPro || autoBackupEnabled) {
+                            val isFolderMissing = autoBackupEnabled && !isFolderSet
+                            RillSwitchListItem(
+                                headline = stringResource(R.string.backup_auto_backup_title),
+                                supporting = if (isFolderMissing) stringResource(R.string.auto_backup_folder_none_hint)
+                                            else if (autoBackupEnabled) stringResource(R.string.backup_auto_backup_enabled)
+                                            else stringResource(R.string.backup_auto_backup_disabled),
+                                supportingColor = if (isFolderMissing) MaterialTheme.colorScheme.error else null,
+                                leadingIcon = Icons.Rounded.CloudSync,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
+                                checked = autoBackupEnabled,
+                                onCheckedChange = { checked ->
+                                    autoBackupEnabled = checked
+                                    prefs.setAutoBackupEnabled(checked)
+                                    if (checked) {
+                                        AutoBackupManager.scheduleAutoBackup(context)
+                                    } else {
+                                        AutoBackupManager.cancelAutoBackup(context)
+                                    }
+                                },
+                                onClick = {
+                                    navigator.navigate(AutoBackupScreenDestination())
+                                }
+                            )
+                        } else {
+                            RillListItem(
+                                headline = stringResource(R.string.backup_auto_backup_title),
+                                supporting = stringResource(R.string.backup_auto_backup_disabled),
+                                leadingIcon = Icons.Rounded.CloudSync,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
+                                trailingIcon = Icons.Default.ChevronRight,
+                                onClick = { navigator.navigate(AutoBackupScreenDestination) })
+                        }
+                    }
+                }
+            }
+
             // ── Pill Tab Selector ─────────────────────────────────────────────
             item {
-                RillAnimatedSection(delayMs = 0L) {
+                RillAnimatedSection(delayMs = 60L) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.background(MaterialTheme.colorScheme.surface).fillMaxWidth().padding(bottom = 6.dp)
                     ) {
                         val tabs = listOf(
                             stringResource(R.string.create_backup) to Icons.Rounded.Backup,
@@ -362,7 +444,7 @@ fun BackupScreen(
             // ── Tab Create Backup ──────────────────────────────────────────
             if (selectedTab == 0) {
                 item {
-                    RillAnimatedSection(delayMs = 60L) {
+                    RillAnimatedSection(delayMs = 90L) {
                         Column {
                             Text(
                                 text = stringResource(R.string.select_data_to_backup),
@@ -431,7 +513,7 @@ fun BackupScreen(
                 }
 
                 item {
-                    RillAnimatedSection(delayMs = 60L) {
+                    RillAnimatedSection(delayMs = 120L) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -482,7 +564,7 @@ fun BackupScreen(
             // ── Tab Restore Backup ─────────────────────────────────────────
             if (selectedTab == 1) {
                 item {
-                    RillAnimatedSection(delayMs = 50L) {
+                    RillAnimatedSection(delayMs = 150L) {
                         Column {
                             Text(
                                 text = stringResource(R.string.restore_select_file_hint),
@@ -493,46 +575,62 @@ fun BackupScreen(
                             RillExpressiveCard {
                                 Column(
                                     modifier = Modifier
+                                        .clickable { restoreFilePickerLauncher.launch("*/*") }
                                         .background(cardColor)
                                         .fillMaxWidth()
-                                        .padding(16.dp),
+                                        .padding(20.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
-                                    Icon(
-                                        Icons.Outlined.FolderOpen,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(40.dp)
+                                    val hasAnyRestore = restoreContents != null && (
+                                            restoreContents!!.hasSettings ||
+                                                    restoreContents!!.hasCallBackgrounds ||
+                                                    restoreContents!!.hasNotes ||
+                                                    restoreContents!!.hasContacts ||
+                                                    restoreContents!!.hasPrivateContacts ||
+                                                    restoreContents!!.hasCallLogs
+                                            )
+                                    RillIconBox(
+                                        icon = if (selectedRestoreFile != null && !hasAnyRestore) Icons.Rounded.QuestionMark
+                                                else if (selectedRestoreFile != null) Icons.Rounded.CloudDone
+                                                else Icons.Rounded.Upload,
+                                        iconContainerColor = if (selectedRestoreFile != null && !hasAnyRestore) MaterialTheme.colorScheme.errorContainer
+                                                else MaterialTheme.colorScheme.onSecondaryContainer,
+                                        iconBgContainerColor = if (selectedRestoreFile != null && !hasAnyRestore) MaterialTheme.colorScheme.onErrorContainer
+                                                else MaterialTheme.colorScheme.secondaryContainer,
+                                        shape = CircleShape,
                                     )
                                     Spacer(Modifier.height(10.dp))
                                     Text(
                                         text = if (selectedRestoreFile != null) {
-                                            selectedRestoreFile!!.name
+                                            restoreOriginalName ?: selectedRestoreFile!!.name
                                         } else {
                                             stringResource(R.string.restore_no_file_selected)
                                         },
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Bold,
+                                        textAlign = TextAlign.Center,
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
                                     Spacer(Modifier.height(4.dp))
                                     Text(
                                         text = if (selectedRestoreFile != null) {
-                                            stringResource(R.string.restore_file_size, selectedRestoreFile!!.length() / 1024)
+                                            val size = restoreOriginalSize ?: selectedRestoreFile!!.length()
+                                            stringResource(R.string.restore_file_size, size / 1024)
                                         } else {
                                             stringResource(R.string.restore_tap_to_choose)
                                         },
                                         style = MaterialTheme.typography.bodySmall,
+                                        textAlign = TextAlign.Center,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
-                                    Spacer(Modifier.height(14.dp))
-                                    FilledTonalButton(
-                                        onClick = { restoreFilePickerLauncher.launch("*/*") },
-                                        shape = CircleShape
-                                    ) {
-                                        Icon(Icons.Default.UploadFile, contentDescription = null, modifier = Modifier.size(18.dp))
-                                        Spacer(Modifier.width(8.dp))
-                                        Text(if (selectedRestoreFile != null) stringResource(R.string.restore_choose_another_button) else stringResource(R.string.restore_browse_button))
+                                    if (selectedRestoreFile != null) {
+                                        Spacer(Modifier.height(8.dp))
+                                        Text(
+                                            text = stringResource(R.string.restore_tap_to_choose_another),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            textAlign = TextAlign.Center,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
                                     }
                                 }
                             }
@@ -543,7 +641,7 @@ fun BackupScreen(
                 if (restoreContents != null) {
                     val contents = restoreContents!!
                     item {
-                        RillAnimatedSection(delayMs = 100L) {
+                        RillAnimatedSection(delayMs = 180L) {
                             Column {
                                 Text(
                                     text = stringResource(R.string.restore_select_items_hint),
@@ -571,7 +669,7 @@ fun BackupScreen(
                                         if (contents.createdAt > 0L) {
                                             val formatted = remember(contents.createdAt) { formatBackupDate(contents.createdAt) }
                                             if (formatted != null) {
-                                                Spacer(Modifier.height(4.dp))
+                                                Spacer(Modifier.height(2.dp))
                                                 Text(
                                                     modifier = Modifier.padding(horizontal = 4.dp),
                                                     text = stringResource(R.string.restore_backup_created_at, formatted),
@@ -678,7 +776,7 @@ fun BackupScreen(
                     }
 
                     item {
-                        RillAnimatedSection(delayMs = 150L) {
+                        RillAnimatedSection(delayMs = 210L) {
                             Button(
                                 onClick = { executeRestore() },
                                 enabled = hasAnyRestoreSelected,
@@ -728,7 +826,7 @@ fun BackupScreen(
         is BackupScreenState.BackupSuccess -> {
             AlertDialog(
                 onDismissRequest = { screenState = BackupScreenState.Idle },
-                icon = { Icon(Icons.Default.CheckCircle, contentDescription = null, tint = ColorGreen, modifier = Modifier.size(36.dp)) },
+                icon = { Icon(Icons.Default.CheckCircle, contentDescription = null, tint = color_call_button, modifier = Modifier.size(36.dp)) },
                 title = { Text(stringResource(R.string.backup_success_title), fontWeight = FontWeight.Bold) },
                 text = { Text(stringResource(R.string.backup_success_message, state.path)) },
                 confirmButton = {
@@ -741,7 +839,7 @@ fun BackupScreen(
         is BackupScreenState.RestoreSuccess -> {
             AlertDialog(
                 onDismissRequest = { screenState = BackupScreenState.Idle },
-                icon = { Icon(Icons.Default.CheckCircle, contentDescription = null, tint = ColorGreen, modifier = Modifier.size(36.dp)) },
+                icon = { Icon(Icons.Default.CheckCircle, contentDescription = null, tint = color_call_button, modifier = Modifier.size(36.dp)) },
                 title = { Text(stringResource(R.string.restore_success_title), fontWeight = FontWeight.Bold) },
                 text = { Text(stringResource(R.string.restore_success_message)) },
                 confirmButton = {
@@ -754,7 +852,7 @@ fun BackupScreen(
         is BackupScreenState.Error -> {
             AlertDialog(
                 onDismissRequest = { screenState = BackupScreenState.Idle },
-                icon = { Icon(Icons.Default.Error, contentDescription = null, tint = ColorRed, modifier = Modifier.size(36.dp)) },
+                icon = { Icon(Icons.Default.Error, contentDescription = null, tint = color_call_end, modifier = Modifier.size(36.dp)) },
                 title = { Text(stringResource(R.string.backup_error_title), fontWeight = FontWeight.Bold) },
                 text = { Text(state.message) },
                 confirmButton = {

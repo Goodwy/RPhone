@@ -49,6 +49,7 @@
     <string name="details">Détails</string>
     <string name="saved">Enregistré</string>
     <string name="save_failed">Échec de l\'enregistrement</string>
+    <string name="warning">Avertissement</string>
 
     <!-- Search -->
     <string name="search">Rechercher</string>
@@ -262,6 +263,9 @@
     <string name="auto_speaker_subtitle">Passer automatiquement au haut-parleur lorsque le téléphone est éloigné de l\'oreille, et revenir à l\'écouteur lorsqu\'il est proche</string>
     <string name="fullscreen_calls">Appels en plein écran</string>
     <string name="fullscreen_calls_subtitle">Les appels entrants sont toujours affichés en mode plein écran</string>
+    <string name="fullscreen_calls_off_subtitle">Les appels entrants sont affichés sous forme de notification lorsque c\'est possible</string>
+    <string name="open_call_screen_from_notification">Ouvrir l\'écran d\'appel après avoir répondu</string>
+    <string name="open_call_screen_from_notification_subtitle">Afficher l\'écran d\'appel lorsque vous répondez depuis une notification. Désactivez pour rester dans l\'application en cours</string>
 
     <!-- Speed dial -->
     <string name="settings_speed_dial_title">Numérotation rapide</string>
@@ -766,13 +770,51 @@
     <string name="backup_auto_backup_enabled">Activée · Sauvegardes automatiques planifiées</string>
     <string name="backup_auto_backup_disabled">Désactivée · Configurer les sauvegardes automatiques</string>
 
+    <!-- Auto backup screen: main -->
+    <string name="auto_backup_settings_title">Paramètres de sauvegarde automatique</string>
+    <string name="auto_backup_enabled_supporting">La sauvegarde automatique est activée</string>
+    <string name="auto_backup_disabled_supporting">Activez pour créer des sauvegardes automatiques de vos données</string>
+
+    <!-- Auto backup screen: folder -->
+    <string name="auto_backup_folder_title">Dossier de sauvegarde</string>
+    <string name="auto_backup_folder_none">Aucun dossier sélectionné</string>
+    <string name="auto_backup_folder_none_hint">Aucun dossier sélectionné • Appuyez pour choisir un dossier de sauvegarde</string>
+
+    <!-- Auto backup screen: what to backup -->
+    <string name="auto_backup_what_title">Éléments à sauvegarder</string>
+    <string name="auto_backup_what_summary_none">Aucun élément sélectionné</string>
+
+    <!-- Auto backup screen: interval -->
+    <string name="auto_backup_every_title">Sauvegarder toutes les :</string>
+    <string name="auto_backup_interval_value_label">Valeur</string>
+    <plurals name="auto_backup_unit_minutes">
+        <item quantity="one">Minute</item>
+        <item quantity="other">Minutes</item>
+    </plurals>
+    <plurals name="auto_backup_unit_hours">
+        <item quantity="one">Heure</item>
+        <item quantity="other">Heures</item>
+    </plurals>
+    <plurals name="auto_backup_unit_days">
+        <item quantity="one">Jour</item>
+        <item quantity="other">Jours</item>
+    </plurals>
+
+    <!-- Auto backup screen: auto delete section -->
+    <string name="auto_backup_delete_section">Suppression automatique des sauvegardes</string>
+    <string name="auto_backup_delete_by_time_title">Supprimer automatiquement les sauvegardes selon leur ancienneté</string>
+    <string name="auto_backup_delete_by_time_supporting">Supprimer les sauvegardes plus anciennes que :</string>
+    <string name="auto_backup_delete_amount_label">Quantité</string>
+    <string name="auto_backup_delete_by_count_title">Supprimer automatiquement les sauvegardes selon leur nombre</string>
+    <string name="auto_backup_delete_by_count_supporting">Nombre maximal de sauvegardes à conserver :</string>
+    <string name="auto_backup_delete_count_label">Nombre</string>
+
     <!-- Backup screen: restore tab -->
     <string name="restore_select_file_hint">Sélectionnez un fichier de sauvegarde .rphone depuis votre stockage</string>
     <string name="restore_no_file_selected">Aucun fichier de sauvegarde sélectionné</string>
-    <string name="restore_tap_to_choose">Appuyez ci-dessous pour choisir un fichier de sauvegarde à restaurer</string>
+    <string name="restore_tap_to_choose">Appuyez pour choisir un fichier de sauvegarde à restaurer</string>
+    <string name="restore_tap_to_choose_another">Appuyez pour choisir un autre fichier de sauvegarde à restaurer</string>
     <string name="restore_file_size">%1$d Ko</string>
-    <string name="restore_browse_button">Parcourir les fichiers de sauvegarde</string>
-    <string name="restore_choose_another_button">Choisir un autre fichier</string>
     <string name="restore_select_items_hint">Sélectionnez les éléments à restaurer depuis ce fichier</string>
     <string name="restore_not_in_backup">Absent de cette sauvegarde</string>
     <string name="restore_selected_button">Restaurer la sélection</string>

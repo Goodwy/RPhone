@@ -272,6 +272,9 @@
     <string name="auto_speaker_subtitle">Automatically switch to loudspeaker when phone is away from ear, and back to earpiece when near</string>
     <string name="fullscreen_calls">Full-screen calls</string>
     <string name="fullscreen_calls_subtitle">Incoming calls are always displayed in full-screen mode</string>
+    <string name="fullscreen_calls_off_subtitle">Incoming calls are displayed in a notification whenever possible</string>
+    <string name="open_call_screen_from_notification">Open call screen after answering</string>
+    <string name="open_call_screen_from_notification_subtitle">Show the in-call screen when you answer from a notification. Turn off to keep using the current app</string>
 
     <!-- Speed dial -->
     <string name="settings_speed_dial_title">Speed dial</string>
@@ -785,13 +788,51 @@
     <string name="backup_auto_backup_enabled">Enabled · Automatic backups scheduled</string>
     <string name="backup_auto_backup_disabled">Disabled · Configure automatic backups</string>
 
+    <!-- Auto backup screen: main -->
+    <string name="auto_backup_settings_title">Auto backup settings</string>
+    <string name="auto_backup_enabled_supporting">Automatic backup is turned on</string>
+    <string name="auto_backup_disabled_supporting">Enable to create automatic backups of your data</string>
+
+    <!-- Auto backup screen: folder -->
+    <string name="auto_backup_folder_title">Backup folder</string>
+    <string name="auto_backup_folder_none">No folder selected</string>
+    <string name="auto_backup_folder_none_hint">No folder selected • Tap to select a backup folder</string>
+
+    <!-- Auto backup screen: what to backup -->
+    <string name="auto_backup_what_title">What to backup</string>
+    <string name="auto_backup_what_summary_none">None selected</string>
+
+    <!-- Auto backup screen: interval -->
+    <string name="auto_backup_every_title">Backup every:</string>
+    <string name="auto_backup_interval_value_label">Value</string>
+    <plurals name="auto_backup_unit_minutes">
+        <item quantity="one">Minute</item>
+        <item quantity="other">Minutes</item>
+    </plurals>
+    <plurals name="auto_backup_unit_hours">
+        <item quantity="one">Hour</item>
+        <item quantity="other">Hours</item>
+    </plurals>
+    <plurals name="auto_backup_unit_days">
+        <item quantity="one">Day</item>
+        <item quantity="other">Days</item>
+    </plurals>
+
+    <!-- Auto backup screen: auto delete section -->
+    <string name="auto_backup_delete_section">Auto delete backups</string>
+    <string name="auto_backup_delete_by_time_title">Auto-delete backups by age</string>
+    <string name="auto_backup_delete_by_time_supporting">Delete backups older than:</string>
+    <string name="auto_backup_delete_amount_label">Amount</string>
+    <string name="auto_backup_delete_by_count_title">Auto-delete backups by count</string>
+    <string name="auto_backup_delete_by_count_supporting">Maximum number of backups to keep:</string>
+    <string name="auto_backup_delete_count_label">Count</string>
+
     <!-- Backup screen: restore tab -->
     <string name="restore_select_file_hint">Select an .rphone backup file from your storage</string>
     <string name="restore_no_file_selected">No backup file selected</string>
-    <string name="restore_tap_to_choose">Tap below to choose a backup file to restore</string>
+    <string name="restore_tap_to_choose">Tap to choose a backup file to restore</string>
+    <string name="restore_tap_to_choose_another">Tap to choose a different backup file to restore</string>
     <string name="restore_file_size">%1$d KB</string>
-    <string name="restore_browse_button">Browse backup file</string>
-    <string name="restore_choose_another_button">Choose another file</string>
     <string name="restore_select_items_hint">Select items to restore from this file</string>
     <string name="restore_not_in_backup">Not present in this backup</string>
     <string name="restore_selected_button">Restore selected</string>

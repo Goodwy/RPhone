@@ -425,11 +425,12 @@ fun ExpressiveCallScreen(
                                 fontSize = callingCardStyle.fontSizeSp.sp,
                                 fontFamily = callingCardStyle.font.family,
                                 fontWeight = callingCardStyle.weight,
+                                lineHeight = callingCardStyle.fontSizeSp.sp,
                                 shadow = nameShadow
                             ),
                             color = nameColor,
                             textAlign = TextAlign.Center,
-                            maxLines = 1,
+                            maxLines = 2,
                             overflow = TextOverflow.Ellipsis
                         )
 
