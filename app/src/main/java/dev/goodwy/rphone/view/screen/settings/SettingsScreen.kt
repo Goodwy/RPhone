@@ -5,8 +5,7 @@ import android.content.Context
 import android.os.Build
 import android.view.Surface
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.animation.AnimatedVisibility
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -115,7 +114,6 @@ object SettingsHolder {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Destination<RootGraph>(style = TabTransitionStyle::class)
 @Composable
 fun SettingsScreen(navigator: DestinationsNavigator) {
@@ -166,11 +164,23 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
     }
     var enabledShake by remember { mutableStateOf(false) }
     var showSnackbar   by remember(settingsState) { mutableStateOf(false) }
+    var snackbarJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
+
+    fun showProSnackbar() {
+        enabledShake = true
+        showSnackbar = true
+        snackbarJob?.cancel()
+        snackbarJob = scope.launch {
+            delay(3000.milliseconds)
+            showSnackbar = false
+        }
+    }
 
     var visible by remember { mutableStateOf(false) }
     var isClosing by remember { mutableStateOf(false) }
 
     fun navigateBack() {
+        if (isClosing) return
         isClosing = true
         scope.launch {
             delay(280.milliseconds)
@@ -192,24 +202,21 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
     LaunchedEffect(Unit) { visible = true }
 
     // Default dialer
-    val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as android.telecom.TelecomManager
-    var isDefaultDialer by remember { mutableStateOf(telecomManager.defaultDialerPackage == context.packageName) }
-    val defaultDialerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        isDefaultDialer = telecomManager.defaultDialerPackage == context.packageName
-    }
+    val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as? android.telecom.TelecomManager
+    var isDefaultDialer by remember { mutableStateOf(telecomManager?.defaultDialerPackage == context.packageName) }
     val activity = context as? Activity
     DisposableEffect(activity) {
         val lifecycleOwner = activity as? androidx.lifecycle.LifecycleOwner
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME)
-                isDefaultDialer = telecomManager.defaultDialerPackage == context.packageName
+                isDefaultDialer = telecomManager?.defaultDialerPackage == context.packageName
         }
         lifecycleOwner?.lifecycle?.addObserver(observer)
         onDispose { lifecycleOwner?.lifecycle?.removeObserver(observer) }
     }
 
     val viewModel: ContactsViewModel = koinActivityViewModel()
-    val trashedContacts by viewModel.trashedContacts.collectAsState()
+    val trashedContacts by viewModel.trashedContacts.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
         viewModel.fetchTrashedContacts()
     }
@@ -550,12 +557,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
             if (isPro || isBlurSupported) {
                 navigator.navigate(CallAnalyticsScreenDestination)
             } else {
-                enabledShake = true
-                showSnackbar = true
-                scope.launch {
-                    delay(3000.milliseconds)
-                    showSnackbar = false
-                }
+                showProSnackbar()
             }
         },
         SettingsSearchEntry(
@@ -729,18 +731,26 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
     } else {
         settingsSearchEntries
     }
-    val filteredSettingsResults = if (settingsSearchQuery.isBlank()) emptyList()
-    else settingsSearchEntriesFinal.filter {
-        it.headline.contains(settingsSearchQuery, ignoreCase = true) ||
-                (it.supporting ?: "").contains(settingsSearchQuery, ignoreCase = true) ||
-                it.options.any { option ->
-                    option.contains(settingsSearchQuery, ignoreCase = true)
-                }
+    val filteredSettingsResults = remember(settingsSearchQuery, settingsSearchEntriesFinal) {
+        if (settingsSearchQuery.isBlank()) emptyList()
+        else settingsSearchEntriesFinal.filter {
+            it.headline.contains(settingsSearchQuery, ignoreCase = true) ||
+                    (it.supporting ?: "").contains(settingsSearchQuery, ignoreCase = true) ||
+                    it.options.any { option ->
+                        option.contains(settingsSearchQuery, ignoreCase = true)
+                    }
+        }
     }
 
     // ── Screen ────────────────────────────────────────────────────────────────
-    val rotation =
-        (context.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager).defaultDisplay.rotation
+    @Suppress("DEPRECATION")
+    val rotation = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        @Suppress("UNNECESSARY_SAFE_CALL", "USELESS_ELVIS")
+        (context.display?.rotation ?: Surface.ROTATION_0)
+    } else {
+        (context.getSystemService(Context.WINDOW_SERVICE) as? android.view.WindowManager)
+            ?.defaultDisplay?.rotation ?: Surface.ROTATION_0
+    }
     val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
     val isRotation90 = rotation == if (isLtr) Surface.ROTATION_90 else Surface.ROTATION_270
     Scaffold(
@@ -775,7 +785,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 modifier = Modifier
                     .fillMaxSize()
                     .alpha(alpha)
-                    .offset(y = offsetY),
+                    .offset { IntOffset(0, offsetY.roundToPx()) },
                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
@@ -962,7 +972,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                                         }
                                     )
                                     val biometricsType =
-                                        remember(prefs.settingsChanged.collectAsStateWithLifecycle().value) {
+                                        remember(settingsState) {
                                             prefs.getString(
                                                 PreferenceManager.KEY_BIOMETRICS_TYPE,
                                                 ""
@@ -997,12 +1007,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                                             if (isPro || isBlurSupported) {
                                                 navigator.navigate(CallAnalyticsScreenDestination)
                                             } else {
-                                                enabledShake = true
-                                                showSnackbar = true
-                                                scope.launch {
-                                                    delay(3000.milliseconds)
-                                                    showSnackbar = false
-                                                }
+                                                showProSnackbar()
                                             }
                                         }
                                     )
@@ -1108,6 +1113,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                         TextButton(
                             modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp),
                             onClick = {
+                                snackbarJob?.cancel()
                                 showSnackbar = false
                                 navigator.navigate(DonateScreenDestination)
                             }
@@ -1144,11 +1150,11 @@ private data class SettingsSearchEntry(
 @Composable
 fun SettingsSectionLabel(
     text: String,
-    modifier: Modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 8.dp)
+    modifier: Modifier = Modifier
 ) {
     Text(
         text,
-        modifier = modifier,
+        modifier = modifier.padding(start = 20.dp, end = 20.dp, bottom = 8.dp),
         style = MaterialTheme.typography.labelLarge,
         lineHeight = MaterialTheme.typography.labelMedium.lineHeight,
         color = MaterialTheme.colorScheme.primary
