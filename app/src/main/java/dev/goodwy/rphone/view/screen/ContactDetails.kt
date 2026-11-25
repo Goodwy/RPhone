@@ -60,14 +60,12 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.CallSplit
 import androidx.compose.material.icons.automirrored.rounded.DriveFileMove
 import androidx.compose.material.icons.automirrored.rounded.Help
 import androidx.compose.material.icons.automirrored.rounded.StickyNote2
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarOutline
 import androidx.compose.material.icons.outlined.Directions
@@ -611,6 +609,7 @@ fun ContactDetailsScreen(
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
             confirmButton = {
                 TextButton(onClick = {
+                    doHapticIfNeed(context, prefs)
                     showDeleteDialog = false
                     val targetId = contact?.id?.takeIf { it.isNotBlank() } ?: contactId
                     if (targetId != null) {
@@ -622,7 +621,10 @@ fun ContactDetailsScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
+                TextButton(onClick = {
+                    doHapticIfNeed(context, prefs)
+                    showDeleteDialog = false }
+                ) {
                     Text(stringResource(R.string.cancel))
                 }
             }
@@ -721,6 +723,40 @@ fun ContactDetailsScreen(
         )
     }
 
+    var showAboutNotesDialog by remember { mutableStateOf(false) }
+    if (showAboutNotesDialog) {
+        RillDialog(
+            onDismissRequest = { showAboutNotesDialog = false },
+            title = stringResource(R.string.about_call_notes),
+            icon = Icons.AutoMirrored.Rounded.Help,
+            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+            confirmButton = {
+                TextButton(onClick = {
+                    doHapticIfNeed(context, prefs)
+                    showAboutNotesDialog = false
+                }) {
+                    Text(
+                        stringResource(R.string.close),
+                        textAlign = TextAlign.End,
+                    )
+                }
+            },
+            dismissButton = {
+                doHapticIfNeed(context, prefs)
+                val notesDir = NoteManager.getNotesDir(context).absolutePath
+                TextButton(onClick = {
+                    showAboutNotesDialog = false
+                    context.copyToClipboard(notesDir)
+                }) {
+                    Text(stringResource(R.string.copy_path))
+                }
+            }
+        ) {
+            Text(stringResource(R.string.about_call_notes_subtitle))
+        }
+    }
+
     val initiateAddCallNote = { number: String ->
         if (number != unknownLabel) {
             editingNoteNumber = number
@@ -729,7 +765,11 @@ fun ContactDetailsScreen(
     }
 
     if (showAddCallNotePicker && contact != null) {
-        NumberPickerDialog(numbers = contact!!.phoneNumbers, onDismissRequest = { showAddCallNotePicker = false }, onNumberSelected = { showAddCallNotePicker = false; initiateAddCallNote(it) })
+        NumberPickerDialog(
+            numbers = contact!!.phoneNumbers,
+            onDismissRequest = { doHapticIfNeed(context, prefs); showAddCallNotePicker = false },
+            onNumberSelected = { doHapticIfNeed(context, prefs); showAddCallNotePicker = false; initiateAddCallNote(it) }
+        )
     }
 
     if (showSourcesDialog && contact != null) {
@@ -738,7 +778,10 @@ fun ContactDetailsScreen(
             sources = contactSources,
             navigator = navigator,
             navigateBack = { navigateBack() },
-            onDismiss = { showSourcesDialog = false }
+            onDismiss = {
+                doHapticIfNeed(context, prefs)
+                showSourcesDialog = false
+            }
         )
     }
 
@@ -836,13 +879,13 @@ fun ContactDetailsScreen(
                                 .fillMaxWidth()
                                 .graphicsLayer { alpha = titleAlpha }
                         ) {
-                            Title(displayName, false)
+                            TitleLight(displayName)
                         }
                     },
                     navigationIcon = {
                         NavigationIcon(
                             modifier = Modifier
-                                .padding(start = 16.dp, end = 14.dp)
+                                .padding(start = 12.dp, end = 10.dp)
                                 .background(
                                     MaterialTheme.colorScheme.surface.copy(0.68f),
                                     CircleShape
@@ -850,6 +893,7 @@ fun ContactDetailsScreen(
                             onClick = { navigateBack() })
                     },
                     actions = {
+                        Spacer(modifier = Modifier.size(8.dp))
                         if (contact != null) {
                             val interactionSource = remember { MutableInteractionSource() }
                             val isPressed by interactionSource.collectIsPressedAsState()
@@ -860,6 +904,7 @@ fun ContactDetailsScreen(
                             )
                             IconButton(
                                 onClick = {
+                                    doHapticIfNeed(context, prefs)
                                     contact?.let { thisContact ->
                                         val newFavorite = !thisContact.isFavorite
                                         contact = thisContact.copy(isFavorite = newFavorite)
@@ -883,6 +928,7 @@ fun ContactDetailsScreen(
                             Spacer(modifier = Modifier.size(8.dp))
                             IconButton(
                                 onClick = {
+                                    doHapticIfNeed(context, prefs)
                                     if (contactSources.size > 1) {
                                         showSourcesDialog = true
                                     } else {
@@ -899,6 +945,7 @@ fun ContactDetailsScreen(
                         } else if (phoneNumber != null && phoneNumber != unknownLabel) {
                             IconButton(
                                 onClick = {
+                                    doHapticIfNeed(context, prefs)
                                     navigator.navigate(ContactEditScreenDestination(initialPhone = phoneNumber, initialName = initialName))
                                 },
                                 colors = IconButtonDefaults.iconButtonColors(
@@ -909,6 +956,7 @@ fun ContactDetailsScreen(
                         if (contact != null) {
                             IconButton(
                                 onClick = {
+                                    doHapticIfNeed(context, prefs)
                                     scope.launch {
                                         val lastIndex = listState.layoutInfo.totalItemsCount - 2
                                         listState.animateScrollToItem(lastIndex)
@@ -919,7 +967,7 @@ fun ContactDetailsScreen(
                                 )
                             ) { Icon(ImageVector.vectorResource(id = R.drawable.ic_settings_account_box), stringResource(R.string.contacts_settings)) }
                         }
-                        Spacer(modifier = Modifier.size(6.dp))
+                        Spacer(modifier = Modifier.size(4.dp))
                     },
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
                 )
@@ -1034,6 +1082,7 @@ fun ContactDetailsScreen(
                                             containerColor = MaterialTheme.colorScheme.primaryContainer,
                                             enabled = (contact != null && contact?.phoneNumbers?.isNotEmpty() == true) || displayPhone != unknownLabel,
                                             onClick = {
+                                                doHapticIfNeed(context, prefs)
                                                 val c = contact
                                                 if (c != null && defaultPhone != null) initiateCall(defaultPhone.number)
                                                 else if (c != null && c.phoneNumbers.size > 1) showNumberPicker = true
@@ -1048,6 +1097,7 @@ fun ContactDetailsScreen(
                                             containerColor = MaterialTheme.colorScheme.secondaryContainer,
                                             enabled = (contact != null && contact?.phoneNumbers?.isNotEmpty() == true) || displayPhone != unknownLabel,
                                             onClick = {
+                                                doHapticIfNeed(context, prefs)
                                                 val c = contact
                                                 if (c != null && defaultPhone != null) messageLauncher.sendMessage(defaultPhone.number, c)
                                                 else if (c != null && c.phoneNumbers.size > 1) showMessagePicker = true
@@ -1062,6 +1112,7 @@ fun ContactDetailsScreen(
                                             containerColor = MaterialTheme.colorScheme.secondaryContainer,
                                             enabled = (contact != null && contact?.phoneNumbers?.isNotEmpty() == true) || displayPhone != unknownLabel,
                                             onClick = {
+                                                doHapticIfNeed(context, prefs)
                                                 val c = contact
                                                 if (c != null && defaultPhone != null) videoLauncher.startVideoCall(defaultPhone.number, c)
                                                 else if (c != null && c.phoneNumbers.size > 1) showVideoPicker = true
@@ -1074,6 +1125,7 @@ fun ContactDetailsScreen(
                                             containerColor = MaterialTheme.colorScheme.secondaryContainer,
                                             enabled = contact?.emails?.isNotEmpty() == true,
                                             onClick = {
+                                                doHapticIfNeed(context, prefs)
                                                 val c = contact
                                                 if (c != null && c.emails.size > 1) showEmailPicker =
                                                     true
@@ -1124,8 +1176,9 @@ fun ContactDetailsScreen(
                                                                     radius = 24.dp
                                                                 ),
                                                                 onClick = {
-                                                                    initiateMessage(phoneDetail.number)
-                                                                }),
+                                                                    doHapticIfNeed(context, prefs)
+                                                                    initiateMessage(phoneDetail.number) }
+                                                            ),
                                                         onClick = { initiateCall(phoneDetail.number) },
                                                         onLongClick = { showOverflowMenu = true }
                                                     )
@@ -1153,6 +1206,7 @@ fun ContactDetailsScreen(
                                                             contentPadding = PaddingValues(horizontal = 24.dp),
                                                             text = { Text(if (numberBlocked) stringResource(R.string.action_unblock_number) else stringResource(R.string.action_block_number)) },
                                                             onClick = {
+                                                                doHapticIfNeed(context, prefs)
                                                                 showOverflowMenu = false
                                                                 if (numberBlocked) {
                                                                     BlockedNumbersManager.unblock(context, phoneDetail.number)
@@ -1166,6 +1220,7 @@ fun ContactDetailsScreen(
                                                             contentPadding = PaddingValues(horizontal = 24.dp),
                                                             text = { Text(stringResource(R.string.add_note)) },
                                                             onClick = {
+                                                                doHapticIfNeed(context, prefs)
                                                                 showOverflowMenu = false
                                                                 editingNoteNumber = phoneDetail.number
                                                                 showNoteEditor = true
@@ -1175,6 +1230,7 @@ fun ContactDetailsScreen(
                                                             contentPadding = PaddingValues(horizontal = 24.dp),
                                                             text = { Text(stringResource(R.string.copy)) },
                                                             onClick = {
+                                                                doHapticIfNeed(context, prefs)
                                                                 showOverflowMenu = false
                                                                 context.copyToClipboard(phoneDetail.number)
                                                             }
@@ -1186,6 +1242,7 @@ fun ContactDetailsScreen(
                                                                     contentPadding = PaddingValues(horizontal = 24.dp),
                                                                     text = { Text(stringResource(R.string.clear_default)) },
                                                                     onClick = {
+                                                                        doHapticIfNeed(context, prefs)
                                                                         showOverflowMenu = false
                                                                         updateDefaultPhone(phoneDetail.number, false)
                                                                         context.toast(textToast)
@@ -1200,6 +1257,7 @@ fun ContactDetailsScreen(
                                                                     contentPadding = PaddingValues(horizontal = 24.dp),
                                                                     text = { Text(stringResource(R.string.set_as_default)) },
                                                                     onClick = {
+                                                                        doHapticIfNeed(context, prefs)
                                                                         showOverflowMenu = false
                                                                         updateDefaultPhone(phoneDetail.number, true)
                                                                         context.toast(message)
@@ -1271,6 +1329,7 @@ fun ContactDetailsScreen(
                                                         contentPadding = PaddingValues(horizontal = 24.dp),
                                                         text = { Text(if (numberBlocked) stringResource(R.string.action_unblock_number) else stringResource(R.string.action_block_number)) },
                                                         onClick = {
+                                                            doHapticIfNeed(context, prefs)
                                                             showOverflowMenu = false
                                                             if (numberBlocked) {
                                                                 BlockedNumbersManager.unblock(context, phoneNumber)
@@ -1284,6 +1343,7 @@ fun ContactDetailsScreen(
                                                         contentPadding = PaddingValues(horizontal = 24.dp),
                                                         text = { Text(stringResource(R.string.copy)) },
                                                         onClick = {
+                                                            doHapticIfNeed(context, prefs)
                                                             showOverflowMenu = false
                                                             context.copyToClipboard(phoneNumber)
                                                         }
@@ -1323,41 +1383,13 @@ fun ContactDetailsScreen(
                                         }
                                     }
 
-                                    var showAboutNotesDialog by remember { mutableStateOf(false) }
-                                    if (showAboutNotesDialog) {
-                                        RillDialog(
-                                            onDismissRequest = { showAboutNotesDialog = false },
-                                            title = stringResource(R.string.about_call_notes),
-                                            icon = Icons.AutoMirrored.Rounded.Help,
-                                            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
-                                            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
-                                            confirmButton = {
-                                                TextButton(onClick = {
-                                                    showAboutNotesDialog = false
-                                                }) {
-                                                    Text(
-                                                        stringResource(R.string.close),
-                                                        textAlign = TextAlign.End,
-                                                    )
-                                                }
-                                            },
-                                            dismissButton = {
-                                                val notesDir = NoteManager.getNotesDir(context).absolutePath
-                                                TextButton(onClick = {
-                                                    showAboutNotesDialog = false
-                                                    context.copyToClipboard(notesDir)
-                                                }) {
-                                                    Text(stringResource(R.string.copy_path))
-                                                }
-                                            }
-                                        ) {
-                                            Text(stringResource(R.string.about_call_notes_subtitle))
-                                        }
-                                    }
                                     RillExpressiveCard(
                                         title = stringResource(R.string.call_notes),
                                         trailingIcon = Icons.AutoMirrored.Outlined.HelpOutline,
-                                        onTrailingIconClick = { showAboutNotesDialog = true }
+                                        onTrailingIconClick = {
+                                            doHapticIfNeed(context, prefs)
+                                            showAboutNotesDialog = true
+                                        }
                                     ) {
                                         if (allNotes.isEmpty()) {
                                             // No notes—display the "Add" button
@@ -1373,6 +1405,7 @@ fun ContactDetailsScreen(
                                                     )
                                                     .combinedClickable(
                                                         onClick = {
+                                                            doHapticIfNeed(context, prefs)
                                                             if (contact != null && contact!!.phoneNumbers.size > 1) showAddCallNotePicker = true
                                                             else if (displayPhone != unknownLabel) initiateAddCallNote(displayPhone)
                                                         }
@@ -1507,6 +1540,7 @@ fun ContactDetailsScreen(
                                                                 radius = 24.dp
                                                             ),
                                                             onClick = {
+                                                                doHapticIfNeed(context, prefs)
                                                                 context.startActivity(
                                                                     Intent(
                                                                         Intent.ACTION_VIEW,
@@ -1544,11 +1578,14 @@ fun ContactDetailsScreen(
                                                     }
                                                 }
                                                 if (contactLogs.size > 3) {
-                                                    val finalContactId = if (contact?.id != null) contact!!.id else if (contactId != "null") contactId else null
-                                                    val finalPhoneNumber = phoneNumber ?: contact?.phoneNumbers?.firstOrNull() ?: contactLogs.firstOrNull()?.number
+                                                    val finalContactId = if (contact?.id != null) contact!!.id
+                                                                else if (contactId != "null") contactId else null
+                                                    val finalPhoneNumber = phoneNumber
+                                                        ?: contact?.phoneNumbers?.firstOrNull()
+                                                        ?: contactLogs.firstOrNull()?.number
                                                     TextButton(
                                                         onClick = {
-//                                                        navController.navigate("call_log_detail_screen?contactId=${finalContactId ?: "null"}&phoneNumber=${finalPhoneNumber ?: "null"}")
+                                                            doHapticIfNeed(context, prefs)
                                                             navigator.navigate(CallLogFullScreenDestination(
                                                                 contactId = finalContactId,
                                                                 phoneNumber = finalPhoneNumber,
@@ -1557,12 +1594,8 @@ fun ContactDetailsScreen(
                                                         },
                                                         modifier = Modifier
                                                             .fillMaxWidth()
-                                                            .offset(
-                                                                x = 0.dp,
-                                                                y = (-2).dp
-                                                            ), // We'll make up for the indentation
-                                                        colors = ButtonDefaults.textButtonColors()
-                                                            .copy(containerColor = cardColor),
+                                                            .offset(x = 0.dp, y = (-2).dp), // We'll make up for the indentation
+                                                        colors = ButtonDefaults.textButtonColors().copy(containerColor = cardColor),
                                                         shape = MaterialTheme.shapes.extraLarge.copy(
                                                             topStart = CornerSize(cardCornerExtraSmall),
                                                             topEnd = CornerSize(cardCornerExtraSmall)
@@ -1631,10 +1664,8 @@ fun ContactDetailsScreen(
                                                         radius = 24.dp
                                                     ),
                                                     onClick = {
-//                                                        if (contact != null && contact!!.phoneNumbers.size > 1) showQrDialogPicker = true
-//                                                        else {
-                                                            pendingQrNumber = null; showQrDialog = true
-//                                                        }
+                                                        doHapticIfNeed(context, prefs)
+                                                        pendingQrNumber = null; showQrDialog = true
                                                     }
                                                 ),
                                             onClick = {
@@ -1719,8 +1750,12 @@ fun ContactDetailsScreen(
                                                                 else if (contact!!.accountName == null && contact!!.accountType == null) LOCAL_SOURCE_KEY
                                                                 else accountSourceKey(contact!!.accountType, contact!!.accountName),
                                                 contactsViewModel = contactsViewModel,
-                                                onDismiss = { showMoveDialog = false },
+                                                onDismiss = {
+                                                    doHapticIfNeed(context, prefs)
+                                                    showMoveDialog = false
+                                                },
                                                 onSuccess = { selectedAccount, isPrivate, newContactId ->
+                                                    doHapticIfNeed(context, prefs)
                                                     context.toast(textToast)
                                                     // Updating local data
                                                     contact = contact!!.copy(
@@ -1748,7 +1783,10 @@ fun ContactDetailsScreen(
                                                 }
                                                 SourceItem(
                                                     modifier = Modifier.combinedClickable(
-                                                        onClick = { showSourcesDialog = true },
+                                                        onClick = {
+                                                            doHapticIfNeed(context, prefs)
+                                                            showSourcesDialog = true
+                                                        }
                                                     ),
                                                     leadingIcon = ContactUtils.getAccountIcon(account, contact!!.isPrivate),
                                                     headline = ContactUtils.getAccountName(account),
@@ -1764,7 +1802,7 @@ fun ContactDetailsScreen(
                                                 modifier = Modifier,
                                                 leadingIcon = ContactUtils.getAccountIcon(contactAccount, contact!!.isPrivate),
                                                 headline = if (contactAccount != null) ContactUtils.getAccountName(contactAccount!!)
-                                                else ContactUtils.getFriendlyAccountName(null, contact!!.isPrivate),
+                                                        else ContactUtils.getFriendlyAccountName(null, contact!!.isPrivate),
                                                 supporting = if (contactAccount != null) ContactUtils.getFriendlyAccountName(contactAccount) else null,
                                             )
                                         }
@@ -1884,6 +1922,7 @@ fun ContactDetailsScreen(
                                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                                         enabled = (contact != null && contact?.phoneNumbers?.isNotEmpty() == true) || displayPhone != unknownLabel,
                                         onClick = {
+                                            doHapticIfNeed(context, prefs)
                                             val c = contact
                                             if (c != null && defaultPhone != null) initiateCall(defaultPhone.number)
                                             else if (c != null && c.phoneNumbers.size > 1) showNumberPicker = true
@@ -1898,6 +1937,7 @@ fun ContactDetailsScreen(
                                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
                                         enabled = (contact != null && contact?.phoneNumbers?.isNotEmpty() == true) || displayPhone != unknownLabel,
                                         onClick = {
+                                            doHapticIfNeed(context, prefs)
                                             val c = contact
                                             if (c != null && defaultPhone != null) messageLauncher.sendMessage(defaultPhone.number, c)
                                             else if (c != null && c.phoneNumbers.size > 1) showMessagePicker = true
@@ -1912,6 +1952,7 @@ fun ContactDetailsScreen(
                                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
                                         enabled = (contact != null && contact?.phoneNumbers?.isNotEmpty() == true) || displayPhone != unknownLabel,
                                         onClick = {
+                                            doHapticIfNeed(context, prefs)
                                             val c = contact
                                             if (c != null && defaultPhone != null) videoLauncher.startVideoCall(defaultPhone.number, c)
                                             else if (c != null && c.phoneNumbers.size > 1) showVideoPicker = true
@@ -1924,6 +1965,7 @@ fun ContactDetailsScreen(
                                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
                                         enabled = contact?.emails?.isNotEmpty() == true,
                                         onClick = {
+                                            doHapticIfNeed(context, prefs)
                                             val c = contact
                                             if (c != null && c.emails.size > 1) showEmailPicker =
                                                 true
@@ -1981,6 +2023,7 @@ fun ContactDetailsScreen(
                                                                 radius = 24.dp
                                                             ),
                                                             onClick = {
+                                                                doHapticIfNeed(context, prefs)
                                                                 openWhatsAppChat(context, phoneDetail.number)
                                                             }),
                                                     trailingIcon = messageImageVector,
@@ -1994,6 +2037,7 @@ fun ContactDetailsScreen(
                                                                 radius = 24.dp
                                                             ),
                                                             onClick = {
+                                                                doHapticIfNeed(context, prefs)
                                                                 initiateMessage(phoneDetail.number)
                                                             }),
                                                     onClick = { initiateCall(phoneDetail.number) },
@@ -2025,6 +2069,7 @@ fun ContactDetailsScreen(
                                                         contentPadding = PaddingValues(horizontal = 24.dp),
                                                         text = { Text(if (numberBlocked) stringResource(R.string.action_unblock_number) else stringResource(R.string.action_block_number)) },
                                                         onClick = {
+                                                            doHapticIfNeed(context, prefs)
                                                             showOverflowMenu = false
                                                             if (numberBlocked) {
                                                                 BlockedNumbersManager.unblock(context, phoneDetail.number)
@@ -2040,6 +2085,7 @@ fun ContactDetailsScreen(
                                                         ),
                                                         text = { Text(stringResource(R.string.add_note)) },
                                                         onClick = {
+                                                            doHapticIfNeed(context, prefs)
                                                             showOverflowMenu = false
                                                             editingNoteNumber = phoneDetail.number
                                                             showNoteEditor = true
@@ -2051,6 +2097,7 @@ fun ContactDetailsScreen(
                                                         ),
                                                         text = { Text(stringResource(R.string.copy)) },
                                                         onClick = {
+                                                            doHapticIfNeed(context, prefs)
                                                             showOverflowMenu = false
                                                             context.copyToClipboard(phoneDetail.number)
                                                         }
@@ -2064,6 +2111,7 @@ fun ContactDetailsScreen(
                                                                 ),
                                                                 text = { Text(stringResource(R.string.clear_default)) },
                                                                 onClick = {
+                                                                    doHapticIfNeed(context, prefs)
                                                                     showOverflowMenu = false
                                                                     updateDefaultPhone(
                                                                         phoneDetail.number,
@@ -2083,6 +2131,7 @@ fun ContactDetailsScreen(
                                                                 ),
                                                                 text = { Text(stringResource(R.string.set_as_default)) },
                                                                 onClick = {
+                                                                    doHapticIfNeed(context, prefs)
                                                                     showOverflowMenu = false
                                                                     updateDefaultPhone(
                                                                         phoneDetail.number,
@@ -2158,6 +2207,7 @@ fun ContactDetailsScreen(
                                                     contentPadding = PaddingValues(horizontal = 24.dp),
                                                     text = { Text(if (numberBlocked) stringResource(R.string.action_unblock_number) else stringResource(R.string.action_block_number)) },
                                                     onClick = {
+                                                        doHapticIfNeed(context, prefs)
                                                         showOverflowMenu = false
                                                         if (numberBlocked) {
                                                             BlockedNumbersManager.unblock(context, phoneNumber)
@@ -2171,6 +2221,7 @@ fun ContactDetailsScreen(
                                                     contentPadding = PaddingValues(horizontal = 24.dp),
                                                     text = { Text(stringResource(R.string.copy)) },
                                                     onClick = {
+                                                        doHapticIfNeed(context, prefs)
                                                         showOverflowMenu = false
                                                         context.copyToClipboard(phoneNumber)
                                                     }
@@ -2210,42 +2261,14 @@ fun ContactDetailsScreen(
                                     }
                                 }
 
-                                var showAboutNotesDialog by remember { mutableStateOf(false) }
-                                if (showAboutNotesDialog) {
-                                    RillDialog(
-                                        onDismissRequest = { showAboutNotesDialog = false },
-                                        title = stringResource(R.string.about_call_notes),
-                                        icon = Icons.AutoMirrored.Rounded.Help,
-                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
-                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
-                                        confirmButton = {
-                                            TextButton(onClick = {
-                                                showAboutNotesDialog = false
-                                            }) {
-                                                Text(
-                                                    stringResource(R.string.close),
-                                                    textAlign = TextAlign.End,
-                                                )
-                                            }
-                                        },
-                                        dismissButton = {
-                                            val notesDir = NoteManager.getNotesDir(context).absolutePath
-                                            TextButton(onClick = {
-                                                showAboutNotesDialog = false
-                                                context.copyToClipboard(notesDir)
-                                            }) {
-                                                Text(stringResource(R.string.copy_path))
-                                            }
-                                        }
-                                    ) {
-                                        Text(stringResource(R.string.about_call_notes_subtitle))
-                                    }
-                                }
                                 RillExpressiveCard(
                                     title = stringResource(R.string.call_notes),
 //                        icon = Icons.AutoMirrored.Outlined.StickyNote2,
                                     trailingIcon = Icons.AutoMirrored.Outlined.HelpOutline,
-                                    onTrailingIconClick = { showAboutNotesDialog = true }
+                                    onTrailingIconClick = {
+                                        doHapticIfNeed(context, prefs)
+                                        showAboutNotesDialog = true
+                                    }
                                 ) {
                                     if (allNotes.isEmpty()) {
                                         // No notes—display the "Add" button
@@ -2261,6 +2284,7 @@ fun ContactDetailsScreen(
                                                 )
                                                 .combinedClickable(
                                                     onClick = {
+                                                        doHapticIfNeed(context, prefs)
                                                         if (contact != null && contact!!.phoneNumbers.size > 1) showAddCallNotePicker = true
                                                         else if (displayPhone != unknownLabel) initiateAddCallNote(displayPhone)
                                                     }
@@ -2396,13 +2420,15 @@ fun ContactDetailsScreen(
                                                             radius = 24.dp
                                                         ),
                                                         onClick = {
+                                                            doHapticIfNeed(context, prefs)
                                                             context.startActivity(
                                                                 Intent(
                                                                     Intent.ACTION_VIEW,
                                                                     "google.navigation:q=$address".toUri()
                                                                 )
                                                             )
-                                                        }),
+                                                        }
+                                                    ),
                                                 onClick = {
                                                     context.startActivity(
                                                         Intent(
@@ -2437,7 +2463,7 @@ fun ContactDetailsScreen(
                                                 val finalPhoneNumber = phoneNumber ?: contact?.phoneNumbers?.firstOrNull() ?: contactLogs.firstOrNull()?.number
                                                 TextButton(
                                                     onClick = {
-//                                                    navController.navigate("call_log_detail_screen?contactId=${finalContactId ?: "null"}&phoneNumber=${finalPhoneNumber ?: "null"}")
+                                                        doHapticIfNeed(context, prefs)
                                                         navigator.navigate(CallLogFullScreenDestination(
                                                             contactId = finalContactId,
                                                             phoneNumber = finalPhoneNumber,
@@ -2446,12 +2472,8 @@ fun ContactDetailsScreen(
                                                     },
                                                     modifier = Modifier
                                                         .fillMaxWidth()
-                                                        .offset(
-                                                            x = 0.dp,
-                                                            y = (-2).dp
-                                                        ), // We'll make up for the indentation
-                                                    colors = ButtonDefaults.textButtonColors()
-                                                        .copy(containerColor = cardColor),
+                                                        .offset(x = 0.dp, y = (-2).dp), // We'll make up for the indentation
+                                                    colors = ButtonDefaults.textButtonColors().copy(containerColor = cardColor),
                                                     shape = MaterialTheme.shapes.extraLarge.copy(
                                                         topStart = CornerSize(cardCornerExtraSmall),
                                                         topEnd = CornerSize(cardCornerExtraSmall)
@@ -2520,10 +2542,8 @@ fun ContactDetailsScreen(
                                                     radius = 24.dp
                                                 ),
                                                 onClick = {
-//                                                    if (contact != null && contact!!.phoneNumbers.size > 1) showQrDialogPicker = true
-//                                                    else {
-                                                        pendingQrNumber = null; showQrDialog = true
-//                                                    }
+                                                    doHapticIfNeed(context, prefs)
+                                                    pendingQrNumber = null; showQrDialog = true
                                                 }
                                             ),
                                         onClick = {
@@ -2614,8 +2634,12 @@ fun ContactDetailsScreen(
                                                             else if (contact!!.accountName == null && contact!!.accountType == null) LOCAL_SOURCE_KEY
                                                             else accountSourceKey(contact!!.accountType, contact!!.accountName),
                                             contactsViewModel = contactsViewModel,
-                                            onDismiss = { showMoveDialog = false },
+                                            onDismiss = {
+                                                doHapticIfNeed(context, prefs)
+                                                showMoveDialog = false
+                                            },
                                             onSuccess = { selectedAccount, isPrivate, newContactId ->
+                                                doHapticIfNeed(context, prefs)
                                                 context.toast(textToast)
                                                 // Updating local data
                                                 contact = contact!!.copy(
@@ -2639,7 +2663,10 @@ fun ContactDetailsScreen(
                                             val account = Account(source.accountName ?: "", source.accountType ?: "")
                                             SourceItem(
                                                 modifier = Modifier.combinedClickable(
-                                                    onClick = { showSourcesDialog = true },
+                                                    onClick = {
+                                                        doHapticIfNeed(context, prefs)
+                                                        showSourcesDialog = true
+                                                    },
                                                 ),
                                                 leadingIcon = ContactUtils.getAccountIcon(account, contact!!.isPrivate),
                                                 headline = ContactUtils.getAccountName(account),
@@ -2672,7 +2699,10 @@ fun ContactDetailsScreen(
                             .navigationBarsPadding()
                             .padding(bottom = 24.dp, end = 24.dp),
                         visible = showButton,
-                        onClick = { scope.launch { listState.animateScrollToItem(0) } }
+                        onClick = {
+                            doHapticIfNeed(context, prefs)
+                            scope.launch { listState.animateScrollToItem(0) }
+                        }
                     )
                 }
             }
@@ -2722,7 +2752,9 @@ fun ContactDetailsScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             SpringIconButton(
-                                onClick = { showFullScreenPhoto = false }
+                                onClick = {
+                                    doHapticIfNeed(context, prefs)
+                                    showFullScreenPhoto = false }
                             ) {
                                 Icon(
                                     Icons.AutoMirrored.Rounded.ArrowBack,
@@ -2744,6 +2776,7 @@ fun ContactDetailsScreen(
                             if (contact?.photoUri != null) {
                                 SpringIconButton(
                                     onClick = {
+                                        doHapticIfNeed(context, prefs)
                                         val safeName = displayName
                                             .replace(Regex("[^A-Za-z0-9._-]"), "_")
                                             .ifBlank { "contact" }
@@ -2775,6 +2808,7 @@ fun QrCodeDialog(
 ) {
     val context = LocalContext.current
     val activity = context as? Activity
+    val prefs: PreferenceManager = koinInject()
 
     val vCard = remember(contact, name, phone, email) {
         if (contact != null) {
@@ -2876,6 +2910,7 @@ fun QrCodeDialog(
                 ) {
                     FilledTonalButton(
                         onClick = {
+                            doHapticIfNeed(context, prefs)
                             if (contact != null) {
                                 QrCodeUtils.shareVCardFile(context, contact)
                             } else {
@@ -2899,7 +2934,9 @@ fun QrCodeDialog(
                     }
 
                     OutlinedButton(
-                        onClick = { QrCodeUtils.copyToClipboard(context, vCard, name) },
+                        onClick = {
+                            doHapticIfNeed(context, prefs)
+                            QrCodeUtils.copyToClipboard(context, vCard, name) },
                         modifier = Modifier.weight(1f),
                         shape = MaterialTheme.shapes.medium
                     ) {
@@ -2914,7 +2951,10 @@ fun QrCodeDialog(
                 Spacer(Modifier.height(4.dp))
 
                 Button(
-                    onClick = onDismiss,
+                    onClick = {
+                        doHapticIfNeed(context, prefs)
+                        onDismiss()
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     shape = MaterialTheme.shapes.medium
                 ) {

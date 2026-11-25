@@ -42,7 +42,7 @@ import dev.goodwy.rphone.cardCornerExtraSmall
 import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillAnimatedSection
 import dev.goodwy.rphone.view.components.Title
-import dev.goodwy.rphone.view.components.performAppHaptic
+import dev.goodwy.rphone.view.components.doHapticIfNeed
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import org.koin.compose.koinInject
 
@@ -156,13 +156,7 @@ fun QuickResponsesScreen(
                                     )
                                     Surface(
                                         onClick = {
-                                            if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                                                performAppHaptic(
-                                                    context,
-                                                    prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light",
-                                                    prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
-                                                )
-                                            }
+                                            doHapticIfNeed(context, prefs)
                                             editingIndex = index
                                             editingText = responseText
                                         },

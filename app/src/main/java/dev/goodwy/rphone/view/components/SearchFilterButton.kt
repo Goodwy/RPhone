@@ -23,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -67,6 +68,7 @@ fun PreferenceManager.getSearchFilterState(): SearchFilterState = SearchFilterSt
  */
 @Composable
 fun SearchFilterButton(modifier: Modifier = Modifier, size: Dp = 52.dp) {
+    val context = LocalContext.current
     val prefs = koinInject<PreferenceManager>()
     var expanded by remember { mutableStateOf(false) }
     val settingsVer by prefs.settingsChanged.collectAsStateWithLifecycle()
@@ -74,7 +76,10 @@ fun SearchFilterButton(modifier: Modifier = Modifier, size: Dp = 52.dp) {
 
     Box(modifier = modifier) {
         IconButton(
-            onClick = { expanded = true }
+            onClick = {
+                doHapticIfNeed(context, prefs)
+                expanded = true
+            }
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Rounded.ManageSearch,
@@ -97,17 +102,26 @@ fun SearchFilterButton(modifier: Modifier = Modifier, size: Dp = 52.dp) {
             SearchFilterCheckRow(
                 label = stringResource(R.string.contacts),
                 checked = state.contacts,
-                onCheckedChange = { prefs.setBoolean(PreferenceManager.KEY_SEARCH_FILTER_CONTACTS, it) }
+                onCheckedChange = {
+                    doHapticIfNeed(context, prefs)
+                    prefs.setBoolean(PreferenceManager.KEY_SEARCH_FILTER_CONTACTS, it)
+                }
             )
             SearchFilterCheckRow(
                 label = stringResource(R.string.calls),
                 checked = state.nonContacts,
-                onCheckedChange = { prefs.setBoolean(PreferenceManager.KEY_SEARCH_FILTER_NON_CONTACTS, it) }
+                onCheckedChange = {
+                    doHapticIfNeed(context, prefs)
+                    prefs.setBoolean(PreferenceManager.KEY_SEARCH_FILTER_NON_CONTACTS, it)
+                }
             )
             SearchFilterCheckRow(
                 label = stringResource(R.string.call_notes),
                 checked = state.contactNotes,
-                onCheckedChange = { prefs.setBoolean(PreferenceManager.KEY_SEARCH_FILTER_CONTACT_NOTES, it) }
+                onCheckedChange = {
+                    doHapticIfNeed(context, prefs)
+                    prefs.setBoolean(PreferenceManager.KEY_SEARCH_FILTER_CONTACT_NOTES, it)
+                }
             )
         }
     }

@@ -50,6 +50,7 @@
     <string name="saved">Enregistré</string>
     <string name="save_failed">Échec de l\'enregistrement</string>
     <string name="warning">Avertissement</string>
+    <string name="edit_number_before_call">Modifier le numéro avant d\'appeler</string>
 
     <!-- Search -->
     <string name="search">Rechercher</string>
@@ -581,6 +582,7 @@
     <string name="calling_card_override_saved">Personnalisation enregistrée</string>
     <string name="calling_card_override_save_failed">Impossible d\'enregistrer l\'arrière-plan</string>
     <string name="calling_card_override_unknown_contact">Contact n° %1$s</string>
+    <string name="calling_card_sync_warning_message">L\'apparence de l\'écran d\'appel est stockée uniquement dans cette application. Elle n\'est pas synchronisée avec Google Contacts ni d\'autres carnets d\'adresses, car ils ne disposent pas d\'un champ pour cela. Les modifications ici n\'affectent que les appels dans cette application. Pour transférer ces paramètres et images d\'arrière-plan vers un autre appareil, utilisez Sauvegarde &amp; Restauration.</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">Ajouter à l\'écran d\'accueil</string>

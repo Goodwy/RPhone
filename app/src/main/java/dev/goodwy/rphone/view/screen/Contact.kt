@@ -272,6 +272,7 @@ fun ContactScreen(navController: NavController, navigator: DestinationsNavigator
                         onSelectAll = {
                             selectedIds = filteredContacts.map { it.id }.toSet()
                         },
+                        doHaptic = { doHapticIfNeed(context, prefs) },
                         isAllSelected = selectedIds == filteredContacts.map { it.id }.toSet()
                     )
                 }
@@ -380,6 +381,7 @@ fun ContactScreen(navController: NavController, navigator: DestinationsNavigator
                     ),
                 visible = showButton && selectedIds.isEmpty(),
                 onClick = {
+                    doHapticIfNeed(context, prefs)
                     scope.launch {
                         listState.animateScrollToItem(0)
                     }
@@ -396,6 +398,8 @@ fun AccountFilterBar(
     viewModel: ContactsViewModel,
     onAddContact: () -> Unit,
 ) {
+    val context = LocalContext.current
+    val prefs = koinInject<PreferenceManager>()
     val accounts by viewModel.filteredAvailableAccounts.collectAsStateWithLifecycle()
     val selectedAccount by viewModel.selectedAccount.collectAsStateWithLifecycle()
     val showLocalOnly by viewModel.showLocalOnly.collectAsStateWithLifecycle()
@@ -463,7 +467,10 @@ fun AccountFilterBar(
         )
         Surface(
             modifier = Modifier.combinedClickable(
-                onClick = { showAccountSheet = true },
+                onClick = {
+                    doHapticIfNeed(context, prefs)
+                    showAccountSheet = true
+                },
                 onLongClick = { navigator.navigate(ContactVisibilityScreenDestination) },
                 interactionSource = interactionSource,
                 indication = null,
@@ -540,7 +547,10 @@ fun AccountFilterBar(
         )
         Surface(
             modifier = Modifier.combinedClickable(
-                onClick = onAddContact,
+                onClick = {
+                    doHapticIfNeed(context, prefs)
+                    onAddContact()
+                },
                 interactionSource = interactionSourceAdd,
                 indication = null,
             ),
@@ -591,22 +601,26 @@ fun AccountFilterBar(
                 },
                 contactCountByPrivate = allContacts.count { it.isPrivate },
                 onSelectAll = {
+                    doHapticIfNeed(context, prefs)
                     showAccountSheet = false
                     viewModel.setShowLocalOnly(false)
                     viewModel.setShowPrivateOnly(false)
                     viewModel.selectAccount(null)
                 },
                 onSelectDeviceOnly = {
+                    doHapticIfNeed(context, prefs)
                     showAccountSheet = false
                     viewModel.setShowLocalOnly(true)
                     viewModel.setShowPrivateOnly(false)
                 },
                 onSelectPrivateOnly = {
+                    doHapticIfNeed(context, prefs)
                     showAccountSheet = false
                     viewModel.setShowLocalOnly(false)
                     viewModel.setShowPrivateOnly(true)
                 },
                 onSelectAccount = { account ->
+                    doHapticIfNeed(context, prefs)
                     showAccountSheet = false
                     viewModel.setShowLocalOnly(false)
                     viewModel.setShowPrivateOnly(false)
@@ -633,6 +647,7 @@ fun BatchActionBar(
     onRemoveFromFav: (() -> Unit)? = null,
     onDeselect: () -> Unit,
     onSelectAll: () -> Unit,
+    doHaptic: () -> Unit,
     isAllSelected: Boolean
 ) {
     val prefs = koinInject<PreferenceManager>()
@@ -656,45 +671,47 @@ fun BatchActionBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             RillIconButton(
-                onClick = onClear,
+                onClick = {
+                    doHaptic()
+                    onClear()
+                },
                 imageVector = Icons.Default.Close,
                 contentDescription = stringResource(R.string.cancel)
             )
             RillTextButton(
-                onClick = if (isAllSelected) onDeselect else onSelectAll,
+                onClick = {
+                    doHaptic()
+                    if (isAllSelected) onDeselect() else onSelectAll()
+                },
                 text = stringResource(R.string.selected_items, selectedCount),
                 toast = if (isAllSelected) stringResource(R.string.deselect_all) else stringResource(R.string.select_all)
             )
             Spacer(modifier = Modifier.weight(1f))
-//            if (onRemoveFromFav != null) {
-//                IconButton(onClick = { showFavDeleteConfirm = true }) {
-//                    Icon(Icons.AutoMirrored.Filled.StarHalf, stringResource(R.string.remove_from_favorites))
-//                }
-//            }
-//            if (onAddToFav != null) {
-//                IconButton(onClick = { showAddFavConfirm = true }) {
-//                    Icon(Icons.Default.Star, stringResource(R.string.add_to_favorites))
-//                }
-//            }
             if (onMove != null && onMoveToPrivate != null) {
                 RillIconButton(
-                    onClick = { showMoveDialog = true },
+                    onClick = {
+                        doHaptic()
+                        showMoveDialog = true
+                    },
                     imageVector = Icons.AutoMirrored.Rounded.DriveFileMove,
                     contentDescription = stringResource(R.string.move_to_another_account)
                 )
             }
             RillIconButton(
-                onClick = { showDeleteConfirm = true },
+                onClick = {
+                    doHaptic()
+                    showDeleteConfirm = true
+                },
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_delete),
                 contentDescription = stringResource(R.string.delete_contacts)
             )
-//            IconButton(onClick = onShare) {
-//                Icon(Icons.Default.Share, stringResource(R.string.share))
-//            }
 
             Box {
                 RillIconButton(
-                    onClick = { showSelectionMenuOuter = true },
+                    onClick = {
+                        doHaptic()
+                        showSelectionMenuOuter = true
+                    },
                     imageVector = Icons.Default.MoreVert,
                     contentDescription = stringResource(R.string.more)
                 )
@@ -704,6 +721,7 @@ fun BatchActionBar(
                         text = { Text(stringResource(R.string.share)) },
                         leadingIcon = { Icon(Icons.Default.Share, null) },
                         onClick = {
+                            doHaptic()
                             showSelectionMenuOuter = false
                             onShare()
                         }
@@ -714,6 +732,7 @@ fun BatchActionBar(
                             text = { Text(stringResource(R.string.add_to_favorites)) },
                             leadingIcon = { Icon(Icons.Default.Star, null) },
                             onClick = {
+                                doHaptic()
                                 showSelectionMenuOuter = false
                                 showAddFavConfirm = true
                             }
@@ -724,6 +743,7 @@ fun BatchActionBar(
                         text = { Text(stringResource(R.string.remove_from_favorites)) },
                         leadingIcon = { Icon(Icons.AutoMirrored.Filled.StarHalf, null) },
                         onClick = {
+                            doHaptic()
                             showSelectionMenuOuter = false
                             showFavDeleteConfirm = true
                         }
@@ -744,6 +764,7 @@ fun BatchActionBar(
             icon = Icons.Default.Star,
             confirmButton = {
                 TextButton(onClick = {
+                    doHaptic()
                     onAddToFav?.invoke()
                     showAddFavConfirm = false
                 }) {
@@ -754,7 +775,10 @@ fun BatchActionBar(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showAddFavConfirm = false }) {
+                TextButton(onClick = {
+                    doHaptic()
+                    showAddFavConfirm = false }
+                ) {
                     Text(stringResource(R.string.cancel))
                 }
             }
@@ -772,6 +796,7 @@ fun BatchActionBar(
             icon = Icons.AutoMirrored.Filled.StarHalf,
             confirmButton = {
                 TextButton(onClick = {
+                    doHaptic()
                     onRemoveFromFav?.invoke()
                     showFavDeleteConfirm = false
                 }) {
@@ -783,7 +808,10 @@ fun BatchActionBar(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showFavDeleteConfirm = false }) {
+                TextButton(onClick = {
+                    doHaptic()
+                    showFavDeleteConfirm = false }
+                ) {
                     Text(stringResource(R.string.cancel))
                 }
             }
@@ -800,6 +828,7 @@ fun BatchActionBar(
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
             confirmButton = {
                 TextButton(onClick = {
+                    doHaptic()
                     onDelete()
                     showDeleteConfirm = false
                 }) {
@@ -807,7 +836,10 @@ fun BatchActionBar(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) {
+                TextButton(onClick = {
+                    doHaptic()
+                    showDeleteConfirm = false }
+                ) {
                     Text(stringResource(R.string.cancel))
                 }
             }
@@ -827,8 +859,12 @@ fun BatchActionBar(
             availableAccounts = availableAccounts,
             localAllowed = contactsVM.canCreateLocalContacts(),
             currentAccountKey = currentAccountKey,
-            onDismiss = { showMoveDialog = false },
+            onDismiss = {
+                doHaptic()
+                showMoveDialog = false
+            },
             onAccountSelected = { account, isPrivate ->
+                doHaptic()
                 if (isPrivate) onMoveToPrivate?.invoke()
                 else onMove?.invoke(account)
                 showMoveDialog = false

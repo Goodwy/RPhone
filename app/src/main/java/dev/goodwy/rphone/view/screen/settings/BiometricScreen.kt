@@ -92,6 +92,7 @@ import dev.goodwy.rphone.modal.data.Contact
 import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 import dev.goodwy.rphone.view.components.RillAvatar
 import dev.goodwy.rphone.view.components.RillSelectionDialog
+import dev.goodwy.rphone.view.components.RillSettingsAnimatedVisibility
 import dev.goodwy.rphone.view.components.Title
 import dev.goodwy.rphone.view.theme.RillShapeDefaults
 import kotlinx.coroutines.delay
@@ -257,11 +258,7 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
 
                 // ── Toggles — only visible when a method is configured ─────────
                 item {
-                    AnimatedVisibility(
-                        visible = biometricsType.isNotEmpty(),
-                        enter = fadeIn(tween(300)) + expandVertically(tween(300)),
-                        exit = fadeOut(tween(200)) + shrinkVertically(tween(200))
-                    ) {
+                    RillSettingsAnimatedVisibility(visible = biometricsType.isNotEmpty()) {
                         Column {
 //                        SettingsSectionLabel(stringResource(R.string.authentication))
                             RillExpressiveCard {
@@ -280,7 +277,7 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
                                         )
                                     }
                                 )
-                                if (appLockEnabled) {
+                                RillSettingsAnimatedVisibility(visible = appLockEnabled) {
                                     RillListItem(
                                         headline = stringResource(R.string.lock_timeout),
                                         supporting = currentTimeoutLabel,
@@ -315,11 +312,7 @@ fun BiometricScreen(navigator: DestinationsNavigator) {
                 }
 
                 item {
-                    AnimatedVisibility(
-                        visible = biometricsType.isNotEmpty() && callLockEnabled,
-                        enter = fadeIn(tween(250)) + expandVertically(tween(250)),
-                        exit = fadeOut(tween(200)) + shrinkVertically(tween(200))
-                    ) {
+                    RillSettingsAnimatedVisibility(visible = biometricsType.isNotEmpty() && callLockEnabled) {
                         Column {
                             SettingsSectionLabel(stringResource(R.string.lock_scope))
                             RillExpressiveCard {

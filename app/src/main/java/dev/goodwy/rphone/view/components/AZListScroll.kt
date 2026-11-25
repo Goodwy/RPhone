@@ -75,7 +75,6 @@ import dev.goodwy.rphone.view.theme.customColors
 import com.ramcosta.composedestinations.generated.destinations.ContactDetailsScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactEditScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import dev.goodwy.rphone.controller.util.forceLtr
 import dev.goodwy.rphone.modal.data.getDisplayContactInfo
 import dev.goodwy.rphone.modal.data.getDisplayName
 import dev.goodwy.rphone.view.theme.RillShapeDefaults
@@ -343,6 +342,7 @@ fun ContactListItem(
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
             confirmButton = {
                 TextButton(onClick = {
+                    doHapticIfNeed(context, prefs)
                     showDeleteConfirm = false
                     contactsVM.deleteContact(contact.id)
                 }) {
@@ -350,7 +350,10 @@ fun ContactListItem(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) {
+                TextButton(onClick = {
+                    doHapticIfNeed(context, prefs)
+                    showDeleteConfirm = false }
+                ) {
                     Text(stringResource(R.string.cancel))
                 }
             }
@@ -369,13 +372,7 @@ fun ContactListItem(
         if (selectionMode && onSelectToggle != null) {
             onSelectToggle()
         } else {
-            if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                performAppHaptic(
-                    context,
-                    prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light",
-                    prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
-                )
-            }
+            doHapticIfNeed(context, prefs)
             navigator.navigate(ContactDetailsScreenDestination(contactId = contact.id))
         }
 
@@ -455,7 +452,7 @@ fun ContactListItem(
                                 onClick()
                             },
                             onLongClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                doHapticIfNeed(context, prefs)
                                 showMenu = true
                             }
                         )
@@ -503,6 +500,7 @@ fun ContactListItem(
                         text = { Text(stringResource(R.string.select)) },
                         leadingIcon = { Icon(Icons.Rounded.CheckBox, null) },
                         onClick = {
+                            doHapticIfNeed(context, prefs)
                             showMenu = false
                             onSelectToggle()
                         }
@@ -516,6 +514,7 @@ fun ContactListItem(
                     text = { Text(stringResource(R.string.view_contact)) },
                     leadingIcon = { Icon(Icons.Rounded.AccountCircle, null) },
                     onClick = {
+                        doHapticIfNeed(context, prefs)
                         showMenu = false
                         navigator.navigate(ContactDetailsScreenDestination(contactId = contact.id))
                     }
@@ -525,6 +524,7 @@ fun ContactListItem(
                     text = { Text(stringResource(R.string.edit_contact)) },
                     leadingIcon = { Icon(Icons.Rounded.Edit, null) },
                     onClick = {
+                        doHapticIfNeed(context, prefs)
                         showMenu = false
                         navigator.navigate(ContactEditScreenDestination(contactId = contact.id))
                     }
@@ -535,6 +535,7 @@ fun ContactListItem(
                     text = { Text(shareText) },
                     leadingIcon = { Icon(Icons.Default.Share, null) },
                     onClick = {
+                        doHapticIfNeed(context, prefs)
                         showMenu = false
                         val intent = Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
@@ -549,6 +550,7 @@ fun ContactListItem(
                         text = { Text(stringResource(R.string.copy)) },
                         leadingIcon = { Icon(Icons.Rounded.ContentCopy, null) },
                         onClick = {
+                            doHapticIfNeed(context, prefs)
                             showMenu = false
                             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                             clipboard.setPrimaryClip(ClipData.newPlainText("Phone number", contactInfo))
@@ -564,6 +566,7 @@ fun ContactListItem(
                     text = { Text(if (contact.isFavorite) stringResource(R.string.remove_from_favorites) else stringResource(R.string.add_to_favorites)) },
                     leadingIcon = { Icon(if (contact.isFavorite) Icons.AutoMirrored.Filled.StarHalf else Icons.Default.Star, null, tint = if (contact.isFavorite) MaterialTheme.colorScheme.error else LocalContentColor.current) },
                     onClick = {
+                        doHapticIfNeed(context, prefs)
                         showMenu = false
                         contactsVM.toggleFavorite(contact)
                     }
@@ -576,6 +579,7 @@ fun ContactListItem(
                     text = { Text(stringResource(R.string.delete_contact), color = MaterialTheme.colorScheme.error) },
                     leadingIcon = { Icon(ImageVector.vectorResource(id = R.drawable.ic_delete), null, tint = MaterialTheme.colorScheme.error) },
                     onClick = {
+                        doHapticIfNeed(context, prefs)
                         showMenu = false
                         showDeleteConfirm = true
                     }

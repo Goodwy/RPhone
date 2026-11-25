@@ -51,6 +51,7 @@
     <string name="saved">געהיט</string>
     <string name="save_failed">האָט נישט געקענט היטן</string>
     <string name="warning">וואָרענונג</string>
+    <string name="edit_number_before_call">רעדאַקטיר נומער איידער רופן</string>
 
     <!-- Search -->
     <string name="search">זוכן</string>
@@ -581,6 +582,7 @@
     <string name="calling_card_override_saved">פּערזענליכקייט געהיט</string>
     <string name="calling_card_override_save_failed">האָט נישט געקענט היטן דעם הינטערגרונט</string>
     <string name="calling_card_override_unknown_contact">קאָנטאַקט #%1$s</string>
+    <string name="calling_card_sync_warning_message">דער אויסזען פֿון רוף פאַרשטעל ווערט נאָר געהיט אין דער אַפּ. עס ווערט נישט סינגכראַניזירט מיט Google קאָנטאַקטן אָדער אַנדערע אַדרעס ביכער, ווײַל זיי האָבן נישט קיין פֿעלד דערפֿאַר. ענדערונגען דאָ באַטרעפֿן נאָר רופן אין דער אַפּ. צו באַוועגן די איינשטעלונגען און הינטערגרונט בילדער צו אַן אַנדער גערעט, נוץ באַקאַפּ און צוריקשטעלן.</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">צולייגן צו היים פאַרשטעל</string>

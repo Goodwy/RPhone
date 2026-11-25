@@ -71,6 +71,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import kotlin.time.Duration.Companion.milliseconds
 import androidx.core.graphics.createBitmap
+import dev.goodwy.rphone.view.components.doHapticIfNeed
 
 internal const val KEY_SELECTED_APP_ICON = "selected_app_icon"
 
@@ -456,6 +457,7 @@ fun AppIconScreen(navigator: DestinationsNavigator) {
                         TextButton(
                             modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp),
                             onClick = {
+                                doHapticIfNeed(context, prefs)
                                 showSnackbar = false
                                 navigator.navigate(DonateScreenDestination)
                             }

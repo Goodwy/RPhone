@@ -50,6 +50,7 @@
     <string name="saved">Сохранено</string>
     <string name="save_failed">Не удалось сохранить</string>
     <string name="warning">Предупреждение</string>
+    <string name="edit_number_before_call">Изменить номер и позвонить</string>
 
     <!-- Search -->
     <string name="search">Поиск</string>

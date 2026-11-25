@@ -50,6 +50,7 @@
     <string name="saved">Salvato</string>
     <string name="save_failed">Salvataggio non riuscito</string>
     <string name="warning">Avviso</string>
+    <string name="edit_number_before_call">Modifica numero prima di chiamare</string>
 
     <!-- Search -->
     <string name="search">Cerca</string>
@@ -582,6 +583,7 @@
     <string name="calling_card_override_saved">Personalizzazione salvata</string>
     <string name="calling_card_override_save_failed">Impossibile salvare lo sfondo</string>
     <string name="calling_card_override_unknown_contact">Contatto #%1$s</string>
+    <string name="calling_card_sync_warning_message">L\'aspetto della schermata di chiamata è memorizzato solo in questa app. Non viene sincronizzato con Google Contatti o altre rubriche, perché non dispongono di un campo dedicato. Le modifiche qui influiscono solo sulle chiamate in questa app. Per trasferire queste impostazioni e le immagini di sfondo su un altro dispositivo, usa Backup e ripristino.</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">Aggiungi alla schermata Home</string>

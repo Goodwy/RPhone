@@ -48,6 +48,7 @@ import dev.goodwy.rphone.COFFEE_URL
 import dev.goodwy.rphone.DONATE_URL
 import dev.goodwy.rphone.controller.util.openLink
 import dev.goodwy.rphone.controller.util.toast
+import dev.goodwy.rphone.view.components.doHapticIfNeed
 import org.koin.compose.koinInject
 import kotlin.math.cos
 import kotlin.math.sin
@@ -99,7 +100,10 @@ fun DonateScreen(navigator: DestinationsNavigator) {
                     NavigationIcon(onClick = { navigator.navigateUp() })
                 },
                 actions = {
-                    TextButton(onClick = { openLink(context, DONATE_URL) }) { Text(stringResource(R.string.support_all_options)) }
+                    TextButton(onClick = {
+                        doHapticIfNeed(context, prefs)
+                        openLink(context, DONATE_URL) }
+                    ) { Text(stringResource(R.string.support_all_options)) }
                     Spacer(modifier = Modifier.size(4.dp))
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
@@ -231,6 +235,7 @@ fun DonateScreen(navigator: DestinationsNavigator) {
                         Switch(
                             checked = isPro,
                             onCheckedChange = {
+                                doHapticIfNeed(context, prefs)
                                 isPro = it
                                 prefs.setBoolean(PreferenceManager.KEY_IS_PRO_FOSS, it)
                                 context.toast(if (it) thankText else lockedText)
@@ -305,7 +310,10 @@ fun DonateScreen(navigator: DestinationsNavigator) {
                     contentAlignment = Alignment.BottomCenter
                 ) {
                     Button(
-                        onClick = { openLink(context, COFFEE_URL) },
+                        onClick = {
+                            doHapticIfNeed(context, prefs)
+                            openLink(context, COFFEE_URL)
+                        },
                         interactionSource = interactionSource,
                         modifier = Modifier
                             .fillMaxWidth()

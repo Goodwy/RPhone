@@ -72,6 +72,7 @@ import dev.goodwy.rphone.view.components.RillIconButton
 import dev.goodwy.rphone.view.components.RillTextButton
 import dev.goodwy.rphone.view.components.Title
 import dev.goodwy.rphone.view.components.TopBar
+import dev.goodwy.rphone.view.components.doHapticIfNeed
 import dev.goodwy.rphone.view.theme.RillShapeDefaults
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -192,6 +193,7 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator, 
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
             confirmButton = {
                 TextButton(onClick = {
+                    doHapticIfNeed(context, prefs)
                     NoteManager.deleteNoteFile(noteToDelete!!.file)
                     showDeleteConfirm = false
                     refreshNotes()
@@ -200,7 +202,10 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator, 
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) {
+                TextButton(onClick = {
+                    doHapticIfNeed(context, prefs)
+                    showDeleteConfirm = false }
+                ) {
                     Text(stringResource(R.string.cancel))
                 }
             }
@@ -293,7 +298,10 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator, 
                             modifier = Modifier.padding(start = 8.dp, end = 4.dp),
                             title = { Title(stringResource(R.string.call_notes)) },
                             navigationIcon = {
-                                if (NavBarVisibilityState.hideForSearchResult) NavigationIcon(onClick = { navigator.navigateUp() })
+                                if (NavBarVisibilityState.hideForSearchResult) NavigationIcon(onClick = {
+                                    doHapticIfNeed(context, prefs)
+                                    navigator.navigateUp() }
+                                )
                             },
                             actions = {
                                 var showAboutNotesDialog by remember { mutableStateOf(false) }
@@ -306,6 +314,7 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator, 
                                         iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
                                         confirmButton = {
                                             TextButton(onClick = {
+                                                doHapticIfNeed(context, prefs)
                                                 showAboutNotesDialog = false
                                             }) {
                                                 Text(
@@ -317,6 +326,7 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator, 
                                         dismissButton = {
                                             val notesDir = NoteManager.getNotesDir(context).absolutePath
                                             TextButton(onClick = {
+                                                doHapticIfNeed(context, prefs)
                                                 showAboutNotesDialog = false
                                                 context.copyToClipboard(notesDir)
                                             }) {
@@ -329,7 +339,10 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator, 
                                 }
 
                                 Box {
-                                    IconButton(onClick = { showOverflow = true }) {
+                                    IconButton(onClick = {
+                                        doHapticIfNeed(context, prefs)
+                                        showOverflow = true }
+                                    ) {
                                         Icon(Icons.Default.MoreVert, stringResource(R.string.more))
                                     }
                                 }
@@ -352,16 +365,10 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator, 
                                         offset = DpOffset(0.dp, 24.dp),
                                     ) {
                                         DropdownMenuItem(
-                                            contentPadding = PaddingValues(
-                                                start = 20.dp,
-                                                end = 26.dp
-                                            ),
+                                            contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
                                             text = { Text(stringResource(R.string.about_call_notes)) },
                                             leadingIcon = {
-                                                Icon(
-                                                    Icons.AutoMirrored.Outlined.Help,
-                                                    null
-                                                )
+                                                Icon(Icons.AutoMirrored.Outlined.Help, null)
                                             },
                                             onClick = {
                                                 showOverflow = false
@@ -373,8 +380,7 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator, 
                             },
                             colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
                         )
-                    }
-                    else {
+                    } else {
                         TopBar(navController, navigator)
                     }
                 } else {
@@ -398,6 +404,7 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator, 
                         onSelectAll = {
                             selectedNotes = notes.map { it.file.absolutePath }.toSet()
                         },
+                        doHaptic = { doHapticIfNeed(context, prefs) },
                         isAllSelected = selectedNotes == notes.map { it.file.absolutePath }.toSet()
                     )
                 }
@@ -437,6 +444,7 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator, 
                                     highlightQuery = if (isHighlighted) highlightQuery else null,
                                     cardCorner = cardCornerExtraLarge,
                                     onClick = {
+                                        doHapticIfNeed(context, prefs)
                                         if (selectionMode) {
                                             val key = note.file.absolutePath
                                             selectedNotes = if (selectedNotes.contains(key)) selectedNotes - key else selectedNotes + key
@@ -486,6 +494,7 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator, 
                             text = { Text(stringResource(R.string.select)) },
                             leadingIcon = { Icon(Icons.Rounded.CheckBox, null) },
                             onClick = {
+                                doHapticIfNeed(context, prefs)
                                 selectedNote?.let { selectedNotes = setOf(it.file.absolutePath) }
                                 selectedNote = null
                             }
@@ -499,6 +508,7 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator, 
                             text = { Text(shareText) },
                             leadingIcon = { Icon(Icons.Rounded.Share, null) },
                             onClick = {
+                                doHapticIfNeed(context, prefs)
                                 val note = selectedNote!!
                                 val intent = Intent(Intent.ACTION_SEND).apply {
                                     type = "text/plain"
@@ -514,6 +524,7 @@ fun NotesScreen(navController: NavController, navigator: DestinationsNavigator, 
                             text = { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) },
                             leadingIcon = { Icon(ImageVector.vectorResource(id = R.drawable.ic_delete), null, tint = MaterialTheme.colorScheme.error) },
                             onClick = {
+                                doHapticIfNeed(context, prefs)
                                 noteToDelete = selectedNote
                                 selectedNote = null
                                 showDeleteConfirm = true
@@ -738,9 +749,10 @@ fun NoteEditorDialog(
     contactName: String,
     phoneNumber: String,
     highlightQuery: String? = null,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
+    val prefs = koinInject<PreferenceManager>()
     val initialText = remember(contactName, phoneNumber) {
         NoteManager.readNote(context, contactName, phoneNumber)
     }
@@ -817,6 +829,7 @@ fun NoteEditorDialog(
                 Button(
                     interactionSource = interactionDeleteSource,
                     onClick = {
+                        doHapticIfNeed(context, prefs)
                         NoteManager.writeNote(context, contactName, phoneNumber, "")
                         onDismiss()
                     },
@@ -837,6 +850,7 @@ fun NoteEditorDialog(
                 Button(
                     interactionSource = interactionSaveSource,
                     onClick = {
+                        doHapticIfNeed(context, prefs)
                         NoteManager.writeNote(context, contactName, phoneNumber, text)
                         onDismiss()
                     },
@@ -878,6 +892,7 @@ fun BatchNotesActionBar(
     onShare: () -> Unit,
     onDeselect: () -> Unit,
     onSelectAll: () -> Unit,
+    doHaptic: () -> Unit,
     isAllSelected: Boolean
 ) {
     var showDeleteConfirm by remember { mutableStateOf(false) }
@@ -895,23 +910,23 @@ fun BatchNotesActionBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             RillIconButton(
-                onClick = onClear,
+                onClick = { doHaptic(); onClear() },
                 imageVector = Icons.Default.Close,
                 contentDescription = stringResource(R.string.cancel)
             )
             RillTextButton(
-                onClick = if (isAllSelected) onDeselect else onSelectAll,
+                onClick = { doHaptic(); if (isAllSelected) onDeselect() else onSelectAll() },
                 text = stringResource(R.string.selected_items, selectedCount),
                 toast = if (isAllSelected) stringResource(R.string.deselect_all) else stringResource(R.string.select_all)
             )
             Spacer(modifier = Modifier.weight(1f))
             RillIconButton(
-                onClick = { showDeleteConfirm = true },
+                onClick = { doHaptic(); showDeleteConfirm = true },
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_delete),
                 contentDescription = stringResource(R.string.delete_notes)
             )
             RillIconButton(
-                onClick = onShare,
+                onClick = { doHaptic(); onShare() },
                 imageVector = Icons.Default.Share,
                 contentDescription = stringResource(R.string.share)
             )
@@ -927,6 +942,7 @@ fun BatchNotesActionBar(
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
             confirmButton = {
                 TextButton(onClick = {
+                    doHaptic()
                     onDelete()
                     showDeleteConfirm = false
                 }) {
@@ -934,7 +950,7 @@ fun BatchNotesActionBar(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) {
+                TextButton(onClick = { doHaptic(); showDeleteConfirm = false }) {
                     Text(stringResource(R.string.cancel))
                 }
             }

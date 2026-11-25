@@ -77,7 +77,7 @@ fun RillAvatar(
     val showPicture     = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_SHOW_PICTURE, true) }
     val showFirstLetter = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_SHOW_FIRST_LETTER, true) }
     val colorfulAvatars = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_COLORFUL_AVATARS, true) }
-    var primaryColorAvatars     by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_PRIMARY_COLOR_AVATARS, false)) }
+//    var primaryColorAvatars     by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_PRIMARY_COLOR_AVATARS, false)) }
     var secondaryColorAvatars     by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SECONDARY_COLOR_AVATARS, false)) }
     var googleContactColorAvatars     by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_GOOGLE_CONTACTS_AVATARS, false)) }
     val avatarFrame = remember(settingsState) { prefs.getBoolean(PreferenceManager.KEY_AVATAR_FRAME, false) }

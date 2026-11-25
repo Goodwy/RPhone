@@ -9,15 +9,8 @@ import android.telecom.TelecomManager
 import android.view.Surface
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -64,6 +57,7 @@ import androidx.core.net.toUri
 import com.ramcosta.composedestinations.generated.destinations.QuickResponsesScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.SpeedDialScreenDestination
 import dev.goodwy.rphone.view.components.RillSelectListItem
+import dev.goodwy.rphone.view.components.RillSettingsAnimatedVisibility
 import dev.goodwy.rphone.view.components.Title
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -253,11 +247,7 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
                                 }
                             )
 
-                            AnimatedVisibility(
-                                visible = !fullscreenCalls,
-                                enter = expandVertically(spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMediumLow)) + fadeIn(tween(220)),
-                                exit = shrinkVertically(tween(180)) + fadeOut(tween(140))
-                            ) {
+                            RillSettingsAnimatedVisibility(visible = !fullscreenCalls) {
                                 RillSwitchListItem(
                                     headline   = stringResource(R.string.open_call_screen_from_notification),
                                     supporting = stringResource(R.string.open_call_screen_from_notification_subtitle),
@@ -305,11 +295,7 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
                                 }
                             )
 
-                            AnimatedVisibility(
-                                visible = busyMode,
-                                enter = expandVertically(spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMediumLow)) + fadeIn(tween(220)),
-                                exit = shrinkVertically(tween(180)) + fadeOut(tween(140))
-                            ) {
+                            RillSettingsAnimatedVisibility(visible = busyMode) {
                                 RillSwitchListItem(
                                     headline = stringResource(R.string.busy_mode_message),
                                     supporting = busyMessage.ifEmpty { defaultBusyMsg },

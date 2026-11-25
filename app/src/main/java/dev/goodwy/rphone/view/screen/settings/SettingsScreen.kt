@@ -90,6 +90,7 @@ import dev.goodwy.rphone.controller.util.ContactUtils.getAccountIcon
 import dev.goodwy.rphone.controller.util.openLink
 import dev.goodwy.rphone.icons.background_replace
 import dev.goodwy.rphone.view.components.Title
+import dev.goodwy.rphone.view.components.doHapticIfNeed
 import dev.goodwy.rphone.view.components.shake
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import dev.goodwy.rphone.view.theme.RillMaterialShapes
@@ -1108,6 +1109,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                         TextButton(
                             modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp),
                             onClick = {
+                                doHapticIfNeed(context, prefs)
                                 showSnackbar = false
                                 navigator.navigate(DonateScreenDestination)
                             }

@@ -118,7 +118,7 @@ import dev.goodwy.rphone.controller.util.openFullScreenIntentSettings
 import dev.goodwy.rphone.view.components.TabSpec
 import dev.goodwy.rphone.view.components.UpdateAvailableDialog
 import dev.goodwy.rphone.view.components.parseTabOrder
-import dev.goodwy.rphone.view.components.performAppHaptic
+import dev.goodwy.rphone.view.components.doHapticIfNeed
 import dev.goodwy.rphone.view.theme.color_call_button
 import dev.goodwy.rphone.view.theme.isLandscapeMode
 import kotlinx.coroutines.delay
@@ -342,7 +342,7 @@ class MainActivity : FragmentActivity() {
                             AnimatedVisibility(
                                 visible = showCallBanner,
                                 enter = slideInVertically { -it } + fadeIn(),
-                                exit = slideOutVertically { -it } + fadeOut()
+                                exit = shrinkVertically(tween(180)) + fadeOut(tween(140))
                             ) {
                                 Box(
                                     modifier = Modifier
@@ -386,7 +386,7 @@ class MainActivity : FragmentActivity() {
                             AnimatedVisibility(
                                 visible = showFsiBanner && !showCallBanner,
                                 enter = slideInVertically { -it } + fadeIn(),
-                                exit = slideOutVertically { -it } + fadeOut()
+                                exit = shrinkVertically(tween(180)) + fadeOut(tween(140))
                             ) {
                                 Column(
                                     modifier = Modifier
@@ -509,13 +509,7 @@ class MainActivity : FragmentActivity() {
                             }
 
                             fun doHaptic() {
-                                if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                                    performAppHaptic(
-                                        context,
-                                        prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light",
-                                        prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
-                                    )
-                                }
+                                doHapticIfNeed(context, prefs)
                             }
 
                             if (isLandscape && isAlreadyDefaultDialer(this@MainActivity)) {

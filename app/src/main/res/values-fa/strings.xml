@@ -51,6 +51,7 @@
     <string name="saved">ذخیره شد</string>
     <string name="save_failed">ذخیره ناموفق بود</string>
     <string name="warning">هشدار</string>
+    <string name="edit_number_before_call">ویرایش شماره قبل از تماس</string>
 
     <!-- Search -->
     <string name="search">جستجو</string>
@@ -581,6 +582,7 @@
     <string name="calling_card_override_saved">سفارشی‌سازی ذخیره شد</string>
     <string name="calling_card_override_save_failed">ذخیره پس‌زمینه ممکن نشد</string>
     <string name="calling_card_override_unknown_contact">مخاطب #%1$s</string>
+    <string name="calling_card_sync_warning_message">ظاهر صفحه تماس فقط در این برنامه ذخیره می‌شود. با مخاطبان Google یا دفترچه‌های آدرس دیگر همگام‌سازی نمی‌شود، زیرا آنها فیلدی برای آن ندارند. تغییرات اینجا فقط بر تماس‌های این برنامه تأثیر می‌گذارد. برای انتقال این تنظیمات و تصاویر پس‌زمینه به دستگاه دیگر، از پشتیبان‌گیری و بازیابی استفاده کنید.</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">افزودن به صفحه اصلی</string>

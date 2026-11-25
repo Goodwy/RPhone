@@ -4,13 +4,8 @@ package dev.goodwy.rphone.view.screen.settings
 
 import android.content.Context
 import android.view.Surface
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CornerSize
@@ -144,11 +139,7 @@ fun SwipeActionsScreen(
 
             // Swipe Right Configuration
             item {
-                AnimatedVisibility(
-                    visible = enabled,
-                    enter = fadeIn(tween(250)) + expandVertically(tween(250)),
-                    exit = fadeOut(tween(200)) + shrinkVertically(tween(200))
-                ) {
+                RillSettingsAnimatedVisibility(visible = enabled) {
                     RillAnimatedSection(delayMs = 80L) {
                         Column {
                             SettingsSectionLabel(stringResource(R.string.recents))
@@ -183,11 +174,7 @@ fun SwipeActionsScreen(
                                     }
                                 )
 
-                                AnimatedVisibility(
-                                    visible = actionLeft != SwipeActionType.NONE,
-                                    enter = fadeIn(tween(250)) + expandVertically(tween(250)),
-                                    exit = fadeOut(tween(200)) + shrinkVertically(tween(200))
-                                ) {
+                                RillSettingsAnimatedVisibility(visible = actionLeft != SwipeActionType.NONE) {
                                     val actionLeftSecond = SwipeActionType.fromId(leftSecondActionId)
                                     RillSelectListItem(
                                         headline = if (isLtr) stringResource(R.string.settings_swipe_left_action_second) else stringResource(R.string.settings_swipe_right_action_second),

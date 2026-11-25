@@ -11,11 +11,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
@@ -76,9 +73,11 @@ import dev.goodwy.rphone.view.components.HeadlineText
 import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillDialog
 import dev.goodwy.rphone.view.components.RillIconBox
+import dev.goodwy.rphone.view.components.RillSettingsAnimatedVisibility
 import dev.goodwy.rphone.view.components.SupportProjectItem
 import dev.goodwy.rphone.view.components.SupportingText
 import dev.goodwy.rphone.view.components.Title
+import dev.goodwy.rphone.view.components.doHapticIfNeed
 import dev.goodwy.rphone.view.components.shake
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import dev.goodwy.rphone.view.theme.customColors
@@ -296,6 +295,7 @@ fun AutoBackupScreen(
                                     if (isFolderSet) {
                                         IconButton(
                                             onClick = {
+                                                doHapticIfNeed(context, prefs)
                                                 folderUriStr = null
                                                 prefs.setAutoBackupFolderUri(null)
                                             }
@@ -395,6 +395,7 @@ fun AutoBackupScreen(
                                                 Surface(
                                                     onClick = {
                                                         if (lowerFeaturesEnabled) {
+                                                            doHapticIfNeed(context, prefs)
                                                             intervalUnit = unitKey
                                                             prefs.setAutoBackupIntervalUnit(unitKey)
                                                             AutoBackupManager.scheduleAutoBackup(context)
@@ -465,11 +466,7 @@ fun AutoBackupScreen(
                                             },
                                         )
 
-                                        AnimatedVisibility(
-                                            visible = autoDeleteTimeEnabled,
-                                            enter = expandVertically(spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMediumLow)) + fadeIn(tween(220)),
-                                            exit = shrinkVertically(tween(180)) + fadeOut(tween(140))
-                                        ) {
+                                        RillSettingsAnimatedVisibility(visible = autoDeleteTimeEnabled) {
                                             Column(
                                                 verticalArrangement = Arrangement.spacedBy(10.dp),
                                                 modifier = Modifier.padding(top = 0.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)
@@ -517,6 +514,7 @@ fun AutoBackupScreen(
                                                             Surface(
                                                                 onClick = {
                                                                     if (lowerFeaturesEnabled) {
+                                                                        doHapticIfNeed(context, prefs)
                                                                         autoDeleteTimeUnit = optKey
                                                                         prefs.setAutoDeleteBackupsTimeUnit(optKey)
                                                                     }
@@ -570,11 +568,7 @@ fun AutoBackupScreen(
                                             },
                                         )
 
-                                        AnimatedVisibility(
-                                            visible = autoDeleteCountEnabled,
-                                            enter = expandVertically(spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMediumLow)) + fadeIn(tween(220)),
-                                            exit = shrinkVertically(tween(180)) + fadeOut(tween(140))
-                                        ) {
+                                        RillSettingsAnimatedVisibility(visible = autoDeleteCountEnabled) {
                                             Column(
                                                 verticalArrangement = Arrangement.spacedBy(10.dp),
                                                 modifier = Modifier.padding(top = 0.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)
@@ -635,6 +629,7 @@ fun AutoBackupScreen(
                         TextButton(
                             modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp),
                             onClick = {
+                                doHapticIfNeed(context, prefs)
                                 showSnackbar = false
                                 navigator.navigate(DonateScreenDestination)
                             }

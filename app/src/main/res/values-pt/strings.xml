@@ -50,6 +50,7 @@
     <string name="saved">Guardado</string>
     <string name="save_failed">Falha ao guardar</string>
     <string name="warning">Aviso</string>
+    <string name="edit_number_before_call">Editar número antes de ligar</string>
 
     <!-- Search -->
     <string name="search">Pesquisar</string>
@@ -581,6 +582,7 @@
     <string name="calling_card_override_saved">Personalização guardada</string>
     <string name="calling_card_override_save_failed">Não foi possível guardar o fundo</string>
     <string name="calling_card_override_unknown_contact">Contacto n.º %1$s</string>
+    <string name="calling_card_sync_warning_message">O aspeto do ecrã de chamada é guardado apenas nesta aplicação. Não é sincronizado com os Contactos Google nem com outros livros de endereços, porque não têm um campo para isso. As alterações aqui afetam apenas as chamadas nesta aplicação. Para transferir estas definições e imagens de fundo para outro dispositivo, utilize a Cópia de segurança e restauro.</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">Adicionar ao ecrã inicial</string>

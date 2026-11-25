@@ -188,6 +188,8 @@ fun CallLogFullScreen(
         )
     }
 
+    val videoLauncher = rememberVideoLauncher()
+
     Scaffold(
         topBar = {
             AnimatedContent(
@@ -214,7 +216,10 @@ fun CallLogFullScreen(
                                 )
                             },
                             navigationIcon = {
-                                NavigationIcon(onClick = { navigator.navigateUp() })
+                                NavigationIcon(onClick = {
+                                    doHapticIfNeed(context, prefs)
+                                    navigator.navigateUp() }
+                                )
                             },
                             colors = TopAppBarDefaults.topAppBarColors(
                                 containerColor = MaterialTheme.colorScheme.surface,
@@ -229,9 +234,14 @@ fun CallLogFullScreen(
                         ) {
                             val filters = CallLogFilter.entries - CallLogFilter.Contacts
                             items(filters) { filter ->
-                                RillFilterChip(stringResource(filter.stringRes), selectedFilter == filter, { _ ->
-                                    viewModel.setFilter(filter)
-                                })
+                                RillFilterChip(
+                                    label = stringResource(filter.stringRes),
+                                    selected = selectedFilter == filter,
+                                    onClick = { _ ->
+                                        doHapticIfNeed(context, prefs)
+                                        viewModel.setFilter(filter)
+                                    }
+                                )
                             }
                         }
                     }
@@ -261,6 +271,7 @@ fun CallLogFullScreen(
                         onSelectAll = {
                             selectedEntries = finalFilteredLogs.toSet()
                         },
+                        doHaptic = { doHapticIfNeed(context, prefs) },
                         isAllSelected = selectedEntries == finalFilteredLogs.toSet()
                     )
                 }
@@ -349,13 +360,9 @@ fun CallLogFullScreen(
                 }
 
                 val initiateMessage = { number: String ->
-                    context.startActivity(
-                        Intent(
-                            Intent.ACTION_VIEW,
-                            "sms:$number".toUri()
-                        )
-                    )
+                    context.startActivity(Intent(Intent.ACTION_VIEW, "sms:$number".toUri()))
                 }
+
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
@@ -385,19 +392,7 @@ fun CallLogFullScreen(
                         Surface(
                             onClick = {
                                 if (phoneNumber != null) {
-                                    if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                                        performAppHaptic(
-                                            context,
-                                            prefs.getString(
-                                                PreferenceManager.KEY_APP_HAPTICS_STRENGTH,
-                                                "light"
-                                            ) ?: "light",
-                                            prefs.getFloat(
-                                                PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY,
-                                                0.5f
-                                            )
-                                        )
-                                    }
+                                    doHapticIfNeed(context, prefs)
                                     if (hasMultipleNumbers) {
                                         showNumberPicker = true
                                     } else {
@@ -406,17 +401,50 @@ fun CallLogFullScreen(
                                 }
                             },
                             modifier = Modifier
-                                .size(height = 46.dp, width = 82.dp)
+                                .size(height = 46.dp, width = 92.dp)
                                 .scale(callButtonScale),
                             shape = RoundedCornerShape(24.dp),
-                            color = color_call_button, //MaterialTheme.colorScheme.primaryContainer
+                            color = color_call_button,
                             interactionSource = callButtonSource
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
                                     imageVector = Icons.Default.Phone,
                                     contentDescription = stringResource(R.string.call),
-                                    tint = Color.White, //MaterialTheme.colorScheme.onPrimaryContainer
+                                    tint = Color.White,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        val videoButtonSource = remember { MutableInteractionSource() }
+                        val videoButtonPressed by videoButtonSource.collectIsPressedAsState()
+                        val videoButtonScale by animateFloatAsState(
+                            targetValue = if (videoButtonPressed) 1.04f else 1f,
+                            animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                            label = "videoButtonScale"
+                        )
+                        Surface(
+                            onClick = {
+                                if (phoneNumber != null) {
+                                    doHapticIfNeed(context, prefs)
+                                    if (!hasMultipleNumbers) videoLauncher.startVideoCall(phoneNumber)
+                                }
+                            },
+                            modifier = Modifier
+                                .size(height = 46.dp, width = 68.dp)
+                                .scale(videoButtonScale),
+                            shape = RoundedCornerShape(24.dp),
+                            color = cardColor,
+                            interactionSource = videoButtonSource
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_video_camera_outline),
+                                    contentDescription = stringResource(R.string.video_call),
+                                    tint = MaterialTheme.colorScheme.onSurface,
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
@@ -432,19 +460,7 @@ fun CallLogFullScreen(
                         Surface(
                             onClick = {
                                 if (phoneNumber != null) {
-                                    if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                                        performAppHaptic(
-                                            context,
-                                            prefs.getString(
-                                                PreferenceManager.KEY_APP_HAPTICS_STRENGTH,
-                                                "light"
-                                            ) ?: "light",
-                                            prefs.getFloat(
-                                                PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY,
-                                                0.5f
-                                            )
-                                        )
-                                    }
+                                    doHapticIfNeed(context, prefs)
                                     if (hasMultipleNumbers) {
                                         showMessagePicker = true
                                     } else {
@@ -497,7 +513,10 @@ fun CallLogFullScreen(
 
             ScrollToTopButton(
                 visible = showButton,
-                onClick = { scope.launch { listState.animateScrollToItem(0) } },
+                onClick = {
+                    doHapticIfNeed(context, prefs)
+                    scope.launch { listState.animateScrollToItem(0) }
+                },
                 modifier = Modifier
                     .navigationBarsPadding()
                     .padding(bottom = if (!hideBottomBar) 102.dp else 24.dp, end = 24.dp)

@@ -38,8 +38,8 @@ data class Contact(
 ) {
     val displayName: String
         get() = getDisplayName(this)
-    val isCompany: Boolean
-        get() = isCompany(this)
+//    val isCompany: Boolean
+//        get() = isCompany(this)
     fun hasLocalName(): Boolean =
         namePrefix.isNotBlank() ||
                 givenName.isNotBlank() ||
@@ -188,8 +188,8 @@ fun getDisplayContactInfo(contact: Contact): String? {
     }
 }
 
-fun isCompany(contact: Contact): Boolean {
-    return contact.namePrefix.isEmpty() && contact.givenName.isEmpty() && contact.middleName.isEmpty()
-            && contact.givenName.isEmpty() && contact.nameSuffix.isEmpty()
-            && (contact.company.isNotEmpty() || contact.jobTitle.isNotEmpty())
-}
+//fun isCompany(contact: Contact): Boolean {
+//    return contact.namePrefix.isEmpty() && contact.givenName.isEmpty() && contact.middleName.isEmpty()
+//            && contact.givenName.isEmpty() && contact.nameSuffix.isEmpty()
+//            && (contact.company.isNotEmpty() || contact.jobTitle.isNotEmpty())
+//}

@@ -50,6 +50,7 @@
     <string name="saved">Sparat</string>
     <string name="save_failed">Kunde inte spara</string>
     <string name="warning">Varning</string>
+    <string name="edit_number_before_call">Redigera nummer före samtal</string>
 
     <!-- Search -->
     <string name="search">Sök</string>
@@ -581,6 +582,7 @@
     <string name="calling_card_override_saved">Anpassning sparad</string>
     <string name="calling_card_override_save_failed">Kunde inte spara bakgrunden</string>
     <string name="calling_card_override_unknown_contact">Kontakt #%1$s</string>
+    <string name="calling_card_sync_warning_message">Samtalskärmens utseende lagras endast i den här appen. Det synkroniseras inte med Google Kontakter eller andra adressböcker, eftersom de inte har något fält för det. Ändringar här påverkar endast samtal i den här appen. För att flytta dessa inställningar och bakgrundsbilder till en annan enhet, använd Säkerhetskopiering och återställning.</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">Lägg till på startsidan</string>

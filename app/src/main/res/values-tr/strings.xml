@@ -50,6 +50,7 @@
     <string name="saved">Kaydedildi</string>
     <string name="save_failed">Kaydedilemedi</string>
     <string name="warning">Uyarı</string>
+    <string name="edit_number_before_call">Aramadan önce numarayı düzenle</string>
 
     <!-- Search -->
     <string name="search">Ara</string>
@@ -581,6 +582,7 @@
     <string name="calling_card_override_saved">Özelleştirme kaydedildi</string>
     <string name="calling_card_override_save_failed">Arka plan kaydedilemedi</string>
     <string name="calling_card_override_unknown_contact">Kişi #%1$s</string>
+    <string name="calling_card_sync_warning_message">Arama ekranı görünümü yalnızca bu uygulamada saklanır. Google Kişiler veya diğer adres defterleriyle eşitlenmez, çünkü bunlarda bunun için bir alan yoktur. Buradaki değişiklikler yalnızca bu uygulamadaki aramaları etkiler. Bu ayarları ve arka plan görsellerini başka bir cihaza taşımak için Yedekleme ve Geri Yükleme\'yi kullanın.</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">Ana ekrana ekle</string>

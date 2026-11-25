@@ -50,6 +50,7 @@
     <string name="saved">सहेजा गया</string>
     <string name="save_failed">सहेजने में विफल</string>
     <string name="warning">चेतावनी</string>
+    <string name="edit_number_before_call">कॉल करने से पहले नंबर संपादित करें</string>
 
     <!-- Search -->
     <string name="search">खोजें</string>
@@ -581,6 +582,7 @@
     <string name="calling_card_override_saved">अनुकूलन सहेजा गया</string>
     <string name="calling_card_override_save_failed">बैकग्राउंड सहेजा नहीं जा सका</string>
     <string name="calling_card_override_unknown_contact">संपर्क #%1$s</string>
+    <string name="calling_card_sync_warning_message">कॉल स्क्रीन की उपस्थिति केवल इस ऐप में संग्रहीत होती है। यह Google संपर्कों या अन्य पता पुस्तिकाओं के साथ सिंक नहीं होती, क्योंकि उनमें इसके लिए कोई फ़ील्ड नहीं है। यहाँ किए गए परिवर्तन केवल इस ऐप में कॉल को प्रभावित करते हैं। इन सेटिंग्स और बैकग्राउंड छवियों को किसी अन्य डिवाइस पर ले जाने के लिए, बैकअप और पुनर्स्थापना का उपयोग करें।</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">होम स्क्रीन पर जोड़ें</string>

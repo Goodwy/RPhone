@@ -270,10 +270,10 @@ class ContactsViewModel(
         _displayOrder.value = order
     }
 
-    fun toggleFavorite(contact: Contact, add: Boolean = false) {
+    fun toggleFavorite(contact: Contact, add: Boolean? = null) {
         viewModelScope.launch {
-            val newFavStatus = !contact.isFavorite
-            contactsRepo.toggleFavorite(contact.id, if (add) true else newFavStatus)
+            val newFavStatus = add ?: !contact.isFavorite
+            contactsRepo.toggleFavorite(contact.id, if (add ?: false) true else newFavStatus)
 
             val currentOrder = preferenceManager.getFavoritesOrder().toMutableList()
             if (newFavStatus) {
@@ -625,8 +625,8 @@ class ContactsViewModel(
         return contactsRepo.getRawContactsForContact(contactId)
             .map { raw ->
                 ContactsRepository.ContactSource(
-                    accountName = raw.accountName?.takeIf { it.isNotBlank() } ?: "Unknown",
-                    accountType = raw.accountType?.takeIf { it.isNotBlank() } ?: "Unknown",
+                    accountName = raw.accountName?.takeIf { it.isNotBlank() },
+                    accountType = raw.accountType?.takeIf { it.isNotBlank() },
                     isPrimary = false, // Will be updated later
                     rawContactId = raw.rawContactId
                 )

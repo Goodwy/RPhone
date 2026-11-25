@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.telecom.TelecomManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
@@ -89,11 +88,13 @@ import com.ramcosta.composedestinations.generated.destinations.ContactScreenDest
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.ContactUtils.getPhoneNumber
 import dev.goodwy.rphone.view.components.PlaceholderView
+import dev.goodwy.rphone.view.components.doHapticIfNeed
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlin.time.Duration.Companion.milliseconds
 
 object FavoritesHolder {
     private val _scrollToTop = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
@@ -191,7 +192,6 @@ fun FavoritesScreen(navController: NavController, navigator: DestinationsNavigat
     }
 
     if (showSimPicker && pendingCallNumber != null) {
-        val telecomManager = remember { context.getSystemService(android.content.Context.TELECOM_SERVICE) as TelecomManager }
         SimPickerDialog(
             onDismissRequest = { showSimPicker = false },
             onSimSelected = { handle ->
@@ -201,7 +201,6 @@ fun FavoritesScreen(navController: NavController, navigator: DestinationsNavigat
         )
     }
 
-    val pillNav = remember { prefs.getBoolean(PreferenceManager.KEY_PILL_NAV, false) }
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
@@ -280,7 +279,7 @@ fun FavoritesScreen(navController: NavController, navigator: DestinationsNavigat
                         },
                         availableAccounts = contactsVM.availableAccountsForMoving.collectAsStateWithLifecycle().value,
                         onShare = {
-                            val text = favorites.filter { selectedIds.contains(it.id) }.joinToString("\n") { "${it.name}: ${it.phoneNumbers.firstOrNull() ?: ""}" }
+                            val text = favorites.filter { selectedIds.contains(it.id) }.joinToString("\n") { "${it.displayName}: ${it.phoneNumbers.firstOrNull() ?: ""}" }
                             val intent = Intent(Intent.ACTION_SEND).apply { type = "text/plain"; putExtra(Intent.EXTRA_TEXT, text) }
                             context.startActivity(Intent.createChooser(intent, "Share contacts"))
                         },
@@ -290,6 +289,7 @@ fun FavoritesScreen(navController: NavController, navigator: DestinationsNavigat
                         onSelectAll = {
                             selectedIds = favorites.map { it.id }.toSet()
                         },
+                        doHaptic = { doHapticIfNeed(context, prefs) },
                         isAllSelected = selectedIds == favorites.map { it.id }.toSet()
                     )
                 }
@@ -324,6 +324,7 @@ fun FavoritesScreen(navController: NavController, navigator: DestinationsNavigat
                         Surface(
                             modifier = Modifier.combinedClickable(
                                 onClick = {
+                                    doHapticIfNeed(context, prefs)
                                     navController.navigate(ContactScreenDestination.route) {
                                         popUpTo(navController.graph.findStartDestination().id) {
                                             saveState = true
@@ -375,6 +376,7 @@ fun FavoritesScreen(navController: NavController, navigator: DestinationsNavigat
                                 contact = contact,
                                 navigator = navigator,
                                 context = context,
+                                prefs = prefs,
                                 isSelected = isSelected,
                                 selectionMode = selectionMode,
                                 isDragging = draggedContactId == contact.id,
@@ -441,9 +443,9 @@ fun FavoritesScreen(navController: NavController, navigator: DestinationsNavigat
                                     }
                                 },
                                 onClick = {
-//                                    val directCall = prefs.getBoolean(PreferenceManager.KEY_DIRECT_CALL_ON_TAP, false)
+                                    doHapticIfNeed(context, prefs)
                                     val phoneNumber = getPhoneNumber(contact)
-                                    if (/*directCall &&*/ phoneNumber != null) {
+                                    if (phoneNumber != null) {
                                         if (ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
                                             placeCallWithSimPreference(context, phoneNumber, simPref) {
                                                 pendingCallNumber = phoneNumber
@@ -475,6 +477,7 @@ fun FavoriteContactCard(
     contact: Contact,
     navigator: DestinationsNavigator,
     context: android.content.Context,
+    prefs: PreferenceManager,
     isSelected: Boolean = false,
     selectionMode: Boolean = false,
     isDragging: Boolean = false,
@@ -553,7 +556,7 @@ fun FavoriteContactCard(
                             var dragStarted = false
 
                             val longPressJob = cs.launch {
-                                delay(viewConfiguration.longPressTimeoutMillis)
+                                delay(viewConfiguration.longPressTimeoutMillis.milliseconds)
                                 longPressTriggered = true
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 isPressed = false
@@ -650,7 +653,7 @@ fun FavoriteContactCard(
                 }
             }
             Text(
-                text = contact.name,
+                text = contact.displayName,
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
                 style = MaterialTheme.typography.labelMedium,
                 fontSize = 11.sp,
@@ -689,6 +692,7 @@ fun FavoriteContactCard(
                     text = { Text(stringResource(R.string.select)) },
                     leadingIcon = { Icon(Icons.Rounded.CheckBox, null) },
                     onClick = {
+                        doHapticIfNeed(context, prefs)
                         showMenu = false
                         onSelectToggle(contact.id)
                     }
@@ -713,6 +717,7 @@ fun FavoriteContactCard(
                     text = { Text(stringResource(R.string.message)) },
                     leadingIcon = { Icon(ImageVector.vectorResource(id = R.drawable.ic_message_filled), null) },
                     onClick = {
+                        doHapticIfNeed(context, prefs)
                         showMenu = false
                         val intent = Intent(Intent.ACTION_VIEW).apply {
                             data = "sms:$phoneNumber".toUri()
@@ -726,6 +731,7 @@ fun FavoriteContactCard(
                 text = { Text(stringResource(R.string.view_contact)) },
                 leadingIcon = { Icon(Icons.Rounded.AccountCircle, null) },
                 onClick = {
+                    doHapticIfNeed(context, prefs)
                     showMenu = false
                     navigator.navigate(ContactDetailsScreenDestination(contactId = contact.id))
                 }
@@ -738,6 +744,7 @@ fun FavoriteContactCard(
                 text = { Text(stringResource(R.string.remove_from_favorites)) },
                 leadingIcon = { Icon(Icons.AutoMirrored.Filled.StarHalf, null, tint = MaterialTheme.colorScheme.error) },
                 onClick = {
+                    doHapticIfNeed(context, prefs)
                     showMenu = false
                     onToggleFavorite()
                 }

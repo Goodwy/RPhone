@@ -15,6 +15,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
@@ -80,6 +81,7 @@ import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.util.forceLtr
 import dev.goodwy.rphone.controller.util.hasCapability
 import dev.goodwy.rphone.controller.util.hasDualSim
+import dev.goodwy.rphone.controller.util.isConference
 import dev.goodwy.rphone.controller.util.isHD
 import dev.goodwy.rphone.liquidglass.LocalLiquidGlassBackdrop
 import dev.goodwy.rphone.liquidglass.backdrops.LayerBackdrop
@@ -122,7 +124,11 @@ fun ExpressiveCallScreen(
     val allCalls by callViewModel.allCalls.collectAsStateWithLifecycle()
     val otherCall = remember(allCalls, call) {
         @Suppress("DEPRECATION")
-        allCalls.find { it != call && it.state != Call.STATE_DISCONNECTED }
+        allCalls.find {
+            it != call &&
+            it.state != Call.STATE_DISCONNECTED &&
+            it.parent == null  // We are removing conference participants
+        }
     }
 
     val simLabel by callViewModel.simLabel.collectAsStateWithLifecycle()
@@ -135,6 +141,7 @@ fun ExpressiveCallScreen(
     var showMore by remember { mutableStateOf(false) }
     var isEnding by remember { mutableStateOf(false) }
     var showManageSheet by remember { mutableStateOf(false) }
+    var showInfo by remember { mutableStateOf(false) }
 
     fun callDisconnect(isIncoming: Boolean = false) {
         if (isIncoming) isEnding = true
@@ -289,12 +296,14 @@ fun ExpressiveCallScreen(
         ) {
             // Other Call Card
             AnimatedVisibility(
-                visible = otherCall != null && !isConference,
+                visible = otherCall != null,
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically()
             ) {
                 otherCall?.let { oc ->
-                    val cnam = if (oc.details?.callerDisplayNamePresentation == TelecomManager.PRESENTATION_ALLOWED) {
+                    val cnam = if (oc.isConference()) {
+                        stringResource(R.string.conference)
+                    } else if (oc.details?.callerDisplayNamePresentation == TelecomManager.PRESENTATION_ALLOWED) {
                         oc.details?.callerDisplayName?.takeIf { it.isNotBlank() }
                     } else null
                     var ocName by remember(oc, cnam) { mutableStateOf(cnam ?: oc.details?.handle?.schemeSpecificPart ?: "Unknown") }
@@ -667,7 +676,7 @@ fun ExpressiveCallScreen(
                                                         callViewModel.mergeCalls()
                                                     }
                                                 )
-                                                if (!isConference) MoreItem(
+                                                MoreItem(
                                                     headline = stringResource(R.string.add_call),
                                                     leadingIcon = Icons.Rounded.AddIcCall,
                                                     enabled = (otherCall == null && callState != Call.STATE_DIALING),
@@ -682,7 +691,8 @@ fun ExpressiveCallScreen(
                                                         val intent = Intent(Intent.ACTION_DIAL)
                                                         context.startActivity(intent)
                                                     }
-                                                ) else MoreItem(
+                                                )
+                                                if (isConference) MoreItem(
                                                     headline = stringResource(R.string.manage),
                                                     leadingIcon = Icons.Rounded.PeopleAlt,
                                                     enabled = isConference,
@@ -1301,11 +1311,6 @@ fun ExpressiveCallScreen(
                 }
 
                 Spacer(Modifier.height(16.dp))
-//                Text(
-//                    text = stringResource(R.string.manage),
-//                    style = MaterialTheme.typography.headlineSmall,
-//                    modifier = Modifier.padding(start = 24.dp, bottom = 16.dp)
-//                )
 
                 val children = remember(allCalls, call) {
                     allCalls.filter { it.parent != null && it.parent == call }

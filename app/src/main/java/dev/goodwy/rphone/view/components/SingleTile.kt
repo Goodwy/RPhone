@@ -52,7 +52,6 @@ import kotlin.math.abs
 @Composable
 fun SingleTile(
     title: String,
-    modifier: Modifier = Modifier,
     subtitle: String? = null,
     photoUri: String? = null,
     icon: ImageVector? = null,
@@ -99,13 +98,7 @@ fun SingleTile(
                     onClick = {
                         if (horizontalDragDetected) return@combinedClickable
                         isPressed = false
-                        if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                            performAppHaptic(
-                                context,
-                                prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light",
-                                prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
-                            )
-                        }
+                        doHapticIfNeed(context, prefs)
                         onClick()
                     },
                     onLongClick = if (useLongClick) {
@@ -133,7 +126,8 @@ fun SingleTile(
                         isPressed = false
                     }
                 }
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .padding(vertical = 8.dp)
+                .padding(start = 16.dp, end = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             RillAvatar(
@@ -149,13 +143,7 @@ fun SingleTile(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null,
                                 onClick = {
-                                    if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                                        performAppHaptic(
-                                            context,
-                                            prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light",
-                                            prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
-                                        )
-                                    }
+                                    doHapticIfNeed(context, prefs)
                                     onAvatarClick()
                                 }
                             )
@@ -222,7 +210,11 @@ fun SingleTile(
                         contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
                         text = { Text(stringResource(R.string.select)) },
                         leadingIcon = { Icon(Icons.Rounded.CheckBox, null) },
-                        onClick = { showMenu = false; onSelectMode() }
+                        onClick = {
+                            doHapticIfNeed(context, prefs)
+                            showMenu = false
+                            onSelectMode()
+                        }
                     )
                     HorizontalDivider(
                         color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
@@ -234,7 +226,11 @@ fun SingleTile(
                             contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
                             text = { Text(stringResource(R.string.call)) },
                             leadingIcon = { Icon(Icons.Rounded.Call, null) },
-                            onClick = { showMenu = false; onCall() }
+                            onClick = {
+                                doHapticIfNeed(context, prefs)
+                                showMenu = false
+                                onCall()
+                            }
                         )
                     }
                     DropdownMenuItem(
@@ -242,6 +238,7 @@ fun SingleTile(
                         text = { Text(stringResource(R.string.message)) },
                         leadingIcon = { Icon(ImageVector.vectorResource(id = R.drawable.ic_message_filled), null) },
                         onClick = {
+                            doHapticIfNeed(context, prefs)
                             showMenu = false
                             val intent = Intent(Intent.ACTION_VIEW).apply {
                                 data = "sms:$numberForMenu".toUri()
@@ -255,6 +252,7 @@ fun SingleTile(
                             text = { Text(stringResource(R.string.create_contact)) },
                             leadingIcon = { Icon(Icons.Default.PersonAdd, null) },
                             onClick = {
+                                doHapticIfNeed(context, prefs)
                                 showMenu = false
                                 val intent = Intent(Intent.ACTION_INSERT).apply {
                                     type = ContactsContract.RawContacts.CONTENT_TYPE
@@ -270,6 +268,7 @@ fun SingleTile(
                     text = { Text(stringResource(R.string.copy)) },
                     leadingIcon = { Icon(Icons.Rounded.ContentCopy, null) },
                     onClick = {
+                        doHapticIfNeed(context, prefs)
                         showMenu = false
                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         clipboard.setPrimaryClip(ClipData.newPlainText("Phone number", numberForMenu ?: title))
@@ -277,19 +276,5 @@ fun SingleTile(
                 )
             }
         }
-    }
-}
-
-@Composable
-fun TileGroup(
-    modifier: Modifier = Modifier,
-    content: @Composable ColumnScope.() -> Unit,
-) {
-    Surface(
-        color    = MaterialTheme.colorScheme.surfaceContainerLow,
-        shape    = RoundedCornerShape(28.dp),
-        modifier = modifier.fillMaxWidth()
-    ) {
-        Column(modifier = Modifier.padding(vertical = 8.dp), content = content)
     }
 }

@@ -60,6 +60,7 @@
     <string name="saved">Saved</string>
     <string name="save_failed">Failed to save</string>
     <string name="warning">Warning</string>
+    <string name="edit_number_before_call">Edit number before call</string>
 
     <!-- Search -->
     <string name="search">Search</string>

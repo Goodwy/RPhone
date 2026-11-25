@@ -51,6 +51,7 @@
     <string name="saved">تم الحفظ</string>
     <string name="save_failed">فشل الحفظ</string>
     <string name="warning">تحذير</string>
+    <string name="edit_number_before_call">تعديل الرقم قبل الاتصال</string>
 
     <!-- Search -->
     <string name="search">بحث</string>
@@ -582,6 +583,7 @@
     <string name="calling_card_override_saved">تم حفظ التخصيص</string>
     <string name="calling_card_override_save_failed">تعذر حفظ الخلفية</string>
     <string name="calling_card_override_unknown_contact">جهة الاتصال #%1$s</string>
+    <string name="calling_card_sync_warning_message">يتم تخزين مظهر شاشة المكالمة في هذا التطبيق فقط. لا تتم مزامنته مع جهات اتصال Google أو دفاتر العناوين الأخرى، لأنها لا تحتوي على حقل لذلك. التغييرات هنا تؤثر فقط على المكالمات في هذا التطبيق. لنقل هذه الإعدادات وصور الخلفية إلى جهاز آخر، استخدم النسخ الاحتياطي والاستعادة.</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">إضافة إلى الشاشة الرئيسية</string>

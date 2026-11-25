@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,7 +17,6 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -36,11 +34,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
@@ -98,7 +93,6 @@ import com.ramcosta.composedestinations.generated.destinations.CallerUIScreenDes
 import com.ramcosta.composedestinations.generated.destinations.DonateScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.LiquidGlassElementsScreenDestination
 import dev.goodwy.rphone.R
-import dev.goodwy.rphone.controller.util.darken
 import dev.goodwy.rphone.icons.page_header
 import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillIconBox
@@ -122,6 +116,8 @@ import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.vectorResource
 import androidx.core.net.toUri
 import dev.goodwy.rphone.view.components.ColorSwatch
+import dev.goodwy.rphone.view.components.RillSettingsAnimatedVisibility
+import dev.goodwy.rphone.view.components.doHapticIfNeed
 
 data class ThemeOption(val key: String, val label: String)
 
@@ -461,11 +457,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                     },
                                     modifier = Modifier.alpha(if (isPro) 1f else 0.6f)
                                 )
-                                AnimatedVisibility(
-                                    visible = !dynamicColors,
-                                    enter = expandVertically(spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMediumLow)) + fadeIn(tween(220)),
-                                    exit = shrinkVertically(tween(180)) + fadeOut(tween(140))
-                                ) {
+                                RillSettingsAnimatedVisibility(visible = !dynamicColors) {
                                     Column(modifier = Modifier
                                         .background(
                                             color = cardColor,
@@ -711,11 +703,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                             )
                                         }
                                     )
-                                    AnimatedVisibility(
-                                        visible = liquidGlass,
-                                        enter = expandVertically(spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMediumLow)) + fadeIn(tween(220)),
-                                        exit = shrinkVertically(tween(180)) + fadeOut(tween(140))
-                                    ) {
+                                    RillSettingsAnimatedVisibility(visible = liquidGlass) {
                                         RillListItem(
                                             headline = stringResource(R.string.liquid_glass_elements),
                                             supporting = stringResource(R.string.liquid_glass_elements_subtitle),
@@ -727,11 +715,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                         )
                                     }
 
-                                    AnimatedVisibility(
-                                        visible = !liquidGlass,
-                                        enter = expandVertically(spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMediumLow)) + fadeIn(tween(220)),
-                                        exit = shrinkVertically(tween(180)) + fadeOut(tween(140))
-                                    ) {
+                                    RillSettingsAnimatedVisibility(visible = !liquidGlass) {
                                         RillSwitchListItem(
                                             headline = stringResource(R.string.material_blur_effects),
                                             supporting = stringResource(R.string.material_blur_effects_subtitle),
@@ -748,11 +732,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                             }
                                         )
                                     }
-                                    AnimatedVisibility(
-                                        visible = blurEffects && !liquidGlass,
-                                        enter = expandVertically(spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMediumLow)) + fadeIn(tween(220)),
-                                        exit = shrinkVertically(tween(180)) + fadeOut(tween(140))
-                                    ) {
+                                    RillSettingsAnimatedVisibility(visible = blurEffects && !liquidGlass) {
                                         RillListItem(
                                             headline = stringResource(R.string.blur_effect_elements),
                                             supporting = stringResource(R.string.blur_effect_elements_subtitle),
@@ -763,16 +743,12 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                                             onClick = { navigator.navigate(BlurEffectsElementsScreenDestination) }
                                         )
                                     }
-                                    AnimatedVisibility(
-                                        visible = liquidGlass || blurEffects,
-                                        enter = expandVertically(spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMediumLow)) + fadeIn(tween(220)),
-                                        exit = shrinkVertically(tween(180)) + fadeOut(tween(140))
-                                    ) {
+                                    RillSettingsAnimatedVisibility(visible = liquidGlass || blurEffects) {
                                         RillSliderListItem(
                                             headline = stringResource(R.string.blur_intensity),
                                             supporting = "${(blurIntensity * 5)}%",
-                                            leadingIcon = Icons.Rounded.BlurLinear,
-                                            modifierLeadingIcon = Modifier.rotate(180f),
+                                            leadingIcon = if (blurIntensity == 0) Icons.Rounded.BlurOff else Icons.Rounded.BlurLinear,
+                                            modifierLeadingIcon = if (blurIntensity != 0) Modifier.rotate(180f) else Modifier,
                                             iconContainerColor =
                                                 if (liquidGlass) MaterialTheme.colorScheme.customColors.colorDarkPink
                                                 else MaterialTheme.colorScheme.customColors.colorDarkOrange,
@@ -994,6 +970,7 @@ fun InterfaceScreen(navigator: DestinationsNavigator) {
                         TextButton(
                             modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp),
                             onClick = {
+                                doHapticIfNeed(context, prefs)
                                 showSnackbar = false
                                 navigator.navigate(DonateScreenDestination)
                             }

@@ -10,6 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,7 +32,6 @@ import androidx.compose.material.icons.rounded.PeopleAlt
 import androidx.compose.material.icons.rounded.QuestionMark
 import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material.icons.rounded.Upload
-import androidx.compose.material.icons.rounded.VolunteerActivism
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
@@ -57,7 +57,6 @@ import dev.goodwy.rphone.view.components.RillAnimatedSection
 import dev.goodwy.rphone.view.components.RillExpressiveCard
 import dev.goodwy.rphone.view.components.RillSwitchListItem
 import com.ramcosta.composedestinations.generated.destinations.AutoBackupScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.DonateScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.cardCornerExtraSmall
@@ -71,12 +70,11 @@ import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillIconBox
 import dev.goodwy.rphone.view.components.RillListItem
 import dev.goodwy.rphone.view.components.Title
+import dev.goodwy.rphone.view.components.doHapticIfNeed
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
-import dev.goodwy.rphone.view.theme.RillMaterialShapes
 import dev.goodwy.rphone.view.theme.color_call_button
 import dev.goodwy.rphone.view.theme.color_call_end
 import dev.goodwy.rphone.view.theme.customColors
-import dev.goodwy.rphone.view.theme.rillPolygonShape
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -381,8 +379,7 @@ fun BackupScreen(
                                 label = "tabFg_$index"
                             )
 
-                            val interactionSource =
-                                remember { MutableInteractionSource() }
+                            val interactionSource = remember { MutableInteractionSource() }
                             val isPressed by interactionSource.collectIsPressedAsState()
                             val cornerRadius by animateDpAsState(
                                 targetValue = if (isPressed || isSelected) 50.dp else 8.dp,
@@ -406,11 +403,19 @@ fun BackupScreen(
                                     )
                                 }
                             }
+                            val weight by animateFloatAsState(
+                                targetValue = if (isSelected) 1f else 0.9f,
+                                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                                label = "ButtonWeight"
+                            )
                             Surface(
-                                onClick = { selectedTab = index },
+                                onClick = {
+                                    doHapticIfNeed(context, prefs)
+                                    selectedTab = index
+                                },
                                 shape = shape,
                                 color = bgAnim,
-                                modifier = Modifier.weight(1f),
+                                modifier = Modifier.weight(weight),
                                 interactionSource = interactionSource,
                             ) {
                                 Row(
@@ -429,7 +434,7 @@ fun BackupScreen(
                                         text = label,
                                         style = MaterialTheme.typography.labelLarge,
                                         lineHeight = MaterialTheme.typography.labelMedium.lineHeight,
-                                        maxLines = 3,
+                                        maxLines = 2,
                                         overflow = TextOverflow.Ellipsis,
                                         fontWeight = FontWeight.SemiBold,
                                         color = fgAnim
@@ -519,7 +524,10 @@ fun BackupScreen(
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
 //                            Button(
-//                                onClick = { executeShare() },
+//                                onClick = {
+//                                    doHapticIfNeed(context, prefs)
+//                                    executeShare()
+//                                },
 //                                enabled = hasAnyBackupSelected,
 //                                shape = CircleShape,
 //                                colors = ButtonDefaults.filledTonalButtonColors(
@@ -538,6 +546,7 @@ fun BackupScreen(
 
                             Button(
                                 onClick = {
+                                    doHapticIfNeed(context, prefs)
                                     val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
                                     saveBackupLauncher.launch("RPhone_Backup_$timestamp.rphone")
                                 },
@@ -575,7 +584,10 @@ fun BackupScreen(
                             RillExpressiveCard {
                                 Column(
                                     modifier = Modifier
-                                        .clickable { restoreFilePickerLauncher.launch("*/*") }
+                                        .clickable {
+                                            doHapticIfNeed(context, prefs)
+                                            restoreFilePickerLauncher.launch("*/*")
+                                        }
                                         .background(cardColor)
                                         .fillMaxWidth()
                                         .padding(20.dp),

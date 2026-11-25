@@ -212,10 +212,10 @@ fun PrivateContactCard(
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).padding(start = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            RillAvatar(name = contact.name, photoUri = contact.photoUri, modifier = Modifier.size(48.dp))
+            RillAvatar(name = contact.displayName, photoUri = contact.photoUri, modifier = Modifier.size(48.dp))
             Spacer(Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(contact.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(contact.displayName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 if (contact.phoneNumbers.isNotEmpty()) {
                     Text(contact.phoneNumbers.first(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }

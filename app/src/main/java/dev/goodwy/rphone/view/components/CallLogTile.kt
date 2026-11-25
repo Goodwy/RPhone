@@ -23,6 +23,7 @@ import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.CheckBox
 import androidx.compose.material.icons.rounded.ContentCopy
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.TravelExplore
 import androidx.compose.material3.*
@@ -98,7 +99,9 @@ fun CallLogTile(
     onAvatarClick: ((CallLogEntry) -> Unit)? = null,
     onAddClick: ((CallLogEntry) -> Unit)? = null,
     onDelete: (() -> Unit)? = null,
+    onEdit: () -> Unit,
     onShowHistory: () -> Unit,
+    doHaptic: () -> Unit,
     isSelected: Boolean = false,
     selectionMode: Boolean = false,
     showSimLabel: Boolean
@@ -146,6 +149,7 @@ fun CallLogTile(
             onLongClick = { onLongClick(log) },
             isMenuOpen  = showMenu && !selectionMode,
             onClick     = { onTileClick(log) },
+            doHaptic = doHaptic,
             isSelected = isSelected,
             selectionMode = selectionMode,
             showSimLabel = showSimLabel
@@ -166,7 +170,10 @@ fun CallLogTile(
                     contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
                     text = { Text(stringResource(R.string.select)) },
                     leadingIcon = { Icon(Icons.Rounded.CheckBox, null) },
-                    onClick = { showMenu = false; onLongClick(log) }
+                    onClick = {
+                        showMenu = false
+                        onLongClick(log)
+                    }
                 )
                 HorizontalDivider(
                     color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
@@ -175,7 +182,11 @@ fun CallLogTile(
                     contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
                     text = { Text(stringResource(R.string.call)) },
                     leadingIcon = { Icon(Icons.Rounded.Call, null) },
-                    onClick = { showMenu = false; onCallClick(log) }
+                    onClick = {
+                        showMenu = false
+                        doHaptic()
+                        onCallClick(log)
+                    }
                 )
                 if (log.number.isNotBlank()) {
                     val phoneNumber = log.number.forceLtr()
@@ -185,6 +196,7 @@ fun CallLogTile(
                         leadingIcon = { Icon(ImageVector.vectorResource(id = R.drawable.ic_message_filled), null) },
                         onClick = {
                             showMenu = false
+                            doHaptic()
                             val intent = Intent(Intent.ACTION_VIEW).apply {
                                 data = "sms:$phoneNumber".toUri()
                             }
@@ -194,23 +206,24 @@ fun CallLogTile(
                 }
                 DropdownMenuItem(
                     contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
+                    text = { Text(stringResource(R.string.edit_number_before_call)) },
+                    leadingIcon = { Icon(Icons.Rounded.Edit, null) },
+                    onClick = {
+                        showMenu = false
+                        onEdit()
+                    }
+                )
+                DropdownMenuItem(
+                    contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
                     text = { Text(stringResource(R.string.copy)) },
                     leadingIcon = { Icon(Icons.Rounded.ContentCopy, null) },
                     onClick = {
                         showMenu = false
+                        doHaptic()
                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         clipboard.setPrimaryClip(ClipData.newPlainText("Phone number", log.number))
                     }
                 )
-//                DropdownMenuItem(
-//                    contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
-//                    text = { Text("Block number") },
-//                    leadingIcon = { Icon(Icons.Default.Block, null) },
-//                    onClick = {
-//                        showMenu = false
-//                        context.toast("Number blocked")
-//                    }
-//                )
                 DropdownMenuItem(
                     contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
                     text = { Text(stringResource(R.string.show_full_history)) },
@@ -227,6 +240,7 @@ fun CallLogTile(
                         leadingIcon = { Icon(Icons.Rounded.TravelExplore, null) },
                         onClick = {
                             showMenu = false
+                            doHaptic()
                             context.launchInternetSearch(log.number)
                         }
                     )
@@ -261,6 +275,7 @@ fun BatchCallLogActionBar(
     onCallLogs: (() -> Unit)? = null,
     onDeselect: () -> Unit,
     onSelectAll: () -> Unit,
+    doHaptic: () -> Unit,
     isAllSelected: Boolean
 ) {
     var showSelectionMenuOuter by remember { mutableStateOf(false) }
@@ -280,32 +295,47 @@ fun BatchCallLogActionBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             RillIconButton(
-                onClick = onClearSelection,
+                onClick = {
+                    doHaptic()
+                    onClearSelection()
+                },
                 imageVector = Icons.Default.Close,
                 contentDescription = stringResource(R.string.cancel)
             )
             RillTextButton(
-                onClick = if (isAllSelected) onDeselect else onSelectAll,
+                onClick = {
+                    doHaptic()
+                    if (isAllSelected) onDeselect() else onSelectAll()
+                },
                 text = stringResource(R.string.selected_items, selectedCount),
                 toast = if (isAllSelected) stringResource(R.string.deselect_all) else stringResource(R.string.select_all)
             )
             Spacer(modifier = Modifier.weight(1f))
             if (onBlock != null) {
                 RillIconButton(
-                    onClick = { showBlockConfirm = true },
+                    onClick = {
+                        doHaptic()
+                        showBlockConfirm = true
+                    },
                     imageVector = Icons.Rounded.Block,
                     contentDescription = stringResource(R.string.action_block_number)
                 )
             }
             RillIconButton(
-                onClick = { showDeleteConfirm = true },
+                onClick = {
+                    doHaptic()
+                    showDeleteConfirm = true
+                },
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_delete),
                 contentDescription = stringResource(R.string.delete_call_logs)
             )
 
             Box {
                 RillIconButton(
-                    onClick = { showSelectionMenuOuter = true },
+                    onClick = {
+                        doHaptic()
+                        showSelectionMenuOuter = true
+                    },
                     imageVector = Icons.Default.MoreVert,
                     contentDescription = stringResource(R.string.more)
                 )
@@ -316,6 +346,7 @@ fun BatchCallLogActionBar(
                             text = { Text(stringResource(R.string.clear_all_filtered_logs), color = MaterialTheme.colorScheme.error, lineHeight = MaterialTheme.typography.bodyMedium.fontSize) },
                             leadingIcon = { Icon(ImageVector.vectorResource(id = R.drawable.ic_delete_sweep), stringResource(R.string.clear_all_filtered_logs), tint = MaterialTheme.colorScheme.error) },
                             onClick = {
+                                doHaptic()
                                 showSelectionMenuOuter = false
                                 showClearAllConfirm = true
                             }
@@ -327,6 +358,7 @@ fun BatchCallLogActionBar(
                             text = { Text(stringResource(R.string.share), lineHeight = MaterialTheme.typography.bodyMedium.fontSize) },
                             leadingIcon = { Icon(Icons.Default.Share, stringResource(R.string.share)) },
                             onClick = {
+                                doHaptic()
                                 showSelectionMenuOuter = false
                                 onShare()
                             }
@@ -338,6 +370,7 @@ fun BatchCallLogActionBar(
                             text = { Text(stringResource(R.string.show_full_history), lineHeight = MaterialTheme.typography.bodyMedium.fontSize) },
                             leadingIcon = { Icon(Icons.Rounded.History, stringResource(R.string.show_full_history)) },
                             onClick = {
+                                doHaptic()
                                 showSelectionMenuOuter = false
                                 onCallLogs()
                             }
@@ -357,6 +390,7 @@ fun BatchCallLogActionBar(
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
             confirmButton = {
                 TextButton(onClick = {
+                    doHaptic()
                     onDelete()
                     showDeleteConfirm = false
                 }) {
@@ -364,7 +398,10 @@ fun BatchCallLogActionBar(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) {
+                TextButton(onClick = {
+                    doHaptic()
+                    showDeleteConfirm = false }
+                ) {
                     Text(stringResource(R.string.cancel))
                 }
             }
@@ -388,6 +425,7 @@ fun BatchCallLogActionBar(
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
             confirmButton = {
                 TextButton(onClick = {
+                    doHaptic()
                     onBlock?.invoke()
                     showBlockConfirm = false
                 }) {
@@ -395,7 +433,10 @@ fun BatchCallLogActionBar(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showBlockConfirm = false }) {
+                TextButton(onClick = {
+                    doHaptic()
+                    showBlockConfirm = false }
+                ) {
                     Text(stringResource(R.string.cancel))
                 }
             }
@@ -419,6 +460,7 @@ fun BatchCallLogActionBar(
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
             confirmButton = {
                 TextButton(onClick = {
+                    doHaptic()
                     onClearAll?.invoke()
                     showClearAllConfirm = false
                 }) {
@@ -426,7 +468,10 @@ fun BatchCallLogActionBar(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showClearAllConfirm = false }) {
+                TextButton(onClick = {
+                    doHaptic()
+                    showClearAllConfirm = false }
+                ) {
                     Text(stringResource(R.string.cancel))
                 }
             }

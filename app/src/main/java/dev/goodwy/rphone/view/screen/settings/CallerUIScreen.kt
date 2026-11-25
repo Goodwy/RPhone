@@ -62,6 +62,7 @@ import dev.goodwy.rphone.view.components.RillSwitchListItem
 import dev.goodwy.rphone.view.components.SupportProjectItem
 import dev.goodwy.rphone.view.components.SupportingText
 import dev.goodwy.rphone.view.components.Title
+import dev.goodwy.rphone.view.components.doHapticIfNeed
 import dev.goodwy.rphone.view.components.shake
 import dev.goodwy.rphone.view.screen.CallScreenPreview
 import dev.goodwy.rphone.view.screen.CallScreenPreviewStyle
@@ -556,6 +557,7 @@ fun CallerUIScreen(navigator: DestinationsNavigator) {
                         TextButton(
                             modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp),
                             onClick = {
+                                doHapticIfNeed(context, prefs)
                                 showSnackbar = false
                                 navigator.navigate(DonateScreenDestination)
                             }

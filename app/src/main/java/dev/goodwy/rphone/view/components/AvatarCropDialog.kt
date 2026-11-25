@@ -85,6 +85,8 @@ import java.io.InputStream
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.scale
 import androidx.core.net.toUri
+import dev.goodwy.rphone.controller.util.PreferenceManager
+import org.koin.compose.koinInject
 
 @Composable
 fun AvatarCropDialog(
@@ -93,6 +95,7 @@ fun AvatarCropDialog(
     onCropSuccess: (Uri) -> Unit
 ) {
     val context = LocalContext.current
+    val prefs: PreferenceManager = koinInject()
     val scope = rememberCoroutineScope()
 
     var sourceBitmap by remember { mutableStateOf<Bitmap?>(null) }
@@ -145,7 +148,9 @@ fun AvatarCropDialog(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        modifier = Modifier.weight(1f).padding(horizontal = 14.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 14.dp),
                         text = stringResource(R.string.crop_avatar_title),
                         style = MaterialTheme.typography.titleLarge,
                         lineHeight = MaterialTheme.typography.titleMedium.lineHeight,
@@ -156,7 +161,10 @@ fun AvatarCropDialog(
 
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         FilledTonalIconButton(
-                            onClick = { flipHorizontally = !flipHorizontally },
+                            onClick = {
+                                doHapticIfNeed(context, prefs)
+                                flipHorizontally = !flipHorizontally
+                            },
                             enabled = !isSaving && sourceBitmap != null,
                             shape = CircleShape,
                             colors = IconButtonDefaults.filledTonalIconButtonColors(
@@ -168,6 +176,7 @@ fun AvatarCropDialog(
                         }
                         FilledTonalIconButton(
                             onClick = {
+                                doHapticIfNeed(context, prefs)
                                 rotationDegrees = (rotationDegrees - 90f) % 360f
                             },
                             enabled = !isSaving && sourceBitmap != null,
@@ -268,7 +277,7 @@ fun AvatarCropDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Button(
-                        onClick = onDismiss,
+                        onClick = { doHapticIfNeed(context, prefs); onDismiss() },
                         enabled = !isSaving,
                         modifier = Modifier.size(72.dp,56.dp),
                         shape = CircleShape,
@@ -281,8 +290,11 @@ fun AvatarCropDialog(
                     }
 
                     TextButton(
-                        modifier = Modifier.weight(1f).padding(horizontal = 14.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 14.dp),
                         onClick = {
+                            doHapticIfNeed(context, prefs)
                             userScale = 1f
                             offset = Offset.Zero
                             rotationDegrees = 0f
@@ -294,6 +306,7 @@ fun AvatarCropDialog(
 
                     Button(
                         onClick = {
+                            doHapticIfNeed(context, prefs)
                             val bmp = sourceBitmap ?: return@Button
                             isSaving = true
                             scope.launch {

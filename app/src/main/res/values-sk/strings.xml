@@ -50,6 +50,7 @@
     <string name="saved">Uložené</string>
     <string name="save_failed">Uloženie zlyhalo</string>
     <string name="warning">Upozornenie</string>
+    <string name="edit_number_before_call">Upraviť číslo pred volaním</string>
 
     <!-- Search -->
     <string name="search">Hľadať</string>
@@ -582,6 +583,7 @@
     <string name="calling_card_override_saved">Prispôsobenie uložené</string>
     <string name="calling_card_override_save_failed">Pozadie sa nepodarilo uložiť</string>
     <string name="calling_card_override_unknown_contact">Kontakt #%1$s</string>
+    <string name="calling_card_sync_warning_message">Vzhľad obrazovky hovoru sa ukladá iba v tejto aplikácii. Nesynchronizuje sa s Kontaktmi Google ani inými adresármi, pretože na to nemajú pole. Zmeny tu ovplyvnia iba hovory v tejto aplikácii. Ak chcete tieto nastavenia a obrázky pozadia preniesť do iného zariadenia, použite Zálohovanie a obnovenie.</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">Pridať na domovskú obrazovku</string>

@@ -50,6 +50,7 @@
     <string name="saved">Salvo</string>
     <string name="save_failed">Falha ao salvar</string>
     <string name="warning">Aviso</string>
+    <string name="edit_number_before_call">Editar número antes de ligar</string>
 
     <!-- Search -->
     <string name="search">Pesquisar</string>
@@ -581,6 +582,7 @@
     <string name="calling_card_override_saved">Personalização salva</string>
     <string name="calling_card_override_save_failed">Não foi possível salvar o fundo</string>
     <string name="calling_card_override_unknown_contact">Contato nº %1$s</string>
+    <string name="calling_card_sync_warning_message">A aparência da tela de chamada é armazenada apenas neste aplicativo. Ela não é sincronizada com os Contatos Google ou outras agendas, porque eles não têm um campo para isso. As alterações aqui afetam apenas as chamadas neste aplicativo. Para transferir essas configurações e imagens de fundo para outro dispositivo, use Backup e restauração.</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">Adicionar à tela inicial</string>

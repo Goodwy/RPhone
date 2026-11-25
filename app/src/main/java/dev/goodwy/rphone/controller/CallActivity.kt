@@ -77,7 +77,6 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
     private val callViewModel: CallViewModel by inject()
     private var proximityWakeLock: PowerManager.WakeLock? = null
     private val isFinishingCall = java.util.concurrent.atomic.AtomicBoolean(false)
-    private var keyguardDismissRequested = false
     private val identityCache = mutableMapOf<String, CachedCallIdentity>()
 
     companion object {

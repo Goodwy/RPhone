@@ -79,7 +79,7 @@ import dev.goodwy.rphone.view.components.PlaceholderView
 import dev.goodwy.rphone.view.components.RillPullToRefreshIndicator
 import dev.goodwy.rphone.view.components.ScrollHapticsEffect
 import dev.goodwy.rphone.view.components.Title
-import dev.goodwy.rphone.view.components.performAppHaptic
+import dev.goodwy.rphone.view.components.doHapticIfNeed
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -115,13 +115,7 @@ fun CallAnalyticsScreen(
     }
 
     fun triggerHaptic() {
-        if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-            performAppHaptic(
-                context,
-                prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light",
-                prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
-            )
-        }
+        doHapticIfNeed(context, prefs)
     }
 
     fun runRefresh() {
@@ -501,6 +495,7 @@ fun CallAnalyticsScreen(
                         TextButton(
                             modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp),
                             onClick = {
+                                doHapticIfNeed(context, prefs)
                                 navigator.navigate(DonateScreenDestination)
                             }
                         ) {

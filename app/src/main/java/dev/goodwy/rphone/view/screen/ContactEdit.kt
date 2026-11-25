@@ -110,7 +110,6 @@ import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.private_only
 import dev.goodwy.rphone.view.components.AvatarCropDialog
 import dev.goodwy.rphone.view.components.RillDialog
-import dev.goodwy.rphone.view.components.Title
 import dev.goodwy.rphone.view.theme.RillShapeDefaults
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -124,6 +123,8 @@ import dev.goodwy.rphone.controller.util.utcMillisToString
 import dev.goodwy.rphone.modal.data.LOCAL_SOURCE_KEY
 import dev.goodwy.rphone.modal.data.PRIVATE_SOURCE_KEY
 import dev.goodwy.rphone.modal.data.accountSourceKey
+import dev.goodwy.rphone.view.components.TitleLight
+import dev.goodwy.rphone.view.components.doHapticIfNeed
 import dev.goodwy.rphone.view.theme.rillCornerDp
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
@@ -639,6 +640,7 @@ fun ContactEditScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
+                        doHapticIfNeed(context, prefs)
                         showExitDialog = false
 
                         scope.launch {
@@ -652,6 +654,7 @@ fun ContactEditScreen(
             dismissButton = {
                 TextButton(
                     onClick = {
+                        doHapticIfNeed(context, prefs)
                         showExitDialog = false
                         exitWithoutSaving()
                     }
@@ -796,35 +799,35 @@ fun ContactEditScreen(
                             description = stringResource(R.string.prefix_description),
                             icon = Icons.Rounded.Person,
                             isSelected = showNamePrefix,
-                            onToggle = { showNamePrefix = !showNamePrefix }
+                            onToggle = { doHapticIfNeed(context, prefs); showNamePrefix = !showNamePrefix }
                         )
                         FieldOption(
                             title = stringResource(R.string.middle_name),
                             description = stringResource(R.string.middle_name_description),
                             icon = Icons.Rounded.Person,
                             isSelected = showMiddleName,
-                            onToggle = { showMiddleName = !showMiddleName }
+                            onToggle = { doHapticIfNeed(context, prefs); showMiddleName = !showMiddleName }
                         )
                         FieldOption(
                             title = stringResource(R.string.suffix),
                             description = stringResource(R.string.suffix_description),
                             icon = Icons.Rounded.Person,
                             isSelected = showNameSuffix,
-                            onToggle = { showNameSuffix = !showNameSuffix }
+                            onToggle = { doHapticIfNeed(context, prefs); showNameSuffix = !showNameSuffix }
                         )
                         FieldOption(
                             title = stringResource(R.string.nickname),
                             description = stringResource(R.string.nickname_description),
                             icon = Icons.Rounded.CrueltyFree,
                             isSelected = showNickname,
-                            onToggle = { showNickname = !showNickname }
+                            onToggle = { doHapticIfNeed(context, prefs); showNickname = !showNickname }
                         )
                         FieldOption(
                             title = stringResource(R.string.job_title),
                             description = stringResource(R.string.job_title_description),
                             icon = Icons.Rounded.Work,
                             isSelected = showJobTitle,
-                            onToggle = { showJobTitle = !showJobTitle }
+                            onToggle = { doHapticIfNeed(context, prefs); showJobTitle = !showJobTitle }
                         )
                     }
                 }
@@ -872,7 +875,10 @@ fun ContactEditScreen(
                     if (isRotation90) WindowInsetsSides.Top + WindowInsetsSides.Horizontal
                     else WindowInsetsSides.Top
                 ),
-                title = { Title(if (contactId == null || contactId == "0") stringResource(R.string.create_contact) else stringResource(R.string.edit_contact), false) },
+                title = { TitleLight(
+                    if (contactId == null || contactId == "0") stringResource(R.string.create_contact)
+                    else stringResource(R.string.edit_contact))
+                },
                 navigationIcon = {
                     NavigationIcon(onClick = {
                         if (hasChanges()) {
@@ -894,6 +900,7 @@ fun ContactEditScreen(
                         )
                         IconButton(
                             onClick = {
+                                doHapticIfNeed(context, prefs)
                                 isFavorite = !isFavorite
                             },
                             interactionSource = interactionSource,
@@ -913,9 +920,8 @@ fun ContactEditScreen(
                     }
                     Button(
                         onClick = {
-                            scope.launch {
-                                saveAndExit()
-                            }
+                            doHapticIfNeed(context, prefs)
+                            scope.launch { saveAndExit() }
                         },
                         enabled = (namePrefix.isNotBlank() || givenName.isNotBlank() || middleName.isNotBlank() ||
                                 familyName.isNotBlank() || nameSuffix.isNotBlank() || nickname.isNotBlank() ||
@@ -943,6 +949,7 @@ fun ContactEditScreen(
                                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
                                 confirmButton = {
                                     TextButton(onClick = {
+                                        doHapticIfNeed(context, prefs)
                                         showDeleteConfirm = false
                                         contactsVM.deleteContact(contactId)
                                         closeScreen(isSaved = true)
@@ -951,7 +958,10 @@ fun ContactEditScreen(
                                     }
                                 },
                                 dismissButton = {
-                                    TextButton(onClick = { showDeleteConfirm = false }) {
+                                    TextButton(onClick = {
+                                        doHapticIfNeed(context, prefs)
+                                        showDeleteConfirm = false }
+                                    ) {
                                         Text(stringResource(R.string.cancel))
                                     }
                                 }
@@ -966,7 +976,10 @@ fun ContactEditScreen(
                             }
                         }
                         Box {
-                            IconButton(onClick = { showSelectionMenuOuter = true }) {
+                            IconButton(onClick = {
+                                doHapticIfNeed(context, prefs)
+                                showSelectionMenuOuter = true }
+                            ) {
                                 Icon(
                                     Icons.Default.MoreVert,
                                     null,
@@ -983,6 +996,7 @@ fun ContactEditScreen(
                                     text = { Text(stringResource(R.string.open)) },
                                     leadingIcon = { Icon(Icons.AutoMirrored.Rounded.OpenInNew, stringResource(R.string.open)) },
                                     onClick = {
+                                        doHapticIfNeed(context, prefs)
                                         showSelectionMenuOuter = false
                                         val intent = Intent(Intent.ACTION_EDIT).apply {
                                             data = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId.toLong())
@@ -1001,6 +1015,7 @@ fun ContactEditScreen(
                                         )
                                     },
                                     onClick = {
+                                        doHapticIfNeed(context, prefs)
                                         showSelectionMenuOuter = false
                                         showDeleteConfirm = true
                                     }
@@ -1008,7 +1023,7 @@ fun ContactEditScreen(
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.size(4.dp))
+                    Spacer(modifier = Modifier.size(2.dp))
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
@@ -1033,15 +1048,14 @@ fun ContactEditScreen(
                     ) {
                         // Left column - avatar
                         Box(
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier
+                                .weight(1f)
                                 .then(
                                     if (isRotation90) Modifier.navigationBarsPadding()
                                     else Modifier
                                 )
                                 .padding(
                                     top = innerPadding.calculateTopPadding(),
-                                    start = 0.dp,
-                                    end = 0.dp,
                                     bottom = 24.dp
                                 )
                                 .fillMaxSize(),
@@ -1071,6 +1085,7 @@ fun ContactEditScreen(
                                     if (displayPhotoUri != null) {
                                         SmallFloatingActionButton(
                                             onClick = {
+                                                doHapticIfNeed(context, prefs)
                                                 photoUri = null
                                                 tempPhotoUri = null
                                             },
@@ -1083,7 +1098,10 @@ fun ContactEditScreen(
                                                 .align(Alignment.BottomStart)
                                                 .offset(x = (-8).dp, y = 0.dp)
                                                 .border(
-                                                    border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
+                                                    border = BorderStroke(
+                                                        3.dp,
+                                                        MaterialTheme.colorScheme.surfaceContainerLowest
+                                                    ),
                                                     shape = CircleShape
                                                 )
                                         ) {
@@ -1095,7 +1113,10 @@ fun ContactEditScreen(
                                         }
 
                                         SmallFloatingActionButton(
-                                            onClick = { cropTargetUriString = displayPhotoUri },
+                                            onClick = {
+                                                doHapticIfNeed(context, prefs)
+                                                cropTargetUriString = displayPhotoUri
+                                            },
                                             containerColor = MaterialTheme.colorScheme.secondaryContainer,
                                             contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                                             shape = CircleShape,
@@ -1105,7 +1126,10 @@ fun ContactEditScreen(
                                                 .align(Alignment.TopEnd)
                                                 .offset(x = 8.dp, y = 0.dp)
                                                 .border(
-                                                    border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
+                                                    border = BorderStroke(
+                                                        3.dp,
+                                                        MaterialTheme.colorScheme.surfaceContainerLowest
+                                                    ),
                                                     shape = CircleShape
                                                 )
                                         ) {
@@ -1119,6 +1143,7 @@ fun ContactEditScreen(
 
                                     SmallFloatingActionButton(
                                         onClick = {
+                                            doHapticIfNeed(context, prefs)
                                             photoPickerLauncher.launch(
                                                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                                             )
@@ -1132,7 +1157,10 @@ fun ContactEditScreen(
                                             .align(Alignment.BottomEnd)
                                             .offset(x = 8.dp, y = 0.dp)
                                             .border(
-                                                border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
+                                                border = BorderStroke(
+                                                    3.dp,
+                                                    MaterialTheme.colorScheme.surfaceContainerLowest
+                                                ),
                                                 shape = CircleShape
                                             )
                                     ) {
@@ -1178,6 +1206,7 @@ fun ContactEditScreen(
                                     if (displayBackground != null) {
                                         SmallFloatingActionButton(
                                             onClick = {
+                                                doHapticIfNeed(context, prefs)
                                                 // If this is a temporary background (not yet saved)
                                                 if (tempCallBackground != null) {
                                                     tempCallBackground = null
@@ -1198,7 +1227,10 @@ fun ContactEditScreen(
                                                 .align(Alignment.BottomStart)
                                                 .offset(x = (-16).dp, y = 12.dp)
                                                 .border(
-                                                    border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
+                                                    border = BorderStroke(
+                                                        3.dp,
+                                                        MaterialTheme.colorScheme.surfaceContainerLowest
+                                                    ),
                                                     shape = CircleShape
                                                 )
                                         ) {
@@ -1211,7 +1243,7 @@ fun ContactEditScreen(
                                     }
 
                                     SmallFloatingActionButton(
-                                        onClick = onBackgroundClick,
+                                        onClick = { doHapticIfNeed(context, prefs); onBackgroundClick() },
                                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                                         shape = CircleShape,
@@ -1221,7 +1253,10 @@ fun ContactEditScreen(
                                             .align(Alignment.BottomEnd)
                                             .offset(x = 16.dp, y = 12.dp)
                                             .border(
-                                                border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
+                                                border = BorderStroke(
+                                                    3.dp,
+                                                    MaterialTheme.colorScheme.surfaceContainerLowest
+                                                ),
                                                 shape = CircleShape
                                             )
                                     ) {
@@ -1285,7 +1320,8 @@ fun ContactEditScreen(
                                                 value = namePrefix,
                                                 onValueChange = { namePrefix = it },
                                                 label = { Text(stringResource(R.string.prefix), modifier = Modifier.padding(vertical = 2.dp)) },
-                                                modifier = Modifier.weight(1f)
+                                                modifier = Modifier
+                                                    .weight(1f)
                                                     .fillMaxWidth()
                                                     .padding(start = paddingHorizontal),
                                                 shape = RoundedCornerShape(cornerLargeDp),
@@ -1299,6 +1335,7 @@ fun ContactEditScreen(
                                             IconButton(
                                                 modifier = Modifier.padding(top = 8.dp),
                                                 onClick = {
+                                                    doHapticIfNeed(context, prefs)
                                                     namePrefix = ""
                                                     showNamePrefix = false
                                                 }
@@ -1339,7 +1376,8 @@ fun ContactEditScreen(
                                                 value = middleName,
                                                 onValueChange = { middleName = it },
                                                 label = { Text(stringResource(R.string.middle_name), modifier = Modifier.padding(vertical = 2.dp)) },
-                                                modifier = Modifier.weight(1f)
+                                                modifier = Modifier
+                                                    .weight(1f)
                                                     .fillMaxWidth()
                                                     .padding(start = paddingHorizontal),
                                                 shape = RoundedCornerShape(cornerLargeDp),
@@ -1353,6 +1391,7 @@ fun ContactEditScreen(
                                             IconButton(
                                                 modifier = Modifier.padding(top = 8.dp),
                                                 onClick = {
+                                                    doHapticIfNeed(context, prefs)
                                                     middleName = ""
                                                     showMiddleName = false
                                                 }
@@ -1393,7 +1432,8 @@ fun ContactEditScreen(
                                                 value = nameSuffix,
                                                 onValueChange = { nameSuffix = it },
                                                 label = { Text(stringResource(R.string.suffix), modifier = Modifier.padding(vertical = 2.dp)) },
-                                                modifier = Modifier.weight(1f)
+                                                modifier = Modifier
+                                                    .weight(1f)
                                                     .fillMaxWidth()
                                                     .padding(start = paddingHorizontal),
                                                 shape = RoundedCornerShape(cornerLargeDp),
@@ -1407,6 +1447,7 @@ fun ContactEditScreen(
                                             IconButton(
                                                 modifier = Modifier.padding(top = 8.dp),
                                                 onClick = {
+                                                    doHapticIfNeed(context, prefs)
                                                     nameSuffix = ""
                                                     showNameSuffix = false
                                                 }
@@ -1432,7 +1473,8 @@ fun ContactEditScreen(
                                                 value = nickname,
                                                 onValueChange = { nickname = it },
                                                 label = { Text(stringResource(R.string.nickname), modifier = Modifier.padding(vertical = 2.dp)) },
-                                                modifier = Modifier.weight(1f)
+                                                modifier = Modifier
+                                                    .weight(1f)
                                                     .fillMaxWidth()
                                                     .padding(start = paddingHorizontal),
                                                 shape = RoundedCornerShape(cornerLargeDp),
@@ -1446,6 +1488,7 @@ fun ContactEditScreen(
                                             IconButton(
                                                 modifier = Modifier.padding(top = 8.dp),
                                                 onClick = {
+                                                    doHapticIfNeed(context, prefs)
                                                     nickname = ""
                                                     showNickname = false
                                                 }
@@ -1515,7 +1558,8 @@ fun ContactEditScreen(
                                                 value = jobTitle,
                                                 onValueChange = { jobTitle = it },
                                                 label = { Text(stringResource(R.string.job_title), modifier = Modifier.padding(vertical = 2.dp)) },
-                                                modifier = Modifier.weight(1f)
+                                                modifier = Modifier
+                                                    .weight(1f)
                                                     .fillMaxWidth()
                                                     .padding(start = paddingHorizontal),
                                                 shape = RoundedCornerShape(cornerLargeDp),
@@ -1529,6 +1573,7 @@ fun ContactEditScreen(
                                             IconButton(
                                                 modifier = Modifier.padding(top = 8.dp),
                                                 onClick = {
+                                                    doHapticIfNeed(context, prefs)
                                                     jobTitle = ""
                                                     showJobTitle = false
                                                 }
@@ -1587,6 +1632,7 @@ fun ContactEditScreen(
                                     AddButton(
                                         text = stringResource(R.string.add_phone),
                                         onClick = {
+                                            doHapticIfNeed(context, prefs)
                                             phoneDetails.add(blankPhoneDetail)
                                             phoneNumbers.add("")
                                         }
@@ -1624,7 +1670,10 @@ fun ContactEditScreen(
                                     }
                                     AddButton(
                                         text = stringResource(R.string.add_email),
-                                        onClick = { emails.add(blankEmail) }
+                                        onClick = {
+                                            doHapticIfNeed(context, prefs)
+                                            emails.add(blankEmail)
+                                        }
                                     )
                                 }
                             }
@@ -1658,7 +1707,10 @@ fun ContactEditScreen(
                                     }
                                     AddButton(
                                         text = stringResource(R.string.add_event),
-                                        onClick = { events.add(blankEvent) }
+                                        onClick = {
+                                            doHapticIfNeed(context, prefs)
+                                            events.add(blankEvent)
+                                        }
                                     )
                                 }
                             }
@@ -1692,7 +1744,10 @@ fun ContactEditScreen(
                                     }
                                     AddButton(
                                         text = stringResource(R.string.add_address),
-                                        onClick = { addresses.add(blankAddress) }
+                                        onClick = {
+                                            doHapticIfNeed(context, prefs)
+                                            addresses.add(blankAddress)
+                                        }
                                     )
                                 }
                             }
@@ -1746,7 +1801,7 @@ fun ContactEditScreen(
                                     label = "ButtonShape"
                                 )
                                 Button(
-                                    onClick = { showFieldsDialog = true },
+                                    onClick = { doHapticIfNeed(context, prefs); showFieldsDialog = true },
                                     interactionSource = interactionSource,
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -1767,7 +1822,7 @@ fun ContactEditScreen(
                             item {
                                 Surface(
                                     modifier = Modifier.padding(horizontal = paddingHorizontal),
-                                    onClick = { showPicker = true },
+                                    onClick = { doHapticIfNeed(context, prefs); showPicker = true },
                                     shape = RoundedCornerShape(16.dp),
                                     color = MaterialTheme.colorScheme.surfaceContainerHigh
                                 ) {
@@ -1840,6 +1895,7 @@ fun ContactEditScreen(
                                     if (displayPhotoUri != null) {
                                         SmallFloatingActionButton(
                                             onClick = {
+                                                doHapticIfNeed(context, prefs)
                                                 photoUri = null
                                                 tempPhotoUri = null
                                             },
@@ -1852,7 +1908,10 @@ fun ContactEditScreen(
                                                 .align(Alignment.BottomStart)
                                                 .offset(x = (-8).dp, y = 0.dp)
                                                 .border(
-                                                    border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
+                                                    border = BorderStroke(
+                                                        3.dp,
+                                                        MaterialTheme.colorScheme.surfaceContainerLowest
+                                                    ),
                                                     shape = CircleShape
                                                 )
                                         ) {
@@ -1864,7 +1923,10 @@ fun ContactEditScreen(
                                         }
 
                                         SmallFloatingActionButton(
-                                            onClick = { cropTargetUriString = displayPhotoUri },
+                                            onClick = {
+                                                doHapticIfNeed(context, prefs)
+                                                cropTargetUriString = displayPhotoUri
+                                            },
                                             containerColor = MaterialTheme.colorScheme.secondaryContainer,
                                             contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                                             shape = CircleShape,
@@ -1874,7 +1936,10 @@ fun ContactEditScreen(
                                                 .align(Alignment.TopEnd)
                                                 .offset(x = 8.dp, y = 0.dp)
                                                 .border(
-                                                    border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
+                                                    border = BorderStroke(
+                                                        3.dp,
+                                                        MaterialTheme.colorScheme.surfaceContainerLowest
+                                                    ),
                                                     shape = CircleShape
                                                 )
                                         ) {
@@ -1888,6 +1953,7 @@ fun ContactEditScreen(
 
                                     SmallFloatingActionButton(
                                         onClick = {
+                                            doHapticIfNeed(context, prefs)
                                             photoPickerLauncher.launch(
                                                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                                             )
@@ -1901,7 +1967,10 @@ fun ContactEditScreen(
                                             .align(Alignment.BottomEnd)
                                             .offset(x = 8.dp, y = 0.dp)
                                             .border(
-                                                border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
+                                                border = BorderStroke(
+                                                    3.dp,
+                                                    MaterialTheme.colorScheme.surfaceContainerLowest
+                                                ),
                                                 shape = CircleShape
                                             )
                                     ) {
@@ -1947,6 +2016,7 @@ fun ContactEditScreen(
                                     if (displayBackground != null) {
                                         SmallFloatingActionButton(
                                             onClick = {
+                                                doHapticIfNeed(context, prefs)
                                                 // If this is a temporary background (not yet saved)
                                                 if (tempCallBackground != null) {
                                                     tempCallBackground = null
@@ -1967,7 +2037,10 @@ fun ContactEditScreen(
                                                 .align(Alignment.BottomStart)
                                                 .offset(x = (-16).dp, y = 12.dp)
                                                 .border(
-                                                    border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
+                                                    border = BorderStroke(
+                                                        3.dp,
+                                                        MaterialTheme.colorScheme.surfaceContainerLowest
+                                                    ),
                                                     shape = CircleShape
                                                 )
                                         ) {
@@ -1980,7 +2053,7 @@ fun ContactEditScreen(
                                     }
 
                                     SmallFloatingActionButton(
-                                        onClick = onBackgroundClick,
+                                        onClick = { doHapticIfNeed(context, prefs); onBackgroundClick() },
                                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                                         shape = CircleShape,
@@ -1990,7 +2063,10 @@ fun ContactEditScreen(
                                             .align(Alignment.BottomEnd)
                                             .offset(x = 16.dp, y = 12.dp)
                                             .border(
-                                                border = BorderStroke(3.dp, MaterialTheme.colorScheme.surfaceContainerLowest),
+                                                border = BorderStroke(
+                                                    3.dp,
+                                                    MaterialTheme.colorScheme.surfaceContainerLowest
+                                                ),
                                                 shape = CircleShape
                                             )
                                     ) {
@@ -2043,7 +2119,8 @@ fun ContactEditScreen(
                                             value = namePrefix,
                                             onValueChange = { namePrefix = it },
                                             label = { Text(stringResource(R.string.prefix), modifier = Modifier.padding(vertical = 2.dp)) },
-                                            modifier = Modifier.weight(1f)
+                                            modifier = Modifier
+                                                .weight(1f)
                                                 .fillMaxWidth()
                                                 .padding(start = paddingHorizontal),
                                             shape = RoundedCornerShape(cornerLargeDp),
@@ -2057,6 +2134,7 @@ fun ContactEditScreen(
                                         IconButton(
                                             modifier = Modifier.padding(top = 8.dp),
                                             onClick = {
+                                                doHapticIfNeed(context, prefs)
                                                 namePrefix = ""
                                                 showNamePrefix = false
                                             }
@@ -2097,7 +2175,8 @@ fun ContactEditScreen(
                                             value = middleName,
                                             onValueChange = { middleName = it },
                                             label = { Text(stringResource(R.string.middle_name), modifier = Modifier.padding(vertical = 2.dp)) },
-                                            modifier = Modifier.weight(1f)
+                                            modifier = Modifier
+                                                .weight(1f)
                                                 .fillMaxWidth()
                                                 .padding(start = paddingHorizontal),
                                             shape = RoundedCornerShape(cornerLargeDp),
@@ -2111,6 +2190,7 @@ fun ContactEditScreen(
                                         IconButton(
                                             modifier = Modifier.padding(top = 8.dp),
                                             onClick = {
+                                                doHapticIfNeed(context, prefs)
                                                 middleName = ""
                                                 showMiddleName = false
                                             }
@@ -2151,7 +2231,8 @@ fun ContactEditScreen(
                                             value = nameSuffix,
                                             onValueChange = { nameSuffix = it },
                                             label = { Text(stringResource(R.string.suffix), modifier = Modifier.padding(vertical = 2.dp)) },
-                                            modifier = Modifier.weight(1f)
+                                            modifier = Modifier
+                                                .weight(1f)
                                                 .fillMaxWidth()
                                                 .padding(start = paddingHorizontal),
                                             shape = RoundedCornerShape(cornerLargeDp),
@@ -2165,6 +2246,7 @@ fun ContactEditScreen(
                                         IconButton(
                                             modifier = Modifier.padding(top = 8.dp),
                                             onClick = {
+                                                doHapticIfNeed(context, prefs)
                                                 nameSuffix = ""
                                                 showNameSuffix = false
                                             }
@@ -2190,7 +2272,8 @@ fun ContactEditScreen(
                                             value = nickname,
                                             onValueChange = { nickname = it },
                                             label = { Text(stringResource(R.string.nickname), modifier = Modifier.padding(vertical = 2.dp)) },
-                                            modifier = Modifier.weight(1f)
+                                            modifier = Modifier
+                                                .weight(1f)
                                                 .fillMaxWidth()
                                                 .padding(start = paddingHorizontal),
                                             shape = RoundedCornerShape(cornerLargeDp),
@@ -2204,6 +2287,7 @@ fun ContactEditScreen(
                                         IconButton(
                                             modifier = Modifier.padding(top = 8.dp),
                                             onClick = {
+                                                doHapticIfNeed(context, prefs)
                                                 nickname = ""
                                                 showNickname = false
                                             }
@@ -2273,7 +2357,8 @@ fun ContactEditScreen(
                                             value = jobTitle,
                                             onValueChange = { jobTitle = it },
                                             label = { Text(stringResource(R.string.job_title), modifier = Modifier.padding(vertical = 2.dp)) },
-                                            modifier = Modifier.weight(1f)
+                                            modifier = Modifier
+                                                .weight(1f)
                                                 .fillMaxWidth()
                                                 .padding(start = paddingHorizontal),
                                             shape = RoundedCornerShape(cornerLargeDp),
@@ -2287,6 +2372,7 @@ fun ContactEditScreen(
                                         IconButton(
                                             modifier = Modifier.padding(top = 8.dp),
                                             onClick = {
+                                                doHapticIfNeed(context, prefs)
                                                 jobTitle = ""
                                                 showJobTitle = false
                                             }
@@ -2346,6 +2432,7 @@ fun ContactEditScreen(
                                 AddButton(
                                     text = stringResource(R.string.add_phone),
                                     onClick = {
+                                        doHapticIfNeed(context, prefs)
                                         phoneDetails.add(blankPhoneDetail)
                                         phoneNumbers.add("")
                                     }
@@ -2383,7 +2470,7 @@ fun ContactEditScreen(
                                 }
                                 AddButton(
                                     text = stringResource(R.string.add_email),
-                                    onClick = { emails.add(blankEmail) }
+                                    onClick = { doHapticIfNeed(context, prefs); emails.add(blankEmail) }
                                 )
                             }
                         }
@@ -2417,7 +2504,7 @@ fun ContactEditScreen(
                                 }
                                 AddButton(
                                     text = stringResource(R.string.add_event),
-                                    onClick = { events.add(blankEvent) }
+                                    onClick = { doHapticIfNeed(context, prefs); events.add(blankEvent) }
                                 )
                             }
                         }
@@ -2451,7 +2538,7 @@ fun ContactEditScreen(
                                 }
                                 AddButton(
                                     text = stringResource(R.string.add_address),
-                                    onClick = { addresses.add(blankAddress) }
+                                    onClick = { doHapticIfNeed(context, prefs); addresses.add(blankAddress) }
                                 )
                             }
                         }
@@ -2505,7 +2592,7 @@ fun ContactEditScreen(
                                 label = "ButtonShape"
                             )
                             Button(
-                                onClick = { showFieldsDialog = true },
+                                onClick = { doHapticIfNeed(context, prefs); showFieldsDialog = true },
                                 interactionSource = interactionSource,
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -2527,7 +2614,7 @@ fun ContactEditScreen(
                             val isNewContact = contactId == null || contactId == "0" || contactId == "null"
                             Surface(
                                 modifier = Modifier.padding(horizontal = paddingHorizontal),
-                                onClick = { showPicker = true },
+                                onClick = { doHapticIfNeed(context, prefs); showPicker = true },
                                 shape = RoundedCornerShape(16.dp),
                                 color = MaterialTheme.colorScheme.surfaceContainerHigh
                             ) {
@@ -2570,7 +2657,7 @@ fun ContactEditScreen(
                         .navigationBarsPadding()
                         .padding(bottom = 24.dp, end = 24.dp),
                     visible = showButton,
-                    onClick = { scope.launch { listState.animateScrollToItem(0) } }
+                    onClick = { doHapticIfNeed(context, prefs); scope.launch { listState.animateScrollToItem(0) } }
                 )
             }
 
@@ -2600,6 +2687,7 @@ fun ContactEditScreen(
                             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
                             colors = ButtonDefaults.textButtonColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
                             onClick = {
+                                doHapticIfNeed(context, prefs)
                                 showSnackbarLocalContact = false
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                                     val intent = Intent(ContactsContract.Settings.ACTION_SET_DEFAULT_ACCOUNT)
@@ -2627,6 +2715,8 @@ fun EditField(
     availableLabels: List<Pair<Int, String>> = emptyList(), // (type, displayName)
     cornerDp: Dp,
 ) {
+    val context = LocalContext.current
+    val prefs: PreferenceManager = koinInject()
     var appeared by remember { mutableStateOf(false) }
     var showLabelEditor by remember { mutableStateOf(false) }
     var currentLabel by remember(label) { mutableStateOf(label) }
@@ -2659,7 +2749,7 @@ fun EditField(
         ) {
             // Edit label button
             IconButton(
-                onClick = { showLabelEditor = !showLabelEditor },
+                onClick = { doHapticIfNeed(context, prefs); showLabelEditor = !showLabelEditor },
                 modifier = Modifier.padding(top = 8.dp)
             ) {
                 Icon(
@@ -2700,7 +2790,7 @@ fun EditField(
             if (onDelete != null) {
                 IconButton(
                     modifier = Modifier.padding(top = 8.dp),
-                    onClick = onDelete,
+                    onClick = { doHapticIfNeed(context, prefs); onDelete() },
                 ) {
                     Icon(
                         Icons.Rounded.RemoveCircleOutline,
@@ -2732,6 +2822,7 @@ fun EditField(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
+                                    doHapticIfNeed(context, prefs)
                                     currentLabel = labelText
                                     onLabelChange?.invoke(labelText, type)
                                     showLabelEditor = false
@@ -2784,9 +2875,12 @@ fun EditField(
                                 ),
                                 trailingIcon = {
                                     IconButton(
-                                        modifier = Modifier.width(72.dp).padding(horizontal = 8.dp),
+                                        modifier = Modifier
+                                            .width(72.dp)
+                                            .padding(horizontal = 8.dp),
                                         onClick = {
                                             if (customLabelText.isNotBlank()) {
+                                                doHapticIfNeed(context, prefs)
                                                 currentLabel = customLabelText
                                                 onLabelChange?.invoke(customLabelText, null) // null means custom type
                                                 showLabelEditor = false
@@ -2813,6 +2907,7 @@ fun EditField(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
+                                    doHapticIfNeed(context, prefs)
                                     showCustomLabelInput = true
                                 }
                                 .padding(horizontal = 20.dp, vertical = 12.dp),
@@ -2938,7 +3033,9 @@ fun EditFieldDate(
     showYearInDisplay: Boolean = true,
     showAgeInDisplay: Boolean = false,
 
-    ) {
+) {
+    val context = LocalContext.current
+    val prefs: PreferenceManager = koinInject()
     var appeared by remember { mutableStateOf(false) }
     var showLabelEditor by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
@@ -2982,7 +3079,7 @@ fun EditFieldDate(
         ) {
             // Edit label button
             IconButton(
-                onClick = { showLabelEditor = !showLabelEditor },
+                onClick = { doHapticIfNeed(context, prefs); showLabelEditor = !showLabelEditor },
                 modifier = Modifier.padding(top = 8.dp)
             ) {
                 Icon(
@@ -3037,7 +3134,7 @@ fun EditFieldDate(
                     .clickable(
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() }
-                    ) { showDatePicker = true },
+                    ) { doHapticIfNeed(context, prefs); showDatePicker = true },
                 shape = if (showLabelEditor) RoundedCornerShape(cornerDp, cornerDp, cornerDp, cardCornerExtraSmall)
                     else RoundedCornerShape(cornerDp),
                 colors = TextFieldDefaults.colors(
@@ -3065,7 +3162,7 @@ fun EditFieldDate(
             if (onDelete != null) {
                 IconButton(
                     modifier = Modifier.padding(top = 8.dp),
-                    onClick = onDelete,
+                    onClick = { doHapticIfNeed(context, prefs); onDelete() },
                 ) {
                     Icon(
                         Icons.Rounded.RemoveCircleOutline,
@@ -3097,6 +3194,7 @@ fun EditFieldDate(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
+                                    doHapticIfNeed(context, prefs)
                                     currentLabel = labelText
                                     onLabelChange?.invoke(labelText, type)
                                     showLabelEditor = false
@@ -3149,9 +3247,12 @@ fun EditFieldDate(
                                 ),
                                 trailingIcon = {
                                     IconButton(
-                                        modifier = Modifier.width(72.dp).padding(horizontal = 8.dp),
+                                        modifier = Modifier
+                                            .width(72.dp)
+                                            .padding(horizontal = 8.dp),
                                         onClick = {
                                             if (customLabelText.isNotBlank()) {
+                                                doHapticIfNeed(context, prefs)
                                                 currentLabel = customLabelText
                                                 onLabelChange?.invoke(customLabelText, null)
                                                 showLabelEditor = false
@@ -3178,6 +3279,7 @@ fun EditFieldDate(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
+                                    doHapticIfNeed(context, prefs)
                                     showCustomLabelInput = true
                                 }
                                 .padding(horizontal = 20.dp, vertical = 12.dp),
@@ -3213,6 +3315,7 @@ fun EditFieldDate(
             confirmButton = {
                 TextButton(
                     onClick = {
+                        doHapticIfNeed(context, prefs)
                         datePickerState.selectedDateMillis?.let { dateMillis ->
                             selectedDateMillis = dateMillis
                         }
@@ -3223,7 +3326,7 @@ fun EditFieldDate(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) {
+                TextButton(onClick = { doHapticIfNeed(context, prefs); showDatePicker = false }) {
                     Text(stringResource(R.string.cancel))
                 }
             }

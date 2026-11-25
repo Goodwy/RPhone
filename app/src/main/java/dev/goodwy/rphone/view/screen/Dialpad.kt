@@ -116,7 +116,8 @@ import dev.goodwy.rphone.modal.data.Contact
 import dev.goodwy.rphone.modal.data.getDisplayContactInfo
 import dev.goodwy.rphone.modal.data.getDisplayName
 import dev.goodwy.rphone.view.components.RillDialog
-import dev.goodwy.rphone.view.components.performAppHaptic
+import dev.goodwy.rphone.view.components.RillSectionHeader
+import dev.goodwy.rphone.view.components.doHapticIfNeed
 import dev.goodwy.rphone.view.components.rememberMessageLauncher
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -334,7 +335,10 @@ fun DialPadContent(
                 },
                 text = { Text(response, style = MaterialTheme.typography.bodyMedium) },
                 confirmButton = {
-                    TextButton(onClick = { UssdRepository.clear() }) {
+                    TextButton(onClick = {
+                        doHapticIfNeed(context, prefs)
+                        UssdRepository.clear() }
+                    ) {
                         Text(stringResource(R.string.ok))
                     }
                 },
@@ -343,7 +347,6 @@ fun DialPadContent(
         }
 
         val soundPool = remember { buildDtmfSoundPool() }
-
 
         val messageLauncher = rememberMessageLauncher()
 
@@ -695,6 +698,7 @@ fun DialPadContent(
                 icon = Icons.Default.Dialpad,
                 confirmButton = {
                     TextButton(onClick = {
+                        doHapticIfNeed(context, prefs)
                         navigator?.navigate(SpeedDialScreenDestination)
                         showSpeedDialDialog = false
                     }) {
@@ -705,7 +709,10 @@ fun DialPadContent(
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = { showSpeedDialDialog = false }) {
+                    TextButton(onClick = {
+                        doHapticIfNeed(context, prefs)
+                        showSpeedDialDialog = false }
+                    ) {
                         Text(stringResource(R.string.cancel))
                     }
                 }
@@ -757,14 +764,11 @@ fun DialPadContent(
                             Column(
                                 modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
                             ) {
-                                Text(
-                                    text = stringResource(R.string.suggested),
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.Bold,
+                                RillSectionHeader(
+                                    stringResource(R.string.suggested),
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                                        .padding(horizontal = 20.dp, vertical = 4.dp)
                                 )
                                 Surface(
                                     shape = MaterialTheme.shapes.extraLarge,
@@ -815,7 +819,10 @@ fun DialPadContent(
                                                 photoUri = photoUri,
                                                 phoneNumber = entry.number,
                                                 trailingContent = {
-                                                    IconButton(onClick = { initiateCall(entry.number) }) {
+                                                    IconButton(onClick = {
+                                                        doHapticIfNeed(context, prefs)
+                                                        initiateCall(entry.number) }
+                                                    ) {
                                                         Icon(
                                                             Icons.Outlined.Call,
                                                             contentDescription = stringResource(R.string.call),
@@ -825,6 +832,7 @@ fun DialPadContent(
                                                 },
                                                 onCall = { initiateCall(entry.number) },
                                                 onClick = {
+                                                    doHapticIfNeed(context, prefs)
                                                     if (targetContactId != null) {
                                                         navigator?.navigate(
                                                             ContactDetailsScreenDestination(contactId = targetContactId)
@@ -863,14 +871,11 @@ fun DialPadContent(
                                     )
                                     .then(if (!isBottomSheet) Modifier.statusBarsPadding() else Modifier)
                             ) {
-                                Text(
-                                    text = stringResource(R.string.contacts),
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.Bold,
+                                RillSectionHeader(
+                                    stringResource(R.string.contacts),
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                                        .padding(horizontal = 20.dp, vertical = 4.dp)
                                 )
                                 Surface(
                                     shape = MaterialTheme.shapes.extraLarge,
@@ -891,13 +896,17 @@ fun DialPadContent(
                                                 phoneNumber = defaultOrFirstPhone,
                                                 trailingContent = {
                                                     if (defaultOrFirstPhone != null) {
-                                                        IconButton(onClick = { initiateCall(defaultOrFirstPhone) }) {
+                                                        IconButton(onClick = {
+                                                            doHapticIfNeed(context, prefs)
+                                                            initiateCall(defaultOrFirstPhone) }
+                                                        ) {
                                                             Icon(Icons.Outlined.Call, contentDescription = stringResource(R.string.call), tint = MaterialTheme.colorScheme.primary)
                                                         }
                                                     }
                                                 },
                                                 onCall = { if (defaultOrFirstPhone != null) initiateCall(defaultOrFirstPhone) },
                                                 onClick = {
+                                                    doHapticIfNeed(context, prefs)
                                                     navigator?.navigate(
                                                         ContactDetailsScreenDestination(
                                                             contactId = contact.id
@@ -926,14 +935,11 @@ fun DialPadContent(
                                     .navigationBarsPadding()
                                     .then(if (!isBottomSheet && !searchResultsNotEmpty) Modifier.statusBarsPadding() else Modifier)
                             ) {
-                                Text(
-                                    text = stringResource(R.string.recents),
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.Bold,
+                                RillSectionHeader(
+                                    stringResource(R.string.recents),
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                                        .padding(horizontal = 20.dp, vertical = 4.dp)
                                 )
                                 Surface(
                                     shape = MaterialTheme.shapes.extraLarge,
@@ -942,31 +948,29 @@ fun DialPadContent(
                                 ) {
                                     Column(
                                         modifier = Modifier
-//                                        .padding(vertical = 8.dp)
                                             .background(if (isBottomSheet) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surface),
                                         verticalArrangement = Arrangement.spacedBy(2.dp),
                                     ) {
                                         filteredSearchLogsResults.forEach { log ->
-                                            val displayName = if (log.name == log.number) log.number.forceLtr() else log.name?.ifEmpty { log.number } ?: log.number.ifEmpty { "Unknown" }
+                                            val displayName =
+                                                if (log.name == log.number) log.number.forceLtr()
+                                                else log.name?.ifEmpty { log.number } ?: log.number.ifEmpty { "Unknown" }
                                             SingleTile(
                                                 title = displayName,
                                                 subtitle = if (log.name == log.number) null else log.number,
                                                 photoUri = log.photoUri,
                                                 phoneNumber = log.number,
                                                 trailingContent = {
-                                                    IconButton(onClick = { initiateCall(log.number) }) {
+                                                    IconButton(onClick = {
+                                                        doHapticIfNeed(context, prefs)
+                                                        initiateCall(log.number) }
+                                                    ) {
                                                         Icon(Icons.Outlined.Call, contentDescription = stringResource(R.string.call), tint = MaterialTheme.colorScheme.primary)
                                                     }
                                                 },
                                                 onCall = { initiateCall(log.number) },
                                                 onClick = {
-                                                    if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                                                        performAppHaptic(
-                                                            context,
-                                                            prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light",
-                                                            prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
-                                                        )
-                                                    }
+                                                    doHapticIfNeed(context, prefs)
                                                     navigator?.navigate(ContactDetailsScreenDestination(phoneNumber = log.number))
                                                 },
                                                 showCreateContact = log.contactId == null,
@@ -1158,7 +1162,7 @@ fun DialPadContent(
                                         },
                                         icon = Icons.AutoMirrored.Outlined.Backspace,
                                         contentDescription = stringResource(R.string.backspace),
-                                        containerColor = Color.Transparent //MaterialTheme.colorScheme.surfaceContainerLow
+                                        containerColor = Color.Transparent
                                     )
                                 }
                             }
@@ -1229,14 +1233,11 @@ fun DialPadContent(
                                     Column(
                                         modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
                                     ) {
-                                        Text(
-                                            text = stringResource(R.string.suggested),
-                                            style = MaterialTheme.typography.labelLarge,
-                                            color = MaterialTheme.colorScheme.primary,
-                                            fontWeight = FontWeight.Bold,
+                                        RillSectionHeader(
+                                            stringResource(R.string.suggested),
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(horizontal = 16.dp, vertical = 4.dp)
+                                                .padding(horizontal = 20.dp, vertical = 4.dp)
                                         )
                                         Surface(
                                             shape = MaterialTheme.shapes.extraLarge,
@@ -1287,7 +1288,10 @@ fun DialPadContent(
                                                         photoUri = photoUri,
                                                         phoneNumber = entry.number,
                                                         trailingContent = {
-                                                            IconButton(onClick = { initiateCall(entry.number) }) {
+                                                            IconButton(onClick = {
+                                                                doHapticIfNeed(context, prefs)
+                                                                initiateCall(entry.number) }
+                                                            ) {
                                                                 Icon(
                                                                     Icons.Outlined.Call,
                                                                     contentDescription = stringResource(R.string.call),
@@ -1297,6 +1301,7 @@ fun DialPadContent(
                                                         },
                                                         onCall = { initiateCall(entry.number) },
                                                         onClick = {
+                                                            doHapticIfNeed(context, prefs)
                                                             if (targetContactId != null) {
                                                                 navigator?.navigate(
                                                                     ContactDetailsScreenDestination(contactId = targetContactId)
@@ -1367,16 +1372,6 @@ fun DialPadContent(
                                         Surface(
                                             onClick = {
                                                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-//                                                val intent =
-//                                                    Intent(Intent.ACTION_INSERT_OR_EDIT).apply {
-//                                                        type =
-//                                                            ContactsContract.Contacts.CONTENT_ITEM_TYPE
-//                                                        putExtra(
-//                                                            ContactsContract.Intents.Insert.PHONE,
-//                                                            number
-//                                                        )
-//                                                    }
-//                                                context.startActivity(intent)
                                                 navigator?.navigate(
                                                     ContactSelectionScreenDestination(
                                                         title = "Add to Existing Contact",
@@ -1475,22 +1470,13 @@ fun DialPadContent(
                                             )
                                 ) {
                                     Column(
-                                        modifier = Modifier//.padding(horizontal = 16.dp, vertical = 4.dp)
-                                            .padding(
-//                                        start = 16.dp,
-//                                        end = 16.dp,
-                                                top = 4.dp,
-                                                bottom = searchResultsPadding
-                                            )
+                                        modifier = Modifier.padding(top = 4.dp, bottom = searchResultsPadding)
                                     ) {
-                                        Text(
-                                            text = stringResource(R.string.contacts),
-                                            style = MaterialTheme.typography.labelLarge,
-                                            color = MaterialTheme.colorScheme.primary,
-                                            fontWeight = FontWeight.Bold,
+                                        RillSectionHeader(
+                                            stringResource(R.string.contacts),
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(horizontal = 16.dp, vertical = 4.dp)
+                                                .padding(horizontal = 20.dp, vertical = 4.dp)
                                         )
                                         Surface(
                                             shape = MaterialTheme.shapes.extraLarge,
@@ -1499,7 +1485,6 @@ fun DialPadContent(
                                         ) {
                                             Column(
                                                 modifier = Modifier
-//                                        .padding(vertical = 8.dp)
                                                     .background(if (isBottomSheet) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surface),
                                                 verticalArrangement = Arrangement.spacedBy(2.dp),
                                             ) {
@@ -1508,36 +1493,29 @@ fun DialPadContent(
                                                         contact.phoneDetails.firstOrNull { it.isPrimary }?.number
                                                             ?: contact.phoneNumbers.firstOrNull()
                                                     SingleTile(
-                                                        title = getDisplayName(
-                                                            contact,
-                                                            displayOrder
-                                                        ), //contact.displayName,
+                                                        title = getDisplayName(contact, displayOrder),
                                                         subtitle = getDisplayContactInfo(contact),
                                                         photoUri = contact.photoUri,
                                                         phoneNumber = defaultOrFirstPhone,
                                                         trailingContent = {
                                                             if (defaultOrFirstPhone != null) {
                                                                 IconButton(onClick = {
-                                                                    initiateCall(
-                                                                        defaultOrFirstPhone
-                                                                    )
-                                                                }) {
+                                                                    doHapticIfNeed(context, prefs)
+                                                                    initiateCall(defaultOrFirstPhone) }
+                                                                ) {
                                                                     Icon(
                                                                         Icons.Outlined.Call,
-                                                                        contentDescription = stringResource(
-                                                                            R.string.call
-                                                                        ),
+                                                                        contentDescription = stringResource(R.string.call),
                                                                         tint = MaterialTheme.colorScheme.primary
                                                                     )
                                                                 }
                                                             }
                                                         },
                                                         onCall = {
-                                                            if (defaultOrFirstPhone != null) initiateCall(
-                                                                defaultOrFirstPhone
-                                                            )
+                                                            if (defaultOrFirstPhone != null) initiateCall(defaultOrFirstPhone)
                                                         },
                                                         onClick = {
+                                                            doHapticIfNeed(context, prefs)
                                                             navigator?.navigate(
                                                                 ContactDetailsScreenDestination(
                                                                     contactId = contact.id
@@ -1556,37 +1534,22 @@ fun DialPadContent(
                                 AnimatedVisibility(
                                     visible = filteredSearchLogsResults.isNotEmpty(),
                                     enter = fadeIn(tween(380, easing = FastOutSlowInEasing)) +
-                                            expandVertically(
-                                                tween(
-                                                    420,
-                                                    easing = FastOutSlowInEasing
-                                                )
-                                            ),
+                                            expandVertically(tween(420, easing = FastOutSlowInEasing)),
                                     exit = fadeOut(tween(280, easing = FastOutLinearInEasing)) +
-                                            shrinkVertically(
-                                                tween(
-                                                    320,
-                                                    easing = FastOutLinearInEasing
-                                                )
-                                            )
+                                            shrinkVertically(tween(320, easing = FastOutLinearInEasing))
                                 ) {
                                     Column(
-                                        modifier = Modifier//.padding(horizontal = 16.dp, vertical = 4.dp)
+                                        modifier = Modifier
                                             .padding(
-//                                        start = 16.dp,
-//                                        end = 16.dp,
                                                 top = 4.dp,
                                                 bottom = searchResultsBottomPadding
                                             )
                                     ) {
-                                        Text(
-                                            text = stringResource(R.string.recents),
-                                            style = MaterialTheme.typography.labelLarge,
-                                            color = MaterialTheme.colorScheme.primary,
-                                            fontWeight = FontWeight.Bold,
+                                        RillSectionHeader(
+                                            stringResource(R.string.recents),
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(horizontal = 16.dp, vertical = 4.dp)
+                                                .padding(horizontal = 20.dp, vertical = 4.dp)
                                         )
                                         Surface(
                                             shape = MaterialTheme.shapes.extraLarge,
@@ -1595,49 +1558,33 @@ fun DialPadContent(
                                         ) {
                                             Column(
                                                 modifier = Modifier
-//                                        .padding(vertical = 8.dp)
                                                     .background(if (isBottomSheet) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surface),
                                                 verticalArrangement = Arrangement.spacedBy(2.dp),
                                             ) {
                                                 filteredSearchLogsResults.forEach { log ->
                                                     val displayName =
-                                                        if (log.name == log.number) log.number.forceLtr() else log.name?.ifEmpty { log.number }
-                                                            ?: log.number.ifEmpty { "Unknown" }
+                                                        if (log.name == log.number) log.number.forceLtr()
+                                                        else log.name?.ifEmpty { log.number } ?: log.number.ifEmpty { "Unknown" }
                                                     SingleTile(
                                                         title = displayName,
                                                         subtitle = if (log.name == log.number) null else log.number,
                                                         photoUri = log.photoUri,
                                                         phoneNumber = log.number,
                                                         trailingContent = {
-                                                            IconButton(onClick = { initiateCall(log.number) }) {
+                                                            IconButton(onClick = {
+                                                                doHapticIfNeed(context, prefs)
+                                                                initiateCall(log.number) }
+                                                            ) {
                                                                 Icon(
                                                                     Icons.Outlined.Call,
-                                                                    contentDescription = stringResource(
-                                                                        R.string.call
-                                                                    ),
+                                                                    contentDescription = stringResource(R.string.call),
                                                                     tint = MaterialTheme.colorScheme.primary
                                                                 )
                                                             }
                                                         },
                                                         onCall = { initiateCall(log.number) },
                                                         onClick = {
-                                                            if (prefs.getBoolean(
-                                                                    PreferenceManager.KEY_APP_HAPTICS,
-                                                                    true
-                                                                )
-                                                            ) {
-                                                                performAppHaptic(
-                                                                    context,
-                                                                    prefs.getString(
-                                                                        PreferenceManager.KEY_APP_HAPTICS_STRENGTH,
-                                                                        "light"
-                                                                    ) ?: "light",
-                                                                    prefs.getFloat(
-                                                                        PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY,
-                                                                        0.5f
-                                                                    )
-                                                                )
-                                                            }
+                                                            doHapticIfNeed(context, prefs)
                                                             navigator?.navigate(
                                                                 ContactDetailsScreenDestination(
                                                                     phoneNumber = log.number
@@ -1697,7 +1644,10 @@ fun DialPadContent(
                                                 )
                                             }
                                             IconButton(
-                                                onClick = { showClipboardBanner = false }
+                                                onClick = {
+                                                    doHapticIfNeed(context, prefs)
+                                                    showClipboardBanner = false
+                                                }
                                             ) {
                                                 Icon(
                                                     Icons.Default.Close,
@@ -1711,19 +1661,9 @@ fun DialPadContent(
                                 AnimatedVisibility(
                                     visible = searchResults.isEmpty() && filteredSearchLogsResults.isEmpty() && number.isNotEmpty(),
                                     enter = fadeIn(tween(380, easing = FastOutSlowInEasing)) +
-                                            expandVertically(
-                                                tween(
-                                                    420,
-                                                    easing = FastOutSlowInEasing
-                                                )
-                                            ),
+                                            expandVertically(tween(420, easing = FastOutSlowInEasing)),
                                     exit = fadeOut(tween(280, easing = FastOutLinearInEasing)) +
-                                            shrinkVertically(
-                                                tween(
-                                                    320,
-                                                    easing = FastOutLinearInEasing
-                                                )
-                                            )
+                                            shrinkVertically(tween(320, easing = FastOutLinearInEasing))
                                 ) {
                                     PlaceholderView(
                                         icon = Icons.Rounded.SearchOff,
@@ -1749,12 +1689,13 @@ fun DialPadContent(
                                     .padding(bottom = if (isBottomSheet) 0.dp else if (pillNav) 88.dp else bottomBarHeight + 12.dp)
                                     .navigationBarsPadding()
                                     .then(
-                                        if (dialpadTab) Modifier
-                                            .padding(horizontal = 16.dp, vertical = 4.dp)
-                                        else Modifier
-                                            .padding(horizontal = 16.dp, vertical = 16.dp)
+                                        if (dialpadTab) Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                                        else Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
                                     ),
-                                onClick = { isDialpadVisible = true },
+                                onClick = {
+                                    doHapticIfNeed(context, prefs)
+                                    isDialpadVisible = true
+                                },
                                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                                 shape = fabShape,
@@ -1767,27 +1708,15 @@ fun DialPadContent(
                             visible = isDialpadVisible,// || number.isEmpty(),
                             enter = slideInVertically(
                                 initialOffsetY = { it },
-                                animationSpec = tween(
-                                    durationMillis = 320,
-                                    easing = FastOutSlowInEasing
-                                )
+                                animationSpec = tween(durationMillis = 320, easing = FastOutSlowInEasing)
                             ) + fadeIn(
-                                animationSpec = tween(
-                                    durationMillis = 280,
-                                    easing = FastOutSlowInEasing
-                                )
+                                animationSpec = tween(durationMillis = 280, easing = FastOutSlowInEasing)
                             ),
                             exit = slideOutVertically(
                                 targetOffsetY = { it },
-                                animationSpec = tween(
-                                    durationMillis = 260,
-                                    easing = FastOutLinearInEasing
-                                )
+                                animationSpec = tween(durationMillis = 260, easing = FastOutLinearInEasing)
                             ) + fadeOut(
-                                animationSpec = tween(
-                                    durationMillis = 200,
-                                    easing = FastOutLinearInEasing
-                                )
+                                animationSpec = tween(durationMillis = 200, easing = FastOutLinearInEasing)
                             )
                         ) {
                             // ── Dialpad card — always at bottom, never moves ───────────────
@@ -1869,6 +1798,7 @@ fun DialPadContent(
                                                             modifier = Modifier
                                                                 .combinedClickable(
                                                                     onClick = {
+                                                                        doHapticIfNeed(context, prefs)
                                                                         showOverflowMenu = true
                                                                     },
                                                                     interactionSource = optionsSource,
@@ -1883,17 +1813,11 @@ fun DialPadContent(
                                                         visible = showOverflowMenu,
                                                         enter = slideInVertically(
                                                             initialOffsetY = { -it },
-                                                            animationSpec = tween(
-                                                                320,
-                                                                easing = FastOutSlowInEasing
-                                                            )
+                                                            animationSpec = tween(320, easing = FastOutSlowInEasing)
                                                         ) + fadeIn(tween(280)),
                                                         exit = slideOutVertically(
                                                             targetOffsetY = { -it },
-                                                            animationSpec = tween(
-                                                                420,
-                                                                easing = FastOutLinearInEasing
-                                                            )
+                                                            animationSpec = tween(420, easing = FastOutLinearInEasing)
                                                         ) + fadeOut(tween(380))
                                                     ) {
                                                         DropdownMenu(
@@ -1906,49 +1830,41 @@ fun DialPadContent(
                                                         ) {
                                                             if (number.isNotEmpty()) {
                                                                 DropdownMenuItem(
-                                                                    contentPadding = PaddingValues(
-                                                                        horizontal = 24.dp
-                                                                    ),
+                                                                    contentPadding = PaddingValues(horizontal = 24.dp),
                                                                     text = { Text(stringResource(R.string.add_pause)) },
                                                                     onClick = {
+                                                                        doHapticIfNeed(context, prefs)
                                                                         showOverflowMenu = false
                                                                         number += ","
                                                                         cursorPosition = number.length
                                                                     }
                                                                 )
                                                                 DropdownMenuItem(
-                                                                    contentPadding = PaddingValues(
-                                                                        horizontal = 24.dp
-                                                                    ),
+                                                                    contentPadding = PaddingValues(horizontal = 24.dp),
                                                                     text = { Text(stringResource(R.string.add_wait)) },
                                                                     onClick = {
+                                                                        doHapticIfNeed(context, prefs)
                                                                         showOverflowMenu = false
                                                                         number += ";"
                                                                         cursorPosition = number.length
                                                                     }
                                                                 )
                                                                 DropdownMenuItem(
-                                                                    contentPadding = PaddingValues(
-                                                                        horizontal = 24.dp
-                                                                    ),
+                                                                    contentPadding = PaddingValues(horizontal = 24.dp),
                                                                     text = { Text(stringResource(R.string.copy)) },
                                                                     onClick = {
+                                                                        doHapticIfNeed(context, prefs)
                                                                         showOverflowMenu = false
-                                                                        clipboard.setText(
-                                                                            AnnotatedString(
-                                                                                number
-                                                                            )
-                                                                        )
+                                                                        clipboard.setText(AnnotatedString(number))
                                                                     }
                                                                 )
                                                             }
                                                             if (pasteText.isNotEmpty()) {
                                                                 DropdownMenuItem(
-                                                                    contentPadding = PaddingValues(
-                                                                        horizontal = 24.dp
-                                                                    ),
+                                                                    contentPadding = PaddingValues(horizontal = 24.dp),
                                                                     text = { Text(stringResource(R.string.paste)) },
                                                                     onClick = {
+                                                                        doHapticIfNeed(context, prefs)
                                                                         showOverflowMenu = false
                                                                         replaceNumber(pasteText)
                                                                     }
@@ -1977,10 +1893,7 @@ fun DialPadContent(
                                                     // Smooth mathematical scaling formula:
                                                     // Start with 30sp. The more characters there are, the more the font size decreases.
                                                     val dynamicFontSize =
-                                                        (30f - (numberLength * 0.5f)).coerceIn(
-                                                            10f,
-                                                            30f
-                                                        ).toInt()
+                                                        (30f - (numberLength * 0.5f)).coerceIn(10f, 30f).toInt()
                                                     DialpadNumberDisplay(
                                                         number = displayNumber,
                                                         fontSize = dynamicFontSize,
@@ -1989,9 +1902,7 @@ fun DialPadContent(
                                                             cursorPosition = displayToRawIndex(displayNumber, displayIdx)
                                                         },
                                                         onLongPress = {
-                                                            haptic.performHapticFeedback(
-                                                                HapticFeedbackType.LongPress
-                                                            )
+                                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                                             showOverflowMenu = true
                                                         },
                                                         enableAnimations = enableAnimations
@@ -2006,18 +1917,19 @@ fun DialPadContent(
                                                         imageVector = Icons.AutoMirrored.Outlined.Backspace,
                                                         contentDescription = stringResource(R.string.backspace),
                                                         tint = if (number.isNotEmpty()) MaterialTheme.colorScheme.onSurfaceVariant
-                                                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                                            alpha = 0.5f
-                                                        ),
+                                                            else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                                                         modifier = Modifier
                                                             .combinedClickable(
-                                                                onClick = { backspaceAtCursor() },
-                                                                onLongClick = { replaceNumber("") },
+                                                                onClick = {
+                                                                    if (number.isNotEmpty()) doHapticIfNeed(context, prefs)
+                                                                    backspaceAtCursor()
+                                                                },
+                                                                onLongClick = {
+                                                                    if (number.isNotEmpty()) doHapticIfNeed(context, prefs)
+                                                                    replaceNumber("")
+                                                                },
                                                                 interactionSource = backspaceSource,
-                                                                indication = ripple(
-                                                                    bounded = false,
-                                                                    radius = 26.dp
-                                                                )
+                                                                indication = ripple(bounded = false, radius = 26.dp)
                                                             ),
                                                     )
 //                                    }

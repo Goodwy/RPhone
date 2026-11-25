@@ -50,6 +50,7 @@
     <string name="saved">Αποθηκεύτηκε</string>
     <string name="save_failed">Αποτυχία αποθήκευσης</string>
     <string name="warning">Προειδοποίηση</string>
+    <string name="edit_number_before_call">Επεξεργασία αριθμού πριν από την κλήση</string>
 
     <!-- Search -->
     <string name="search">Αναζήτηση</string>
@@ -581,6 +582,7 @@
     <string name="calling_card_override_saved">Η προσαρμογή αποθηκεύτηκε</string>
     <string name="calling_card_override_save_failed">Δεν ήταν δυνατή η αποθήκευση του φόντου</string>
     <string name="calling_card_override_unknown_contact">Επαφή #%1$s</string>
+    <string name="calling_card_sync_warning_message">Η εμφάνιση της οθόνης κλήσης αποθηκεύεται μόνο σε αυτήν την εφαρμογή. Δεν συγχρονίζεται με τις Επαφές Google ή άλλα βιβλία διευθύνσεων, καθώς δεν διαθέτουν αντίστοιχο πεδίο. Οι αλλαγές εδώ επηρεάζουν μόνο τις κλήσεις σε αυτήν την εφαρμογή. Για να μεταφέρετε αυτές τις ρυθμίσεις και τις εικόνες φόντου σε άλλη συσκευή, χρησιμοποιήστε τη «Δημιουργία αντιγράφων ασφαλείας &amp; Επαναφορά».</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">Προσθήκη στην αρχική οθόνη</string>

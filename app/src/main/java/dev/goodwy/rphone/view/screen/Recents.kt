@@ -82,6 +82,8 @@ import dev.goodwy.rphone.controller.ContactsViewModel
 import dev.goodwy.rphone.modal.data.CallLogEntry
 import dev.goodwy.rphone.modal.data.Contact
 import com.ramcosta.composedestinations.generated.destinations.CallLogFullScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.DialPadScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.DialPadScreenDestination.invoke
 import com.ramcosta.composedestinations.generated.destinations.SettingsScreenDestination
 import dev.goodwy.rphone.controller.CallNotificationManager
 import dev.goodwy.rphone.controller.util.BlockedNumbersManager
@@ -142,9 +144,6 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
     var fabVisible by remember { mutableStateOf(false) }
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-
-    var isDraggingFavorite by remember { mutableStateOf(false) }
-    val currentIsDraggingFavorite by rememberUpdatedState(isDraggingFavorite)
 
     var selectedEntries by remember { mutableStateOf(setOf<CallLogEntry>()) }
 
@@ -337,9 +336,14 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
                                     items(CallLogFilter.entries) { filter ->
-                                        RillFilterChip(stringResource(filter.stringRes), selectedFilter == filter, { _ ->
-                                            viewModel.setFilter(filter)
-                                        })
+                                        RillFilterChip(
+                                            label = stringResource(filter.stringRes),
+                                            selected = selectedFilter == filter,
+                                            onClick = { _ ->
+                                                doHapticIfNeed(context, prefs)
+                                                viewModel.setFilter(filter)
+                                            }
+                                        )
                                     }
                                 }
                                 if (searchEnabled && !settingsEnabled) {
@@ -351,23 +355,7 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
                                             .padding(horizontal = 16.dp)
                                             .combinedClickable(
                                                 onClick = {
-                                                    if (prefs.getBoolean(
-                                                            PreferenceManager.KEY_APP_HAPTICS,
-                                                            true
-                                                        )
-                                                    ) {
-                                                        performAppHaptic(
-                                                            context,
-                                                            prefs.getString(
-                                                                PreferenceManager.KEY_APP_HAPTICS_STRENGTH,
-                                                                "light"
-                                                            ) ?: "light",
-                                                            prefs.getFloat(
-                                                                PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY,
-                                                                0.5f
-                                                            )
-                                                        )
-                                                    }
+                                                    doHapticIfNeed(context, prefs)
                                                     navigator.navigate(SettingsScreenDestination)
                                                 },
                                                 interactionSource = null,
@@ -417,12 +405,9 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
                                     numbersList = selectedEntries.map {it.number}.distinct().toTypedArray()
                                 ))
                             },
-                            onDeselect = {
-                                selectedEntries = emptySet()
-                            },
-                            onSelectAll = {
-                                selectedEntries = filteredLogs.toSet()
-                            },
+                            onDeselect = { selectedEntries = emptySet() },
+                            onSelectAll = { selectedEntries = filteredLogs.toSet() },
+                            doHaptic = { doHapticIfNeed(context, prefs) },
                             isAllSelected = selectedEntries == filteredLogs.toSet()
                         )
                     }
@@ -494,7 +479,10 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
                         )
                     ) {
                         FloatingActionButton(
-                            onClick = { showDialpad = true },
+                            onClick = {
+                                doHapticIfNeed(context, prefs)
+                                showDialpad = true
+                            },
                             containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.0f),
                             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                             shape = fabShape,
@@ -503,7 +491,10 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
                     }
                 } else {
                     FloatingActionButton(
-                        onClick = { showDialpad = true },
+                        onClick = {
+                            doHapticIfNeed(context, prefs)
+                            showDialpad = true
+                        },
                         containerColor = if (useBlur)
                             MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.75f)
                         else
@@ -536,8 +527,6 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
                         selectedEntries + entry
                     }
                 },
-                isDraggingFavorite = currentIsDraggingFavorite,
-                onDraggingFavoriteChange = { isDraggingFavorite = it },
             )
 
             val endPadding = if (!dialpadEnabled) 86.dp else 32.dp
@@ -556,6 +545,7 @@ fun RecentScreen(navController: NavController, navigator: DestinationsNavigator)
                     ),
                 visible = showButton,
                 onClick = {
+                    doHapticIfNeed(context, prefs)
                     scope.launch {
                         listState.animateScrollToItem(0)
                     }
@@ -575,8 +565,6 @@ fun CallLogFullContent(
     listState: LazyListState,
     selectedEntries: Set<CallLogEntry>,
     onToggleSelection: (CallLogEntry) -> Unit,
-    isDraggingFavorite: Boolean = false,
-    onDraggingFavoriteChange: (Boolean) -> Unit = {},
 ) {
     val prefs = koinInject<PreferenceManager>()
     val favouritesEnabled = prefs.getBoolean(PreferenceManager.KEY_TAB_SHOW_FAVORITES, false)
@@ -792,7 +780,9 @@ fun CallLogFullContent(
                         ScrollHapticsEffect(listState = listState)
                         LazyColumn(
                             state = listState,
-                            modifier = Modifier.fillMaxSize().padding(top = 8.dp),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(top = 8.dp),
                             contentPadding = PaddingValues(bottom = 168.dp),
                             verticalArrangement = Arrangement.spacedBy(0.dp)
                         ) {
@@ -811,6 +801,7 @@ fun CallLogFullContent(
                                                 .clip(RoundedCornerShape(20.dp))
                                                 .combinedClickable(
                                                     onClick = {
+                                                        doHapticIfNeed(context, prefs)
                                                         val newCollapsed = !isFavoritesCollapsed
                                                         isFavoritesCollapsed = newCollapsed
                                                         prefs.setBoolean(
@@ -855,6 +846,7 @@ fun CallLogFullContent(
                                                     .clip(RoundedCornerShape(20.dp))
                                                     .combinedClickable(
                                                         onClick = {
+                                                            doHapticIfNeed(context, prefs)
                                                             navController.navigate(
                                                                 ContactScreenDestination.route
                                                             ) {
@@ -892,6 +884,7 @@ fun CallLogFullContent(
                                                 .clip(RoundedCornerShape(20.dp))
                                                 .combinedClickable(
                                                     onClick = {
+                                                        doHapticIfNeed(context, prefs)
                                                         isEditingFavorites = !isEditingFavorites
 
                                                         if (isFavoritesCollapsed) {
@@ -932,7 +925,7 @@ fun CallLogFullContent(
                                             animationSpec = tween(300, easing = FastOutSlowInEasing)
                                         ) + fadeOut()
                                     ) {
-                                        IPhoneFavoritesRow(
+                                        FavoritesRow(
                                             favorites = favorites,
                                             isEditing = isEditingFavorites,
                                             onUnfavorite = { contact ->
@@ -942,7 +935,7 @@ fun CallLogFullContent(
                                                 prefs.setFavoritesOrder(newOrder)
                                             },
                                             onClick = { contact ->
-//                                        callLauncher.dial(contact.phoneNumbers.firstOrNull() ?: "", contact)
+                                                doHapticIfNeed(context, prefs)
                                                 val phoneNumber = getPhoneNumber(contact)
                                                 if (phoneNumber != null) {
                                                     placeCallWithSimPreference(
@@ -961,8 +954,6 @@ fun CallLogFullContent(
                                                     )
                                                 }
                                             },
-                                            isDragging = isDraggingFavorite,
-                                            onDraggingChange = onDraggingFavoriteChange,
                                             displayOrder = displayOrder
                                         )
                                     }
@@ -1055,21 +1046,6 @@ fun CallLogFullContent(
                                                                 onToggleSelection(log)
                                                             },
                                                             onAvatarClick = { log ->
-//                                                                if (log.contactId != null) {
-//                                                                    navigator.navigate(
-//                                                                        ContactDetailsScreenDestination(
-//                                                                            contactId = log.contactId,
-//                                                                            phoneNumber = log.number
-//                                                                        )
-//                                                                    )
-//                                                                } else {
-//                                                                    navigator.navigate(
-//                                                                        ContactEditScreenDestination(
-//                                                                            initialPhone = log.number,
-//                                                                            initialName = if (log.number != log.name) log.name else null
-//                                                                        )
-//                                                                    )
-//                                                                }
                                                                 if (selectionMode) {
                                                                     onToggleSelection(log)
                                                                 } else {
@@ -1084,6 +1060,7 @@ fun CallLogFullContent(
                                                             },
                                                             onAddClick = { log ->
                                                                 if (log.contactId == null) {
+                                                                    doHapticIfNeed(context, prefs)
                                                                     navigator.navigate(
                                                                         ContactEditScreenDestination(
                                                                             initialPhone = log.number,
@@ -1096,20 +1073,25 @@ fun CallLogFullContent(
                                                                 if (selectionMode) {
                                                                     onToggleSelection(log)
                                                                 } else {
-                                                                    placeCallWithSimPreference(
-                                                                        context,
-                                                                        log.number,
-                                                                        simPref
-                                                                    ) {
+                                                                    placeCallWithSimPreference(context, log.number, simPref) {
                                                                         pendingNumber = log.number
                                                                         showSimPicker = true
                                                                     }
                                                                 }
                                                             },
                                                             onDelete = {
+                                                                doHapticIfNeed(context, prefs)
                                                                 pendingDeleteIds = lg.ids
                                                             },
+                                                            onEdit = {
+                                                                doHapticIfNeed(context, prefs)
+                                                                val phoneNumber = lg.number
+                                                                navigator.navigate(
+                                                                    DialPadScreenDestination(initialNumber = phoneNumber)
+                                                                )
+                                                            },
                                                             onShowHistory = {
+                                                                doHapticIfNeed(context, prefs)
                                                                 val contactId = lg.contactId
                                                                 val phoneNumber = lg.number
                                                                 navigator.navigate(
@@ -1119,6 +1101,7 @@ fun CallLogFullContent(
                                                                     )
                                                                 )
                                                             },
+                                                            doHaptic = { doHapticIfNeed(context, prefs) },
                                                             showSimLabel = showSimLabel,
                                                         )
                                                     }
@@ -1145,6 +1128,7 @@ fun CallLogFullContent(
                 iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
                 confirmButton = {
                     TextButton(onClick = {
+                        doHapticIfNeed(context, prefs)
                         viewModel.deleteCallLogsByIds(pendingDeleteIds)
                         pendingDeleteIds = emptyList()
                     }) {
@@ -1152,7 +1136,10 @@ fun CallLogFullContent(
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = { pendingDeleteIds = emptyList() }) {
+                    TextButton(onClick = {
+                        doHapticIfNeed(context, prefs)
+                        pendingDeleteIds = emptyList() }
+                    ) {
                         Text(stringResource(R.string.cancel))
                     }
                 }
@@ -1175,27 +1162,3 @@ fun CallLogFullContent(
         )
     }
 }
-
-//@Composable
-//private fun AnimatedStatCard(
-//    delayMs: Long,
-//    label: String,
-//    value: String,
-//    icon: ImageVector,
-//    iconTint: Color,
-//    modifier: Modifier = Modifier,
-//    containerColor: Color = MaterialTheme.colorScheme.surfaceContainerLow,
-//    onClick: () -> Unit = {}
-//) {
-//    var visible by remember { mutableStateOf(false) }
-//    LaunchedEffect(Unit) { delay(delayMs); visible = true }
-//    val cardAlpha by animateFloatAsState(if (visible) 1f else 0f, tween(350), label = "statAlpha")
-//    val cardOffset by animateDpAsState(if (visible) 0.dp else 16.dp, spring(stiffness = Spring.StiffnessMediumLow), label = "statOffset")
-//    Box(modifier = Modifier
-//        .alpha(cardAlpha)
-//        .offset(y = cardOffset)) {
-//        Surface(onClick = onClick, shape = RoundedCornerShape(20.dp), color = containerColor, modifier = modifier) {
-//            RillStatCard(label = label, value = value, icon = icon, iconTint = iconTint, containerColor = Color.Transparent, modifier = Modifier.fillMaxWidth())
-//        }
-//    }
-//}

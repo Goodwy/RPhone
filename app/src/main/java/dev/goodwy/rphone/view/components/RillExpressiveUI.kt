@@ -141,6 +141,16 @@ fun RillGroupedCardContainer(
 
 // ─── App Haptics Helper ────────────────────────────────────────────────────────
 
+fun doHapticIfNeed(context: android.content.Context, prefs: PreferenceManager) {
+    if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
+        performAppHaptic(
+            context,
+            prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light",
+            prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
+        )
+    }
+}
+
 /**
  * strength: "light" | "strong" | "custom"
  * customIntensity: 0f..1f, only used when strength == "custom"
@@ -159,7 +169,7 @@ fun performAppHaptic(
                 durationMs = (10 + customIntensity * 70).toLong().coerceIn(10, 80)
                 amplitude  = (40  + (customIntensity * 215)).toInt().coerceIn(40, 255)
             }
-            else -> { durationMs = 20; amplitude = 80 } // light
+            else -> { durationMs = 2; amplitude = 6 } // light
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val vm = context.getSystemService(VibratorManager::class.java)
@@ -609,6 +619,7 @@ fun CallLogListItem(
     onAddClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
     onShowHistory: () -> Unit,
+    doHaptic: () -> Unit,
     directCall: Boolean,
     isMenuOpen: Boolean = false,
     modifier: Modifier = Modifier,
@@ -617,7 +628,6 @@ fun CallLogListItem(
     showSimLabel: Boolean
 ) {
     val context = LocalContext.current
-    val prefs = koinInject<PreferenceManager>()
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
@@ -650,16 +660,10 @@ fun CallLogListItem(
                     interactionSource = interactionSource,
                     indication = ripple(),
                     onClick = {
-                        if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                            performAppHaptic(
-                                context,
-                                prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light")
-                                    ?: "light",
-                                prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
-                            )
-                        }
-//                            if (directCall) onCallClick() else onClick()
-                        if (directCall) onCallClick() else if (selectionMode) onClick() else { isExpanded = !isExpanded }
+                        doHaptic()
+                        if (directCall) onCallClick()
+                        else if (selectionMode) onClick()
+                        else { isExpanded = !isExpanded }
                     },
                     onLongClick = onLongClick
                 ),
@@ -702,7 +706,10 @@ fun CallLogListItem(
                                     Modifier.combinedClickable(
                                         interactionSource = null,
                                         indication = ripple(bounded = false, radius = 32.dp),
-                                        onClick = onAvatarClick,
+                                        onClick = {
+                                            doHaptic()
+                                            onAvatarClick()
+                                        },
                                         onLongClick = onAvatarLongClick
                                     )
                                 else Modifier
@@ -780,20 +787,7 @@ fun CallLogListItem(
                             interactionSource = interactionSourceCall,
                             indication = ripple(bounded = false, radius = 28.dp),
                             onClick = {
-                                if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                                    performAppHaptic(
-                                        context,
-                                        prefs.getString(
-                                            PreferenceManager.KEY_APP_HAPTICS_STRENGTH,
-                                            "light"
-                                        ) ?: "light",
-                                        prefs.getFloat(
-                                            PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY,
-                                            0.5f
-                                        )
-                                    )
-                                }
-//                                if (directCall) onClick() else onCallClick()
+                                doHaptic()
                                 if (directCall) { isExpanded = !isExpanded } else onCallClick()
                             },
                             onLongClick = if (!selectionMode) onAvatarLongClick else onLongClick
@@ -881,7 +875,10 @@ fun CallLogListItem(
                         TileMoreItem(
                             headline = stringResource(R.string.details),
                             leadingIcon = Icons.Outlined.Info,
-                            onClick = onClick
+                            onClick = {
+                                doHaptic()
+                                onClick()
+                            }
                         )
                         TileMoreItem(
                             headline = stringResource(R.string.show_full_history),
@@ -891,7 +888,10 @@ fun CallLogListItem(
                         TileMoreItem(
                             headline = stringResource(R.string.lookup),
                             leadingIcon = Icons.Rounded.TravelExplore,
-                            onClick = { context.launchInternetSearch(log.number) }
+                            onClick = {
+                                doHaptic()
+                                context.launchInternetSearch(log.number)
+                            }
                         )
                         if (log.contactId == null && onAddClick != null) TileMoreItem(
                             headline = stringResource(R.string.add_contact),
@@ -998,14 +998,7 @@ fun CallLogListItemSimple(
                     interactionSource = interactionSource,
                     indication = ripple(),
                     onClick = {
-                        if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                            performAppHaptic(
-                                context,
-                                prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light")
-                                    ?: "light",
-                                prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
-                            )
-                        }
+                        doHapticIfNeed(context, prefs)
                         onClick()
                     },
                     onLongClick = onLongClick
@@ -1157,13 +1150,7 @@ fun RillListItem(
                     interactionSource = interactionSource,
                     indication = ripple(),
                     onClick = {
-                        if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                            performAppHaptic(
-                                context,
-                                prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light",
-                                prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
-                            )
-                        }
+                        doHapticIfNeed(context, prefs)
                         onClick()
                     },
                     onLongClick = onLongClick
@@ -1179,7 +1166,10 @@ fun RillListItem(
                         .size(48.dp)
                         .then(
                             if (onAvatarClick != null)
-                                Modifier.combinedClickable(onClick = onAvatarClick)
+                                Modifier.combinedClickable(onClick = {
+                                    doHapticIfNeed(context, prefs)
+                                    onAvatarClick
+                                })
                             else Modifier
                         )
                 )
@@ -1285,13 +1275,7 @@ fun RillSwitchListItem(
     Surface(
         enabled = enabled,
         onClick = {
-            if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                performAppHaptic(
-                    context,
-                    prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light",
-                    prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
-                )
-            }
+            doHapticIfNeed(context, prefs)
             onCheckedChange(!checked)
         },
         shape = RoundedCornerShape(cardCornerExtraSmall),
@@ -1331,14 +1315,7 @@ fun RillSwitchListItem(
             Switch(
                 checked = checked && enabled,
                 onCheckedChange = {
-                    if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                        performAppHaptic(
-                            context,
-                            prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light")
-                                ?: "light",
-                            prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
-                        )
-                    }
+                    doHapticIfNeed(context, prefs)
                     onCheckedChange(it)
                 },
                 enabled = enabled,
@@ -1380,13 +1357,7 @@ fun RillSwitchListItem(
 
     Surface(
         onClick = {
-            if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                performAppHaptic(
-                    context,
-                    prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light",
-                    prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
-                )
-            }
+            doHapticIfNeed(context, prefs)
             onClick()
         },
         shape = RoundedCornerShape(cardCornerExtraSmall),
@@ -1442,14 +1413,7 @@ fun RillSwitchListItem(
             Switch(
                 checked = checked && enabled,
                 onCheckedChange = {
-                    if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                        performAppHaptic(
-                            context,
-                            prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light")
-                                ?: "light",
-                            prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
-                        )
-                    }
+                    doHapticIfNeed(context, prefs)
                     onCheckedChange(it)
                 },
                 enabled = enabled,
@@ -1493,13 +1457,7 @@ fun RillSelectListItem(
 
     Surface(
         onClick = {
-            if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                performAppHaptic(
-                    context,
-                    prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light",
-                    prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
-                )
-            }
+            doHapticIfNeed(context, prefs)
             showSelectionScreen = true
         },
         shape = RoundedCornerShape(cardCornerExtraSmall),

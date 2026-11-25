@@ -40,8 +40,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
@@ -63,7 +61,9 @@ import dev.goodwy.rphone.view.theme.customColors
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import dev.goodwy.rphone.view.components.RillSettingsAnimatedVisibility
 import dev.goodwy.rphone.view.components.Title
+import dev.goodwy.rphone.view.components.doHapticIfNeed
 import org.koin.compose.koinInject
 import kotlin.math.roundToInt
 
@@ -121,74 +121,81 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
                     )
                 }
 
-                if (flashOnCallEnabled) {
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(0.4f))
+                RillSettingsAnimatedVisibility(visible = flashOnCallEnabled) {
+                    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                        Text(
+                            stringResource(R.string.flash_on_call_mode),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary
+                        )
 
-                    Text(stringResource(R.string.flash_on_call_mode), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            listOf(
+                                0 to stringResource(R.string.flash_mode_always),
+                                1 to stringResource(R.string.flash_mode_silent_vibrate)
+                            ).forEach { (modeKey, label) ->
+                                val selected = flashOnCallMode == modeKey
+                                val interactionSource =
+                                    remember { MutableInteractionSource() }
+                                val isPressed by interactionSource.collectIsPressedAsState()
+                                val cornerRadius by animateDpAsState(
+                                    targetValue = if (isPressed || selected) 20.dp else 8.dp,
+                                    animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                                    label = "ButtonShape"
+                                )
+                                val outsideCornerRadius by animateDpAsState(
+                                    targetValue = 20.dp,
+                                    animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                                    label = "ButtonShape"
+                                )
+                                val shape = remember(cornerRadius, modeKey) {
+                                    when (modeKey) {
+                                        0 -> RoundedCornerShape(
+                                            topStart = outsideCornerRadius,
+                                            topEnd = cornerRadius,
+                                            bottomEnd = cornerRadius,
+                                            bottomStart = outsideCornerRadius
+                                        )
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(2.dp)
-                    ) {
-                        listOf(
-                            0 to stringResource(R.string.flash_mode_always),
-                            1 to stringResource(R.string.flash_mode_silent_vibrate)
-                        ).forEach { (modeKey, label) ->
-                            val selected = flashOnCallMode == modeKey
-                            val interactionSource =
-                                remember { MutableInteractionSource() }
-                            val isPressed by interactionSource.collectIsPressedAsState()
-                            val cornerRadius by animateDpAsState(
-                                targetValue = if (isPressed || selected) 20.dp else 8.dp,
-                                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-                                label = "ButtonShape"
-                            )
-                            val outsideCornerRadius by animateDpAsState(
-                                targetValue = 20.dp,
-                                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-                                label = "ButtonShape"
-                            )
-                            val shape = remember(cornerRadius, modeKey) {
-                                when (modeKey) {
-                                    0 -> RoundedCornerShape(
-                                        topStart = outsideCornerRadius,
-                                        topEnd = cornerRadius,
-                                        bottomEnd = cornerRadius,
-                                        bottomStart = outsideCornerRadius
-                                    )
-
-                                    else -> RoundedCornerShape(
-                                        topStart = cornerRadius,
-                                        topEnd = outsideCornerRadius,
-                                        bottomEnd = outsideCornerRadius,
-                                        bottomStart = cornerRadius
-                                    )
+                                        else -> RoundedCornerShape(
+                                            topStart = cornerRadius,
+                                            topEnd = outsideCornerRadius,
+                                            bottomEnd = outsideCornerRadius,
+                                            bottomStart = cornerRadius
+                                        )
+                                    }
                                 }
-                            }
 
-                            Surface(
-                                onClick = {
-                                    flashOnCallMode = modeKey
-                                    prefs.setInt(PreferenceManager.KEY_FLASH_ON_CALL_MODE, modeKey)
-                                },
-                                shape = shape,
-                                color = if (selected) MaterialTheme.colorScheme.primary else cardColor,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(42.dp),
-                                interactionSource = interactionSource,
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Text(
-                                        label,
-                                        style = MaterialTheme.typography.labelLarge,
-                                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                                        color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        modifier = Modifier.padding(horizontal = 8.dp)
-                                    )
+                                Surface(
+                                    onClick = {
+                                        flashOnCallMode = modeKey
+                                        prefs.setInt(
+                                            PreferenceManager.KEY_FLASH_ON_CALL_MODE,
+                                            modeKey
+                                        )
+                                    },
+                                    shape = shape,
+                                    color = if (selected) MaterialTheme.colorScheme.primary else cardColor,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(42.dp),
+                                    interactionSource = interactionSource,
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Text(
+                                            label,
+                                            style = MaterialTheme.typography.labelLarge,
+                                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                                            color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                            modifier = Modifier.padding(horizontal = 8.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -201,8 +208,8 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
     // ── Haptics Dialog ────────────────────────────────────────────────────────
     if (showHapticsDialog) {
         fun triggerPreviewVibration(strength: String) {
-            val duration = if (strength == "strong") 80L else 40L
-            val amplitude = if (strength == "strong") 255 else 80
+            val duration = if (strength == "strong") 40L else 2L
+            val amplitude = if (strength == "strong") VibrationEffect.DEFAULT_AMPLITUDE else 6
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     val vm = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
@@ -227,7 +234,10 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
             iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
             confirmButton = {
-                TextButton(onClick = { showHapticsDialog = false }) { Text(stringResource(R.string.done)) }
+                TextButton(onClick = {
+                    doHapticIfNeed(context, prefs)
+                    showHapticsDialog = false }
+                ) { Text(stringResource(R.string.done)) }
             }
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -246,149 +256,169 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
                     )
                 }
 
-                if (tapHapticsEnabled) {
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(0.4f))
+                RillSettingsAnimatedVisibility(visible = tapHapticsEnabled) {
+                    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
 
-                    Text(stringResource(R.string.haptics_intensity), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                        Text(
+                            stringResource(R.string.haptics_intensity),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary
+                        )
 
-                    // Three-way segmented control: Light / Strong / Custom
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(2.dp)
-                    ) {
-                        listOf(
-                            "light" to stringResource(R.string.haptics_soft),
-                            "strong" to stringResource(R.string.haptics_strong),
-                            "custom" to stringResource(R.string.haptics_custom)
-                        ).forEach { (key, label) ->
-                            val selected = hapticsStrength == key
-                            val interactionSource =
-                                remember { MutableInteractionSource() }
-                            val isPressed by interactionSource.collectIsPressedAsState()
-                            val cornerRadius by animateDpAsState(
-                                targetValue = if (isPressed || selected) 20.dp else 8.dp,
-                                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-                                label = "ButtonShape"
-                            )
-                            val outsideCornerRadius by animateDpAsState(
-                                targetValue = 20.dp,
-                                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-                                label = "ButtonShape"
-                            )
-                            val shape = remember(cornerRadius, key) {
-                                when (key) {
-                                    "light" -> RoundedCornerShape(
-                                        topStart = outsideCornerRadius,
-                                        topEnd = cornerRadius,
-                                        bottomEnd = cornerRadius,
-                                        bottomStart = outsideCornerRadius
-                                    )
+                        // Three-way segmented control: Light / Strong / Custom
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            listOf(
+                                "light" to stringResource(R.string.haptics_soft),
+                                "strong" to stringResource(R.string.haptics_strong),
+                                "custom" to stringResource(R.string.haptics_custom)
+                            ).forEach { (key, label) ->
+                                val selected = hapticsStrength == key
+                                val interactionSource =
+                                    remember { MutableInteractionSource() }
+                                val isPressed by interactionSource.collectIsPressedAsState()
+                                val cornerRadius by animateDpAsState(
+                                    targetValue = if (isPressed || selected) 20.dp else 8.dp,
+                                    animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                                    label = "ButtonShape"
+                                )
+                                val outsideCornerRadius by animateDpAsState(
+                                    targetValue = 20.dp,
+                                    animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                                    label = "ButtonShape"
+                                )
+                                val shape = remember(cornerRadius, key) {
+                                    when (key) {
+                                        "light" -> RoundedCornerShape(
+                                            topStart = outsideCornerRadius,
+                                            topEnd = cornerRadius,
+                                            bottomEnd = cornerRadius,
+                                            bottomStart = outsideCornerRadius
+                                        )
 
-                                    "custom" -> RoundedCornerShape(
-                                        topStart = cornerRadius,
-                                        topEnd = outsideCornerRadius,
-                                        bottomEnd = outsideCornerRadius,
-                                        bottomStart = cornerRadius
-                                    )
+                                        "custom" -> RoundedCornerShape(
+                                            topStart = cornerRadius,
+                                            topEnd = outsideCornerRadius,
+                                            bottomEnd = outsideCornerRadius,
+                                            bottomStart = cornerRadius
+                                        )
 
-                                    else -> RoundedCornerShape(cornerRadius)
-                                }
-                            }
-
-                            Surface(
-                                onClick = {
-                                    hapticsStrength = key
-                                    prefs.setString(PreferenceManager.KEY_HAPTICS_STRENGTH, key)
-                                    if (key != "custom") triggerPreviewVibration(key)
-                                    else {
-                                        // preview with current custom intensity
-                                        val dur = (10 + customIntensity * 70).toLong().coerceIn(10, 80)
-                                        val amp = (40  + (customIntensity * 215)).toInt().coerceIn(40, 255)
-                                        try {
-                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                                val vm = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-                                                vm.defaultVibrator.vibrate(VibrationEffect.createOneShot(dur, amp))
-                                            } else {
-                                                @Suppress("DEPRECATION")
-                                                val v = context.getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
-                                                v.vibrate(VibrationEffect.createOneShot(dur, amp))
-                                            }
-                                        } catch (_: Exception) {}
+                                        else -> RoundedCornerShape(cornerRadius)
                                     }
-                                },
-                                shape = shape,
-                                color = if (selected) MaterialTheme.colorScheme.primary else cardColor,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(42.dp),
-                                interactionSource = interactionSource,
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Text(
-                                        label,
-                                        style = MaterialTheme.typography.labelLarge,
-                                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                                        color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
+                                }
+
+                                Surface(
+                                    onClick = {
+                                        hapticsStrength = key
+                                        prefs.setString(PreferenceManager.KEY_HAPTICS_STRENGTH, key)
+                                        if (key != "custom") triggerPreviewVibration(key)
+                                        else {
+                                            // preview with current custom intensity
+                                            val dur = (10 + customIntensity * 70).toLong()
+                                                .coerceIn(10, 80)
+                                            val amp = (40 + (customIntensity * 215)).toInt()
+                                                .coerceIn(40, 255)
+                                            try {
+                                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                                    val vm = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                                                    vm.defaultVibrator.vibrate(VibrationEffect.createOneShot(dur, amp))
+                                                } else {
+                                                    @Suppress("DEPRECATION")
+                                                    val v = context.getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
+                                                    v.vibrate(VibrationEffect.createOneShot(dur, amp))
+                                                }
+                                            } catch (_: Exception) {
+                                            }
+                                        }
+                                    },
+                                    shape = shape,
+                                    color = if (selected) MaterialTheme.colorScheme.primary else cardColor,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(42.dp),
+                                    interactionSource = interactionSource,
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Text(
+                                            label,
+                                            style = MaterialTheme.typography.labelLarge,
+                                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                                            color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    // Custom intensity slider — only shown when "Custom" is selected
-                    AnimatedVisibility(
-                        visible = hapticsStrength == "custom",
-                        enter = expandVertically() + fadeIn(),
-                        exit = shrinkVertically() + fadeOut()
-                    ) {
-                        var lastVibratedSegment by remember { mutableIntStateOf(-1) }
-                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Slider(
-                                value = customIntensity,
-                                onValueChange = { v ->
-                                    customIntensity = v
-                                    prefs.setFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, v)
-                                    // Vibrate every ~6% of range change for continuous multi-level feedback
-                                    val segment = (v * 16).toInt()
-                                    if (segment != lastVibratedSegment) {
-                                        lastVibratedSegment = segment
-                                        val dur = (8 + v * 55).toLong().coerceIn(8, 63)
-                                        val amp = (30 + (v * 180)).toInt().coerceIn(30, 210)
+                        // Custom intensity slider — only shown when "Custom" is selected
+                        RillSettingsAnimatedVisibility(visible = hapticsStrength == "custom") {
+                            var lastVibratedSegment by remember { mutableIntStateOf(-1) }
+                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Slider(
+                                    value = customIntensity,
+                                    onValueChange = { v ->
+                                        customIntensity = v
+                                        prefs.setFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, v)
+                                        // Vibrate every ~6% of range change for continuous multi-level feedback
+                                        val segment = (v * 16).toInt()
+                                        if (segment != lastVibratedSegment) {
+                                            lastVibratedSegment = segment
+                                            val dur = (8 + v * 55).toLong().coerceIn(8, 63)
+                                            val amp = (30 + (v * 180)).toInt().coerceIn(30, 210)
+                                            try {
+                                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                                    val vm =
+                                                        context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                                                    vm.defaultVibrator.vibrate(
+                                                        VibrationEffect.createOneShot(dur, amp)
+                                                    )
+                                                } else {
+                                                    @Suppress("DEPRECATION")
+                                                    val v2 =
+                                                        context.getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
+                                                    v2.vibrate(
+                                                        VibrationEffect.createOneShot(dur, amp)
+                                                    )
+                                                }
+                                            } catch (_: Exception) {
+                                            }
+                                        }
+                                    },
+                                    onValueChangeFinished = {
+                                        // Final vibration at full saved intensity
+                                        val dur =
+                                            (10 + customIntensity * 70).toLong().coerceIn(10, 80)
+                                        val amp =
+                                            (40 + (customIntensity * 215)).toInt().coerceIn(40, 255)
                                         try {
                                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                                val vm = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-                                                vm.defaultVibrator.vibrate(VibrationEffect.createOneShot(dur, amp))
+                                                val vm =
+                                                    context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                                                vm.defaultVibrator.vibrate(
+                                                    VibrationEffect.createOneShot(
+                                                        dur,
+                                                        amp
+                                                    )
+                                                )
                                             } else {
                                                 @Suppress("DEPRECATION")
-                                                val v2 = context.getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
+                                                val v2 =
+                                                    context.getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
                                                 v2.vibrate(VibrationEffect.createOneShot(dur, amp))
                                             }
-                                        } catch (_: Exception) {}
-                                    }
-                                },
-                                onValueChangeFinished = {
-                                    // Final vibration at full saved intensity
-                                    val dur = (10 + customIntensity * 70).toLong().coerceIn(10, 80)
-                                    val amp = (40  + (customIntensity * 215)).toInt().coerceIn(40, 255)
-                                    try {
-                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                            val vm = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-                                            vm.defaultVibrator.vibrate(VibrationEffect.createOneShot(dur, amp))
-                                        } else {
-                                            @Suppress("DEPRECATION")
-                                            val v2 = context.getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
-                                            v2.vibrate(VibrationEffect.createOneShot(dur, amp))
+                                        } catch (_: Exception) {
                                         }
-                                    } catch (_: Exception) {}
-                                    lastVibratedSegment = -1
-                                },
-                                valueRange = 0f..1f,
-                                steps = 15,
-                                modifier = Modifier.fillMaxWidth()
-                            )
+                                        lastVibratedSegment = -1
+                                    },
+                                    valueRange = 0f..1f,
+                                    steps = 15,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
 //                            Row(
 //                                modifier = Modifier.fillMaxWidth(),
 //                                horizontalArrangement = Arrangement.SpaceBetween
@@ -396,34 +426,44 @@ fun SoundVibrationScreen(navigator: DestinationsNavigator) {
 //                                Text("Softer", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
 //                                Text("Stronger", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
 //                            }
-                        }
-                    }
-
-                    Button(
-                        onClick = {
-                            if (hapticsStrength == "custom") {
-                                val dur = (10 + customIntensity * 70).toLong().coerceIn(10, 80)
-                                val amp = (40  + (customIntensity * 215)).toInt().coerceIn(40, 255)
-                                try {
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                        val vm = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-                                        vm.defaultVibrator.vibrate(VibrationEffect.createOneShot(dur, amp))
-                                    } else {
-                                        @Suppress("DEPRECATION")
-                                        val v = context.getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
-                                        v.vibrate(VibrationEffect.createOneShot(dur, amp))
-                                    }
-                                } catch (_: Exception) {}
-                            } else {
-                                triggerPreviewVibration(hapticsStrength)
                             }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(50)
-                    ) {
-                        Icon(Icons.Rounded.Vibration, null, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(8.dp))
-                        Text(stringResource(R.string.preview_haptic))
+                        }
+
+                        Button(
+                            onClick = {
+                                if (hapticsStrength == "custom") {
+                                    val dur = (10 + customIntensity * 70).toLong().coerceIn(10, 80)
+                                    val amp =
+                                        (40 + (customIntensity * 215)).toInt().coerceIn(40, 255)
+                                    try {
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                            val vm =
+                                                context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                                            vm.defaultVibrator.vibrate(
+                                                VibrationEffect.createOneShot(
+                                                    dur,
+                                                    amp
+                                                )
+                                            )
+                                        } else {
+                                            @Suppress("DEPRECATION")
+                                            val v =
+                                                context.getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
+                                            v.vibrate(VibrationEffect.createOneShot(dur, amp))
+                                        }
+                                    } catch (_: Exception) {
+                                    }
+                                } else {
+                                    triggerPreviewVibration(hapticsStrength)
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(50)
+                        ) {
+                            Icon(Icons.Rounded.Vibration, null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text(stringResource(R.string.preview_haptic))
+                        }
                     }
                 }
             }

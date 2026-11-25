@@ -80,7 +80,7 @@ fun SpamScreen(navigator: DestinationsNavigator) {
         LaunchedEffect(blockedContactsList) {
             blockedWithInfo = blockedContactsList.map { number ->
                 val contact = try { contactsRepo.getContactByNumber(number) } catch (_: Exception) { null }
-                Triple(number, contact?.name ?: number, contact?.photoUri)
+                Triple(number, contact?.displayName ?: number, contact?.photoUri)
             }
         }
 
@@ -177,14 +177,14 @@ fun SpamScreen(navigator: DestinationsNavigator) {
                     val num = log.number
                     if (num.isBlank() || !seen.add(num)) continue
                     val contact = try { contactsRepo.getContactByNumber(num) } catch (_: Exception) { null }
-                    result.add(Triple(num, contact?.name ?: num, contact?.photoUri))
+                    result.add(Triple(num, contact?.displayName ?: num, contact?.photoUri))
                 }
                 recentNumbers = result
             } catch (_: Exception) {}
             try {
                 contactNumbers = contactsRepo.getContacts()
                     .filter { it.phoneNumbers.isNotEmpty() }
-                    .flatMap { c -> c.phoneNumbers.map { num -> Triple(num, c.name, c.photoUri) } }
+                    .flatMap { c -> c.phoneNumbers.map { num -> Triple(num, c.displayName, c.photoUri) } }
                     .distinctBy { it.first }
                     .sortedBy { it.second }
             } catch (_: Exception) {}

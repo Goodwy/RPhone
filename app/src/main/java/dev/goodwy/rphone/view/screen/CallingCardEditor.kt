@@ -39,14 +39,11 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.rounded.AddAPhoto
 import androidx.compose.material.icons.rounded.AddPhotoAlternate
 import androidx.compose.material.icons.rounded.BlurOff
 import androidx.compose.material.icons.rounded.BlurOn
-import androidx.compose.material.icons.rounded.FormatBold
-import androidx.compose.material.icons.rounded.TextFields
 import androidx.compose.material.icons.rounded.Wallpaper
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -110,16 +107,19 @@ import dev.goodwy.rphone.controller.util.CallingCardFont
 import dev.goodwy.rphone.controller.util.CallingCardPhotoSupport
 import dev.goodwy.rphone.controller.util.CallingCardStyle
 import dev.goodwy.rphone.controller.util.CallingCardStyleCodec
+import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.view.components.ColorSwatch
 import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillDialog
 import dev.goodwy.rphone.view.components.Title
+import dev.goodwy.rphone.view.components.doHapticIfNeed
 import dev.goodwy.rphone.view.theme.LocalIsDarkTheme
 import dev.goodwy.rphone.view.theme.MyColors.dialpadKeyColor
 import dev.goodwy.rphone.view.theme.customColors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.compose.koinInject
 import kotlin.math.roundToInt
 
 /**
@@ -153,6 +153,7 @@ fun CallingCardEditorDialog(
     onDone: (CallingCardEditorResult) -> Unit
 ) {
     val context = LocalContext.current
+    val prefs: PreferenceManager = koinInject()
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     var stage by rememberSaveable { mutableIntStateOf(0) }
@@ -378,14 +379,18 @@ fun CallingCardEditorDialog(
             text = { Text(stringResource(R.string.calling_card_google_photos_not_installed)) },
             confirmButton = {
                 TextButton(onClick = {
+                    doHapticIfNeed(context, prefs)
                     googlePhotosNotInstalled = false
-                    launchGalleryFallback()
-                }) {
+                    launchGalleryFallback() }
+                ) {
                     Text(stringResource(R.string.calling_card_action_gallery))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { googlePhotosNotInstalled = false }) {
+                TextButton(onClick = {
+                    doHapticIfNeed(context, prefs)
+                    googlePhotosNotInstalled = false }
+                ) {
                     Text(stringResource(R.string.not_now))
                 }
             }
@@ -402,7 +407,8 @@ private fun EditorHeader(
     usingDefault: Boolean = false,
     onUseDefault: (() -> Unit)? = null
 ) {
-
+    val context = LocalContext.current
+    val prefs: PreferenceManager = koinInject()
     var showWarningDialog by remember { mutableStateOf(false) }
 
     if (showWarningDialog) {
@@ -414,6 +420,7 @@ private fun EditorHeader(
             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
             confirmButton = {
                 TextButton(onClick = {
+                    doHapticIfNeed(context, prefs)
                     showWarningDialog = false
                 }) {
                     Text(
@@ -421,14 +428,7 @@ private fun EditorHeader(
                         textAlign = TextAlign.End,
                     )
                 }
-            },
-//            dismissButton = {
-//                TextButton(onClick = {
-//                    showWarningDialog = false
-//                }) {
-//                    Text(stringResource(R.string.copy_path))
-//                }
-//            }
+            }
         ) {
             Text(stringResource(R.string.calling_card_sync_warning_message))
         }
@@ -441,15 +441,17 @@ private fun EditorHeader(
         verticalAlignment = Alignment.CenterVertically
     ) {
         NavigationIcon(onClick = onBack)
-        Box(modifier = Modifier.weight(1f).padding(horizontal = 6.dp)) {
+        Box(modifier = Modifier
+            .weight(1f)
+            .padding(horizontal = 6.dp)) {
             Title(title)
         }
 
-
         IconButton(
-            onClick = { showWarningDialog = true },
-            enabled = !usingDefault,
-//            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+            onClick = {
+                doHapticIfNeed(context, prefs)
+                showWarningDialog = true
+            }
         ) {
             Icon(
                 Icons.Outlined.Info, stringResource(R.string.back),
@@ -459,7 +461,10 @@ private fun EditorHeader(
         Spacer(Modifier.width(6.dp))
         if (onUseDefault != null) {
             Button(
-                onClick = onUseDefault,
+                onClick = {
+                    doHapticIfNeed(context, prefs)
+                    onUseDefault()
+                },
                 enabled = !usingDefault,
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
             ) {
@@ -467,7 +472,10 @@ private fun EditorHeader(
             }
             Spacer(Modifier.width(6.dp))
         }
-        Button(onClick = onAction) {
+        Button(onClick = {
+            doHapticIfNeed(context, prefs)
+            onAction() }
+        ) {
             Text(actionLabel)
         }
         Spacer(Modifier.width(16.dp))
@@ -624,7 +632,10 @@ private fun CallingCardPhotoActionBar(
     modifier: Modifier = Modifier.fillMaxWidth()
 ) {
     Surface(
-        modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 16.dp).fillMaxWidth(),
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 16.dp)
+            .fillMaxWidth(),
         color = dialpadKeyColor,
         shape = MaterialTheme.shapes.extraLarge,
         tonalElevation = 3.dp
@@ -697,6 +708,8 @@ private fun PhotoActionButton(
     enabled: Boolean = true,
     icon: @Composable () -> Unit
 ) {
+    val context = LocalContext.current
+    val prefs: PreferenceManager = koinInject()
     val containerColor = if (enabled) {
         MaterialTheme.colorScheme.secondaryContainer
     } else {
@@ -726,9 +739,11 @@ private fun PhotoActionButton(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Surface(
-            onClick = onClick,
+            onClick = { doHapticIfNeed(context, prefs); onClick() },
             enabled = enabled,
-            modifier = Modifier.height(56.dp).fillMaxWidth(),
+            modifier = Modifier
+                .height(56.dp)
+                .fillMaxWidth(),
             shape = RoundedCornerShape(radius),
             color = containerColor,
             interactionSource = interaction
@@ -816,6 +831,8 @@ private fun CallingCardCustomizeStep(
     usingDefault: Boolean,
     onDone: () -> Unit
 ) {
+    val context = LocalContext.current
+    val prefs: PreferenceManager = koinInject()
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     Box(
@@ -859,7 +876,9 @@ private fun CallingCardCustomizeStep(
                         photoUri = photoUri,
                         backgroundUri = backgroundUri,
                         style = style,
-                        modifier = Modifier.weight(1f).fillMaxSize()
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxSize()
                     )
                     Column(
                         modifier = Modifier
@@ -872,14 +891,16 @@ private fun CallingCardCustomizeStep(
                             style = style,
                             showBlur = backgroundUri != null,
                             usingDefault = usingDefault,
-                            onStyleChange = onStyleChange,
-                            onUseDefault = onUseDefault
+                            onStyleChange = onStyleChange
                         )
 
                         if (backgroundUri != null) {
                             Spacer(Modifier.height(cardSpacedBy))
                             Surface(
-                                modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 16.dp).fillMaxWidth(),
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp)
+                                    .padding(bottom = 16.dp)
+                                    .fillMaxWidth(),
                                 color = dialpadKeyColor,
                                 shape = MaterialTheme.shapes.extraLarge.copy(
                                     topStart = CornerSize(cardCornerExtraSmall), topEnd = CornerSize(cardCornerExtraSmall)
@@ -901,7 +922,9 @@ private fun CallingCardCustomizeStep(
                                         },
                                         valueRange = 0f..CallingCardStyle.MAX_BLUR_DP.toFloat(),
                                         steps = CallingCardStyle.MAX_BLUR_DP - 1,
-                                        modifier = Modifier.weight(1f).padding(horizontal = 6.dp),
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .padding(horizontal = 6.dp),
                                         thumb = {
                                             SliderDefaults.Thumb(
                                                 interactionSource = remember { MutableInteractionSource() },
@@ -923,7 +946,10 @@ private fun CallingCardCustomizeStep(
 
                 Button(
                     modifier = Modifier.padding(horizontal = 16.dp),
-                    onClick = onUseDefault,
+                    onClick = {
+                        doHapticIfNeed(context, prefs)
+                        onUseDefault()
+                    },
                     enabled = !usingDefault,
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
                 ) {
@@ -937,14 +963,16 @@ private fun CallingCardCustomizeStep(
                     style = style,
                     showBlur = backgroundUri != null,
                     usingDefault = usingDefault,
-                    onStyleChange = onStyleChange,
-                    onUseDefault = onUseDefault
+                    onStyleChange = onStyleChange
                 )
 
                 if (backgroundUri != null) {
                     Spacer(Modifier.height(cardSpacedBy))
                     Surface(
-                        modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 16.dp).fillMaxWidth(),
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .padding(bottom = 16.dp)
+                            .fillMaxWidth(),
                         color = dialpadKeyColor,
                         shape = MaterialTheme.shapes.extraLarge.copy(
                             topStart = CornerSize(cardCornerExtraSmall), topEnd = CornerSize(cardCornerExtraSmall)
@@ -966,7 +994,9 @@ private fun CallingCardCustomizeStep(
                                 },
                                 valueRange = 0f..CallingCardStyle.MAX_BLUR_DP.toFloat(),
                                 steps = CallingCardStyle.MAX_BLUR_DP - 1,
-                                modifier = Modifier.weight(1f).padding(horizontal = 6.dp),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(horizontal = 6.dp),
                                 thumb = {
                                     SliderDefaults.Thumb(
                                         interactionSource = remember { MutableInteractionSource() },
@@ -1014,10 +1044,13 @@ private fun AppearanceControls(
     showBlur: Boolean,
     usingDefault: Boolean,
     onStyleChange: (CallingCardStyle) -> Unit,
-    onUseDefault: () -> Unit
 ) {
+    val context = LocalContext.current
+    val prefs: PreferenceManager = koinInject()
     Surface(
-        modifier = modifier.padding(horizontal = 16.dp).fillMaxWidth()
+        modifier = modifier
+            .padding(horizontal = 16.dp)
+            .fillMaxWidth()
             .then(
                 if (showBlur) Modifier
                 else Modifier.padding(bottom = 16.dp)
@@ -1043,6 +1076,7 @@ private fun AppearanceControls(
                         font = font,
                         selected = !usingDefault && style.font == font,
                         onClick = {
+                            doHapticIfNeed(context, prefs)
                             val clampedWeight = style.fontWeight.coerceIn(font.minWeight, font.maxWeight)
                             onStyleChange(style.copy(font = font, fontWeight = clampedWeight))
                         }
@@ -1068,7 +1102,9 @@ private fun AppearanceControls(
                     },
                     valueRange = CallingCardStyle.MIN_FONT_SIZE_SP.toFloat()..CallingCardStyle.MAX_FONT_SIZE_SP.toFloat(),
                     steps = CallingCardStyle.MAX_FONT_SIZE_SP - CallingCardStyle.MIN_FONT_SIZE_SP - 1,
-                    modifier = Modifier.weight(1f).padding(horizontal = 6.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 6.dp),
                     thumb = {
                         SliderDefaults.Thumb(
                             interactionSource = remember { MutableInteractionSource() },
@@ -1103,7 +1139,9 @@ private fun AppearanceControls(
                     },
                     valueRange = weightMin.toFloat()..weightMax.toFloat(),
                     steps = ((weightMax - weightMin) / CallingCardStyle.WEIGHT_STEP - 1).coerceAtLeast(0),
-                    modifier = Modifier.weight(1f).padding(horizontal = 6.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 6.dp),
                     thumb = {
                         SliderDefaults.Thumb(
                             interactionSource = remember { MutableInteractionSource() },
@@ -1128,7 +1166,10 @@ private fun AppearanceControls(
                         color = null,
                         label = stringResource(R.string.calling_card_color_default),
                         selected = !usingDefault && style.textColorArgb == null,
-                        onClick = { onStyleChange(style.copy(textColorArgb = null)) }
+                        onClick = {
+                            doHapticIfNeed(context, prefs)
+                            onStyleChange(style.copy(textColorArgb = null))
+                        }
                     )
                 }
                 items(callingCardColors, key = { it.argb }) { preset ->
@@ -1136,7 +1177,10 @@ private fun AppearanceControls(
                         color = Color(preset.argb),
                         label = if (preset.labelRes != null) stringResource(preset.labelRes) else null,
                         selected = !usingDefault && style.textColorArgb == preset.argb,
-                        onClick = { onStyleChange(style.copy(textColorArgb = preset.argb)) }
+                        onClick = {
+                            doHapticIfNeed(context, prefs)
+                            onStyleChange(style.copy(textColorArgb = preset.argb))
+                        }
                     )
                 }
             }

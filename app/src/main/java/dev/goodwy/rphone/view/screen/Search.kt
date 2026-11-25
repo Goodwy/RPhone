@@ -51,7 +51,6 @@ import dev.goodwy.rphone.view.theme.MyColors.cardColor
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.ContactDetailsScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.ContactDetailsScreenDestination.invoke
 import com.ramcosta.composedestinations.generated.destinations.DialPadScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.NotesScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -86,16 +85,10 @@ fun SearchScreen(navController: NavController, navigator: DestinationsNavigator,
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        containerColor = cardColor //MaterialTheme.colorScheme.surface
+        containerColor = cardColor
     ) { innerPadding ->
         Box(modifier = Modifier
-//            .padding(innerPadding)
-            .padding(
-                top = innerPadding.calculateTopPadding() + 8.dp,
-                start = 0.dp, //innerPadding.calculateStartPadding(LayoutDirection.Ltr),
-                end = 0.dp, //innerPadding.calculateEndPadding(LayoutDirection.Ltr),
-                bottom = 0.dp
-            )
+            .padding(top = innerPadding.calculateTopPadding() + 8.dp)
             .background(MaterialTheme.colorScheme.surface)
             .fillMaxSize()
         ) {
@@ -289,7 +282,12 @@ fun ContactSearchContent(
                 modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
                 placeholder = { Text(stringResource(R.string.search)) },
                 leadingIcon = {
-                    if (!searchEnabled) IconButton(onClick = { navigator.navigateUp() }) {
+                    if (!searchEnabled) IconButton(
+                        onClick = {
+                            doHapticIfNeed(context, prefs)
+                            navigator.navigateUp()
+                        }
+                    ) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
@@ -301,6 +299,7 @@ fun ContactSearchContent(
                             exit = fadeOut() + scaleOut()
                         ) {
                             IconButton(onClick = {
+                                doHapticIfNeed(context, prefs)
                                 queryFieldValue = TextFieldValue("", selection = TextRange(0))
                             }) {
                                 Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.clear))
@@ -314,6 +313,7 @@ fun ContactSearchContent(
                         ) {
                             IconButton(
                                 onClick = {
+                                    doHapticIfNeed(context, prefs)
                                     if (micPermissionState.status == PermissionStatus.Granted) {
                                         voiceSearchLauncher.launch(Unit)
                                     } else {
@@ -353,7 +353,12 @@ fun ContactSearchContent(
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
+                    .padding(horizontal = 12.dp)
+                    .padding(top = 16.dp, bottom = 4.dp),
+                onClick = {
+                    doHapticIfNeed(context, prefs)
+                    navigator.navigate(DialPadScreenDestination(initialNumber = query))
+                },
                 shape = MaterialTheme.shapes.extraLarge,
                 color = MaterialTheme.colorScheme.primaryContainer
             ) {
@@ -370,6 +375,7 @@ fun ContactSearchContent(
                         modifier = Modifier.weight(1f)
                     )
                     IconButton(onClick = {
+                        doHapticIfNeed(context, prefs)
                         navigator.navigate(DialPadScreenDestination(initialNumber = query))
                     }) {
                         Icon(Icons.Default.Dialpad, null, tint = MaterialTheme.colorScheme.primary)
@@ -426,17 +432,20 @@ fun ContactSearchContent(
                 LazyColumn(
                     state = listState,
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    contentPadding = PaddingValues(horizontal = 16.dp),
                 ) {
                     if (filteredContacts.isNotEmpty()) {
-                        item {
+                        stickyHeader(key = "header_contacts") {
                             RillSectionHeader(
                                 title = stringResource(R.string.contacts),
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 20.dp, vertical = 8.dp)
+                                    .background(MaterialTheme.colorScheme.surface)
+                                    .padding(horizontal = 20.dp)
+                                    .padding(top = 16.dp, bottom = 8.dp)
                             )
+                        }
+                        item(key = "contacts_card") {
                             RillExpressiveCard {
                                 filteredContacts.forEach { contact ->
 //                                    ContactListItem(
@@ -455,6 +464,7 @@ fun ContactSearchContent(
 //                                                navigator.navigate(DialPadScreenDestination(initialNumber = entry.number))
                                             if (defaultOrFirstPhone != null) {
                                                 IconButton(onClick = {
+                                                    doHapticIfNeed(context, prefs)
                                                     placeCallWithSimPreference(context, defaultOrFirstPhone, simPref) {
                                                         pendingNumber = defaultOrFirstPhone; showSimPicker = true
                                                     }
@@ -465,19 +475,14 @@ fun ContactSearchContent(
                                         },
                                         onCall = {
                                             if (defaultOrFirstPhone != null) {
+                                                doHapticIfNeed(context, prefs)
                                                 placeCallWithSimPreference(context, defaultOrFirstPhone, simPref) {
                                                     pendingNumber = defaultOrFirstPhone; showSimPicker = true
                                                 }
                                             }
                                         },
                                         onClick = {
-                                            if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                                                performAppHaptic(
-                                                    context,
-                                                    prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light",
-                                                    prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
-                                                )
-                                            }
+                                            doHapticIfNeed(context, prefs)
                                             navigator.navigate(ContactDetailsScreenDestination(contactId = contact.id))
                                         }
                                     )
@@ -487,13 +492,17 @@ fun ContactSearchContent(
                     }
 
                     if (nonContactResults.isNotEmpty()) {
-                        item {
+                        stickyHeader(key = "header_calls") {
                             RillSectionHeader(
                                 title = stringResource(R.string.calls),
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 20.dp, vertical = 8.dp)
+                                    .background(MaterialTheme.colorScheme.surface)
+                                    .padding(horizontal = 20.dp)
+                                    .padding(top = 16.dp, bottom = 8.dp)
                             )
+                        }
+                        item(key = "calls_card") {
                             RillExpressiveCard {
                                 nonContactResults.forEach { entry ->
                                     val displayName = if (entry.name == entry.number) entry.number.forceLtr() else entry.name?.ifEmpty { entry.number } ?: entry.number.ifEmpty { "Unknown" }
@@ -505,6 +514,7 @@ fun ContactSearchContent(
                                         trailingContent = {
                                             IconButton(onClick = {
 //                                                navigator.navigate(DialPadScreenDestination(initialNumber = entry.number))
+                                                doHapticIfNeed(context, prefs)
                                                 placeCallWithSimPreference(context, entry.number, simPref) {
                                                     pendingNumber = entry.number; showSimPicker = true
                                                 }
@@ -513,18 +523,13 @@ fun ContactSearchContent(
                                             }
                                         },
                                         onCall = {
+                                            doHapticIfNeed(context, prefs)
                                             placeCallWithSimPreference(context, entry.number, simPref) {
                                                 pendingNumber = entry.number; showSimPicker = true
                                             }
                                         },
                                         onClick = {
-                                            if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                                                performAppHaptic(
-                                                    context,
-                                                    prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light",
-                                                    prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f)
-                                                )
-                                            }
+                                            doHapticIfNeed(context, prefs)
                                             navigator.navigate(ContactDetailsScreenDestination(phoneNumber = entry.number))
                                         },
                                         showCreateContact = entry.contactId == null
@@ -535,13 +540,17 @@ fun ContactSearchContent(
                     }
 
                     if (contactNoteResults.isNotEmpty()) {
-                        item {
+                        stickyHeader(key = "header_notes") {
                             RillSectionHeader(
                                 title = stringResource(R.string.call_notes),
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 20.dp, vertical = 8.dp)
+                                    .background(MaterialTheme.colorScheme.surface)
+                                    .padding(horizontal = 20.dp)
+                                    .padding(top = 16.dp, bottom = 8.dp)
                             )
+                        }
+                        item(key = "notes_card") {
                             RillExpressiveCard {
                                 contactNoteResults.forEach { note ->
                                     var showNoteEditor by remember { mutableStateOf(false) }
@@ -561,6 +570,7 @@ fun ContactSearchContent(
                                             )
                                         },
                                         onClick = {
+                                            doHapticIfNeed(context, prefs)
                                             showNoteEditor = true
                                         },
                                         useLongClick = false
@@ -579,15 +589,13 @@ fun ContactSearchContent(
                                 if (contactNoteResults.size > 1) {
                                     TextButton(
                                         onClick = {
+                                            doHapticIfNeed(context, prefs)
                                             NavBarVisibilityState.hideForSearchResult = true
                                             navigator.navigate(NotesScreenDestination(highlightQuery = query))
                                         },
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .offset(
-                                                x = 0.dp,
-                                                y = (-4).dp
-                                            ), // We'll make up for the indentation
+                                            .offset(x = 0.dp, y = (-4).dp),
                                         colors = ButtonDefaults.textButtonColors()
                                             .copy(containerColor = cardColor),
                                         shape = MaterialTheme.shapes.extraLarge.copy(
@@ -602,7 +610,7 @@ fun ContactSearchContent(
                         }
                     }
 
-                    item { Spacer(modifier = Modifier.height(300.dp)) }
+                    item { Spacer(modifier = Modifier.height(320.dp)) }
                 }
             }
         }

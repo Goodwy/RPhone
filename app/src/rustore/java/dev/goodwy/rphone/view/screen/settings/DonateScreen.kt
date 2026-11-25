@@ -43,13 +43,13 @@ import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.util.toast
 import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillAnimatedSection
-import dev.goodwy.rphone.view.components.performAppHaptic
 import dev.goodwy.rphone.view.screen.FloatingParticles
 import dev.goodwy.rphone.view.theme.customColors
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.goodwy.rphone.controller.util.HtmlTextView
+import dev.goodwy.rphone.view.components.doHapticIfNeed
 import org.koin.compose.koinInject
 
 data class RuStoreDonate(
@@ -180,8 +180,7 @@ fun DonateScreen(navigator: DestinationsNavigator) {
         )
     )
 
-    val rotation = (context.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager)
-        .defaultDisplay.rotation
+    val rotation = (context.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager).defaultDisplay.rotation
     val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
     val isRotation90 = rotation == if (isLtr) Surface.ROTATION_90 else Surface.ROTATION_270
 
@@ -199,6 +198,7 @@ fun DonateScreen(navigator: DestinationsNavigator) {
                 actions = {
                     TextButton(
                         onClick = {
+                            doHapticIfNeed(context, prefs)
                             purchaseHelper.restorePurchases()
                         },
                         enabled = !isLoading
@@ -300,7 +300,10 @@ fun DonateScreen(navigator: DestinationsNavigator) {
                                 } else {
                                     purchaseHelper.isIapPurchased(donate.productId)
                                 },
-                                onClick = { currentDonate = index },
+                                onClick = {
+                                    doHapticIfNeed(context, prefs)
+                                    currentDonate = index
+                                },
                             )
                         }
                     }
@@ -326,6 +329,7 @@ fun DonateScreen(navigator: DestinationsNavigator) {
                 ) {
                     Button(
                         onClick = {
+                            doHapticIfNeed(context, prefs)
                             if (isBillingReady) {
                                 val selectedDonate = donates[currentDonate]
                                 if (selectedDonate.isSubscription) {
@@ -431,19 +435,6 @@ fun RuStoreDonateItem(
                         indication = ripple(),
                         onClick = {
                             if (!isPurchased) {
-                                if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                                    performAppHaptic(
-                                        context,
-                                        prefs.getString(
-                                            PreferenceManager.KEY_APP_HAPTICS_STRENGTH,
-                                            "light"
-                                        ) ?: "light",
-                                        prefs.getFloat(
-                                            PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY,
-                                            0.5f
-                                        )
-                                    )
-                                }
                                 onClick()
                             }
                         },

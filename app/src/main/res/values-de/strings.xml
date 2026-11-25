@@ -50,6 +50,7 @@
     <string name="saved">Gespeichert</string>
     <string name="save_failed">Speichern fehlgeschlagen</string>
     <string name="warning">Warnung</string>
+    <string name="edit_number_before_call">Nummer vor dem Anruf bearbeiten</string>
 
     <!-- Search -->
     <string name="search">Suche</string>
@@ -581,6 +582,7 @@
     <string name="calling_card_override_saved">Anpassung gespeichert</string>
     <string name="calling_card_override_save_failed">Hintergrund konnte nicht gespeichert werden</string>
     <string name="calling_card_override_unknown_contact">Kontakt #%1$s</string>
+    <string name="calling_card_sync_warning_message">Das Erscheinungsbild des Anrufbildschirms wird nur in dieser App gespeichert. Es wird nicht mit Google Kontakten oder anderen Adressbüchern synchronisiert, da diese kein entsprechendes Feld haben. Änderungen hier betreffen nur Anrufe in dieser App. Um diese Einstellungen und Hintergrundbilder auf ein anderes Gerät zu übertragen, verwenden Sie Backup &amp; Wiederherstellung.</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">Zum Startbildschirm hinzufügen</string>

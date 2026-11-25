@@ -332,7 +332,10 @@ class CallService : InCallService() {
         val callsList = calls ?: emptyList()
         callRepository.updateAllCalls(callsList)
 
-        callsList.forEach { c ->
+        // To select the primary call and the "other" call, we consider only independent calls (not conference participants)
+        val topLevelCalls = callsList.filter { it.parent == null }
+
+        topLevelCalls.forEach { c ->
             if (c.state == Call.STATE_ACTIVE) {
                 val detailsTime = c.details?.connectTimeMillis ?: 0L
                 if (detailsTime > 0) {
@@ -350,16 +353,20 @@ class CallService : InCallService() {
         }
 
         val currentPreferred = callRepository.getPreferredCall()
-        val activePreferred = if (currentPreferred != null && currentPreferred.state != Call.STATE_DISCONNECTED && currentPreferred.state != Call.STATE_HOLDING) currentPreferred else null
+        val activePreferred = if (currentPreferred != null &&
+            currentPreferred.state != Call.STATE_DISCONNECTED &&
+            currentPreferred.state != Call.STATE_HOLDING &&
+            currentPreferred.parent == null
+        ) currentPreferred else null
 
-        val priorityCall = callsList.find { it.state == Call.STATE_RINGING }
+        val priorityCall = topLevelCalls.find { it.state == Call.STATE_RINGING }
             ?: activePreferred
-            ?: callsList.find { it.details?.hasProperty(Call.Details.PROPERTY_CONFERENCE) == true && it.state != Call.STATE_DISCONNECTED }
-            ?: callsList.find { it.state == Call.STATE_DIALING || it.state == Call.STATE_CONNECTING }
-            ?: callsList.find { it.state == Call.STATE_ACTIVE }
-            ?: callsList.find { it == preferred }
-            ?: callsList.find { it.state == Call.STATE_HOLDING }
-            ?: callsList.firstOrNull { it.state != Call.STATE_DISCONNECTED }
+            ?: topLevelCalls.find { it.state == Call.STATE_DIALING || it.state == Call.STATE_CONNECTING }
+            ?: topLevelCalls.find { it.state == Call.STATE_ACTIVE && it.details?.hasProperty(Call.Details.PROPERTY_CONFERENCE) != true }
+            ?: topLevelCalls.find { it.state == Call.STATE_ACTIVE }
+            ?: topLevelCalls.find { it == preferred }
+            ?: topLevelCalls.find { it.state == Call.STATE_HOLDING }
+            ?: topLevelCalls.firstOrNull { it.state != Call.STATE_DISCONNECTED }
 
         if (priorityCall != null) {
             val connectTime = callStartTimes[priorityCall] ?: 0L

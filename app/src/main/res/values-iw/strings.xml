@@ -51,6 +51,7 @@
     <string name="saved">נשמר</string>
     <string name="save_failed">השמירה נכשלה</string>
     <string name="warning">אזהרה</string>
+    <string name="edit_number_before_call">ערוך מספר לפני חיוג</string>
 
     <!-- Search -->
     <string name="search">חיפוש</string>
@@ -582,6 +583,7 @@
     <string name="calling_card_override_saved">ההתאמה האישית נשמרה</string>
     <string name="calling_card_override_save_failed">לא ניתן היה לשמור את הרקע</string>
     <string name="calling_card_override_unknown_contact">איש קשר #%1$s</string>
+    <string name="calling_card_sync_warning_message">מראה מסך השיחה נשמר רק באפליקציה זו. הוא אינו מסונכרן עם אנשי קשר של Google או פנקסי כתובות אחרים, מכיוון שאין להם שדה לכך. שינויים כאן משפיעים רק על שיחות באפליקציה זו. כדי להעביר הגדרות אלה ותמונות רקע להתקן אחר, השתמש בגיבוי ושחזור.</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">הוסף למסך הבית</string>

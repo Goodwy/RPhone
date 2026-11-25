@@ -46,7 +46,6 @@ import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.util.toast
 import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillAnimatedSection
-import dev.goodwy.rphone.view.components.performAppHaptic
 import dev.goodwy.rphone.view.screen.FloatingParticles
 import dev.goodwy.rphone.view.theme.customColors
 import com.ramcosta.composedestinations.annotation.Destination
@@ -56,6 +55,7 @@ import dev.goodwy.rphone.BuildConfig
 import dev.goodwy.rphone.controller.PlayStoreViewModel
 import dev.goodwy.rphone.controller.PurchaseHelper
 import dev.goodwy.rphone.controller.util.HtmlTextView
+import dev.goodwy.rphone.view.components.doHapticIfNeed
 import org.koin.compose.koinInject
 import kotlin.math.cos
 import kotlin.math.sin
@@ -214,6 +214,7 @@ fun DonateScreen(navigator: DestinationsNavigator) {
                 actions = {
                     TextButton(
                         onClick = {
+                            doHapticIfNeed(context, prefs)
                             purchaseHelper.refreshAllData()
                         },
                         enabled = !isLoading
@@ -316,7 +317,10 @@ fun DonateScreen(navigator: DestinationsNavigator) {
                                 } else {
                                     purchaseHelper.isIapPurchased(donate.productId)
                                 },
-                                onClick = { currentDonate = index },
+                                onClick = {
+                                    doHapticIfNeed(context, prefs)
+                                    currentDonate = index
+                                },
                             )
                         }
                     }
@@ -342,6 +346,7 @@ fun DonateScreen(navigator: DestinationsNavigator) {
                 ) {
                     Button(
                         onClick = {
+                            doHapticIfNeed(context, prefs)
                             if (isBillingReady) {
                                 val selectedDonate = donates[currentDonate]
                                 if (selectedDonate.isSubscription) {
@@ -401,8 +406,6 @@ fun DonateItem(
     isPurchased: Boolean = false,
     onClick: () -> Unit,
 ) {
-    val context = LocalContext.current
-    val prefs = koinInject<PreferenceManager>()
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
@@ -447,19 +450,6 @@ fun DonateItem(
                         indication = ripple(),
                         onClick = {
                             if (!isPurchased) {
-                                if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                                    performAppHaptic(
-                                        context,
-                                        prefs.getString(
-                                            PreferenceManager.KEY_APP_HAPTICS_STRENGTH,
-                                            "light"
-                                        ) ?: "light",
-                                        prefs.getFloat(
-                                            PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY,
-                                            0.5f
-                                        )
-                                    )
-                                }
                                 onClick()
                             }
                         },

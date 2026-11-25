@@ -28,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.view.theme.MyColors.cardColor
@@ -60,12 +61,7 @@ fun SearchBarPill(navigator: DestinationsNavigator, modifier: Modifier = Modifie
 
     Surface(
         onClick = {
-            if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                performAppHaptic(
-                    context,
-                    prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light",
-                    prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f))
-            }
+            doHapticIfNeed(context, prefs)
             navigator.navigate(SearchScreenDestination())
         },
         modifier = modifier.height(52.dp).scale(searchScale),
@@ -98,9 +94,7 @@ fun SearchBarPill(navigator: DestinationsNavigator, modifier: Modifier = Modifie
                     modifier = Modifier
                         .combinedClickable(
                             onClick = {
-                                if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                                    performAppHaptic(context, prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light", prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f))
-                                }
+                                doHapticIfNeed(context, prefs)
                                 navigator.navigate(SearchScreenDestination(true))
                             },
                             interactionSource = micSource,
@@ -118,9 +112,7 @@ fun SearchBarPill(navigator: DestinationsNavigator, modifier: Modifier = Modifie
                     modifier = Modifier
                         .combinedClickable(
                             onClick = {
-                                if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                                    performAppHaptic(context, prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light", prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f))
-                                }
+                                doHapticIfNeed(context, prefs)
                                 navigator.navigate(SettingsScreenDestination)
                             },
                             interactionSource = settingsSource,
@@ -193,9 +185,7 @@ fun TopBar(
             val shape = if (cardCorner > 12) CircleShape else MaterialTheme.shapes.extraExtraLarge
             Surface(
                 onClick = {
-                    if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                        performAppHaptic(context, prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light", prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f))
-                    }
+                    doHapticIfNeed(context, prefs)
                     navigator.navigate(SearchScreenDestination())
                 },
                 modifier = Modifier.weight(1f).height(52.dp).scale(searchScale),
@@ -228,9 +218,7 @@ fun TopBar(
                             modifier = Modifier
                                 .combinedClickable(
                                     onClick = {
-                                        if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                                            performAppHaptic(context, prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light", prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f))
-                                        }
+                                        doHapticIfNeed(context, prefs)
                                         navigator.navigate(SearchScreenDestination(true))
                                     },
                                     interactionSource = micSource,
@@ -248,9 +236,7 @@ fun TopBar(
                             modifier = Modifier
                                 .combinedClickable(
                                     onClick = {
-                                        if (prefs.getBoolean(PreferenceManager.KEY_APP_HAPTICS, true)) {
-                                            performAppHaptic(context, prefs.getString(PreferenceManager.KEY_APP_HAPTICS_STRENGTH, "light") ?: "light", prefs.getFloat(PreferenceManager.KEY_HAPTICS_CUSTOM_INTENSITY, 0.5f))
-                                        }
+                                        doHapticIfNeed(context, prefs)
                                         navigator.navigate(SettingsScreenDestination)
                                     },
                                     interactionSource = settingsSource,
@@ -291,11 +277,16 @@ fun SpringIconButton(
 @Composable
 fun NavigationIcon(
     onClick: () -> Unit,
-    modifier: Modifier = Modifier.padding(start = 16.dp, end = 14.dp)
+    modifier: Modifier = Modifier.padding(start = 12.dp, end = 10.dp)
 ) {
+    val context = LocalContext.current
+    val prefs: PreferenceManager = koinInject()
     SpringIconButton(
         modifier = modifier,
-        onClick = { onClick() }
+        onClick = {
+            doHapticIfNeed(context, prefs)
+            onClick()
+        }
     ) {
         Icon(
             Icons.AutoMirrored.Rounded.ArrowBack, stringResource(R.string.back),
@@ -313,6 +304,21 @@ fun Title(
         text = text,
         style = MaterialTheme.typography.titleLarge,
         lineHeight = MaterialTheme.typography.titleMedium.lineHeight,
+        fontWeight = if (bold) FontWeight.Bold else FontWeight.Normal,
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis
+    )
+}
+
+@Composable
+fun TitleLight(
+    text: String,
+    bold: Boolean = false
+) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp),
+        lineHeight = MaterialTheme.typography.titleSmall.lineHeight,
         fontWeight = if (bold) FontWeight.Bold else FontWeight.Normal,
         maxLines = 2,
         overflow = TextOverflow.Ellipsis
