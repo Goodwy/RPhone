@@ -8,6 +8,7 @@ import android.net.Uri
 import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import dev.goodwy.rphone.controller.util.ContactUtils
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.device_only
 import dev.goodwy.rphone.modal.data.Contact
@@ -327,9 +328,9 @@ class ContactsViewModel(
             return null
         }
 
-        if (lastUsedName != null && lastUsedType != null) {
-            val lastUsed = Account(lastUsedName, lastUsedType)
-            if (_availableAccountsForMoving.value.contains(lastUsed)) {
+        if (!lastUsedName.isNullOrBlank() && !lastUsedType.isNullOrBlank()) {
+            val lastUsed = ContactUtils.getAccount(lastUsedName, lastUsedType)
+            if (lastUsed != null && _availableAccountsForMoving.value.contains(lastUsed)) {
                 return lastUsed
             }
         }
@@ -359,7 +360,7 @@ class ContactsViewModel(
         val type = maxKey.substring(0, sep)
         val name = maxKey.substring(sep + 1)
         return accounts.firstOrNull { it.type == type && it.name == name }
-            ?: Account(name, type)
+            ?: ContactUtils.getAccount(name, type)
     }
 
     fun fetchTrashedContacts() {
