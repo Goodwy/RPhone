@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.provider.CallLog
 import android.telecom.PhoneAccountHandle
 import android.telecom.TelecomManager
+import dev.goodwy.rphone.controller.util.BlockedNumbersManager
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.util.normalizePhoneNumber
 import dev.goodwy.rphone.modal.`interface`.ICallLogRepository
@@ -190,6 +191,7 @@ class CallLogRepository(
         val unknownLabel = context.getString(R.string.label_unknown)
 
         val displayOrder = preferenceManager.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0)
+        val blockedPatterns = BlockedNumbersManager.getBlockedPatterns(context)
 
         val zone = ZoneId.systemDefault()
         fun dayKey(dateMillis: Long): LocalDate =
@@ -208,7 +210,9 @@ class CallLogRepository(
 
             var simLabel: String? = null
 
-            val isBlocked = type == CallLog.Calls.BLOCKED_TYPE// || type == CallLog.Calls.REJECTED_TYPE
+            val isBlocked = type == CallLog.Calls.BLOCKED_TYPE ||
+                ((type == CallLog.Calls.REJECTED_TYPE || type == CallLog.Calls.MISSED_TYPE) &&
+                    BlockedNumbersManager.matchesAnyPattern(number, blockedPatterns))
 
             // If label is missing, try to resolve it from account ID
             if (accountIdIdx != -1 && componentNameIdx != -1) {

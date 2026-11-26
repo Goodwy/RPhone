@@ -362,6 +362,18 @@
     <string name="hide_from_logs">Hide from logs</string>
     <string name="show_in_logs">Show in logs</string>
     <string name="blocked_size">Blocked: %s</string>
+    <string name="add_blocked_number">Add number or pattern</string>
+    <string name="add_blocked_number_subtitle">Block a specific number or use * as a wildcard</string>
+    <string name="blocked_pattern_label">Wildcard pattern</string>
+    <string name="system_blocked_numbers">System block list</string>
+    <string name="system_blocked_numbers_subtitle">Open the OS block list settings</string>
+    <string name="number_or_pattern">Number or pattern</string>
+    <string name="pattern_help_text">Use * as a wildcard.\nExamples: +1800* (starts with), *1919 (ends with), *800* (contains).</string>
+    <string name="unblock_number">Unblock number</string>
+    <string name="unblock">Unblock</string>
+    <string name="block">Block</string>
+    <string name="unblock_number_confirm">Remove %s from the block list?</string>
+    <string name="block_number_failed">Unable to block number. Make sure RPhone is set as the default phone app.</string>
 
     <string name="authentication">Authentication</string>
     <string name="authentication_method">Authentication method</string>
