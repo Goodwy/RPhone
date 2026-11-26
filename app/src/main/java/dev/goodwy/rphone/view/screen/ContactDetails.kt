@@ -312,14 +312,7 @@ fun ContactDetailsScreen(
             val rawContacts = contactsViewModel.getContactSources(c.id)
             contactSources = rawContacts
             val first = rawContacts.firstOrNull()
-            contactAccount = if (first != null &&
-                !first.accountName.isNullOrBlank() &&
-                !first.accountType.isNullOrBlank()
-            ) {
-                Account(first.accountName, first.accountType)
-            } else {
-                null
-            }
+            contactAccount = ContactUtils.getAccount(first?.accountName, first?.accountType)
         } else {
             contactSources = emptyList()
             contactAccount = null
@@ -1776,11 +1769,7 @@ fun ContactDetailsScreen(
                                     item {
                                         RillExpressiveCard(title = stringResource(R.string.contact_sources)) {
                                             contactSources.forEachIndexed { index, source ->
-                                                val account = if (!source.accountName.isNullOrEmpty()) {
-                                                    Account(source.accountName, source.accountType ?: "")
-                                                } else {
-                                                    null // We do not create accounts with blank names
-                                                }
+                                                val account = ContactUtils.getAccount(source.accountName, source.accountType)
                                                 SourceItem(
                                                     modifier = Modifier.combinedClickable(
                                                         onClick = {
@@ -2660,7 +2649,7 @@ fun ContactDetailsScreen(
                                 item {
                                     RillExpressiveCard(title = stringResource(R.string.contact_sources)) {
                                         contactSources.forEachIndexed { index, source ->
-                                            val account = Account(source.accountName ?: "", source.accountType ?: "")
+                                            val account = ContactUtils.getAccount(source.accountName, source.accountType)
                                             SourceItem(
                                                 modifier = Modifier.combinedClickable(
                                                     onClick = {
@@ -3121,11 +3110,7 @@ fun SourcesDialog(
 
                 RillExpressiveCard(shape = MaterialTheme.shapes.large) {
                     sources.forEachIndexed { _, source ->
-                        val account = if (!source.accountName.isNullOrEmpty()) {
-                            Account(source.accountName, source.accountType ?: "")
-                        } else {
-                            null // If there is no name, do not create an account
-                        }
+                        val account = ContactUtils.getAccount(source.accountName, source.accountType)
                         val contactData = sourceData[source.rawContactId]
 
                         Card(

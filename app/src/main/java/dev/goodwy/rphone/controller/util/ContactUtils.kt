@@ -13,6 +13,12 @@ import dev.goodwy.rphone.R
 import dev.goodwy.rphone.modal.data.Contact
 
 object ContactUtils {
+    fun getAccount(name: String?, type: String?): Account? {
+        val safeName = name?.trim()?.takeIf { it.isNotEmpty() } ?: return null
+        val safeType = type?.trim()?.takeIf { it.isNotEmpty() } ?: return null
+        return runCatching { Account(safeName, safeType) }.getOrNull()
+    }
+
     fun getAccountName(account: Account?): String {
         return when {
             account == null -> "Local (Device Only)"

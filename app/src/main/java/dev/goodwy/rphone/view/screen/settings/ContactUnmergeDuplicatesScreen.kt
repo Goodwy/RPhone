@@ -1,6 +1,5 @@
 package dev.goodwy.rphone.view.screen.settings
 
-import android.accounts.Account
 import android.content.Context
 import android.view.Surface
 import android.view.WindowManager
@@ -303,10 +302,8 @@ fun MergedContactCard(
 
         // List of sources (the contacts that make up the combined list)
         merged.sourceContacts.forEachIndexed { index, sourceContact ->
-            val account = Account(
-                merged.sources[index].accountName ?: "",
-                merged.sources[index].accountType ?: ""
-            )
+            val source = merged.sources.getOrNull(index)
+            val account = ContactUtils.getAccount(source?.accountName, source?.accountType)
 
             Card(
                 modifier = Modifier
