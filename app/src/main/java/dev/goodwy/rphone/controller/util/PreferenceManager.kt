@@ -248,6 +248,31 @@ class PreferenceManager(context: Context) {
         )
     }
 
+    fun getBlockedPatterns(): List<String> {
+        val raw = getString(KEY_BLOCKED_PATTERNS, null) ?: return emptyList()
+        return try {
+            val array = org.json.JSONArray(raw)
+            buildList {
+                for (i in 0 until array.length()) {
+                    val item = array.optString(i, "").trim()
+                    if (item.isNotEmpty()) add(item)
+                }
+            }
+        } catch (_: Exception) {
+            emptyList()
+        }
+    }
+
+    fun setBlockedPatterns(patterns: List<String>) {
+        val cleaned = patterns.map { it.trim() }.filter { it.isNotEmpty() }.distinct()
+        val encoded = org.json.JSONArray(cleaned).toString()
+        val key = stringPreferencesKey(KEY_BLOCKED_PATTERNS)
+        _prefsCache.value = _prefsCache.value.toMutablePreferences().apply {
+            this[key] = encoded
+        }
+        setString(KEY_BLOCKED_PATTERNS, encoded)
+    }
+
     fun contactBackgroundIdKey(contactId: String): String {
         return CONTACT_BACKGROUND_PREFIX + contactId
     }
@@ -484,6 +509,7 @@ class PreferenceManager(context: Context) {
         const val KEY_BLOCK_METHOD = "block_method"
         const val KEY_BLOCK_LOG_VISIBILITY = "block_log_visibility"
         const val KEY_BLOCK_NOTIFICATION = "block_notification"
+        const val KEY_BLOCKED_PATTERNS = "blocked_patterns"
         const val KEY_VIBRATE_ON_ANSWER = "vibrate_on_answer"
         const val KEY_VIBRATE_ON_HANGUP = "vibrate_on_hangup"
         const val KEY_DIALPAD_STYLE = "dialpad_style"

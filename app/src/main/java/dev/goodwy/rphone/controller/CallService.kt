@@ -8,7 +8,6 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
-import android.provider.BlockedNumberContract
 import android.telecom.Call
 import android.telecom.CallAudioState
 import android.telecom.DisconnectCause
@@ -18,6 +17,7 @@ import android.telephony.SmsManager
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import dev.goodwy.rphone.R
+import dev.goodwy.rphone.controller.util.BlockedNumbersManager
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.util.toast
 import dev.goodwy.rphone.modal.`interface`.CallSession
@@ -247,7 +247,7 @@ class CallService : InCallService() {
     private suspend fun isNumberBlocked(number: String): Boolean = withContext(Dispatchers.IO) {
         if (number.isBlank()) return@withContext false
         return@withContext try {
-            BlockedNumberContract.isBlocked(this@CallService, number)
+            BlockedNumbersManager.isBlocked(this@CallService, number)
         } catch (_: Exception) {
             false
         }
@@ -488,12 +488,12 @@ class CallService : InCallService() {
         updateCallState()
 
         serviceScope.launch {
-            if (isNumberBlocked(number)) {
+            val isIncoming = details?.callDirection == Call.Details.DIRECTION_INCOMING || call.state == Call.STATE_RINGING
+            if (isIncoming && isNumberBlocked(number)) {
                 handleBlockedCall(call, number)
                 return@launch
             }
 
-            val isIncoming = details?.callDirection == Call.Details.DIRECTION_INCOMING || call.state == Call.STATE_RINGING
             if (isIncoming && preferenceManager.getBoolean(PreferenceManager.KEY_BUSY_MODE_ENABLED, false)) {
                 handleBusyModeCall(call, number)
                 return@launch
