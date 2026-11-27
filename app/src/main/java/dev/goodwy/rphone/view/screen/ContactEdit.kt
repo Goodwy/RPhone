@@ -1177,11 +1177,19 @@ fun ContactEditScreen(
                                     // showing either the temporary or the stored one right away.
                                     val displayBackground =
                                         if (tempBackgroundDeleted) null else (tempCallBackground ?: callBackground)
+                                    val previewCardStyle = if (tempCallingCardStyleCleared) {
+                                        CallingCardStyle.ThemeDefault
+                                    } else {
+                                        tempCallingCardStyle ?: callingCardStyle ?: CallingCardStyle.ThemeDefault
+                                    }
                                     if (displayBackground != null) {
-                                        AsyncImage(
+                                        CallingCardWallpaperImage(
                                             model = displayBackground,
                                             contentDescription = stringResource(R.string.contact_call_background_preview),
-                                            contentScale = ContentScale.Crop,
+                                            scale = previewCardStyle.bgScale,
+                                            offsetX = previewCardStyle.bgOffsetX,
+                                            offsetY = previewCardStyle.bgOffsetY,
+                                            blurDp = previewCardStyle.blurRadiusDp,
                                             modifier = Modifier
                                                 .size(width = 82.dp, height = 160.dp)
                                                 .clip(RoundedCornerShape(RillShapeDefaults.BaseMedium))
@@ -1987,11 +1995,19 @@ fun ContactEditScreen(
                                     // showing either the temporary or the stored one right away.
                                     val displayBackground =
                                         if (tempBackgroundDeleted) null else (tempCallBackground ?: callBackground)
+                                    val previewCardStyle = if (tempCallingCardStyleCleared) {
+                                        CallingCardStyle.ThemeDefault
+                                    } else {
+                                        tempCallingCardStyle ?: callingCardStyle ?: CallingCardStyle.ThemeDefault
+                                    }
                                     if (displayBackground != null) {
-                                        AsyncImage(
+                                        CallingCardWallpaperImage(
                                             model = displayBackground,
                                             contentDescription = stringResource(R.string.contact_call_background_preview),
-                                            contentScale = ContentScale.Crop,
+                                            scale = previewCardStyle.bgScale,
+                                            offsetX = previewCardStyle.bgOffsetX,
+                                            offsetY = previewCardStyle.bgOffsetY,
+                                            blurDp = previewCardStyle.blurRadiusDp,
                                             modifier = Modifier
                                                 .size(width = 82.dp, height = 160.dp)
                                                 .clip(RoundedCornerShape(RillShapeDefaults.BaseMedium))

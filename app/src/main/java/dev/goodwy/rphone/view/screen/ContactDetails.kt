@@ -798,17 +798,7 @@ fun ContactDetailsScreen(
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-    val request = remember(callBackground, context) {
-        if (callBackground.isNullOrEmpty()) {
-            null
-        } else {
-            ImageRequest.Builder(context)
-                .data(callBackground)
-                .crossfade(RillDurations.Long1)
-                .build()
-        }
-    }
-    val showCallBackground = request != null && !isLandscape
+    val showCallBackground = !callBackground.isNullOrEmpty() && !isLandscape
 
     val scrollProgress by remember {
         derivedStateOf {
@@ -825,15 +815,13 @@ fun ContactDetailsScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         if (showCallBackground) {
             val backgroundBlurDp = callingCardStyle?.blurRadiusDp ?: 0
-            AsyncImage(
-                model = request,
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize()
-                    .then(
-                        if (backgroundBlurDp > 0) Modifier.blur(backgroundBlurDp.dp)
-                        else Modifier
-                    ),
-                contentScale = ContentScale.Crop
+            CallingCardWallpaperImage(
+                model = callBackground,
+                modifier = Modifier.fillMaxSize(),
+                scale = callingCardStyle?.bgScale ?: CallingCardStyle.DEFAULT_BG_SCALE,
+                offsetX = callingCardStyle?.bgOffsetX ?: 0f,
+                offsetY = callingCardStyle?.bgOffsetY ?: 0f,
+                blurDp = backgroundBlurDp
             )
 
             val alphaFraction = (animatedProgress / 0.3f).pow(0.7f).coerceIn(0f, 1f)

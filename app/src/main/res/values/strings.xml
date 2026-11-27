@@ -606,6 +606,8 @@
     <string name="calling_card_override_save_failed">Couldn\'t save the background</string>
     <string name="calling_card_override_unknown_contact">Contact #%1$s</string>
     <string name="calling_card_sync_warning_message">Call screen appearance is stored only in this app. It is not synced with Google Contacts or other address books, because they have no field for it. Changes here affect calls in this app only. To move these settings and background images to another device, use Backup &amp; Restore.</string>
+    <string name="calling_card_zoom_hint">Pinch to zoom, drag to move</string>
+    <string name="calling_card_reset_framing">Reset framing</string>
 
     <!-- Shortcuts -->
     <string name="add_to_home_screen">Add to home screen</string>

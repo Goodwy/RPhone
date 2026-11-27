@@ -290,11 +290,15 @@ fun ExpressiveCallScreen(
         .background(MaterialTheme.colorScheme.surface)
     ) {
         ExpressiveBackground(
-            photoUri,
-            backgroundUri,
-            liquidGlassBackdrop,
-            useLgCallScreen || useBlurCallScreen,
-            backgroundBlurDp = callingCardStyle.blurRadiusDp)
+            photoUri = photoUri,
+            backgroundUri = backgroundUri,
+            liquidGlassBackdrop = liquidGlassBackdrop,
+            hideGradient = useLgCallScreen || useBlurCallScreen,
+            backgroundBlurDp = callingCardStyle.blurRadiusDp,
+            backgroundScale = callingCardStyle.bgScale,
+            backgroundOffsetX = callingCardStyle.bgOffsetX,
+            backgroundOffsetY = callingCardStyle.bgOffsetY
+        )
 
         Column(
             modifier = Modifier.fillMaxSize(),

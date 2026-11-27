@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -75,7 +76,8 @@ fun CallScreenPreview(
     style: CallScreenPreviewStyle = CallScreenPreviewStyle.Default,
     callingCardStyle: CallingCardStyle = CallingCardStyle.ThemeDefault,
     modifier: Modifier = Modifier,
-    defaultPreview: Boolean = false
+    defaultPreview: Boolean = false,
+    onBackgroundIntrinsicSize: ((Size) -> Unit)? = null
 ) {
     val context = LocalContext.current
     val preferenceManager = koinInject<PreferenceManager>()
@@ -123,7 +125,11 @@ fun CallScreenPreview(
             liquidGlassBackdrop = backdrop,
             hideGradient = false,
             enableParticles = false,
-            backgroundBlurDp = callingCardStyle.blurRadiusDp
+            backgroundBlurDp = callingCardStyle.blurRadiusDp,
+            backgroundScale = callingCardStyle.bgScale,
+            backgroundOffsetX = callingCardStyle.bgOffsetX,
+            backgroundOffsetY = callingCardStyle.bgOffsetY,
+            onBackgroundIntrinsicSize = onBackgroundIntrinsicSize
         )
 
         Column(
