@@ -23,9 +23,15 @@ import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.CheckBox
 import androidx.compose.material.icons.rounded.ContentCopy
+import android.widget.Toast
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.History
+import androidx.compose.material.icons.rounded.ReportProblem
 import androidx.compose.material.icons.rounded.TravelExplore
+import dev.goodwy.rphone.modal.data.SpamCategory
+import dev.goodwy.rphone.modal.repository.SpamRepository
+import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -107,6 +113,8 @@ fun CallLogTile(
     showSimLabel: Boolean
 ) {
     val context   = LocalContext.current
+    val spamRepository = koinInject<SpamRepository>()
+    val coroutineScope = rememberCoroutineScope()
     var showMenu  by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxWidth()) {
@@ -242,6 +250,26 @@ fun CallLogTile(
                             showMenu = false
                             doHaptic()
                             context.launchInternetSearch(log.number)
+                        }
+                    )
+                    val spamReportedMsg = stringResource(R.string.spam_reported_toast, log.number)
+                    val spamInvalidMsg = stringResource(R.string.spam_invalid_number_toast)
+                    DropdownMenuItem(
+                        contentPadding = PaddingValues(start = 20.dp, end = 26.dp),
+                        text = { Text(stringResource(R.string.spam_report_action)) },
+                        leadingIcon = { Icon(Icons.Rounded.ReportProblem, null, tint = MaterialTheme.colorScheme.error) },
+                        onClick = {
+                            showMenu = false
+                            doHaptic()
+                            coroutineScope.launch {
+                                val reported = spamRepository.reportSpam(
+                                    number = log.number,
+                                    category = SpamCategory.USER_REPORTED,
+                                    alsoBlock = false
+                                )
+                                val msg = if (reported) spamReportedMsg else spamInvalidMsg
+                                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                            }
                         }
                     )
                 }

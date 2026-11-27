@@ -21,6 +21,29 @@ fun getDefaultDialerIntent(context: Context): Intent {
     return roleManager.createRequestRoleIntent(RoleManager.ROLE_DIALER)
 }
 
+fun isCallScreeningRoleHeld(context: Context): Boolean {
+    return try {
+        val roleManager = context.getSystemService(Context.ROLE_SERVICE) as RoleManager
+        roleManager.isRoleHeld(RoleManager.ROLE_CALL_SCREENING)
+    } catch (_: Exception) {
+        false
+    }
+}
+
+fun isCallScreeningRoleAvailable(context: Context): Boolean {
+    return try {
+        val roleManager = context.getSystemService(Context.ROLE_SERVICE) as RoleManager
+        roleManager.isRoleAvailable(RoleManager.ROLE_CALL_SCREENING)
+    } catch (_: Exception) {
+        false
+    }
+}
+
+fun getCallScreeningRoleIntent(context: Context): Intent {
+    val roleManager = context.getSystemService(Context.ROLE_SERVICE) as RoleManager
+    return roleManager.createRequestRoleIntent(RoleManager.ROLE_CALL_SCREENING)
+}
+
 fun hasReadContacts(ctx: Context) =
     ContextCompat.checkSelfPermission(ctx, Manifest.permission.READ_CONTACTS) ==
             PackageManager.PERMISSION_GRANTED

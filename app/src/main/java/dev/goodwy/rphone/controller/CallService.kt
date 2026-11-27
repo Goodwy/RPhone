@@ -23,10 +23,13 @@ import dev.goodwy.rphone.controller.util.IncomingCallDecision
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.util.toast
 import dev.goodwy.rphone.modal.data.CallerMetadata
+import dev.goodwy.rphone.modal.data.SpamCategory
+import dev.goodwy.rphone.modal.data.SpamVerdict
 import dev.goodwy.rphone.modal.`interface`.CallSession
 import dev.goodwy.rphone.modal.`interface`.ICallRepository
 import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 import dev.goodwy.rphone.modal.repository.CallRepositoryImpl
+import dev.goodwy.rphone.modal.repository.SpamRepository
 import dev.goodwy.rphone.view.screen.BiometricCallActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -51,6 +54,7 @@ class CallService : InCallService() {
     private val flashNotificationManager: dev.goodwy.rphone.controller.sensor.FlashNotificationManager by inject()
     private val callRepository: ICallRepository by inject()
     private val contactsRepository: IContactsRepository by inject()
+    private val spamRepository: SpamRepository by inject()
 
     private data class FloatingCallMetadata(
         val contactName: String,
@@ -69,6 +73,7 @@ class CallService : InCallService() {
     private val evaluatedIncomingCalls = java.util.Collections.synchronizedSet(HashSet<Call>())
     private val allowedIncomingCalls = java.util.Collections.synchronizedSet(HashSet<Call>())
     private val handledBlockedCalls = java.util.Collections.synchronizedSet(HashSet<Call>())
+    private val handledSpamCalls = java.util.Collections.synchronizedSet(HashSet<Call>())
 
     // BroadcastReceiver for monitoring when the screen is locked or turned off
     private val screenStateReceiver = object : BroadcastReceiver() {
@@ -126,7 +131,7 @@ class CallService : InCallService() {
     }
 
     private fun isCallSuppressedOrPendingIncoming(call: Call): Boolean {
-        if (call in handledBlockedCalls || call in handledBusyCalls) return true
+        if (call in handledBlockedCalls || call in handledBusyCalls || call in handledSpamCalls) return true
         if (call.state == Call.STATE_RINGING && call !in allowedIncomingCalls) return true
         return false
     }
@@ -247,8 +252,9 @@ class CallService : InCallService() {
         }
 
         if (isIncoming && wasNeverConnected && (cause?.code == DisconnectCause.MISSED || cause?.code == DisconnectCause.REMOTE || cause?.code == DisconnectCause.REJECTED)) {
+            val isHandledSpam = call in handledSpamCalls
             serviceScope.launch {
-                val isBlocked = isNumberBlocked(number)
+                val isBlocked = isNumberBlocked(number) || isHandledSpam
                 val showBlocked = preferenceManager.getInt(PreferenceManager.KEY_BLOCK_LOG_VISIBILITY, 0) == 1
                 if (!isBlocked || showBlocked) {
                     val cnam = if (details.callerDisplayNamePresentation == TelecomManager.PRESENTATION_ALLOWED) {
@@ -344,12 +350,47 @@ class CallService : InCallService() {
         }
     }
 
+    private fun handleSpamFallbackCall(call: Call, number: String, verdict: SpamVerdict, category: SpamCategory) {
+        if (!handledSpamCalls.add(call)) return
+
+        if (verdict == SpamVerdict.DECLINE) {
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    call.reject(Call.REJECT_REASON_DECLINED)
+                } else {
+                    call.disconnect()
+                }
+            } catch (_: Exception) {
+                try { call.disconnect() } catch (_: Exception) {}
+            }
+        }
+
+        if (preferenceManager.getBoolean(PreferenceManager.KEY_SPAM_NOTIFICATION, true)) {
+            notificationManager.showSpamBlockedNotification(number, spamCategoryLabel(category))
+        }
+    }
+
+    private fun spamCategoryLabel(category: SpamCategory): String {
+        val resId = when (category) {
+            SpamCategory.TELEMARKETER -> R.string.spam_category_telemarketer
+            SpamCategory.SCAM -> R.string.spam_category_scam
+            SpamCategory.ROBOCALL -> R.string.spam_category_robocall
+            SpamCategory.SPOOFED -> R.string.spam_category_spoofed
+            SpamCategory.PRIVATE_NUMBER -> R.string.spam_category_private
+            SpamCategory.UNKNOWN_CALLER -> R.string.spam_category_unknown
+            SpamCategory.USER_REPORTED -> R.string.spam_category_reported
+            SpamCategory.SPAM, SpamCategory.NONE -> R.string.spam_category_spam
+        }
+        return getString(resId)
+    }
+
     private fun evaluateIncomingCall(call: Call) {
         if (!evaluatedIncomingCalls.add(call)) return
 
         incomingEvaluationJobs[call]?.cancel()
         incomingEvaluationJobs[call] = serviceScope.launch {
-            val number = call.details?.handle?.schemeSpecificPart?.let { Uri.decode(it) } ?: ""
+            val details = call.details
+            val number = details?.handle?.schemeSpecificPart?.let { Uri.decode(it) } ?: ""
             val decision = withContext(Dispatchers.IO) {
                 BusyModeExceptionsHelper.evaluateIncomingCall(
                     incomingNumber = number,
@@ -367,15 +408,47 @@ class CallService : InCallService() {
             when (decision) {
                 IncomingCallDecision.BLOCK -> {
                     handleBlockedCall(call, number)
+                    return@launch
                 }
                 IncomingCallDecision.REJECT_BUSY_MODE -> {
                     handleBusyModeCall(call, number)
+                    return@launch
                 }
-                IncomingCallDecision.ALLOW_NORMAL -> {
-                    allowedIncomingCalls.add(call)
-                    proceedWithAllowedCall(call)
+                IncomingCallDecision.ALLOW_NORMAL -> Unit
+            }
+
+            // Use existing CallScreeningService evaluation if present; otherwise run fallback local screening.
+            val screenedResult = callStateManager.getRecentScreeningResult(number, requireServiceScreened = true)
+            if (screenedResult == null) {
+                val presentation = RillCallScreeningService.mapPresentation(
+                    details?.handlePresentation ?: TelecomManager.PRESENTATION_ALLOWED
+                )
+                val stirShaken = RillCallScreeningService.mapStirShaken(details)
+                val fallbackResult = withContext(Dispatchers.IO) {
+                    spamRepository.evaluateIncomingCall(
+                        rawNumber = number,
+                        presentation = presentation,
+                        stirShakenStatus = stirShaken,
+                        isExplicitlyBlocked = false,
+                        recordBurstAttempt = true
+                    )
+                }
+                if (!isActive || call.state == Call.STATE_DISCONNECTED) return@launch
+
+                callStateManager.recordSpamEvaluation(
+                    number = number,
+                    result = fallbackResult,
+                    screenedByService = false
+                )
+
+                if (fallbackResult.verdict == SpamVerdict.DECLINE || fallbackResult.verdict == SpamVerdict.SILENCE) {
+                    handleSpamFallbackCall(call, number, fallbackResult.verdict, fallbackResult.category)
+                    return@launch
                 }
             }
+
+            allowedIncomingCalls.add(call)
+            proceedWithAllowedCall(call)
         }
     }
 
@@ -590,6 +663,7 @@ class CallService : InCallService() {
         allowedIncomingCalls.remove(call)
         handledBlockedCalls.remove(call)
         handledBusyCalls.remove(call)
+        handledSpamCalls.remove(call)
         call.unregisterCallback(callCallback)
 
         // If the call being deleted is the same one for which a floating window was launched,
@@ -683,6 +757,7 @@ class CallService : InCallService() {
         allowedIncomingCalls.clear()
         handledBlockedCalls.clear()
         handledBusyCalls.clear()
+        handledSpamCalls.clear()
 
         (callRepository as? CallRepositoryImpl)?.unbindService()
         serviceScope.cancel()

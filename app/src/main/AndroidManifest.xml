@@ -275,6 +275,16 @@
         </service>
 
         <service
+            android:name=".controller.RillCallScreeningService"
+            android:permission="android.permission.BIND_SCREENING_SERVICE"
+            android:exported="true"
+            android:directBootAware="true">
+            <intent-filter>
+                <action android:name="android.telecom.CallScreeningService" />
+            </intent-filter>
+        </service>
+
+        <service
             android:name="dev.goodwy.rphone.controller.tiles.BusyModeTileService"
             android:exported="true"
             android:icon="@drawable/ic_phone_cancel"

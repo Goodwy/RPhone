@@ -10,14 +10,16 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 @Database(
     entities = [
         PrivateContactEntity::class,
-        TrashedContactEntity::class
+        TrashedContactEntity::class,
+        SpamNumberEntity::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 abstract class RillDatabase : RoomDatabase() {
     abstract fun privateContactDao(): PrivateContactDao
     abstract fun trashedContactDao(): TrashedContactDao
+    abstract fun spamNumberDao(): SpamNumberDao
 
     companion object {
         val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -43,6 +45,26 @@ abstract class RillDatabase : RoomDatabase() {
                 `phoneNumbersJson` TEXT NOT NULL,
                 `contactJson` TEXT NOT NULL,
                 `trashedAt` INTEGER NOT NULL
+            )
+            """.trimIndent()
+                )
+            }
+        }
+
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+            CREATE TABLE IF NOT EXISTS `spam_numbers` (
+                `normalizedNumber` TEXT NOT NULL,
+                `rawNumber` TEXT NOT NULL,
+                `category` TEXT NOT NULL,
+                `source` TEXT NOT NULL,
+                `label` TEXT DEFAULT NULL,
+                `confidence` INTEGER NOT NULL DEFAULT 100,
+                `reportCount` INTEGER NOT NULL DEFAULT 1,
+                `updatedAt` INTEGER NOT NULL,
+                PRIMARY KEY(`normalizedNumber`)
             )
             """.trimIndent()
                 )
