@@ -77,4 +77,87 @@ class CallingCardStyleTest {
         assertNotNull(callingCardNameShadow(Color.White, hasBackground = true))
         assertNotNull(callingCardNameShadow(Color.Black, hasBackground = true))
     }
+
+    @Test
+    fun wallpaperTransformRoundTrips() {
+        val style = CallingCardStyle(
+            font = CallingCardFont.Playfair,
+            fontWeight = 600,
+            fontSizeSp = 32,
+            textColorArgb = 0xFFFFC857.toInt(),
+            blurRadiusDp = 6,
+            bgScale = 2.35f,
+            bgOffsetX = -0.425f,
+            bgOffsetY = 0.3125f
+        )
+        val encoded = CallingCardStyleCodec.encode(style)
+        val decoded = CallingCardStyleCodec.decode(encoded)
+        assertNotNull(decoded)
+        assertEquals(style.font, decoded!!.font)
+        assertEquals(style.fontWeight, decoded.fontWeight)
+        assertEquals(style.fontSizeSp, decoded.fontSizeSp)
+        assertEquals(style.textColorArgb, decoded.textColorArgb)
+        assertEquals(style.blurRadiusDp, decoded.blurRadiusDp)
+        assertEquals(2.35f, decoded.bgScale, 0.0001f)
+        assertEquals(-0.425f, decoded.bgOffsetX, 0.0001f)
+        assertEquals(0.3125f, decoded.bgOffsetY, 0.0001f)
+    }
+
+    @Test
+    fun legacyFiveFieldFormatDecodesToDefaultTransform() {
+        val decoded = CallingCardStyleCodec.decode("inter|600|28|FFFFFFFF|8")
+        assertNotNull(decoded)
+        assertEquals(CallingCardFont.Inter, decoded!!.font)
+        assertEquals(600, decoded.fontWeight)
+        assertEquals(28, decoded.fontSizeSp)
+        assertEquals(0xFFFFFFFF.toInt(), decoded.textColorArgb)
+        assertEquals(8, decoded.blurRadiusDp)
+        assertEquals(1f, decoded.bgScale, 0.0001f)
+        assertEquals(0f, decoded.bgOffsetX, 0.0001f)
+        assertEquals(0f, decoded.bgOffsetY, 0.0001f)
+        assertEquals(false, decoded.hasCustomBackgroundTransform)
+    }
+
+    @Test
+    fun outOfRangeAndMalformedTransformsAreClampedSafely() {
+        val high = CallingCardStyleCodec.decode("system|500|24||0|9.5|NaN|Infinity")
+        assertNotNull(high)
+        assertEquals(CallingCardStyle.MAX_BG_SCALE, high!!.bgScale, 0.0001f)
+        assertEquals(0f, high.bgOffsetX, 0.0001f)
+        assertEquals(0f, high.bgOffsetY, 0.0001f)
+
+        val low = CallingCardStyleCodec.decode("system|500|24||0|0.2|-999|999")
+        assertNotNull(low)
+        assertEquals(CallingCardStyle.MIN_BG_SCALE, low!!.bgScale, 0.0001f)
+        assertEquals(-CallingCardStyle.MAX_BG_OFFSET, low.bgOffsetX, 0.0001f)
+        assertEquals(CallingCardStyle.MAX_BG_OFFSET, low.bgOffsetY, 0.0001f)
+    }
+
+    @Test
+    fun transformOnlyCustomizationIsNotThemeDefault() {
+        val zoomed = CallingCardStyle(bgScale = 1.5f)
+        assertEquals(true, zoomed.hasCustomBackgroundTransform)
+        assertEquals(false, zoomed.isThemeDefault)
+
+        val reset = zoomed.resetBackgroundTransform()
+        assertEquals(false, reset.hasCustomBackgroundTransform)
+        assertEquals(true, reset.isThemeDefault)
+    }
+
+    @Test
+    fun encodingUsesDotDecimalsRegardlessOfDefaultLocale() {
+        val previous = java.util.Locale.getDefault()
+        try {
+            java.util.Locale.setDefault(java.util.Locale.FRANCE)
+            val style = CallingCardStyle(bgScale = 1.75f, bgOffsetX = 0.25f, bgOffsetY = -0.5f)
+            val encoded = CallingCardStyleCodec.encode(style)
+            val decoded = CallingCardStyleCodec.decode(encoded)
+            assertNotNull(decoded)
+            assertEquals(1.75f, decoded!!.bgScale, 0.0001f)
+            assertEquals(0.25f, decoded.bgOffsetX, 0.0001f)
+            assertEquals(-0.5f, decoded.bgOffsetY, 0.0001f)
+        } finally {
+            java.util.Locale.setDefault(previous)
+        }
+    }
 }

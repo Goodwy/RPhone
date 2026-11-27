@@ -383,11 +383,22 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
             val styleNumbers = (contact?.phoneNumbers ?: emptyList()) + listOfNotNull(
                 number.ifEmpty { null }
             )
-            val callingCardStyle = CallingCardStore.effectiveStyle(
+            val perContactStyle = CallingCardStore.peek(
                 context = context,
                 contactId = contactId,
                 numbers = styleNumbers
             )
+            val rawEffectiveStyle = perContactStyle
+                ?: CallingCardStore.effectiveStyle(
+                    context = context,
+                    contactId = contactId,
+                    numbers = styleNumbers
+                )
+            val callingCardStyle = if (resolvedBackground != null && perContactStyle == null) {
+                rawEffectiveStyle.resetBackgroundTransform()
+            } else {
+                rawEffectiveStyle
+            }
 
             val resolved = CallIdentity(
                 number = number,

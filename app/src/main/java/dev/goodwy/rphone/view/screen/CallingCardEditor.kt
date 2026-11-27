@@ -7,11 +7,17 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -44,12 +50,15 @@ import androidx.compose.material.icons.rounded.AddAPhoto
 import androidx.compose.material.icons.rounded.AddPhotoAlternate
 import androidx.compose.material.icons.rounded.BlurOff
 import androidx.compose.material.icons.rounded.BlurOn
+import androidx.compose.material.icons.rounded.RestartAlt
 import androidx.compose.material.icons.rounded.Wallpaper
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
@@ -61,12 +70,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -74,10 +85,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.isSpecified
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -93,6 +109,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -107,7 +124,9 @@ import dev.goodwy.rphone.controller.util.CallingCardFont
 import dev.goodwy.rphone.controller.util.CallingCardPhotoSupport
 import dev.goodwy.rphone.controller.util.CallingCardStyle
 import dev.goodwy.rphone.controller.util.CallingCardStyleCodec
+import dev.goodwy.rphone.controller.util.CallingCardTransformMath
 import dev.goodwy.rphone.controller.util.PreferenceManager
+import dev.goodwy.rphone.controller.util.WallpaperTransform
 import dev.goodwy.rphone.view.components.ColorSwatch
 import dev.goodwy.rphone.view.components.NavigationIcon
 import dev.goodwy.rphone.view.components.RillDialog
@@ -117,9 +136,12 @@ import dev.goodwy.rphone.view.theme.LocalIsDarkTheme
 import dev.goodwy.rphone.view.theme.MyColors.dialpadKeyColor
 import dev.goodwy.rphone.view.theme.customColors
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
+import java.util.Locale
 import kotlin.math.roundToInt
 
 /**
@@ -191,6 +213,10 @@ fun CallingCardEditorDialog(
             if (readable) {
                 CallingCardPhotoSupport.deleteIfCapture(context, backgroundUri)
                 backgroundUri = uri.toString()
+                if (style.hasCustomBackgroundTransform) {
+                    style = style.resetBackgroundTransform()
+                    usingDefault = false
+                }
             } else {
                 showMessage(callingCardImageUnreadable)
             }
@@ -222,6 +248,10 @@ fun CallingCardEditorDialog(
             if (readable) {
                 CallingCardPhotoSupport.deleteIfCapture(context, backgroundUri)
                 backgroundUri = target
+                if (style.hasCustomBackgroundTransform) {
+                    style = style.resetBackgroundTransform()
+                    usingDefault = false
+                }
             } else {
                 CallingCardPhotoSupport.deleteCaptureUri(context, target)
                 showMessage(callingCardCameraFailed)
@@ -320,7 +350,12 @@ fun CallingCardEditorDialog(
                         contactName = contactName,
                         photoUri = contactPhotoUri,
                         backgroundUri = previewBackgroundUri,
+                        style = style,
                         canRemovePhoto = backgroundUri != null,
+                        onStyleChange = {
+                            style = it
+                            usingDefault = false
+                        },
                         onBack = {
                             discardDrafts()
                             onDismiss()
@@ -332,6 +367,11 @@ fun CallingCardEditorDialog(
                         onRemovePhoto = {
                             CallingCardPhotoSupport.deleteIfCapture(context, backgroundUri)
                             backgroundUri = null
+                            style = if (inheritedBackgroundUri != null) {
+                                style.withWallpaperTransform(fallbackStyle.wallpaperTransform)
+                            } else {
+                                style.resetBackgroundTransform()
+                            }
                         }
                     )
 
@@ -487,7 +527,9 @@ private fun CallingCardPhotoStep(
     contactName: String,
     photoUri: String?,
     backgroundUri: String?,
+    style: CallingCardStyle,
     canRemovePhoto: Boolean,
+    onStyleChange: (CallingCardStyle) -> Unit,
     onBack: () -> Unit,
     onNext: () -> Unit,
     onCamera: () -> Unit,
@@ -534,22 +576,28 @@ private fun CallingCardPhotoStep(
                     shape = MaterialTheme.shapes.large
                 ) {
                     if (backgroundUri != null) {
-                        Box(
+                        WallpaperTransformViewport(
+                            enabled = true,
+                            backgroundKey = backgroundUri,
+                            style = style,
+                            onStyleChange = onStyleChange,
+                            showHintWhenIdle = true,
                             modifier = Modifier
                                 .fillMaxSize()
                                 .semantics {
                                     contentDescription = previewDescription
                                 }
-                        ) {
-                            // Same rendering the live call screen uses: Crop for the
-                            // custom background and the same scrims, so the preview shows
-                            // exactly what will be saved.
+                        ) { onIntrinsicSize ->
                             ExpressiveBackground(
                                 photoUri = photoUri,
                                 backgroundUri = backgroundUri,
                                 liquidGlassBackdrop = callScreenBackdrop,
                                 hideGradient = false,
-                                enableParticles = false
+                                enableParticles = false,
+                                backgroundScale = style.bgScale,
+                                backgroundOffsetX = style.bgOffsetX,
+                                backgroundOffsetY = style.bgOffsetY,
+                                onBackgroundIntrinsicSize = onIntrinsicSize
                             )
                         }
                     } else {
@@ -584,22 +632,28 @@ private fun CallingCardPhotoStep(
                     )
             ) {
                 if (backgroundUri != null) {
-                    Box(
+                    WallpaperTransformViewport(
+                        enabled = true,
+                        backgroundKey = backgroundUri,
+                        style = style,
+                        onStyleChange = onStyleChange,
+                        showHintWhenIdle = true,
                         modifier = Modifier
                             .fillMaxSize()
                             .semantics {
                                 contentDescription = previewDescription
                             }
-                    ) {
-                        // Same rendering the live call screen uses: Crop for the
-                        // custom background and the same scrims, so the preview shows
-                        // exactly what will be saved.
+                    ) { onIntrinsicSize ->
                         ExpressiveBackground(
                             photoUri = photoUri,
                             backgroundUri = backgroundUri,
                             liquidGlassBackdrop = callScreenBackdrop,
                             hideGradient = false,
-                            enableParticles = false
+                            enableParticles = false,
+                            backgroundScale = style.bgScale,
+                            backgroundOffsetX = style.bgOffsetX,
+                            backgroundOffsetY = style.bgOffsetY,
+                            onBackgroundIntrinsicSize = onIntrinsicSize
                         )
                     }
                 } else {
@@ -834,17 +888,32 @@ private fun CallingCardCustomizeStep(
     val context = LocalContext.current
     val prefs: PreferenceManager = koinInject()
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+    var portraitZoomBadgeVisible by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        if (!isLandscape) LivePreview(
-            contactName = contactName,
-            phoneNumber = phoneNumber,
-            photoUri = photoUri,
-            backgroundUri = backgroundUri,
-            style = style
-        )
+        if (!isLandscape) {
+            WallpaperTransformViewport(
+                enabled = backgroundUri != null,
+                backgroundKey = backgroundUri,
+                style = style,
+                onStyleChange = onStyleChange,
+                showHintWhenIdle = false,
+                showOverlays = false,
+                onZoomBadgeVisibilityChange = { portraitZoomBadgeVisible = it },
+                modifier = Modifier.fillMaxSize()
+            ) { onIntrinsicSize ->
+                LivePreview(
+                    contactName = contactName,
+                    phoneNumber = phoneNumber,
+                    photoUri = photoUri,
+                    backgroundUri = backgroundUri,
+                    style = style,
+                    onBackgroundIntrinsicSize = onIntrinsicSize
+                )
+            }
+        }
 
         Column(
             modifier = Modifier
@@ -876,6 +945,7 @@ private fun CallingCardCustomizeStep(
                         photoUri = photoUri,
                         backgroundUri = backgroundUri,
                         style = style,
+                        onStyleChange = onStyleChange,
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxSize()
@@ -944,22 +1014,57 @@ private fun CallingCardCustomizeStep(
             } else {
                 Spacer(Modifier.weight(1f))
 
-                Button(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    onClick = {
-                        doHapticIfNeed(context, prefs)
-                        onUseDefault()
-                    },
-                    enabled = !usingDefault,
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
                 ) {
-                    Text(stringResource(R.string.reset))
+                    AnimatedVisibility(
+                        visible = backgroundUri != null && portraitZoomBadgeVisible,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        ZoomLevelBadge(scale = style.bgScale)
+                    }
+
+                    Spacer(Modifier.weight(1f))
+
+                    if (backgroundUri != null && style.hasCustomBackgroundTransform) {
+                        FilledTonalIconButton(
+                            onClick = {
+                                doHapticIfNeed(context, prefs)
+                                onStyleChange(style.resetBackgroundTransform())
+                            },
+                            colors = IconButtonDefaults.filledTonalIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.RestartAlt,
+                                contentDescription = stringResource(R.string.calling_card_reset_framing)
+                            )
+                        }
+                    }
+
+                    Button(
+                        onClick = {
+                            doHapticIfNeed(context, prefs)
+                            onUseDefault()
+                        },
+                        enabled = !usingDefault,
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                    ) {
+                        Text(stringResource(R.string.reset))
+                    }
                 }
 
                 Spacer(Modifier.height(8.dp))
 
                 AppearanceControls(
-                    modifier = Modifier,
+                    modifier = Modifier.pointerInput(Unit) {},
                     style = style,
                     showBlur = backgroundUri != null,
                     usingDefault = usingDefault,
@@ -972,7 +1077,8 @@ private fun CallingCardCustomizeStep(
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
                             .padding(bottom = 16.dp)
-                            .fillMaxWidth(),
+                            .fillMaxWidth()
+                            .pointerInput(Unit) {},
                         color = dialpadKeyColor,
                         shape = MaterialTheme.shapes.extraLarge.copy(
                             topStart = CornerSize(cardCornerExtraSmall), topEnd = CornerSize(cardCornerExtraSmall)
@@ -1024,7 +1130,8 @@ private fun LivePreview(
     phoneNumber: String,
     photoUri: String?,
     backgroundUri: String?,
-    style: CallingCardStyle
+    style: CallingCardStyle,
+    onBackgroundIntrinsicSize: ((Size) -> Unit)? = null
 ) {
     CallScreenPreview(
         contactName = contactName,
@@ -1033,7 +1140,8 @@ private fun LivePreview(
         backgroundUri = backgroundUri,
         style = CallScreenPreviewStyle.Default,
         callingCardStyle = style,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
+        onBackgroundIntrinsicSize = onBackgroundIntrinsicSize
     )
 }
 
@@ -1300,6 +1408,7 @@ private fun ScaledCallScreenPreview(
     photoUri: String?,
     backgroundUri: String?,
     style: CallingCardStyle,
+    onStyleChange: (CallingCardStyle) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val configuration = LocalConfiguration.current
@@ -1323,18 +1432,243 @@ private fun ScaledCallScreenPreview(
                 .clip(MaterialTheme.shapes.large)
                 .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.large)
         ) {
-            CompositionLocalProvider(LocalDensity provides scaledDensity) {
-                CallScreenPreview(
-                    contactName = contactName,
-                    phoneNumber = phoneNumber,
-                    photoUri = photoUri,
-                    backgroundUri = backgroundUri,
-                    style = CallScreenPreviewStyle.Default,
-                    callingCardStyle = style,
-                    modifier = Modifier.fillMaxSize()
-                )
+            WallpaperTransformViewport(
+                enabled = backgroundUri != null,
+                backgroundKey = backgroundUri,
+                style = style,
+                onStyleChange = onStyleChange,
+                showHintWhenIdle = false,
+                modifier = Modifier.fillMaxSize()
+            ) { onIntrinsicSize ->
+                CompositionLocalProvider(LocalDensity provides scaledDensity) {
+                    CallScreenPreview(
+                        contactName = contactName,
+                        phoneNumber = phoneNumber,
+                        photoUri = photoUri,
+                        backgroundUri = backgroundUri,
+                        style = CallScreenPreviewStyle.Default,
+                        callingCardStyle = style,
+                        modifier = Modifier.fillMaxSize(),
+                        onBackgroundIntrinsicSize = onIntrinsicSize
+                    )
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun WallpaperTransformViewport(
+    enabled: Boolean,
+    backgroundKey: String?,
+    style: CallingCardStyle,
+    onStyleChange: (CallingCardStyle) -> Unit,
+    modifier: Modifier = Modifier,
+    showHintWhenIdle: Boolean = false,
+    showOverlays: Boolean = true,
+    onZoomBadgeVisibilityChange: ((Boolean) -> Unit)? = null,
+    content: @Composable (onIntrinsicSize: (Size) -> Unit) -> Unit
+) {
+    val context = LocalContext.current
+    val prefs: PreferenceManager = koinInject()
+    val scope = rememberCoroutineScope()
+
+    var containerSize by remember { mutableStateOf(IntSize.Zero) }
+    var intrinsicSize by remember(backgroundKey) { mutableStateOf(Size.Unspecified) }
+    var gestureVersion by remember(backgroundKey) { mutableIntStateOf(0) }
+    var showZoomBadge by remember(backgroundKey) { mutableStateOf(false) }
+    var hasInteracted by remember(backgroundKey) { mutableStateOf(false) }
+    var animJob by remember(backgroundKey) { mutableStateOf<Job?>(null) }
+
+    val currentStyle by rememberUpdatedState(style)
+    val currentOnStyleChange by rememberUpdatedState(onStyleChange)
+    val currentContainerSize by rememberUpdatedState(containerSize)
+    val currentIntrinsicSize by rememberUpdatedState(intrinsicSize)
+
+    LaunchedEffect(gestureVersion) {
+        if (gestureVersion > 0) {
+            delay(900)
+            showZoomBadge = false
+            onZoomBadgeVisibilityChange?.invoke(false)
+        }
+    }
+
+    fun animateToTransform(target: WallpaperTransform) {
+        animJob?.cancel()
+        val start = currentStyle.wallpaperTransform
+        animJob = scope.launch {
+            animate(
+                initialValue = 0f,
+                targetValue = 1f,
+                animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
+            ) { fraction, _ ->
+                val interpolated = WallpaperTransform(
+                    scale = start.scale + (target.scale - start.scale) * fraction,
+                    offsetX = start.offsetX + (target.offsetX - start.offsetX) * fraction,
+                    offsetY = start.offsetY + (target.offsetY - start.offsetY) * fraction
+                )
+                currentOnStyleChange(currentStyle.withWallpaperTransform(interpolated))
+            }
+        }
+    }
+
+    Box(
+        modifier = modifier
+            .onSizeChanged { containerSize = it }
+            .then(
+                if (enabled) {
+                    Modifier
+                        .pointerInput(backgroundKey) {
+                            detectTransformGestures { centroid, pan, zoom, _ ->
+                                if (zoom == 1f && pan == Offset.Zero) return@detectTransformGestures
+                                val w = currentContainerSize.width.toFloat()
+                                val h = currentContainerSize.height.toFloat()
+                                if (w <= 0f || h <= 0f) return@detectTransformGestures
+
+                                animJob?.cancel()
+                                val img = currentIntrinsicSize
+                                val imgW = if (img.isSpecified && img.width > 0f) img.width else 0f
+                                val imgH = if (img.isSpecified && img.height > 0f) img.height else 0f
+
+                                val updated = CallingCardTransformMath.applyTransformGesture(
+                                    current = currentStyle.wallpaperTransform,
+                                    containerWidth = w,
+                                    containerHeight = h,
+                                    intrinsicWidth = imgW,
+                                    intrinsicHeight = imgH,
+                                    centroidX = centroid.x,
+                                    centroidY = centroid.y,
+                                    panX = pan.x,
+                                    panY = pan.y,
+                                    zoomChange = zoom
+                                )
+                                hasInteracted = true
+                                showZoomBadge = true
+                                onZoomBadgeVisibilityChange?.invoke(true)
+                                gestureVersion++
+                                currentOnStyleChange(currentStyle.withWallpaperTransform(updated))
+                            }
+                        }
+                        .pointerInput(backgroundKey) {
+                            detectTapGestures(
+                                onDoubleTap = { tapOffset ->
+                                    val w = currentContainerSize.width.toFloat()
+                                    val h = currentContainerSize.height.toFloat()
+                                    if (w <= 0f || h <= 0f) return@detectTapGestures
+
+                                    val img = currentIntrinsicSize
+                                    val imgW = if (img.isSpecified && img.width > 0f) img.width else 0f
+                                    val imgH = if (img.isSpecified && img.height > 0f) img.height else 0f
+
+                                    val target = CallingCardTransformMath.toggleDoubleTapTransform(
+                                        current = currentStyle.wallpaperTransform,
+                                        containerWidth = w,
+                                        containerHeight = h,
+                                        intrinsicWidth = imgW,
+                                        intrinsicHeight = imgH,
+                                        tapX = tapOffset.x,
+                                        tapY = tapOffset.y
+                                    )
+                                    doHapticIfNeed(context, prefs)
+                                    hasInteracted = true
+                                    showZoomBadge = true
+                                    onZoomBadgeVisibilityChange?.invoke(true)
+                                    gestureVersion++
+                                    animateToTransform(target)
+                                }
+                            )
+                        }
+                } else {
+                    Modifier
+                }
+            )
+    ) {
+        content { loadedSize ->
+            if (loadedSize.isSpecified && loadedSize.width > 0f && loadedSize.height > 0f) {
+                intrinsicSize = loadedSize
+            }
+        }
+
+        if (enabled && showOverlays) {
+            AnimatedVisibility(
+                visible = style.hasCustomBackgroundTransform,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(10.dp)
+            ) {
+                FilledTonalIconButton(
+                    onClick = {
+                        doHapticIfNeed(context, prefs)
+                        hasInteracted = true
+                        animateToTransform(WallpaperTransform())
+                    },
+                    colors = IconButtonDefaults.filledTonalIconButtonColors(
+                        containerColor = Color.Black.copy(alpha = 0.56f),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.RestartAlt,
+                        contentDescription = stringResource(R.string.calling_card_reset_framing)
+                    )
+                }
+            }
+
+            AnimatedVisibility(
+                visible = showZoomBadge,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 14.dp)
+            ) {
+                ZoomLevelBadge(scale = style.bgScale)
+            }
+
+            AnimatedVisibility(
+                visible = showHintWhenIdle && !showZoomBadge && !hasInteracted && !style.hasCustomBackgroundTransform,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(horizontal = 12.dp, vertical = 14.dp)
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    color = Color.Black.copy(alpha = 0.56f),
+                    contentColor = Color.White
+                ) {
+                    Text(
+                        text = stringResource(R.string.calling_card_zoom_hint),
+                        style = MaterialTheme.typography.labelMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ZoomLevelBadge(
+    scale: Float,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier,
+        shape = CircleShape,
+        color = Color.Black.copy(alpha = 0.62f),
+        contentColor = Color.White
+    ) {
+        Text(
+            text = String.format(Locale.US, "%.1f×", scale),
+            style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
+        )
     }
 }
 

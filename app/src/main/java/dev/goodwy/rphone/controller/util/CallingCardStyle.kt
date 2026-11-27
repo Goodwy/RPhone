@@ -91,7 +91,8 @@ enum class CallingCardFont(
 }
 
 /**
- * Per-contact or global calling card appearance. (font|weight|fontSize|color|blur)
+ * Per-contact or global calling card appearance.
+ * (`font|weight|fontSize|color|blur[|bgScale|bgOffsetX|bgOffsetY]`)
  *
  * [textColorArgb] is null when the name should use the app theme colour, which
  * keeps every screen readable without any customization.
@@ -101,14 +102,42 @@ data class CallingCardStyle(
     val fontWeight: Int = DEFAULT_WEIGHT,
     val fontSizeSp: Int = DEFAULT_FONT_SIZE_SP,
     val textColorArgb: Int? = null,
-    val blurRadiusDp: Int = 0
+    val blurRadiusDp: Int = 0,
+    val bgScale: Float = DEFAULT_BG_SCALE,
+    val bgOffsetX: Float = 0f,
+    val bgOffsetY: Float = 0f
 ) {
+    val hasCustomBackgroundTransform: Boolean
+        get() = kotlin.math.abs(bgScale - DEFAULT_BG_SCALE) > TRANSFORM_EPSILON ||
+                kotlin.math.abs(bgOffsetX) > TRANSFORM_EPSILON ||
+                kotlin.math.abs(bgOffsetY) > TRANSFORM_EPSILON
+
+    val wallpaperTransform: WallpaperTransform
+        get() = WallpaperTransform(
+            scale = bgScale,
+            offsetX = bgOffsetX,
+            offsetY = bgOffsetY
+        )
+
+    fun withWallpaperTransform(transform: WallpaperTransform): CallingCardStyle = copy(
+        bgScale = CallingCardTransformMath.normalizeZero(CallingCardTransformMath.sanitizeScale(transform.scale)),
+        bgOffsetX = CallingCardTransformMath.normalizeZero(CallingCardTransformMath.sanitizeOffset(transform.offsetX)),
+        bgOffsetY = CallingCardTransformMath.normalizeZero(CallingCardTransformMath.sanitizeOffset(transform.offsetY))
+    )
+
+    fun resetBackgroundTransform(): CallingCardStyle = copy(
+        bgScale = DEFAULT_BG_SCALE,
+        bgOffsetX = 0f,
+        bgOffsetY = 0f
+    )
+
     val isThemeDefault: Boolean
         get() = font == CallingCardFont.System &&
                 fontWeight == DEFAULT_WEIGHT &&
                 fontSizeSp == DEFAULT_FONT_SIZE_SP &&
                 textColorArgb == null &&
-                blurRadiusDp == 0
+                blurRadiusDp == 0 &&
+                !hasCustomBackgroundTransform
 
     val textColor: Color?
         get() = textColorArgb?.let { Color(it) }
@@ -123,11 +152,18 @@ data class CallingCardStyle(
         const val DEFAULT_FONT_SIZE_SP = 24
         const val MIN_FONT_SIZE_SP = 14
         const val MAX_FONT_SIZE_SP = 56
+        const val DEFAULT_BG_SCALE = 1f
+        const val MIN_BG_SCALE = 1f
+        const val MAX_BG_SCALE = 4f
+        const val MAX_BG_OFFSET = 20f
+        const val TRANSFORM_EPSILON = 0.001f
     }
 }
 
 /**
- * Stable string form used in DataStore: `fontId|AARRGGBB` (colour may be empty).
+ * Stable string form used in DataStore:
+ * `fontId|weight|fontSize|AARRGGBB|blur` with optional trailing `|bgScale|bgOffsetX|bgOffsetY`
+ * (colour may be empty; trailing transform fields are omitted when at defaults).
  */
 object CallingCardStyleCodec {
 
@@ -140,6 +176,14 @@ object CallingCardStyleCodec {
         append(style.textColorArgb?.let { String.format(Locale.US, "%08X", it) }.orEmpty())
             .append(SEPARATOR)
         append(style.blurRadiusDp)
+        if (style.hasCustomBackgroundTransform) {
+            append(SEPARATOR)
+            append(String.format(Locale.US, "%.4f", CallingCardTransformMath.sanitizeScale(style.bgScale)))
+            append(SEPARATOR)
+            append(String.format(Locale.US, "%.4f", CallingCardTransformMath.sanitizeOffset(style.bgOffsetX)))
+            append(SEPARATOR)
+            append(String.format(Locale.US, "%.4f", CallingCardTransformMath.sanitizeOffset(style.bgOffsetY)))
+        }
     }
 
     fun decode(raw: String?): CallingCardStyle? {
@@ -161,12 +205,33 @@ object CallingCardStyleCodec {
             ?.toIntOrNull()
             ?.coerceIn(0, CallingCardStyle.MAX_BLUR_DP)
             ?: 0
+        val bgScale = parts.getOrNull(5)
+            ?.toFloatOrNull()
+            ?.takeIf { it.isFinite() }
+            ?.coerceIn(CallingCardStyle.MIN_BG_SCALE, CallingCardStyle.MAX_BG_SCALE)
+            ?.let { CallingCardTransformMath.normalizeZero(it) }
+            ?: CallingCardStyle.DEFAULT_BG_SCALE
+        val bgOffsetX = parts.getOrNull(6)
+            ?.toFloatOrNull()
+            ?.takeIf { it.isFinite() }
+            ?.coerceIn(-CallingCardStyle.MAX_BG_OFFSET, CallingCardStyle.MAX_BG_OFFSET)
+            ?.let { CallingCardTransformMath.normalizeZero(it) }
+            ?: 0f
+        val bgOffsetY = parts.getOrNull(7)
+            ?.toFloatOrNull()
+            ?.takeIf { it.isFinite() }
+            ?.coerceIn(-CallingCardStyle.MAX_BG_OFFSET, CallingCardStyle.MAX_BG_OFFSET)
+            ?.let { CallingCardTransformMath.normalizeZero(it) }
+            ?: 0f
         return CallingCardStyle(
             font = font,
             fontWeight = weight,
             fontSizeSp = size,
             textColorArgb = color,
-            blurRadiusDp = blur
+            blurRadiusDp = blur,
+            bgScale = bgScale,
+            bgOffsetX = bgOffsetX,
+            bgOffsetY = bgOffsetY
         )
     }
 }
