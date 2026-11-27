@@ -7,5 +7,6 @@ data class CallerMetadata(
     val number: String,
     val name: String,
     val isLocalContact: Boolean,
-    val photoUri: String? = null
+    val photoUri: String? = null,
+    val hasLocalName: Boolean = false
 )

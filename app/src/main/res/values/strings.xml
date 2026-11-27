@@ -903,6 +903,29 @@
     <string name="busy_mode_call_rejected_sent_sms_toast">Call declined (Busy Mode). SMS sent.</string>
     <string name="edit_busy_message">Edit the Busy Mode message</string>
     <string name="busy_mode_permission_required">Grant permission to send SMS messages in the app settings</string>
+    <string name="busy_mode_exceptions">Exceptions</string>
+    <string name="busy_mode_exceptions_subtitle">Allow selected contacts and phone numbers to ring normally while Busy Mode is on</string>
+    <string name="busy_mode_exceptions_none">No exceptions</string>
+    <plurals name="busy_mode_exceptions_count">
+        <item quantity="one">%d exception</item>
+        <item quantity="other">%d exceptions</item>
+    </plurals>
+    <string name="busy_mode_exceptions_select_contacts">Select saved contacts</string>
+    <string name="busy_mode_exceptions_select_contacts_subtitle">Choose one or more saved contacts allowed to bypass Busy Mode</string>
+    <string name="busy_mode_exceptions_add_number">Add phone number</string>
+    <string name="busy_mode_exceptions_add_number_subtitle">Enter a phone number manually to bypass Busy Mode</string>
+    <string name="busy_mode_exceptions_saved_contacts_section">Saved contacts</string>
+    <string name="busy_mode_exceptions_manual_numbers_section">Manual phone numbers</string>
+    <string name="busy_mode_exceptions_empty_title">No Busy Mode exceptions</string>
+    <string name="busy_mode_exceptions_empty_description">Selected contacts and manually added numbers will ring normally when Busy Mode is enabled. Blocked numbers always remain blocked.</string>
+    <string name="busy_mode_exceptions_invalid_number">Enter a valid phone number</string>
+    <string name="busy_mode_exceptions_duplicate_number">This phone number is already in your exceptions</string>
+    <string name="busy_mode_exceptions_contacts_permission_required">Allow contacts permission to select saved contacts</string>
+    <string name="busy_mode_exceptions_remove_action">Remove exception</string>
+
+    <!-- Caller UI: Hide Saved Contact Phone Numbers -->
+    <string name="hide_saved_contact_numbers">Hide phone numbers for saved contacts</string>
+    <string name="hide_saved_contact_numbers_subtitle">Show only the contact name during calls and in the floating call bubble. Unknown callers still show numbers</string>
 
     <!-- Avatar Cropping -->
     <string name="crop_avatar_title">Crop &amp; rotate</string>

@@ -62,7 +62,9 @@ private data class CallIdentity(
     val name: String,
     val photoUri: String?,
     val backgroundUri: String?,
-    val callingCardStyle: CallingCardStyle
+    val callingCardStyle: CallingCardStyle,
+    val isSavedContact: Boolean = false,
+    val hasUsableContactName: Boolean = false
 )
 
 private data class CachedCallIdentity(
@@ -264,7 +266,9 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
                                     callingCardStyle = targetIdentity.callingCardStyle,
                                     skipIncomingScreen = answeredFromNotification,
                                     isConference = isConference,
-                                    liquidGlassBackdrop = liquidGlassBackdrop
+                                    liquidGlassBackdrop = liquidGlassBackdrop,
+                                    isSavedContact = targetIdentity.isSavedContact,
+                                    hasUsableContactName = targetIdentity.hasUsableContactName
                                 )
                             }
                         }
@@ -372,13 +376,26 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
                 ?: identity.backgroundUri.takeIf { resolveFailed }
                 ?: defaultBackground
 
-            val resolvedName = if (contact != null && contact.hasLocalName()) {
-                getDisplayName(contact, displayOrder).takeIf { it.isNotBlank() } ?: cnam
+            val localDisplayName = if (contact != null && contact.hasLocalName()) {
+                getDisplayName(contact, displayOrder).takeIf { it.isNotBlank() }
             } else {
-                cnam
-            } ?: contact?.let { getDisplayName(it, displayOrder) }?.takeIf { it.isNotBlank() }
-              ?: identity.name.takeIf { contactFailed && it.isNotBlank() }
-              ?: number.ifEmpty { unknownLabel }
+                null
+            }
+            val resolvedName = localDisplayName
+                ?: cnam
+                ?: contact?.let { getDisplayName(it, displayOrder) }?.takeIf { it.isNotBlank() }
+                ?: identity.name.takeIf { contactFailed && it.isNotBlank() }
+                ?: number.ifEmpty { unknownLabel }
+            val isSavedContact = when {
+                contact != null -> true
+                contactFailed -> identity.isSavedContact
+                else -> false
+            }
+            val hasUsableContactName = when {
+                contact != null -> localDisplayName != null
+                contactFailed -> identity.hasUsableContactName
+                else -> false
+            }
 
             val styleNumbers = (contact?.phoneNumbers ?: emptyList()) + listOfNotNull(
                 number.ifEmpty { null }
@@ -394,7 +411,9 @@ class CallActivity : FragmentActivity() { //ComponentActivity()
                 name = resolvedName,
                 photoUri = contact?.photoUri ?: identity.photoUri.takeIf { contactFailed },
                 backgroundUri = background,
-                callingCardStyle = callingCardStyle
+                callingCardStyle = callingCardStyle,
+                isSavedContact = isSavedContact,
+                hasUsableContactName = hasUsableContactName
             )
             cacheIdentity(number, resolved, settingsState)
             identity = resolved

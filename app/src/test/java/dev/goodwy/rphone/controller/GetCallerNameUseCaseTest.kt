@@ -34,6 +34,7 @@ class GetCallerNameUseCaseTest {
 
             assertEquals("Alice Smith", metadata.name)
             assertTrue(metadata.isLocalContact)
+            assertTrue(metadata.hasLocalName)
             assertEquals("content://photo/1", metadata.photoUri)
         }
     }
@@ -48,6 +49,7 @@ class GetCallerNameUseCaseTest {
 
             assertEquals("Spam Detector / Delivery Service", metadata.name)
             assertFalse(metadata.isLocalContact)
+            assertFalse(metadata.hasLocalName)
         }
     }
 
@@ -97,7 +99,25 @@ class GetCallerNameUseCaseTest {
 
             assertEquals("Delivery Service", metadata.name)
             assertFalse(metadata.isLocalContact)
+            assertFalse(metadata.hasLocalName)
             assertEquals("content://photo/3", metadata.photoUri)
+        }
+    }
+
+    @Test
+    fun testMarksHasLocalNameFalseWhenSavedContactHasNoNameFieldsAndNoCnam() {
+        runBlocking {
+            val namelessContact = Contact(
+                id = "4",
+                phoneNumbers = listOf("+15550007777")
+            )
+            val fakeRepo = FakeCallerRepository(mapOf("+15550007777" to namelessContact))
+            val useCase = GetCallerNameUseCase(fakeRepo)
+
+            val metadata = useCase("+15550007777", cnamName = null)
+
+            assertTrue(metadata.isLocalContact)
+            assertFalse(metadata.hasLocalName)
         }
     }
 

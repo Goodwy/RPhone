@@ -56,6 +56,7 @@ import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.util.forceLtr
+import dev.goodwy.rphone.controller.util.shouldShowCallPhoneNumber
 import dev.goodwy.rphone.view.components.RillAvatar
 import dev.goodwy.rphone.view.theme.MyColors.dialpadKeyColor
 import dev.goodwy.rphone.view.theme.Rill4Theme
@@ -80,6 +81,8 @@ class FloatingCallService : Service() {
     private val contactNameState = mutableStateOf("?")
     private val phoneNumberState  = mutableStateOf("")
     private val photoUriState     = mutableStateOf<String?>(null)
+    private val isSavedContactState = mutableStateOf(false)
+    private val hasUsableContactNameState = mutableStateOf(false)
     private val menuVisibleState  = mutableStateOf(false)
     private var menuDelayJob: Job? = null
 
@@ -143,11 +146,23 @@ class FloatingCallService : Service() {
         const val EXTRA_CONTACT_NAME = "contact_name"
         const val EXTRA_PHONE_NUMBER = "phone_number"
         const val EXTRA_PHOTO_URI    = "photo_uri"
+        const val EXTRA_IS_SAVED_CONTACT = "is_saved_contact"
+        const val EXTRA_HAS_USABLE_NAME = "has_usable_contact_name"
 
-        fun start(context: Context, name: String, number: String, photoUri: String? = null) {
+        fun start(
+            context: Context,
+            name: String,
+            number: String,
+            photoUri: String? = null,
+            isSavedContact: Boolean = false,
+            hasUsableContactName: Boolean = false
+        ) {
             context.startService(Intent(context, FloatingCallService::class.java).apply {
-                putExtra(EXTRA_CONTACT_NAME, name); putExtra(EXTRA_PHONE_NUMBER, number)
+                putExtra(EXTRA_CONTACT_NAME, name)
+                putExtra(EXTRA_PHONE_NUMBER, number)
                 putExtra(EXTRA_PHOTO_URI, photoUri)
+                putExtra(EXTRA_IS_SAVED_CONTACT, isSavedContact)
+                putExtra(EXTRA_HAS_USABLE_NAME, hasUsableContactName)
             })
         }
         fun stop(context: Context) =
@@ -176,6 +191,8 @@ class FloatingCallService : Service() {
         contactNameState.value = intent?.getStringExtra(EXTRA_CONTACT_NAME) ?: "?"
         phoneNumberState.value  = intent?.getStringExtra(EXTRA_PHONE_NUMBER) ?: ""
         photoUriState.value     = intent?.getStringExtra(EXTRA_PHOTO_URI)
+        isSavedContactState.value = intent?.getBooleanExtra(EXTRA_IS_SAVED_CONTACT, false) ?: false
+        hasUsableContactNameState.value = intent?.getBooleanExtra(EXTRA_HAS_USABLE_NAME, false) ?: false
         if (bubbleView == null) { createBubble(); observeAll() }
         return START_STICKY
     }
@@ -347,6 +364,8 @@ class FloatingCallService : Service() {
                     CallMenuSheet(
                         contactName = contactNameState.value,
                         phoneNumber = phoneNumberState.value,
+                        isSavedContact = isSavedContactState.value,
+                        hasUsableContactName = hasUsableContactNameState.value,
                         visible     = menuVisibleState.value,
                         onDismiss   = { dismissMenu() },
                         onAction    = { performAction(it) }
@@ -425,6 +444,8 @@ class FloatingCallService : Service() {
     private fun CallMenuSheet(
         contactName: String,
         phoneNumber: String,
+        isSavedContact: Boolean,
+        hasUsableContactName: Boolean,
         visible: Boolean,
         onDismiss: () -> Unit,
         onAction: (MenuAction) -> Unit
@@ -440,6 +461,17 @@ class FloatingCallService : Service() {
         }
 
         val audioState by callRepository.audioState.collectAsStateWithLifecycle()
+        val settingsVersion by preferenceManager.settingsChanged.collectAsStateWithLifecycle()
+        val hideSavedContactNumber = remember(settingsVersion) {
+            preferenceManager.isHideSavedContactNumberEnabled()
+        }
+        val showPhoneNumber = shouldShowCallPhoneNumber(
+            contactName = contactName,
+            phoneNumber = phoneNumber,
+            isSavedContact = isSavedContact,
+            hasUsableContactName = hasUsableContactName,
+            hideSavedContactNumber = hideSavedContactNumber
+        )
         val isMuted    = audioState?.isMuted ?: false
         val isSpeaker  = audioState?.route == CallAudioState.ROUTE_SPEAKER
 
@@ -505,7 +537,7 @@ class FloatingCallService : Service() {
                                     fontWeight = FontWeight.Bold,
                                     color      = MaterialTheme.colorScheme.onSurface
                                 )
-                                if (!isLocked && phoneNumber.isNotEmpty() && phoneNumber != contactName) {
+                                if (!isLocked && showPhoneNumber) {
                                     Text(
                                         text  = phoneNumber,
                                         style = MaterialTheme.typography.bodySmall,
