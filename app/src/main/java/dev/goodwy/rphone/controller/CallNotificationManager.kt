@@ -340,6 +340,19 @@ class CallNotificationManager(
         notificationManager.notify(number.hashCode(), builder.build())
     }
 
+    fun showSpamBlockedNotification(number: String, categoryLabel: String) {
+        ensureChannel(CHANNEL_ID_LOW)
+        val displayNum = number.ifBlank { context.getString(R.string.label_unknown) }
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID_LOW)
+            .setSmallIcon(R.drawable.ic_close)
+            .setContentTitle(context.getString(R.string.notif_spam_call_title))
+            .setContentText(context.getString(R.string.notif_spam_call_text, displayNum, categoryLabel))
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setAutoCancel(true)
+
+        notificationManager.notify(("spam_" + displayNum).hashCode(), builder.build())
+    }
+
     suspend fun getContactBitmap(photoUri: String?): Bitmap? = withContext(kotlinx.coroutines.Dispatchers.IO) {
         if (photoUri == null) return@withContext null
         try {

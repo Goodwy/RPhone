@@ -125,6 +125,13 @@ fun ExpressiveCallScreen(
     // telecomManager removed as it's now handled by ViewModel
 
     val allCalls by callViewModel.allCalls.collectAsStateWithLifecycle()
+    val spamEvaluationMap by callViewModel.spamEvaluationMap.collectAsStateWithLifecycle()
+    val normalizedSpamKey = remember(phoneNumber) {
+        dev.goodwy.rphone.controller.util.BusyModeExceptionsHelper.normalizeManualNumber(phoneNumber)
+    }
+    val spamEvaluation = if (!isConference && !isSavedContact) {
+        spamEvaluationMap[phoneNumber] ?: spamEvaluationMap[normalizedSpamKey]
+    } else null
     val otherCall = remember(allCalls, call) {
         @Suppress("DEPRECATION")
         allCalls.find {
@@ -473,6 +480,52 @@ fun ExpressiveCallScreen(
                         val currentSimLabel = simLabel
                         val showSimLabel = hasDualSim(context) && currentSimLabel != null
                         val isHD = call.isHD()
+                        if (spamEvaluation != null && (spamEvaluation.isSuspectedSpam ||
+                                spamEvaluation.stirShakenStatus == dev.goodwy.rphone.modal.data.StirShakenStatus.PASSED)
+                        ) {
+                            Spacer(modifier = Modifier.height(10.dp))
+                            val isSpam = spamEvaluation.isSuspectedSpam
+                            val badgeContainer = if (isSpam) {
+                                MaterialTheme.colorScheme.errorContainer
+                            } else {
+                                MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.85f)
+                            }
+                            val badgeContent = if (isSpam) {
+                                MaterialTheme.colorScheme.onErrorContainer
+                            } else {
+                                MaterialTheme.colorScheme.onSecondaryContainer
+                            }
+                            val badgeText = when {
+                                isSpam && dev.goodwy.rphone.modal.data.SpamReason.STIR_SHAKEN_FAILED in spamEvaluation.reasons ->
+                                    stringResource(R.string.spam_badge_spoofed)
+                                isSpam -> stringResource(R.string.spam_badge_suspected)
+                                else -> stringResource(R.string.spam_badge_verified)
+                            }
+                            Surface(
+                                color = badgeContainer,
+                                shape = RoundedCornerShape(50),
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = if (isSpam) Icons.Rounded.Warning else Icons.Rounded.VerifiedUser,
+                                        contentDescription = null,
+                                        tint = badgeContent,
+                                        modifier = Modifier.size(15.dp)
+                                    )
+                                    Text(
+                                        text = badgeText,
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = badgeContent,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                        }
                         if (showSimLabel || isHD) {
                             Spacer(modifier = Modifier.height(6.dp))
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

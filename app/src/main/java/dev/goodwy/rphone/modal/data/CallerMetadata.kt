@@ -8,5 +8,6 @@ data class CallerMetadata(
     val name: String,
     val isLocalContact: Boolean,
     val photoUri: String? = null,
-    val hasLocalName: Boolean = false
+    val hasLocalName: Boolean = false,
+    val spamEvaluation: SpamEvaluationResult? = null
 )

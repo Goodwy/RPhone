@@ -41,6 +41,7 @@ import androidx.compose.material.icons.rounded.PeopleAlt
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.PrivacyTip
 import androidx.compose.material.icons.rounded.Restore
+import androidx.compose.material.icons.rounded.Security
 import androidx.compose.material.icons.rounded.StarRate
 import androidx.compose.material.icons.rounded.Swipe
 import androidx.compose.material.icons.rounded.SystemUpdate
@@ -509,6 +510,24 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
             )
         ) { navigator.navigate(BlockedNumbersScreenDestination) },
         SettingsSearchEntry(
+            headline = stringResource(R.string.spam_protection),
+            supporting = stringResource(R.string.spam_protection_subtitle),
+            leadingIcon = Icons.Rounded.Security,
+            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
+            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
+            options = listOf(
+                stringResource(R.string.spam_enable_protection),
+                stringResource(R.string.spam_action_mode),
+                stringResource(R.string.spam_silence_unknown),
+                stringResource(R.string.spam_block_private),
+                stringResource(R.string.spam_stir_shaken),
+                stringResource(R.string.spam_burst_protection),
+                stringResource(R.string.spam_neighbor_spoofing),
+                stringResource(R.string.spam_import_blocklist),
+                stringResource(R.string.spam_export_blocklist),
+            )
+        ) { navigator.navigate(SpamScreenDestination) },
+        SettingsSearchEntry(
             headline = stringResource(R.string.authentication),
             leadingIcon = Icons.Rounded.Fingerprint,
             iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
@@ -973,6 +992,19 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                                         onClick = {
                                             navigator.navigate(
                                                 BlockedNumbersScreenDestination
+                                            )
+                                        }
+                                    )
+                                    RillListItem(
+                                        headline = stringResource(R.string.spam_protection),
+                                        supporting = stringResource(R.string.spam_protection_subtitle),
+                                        leadingIcon = Icons.Rounded.Security,
+                                        iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
+                                        iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
+                                        trailingIcon = Icons.Default.ChevronRight,
+                                        onClick = {
+                                            navigator.navigate(
+                                                SpamScreenDestination
                                             )
                                         }
                                     )

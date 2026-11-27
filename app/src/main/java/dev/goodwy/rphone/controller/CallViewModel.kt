@@ -8,6 +8,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.modal.data.CallerMetadata
+import dev.goodwy.rphone.modal.data.SpamEvaluationResult
 import dev.goodwy.rphone.modal.`interface`.CallSession
 import dev.goodwy.rphone.modal.`interface`.ICallRepository
 import kotlinx.coroutines.delay
@@ -25,7 +26,8 @@ class CallViewModel(
     val currentCallSession: StateFlow<CallSession?> = callRepository.currentCallSession
     val allCalls: StateFlow<List<Call>> = callRepository.allCalls
     val audioState = callRepository.audioState
-    
+    val spamEvaluationMap: StateFlow<Map<String, SpamEvaluationResult>> = callStateManager.spamEvaluationMap
+
     val callerMetadata: StateFlow<CallerMetadata?> = combine(
         callRepository.currentCallSession,
         callStateManager.callerMetadataMap

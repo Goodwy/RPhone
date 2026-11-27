@@ -1,53 +1,108 @@
 package dev.goodwy.rphone.view.screen.settings
 
 import android.content.Context
+import android.os.Build
 import android.view.Surface
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.rounded.Block
-import androidx.compose.material.icons.rounded.Cancel
-import androidx.compose.material.icons.rounded.PersonOff
+import androidx.compose.material.icons.rounded.CallEnd
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.DeleteSweep
+import androidx.compose.material.icons.rounded.FileDownload
+import androidx.compose.material.icons.rounded.FileUpload
+import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.PhoneDisabled
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.rounded.PrivacyTip
+import androidx.compose.material.icons.rounded.Radar
+import androidx.compose.material.icons.rounded.Repeat
+import androidx.compose.material.icons.rounded.Security
+import androidx.compose.material.icons.rounded.Shield
+import androidx.compose.material.icons.rounded.VerifiedUser
+import androidx.compose.material.icons.rounded.VisibilityOff
+import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import dev.goodwy.rphone.cardCornerExtraSmall
-import dev.goodwy.rphone.controller.util.PreferenceManager
-import dev.goodwy.rphone.modal.`interface`.ICallLogRepository
-import dev.goodwy.rphone.modal.`interface`.IContactsRepository
-import dev.goodwy.rphone.view.components.NavigationIcon
-import dev.goodwy.rphone.view.components.RillAnimatedSection
-import dev.goodwy.rphone.view.components.RillAvatar
-import dev.goodwy.rphone.view.components.RillExpressiveCard
-import dev.goodwy.rphone.view.components.RillListItem
-import dev.goodwy.rphone.view.components.RillSwitchListItem
-import dev.goodwy.rphone.view.theme.MyColors.cardColor
-import dev.goodwy.rphone.view.theme.customColors
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.BlockedNumbersScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import dev.goodwy.rphone.R
+import dev.goodwy.rphone.controller.util.PreferenceManager
+import dev.goodwy.rphone.controller.util.getCallScreeningRoleIntent
+import dev.goodwy.rphone.controller.util.isCallScreeningRoleAvailable
+import dev.goodwy.rphone.controller.util.isCallScreeningRoleHeld
+import dev.goodwy.rphone.controller.util.toast
+import dev.goodwy.rphone.modal.data.SpamActionMode
+import dev.goodwy.rphone.modal.data.SpamCategory
+import dev.goodwy.rphone.modal.db.SpamNumberEntity
+import dev.goodwy.rphone.modal.repository.SpamRepository
+import dev.goodwy.rphone.view.components.NavigationIcon
+import dev.goodwy.rphone.view.components.RillAnimatedSection
+import dev.goodwy.rphone.view.components.RillDialog
+import dev.goodwy.rphone.view.components.RillExpressiveCard
+import dev.goodwy.rphone.view.components.RillListItem
+import dev.goodwy.rphone.view.components.RillSelectListItem
+import dev.goodwy.rphone.view.components.RillSwitchListItem
 import dev.goodwy.rphone.view.components.Title
+import dev.goodwy.rphone.view.theme.customColors
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,336 +110,119 @@ import org.koin.compose.koinInject
 @Composable
 fun SpamScreen(navigator: DestinationsNavigator) {
     val prefs = koinInject<PreferenceManager>()
+    val spamRepository = koinInject<SpamRepository>()
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val settingsState by prefs.settingsChanged.collectAsStateWithLifecycle()
 
-    var silenceUnknown by remember { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SILENCE_UNKNOWN, false)) }
+    val spamNumbers by spamRepository.observeSpamNumbers().collectAsStateWithLifecycle(initialValue = emptyList())
 
-    // Blocked numbers dialog state
-    var showBlockedNumbersDialog by remember { mutableStateOf(false) }
-    var showBlockListDialog by remember { mutableStateOf(false) }
-    var blockedNumbersTab by remember { mutableStateOf(0) }
-    var blockedNumberInput by remember { mutableStateOf("") }
-    var blockedContactsList by remember {
-        mutableStateOf(
-            prefs.getString(PreferenceManager.KEY_BLOCKED_CONTACTS, "")
-                ?.split(",")
-                ?.filter { it.isNotBlank() }
-                ?: emptyList()
-        )
+    var protectionEnabled by remember(settingsState) {
+        mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SPAM_PROTECTION_ENABLED, true))
+    }
+    var spamActionMode by remember(settingsState) {
+        mutableIntStateOf(prefs.getInt(PreferenceManager.KEY_SPAM_ACTION, SpamActionMode.SILENCE.value))
+    }
+    var silenceUnknown by remember(settingsState) {
+        mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SILENCE_UNKNOWN, false))
+    }
+    var blockPrivate by remember(settingsState) {
+        mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SPAM_BLOCK_PRIVATE, false))
+    }
+    var stirShakenEnabled by remember(settingsState) {
+        mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SPAM_STIR_SHAKEN_ENABLED, true))
+    }
+    var burstProtectionEnabled by remember(settingsState) {
+        mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SPAM_BURST_PROTECTION, true))
+    }
+    var neighborSpoofingEnabled by remember(settingsState) {
+        mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SPAM_NEIGHBOR_SPOOFING, false))
+    }
+    var spamNotifications by remember(settingsState) {
+        mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_SPAM_NOTIFICATION, true))
     }
 
-    // ── Block List Detail Dialog ───────────────────────────────────────────────
-    if (showBlockListDialog) {
-        val contactsRepo: IContactsRepository = koinInject()
-        var blockedWithInfo by remember { mutableStateOf<List<Triple<String, String, String?>>>(emptyList()) }
-        LaunchedEffect(blockedContactsList) {
-            blockedWithInfo = blockedContactsList.map { number ->
-                val contact = try { contactsRepo.getContactByNumber(number) } catch (_: Exception) { null }
-                Triple(number, contact?.displayName ?: number, contact?.photoUri)
+    var isRoleAvailable by remember { mutableStateOf(isCallScreeningRoleAvailable(context)) }
+    var isRoleHeld by remember { mutableStateOf(isCallScreeningRoleHeld(context)) }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                isRoleAvailable = isCallScreeningRoleAvailable(context)
+                isRoleHeld = isCallScreeningRoleHeld(context)
             }
         }
-
-        Dialog(onDismissRequest = { showBlockListDialog = false }) {
-            Surface(
-                shape = RoundedCornerShape(24.dp),
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(modifier = Modifier.padding(top = 20.dp, bottom = 8.dp, start = 20.dp, end = 20.dp), /*verticalArrangement = Arrangement.spacedBy(12.dp)*/) {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Surface(
-                            shape = RoundedCornerShape(10.dp),
-                            color = MaterialTheme.colorScheme.customColors.colorRed,
-                            modifier = Modifier.size(32.dp)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    Icons.Rounded.Block,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.customColors.colorDarkRed,
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
-                        }
-                        Text("Block List", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                        Surface(shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.customColors.colorRed) {
-                            Text("${blockedContactsList.size}", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.customColors.colorDarkRed, modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp))
-                        }
-                    }
-                    Spacer(Modifier.height(16.dp))
-
-//                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(0.4f))
-
-                    if (blockedContactsList.isEmpty()) {
-                        Box(modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp), contentAlignment = Alignment.Center) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Icon(Icons.Rounded.Block, null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.35f), modifier = Modifier.size(44.dp))
-                                Text("No numbers blocked", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            }
-                        }
-                    } else {
-                        Surface(shape = MaterialTheme.shapes.large, color = Color.Transparent, modifier = Modifier.wrapContentSize()) {
-                            LazyColumn(modifier = Modifier.heightIn(max = 340.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                                itemsIndexed(blockedWithInfo) { index, (number, name, photoUri) ->
-                                    Surface(shape = RoundedCornerShape(cardCornerExtraSmall), color = cardColor, modifier = Modifier.fillMaxWidth()) {
-                                        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-                                            RillAvatar(name = name, photoUri = photoUri, modifier = Modifier.size(46.dp))
-                                            Spacer(Modifier.width(12.dp))
-                                            Column(modifier = Modifier.weight(1f)) {
-                                                Text(name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold, maxLines = 1)
-                                                if (name != number) Text(number, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
-                                            }
-                                            IconButton(onClick = {
-                                                val updated = blockedContactsList.toMutableList().also { it.removeAt(index) }
-                                                blockedContactsList = updated
-                                                prefs.setString(PreferenceManager.KEY_BLOCKED_CONTACTS, updated.joinToString(","))
-                                            }, modifier = Modifier.size(36.dp)) {
-                                                Icon(Icons.Rounded.Cancel, "Remove", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(24.dp))
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    Spacer(Modifier.height(8.dp))
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                        TextButton(onClick = { showBlockListDialog = false }) { Text("Close") }
-                    }
-                }
-            }
-        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    // ── Blocked Numbers Dialog ────────────────────────────────────────────────
-    if (showBlockedNumbersDialog) {
-        val callLogRepo: ICallLogRepository = koinInject()
-        val contactsRepo: IContactsRepository = koinInject()
+    LaunchedEffect(Unit) {
+        spamRepository.migrateLegacyBlockedContactsIfNeeded()
+    }
 
-        var recentNumbers by remember { mutableStateOf<List<Triple<String, String, String?>>>(emptyList()) }
-        var contactNumbers by remember { mutableStateOf<List<Triple<String, String, String?>>>(emptyList()) }
-        var searchQuery by remember { mutableStateOf("") }
-        var isLoading by remember { mutableStateOf(true) }
+    val roleLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) {
+        isRoleHeld = isCallScreeningRoleHeld(context)
+    }
 
-        LaunchedEffect(Unit) {
-            isLoading = true
-            try {
-                val logs = callLogRepo.getCallLogs()
-                val seen = mutableSetOf<String>()
-                val result = mutableListOf<Triple<String, String, String?>>()
-                for (log in logs) {
-                    val num = log.number
-                    if (num.isBlank() || !seen.add(num)) continue
-                    val contact = try { contactsRepo.getContactByNumber(num) } catch (_: Exception) { null }
-                    result.add(Triple(num, contact?.displayName ?: num, contact?.photoUri))
-                }
-                recentNumbers = result
-            } catch (_: Exception) {}
-            try {
-                contactNumbers = contactsRepo.getContacts()
-                    .filter { it.phoneNumbers.isNotEmpty() }
-                    .flatMap { c -> c.phoneNumbers.map { num -> Triple(num, c.displayName, c.photoUri) } }
-                    .distinctBy { it.first }
-                    .sortedBy { it.second }
-            } catch (_: Exception) {}
-            isLoading = false
-        }
-
-        val filteredRecents = remember(recentNumbers, searchQuery) {
-            if (searchQuery.isBlank()) recentNumbers
-            else recentNumbers.filter { (num, name, _) ->
-                name.contains(searchQuery, ignoreCase = true) || num.contains(searchQuery)
+    val resources = LocalResources.current
+    val importEmptyMsg = stringResource(R.string.spam_import_empty)
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        scope.launch {
+            val rawText = withContext(Dispatchers.IO) {
+                runCatching {
+                    context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
+                }.getOrNull()
             }
-        }
-        val filteredContacts = remember(contactNumbers, searchQuery) {
-            if (searchQuery.isBlank()) contactNumbers
-            else contactNumbers.filter { (num, name, _) ->
-                name.contains(searchQuery, ignoreCase = true) || num.contains(searchQuery)
+            if (rawText.isNullOrBlank()) {
+                context.toast(importEmptyMsg)
+                return@launch
             }
-        }
-
-        fun blockNumber(number: String) {
-            if (!blockedContactsList.contains(number)) {
-                val updated = blockedContactsList + number
-                blockedContactsList = updated
-                prefs.setString(PreferenceManager.KEY_BLOCKED_CONTACTS, updated.joinToString(","))
-            }
-        }
-
-        Dialog(onDismissRequest = { showBlockedNumbersDialog = false }) {
-            Surface(
-                shape = RoundedCornerShape(24.dp),
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(modifier = Modifier.padding(top = 20.dp, bottom = 8.dp, start = 20.dp, end = 20.dp), /*verticalArrangement = Arrangement.spacedBy(12.dp)*/) {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Surface(
-                            shape = RoundedCornerShape(10.dp),
-                            color = MaterialTheme.colorScheme.customColors.colorRed,
-                            modifier = Modifier.size(32.dp)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    Icons.Rounded.PersonOff,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.customColors.colorDarkRed,
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
-                        }
-                        Text("Blocked Numbers", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    }
-
-                    Spacer(Modifier.height(16.dp))
-                    OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = { searchQuery = it },
-                        placeholder = { Text("Search…") },
-                        leadingIcon = { Icon(Icons.Default.Search, null, modifier = Modifier.size(20.dp)) },
-                        trailingIcon = {
-                            if (searchQuery.isNotBlank()) IconButton(onClick = { searchQuery = "" }) { Icon(Icons.Default.Close, null, modifier = Modifier.size(18.dp)) }
-                        },
-                        singleLine = true,
-                        shape = RoundedCornerShape(50),
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = MaterialTheme.colorScheme.primary)
+            val result = spamRepository.importBlocklist(rawText)
+            if (result.importedCount > 0) {
+                context.toast(
+                    resources.getString(
+                        R.string.spam_import_success,
+                        result.importedCount,
+                        result.skippedInvalidCount
                     )
-
-                    Spacer(Modifier.height(16.dp))
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        listOf("Call Logs", "Contacts", "Manual").forEachIndexed { index, label ->
-                            val selected = blockedNumbersTab == index
-                            Surface(
-                                onClick = { blockedNumbersTab = index },
-                                shape = RoundedCornerShape(50),
-                                color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-                                modifier = Modifier.weight(1f).height(36.dp)
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Text(
-                                        label,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                                        color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-//                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(0.4f))
-
-                    Spacer(Modifier.height(16.dp))
-                    Box(modifier = Modifier.heightIn(min = 80.dp, max = 320.dp)) {
-                        when (blockedNumbersTab) {
-                            0 -> {
-                                if (isLoading) {
-                                    Box(Modifier.fillMaxWidth().height(80.dp), contentAlignment = Alignment.Center) {
-                                        CircularProgressIndicator(modifier = Modifier.size(28.dp))
-                                    }
-                                } else if (filteredRecents.isEmpty()) {
-                                    Box(Modifier.fillMaxWidth().height(80.dp), contentAlignment = Alignment.Center) {
-                                        Text(if (searchQuery.isBlank()) "No call logs found." else "No results for \"$searchQuery\"",
-                                            style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                    }
-                                } else {
-                                    Surface(shape = MaterialTheme.shapes.large, color = Color.Transparent, modifier = Modifier.wrapContentSize()) {
-                                        LazyColumn(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                                            items(filteredRecents, key = { it.first }) { (number, name, photoUri) ->
-                                                val alreadyBlocked = blockedContactsList.contains(number)
-                                                Surface(shape = RoundedCornerShape(cardCornerExtraSmall), color = if (alreadyBlocked) MaterialTheme.colorScheme.errorContainer.copy(0.3f) else cardColor) {
-                                                    Row(Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-                                                        RillAvatar(name = name, photoUri = photoUri, modifier = Modifier.size(38.dp))
-                                                        Spacer(Modifier.width(10.dp))
-                                                        Column(modifier = Modifier.weight(1f)) {
-                                                            Text(name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium, maxLines = 1)
-                                                            if (name != number) Text(number, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
-                                                        }
-                                                        TextButton(onClick = { blockNumber(number) }, enabled = !alreadyBlocked, contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)) {
-                                                            Text(if (alreadyBlocked) "Blocked" else "Block", style = MaterialTheme.typography.labelSmall, color = if (alreadyBlocked) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary)
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            1 -> {
-                                if (isLoading) {
-                                    Box(Modifier.fillMaxWidth().height(80.dp), contentAlignment = Alignment.Center) {
-                                        CircularProgressIndicator(modifier = Modifier.size(28.dp))
-                                    }
-                                } else if (filteredContacts.isEmpty()) {
-                                    Box(Modifier.fillMaxWidth().height(80.dp), contentAlignment = Alignment.Center) {
-                                        Text(if (searchQuery.isBlank()) "No contacts found." else "No results for \"$searchQuery\"",
-                                            style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                    }
-                                } else {
-                                    Surface(shape = MaterialTheme.shapes.large, color = Color.Transparent, modifier = Modifier.wrapContentSize()) {
-                                        LazyColumn(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                                            items(filteredContacts, key = { it.first }) { (number, name, photoUri) ->
-                                                val alreadyBlocked = blockedContactsList.contains(number)
-                                                Surface(shape = RoundedCornerShape(cardCornerExtraSmall), color = if (alreadyBlocked) MaterialTheme.colorScheme.errorContainer.copy(0.3f) else cardColor) {
-                                                    Row(Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-                                                        RillAvatar(name = name, photoUri = photoUri, modifier = Modifier.size(38.dp))
-                                                        Spacer(Modifier.width(10.dp))
-                                                        Column(modifier = Modifier.weight(1f)) {
-                                                            Text(name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium, maxLines = 1)
-                                                            if (name != number) Text(number, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
-                                                        }
-                                                        TextButton(onClick = { blockNumber(number) }, enabled = !alreadyBlocked, contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)) {
-                                                            Text(if (alreadyBlocked) "Blocked" else "Block", style = MaterialTheme.typography.labelSmall, color = if (alreadyBlocked) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary)
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            2 -> {
-                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    OutlinedTextField(
-                                        value = blockedNumberInput,
-                                        onValueChange = { blockedNumberInput = it },
-                                        label = { Text("Enter number to block") },
-                                        singleLine = true,
-                                        shape = RoundedCornerShape(12.dp),
-                                        modifier = Modifier.fillMaxWidth(),
-                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                                        trailingIcon = {
-                                            if (blockedNumberInput.isNotBlank()) {
-                                                IconButton(onClick = {
-                                                    val num = blockedNumberInput.trim()
-                                                    if (num.isNotBlank()) blockNumber(num)
-                                                    blockedNumberInput = ""
-                                                }) { Icon(Icons.Default.Add, "Add", tint = MaterialTheme.colorScheme.primary) }
-                                            }
-                                        }
-                                    )
-                                    if (searchQuery.isNotBlank()) {
-                                        Button(
-                                            onClick = { blockNumber(searchQuery.trim()); searchQuery = "" },
-                                            modifier = Modifier.fillMaxWidth(),
-                                            shape = RoundedCornerShape(50)
-                                        ) { Text("Block \"${searchQuery.trim()}\"") }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    Spacer(Modifier.height(8.dp))
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                        TextButton(onClick = { showBlockedNumbersDialog = false }) { Text("Done") }
-                    }
-                }
+                )
+            } else {
+                context.toast(importEmptyMsg)
             }
         }
     }
+
+    val exportSuccessMsg = stringResource(R.string.spam_export_success)
+    val exportEmptyMsg = stringResource(R.string.spam_export_empty)
+    val exportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("text/csv")
+    ) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        scope.launch {
+            val csv = spamRepository.exportBlocklistCsv()
+            withContext(Dispatchers.IO) {
+                runCatching {
+                    context.contentResolver.openOutputStream(uri)?.bufferedWriter()?.use { it.write(csv) }
+                }
+            }
+            context.toast(exportSuccessMsg)
+        }
+    }
+
+    var showReportDialog by remember { mutableStateOf(false) }
+    var reportNumberInput by remember { mutableStateOf("") }
+    var reportCategory by remember { mutableStateOf(SpamCategory.SPAM) }
+    var reportAlsoBlock by remember { mutableStateOf(false) }
+
+    var showSpamListDialog by remember { mutableStateOf(false) }
+    var entryToRemove by remember { mutableStateOf<SpamNumberEntity?>(null) }
+    var showClearImportedConfirm by remember { mutableStateOf(false) }
 
     var visible by remember { mutableStateOf(false) }
     val screenAlpha by animateFloatAsState(
@@ -394,10 +232,12 @@ fun SpamScreen(navigator: DestinationsNavigator) {
     )
     LaunchedEffect(Unit) { visible = true }
 
+    @Suppress("DEPRECATION")
     val rotation =
         (context.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager).defaultDisplay.rotation
     val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
     val isRotation90 = rotation == if (isLtr) Surface.ROTATION_90 else Surface.ROTATION_270
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -405,7 +245,7 @@ fun SpamScreen(navigator: DestinationsNavigator) {
                     if (isRotation90) WindowInsetsSides.Top + WindowInsetsSides.Horizontal
                     else WindowInsetsSides.Top
                 ),
-                title = { Title("Spam") },
+                title = { Title(stringResource(R.string.spam_protection)) },
                 navigationIcon = {
                     NavigationIcon(onClick = { navigator.navigateUp() })
                 }
@@ -415,7 +255,6 @@ fun SpamScreen(navigator: DestinationsNavigator) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-//                .padding(padding)
                 .padding(
                     top = padding.calculateTopPadding(),
                     start = 0.dp,
@@ -426,47 +265,259 @@ fun SpamScreen(navigator: DestinationsNavigator) {
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
+            // ── On-device privacy & system role card ─────────────────────
             item {
                 RillAnimatedSection(delayMs = 0L) {
                     RillExpressiveCard {
+                        RillListItem(
+                            headline = stringResource(R.string.spam_privacy_badge_title),
+                            supporting = stringResource(R.string.spam_privacy_badge_subtitle),
+                            leadingIcon = Icons.Rounded.PrivacyTip,
+                            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
+                            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
+                            onClick = {}
+                        )
+                        if (isRoleAvailable) {
+                            RillListItem(
+                                headline = stringResource(
+                                    if (isRoleHeld) R.string.spam_screening_role_active
+                                    else R.string.spam_screening_role_title
+                                ),
+                                supporting = stringResource(
+                                    if (isRoleHeld) R.string.spam_screening_role_active_subtitle
+                                    else R.string.spam_screening_role_subtitle
+                                ),
+                                leadingIcon = if (isRoleHeld) Icons.Rounded.VerifiedUser else Icons.Rounded.Shield,
+                                iconContainerColor = if (isRoleHeld) {
+                                    MaterialTheme.colorScheme.customColors.colorDarkGreen
+                                } else {
+                                    MaterialTheme.colorScheme.customColors.colorDarkAmber
+                                },
+                                iconBgContainerColor = if (isRoleHeld) {
+                                    MaterialTheme.colorScheme.customColors.colorGreen
+                                } else {
+                                    MaterialTheme.colorScheme.customColors.colorAmber
+                                },
+                                trailingIcon = if (isRoleHeld) null else Icons.Default.ChevronRight,
+                                onClick = {
+                                    if (!isRoleHeld) {
+                                        runCatching {
+                                            roleLauncher.launch(getCallScreeningRoleIntent(context))
+                                        }
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
+            // ── Master toggle & action mode ──────────────────────────────
+            item {
+                RillAnimatedSection(delayMs = 50L) {
+                    RillExpressiveCard {
                         RillSwitchListItem(
-                            headline   = "Silence Unknown Callers",
-                            supporting = "Automatically decline calls from unknown numbers",
-                            leadingIcon = Icons.Rounded.PhoneDisabled,
+                            headline = stringResource(R.string.spam_enable_protection),
+                            supporting = stringResource(R.string.spam_enable_protection_subtitle),
+                            leadingIcon = Icons.Rounded.Security,
                             iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
                             iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
-                            checked = silenceUnknown,
+                            checked = protectionEnabled,
                             onCheckedChange = {
-                                silenceUnknown = it
-                                prefs.setBoolean(PreferenceManager.KEY_SILENCE_UNKNOWN, it)
+                                protectionEnabled = it
+                                prefs.setBoolean(PreferenceManager.KEY_SPAM_PROTECTION_ENABLED, it)
+                            }
+                        )
+                        RillSelectListItem(
+                            headline = stringResource(R.string.spam_action_mode),
+                            supporting = stringResource(R.string.spam_action_mode_subtitle),
+                            leadingIcon = when (spamActionMode) {
+                                SpamActionMode.WARN.value -> Icons.Rounded.Warning
+                                SpamActionMode.DECLINE.value -> Icons.Rounded.CallEnd
+                                else -> Icons.Rounded.PhoneDisabled
+                            },
+                            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+                            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
+                            options = listOf(
+                                stringResource(R.string.spam_action_warn) to SpamActionMode.WARN.value,
+                                stringResource(R.string.spam_action_silence) to SpamActionMode.SILENCE.value,
+                                stringResource(R.string.spam_action_decline) to SpamActionMode.DECLINE.value
+                            ),
+                            selectedValue = spamActionMode,
+                            onValueChange = {
+                                spamActionMode = it
+                                prefs.setInt(PreferenceManager.KEY_SPAM_ACTION, it)
                             }
                         )
                     }
                 }
             }
 
+            // ── Local detection rules ────────────────────────────────────
             item {
-                RillAnimatedSection(delayMs = 80L) {
-                    RillExpressiveCard {
-                        RillListItem(
-                            headline = "Blocked Numbers",
-                            supporting = "${blockedContactsList.size} number(s) blocked",
-                            leadingIcon = Icons.Rounded.PersonOff,
-                            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
-                            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
-                            trailingIcon = Icons.Default.ChevronRight,
-                            onClick = { showBlockedNumbersDialog = true }
-                        )
-                        RillListItem(
-                            headline = "Tap to see the Block list",
-                            supporting = if (blockedContactsList.isEmpty()) "No numbers blocked"
-                            else "${blockedContactsList.size} number(s) blocked",
-                            leadingIcon = Icons.Rounded.Block,
-                            iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
-                            iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
-                            trailingIcon = Icons.Default.ChevronRight,
-                            onClick = { showBlockListDialog = true }
-                        )
+                RillAnimatedSection(delayMs = 100L) {
+                    Column {
+                        SettingsSectionLabel(stringResource(R.string.spam_detection_rules))
+                        RillExpressiveCard {
+                            RillSwitchListItem(
+                                headline = stringResource(R.string.spam_silence_unknown),
+                                supporting = stringResource(R.string.spam_silence_unknown_subtitle),
+                                leadingIcon = Icons.Rounded.PhoneDisabled,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkPurple,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorPurple,
+                                checked = silenceUnknown,
+                                onCheckedChange = {
+                                    silenceUnknown = it
+                                    prefs.setBoolean(PreferenceManager.KEY_SILENCE_UNKNOWN, it)
+                                }
+                            )
+                            RillSwitchListItem(
+                                headline = stringResource(R.string.spam_block_private),
+                                supporting = stringResource(R.string.spam_block_private_subtitle),
+                                leadingIcon = Icons.Rounded.VisibilityOff,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
+                                checked = blockPrivate,
+                                enabled = protectionEnabled,
+                                onCheckedChange = {
+                                    blockPrivate = it
+                                    prefs.setBoolean(PreferenceManager.KEY_SPAM_BLOCK_PRIVATE, it)
+                                }
+                            )
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                RillSwitchListItem(
+                                    headline = stringResource(R.string.spam_stir_shaken),
+                                    supporting = stringResource(R.string.spam_stir_shaken_subtitle),
+                                    leadingIcon = Icons.Rounded.VerifiedUser,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
+                                    checked = stirShakenEnabled,
+                                    enabled = protectionEnabled,
+                                    onCheckedChange = {
+                                        stirShakenEnabled = it
+                                        prefs.setBoolean(PreferenceManager.KEY_SPAM_STIR_SHAKEN_ENABLED, it)
+                                    }
+                                )
+                            }
+                            RillSwitchListItem(
+                                headline = stringResource(R.string.spam_burst_protection),
+                                supporting = stringResource(R.string.spam_burst_protection_subtitle),
+                                leadingIcon = Icons.Rounded.Repeat,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+                                checked = burstProtectionEnabled,
+                                enabled = protectionEnabled,
+                                onCheckedChange = {
+                                    burstProtectionEnabled = it
+                                    prefs.setBoolean(PreferenceManager.KEY_SPAM_BURST_PROTECTION, it)
+                                }
+                            )
+                            RillSwitchListItem(
+                                headline = stringResource(R.string.spam_neighbor_spoofing),
+                                supporting = stringResource(R.string.spam_neighbor_spoofing_subtitle),
+                                leadingIcon = Icons.Rounded.Radar,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
+                                checked = neighborSpoofingEnabled,
+                                enabled = protectionEnabled,
+                                onCheckedChange = {
+                                    neighborSpoofingEnabled = it
+                                    prefs.setBoolean(PreferenceManager.KEY_SPAM_NEIGHBOR_SPOOFING, it)
+                                }
+                            )
+                            RillSwitchListItem(
+                                headline = stringResource(R.string.spam_notifications),
+                                supporting = stringResource(R.string.spam_notifications_subtitle),
+                                leadingIcon = Icons.Rounded.NotificationsActive,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkAmber,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
+                                checked = spamNotifications,
+                                enabled = protectionEnabled,
+                                onCheckedChange = {
+                                    spamNotifications = it
+                                    prefs.setBoolean(PreferenceManager.KEY_SPAM_NOTIFICATION, it)
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
+            // ── Local spam database & offline blocklists ─────────────────
+            item {
+                RillAnimatedSection(delayMs = 150L) {
+                    Column {
+                        SettingsSectionLabel(stringResource(R.string.spam_database_section))
+                        RillExpressiveCard {
+                            RillListItem(
+                                headline = stringResource(R.string.spam_add_number),
+                                supporting = stringResource(R.string.spam_add_number_subtitle),
+                                leadingIcon = Icons.Outlined.Add,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkOrange,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorOrange,
+                                onClick = {
+                                    reportNumberInput = ""
+                                    reportCategory = SpamCategory.SPAM
+                                    reportAlsoBlock = false
+                                    showReportDialog = true
+                                }
+                            )
+                            RillListItem(
+                                headline = if (spamNumbers.isEmpty()) {
+                                    stringResource(R.string.spam_view_list_empty)
+                                } else {
+                                    stringResource(R.string.spam_view_list, spamNumbers.size)
+                                },
+                                supporting = stringResource(R.string.spam_view_list_subtitle),
+                                leadingIcon = Icons.Rounded.Block,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
+                                trailingIcon = Icons.Default.ChevronRight,
+                                onClick = { showSpamListDialog = true }
+                            )
+                            RillListItem(
+                                headline = stringResource(R.string.spam_import_blocklist),
+                                supporting = stringResource(R.string.spam_import_blocklist_subtitle),
+                                leadingIcon = Icons.Rounded.FileUpload,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkBlue,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorBlue,
+                                onClick = {
+                                    importLauncher.launch(arrayOf("text/csv", "text/comma-separated-values", "text/plain", "*/*"))
+                                }
+                            )
+                            RillListItem(
+                                headline = stringResource(R.string.spam_export_blocklist),
+                                supporting = stringResource(R.string.spam_export_blocklist_subtitle),
+                                leadingIcon = Icons.Rounded.FileDownload,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
+                                onClick = {
+                                    if (spamNumbers.isEmpty()) {
+                                        context.toast(exportEmptyMsg)
+                                    } else {
+                                        exportLauncher.launch("rill_spam_list.csv")
+                                    }
+                                }
+                            )
+                            if (spamNumbers.any { it.source == SpamNumberEntity.SOURCE_IMPORTED_LIST }) {
+                                RillListItem(
+                                    headline = stringResource(R.string.spam_clear_imported),
+                                    leadingIcon = Icons.Rounded.DeleteSweep,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
+                                    onClick = { showClearImportedConfirm = true }
+                                )
+                            }
+                            RillListItem(
+                                headline = stringResource(R.string.spam_manage_blocked_link),
+                                supporting = stringResource(R.string.spam_manage_blocked_link_subtitle),
+                                leadingIcon = Icons.Rounded.Block,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
+                                trailingIcon = Icons.Default.ChevronRight,
+                                onClick = { navigator.navigate(BlockedNumbersScreenDestination) }
+                            )
+                        }
                     }
                 }
             }
@@ -474,4 +525,202 @@ fun SpamScreen(navigator: DestinationsNavigator) {
             item { SettingsBottomPadding() }
         }
     }
+
+    // ── Report Spam Number Dialog ────────────────────────────────────────
+    if (showReportDialog) {
+        val invalidMsg = stringResource(R.string.spam_invalid_number_toast)
+        RillDialog(
+            onDismissRequest = { showReportDialog = false },
+            title = stringResource(R.string.spam_add_number),
+            icon = Icons.Rounded.Warning,
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val raw = reportNumberInput.trim()
+                        scope.launch {
+                            val ok = spamRepository.reportSpam(
+                                number = raw,
+                                category = reportCategory,
+                                alsoBlock = reportAlsoBlock
+                            )
+                            if (!ok) {
+                                context.toast(invalidMsg)
+                            }
+                            showReportDialog = false
+                        }
+                    },
+                    enabled = reportNumberInput.isNotBlank()
+                ) {
+                    Text(stringResource(R.string.spam_report_action), textAlign = TextAlign.End)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showReportDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = reportNumberInput,
+                    onValueChange = { reportNumberInput = it },
+                    label = { Text(stringResource(R.string.number_or_pattern)) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                    shape = RoundedCornerShape(14.dp),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Text(
+                    text = stringResource(R.string.spam_category_label),
+                    style = MaterialTheme.typography.labelLarge
+                )
+                val selectableCategories = listOf(
+                    SpamCategory.SPAM to R.string.spam_category_spam,
+                    SpamCategory.TELEMARKETER to R.string.spam_category_telemarketer,
+                    SpamCategory.SCAM to R.string.spam_category_scam,
+                    SpamCategory.ROBOCALL to R.string.spam_category_robocall
+                )
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    selectableCategories.chunked(2).forEach { pair ->
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            pair.forEach { (cat, labelRes) ->
+                                FilterChip(
+                                    selected = reportCategory == cat,
+                                    onClick = { reportCategory = cat },
+                                    label = { Text(stringResource(labelRes)) }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Checkbox(
+                        checked = reportAlsoBlock,
+                        onCheckedChange = { reportAlsoBlock = it }
+                    )
+                    Text(
+                        text = stringResource(R.string.spam_also_block_system),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        }
+    }
+
+    // ── Local Spam List Dialog ───────────────────────────────────────────
+    if (showSpamListDialog) {
+        RillDialog(
+            onDismissRequest = { showSpamListDialog = false },
+            title = stringResource(R.string.spam_database_section),
+            icon = Icons.Rounded.Security,
+            confirmButton = {
+                TextButton(onClick = { showSpamListDialog = false }) {
+                    Text(stringResource(R.string.close))
+                }
+            }
+        ) {
+            if (spamNumbers.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.spam_view_list_empty),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 360.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(spamNumbers, key = { it.normalizedNumber }) { entry ->
+                        RillExpressiveCard {
+                            RillListItem(
+                                headline = entry.rawNumber,
+                                supporting = spamCategoryLabel(SpamCategory.fromStorageKey(entry.category)) +
+                                    (entry.label?.let { " • $it" } ?: ""),
+                                leadingIcon = Icons.Rounded.Warning,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkRed,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorRed,
+                                trailingIcon = Icons.Rounded.Close,
+                                modifierTrailingIcon = Modifier.size(20.dp),
+                                onClick = { entryToRemove = entry }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // ── Remove Spam Entry Confirmation ───────────────────────────────────
+    entryToRemove?.let { entry ->
+        RillDialog(
+            onDismissRequest = { entryToRemove = null },
+            title = stringResource(R.string.spam_database_section),
+            icon = Icons.Rounded.Block,
+            confirmButton = {
+                TextButton(onClick = {
+                    scope.launch {
+                        spamRepository.removeSpamNumber(entry.normalizedNumber)
+                        entryToRemove = null
+                    }
+                }) {
+                    Text(stringResource(R.string.delete))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { entryToRemove = null }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        ) {
+            Text(stringResource(R.string.spam_remove_confirm, entry.rawNumber))
+        }
+    }
+
+    // ── Clear Imported Blocklist Confirmation ────────────────────────────
+    if (showClearImportedConfirm) {
+        RillDialog(
+            onDismissRequest = { showClearImportedConfirm = false },
+            title = stringResource(R.string.spam_clear_imported),
+            icon = Icons.Rounded.DeleteSweep,
+            confirmButton = {
+                TextButton(onClick = {
+                    scope.launch {
+                        spamRepository.clearImportedBlocklist()
+                        showClearImportedConfirm = false
+                    }
+                }) {
+                    Text(stringResource(R.string.delete))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showClearImportedConfirm = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        ) {
+            Text(stringResource(R.string.spam_clear_imported_confirm))
+        }
+    }
+}
+
+@Composable
+private fun spamCategoryLabel(category: SpamCategory): String {
+    val resId = when (category) {
+        SpamCategory.TELEMARKETER -> R.string.spam_category_telemarketer
+        SpamCategory.SCAM -> R.string.spam_category_scam
+        SpamCategory.ROBOCALL -> R.string.spam_category_robocall
+        SpamCategory.SPOOFED -> R.string.spam_category_spoofed
+        SpamCategory.PRIVATE_NUMBER -> R.string.spam_category_private
+        SpamCategory.UNKNOWN_CALLER -> R.string.spam_category_unknown
+        SpamCategory.USER_REPORTED -> R.string.spam_category_reported
+        SpamCategory.SPAM, SpamCategory.NONE -> R.string.spam_category_spam
+    }
+    return stringResource(resId)
 }

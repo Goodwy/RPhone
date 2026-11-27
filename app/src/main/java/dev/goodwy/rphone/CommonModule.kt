@@ -21,6 +21,7 @@ import dev.goodwy.rphone.modal.repository.CallLogRepository
 import dev.goodwy.rphone.modal.repository.CallRepositoryImpl
 import dev.goodwy.rphone.modal.repository.CallerRepositoryImpl
 import dev.goodwy.rphone.modal.repository.ContactsRepository
+import dev.goodwy.rphone.modal.repository.SpamRepository
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
@@ -37,10 +38,12 @@ val commonModule = module {
         ).addMigrations(RillDatabase.MIGRATION_1_2)
             .addMigrations(RillDatabase.MIGRATION_2_3)
             .addMigrations(RillDatabase.MIGRATION_3_4)
+            .addMigrations(RillDatabase.MIGRATION_4_5)
             .build()
     }
     single { get<RillDatabase>().privateContactDao() }
     single { get<RillDatabase>().trashedContactDao() }
+    single { get<RillDatabase>().spamNumberDao() }
 
     single<IContactsRepository> {
         ContactsRepository(androidContext(), get(), get())
@@ -53,6 +56,7 @@ val commonModule = module {
             dev.goodwy.rphone.controller.util.CallingCardStore.attach(it)
         }
     }
+    single { SpamRepository(androidContext(), get(), get(), get()) }
     // Clean Architecture Wires
     single<ICallerRepository> { CallerRepositoryImpl(get()) }
     single { GetCallerNameUseCase(get()) }
