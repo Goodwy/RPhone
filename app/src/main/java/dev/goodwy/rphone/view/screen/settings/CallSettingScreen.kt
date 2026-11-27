@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Dialpad
 import androidx.compose.material.icons.rounded.AdUnits
 import androidx.compose.material.icons.rounded.CropFree
 import androidx.compose.material.icons.rounded.History
+import androidx.compose.material.icons.rounded.PhoneInTalk
 import androidx.compose.material.icons.rounded.PictureInPicture
 import androidx.compose.material.icons.rounded.ScreenLockPortrait
 import androidx.compose.material.icons.rounded.SettingsPhone
@@ -34,6 +35,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
@@ -54,6 +56,7 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.compose.koinInject
 import androidx.core.net.toUri
+import com.ramcosta.composedestinations.generated.destinations.BusyModeExceptionsScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.QuickResponsesScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.SpeedDialScreenDestination
 import dev.goodwy.rphone.view.components.RillSelectListItem
@@ -82,6 +85,9 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
     var busyMode by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_BUSY_MODE_ENABLED, false)) }
     var busyMessageEnable by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_BUSY_MODE_MESSAGE_ENABLED, false)) }
     var busyMessage by remember(settingsState) { mutableStateOf(prefs.getString(PreferenceManager.KEY_BUSY_MODE_MESSAGE, defaultBusyMsg) ?: defaultBusyMsg) }
+    val busyExceptionsCount = remember(settingsState) {
+        prefs.getBusyModeExceptionContactIds().size + prefs.getBusyModeExceptionNumbers().size
+    }
     var showBusyMessageDialog by remember { mutableStateOf(false) }
     var editingBusyMsgText by remember { mutableStateOf("") }
 
@@ -322,6 +328,24 @@ fun CallSettingScreen(navigator: DestinationsNavigator) {
                                     }
                                 )
                             }
+
+                            RillListItem(
+                                headline = stringResource(R.string.busy_mode_exceptions),
+                                supporting = if (busyExceptionsCount == 0) {
+                                    stringResource(R.string.busy_mode_exceptions_none)
+                                } else {
+                                    pluralStringResource(
+                                        R.plurals.busy_mode_exceptions_count,
+                                        busyExceptionsCount,
+                                        busyExceptionsCount
+                                    )
+                                },
+                                leadingIcon = Icons.Rounded.PhoneInTalk,
+                                iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
+                                iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
+                                trailingIcon = Icons.Default.ChevronRight,
+                                onClick = { navigator.navigate(BusyModeExceptionsScreenDestination) }
+                            )
                         }
                     }
                 }

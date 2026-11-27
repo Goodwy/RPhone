@@ -273,6 +273,53 @@ class PreferenceManager(context: Context) {
         setString(KEY_BLOCKED_PATTERNS, encoded)
     }
 
+    private fun getStringListPref(keyName: String): List<String> {
+        val raw = getString(keyName, null) ?: return emptyList()
+        return try {
+            val array = org.json.JSONArray(raw)
+            buildList {
+                for (i in 0 until array.length()) {
+                    val item = array.optString(i, "").trim()
+                    if (item.isNotEmpty()) add(item)
+                }
+            }
+        } catch (_: Exception) {
+            emptyList()
+        }
+    }
+
+    private fun setStringListPref(keyName: String, values: List<String>) {
+        val cleaned = values.map { it.trim() }.filter { it.isNotEmpty() }.distinct()
+        val encoded = org.json.JSONArray(cleaned).toString()
+        val key = stringPreferencesKey(keyName)
+        _prefsCache.value = _prefsCache.value.toMutablePreferences().apply {
+            this[key] = encoded
+        }
+        setString(keyName, encoded)
+    }
+
+    fun getBusyModeExceptionContactIds(): List<String> =
+        getStringListPref(KEY_BUSY_MODE_EXCEPTION_CONTACT_IDS)
+
+    fun setBusyModeExceptionContactIds(contactIds: List<String>) {
+        setStringListPref(KEY_BUSY_MODE_EXCEPTION_CONTACT_IDS, contactIds)
+    }
+
+    fun getBusyModeExceptionNumbers(): List<String> =
+        getStringListPref(KEY_BUSY_MODE_EXCEPTION_NUMBERS)
+
+    fun setBusyModeExceptionNumbers(numbers: List<String>) {
+        val normalized = buildList {
+            for (raw in numbers) {
+                val cleaned = BusyModeExceptionsHelper.normalizeManualNumber(raw)
+                if (cleaned.isNotEmpty() && none { BusyModeExceptionsHelper.comparePhoneNumbers(it, cleaned) }) {
+                    add(cleaned)
+                }
+            }
+        }
+        setStringListPref(KEY_BUSY_MODE_EXCEPTION_NUMBERS, normalized)
+    }
+
     fun contactBackgroundIdKey(contactId: String): String {
         return CONTACT_BACKGROUND_PREFIX + contactId
     }
@@ -533,6 +580,9 @@ class PreferenceManager(context: Context) {
         const val KEY_BUSY_MODE_ENABLED = "busy_mode_enabled"
         const val KEY_BUSY_MODE_MESSAGE_ENABLED = "busy_mode_message_enabled"
         const val KEY_BUSY_MODE_MESSAGE = "busy_mode_message"
+        const val KEY_BUSY_MODE_EXCEPTION_CONTACT_IDS = "busy_mode_exception_contact_ids"
+        const val KEY_BUSY_MODE_EXCEPTION_NUMBERS = "busy_mode_exception_numbers"
+        const val KEY_HIDE_SAVED_CONTACT_NUMBER = "hide_saved_contact_number"
         const val KEY_QUICK_RESPONSES = "custom_quick_responses"
 
         const val KEY_RECENTS_FAVORITES_COLLAPSED = "recents_favorites_collapsed"
@@ -704,6 +754,8 @@ class PreferenceManager(context: Context) {
     fun setAlwaysFullscreenCalls(enabled: Boolean) = setBoolean(KEY_ALWAYS_FULLSCREEN_CALLS, enabled)
     fun isOpenCallScreen(): Boolean = getBoolean(KEY_OPEN_CALL_SCREEN_FROM_NOTIFICATION, true)
     fun setOpenCallScreen(enabled: Boolean) = setBoolean(KEY_OPEN_CALL_SCREEN_FROM_NOTIFICATION, enabled)
+    fun isHideSavedContactNumberEnabled(): Boolean = getBoolean(KEY_HIDE_SAVED_CONTACT_NUMBER, false)
+    fun setHideSavedContactNumberEnabled(enabled: Boolean) = setBoolean(KEY_HIDE_SAVED_CONTACT_NUMBER, enabled)
 
     fun getCallLogLimit(): Int = getInt(KEY_CALL_LOG_LIMIT, CALL_LOG_LIMIT_DEFAULT)
     fun setCallLogLimit(limit: Int) = setInt(KEY_CALL_LOG_LIMIT, limit)

@@ -18,10 +18,14 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import dev.goodwy.rphone.R
 import dev.goodwy.rphone.controller.util.BlockedNumbersManager
+import dev.goodwy.rphone.controller.util.BusyModeExceptionsHelper
+import dev.goodwy.rphone.controller.util.IncomingCallDecision
 import dev.goodwy.rphone.controller.util.PreferenceManager
 import dev.goodwy.rphone.controller.util.toast
+import dev.goodwy.rphone.modal.data.CallerMetadata
 import dev.goodwy.rphone.modal.`interface`.CallSession
 import dev.goodwy.rphone.modal.`interface`.ICallRepository
+import dev.goodwy.rphone.modal.`interface`.IContactsRepository
 import dev.goodwy.rphone.modal.repository.CallRepositoryImpl
 import dev.goodwy.rphone.view.screen.BiometricCallActivity
 import kotlinx.coroutines.CoroutineScope
@@ -46,12 +50,25 @@ class CallService : InCallService() {
     private val notificationManager: CallNotificationManager by inject()
     private val flashNotificationManager: dev.goodwy.rphone.controller.sensor.FlashNotificationManager by inject()
     private val callRepository: ICallRepository by inject()
+    private val contactsRepository: IContactsRepository by inject()
+
+    private data class FloatingCallMetadata(
+        val contactName: String,
+        val number: String,
+        val photoUri: String?,
+        val isSavedContact: Boolean,
+        val hasUsableContactName: Boolean
+    )
 
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var redialCount = 0
     private val callStartTimes = mutableMapOf<Call, Long>()
-    private var lastFloatingCallMetadata: Triple<String, String, String?>? = null
+    private var lastFloatingCallMetadata: FloatingCallMetadata? = null
     private var notificationUpdateJobs = mutableMapOf<Call, Job>()
+    private val incomingEvaluationJobs = mutableMapOf<Call, Job>()
+    private val evaluatedIncomingCalls = java.util.Collections.synchronizedSet(HashSet<Call>())
+    private val allowedIncomingCalls = java.util.Collections.synchronizedSet(HashSet<Call>())
+    private val handledBlockedCalls = java.util.Collections.synchronizedSet(HashSet<Call>())
 
     // BroadcastReceiver for monitoring when the screen is locked or turned off
     private val screenStateReceiver = object : BroadcastReceiver() {
@@ -103,12 +120,21 @@ class CallService : InCallService() {
         }
     }
 
+    private fun isIncomingCall(call: Call): Boolean {
+        return call.details?.callDirection == Call.Details.DIRECTION_INCOMING ||
+            call.state == Call.STATE_RINGING
+    }
+
+    private fun isCallSuppressedOrPendingIncoming(call: Call): Boolean {
+        if (call in handledBlockedCalls || call in handledBusyCalls) return true
+        if (call.state == Call.STATE_RINGING && call !in allowedIncomingCalls) return true
+        return false
+    }
+
     private fun updateRingingAlerts() {
-        val ringingCall = calls?.find { it.state == Call.STATE_RINGING }
+        val ringingCall = calls?.find { it.state == Call.STATE_RINGING && it in allowedIncomingCalls }
         if (ringingCall != null) {
-            if (!preferenceManager.getBoolean(PreferenceManager.KEY_BUSY_MODE_ENABLED, false)) {
-                flashNotificationManager.startFlashing()
-            }
+            flashNotificationManager.startFlashing()
         } else {
             flashNotificationManager.stopFlashing()
         }
@@ -132,12 +158,9 @@ class CallService : InCallService() {
             super.onStateChanged(call, state)
             updateCallState()
 
-            if (state == Call.STATE_RINGING) {
-                val number = call.details?.handle?.schemeSpecificPart?.let { Uri.decode(it) } ?: ""
-                if (preferenceManager.getBoolean(PreferenceManager.KEY_BUSY_MODE_ENABLED, false)) {
-                    handleBusyModeCall(call, number)
-                    return
-                }
+            if (state == Call.STATE_RINGING && call !in allowedIncomingCalls) {
+                evaluateIncomingCall(call)
+                return
             }
 
             updateRingingAlerts()
@@ -158,7 +181,7 @@ class CallService : InCallService() {
                         cancelNotification()
                     }
                 }
-            } else {
+            } else if (!isCallSuppressedOrPendingIncoming(call)) {
                 updateNotification(call)
             }
         }
@@ -172,7 +195,9 @@ class CallService : InCallService() {
             callStateManager.onNewCallReceived(number, cnam)
             updateCallState()
             updateRingingAlerts()
-            updateNotification(call)
+            if (!isCallSuppressedOrPendingIncoming(call)) {
+                updateNotification(call)
+            }
         }
     }
 
@@ -302,6 +327,8 @@ class CallService : InCallService() {
     }
 
     private fun handleBlockedCall(call: Call, number: String) {
+        if (!handledBlockedCalls.add(call)) return
+
         val method = preferenceManager.getInt(PreferenceManager.KEY_BLOCK_METHOD, 0) // 0: Decline, 1: Silent
 
         if (method == 0) {
@@ -317,15 +344,72 @@ class CallService : InCallService() {
         }
     }
 
+    private fun evaluateIncomingCall(call: Call) {
+        if (!evaluatedIncomingCalls.add(call)) return
+
+        incomingEvaluationJobs[call]?.cancel()
+        incomingEvaluationJobs[call] = serviceScope.launch {
+            val number = call.details?.handle?.schemeSpecificPart?.let { Uri.decode(it) } ?: ""
+            val decision = withContext(Dispatchers.IO) {
+                BusyModeExceptionsHelper.evaluateIncomingCall(
+                    incomingNumber = number,
+                    isBusyModeEnabled = preferenceManager.getBoolean(PreferenceManager.KEY_BUSY_MODE_ENABLED, false),
+                    exceptionContactIds = preferenceManager.getBusyModeExceptionContactIds(),
+                    exceptionNumbers = preferenceManager.getBusyModeExceptionNumbers(),
+                    isNumberBlocked = { num -> isNumberBlocked(num) },
+                    findContactByNumber = { num -> contactsRepository.getContactByNumber(num) },
+                    findContactById = { id -> contactsRepository.getContactById(id) }
+                )
+            }
+
+            if (!isActive || call.state == Call.STATE_DISCONNECTED) return@launch
+
+            when (decision) {
+                IncomingCallDecision.BLOCK -> {
+                    handleBlockedCall(call, number)
+                }
+                IncomingCallDecision.REJECT_BUSY_MODE -> {
+                    handleBusyModeCall(call, number)
+                }
+                IncomingCallDecision.ALLOW_NORMAL -> {
+                    allowedIncomingCalls.add(call)
+                    proceedWithAllowedCall(call)
+                }
+            }
+        }
+    }
+
+    private fun proceedWithAllowedCall(call: Call) {
+        updateRingingAlerts()
+        updateNotification(call)
+
+        val fullscreenCalls = preferenceManager.isAlwaysFullscreenCalls()
+        if (call.state != Call.STATE_RINGING || fullscreenCalls) {
+            val intent = Intent(this@CallService, CallActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            }
+            try {
+                startActivity(intent)
+            } catch (_: Exception) {
+            }
+        }
+    }
+
+    private fun getCallerMetadataFromCache(number: String): CallerMetadata? {
+        if (number.isEmpty()) return null
+        val decoded = Uri.decode(number)
+        return callStateManager.callerMetadataMap.value[decoded]
+            ?: callStateManager.callerMetadataMap.value[number]
+    }
+
     private fun getContactNameFromCache(number: String): String {
         if (number.isEmpty()) return getString(R.string.label_unknown_number)
-        val metadata = callStateManager.callerMetadataMap.value[number]
+        val metadata = getCallerMetadataFromCache(number)
         return metadata?.name?.takeIf { it.isNotEmpty() } ?: number
     }
 
     private fun getContactPhotoFromCache(number: String): String? {
-        val metadata = callStateManager.callerMetadataMap.value[number]
-        return metadata?.photoUri
+        return getCallerMetadataFromCache(number)?.photoUri
     }
 
     private fun updateCallState() {
@@ -387,15 +471,19 @@ class CallService : InCallService() {
     }
 
     private fun updateNotification(call: Call, forcedHigh: Boolean? = null) {
+        if (isCallSuppressedOrPendingIncoming(call)) return
         notificationUpdateJobs[call]?.cancel()
         notificationUpdateJobs[call] = serviceScope.launch {
             val details = call.details ?: return@launch
             val handle = details.handle
-            val number = handle?.schemeSpecificPart ?: ""
+            val number = handle?.schemeSpecificPart?.let { Uri.decode(it) } ?: ""
+            val metadata = getCallerMetadataFromCache(number)
             val contactName = getContactNameFromCache(number)
             val photoUri = getContactPhotoFromCache(number)
+            val isSavedContact = metadata?.isLocalContact == true
+            val hasUsableContactName = metadata?.hasLocalName == true
 
-            if (!isActive || call.state == Call.STATE_DISCONNECTED) return@launch
+            if (!isActive || call.state == Call.STATE_DISCONNECTED || isCallSuppressedOrPendingIncoming(call)) return@launch
 
             val callScreenVisible = callRepository.isActivityVisible.value
 
@@ -444,7 +532,7 @@ class CallService : InCallService() {
 
             // Start/stop floating bubble based on preference
             if (call.state != Call.STATE_DISCONNECTED && call.state != Call.STATE_DISCONNECTING) {
-                maybeStartFloatingCall(contactName, number, photoUri)
+                maybeStartFloatingCall(contactName, number, photoUri, isSavedContact, hasUsableContactName)
             }
         }
     }
@@ -487,45 +575,28 @@ class CallService : InCallService() {
         // Update call state synchronously so CallActivity sees active calls immediately
         updateCallState()
 
-        serviceScope.launch {
-            val isIncoming = details?.callDirection == Call.Details.DIRECTION_INCOMING || call.state == Call.STATE_RINGING
-            if (isIncoming && isNumberBlocked(number)) {
-                handleBlockedCall(call, number)
-                return@launch
-            }
-
-            if (isIncoming && preferenceManager.getBoolean(PreferenceManager.KEY_BUSY_MODE_ENABLED, false)) {
-                handleBusyModeCall(call, number)
-                return@launch
-            }
-
-            updateRingingAlerts()
-            updateNotification(call)
-
-            val fullscreenCalls = preferenceManager.isAlwaysFullscreenCalls()
-            if (call.state != Call.STATE_RINGING || fullscreenCalls) {
-                val intent = Intent(this@CallService, CallActivity::class.java).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                }
-                try {
-                    startActivity(intent)
-                } catch (_: Exception) {
-                }
-            }
+        if (isIncomingCall(call)) {
+            evaluateIncomingCall(call)
+        } else {
+            proceedWithAllowedCall(call)
         }
     }
 
     override fun onCallRemoved(call: Call) {
         super.onCallRemoved(call)
         notificationUpdateJobs.remove(call)?.cancel()
+        incomingEvaluationJobs.remove(call)?.cancel()
+        evaluatedIncomingCalls.remove(call)
+        allowedIncomingCalls.remove(call)
+        handledBlockedCalls.remove(call)
         handledBusyCalls.remove(call)
         call.unregisterCallback(callCallback)
 
         // If the call being deleted is the same one for which a floating window was launched,
         // we must clear the cache to allow it to be launched for the next call.
-        val number = call.details?.handle?.schemeSpecificPart ?: ""
+        val number = call.details?.handle?.schemeSpecificPart?.let { Uri.decode(it) } ?: ""
         val currentMetadata = lastFloatingCallMetadata
-        if (currentMetadata != null && currentMetadata.second == number) {
+        if (currentMetadata != null && currentMetadata.number == number) {
             lastFloatingCallMetadata = null
         }
 
@@ -606,21 +677,45 @@ class CallService : InCallService() {
 
         notificationUpdateJobs.values.forEach { it.cancel() }
         notificationUpdateJobs.clear()
+        incomingEvaluationJobs.values.forEach { it.cancel() }
+        incomingEvaluationJobs.clear()
+        evaluatedIncomingCalls.clear()
+        allowedIncomingCalls.clear()
+        handledBlockedCalls.clear()
         handledBusyCalls.clear()
 
         (callRepository as? CallRepositoryImpl)?.unbindService()
         serviceScope.cancel()
     }
 
-    private fun maybeStartFloatingCall(contactName: String, number: String, photoUri: String?) {
+    private fun maybeStartFloatingCall(
+        contactName: String,
+        number: String,
+        photoUri: String?,
+        isSavedContact: Boolean,
+        hasUsableContactName: Boolean
+    ) {
         if (!preferenceManager.getBoolean(PreferenceManager.KEY_FLOATING_CALL, false)) return
         if (!android.provider.Settings.canDrawOverlays(this)) return
 
-        val metadata = Triple(contactName, number, photoUri)
+        val metadata = FloatingCallMetadata(
+            contactName = contactName,
+            number = number,
+            photoUri = photoUri,
+            isSavedContact = isSavedContact,
+            hasUsableContactName = hasUsableContactName
+        )
         if (lastFloatingCallMetadata == metadata) return
         lastFloatingCallMetadata = metadata
 
-        FloatingCallService.start(this, contactName, number, photoUri)
+        FloatingCallService.start(
+            context = this,
+            name = contactName,
+            number = number,
+            photoUri = photoUri,
+            isSavedContact = isSavedContact,
+            hasUsableContactName = hasUsableContactName
+        )
     }
 
     /** Returns true for any MMI / USSD code like *124# *#06# ##002# *21*N# */

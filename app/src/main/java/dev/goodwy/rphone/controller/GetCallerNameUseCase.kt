@@ -17,7 +17,8 @@ class GetCallerNameUseCase(private val repository: ICallerRepository) {
                     number = incomingNumber,
                     name = localContact.displayName,
                     isLocalContact = true,
-                    photoUri = localContact.photoUri
+                    photoUri = localContact.photoUri,
+                    hasLocalName = true
                 )
             }
             cleanCnam != null -> {
@@ -25,7 +26,8 @@ class GetCallerNameUseCase(private val repository: ICallerRepository) {
                     number = incomingNumber,
                     name = cleanCnam,
                     isLocalContact = false,
-                    photoUri = localContact?.photoUri
+                    photoUri = localContact?.photoUri,
+                    hasLocalName = false
                 )
             }
             localContact != null -> {
@@ -34,14 +36,16 @@ class GetCallerNameUseCase(private val repository: ICallerRepository) {
                     number = incomingNumber,
                     name = localContact.displayName,
                     isLocalContact = true,
-                    photoUri = localContact.photoUri
+                    photoUri = localContact.photoUri,
+                    hasLocalName = false
                 )
             }
             else -> {
                 CallerMetadata(
                     number = incomingNumber,
                     name = incomingNumber,
-                    isLocalContact = false
+                    isLocalContact = false,
+                    hasLocalName = false
                 )
             }
         }

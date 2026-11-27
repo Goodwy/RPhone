@@ -20,6 +20,8 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.rounded.CallEnd
 import androidx.compose.material.icons.rounded.RememberMe
+import androidx.compose.material.icons.rounded.Visibility
+import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material.icons.rounded.Wallpaper
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -103,6 +105,7 @@ fun CallerUIScreen(navigator: DestinationsNavigator) {
     var themeMode   by remember(settingsState) { mutableStateOf(prefs.getString(PreferenceManager.KEY_THEME_MODE, "auto") ?: "auto") }
     var hangupWidth by remember(settingsState) { mutableFloatStateOf(prefs.getFloat(PreferenceManager.KEY_HANGUP_WIDTH, 0.5f).coerceIn(0.1f, 1.0f)) }
     var hideAvatarWithBg          by remember(settingsState) { mutableStateOf(prefs.getBoolean(PreferenceManager.KEY_HIDE_AVATAR_WITH_BACKGROUND, false)) }
+    var hideSavedContactNumbers   by remember(settingsState) { mutableStateOf(prefs.isHideSavedContactNumberEnabled()) }
 
     var defaultCallBg by remember { mutableStateOf<String?>(null) }
     var defaultCardStyle by remember { mutableStateOf(CallingCardStyle.ThemeDefault) }
@@ -385,6 +388,18 @@ fun CallerUIScreen(navigator: DestinationsNavigator) {
                                     iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorAmber,
                                     checked = hideAvatarWithBg,
                                     onCheckedChange = { hideAvatarWithBg = it; prefs.setBoolean(PreferenceManager.KEY_HIDE_AVATAR_WITH_BACKGROUND, it) }
+                                )
+                                RillSwitchListItem(
+                                    headline = stringResource(R.string.hide_saved_contact_numbers),
+                                    supporting = stringResource(R.string.hide_saved_contact_numbers_subtitle),
+                                    leadingIcon = if (hideSavedContactNumbers) Icons.Rounded.VisibilityOff else Icons.Rounded.Visibility,
+                                    iconContainerColor = MaterialTheme.colorScheme.customColors.colorDarkGreen,
+                                    iconBgContainerColor = MaterialTheme.colorScheme.customColors.colorGreen,
+                                    checked = hideSavedContactNumbers,
+                                    onCheckedChange = {
+                                        hideSavedContactNumbers = it
+                                        prefs.setHideSavedContactNumberEnabled(it)
+                                    }
                                 )
                             }
                         }

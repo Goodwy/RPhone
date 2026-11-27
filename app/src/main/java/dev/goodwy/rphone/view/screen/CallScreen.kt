@@ -83,6 +83,7 @@ import dev.goodwy.rphone.controller.util.hasCapability
 import dev.goodwy.rphone.controller.util.hasDualSim
 import dev.goodwy.rphone.controller.util.isConference
 import dev.goodwy.rphone.controller.util.isHD
+import dev.goodwy.rphone.controller.util.shouldShowCallPhoneNumber
 import dev.goodwy.rphone.liquidglass.LocalLiquidGlassBackdrop
 import dev.goodwy.rphone.liquidglass.backdrops.LayerBackdrop
 import dev.goodwy.rphone.liquidglass.drawBackdrop
@@ -112,7 +113,9 @@ fun ExpressiveCallScreen(
     callingCardStyle: CallingCardStyle = CallingCardStyle.ThemeDefault,
     skipIncomingScreen: Boolean = false,
     isConference: Boolean,
-    liquidGlassBackdrop: LayerBackdrop
+    liquidGlassBackdrop: LayerBackdrop,
+    isSavedContact: Boolean = false,
+    hasUsableContactName: Boolean = false
 ) {
     val view = LocalView.current
     val context = LocalContext.current
@@ -154,6 +157,9 @@ fun ExpressiveCallScreen(
     }
     val hideAvatarWithBg = remember(settingsState) {
         preferenceManager.getBoolean(PreferenceManager.KEY_HIDE_AVATAR_WITH_BACKGROUND, false)
+    }
+    val hideSavedContactNumber = remember(settingsState) {
+        preferenceManager.isHideSavedContactNumberEnabled()
     }
     val defaultBg = remember(settingsState) { CallBackgroundStore.defaultModel(context) }
     val shouldShowAvatar = CallBackgroundStore.shouldShowAvatar(
@@ -443,7 +449,14 @@ fun ExpressiveCallScreen(
                             overflow = TextOverflow.Ellipsis
                         )
 
-                        if (contactName != phoneNumber) {
+                        val showPhoneNumber = shouldShowCallPhoneNumber(
+                            contactName = contactName,
+                            phoneNumber = phoneNumber,
+                            isSavedContact = isSavedContact,
+                            hasUsableContactName = hasUsableContactName,
+                            hideSavedContactNumber = hideSavedContactNumber
+                        )
+                        if (showPhoneNumber) {
                             Spacer(modifier = Modifier.height(10.dp))
                             Text(
                                 text = phoneNumber,
@@ -1328,13 +1341,21 @@ fun ExpressiveCallScreen(
                         val childNumber = childDetails?.handle?.schemeSpecificPart ?: ""
                         var childName by remember(childCall) { mutableStateOf(childNumber) }
                         var childPhotoUri by remember(childCall) { mutableStateOf("") }
+                        var childIsSavedContact by remember(childCall) { mutableStateOf(false) }
+                        var childHasUsableName by remember(childCall) { mutableStateOf(false) }
 
                         LaunchedEffect(childCall) {
                             val cnam = if (childDetails?.callerDisplayNamePresentation == TelecomManager.PRESENTATION_ALLOWED) {
                                 childDetails.callerDisplayName?.takeIf { it.isNotBlank() }
                             } else null
                             val contact = if (childNumber.isNotEmpty()) try { contactsRepo.getContactByNumber(childNumber) } catch (_: Exception) { null } else null
-                            childName = if (contact != null && contact.hasLocalName()) getDisplayName(contact, 0) else cnam ?: contact?.let { getDisplayName(it, 0) } ?: childNumber.forceLtr()
+                            val displayOrder = preferenceManager.getInt(PreferenceManager.KEY_CONTACT_DISPLAY_ORDER, 0)
+                            val localName = if (contact != null && contact.hasLocalName()) {
+                                getDisplayName(contact, displayOrder).takeIf { it.isNotBlank() }
+                            } else null
+                            childIsSavedContact = contact != null
+                            childHasUsableName = localName != null
+                            childName = localName ?: cnam ?: contact?.let { getDisplayName(it, displayOrder) }?.takeIf { it.isNotBlank() } ?: childNumber.forceLtr()
                             childPhotoUri = contact?.photoUri ?: ""
                         }
 
@@ -1358,7 +1379,14 @@ fun ExpressiveCallScreen(
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
-                                if (childName != childNumber && childNumber.isNotEmpty()) {
+                                val showChildNumber = shouldShowCallPhoneNumber(
+                                    contactName = childName,
+                                    phoneNumber = childNumber,
+                                    isSavedContact = childIsSavedContact,
+                                    hasUsableContactName = childHasUsableName,
+                                    hideSavedContactNumber = hideSavedContactNumber
+                                )
+                                if (showChildNumber) {
                                     Text(
                                         text = childNumber,
                                         style = MaterialTheme.typography.bodyMedium,

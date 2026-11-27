@@ -83,6 +83,7 @@ import com.ramcosta.composedestinations.generated.destinations.AvatarsPreference
 import com.ramcosta.composedestinations.generated.destinations.BiometricScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.BlockedNumbersScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.BlurEffectsElementsScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.BusyModeExceptionsScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.CallSettingScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.CallerUIScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ContactManagementScreenDestination
@@ -657,7 +658,7 @@ class MainActivity : FragmentActivity() {
                                                                     it.route == SettingsScreenDestination.route || it.route == DonateScreenDestination.route ||
                                                                     it.route == AboutAppScreenDestination.route || it.route == AppIconScreenDestination.route ||
                                                                     it.route == BiometricScreenDestination.route || it.route == BlockedNumbersScreenDestination.route ||
-                                                                    it.route == BlurEffectsElementsScreenDestination.route ||
+                                                                    it.route == BlurEffectsElementsScreenDestination.route || it.route == BusyModeExceptionsScreenDestination.route ||
                                                                     it.route == CallerUIScreenDestination.route || it.route == CallSettingScreenDestination.route ||
                                                                     it.route == ContributorsScreenDestination.route || it.route == InterfaceScreenDestination.route ||
                                                                     it.route == LiquidGlassElementsScreenDestination.route || it.route == NavigationScreenDestination.route ||
